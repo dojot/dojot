@@ -1,0 +1,153 @@
+#!/bin/bash
+
+##################################################################
+#                                                                #
+# Copyright (c) 2018-2019 PrimeKey Solutions AB.                 #
+#                                                                #
+# This software is free software; you can redistribute it and/or #
+# modify it under the terms of the GNU Lesser General Public     #
+# License as published by the Free Software Foundation; either   #
+# version 2.1 of the License, or any later version.              #
+#                                                                #
+# See terms of license at gnu.org.                               #
+#                                                                #
+##################################################################
+
+# In Wildfly 14.0.1 there are a lot of UT005085: Connection io.undertow.server.protocol.http2.Http2ServerConnection... was not closed cleanly, forcibly closing connection
+enableHttp2="false"
+# Set an upper limit for HTTP POST size, that can be lowered further by individual web apps
+maxPostSize=33554432
+
+jbossCli="$(realpath ${baseDir}/appserver/bin/jboss-cli.sh)"
+
+serverConfigXml="standalone.xml"
+
+# Ensure that we don't let the Wildfly CLI JVM allocate RAM or cores based on the hosts specs
+export JAVA_OPTS_WILDFLYCLI="-Xms32m -Xmx32m -XX:MetaspaceSize=32M -XX:MaxMetaspaceSize=32m -XX:ParallelGCThreads=1 -XX:ConcGCThreads=1 -Djava.util.concurrent.ForkJoinPool.common.parallelism=1 -XX:CICompilerCount=2"
+
+appserver_command() {
+    JAVA_OPTS="$JAVA_OPTS_WILDFLYCLI" $jbossCli --connect "$1" | grep -v "success" | log "WARN" && return 0 || return 1
+}
+
+appserver_start() {
+    $(realpath ${baseDir}/appserver/bin/standalone.sh) --server-config=${serverConfigXml} -b 0.0.0.0
+}
+
+appserver_shutdown() {
+    appserver_command ':shutdown'
+}
+
+appserver_reset_config() {
+    if [ -f ${baseDir}/appserver/standalone/configuration/${serverConfigXml}.original ] ; then
+        # Reset configuration
+        cp ${baseDir}/appserver/standalone/configuration/${serverConfigXml}.original ${baseDir}/appserver/standalone/configuration/${serverConfigXml}
+    else
+        # Backup original configuration
+        cp ${baseDir}/appserver/standalone/configuration/${serverConfigXml} ${baseDir}/appserver/standalone/configuration/${serverConfigXml}.original
+    fi
+    rm ${baseDir}/appserver/standalone/configuration/keystore.jks   2>/dev/null
+    rm ${baseDir}/appserver/standalone/configuration/truststore.jks 2>/dev/null
+}
+
+appserver_prepare_startup() {
+    rm ${baseDir}/appserver/standalone/deployments/*.failed   2>/dev/null
+    rm ${baseDir}/appserver/standalone/deployments/*.deployed 2>/dev/null
+}
+
+appserver_deployment_failed() {
+    for f in ${baseDir}/appserver/standalone/deployments/*.ear.failed ; do
+      if [ -e "$f" ] ; then
+        return 0 # true
+      fi
+      break
+    done
+    return 1 # false
+}
+
+appserver_deployment_success() {
+    for f in ${baseDir}/appserver/standalone/deployments/*.ear.deployed ; do
+      if [ -e "$f" ] ; then
+        return 0 # true
+      fi
+      break
+    done
+    return 1 # false
+}
+
+appserver_config_proxy_ajp() {
+    appserver_command "
+/interface=proxy-ajp:add(inet-address=${1}),
+/socket-binding-group=standard-sockets/socket-binding=proxy-ajp:add(interface=proxy-ajp,port=8009),
+/subsystem=undertow/server=default-server/ajp-listener=proxy-ajp-listener:add(socket-binding=proxy-ajp,scheme=https,max-post-size=${maxPostSize})
+" && return 0 || return 1
+}
+
+appserver_config_proxy_http() {
+    appserver_command "
+/interface=proxy-http:add(inet-address=${1}),
+/socket-binding-group=standard-sockets/socket-binding=proxy-http:add(interface=proxy-http,port=8081),
+/socket-binding-group=standard-sockets/socket-binding=proxy-https:add(interface=proxy-http,port=8082),
+/subsystem=undertow/server=default-server/http-listener=proxy-https-listener:add(socket-binding=proxy-https,proxy-address-forwarding=true,allow-encoded-slash=true,max-post-size=${maxPostSize},certificate-forwarding=true,secure=true),
+/subsystem=undertow/server=default-server/http-listener=proxy-http-listener:add(socket-binding=proxy-http,proxy-address-forwarding=true,allow-encoded-slash=true,max-post-size=${maxPostSize},redirect-socket=proxy-https)
+" && return 0 || return 1
+}
+
+appserver_config_enable_public_interface() {
+    appserver_command "
+/interface=public:add(inet-address=0.0.0.0)
+" && return 0 || return 1
+}
+
+appserver_config_enable_http() {
+    local redirectSocket=$1
+
+    appserver_command "
+/socket-binding-group=standard-sockets/socket-binding=http:add(interface=public,port=8080)
+"
+
+    log "INFO" "Enabling HTTP listener on 0.0.0.0:8080."
+    if [ -z $redirectSocket ] ; then
+        appserver_command "
+/subsystem=undertow/server=default-server/http-listener=default:add(socket-binding=http,allow-encoded-slash=true,max-post-size=${maxPostSize},enable-http2=${enableHttp2})
+" && return 0 || return 1
+    else
+        appserver_command "
+/subsystem=undertow/server=default-server/http-listener=default:add(socket-binding=http,allow-encoded-slash=true,max-post-size=${maxPostSize},enable-http2=${enableHttp2},redirect-socket=$redirectSocket)
+" && return 0 || return 1
+    fi
+}
+
+appserver_config_enable_https() {
+    local keyStoreFile=$1
+    local keyStorePassword=$2
+    local trustStoreFile=$3
+    local trustStorePassword=$4
+
+    if [ ! -z $trustStoreFile ] && [ -f $trustStoreFile ] ; then
+        mv $trustStoreFile ${baseDir}/appserver/standalone/configuration/truststore.jks
+    fi
+    mv $keyStoreFile   ${baseDir}/appserver/standalone/configuration/keystore.jks
+
+    if [ -f ${baseDir}/appserver/standalone/configuration/truststore.jks ] ; then
+        log "INFO" "Enabling HTTPS listener on 0.0.0.0:8443 with optional client certificate authentication."
+        appserver_command "
+/subsystem=elytron/key-store=httpsKS:add(path=keystore.jks,relative-to=jboss.server.config.dir,credential-reference={clear-text=\"${keyStorePassword}\"},type=JKS),
+/subsystem=elytron/key-store=httpsTS:add(path=truststore.jks,relative-to=jboss.server.config.dir,credential-reference={clear-text=\"${trustStorePassword}\"},type=JKS),
+/subsystem=elytron/key-manager=httpsKM:add(key-store=httpsKS,algorithm=\"SunX509\",credential-reference={clear-text=\"${keyStorePassword}\"}),
+/subsystem=elytron/trust-manager=httpsTM:add(key-store=httpsTS),
+/subsystem=elytron/server-ssl-context=httpsSSC:add(key-manager=httpsKM,protocols=[\"TLSv1.2\"],trust-manager=httpsTM,need-client-auth=false,authentication-optional=true,want-client-auth=true),
+/socket-binding-group=standard-sockets/socket-binding=https:add(interface=public,port=8443),
+/subsystem=undertow/server=default-server/https-listener=https:add(socket-binding=https,allow-encoded-slash=true,max-post-size=${maxPostSize},enable-http2=${enableHttp2},ssl-context=httpsSSC)
+" || return 1
+    else
+        log "INFO" "Enabling HTTPS listener on 0.0.0.0:8443."
+        appserver_command "
+/subsystem=elytron/key-store=httpsKS:add(path=keystore.jks,relative-to=jboss.server.config.dir,credential-reference={clear-text=\"${keyStorePassword}\"},type=JKS),
+/subsystem=elytron/key-manager=httpsKM:add(key-store=httpsKS,algorithm="SunX509",credential-reference={clear-text=\"${keyStorePassword}\"}),
+/subsystem=elytron/server-ssl-context=httpsSSC:add(key-manager=httpsKM,protocols=[\"TLSv1.2\"]),
+/socket-binding-group=standard-sockets/socket-binding=https:add(interface=public,port=8443),
+/subsystem=undertow/server=default-server/https-listener=https:add(socket-binding=https,allow-encoded-slash=true,max-post-size=${maxPostSize},enable-http2=${enableHttp2},ssl-context=httpsSSC)
+" || return 1
+    fi
+    return 0
+}

@@ -1,0 +1,33 @@
+#/bin/bash
+
+##################################################################
+#                                                                #
+# Copyright (c) 2018-2019 PrimeKey Solutions AB.                 #
+#                                                                #
+# This software is free software; you can redistribute it and/or #
+# modify it under the terms of the GNU Lesser General Public     #
+# License as published by the Free Software Foundation; either   #
+# version 2.1 of the License, or any later version.              #
+#                                                                #
+# See terms of license at gnu.org.                               #
+#                                                                #
+##################################################################
+
+# When running the container under a non-docker environment like systemd-nspawn variables are never set to default and this must be done manually
+
+export APPLICATION_NAME="ejbca"
+
+export LOG_LEVEL_APP="${LOG_LEVEL_APP:-INFO}"
+export LOG_LEVEL_APP_OCSP_TRANSACTIONS="${LOG_LEVEL_APP_OCSP_TRANSACTIONS:-DEBUG}"
+export LOG_LEVEL_APP_OCSP_AUDIT="${LOG_LEVEL_APP_OCSP_AUDIT:-INFO}"
+export LOG_LEVEL_APP_WS_TRANSACTIONS="${LOG_LEVEL_APP_WS_TRANSACTIONS:-DEBUG}"
+export LOG_LEVEL_SERVER="${LOG_LEVEL_SERVER:-INFO}"
+export LOG_LEVEL_SERVER_SUBSYSTEMS="${LOG_LEVEL_SERVER_SUBSYSTEMS:-WARN}"
+export PROXY_AJP_BIND="${PROXY_AJP_BIND:-}"
+export PROXY_HTTP_BIND="${PROXY_HTTP_BIND:-}"
+export TLS_SETUP_ENABLED="${TLS_SETUP_ENABLED:-true}"
+
+if [ "x${TLS_SETUP_ENABLED}" == "xsimple" ] ; then
+    # A non-existing INITIAL_ADMIN will result in Open System access unless a CA is created
+    export INITIAL_ADMIN=";PublicAccessAuthenticationToken:TRANSPORT_CONFIDENTIAL;"
+fi

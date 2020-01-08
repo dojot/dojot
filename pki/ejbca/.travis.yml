@@ -1,0 +1,17 @@
+language: node_js
+node_js: '10'
+services:
+  - docker
+cache:
+  directories:
+    - node_modules
+script:
+  - npm test
+  - 'docker build -t ${TRAVIS_REPO_SLUG} .'
+install:
+  - npm install
+  - npm install -g codecov
+after_success:
+  - codecov
+  - travis/publish.sh
+  - travis/deploy-gh-pages.sh
