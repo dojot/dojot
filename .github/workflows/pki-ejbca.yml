@@ -41,8 +41,8 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: pki/ejbca/coverage/lcov.info # create when run npm test
-        flags: unittests
-        name: jest
+        flags: pki-ejbca # Flags allow you to isolate coverage reports for different tests
+        name: pki-ejbca # Custom defined name for the upload 
 
   docker-hub:
     needs: unit-tests
@@ -64,6 +64,7 @@ jobs:
 
     - name: Build and Push
       uses: elgohr/Publish-Docker-Github-Action@2.11
+      if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
       with:
         name: ${{ steps.get_owner.outputs.owner }}/ejbca-wrapper
         username: ${{ secrets.DOCKER_USERNAME }}
