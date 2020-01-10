@@ -12,8 +12,8 @@ on:
 
 jobs:
   unit-tests:
-    name: (pki/ejbca) Unit Tests #  path to help identify in Status checks each job 
-    if: contains(github.event.head_commit.message, 'ci skip')   == false # if the commit message has ci skip, doesn't run anything because needs 
+    name: (pki/ejbca) Unit Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,7 +36,7 @@ jobs:
         npm run build --if-present
         npm test
 
-    - name: Upload coverage to Codecov 
+    - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
@@ -44,18 +44,17 @@ jobs:
         flags: unittests
         name: jest
 
-  
   docker-hub:
     needs: unit-tests
-    name: (pki/ejbca) Build and Publish image to DockerHUb #  path to help identify in Status checks each job 
+    name: (pki/ejbca) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/pull/') == false  # if this a PR doesn't run 
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
     steps:
 
     - name: Owner Repository
       id: get_owner
       run: |
-        
+
         export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
         echo Current Owner is $OWNER
         echo ::set-output name=owner::$OWNER
@@ -63,21 +62,21 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
-    - name: Build and Push 
+    - name: Build and Push
       uses: elgohr/Publish-Docker-Github-Action@2.11
       with:
-        name: ${{ steps.get_owner.outputs.owner }}/ejbca-wrapper  
+        name: ${{ steps.get_owner.outputs.owner }}/ejbca-wrapper
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        workdir: pki/ejbca 
+        workdir: pki/ejbca
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
         tag_names: true # tag will be based in branch name or tag name
 
   gh-pages:
     needs: docker-hub
-    name: (pki/ejbca) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job 
+    name: (pki/ejbca) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/pull/') == false  # if this a PR doesn't run 
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
     steps:
 
     - name: Checkout
@@ -100,8 +99,8 @@ jobs:
         PATH_APIB: ./pki/ejbca/api-docs/apiary.apib
         VERSION_NAME: ${{ steps.version_doc.outputs.version }}
       run: |
-        
-        sh .github/workflows/scripts/doc_aglio_api.sh 
+
+        sh .github/workflows/scripts/doc_aglio_api.sh
 
     - name: Publish Documentation
       uses: peaceiris/actions-gh-pages@v2
