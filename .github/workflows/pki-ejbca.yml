@@ -37,7 +37,7 @@ jobs:
         npm test
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: pki/ejbca/coverage/lcov.info # create when run npm test
