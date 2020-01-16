@@ -468,7 +468,7 @@ describe('Testing EJBCA Routes functionalities', () => {
       ejbcaUtils.errorValidator = jest.fn(() => error);
       ejbcaUtils.findUserandReset = jest.fn(() => error);
 
-      const info = { passwd: 'data', certificate: 'data' };
+      const info = { passwd: undefined, certificate: 'data' };
       const response = await post('/sign/:username/pkcs10', info);
       expect(response.status).toEqual(200);
     });

@@ -379,7 +379,7 @@ const ejbcaRoute = (app, client, myCache) => {
     const pkcs10Send = () => {
       const args = {
         arg0: username,
-        arg1: info.passwd,
+        arg1: info.passwd || 'dojot',
         arg2: info.certificate,
         arg3: null,
         arg4: 'CERTIFICATE',
