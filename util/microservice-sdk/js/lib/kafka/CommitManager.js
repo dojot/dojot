@@ -1,0 +1,165 @@
+const { logger } = require('@dojot/dojot-module-logger');
+
+const TAG = { filename: 'commit-mngr' };
+
+const DEFAULT_COMMIT_TIME_INTERVAL = 5000;
+
+/**
+ * A simple class to track the processing of the Kafka messages and manager the commits.
+ * It calls periodically a method to consolidates the processed messages into the
+ * message brokers (Kafka instances).
+ */
+module.exports = class CommitManager {
+  /**
+   * Creates a new instance of the CommitManager
+   * @param {*} commitCb the function to be called to commit the messages into Kafka.
+   * @param {*} commitInterval the interval in ms that the consolidator should be called.
+   */
+  constructor(commitCb, commitInterval) {
+    this.commitCb = commitCb;
+    this.commitInterval = commitInterval || DEFAULT_COMMIT_TIME_INTERVAL;
+    this.topics = {};
+    this.caller = null;
+  }
+
+  /**
+   * Initializes the manager. It is invoked in each `commitInterval` ms
+   * to consolidates the processed messages.
+   */
+  init() {
+    if (this.caller) {
+      clearInterval(this.caller);
+    }
+    this.caller = setInterval(this.commitProcessedOffsets.bind(this),
+      this.commitInterval);
+  }
+
+  /**
+   * Notifies the manager that a new message is started to be processed.
+   * ATTENTION: it should be called in order, before any async processing.
+   * @param {*} data the kafka message that is starting to be processed. It is
+   * an object with at least the following attributes:
+   * {
+   *   topic: 'librdtesting-01', // topic the message comes from
+   *   partition: 1, // partition the message was on
+   *   offset: 1337, // offset the message was read from
+   * }.
+   */
+  notifyStartProcessing(data) {
+    const { partition, offset, topic } = data;
+    this.topics[topic] = this.topics[topic] || {};
+    this.topics[topic][partition] = this.topics[topic][partition] || [];
+    this.topics[topic][partition].push({
+      offset,
+      done: false,
+    });
+  }
+
+  /**
+   * Notifies the manager that a previous notified message
+   * (on `notifyStartProcessing`) has been finished to be processed.
+   * @param {*} data the kafka message that is finished to be processed. It is
+   * an object with at least the following attributes:
+   * {
+   *   topic: 'librdtesting-01', // topic the message comes from
+   *   partition: 1, // partition the message was on
+   *   offset: 1337, // offset the message was read from
+   * }.
+   */
+  notifyFinishedProcessing(data) {
+    // console.log(`finish ${JSON.stringify(data)}`);
+    const { partition, offset, topic } = data;
+    const topicPartitions = this.topics[topic];
+    if (!topicPartitions) {
+      return;
+    }
+
+    const partitionOffsets = topicPartitions[partition];
+    if (!partitionOffsets) {
+      return;
+    }
+
+    const record = partitionOffsets.filter(
+      (currRecord) => currRecord.offset === offset,
+    )[0];
+    if (record) {
+      record.done = true;
+    }
+  }
+
+  /**
+   * This method should be invoked during the Kafka's rebalance procedure.
+   * It clear the work tracking.
+   */
+  onRebalance() {
+    this.topics = {};
+  }
+
+  /**
+   * Consolidates the processed messages into Kafka
+   * @access private
+   */
+  async commitProcessedOffsets() {
+    try {
+      const offsetsToCommit = [];
+      const topicsToBeDeleted = [];
+
+      Object.keys(this.topics).forEach((topic) => {
+        const partitions = this.topics[topic];
+        const partitionsToBeDeleted = [];
+        Object.keys(partitions).forEach((partition) => {
+          const partitionOffsets = partitions[partition];
+
+          const firstProcessedMsgIndex = partitionOffsets.findIndex((record) => record.done);
+          const firstNonProcessedMsgIndex = partitionOffsets.findIndex((record) => !record.done);
+
+          if (((firstProcessedMsgIndex > firstNonProcessedMsgIndex)
+              && (firstNonProcessedMsgIndex !== -1))
+            || (firstProcessedMsgIndex === -1)) {
+            // there is some pending task before the first completed task
+            // or there is not completed tasks
+            // in these cases we do not commit
+            return;
+          }
+
+          let lastProcessedRecordIndex = firstNonProcessedMsgIndex - 1;
+          // all tasks are finished
+          if (firstNonProcessedMsgIndex === -1) {
+            lastProcessedRecordIndex = partitionOffsets.length - 1;
+          }
+          const lastProcessedRecord = partitionOffsets[lastProcessedRecordIndex];
+          offsetsToCommit.push({
+            partition: Number(partition),
+            offset: lastProcessedRecord.offset + 1,
+            topic,
+          });
+          // remove committed records from array
+          partitionOffsets.splice(0, lastProcessedRecordIndex + 1);
+          if (partitionOffsets.length === 0) {
+            partitionsToBeDeleted.push(partition);
+          }
+        });
+        partitionsToBeDeleted.forEach((partition) => {
+          delete this.topics[topic][partition];
+        });
+        if (Object.values(this.topics[topic]).length === 0) {
+          topicsToBeDeleted.push(topic);
+        }
+      });
+
+      topicsToBeDeleted.forEach((topic) => {
+        delete this.topics[topic];
+      });
+
+      if (offsetsToCommit.length > 0) {
+        logger.debug(`Submitting a commit to Kafka: ${JSON.stringify(offsetsToCommit)}`, TAG);
+        this.commitCb(offsetsToCommit);
+      }
+
+      return Promise.resolve();
+    } catch (error) {
+      logger.warn(`Failed on process commit. ${error}`, TAG);
+      return Promise.reject(error);
+    }
+  }
+};

@@ -1,0 +1,62 @@
+{
+  "name": "microservice-sdk",
+  "version": "0.1.0",
+  "description": "A SDK to help to build microservices for the dojot platform",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Raul Negreiros",
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/dojot/dojot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot.git"
+  },
+  "keywords": [
+    "dojot",
+    "microservices",
+    "sdk"
+  ],
+  "files": [
+    "npm-shrinkwrap.json",
+    "lib/**/*.js",
+    "test/",
+    "!test/unit/coverage/",
+    "examples/"
+  ],
+  "dependencies": {
+    "@dojot/dojot-module-logger": "0.0.1-alpha.5",
+    "async": "^3.1.0",
+    "node-rdkafka": "^2.7.4",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "jest": "^24.9.0"
+  },
+  "jest": {
+    "verbose": true,
+    "testRegex": [
+      "test/unit/*"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "lib"
+    ],
+    "collectCoverage": true,
+    "testPathIgnorePatterns": [
+      "test/unit/coverage"
+    ],
+    "coverageDirectory": "test/unit/coverage",
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  }
+}
