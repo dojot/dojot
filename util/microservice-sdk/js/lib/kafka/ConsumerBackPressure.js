@@ -285,7 +285,7 @@ module.exports = class ConsumerBackPressure {
       this.isWaitingForRefreshSubscriptions = true;
 
       const subscriptionProcedure = (currentHoldOff) => {
-        logger.debug('Refreshing subscriptions', TAG);        
+        logger.debug('Refreshing subscriptions', TAG);
 
         // According to the node-rdkafka documentation we need to call
         // the unsubscribe method before call the subscribe with new topics
