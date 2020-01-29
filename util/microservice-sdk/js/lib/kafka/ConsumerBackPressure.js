@@ -18,15 +18,15 @@ const DEFAULT_PARALLEL_HANDLERS = 1;
  */
 const DEFAULT_MAX_QUEUE_BYTES = 1048576; // 1 mb
 /**
- * Default value of the hold off time for update the subscripts
+ * Default value of the hold off time for updating the subscripts (in ms)
  */
 const DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION = 1000;
 /**
- * Default value of the maximum hold off time for update the subscripts
+ * Default value of the maximum hold off time for updating the subscripts (in ms)
  */
 const DEFAULT_MAX_HOLD_OFF_TIME_SUBSCRIPTION = 10000;
 /**
- * Default value of the hold off time factor for update the subscripts
+ * Default value of the hold off time factor for updating the subscripts
  */
 const DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION_FACTOR = 1.5;
 
@@ -34,7 +34,7 @@ const DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION_FACTOR = 1.5;
  * This class is a wrapper over the node-rdkafka implementation. It adds:
  * - a register callback system for messages;
  * - a mechanism to control the processing flow that allows the consuming be
- * paused with a water mark is reached;
+ * paused when a given watermark is reached;
  * - a commit management, ensuring that all message will be processed at least
  * once.
  * NOTE: Let's keep an healthy relationship, so please do not use the
@@ -72,7 +72,7 @@ module.exports = class ConsumerBackPressure {
   /**
    * Initializes the consumer.
    * @param {*} commitInterval the interval in ms that the message offset should be committed
-   * @returns a Promise that is fullfil when the consumer become ready.
+   * @returns a Promise that is fullfil when the consumer becomes ready.
    */
   async init(commitInterval) {
     return new Promise((resolve) => {
@@ -103,7 +103,7 @@ module.exports = class ConsumerBackPressure {
       }, this.maxParallelHandlers);
 
       // when the processing was finalized, we need to resume the consumer, if
-      // he has been paused
+      // it has been paused
       this.msgQueue.drain(this.resumeConsumer);
 
       this.consumer.connect(undefined, (error) => {
@@ -179,7 +179,7 @@ module.exports = class ConsumerBackPressure {
   /**
    * Unregister a callback previously registered by the 'registerCallback' method.
    * @param {*} registerId the subscription id that belongs to the callback register
-   * the you desire to remove
+   * that you desire to remove
    */
   unregisterCallback(registerId) {
     logger.debug(`unsubscribing id: ${registerId}`, TAG);
@@ -213,9 +213,9 @@ module.exports = class ConsumerBackPressure {
   }
 
   /**
-   * Configures the hold off time for update the subscriptions.
+   * Configures the hold off time for updating the subscriptions.
    * This is the time that a call for the 'registerCallback' will wait
-   * for refresh the subscriptions with the kafka if a new topic is requested.
+   * for refreshing the subscriptions with the kafka if a new topic is requested.
    * The timer is not restarted if a new call to register is performed before a
    * previous timer expires.
    * @param {*} holdOffTimeSubscription the hold off time in ms
@@ -265,7 +265,7 @@ module.exports = class ConsumerBackPressure {
 
   /**
    * Configures the maximum size in bytes that the message queue can handle. If
-   * this limit is exceeded the consumer is paused until all messages been
+   * this limit is exceeded the consumer is paused until all messages have been
    * processed, so the consumer is resumed.
    * @param {*} maxQueueBytes the maximum bytes that the processing queue can handle
    */
@@ -285,8 +285,7 @@ module.exports = class ConsumerBackPressure {
       this.isWaitingForRefreshSubscriptions = true;
 
       const subscriptionProcedure = (currentHoldOff) => {
-        logger.debug('Refreshing subscriptions', TAG);
-        this.isWaitingForRefreshSubscriptions = false;
+        logger.debug('Refreshing subscriptions', TAG);        
 
         // According to the node-rdkafka documentation we need to call
         // the unsubscribe method before call the subscribe with new topics
@@ -299,6 +298,7 @@ module.exports = class ConsumerBackPressure {
           if (topics.length > 0) {
             this.consumer.subscribe(topics);
           }
+          this.isWaitingForRefreshSubscriptions = false;
         } catch (error) {
           logger.warn(`Error while subscribing: ${error}`, TAG);
           // computes the next hold off time
@@ -342,7 +342,7 @@ module.exports = class ConsumerBackPressure {
   }
 
   /**
-   * Handles the raw messages that has been came from the Kafka
+   * Handles the raw messages that has been come from the Kafka
    * @access private
    * @param {*} data the received message with the following attributes:
    * {
@@ -362,7 +362,7 @@ module.exports = class ConsumerBackPressure {
       this.currQueueBytes -= data.size;
     });
 
-    logger.debug(`Current queue capacity: ${this.currQueueBytes}/${this.maxQueueBytes} bytes`, TAG);
+    logger.debug(`Current queue utilization: ${this.currQueueBytes}/${this.maxQueueBytes} bytes`, TAG);
 
     // checks is the queue is full or not
     if (this.currQueueBytes > this.maxQueueBytes) {
@@ -373,7 +373,7 @@ module.exports = class ConsumerBackPressure {
   }
 
   /**
-   * Given a kafka message this method invokes all interested callbacks based in
+   * Given a kafka message this method invokes all interested callbacks based on
    * the message's topic
    * @access private
    * @param {*} data the kafka message with the following attributes:

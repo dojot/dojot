@@ -15,7 +15,8 @@
   "keywords": [
     "dojot",
     "microservices",
-    "sdk"
+    "sdk",
+    "kafka"
   ],
   "files": [
     "npm-shrinkwrap.json",

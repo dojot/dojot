@@ -5,8 +5,8 @@ const TAG = { filename: 'commit-mngr' };
 const DEFAULT_COMMIT_TIME_INTERVAL = 5000;
 
 /**
- * A simple class to track the processing of the Kafka messages and manager the commits.
- * It calls periodically a method to consolidates the processed messages into the
+ * A simple class to tracking the processing of the Kafka messages and managing the commits.
+ * It calls periodically a method to consolidate the processed messages into the
  * message brokers (Kafka instances).
  */
 module.exports = class CommitManager {
@@ -23,8 +23,8 @@ module.exports = class CommitManager {
   }
 
   /**
-   * Initializes the manager. It is invoked in each `commitInterval` ms
-   * to consolidates the processed messages.
+   * Initializes the manager. It schedules to run the consolidation of the
+   * commits every 'commitInterval' ms.
    */
   init() {
     if (this.caller) {
@@ -89,7 +89,7 @@ module.exports = class CommitManager {
 
   /**
    * This method should be invoked during the Kafka's rebalance procedure.
-   * It clear the work tracking.
+   * It clears the work tracking.
    */
   onRebalance() {
     this.topics = {};
