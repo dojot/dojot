@@ -337,9 +337,9 @@ describe('Validate setters', () => {
   test('setHoldOffFactorTimeSubscription', async () => {
     const consumer = new ConsumerBackPressure({});
 
-    const holdOffFactorTimeSubscription = 100;
+    const holdOffFactorTimeSubscription = 100.0;
     consumer.setHoldOffFactorTimeSubscription(holdOffFactorTimeSubscription);
-    expect(consumer.holdOffFactorTimeSubscription).toBe(holdOffFactorTimeSubscription);
+    expect(consumer.holdOffFactorTimeSubscription).toBeCloseTo(holdOffFactorTimeSubscription);
   });
 
   test('setMaxHoldOffTimeSubscription', async () => {
