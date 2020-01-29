@@ -1,0 +1,27 @@
+@startuml
+
+[Master] as Ms #EEE
+
+[Dojot] as Dj #EEE 
+
+node " " {
+    [Slave n] as sn
+    [...] as sdot
+    [Slave 2] as s2
+    [Slave 1] as s1
+} 
+
+
+[s1] -up-> [Ms]
+[s2] -up-> [Ms]
+[sdot] -up-> [Ms]
+[sn] -up-> [Ms]
+
+[s1] <-down-> [Dj]
+[s2] <-down-> [Dj]
+[sdot] <-down-> [Dj]
+[sn] <-down-> [Dj]
+
+
+
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+
+title VerneMQ Dojot
+
+collections "MQTT BRIDGE" as MB #EEE
+collections "VerneMQ" as VMQ #EEE
+collections "Kafka" as Kf  #EEE
+
+[VMQ]-down->  [MB] : $share/group/+/attrs
+[MB] -down->  [Kf] 
+
+@enduml
