@@ -243,7 +243,7 @@ echo "-----END CERTIFICATE-----" ) > root.crt
 
 NOTE: Ports and address may change depending on the deployment
 
-NOTE 2: The **tenant** is *admin* and **device_id** is *a1998e* for these examples.
+NOTE 2: The **tenant** is *admin* and **device_id** is *a1998e* for these examples. You must change them for your case.
 
 In these examples we will use [mosquitto](https://mosquitto.org/) client.
 
