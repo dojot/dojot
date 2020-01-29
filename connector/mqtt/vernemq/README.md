@@ -124,7 +124,7 @@ export DOJOT_PASSWORD=password
 ```
 
 
-#### 2. GET JWT TOKEN  
+#### 2. GET JWT TOKEN
 
 Get token from dojot
 
@@ -243,6 +243,8 @@ echo "-----END CERTIFICATE-----" ) > root.crt
 
 NOTE: Ports and address may change depending on the deployment
 
+NOTE 2: The **tenant** is *admin* and **device_id** is *a1998e* for these examples.
+
 In these examples we will use [mosquitto](https://mosquitto.org/) client.
 
 ##### Some options for mosquitto_pub and mosquitto_sub
@@ -273,7 +275,7 @@ The tree files are require: *client.crt*, *client.key* and *root.crt*. See examp
 mosquitto_pub -h myhost -p 30311 -t admin:a1998e/attrs -m '{"attr_example": 10 }' --cert client.crt  --key client.key --cafile root.crt
 ```
 
-Note: In this case, the message is a publish  on an attribute with the label attr_example and a new value 10.
+Note: In this case, the message is a publish  on an attribute with the label attr_example and a new value 10 in device *a1998e* with tenant *admin*.
 
 ##### Example on how to subscribe:
 
@@ -290,7 +292,7 @@ MQTT without security is not recommended, use this for testing only.
 ```console
  mosquitto_pub -h myhost -p 30310 -t admin:a1998e/attrs -m '{"attr_example": 10 }' -u admin:a1998e
 ```
-Note: In this case, the message is a publish  on an attribute with the label attr_example and a new value 10.
+Note: In this case, the message is a publish  on an attribute with the label attr_example and a new value 10 in device *a1998e* with tenant *admin*.
 
 ##### Example on how to subscribe:
 
