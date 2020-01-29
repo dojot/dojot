@@ -203,7 +203,7 @@ export CRT_ENTITY_CONTENT=$(curl  -X POST ${DOJOT_URL}/sign/${TENANT}:${DEVICE_I
 -H "Authorization: Bearer ${JWT}" \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" \
--d  "{\"certificate\": \"${CSR_CONTENT}\"}" | jq '.status.data' -r)
+-d  "{\"certificate\": \"${CSR_CONTENT}\", \"passwd\": \"dojot\"}" | jq '.status.data' -r)
 ```
 
 ##### Create a public certificate
