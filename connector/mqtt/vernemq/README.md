@@ -6,7 +6,7 @@
 
 The Dojot VerneMQ service is a extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features for dojot case.
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt)
 
 Fig. 1 - VerneMQ with Dojot (Whereas V2K, K2V, VerneMQ and Client  already have certificates, can occur later communications between PKI and these services. This is better explained later.)
 
@@ -48,7 +48,7 @@ The process of obtaining certificates for client (Fig. 2):
 
 - Obtaining the root certificate (public certificate of **CA**).
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_client)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_client)
 
 Fig. 2 - Client retrives certificates from PKI (EJBCA)
 
@@ -63,7 +63,7 @@ The process of obtaining certificates for VerneMQ, K2V Brige and K2V-bridge (ser
 - CRL updated the CRL certificate every time by setting in CRL_UPDATE_TIME
 
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
 
 
 Fig. 3 - VerneMQ (Broker) retrive certificates from PKI (EJBCA)
