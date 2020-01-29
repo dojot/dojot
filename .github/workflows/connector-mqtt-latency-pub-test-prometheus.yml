@@ -38,7 +38,7 @@ jobs:
         token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
         file: connector/mqtt/latency-pub-test-prometheus/lcov.info # create when run npm test
         flags: mqttLatencyPrometheus # Flags allow you to isolate coverage reports for different tests
-        name: latency-pub-test-prometheus # Custom defined name for the upload
+        name: mqttLatencyPrometheus # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests
