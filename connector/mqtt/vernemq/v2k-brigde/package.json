@@ -1,0 +1,35 @@
+{
+  "name": "v2kbridge",
+  "version": "1.0.0",
+  "description": "service to bridge verne to kafka",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app/index.js",
+    "test": "jest test/unit/*.js --coverage"
+  },
+  "keywords": [],
+  "author": "Jonaphael Aristil, Muhamed Avila",
+  "license": "ISC",
+  "dependencies": {
+    "@dojot/dojot-module-logger": "0.0.1-alpha.5",
+    "@dojot/iotagent-nodejs": "2.1.0-beta.8",
+    "moment": "^2.24.0",
+    "mqtt": "^3.0.0"
+  },
+  "jest": {
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "utils/**/*.js",
+      "!app/index.js",
+      "!app/config.js"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "jest": "^24.9.0"
+  }
+}
