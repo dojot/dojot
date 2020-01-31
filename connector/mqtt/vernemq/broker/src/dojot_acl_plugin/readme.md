@@ -1,11 +1,11 @@
 # Dojot ACL Plugin
 
-This plugin enable the ACL for dojot. The important files are:
+This plugin enables the ACL for dojot. The important files are:
 
 - src/dojot_acl.erl
 - src/dojot_acl_plugin.app.src
 
-This plugin use Erlang OTP.
+This plugin uses Erlang OTP.
 
 
 You must have a recent version of Erlang installed (it's recommended to use the
@@ -13,7 +13,7 @@ same one VerneMQ is compiled for, typically > 17). To compile do:
 
     ./rebar3 compile
 
-Then enable the plugin using:
+Then enable the plugin using (inside of container docker running verneMQ with the copy of plugin):
 
     vmq-admin plugin enable --name dojot_acl_plugin --path <PathToYourPlugin>/dojot_acl_plugin/_build/default
 
