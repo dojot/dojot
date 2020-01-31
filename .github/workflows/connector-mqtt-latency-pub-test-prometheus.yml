@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: npm install, build, and test
+    - name: npm install, build, lint and test
       run: |
         cd connector/mqtt/latency-pub-test-prometheus
         npm ci
