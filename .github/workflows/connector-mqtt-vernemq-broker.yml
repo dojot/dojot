@@ -1,6 +1,6 @@
 name: VerneMQ Broker MQTT (connector/mqtt/vernemq/broker)
 
-# trigger when create a branch, push a tag or a branch, PR with changes in 'pki/ejbca/**'
+# trigger when create a branch, push a tag or a branch, PR with changes in 'connector/mqtt/vernemq/broker/**'
 on:
   create:
   push:
