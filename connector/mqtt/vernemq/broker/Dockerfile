@@ -12,7 +12,7 @@ RUN chmod +x "$SUPERCRONIC"
 RUN mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}"
 RUN ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
-COPY bin/command.sh /
+COPY bin/command.sh /command.sh
 
 COPY bin/vmq_dojot/scripts_tls/ /vernemq/scripts_tls
 COPY bin/vmq_dojot/vmq_dojot.sh /vernemq/vmq_dojot.sh
