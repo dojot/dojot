@@ -1,0 +1,41 @@
+{
+  "name": "k2v-bridge",
+  "version": "1.0.0",
+  "description": "MQTT message transmitter",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest test/**/*.test.js --coverage",
+    "test:watch": "jest --watch tests/**/*.test.js --coverage",
+    "run-client": "node app/index.js"
+  },
+  "keywords": [
+    "node",
+    "kafka",
+    "mqtt"
+  ],
+  "author": "Eduardo Garcia Misiuk, Muhamed Avila, Jonaphael Aristil",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@dojot/dojot-module-logger": "0.0.1-alpha.5",
+    "@dojot/iotagent-nodejs": "2.1.0-beta.8",
+    "mqtt": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "jest": "^24.9.0"
+  },
+  "jest": {
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!app/index.js"
+    ],
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  }
+}
