@@ -5,7 +5,7 @@ This plugin checks and closes staled connections for dojot. The important files 
 - src/clean_sess.erl 
 - src/dojot_disconnect_plugin.app.src
 
-This plugin use Erlang OTP.
+This plugin uses Erlang OTP.
 
 
 You must have a recent version of Erlang installed (it's recommended to use the
@@ -15,7 +15,7 @@ same one VerneMQ is compiled for, typically > 17). To compile do:
 
 Before generating the VerneMQ docker image, you MUST generate the _build with rebar3 and move the _build dir to dojot_disconnect_plugin.
 
-To enable the plugin, use:
+To enable the plugin, use (inside the container docker running verneMQ with the copy of the plugin):
 
     vmq-admin plugin enable --name dojot_disconnect_plugin --path <PathToYourPlugin>/dojot_disconnect_plugin/_build/default
 
