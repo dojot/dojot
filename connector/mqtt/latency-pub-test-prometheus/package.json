@@ -7,6 +7,7 @@
     "test": "jest test/**/*.test.js --coverage",
     "test:watch": "jest --watch test/**/*.test.js --coverage",
     "run-client": "node app/Index.js",
+    "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js ."
   },
   "keywords": [
