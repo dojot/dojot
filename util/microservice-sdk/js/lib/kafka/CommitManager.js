@@ -5,7 +5,7 @@ const TAG = { filename: 'commit-mngr' };
 const DEFAULT_COMMIT_TIME_INTERVAL = 5000;
 
 /**
- * A simple class to tracking the processing of the Kafka messages and managing the commits.
+ * A simple class for tracking the processing of the Kafka messages and managing the commits.
  * It calls periodically a method to consolidate the processed messages into the
  * message brokers (Kafka instances).
  */
