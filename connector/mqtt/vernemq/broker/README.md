@@ -12,6 +12,7 @@ EJBCA_PORT               | Ejbca service port                                   
 USE_VMQ_OPERATOR         | yes if use with vmq-operator                                  | "n"            | y or n
 HOSTNAME                 | Name to container                                             | "broker"       | string
 SERVER_HOSTNAME          | Server hostname (the host to connect)                         | "localhost"    | hostname
+CA_NAME                  | CA Name from EJBCA                                            | "IOTmidCA"    | string
 CHECK_EXPIRATION_TIME    | Checks if the certificates expires every define time by cron  | "0 1 * * *" | cron schedule expressions
 CHECK_BROKER_CERT_REVOKED_TIME  | Checks if the public certificate of broker has revoked every define time by cron  | "0 */3 * * *" | cron schedule expressions
 CRL_UPDATE_TIME          | Update CRL certificate every define time by cron              | "0 */2 * * *" | cron schedule expressions
@@ -26,7 +27,7 @@ PLUGIN_DISC_LIFETIME_SESSION | Plugin Disconnect -  session lifetime            
 
 In dojot case we use this configuration [see here](./examples/vernemq.conf).
 
-You can pass a environment variable VERNEMQ_CONF in base64 with the contents of the [configuration.](./examples/vernemq.conf)
+You can pass an environment variable VERNEMQ_CONF in base64 with the contents of the [configuration.](./examples/vernemq.conf)
 
 Example of part of a yaml
 
@@ -49,8 +50,6 @@ Plugin verneMQ Disconnect for Dojot [see here](./src/dojot_disconnect_plugin).
 Example:
 
 ```shell
-
-./bin/plugins_builder/plugin_builder.sh
 
 docker build -t <img_name> .
 

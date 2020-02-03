@@ -8,7 +8,7 @@ cat "${certDir}"/"${certCaFile}" "${certDir}"/"${certCrlFile}" > "${certDir}"/cr
 
 if openssl verify -crl_check -CAfile "${certDir}"/crl_chain.pem "${certDir}"/"${certCertFile}"
 then
-  echo "Certificate for broker is not revoked!"
+  echo "Certificate for broker is active!"
 else
   echo "Certificate for broker has been revoked!"
   echo "Renew:"

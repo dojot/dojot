@@ -10,7 +10,7 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 echo "Signing cert for entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/sign/${certCname}/pkcs10 "
 csrContent=$(<  "${certDir}"/"${certCsrFile}"  sed '1,1d;$ d' | tr -d '\r\n')
 
-signCertCa=$(curl --silent -X POST "${certEjbcaApiUrl}"/sign/"${certCname}"/pkcs10 \
+signCertCa=$(curl -X POST "${certEjbcaApiUrl}"/sign/"${certCname}"/pkcs10 \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" \
 -d  "{

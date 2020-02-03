@@ -5,7 +5,7 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 . "${BASE_DIR}"/scripts_tls/_initVariables.sh
 
 echo "Retrieve crl from  ${certCAName} CA : ${certEjbcaApiUrl}/ca/${certCAName}/crl?update=true"
-certCrl=$(curl --silent -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}"/crl?update=true \
+certCrl=$(curl  -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}"/crl?update=true \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" | jq '.CRL' -r)
 
