@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "A SDK to help to build microservices for the dojot platform",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "node_modules/.bin/eslint lib/ test/unit/"
   },
   "author": "Raul Negreiros",
   "license": "GPL-3.0",

@@ -188,13 +188,13 @@ module.exports = class ConsumerBackPressure {
 
     // check if the id belongs to a regular expression registry
     const topicsRegExpBefore = this.topicRegExpArray.length;
-    this.topicRegExpArray = this.topicRegExpArray.filter(entry => entry.id !== registerId);
+    this.topicRegExpArray = this.topicRegExpArray.filter((entry) => entry.id !== registerId);
     if (topicsRegExpBefore !== this.topicRegExpArray.length) {
       needToRefreshSubscriptions = true;
     } else {
       Object.keys(this.topicMap).forEach((topic) => {
         this.topicMap[topic] = this.topicMap[topic].filter(
-          entry => entry.id !== registerId,
+          (entry) => entry.id !== registerId,
         );
         if (this.topicMap[topic].length === 0) {
           needToRefreshSubscriptions = true;
@@ -293,7 +293,7 @@ module.exports = class ConsumerBackPressure {
           this.consumer.unsubscribe();
           // concatenates the topics explicits with the regular expressions
           const topics = Array.prototype.concat(Object.keys(this.topicMap),
-            this.topicRegExpArray.map(entry => entry.regExp));
+            this.topicRegExpArray.map((entry) => entry.regExp));
           logger.debug(`subscribing in the following topics (${topics.length}): ${JSON.stringify(topics)}`);
           if (topics.length > 0) {
             this.consumer.subscribe(topics);

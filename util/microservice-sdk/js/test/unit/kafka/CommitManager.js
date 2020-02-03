@@ -1,4 +1,4 @@
-const CommitManager = require('kafka/CommitManager.js');
+const CommitManager = require('../../../lib/kafka/CommitManager.js');
 
 jest.mock('@dojot/dojot-module-logger');
 

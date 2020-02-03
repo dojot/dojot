@@ -80,7 +80,7 @@ module.exports = class CommitManager {
     }
 
     const record = partitionOffsets.filter(
-      currRecord => currRecord.offset === offset,
+      (currRecord) => currRecord.offset === offset,
     )[0];
     if (record) {
       record.done = true;
@@ -110,8 +110,8 @@ module.exports = class CommitManager {
         Object.keys(partitions).forEach((partition) => {
           const partitionOffsets = partitions[partition];
 
-          const firstProcessedMsgIndex = partitionOffsets.findIndex(record => record.done);
-          const firstNonProcessedMsgIndex = partitionOffsets.findIndex(record => !record.done);
+          const firstProcessedMsgIndex = partitionOffsets.findIndex((record) => record.done);
+          const firstNonProcessedMsgIndex = partitionOffsets.findIndex((record) => !record.done);
 
           if (((firstProcessedMsgIndex > firstNonProcessedMsgIndex)
               && (firstNonProcessedMsgIndex !== -1))
