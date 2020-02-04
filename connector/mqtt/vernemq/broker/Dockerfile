@@ -1,4 +1,4 @@
-FROM dojot/erlang_for_build_plugin_verne:16012020 as basis
+FROM erlang:19.3.6.13 as basis
 
 # Build ACL Plugin:
 COPY src/dojot_acl_plugin /build/plugins/dojot_acl_plugin
@@ -27,7 +27,7 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" && \
     ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
 # Copy dojot plugins for vernemq from basis
-# COPY --from=basis /build/plugins/* /vernemq/
+COPY --from=basis /build/plugins/* /vernemq/
 
 # Copy tls scripts
 COPY bin/vmq_dojot/scripts_tls/ /vernemq/scripts_tls
