@@ -1,0 +1,14 @@
+# Binaries
+build
+
+# NodeJS
+node_modules
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Github
+.git
+.github
+.gitignore

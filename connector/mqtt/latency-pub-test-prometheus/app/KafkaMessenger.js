@@ -24,7 +24,7 @@ class KafkaMessenger {
     this.messenger.init().then(() => {
       this.initKafka();
     }).catch((error) => {
-      logger.debug(`... failed to initialize the dojot-prom-metrics messenger. Error: ${error.toString()}`, TAG);
+      logger.debug(`... failed to initialize the latency-pub-test-prometheus messenger. Error: ${error.toString()}`, TAG);
     });
   }
 

@@ -7,5 +7,3 @@
 
 # Abort on any error (good shell hygiene)
 set -e
-
-npm run run-client
