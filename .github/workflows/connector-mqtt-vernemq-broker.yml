@@ -11,7 +11,7 @@ jobs:
   docker-hub:
     name: (connector/mqtt/vernemq/broker) Build  and Publish image with plugins to DockerHUb #  path to help identify in Status checks each job
     runs-on: ubuntu-latest
-    # If this is a PR, it won't run or commit with msg ci skip
+    # If this is a PR or commit with msg ci skip, it won't run 
     if: contains(github.ref, 'refs/pull/') == false || contains(github.event.head_commit.message, 'ci skip') == false
     steps:
 
