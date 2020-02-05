@@ -1,42 +1,53 @@
-# MQTT 
+# IoTAgent MQTT (VerneMQ)
 
 ## Overview
 
-### Iot-Agent MQTT for Dojot
+An IoTAgent is an adaptation service between physical devices and dojot’s core components. The IoTAgents are responsible for receiving messages from physical devices (directly or through a gateway) and sending them commands in order to configure. The dojot platform can have multiple iot-agents, each one of them being specialized in a specific protocol like in this case MQTT. It is also responsible to ensure that it communicates with devices using secure channels.
 
-The Dojot VerneMQ service is a extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features for dojot case.
+The IoTAgent MQTT is a extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features e services for dojot case. The **VerneMQ** receiving messages from devices and sending messages for them. The V2K-bridge service receives messages from VerneMQ via MQTT and send this messages to Kafka to be use in dojot’s core components. While the K2V-bridge service receives messages from dojot’s core components via Kafka and send them for VerneMQ via MQTT, and then the device receives this message. See this all flux in Fig. 1.
+
+- Which version of the protocol does it use? 3 ou 5?
 
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt)
 
-Fig. 1 - VerneMQ with Dojot (Whereas V2K, K2V, VerneMQ and Client  already have certificates, can occur later communications between PKI and these services. This is better explained later.)
+Fig. 1 - VerneMQ with Dojot (Whereas V2K-Bridge, K2V-Bridge, VerneMQ and Client already have certificates, can occur later communications between PKI and these services. This is better explained later.)
 
-## V2K-bridge
+### VerneMQ Broker with Custom to Dojot
 
-The V2K-bridge service is the core between the communication of VerneMQ broker and the Kafka broker.
+The VerneMQ Broker with Custom to Dojot has some additions of scripts to integration with our CA for communications via TLS and security.
+
+For more see [here](./broker)
+
+### V2K-bridge
+
+The V2K-bridge service implements a bridge between VerneMQ broker and Kafka broker. Basically, it subscribes to some MQTT topics and forward the messages to some Kafka topics following the dojot's topics rules. In order to scale the bridge service, shared MQTT subscriptions are used, which allows to instantiate a group of consumers, i.e. a group of bridge instance, when necessary. The communication between the bridge and the VerneMQ is secured with mutual TLS. Soon, the communication with Kafka will also use mutual TLS.
 
 For more see [here](./v2k-bridge)
 
-## K2V-bridge
+### K2V-bridge
 
-The k2v-bridge service is who consume messages from kafka, extract its attrs value, build a topic with the kafka key where the message where produced, then publish the attrs payload to verneMQ.
+The K2V-bridge service implements a bridge between Kafka broker and VerneMQ broker. It recevies messagens from some Kafka dojot's topics and publish the messages to a some MQTT topics.
+The communication between the bridge and the VerneMQ is secured with mutual TLS. Soon, the communication with Kafka will also use mutual TLS.
 
 For more see [here](./k2v-bridge)
 
-## MQTT Security: VerneMQ + TLS + PKI (EJBCA) + ACL
+## ACL (access-control list)
 
-We use **TLS** mutual authentication to provide a secure communication between devices and broker ([VerneMQ](https://github.com/vernemq/vernemq)) through **MQTT**.  Transport Layer Security (**TLS**) is a cryptographic protocol designed to provide communications security over a computer network.
-
-In **TLS** each device and broker should be provisioned with a private key and corresponding public certificate sign from **CA** (certificate authority) and a root certificate (public certificate of **CA**), the **CA** is include in **PKI** (public key infrastructure). A **PKI**  ([EJBCA](./ejbca)) is a system for the creation, storage, and distribution of digital certificates.
-
-An **ACL** (access-control list) based authorization is provided to manage permissions, so a device can only publish and subscribe to its own topic, the topics are: 
+An **ACL** (access-control list) based authorization is provided to manage permissions, so a device can only publish and subscribe to its own topic, the topics are:
 
 - For publish: ***tenant***_:_***device_id***_/attrs_
 - For subscription: ***tenant***_:_***device_id***_/config_
 
-Where ***tenant*** is the information context separation of dojot and ***device_id*** is a unique identification for the device.  
+Where ***tenant*** is the information context separation of dojot and ***device_id*** is a unique identification for the device.
 The junction (***tenant:device_id***) of *tenant* and  *device_id* must be unique.
 
 See more about [ACL Plugin](vernemq/plugins/dojot_acl_plugin) for VerneMQ.
+
+## Security
+
+We use **TLS** mutual authentication to provide a secure communication between devices and broker [VerneMQ](https://github.com/vernemq/vernemq) through **MQTT**.  Transport Layer Security (**TLS**) is a cryptographic protocol designed to provide communications security over a computer network.
+
+In **TLS** each device and broker should be provisioned with a private key and corresponding public certificate sign from **CA** (certificate authority) and a root certificate (public certificate of **CA**), the **CA** is include in **PKI** (public key infrastructure). A **PKI**  ([EJBCA](./ejbca)) is a system for the creation, storage, and distribution of digital certificates.
 
 Also a PKI includes the certificate revocation list (**CRL**), which is a list of certificates that have been revoked before reaching the expiration date of the certificate.
 
@@ -52,9 +63,11 @@ The process of obtaining certificates for client (Fig. 2):
 
 Fig. 2 - Client retrives certificates from PKI (EJBCA)
 
-The step by step on how to get a certificate for a client will be explained later, see [here](##how-to-get-a-certificate-for-a-client-to-use-with-dojot-vernemq).
+The step by step on how to get a certificate for a client will be explained later.
 
-The process of obtaining certificates for VerneMQ, K2V Brige and K2V-bridge (services) instances follows the same steps as for the client, with some more followed by (Fig. 3):
+The process of obtaining certificates for K2V Brige and K2V-bridge instances follows the same steps as for the client.
+
+The process of obtaining certificates for VerneMQ instances follows the same steps as for the client, with some more followed by (Fig. 3):
 
 - At each defined time (CHECK_EXPIRATION_TIME), it's checked if the root certificate and public certificate of the service instance will expire in the next CHECKEND_EXPIRATION_SEC seconds.
 
@@ -62,20 +75,18 @@ The process of obtaining certificates for VerneMQ, K2V Brige and K2V-bridge (ser
 
 - CRL updated the CRL certificate every time by setting in CRL_UPDATE_TIME
 
-
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
-
 
 Fig. 3 - VerneMQ (Broker) retrive certificates from PKI (EJBCA)
 
 The TLS connection has a maximum life time, see more about [Disconnect Plugin](vernemq/plugins/dojot_disconnect_plugin) for VerneMQ.
-The TLS connection also has a configurable timeout, which is a VerneMQ configuration..
+The TLS connection also has a configurable timeout, which is a VerneMQ configuration.
 
 Environment variables mentioned above are more described in [here](./vernemq)
 
-## How to get a certificate for a client to use with Dojot VerneMQ
+## How to connect a device with the IoTAgent-MQTT witn Security (via TLS)
 
-### **Before**
+### **Prerequisites**
 
 - Create a device in Dojot and get a tenant and a device ID.
 - Install [openssl](https://www.openssl.org/), [jq](https://stedolan.github.io/jq/) and [cURL](https://curl.haxx.se/).
@@ -96,7 +107,6 @@ Change the value of the DOJOT_URL variable from the code block below and execute
 ```console
 export DOJOT_URL=http://myhost:8000
 ```
-
 
 ##### Server hostname
 
@@ -239,7 +249,7 @@ echo ${CRT_ROOT_CONTENT}
 echo "-----END CERTIFICATE-----" ) > root.crt
 ```
 
-### How  to communicate with VerneMQ
+## Simulating a device with mosquitto
 
 NOTE: Ports and address may change depending on the deployment
 
@@ -265,37 +275,42 @@ In these examples we will use [mosquitto](https://mosquitto.org/) client.
 
 - **-u**: Provide a username to be used for authenticating with the broker.
 
-#### Use certificates to communicate with VerneMQ
+### With security: use TLS to communicate with VerneMQ
 
 The tree files are require: *client.crt*, *client.key* and *root.crt*. See example:
 
-##### Example on how to publish:
+##### Example on how to publish
 
 ```console
-mosquitto_pub -h myhost -p 30311 -t admin:a1998e/attrs -m '{"attr_example": 10 }' --cert client.crt  --key client.key --cafile root.crt
+mosquitto_pub -h myhost -p 8883 -t admin:a1998e/attrs -m '{"attr_example": 10 }' --cert client.crt  --key client.key --cafile root.crt
 ```
 
 Note: In this case, the message is a publish  on an attribute with the label attr_example and a new value 10 in device *a1998e* with tenant *admin*.
 
-##### Example on how to subscribe:
+##### Example on how to subscribe
 
 ```console
-mosquitto_sub -h myhost -p 30311 -t admin:a1998e/config --cert client.crt  --key client.key --cafile root.crt
+mosquitto_sub -h myhost -p 8883 -t admin:a1998e/config --cert client.crt  --key client.key --cafile root.crt
 ```
 
-####  MQTT without Security: VerneMQ + ACL
+### Without security
 
-MQTT without security is not recommended, use this for testing only.
+**MQTT without security is not recommended, use this for testing only.**
 
-##### Example on how to publish:
+##### Prerequisites
+
+Create a device in Dojot and get a tenant and a device ID.
+
+##### Example on how to publish
 
 ```console
- mosquitto_pub -h myhost -p 30310 -t admin:a1998e/attrs -m '{"attr_example": 10 }' -u admin:a1998e
+ mosquitto_pub -h myhost -p 1883 -t admin:a1998e/attrs -m '{"attr_example": 10 }' -u admin:a1998e
 ```
+
 Note: In this case, the message is a publish  on an attribute with the label attr_example and a new value 10 in device *a1998e* with tenant *admin*.
 
-##### Example on how to subscribe:
+##### Example on how to subscribe
 
 ```console
- mosquitto_sub -h myhost -p 30310 -t admin:a1998e/attrs -u admin:a1998e
+ mosquitto_sub -h myhost -p 1883 -t admin:a1998e/attrs -u admin:a1998e
 ```

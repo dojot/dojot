@@ -5,14 +5,14 @@ frame "Dojot" {
     collections "K2V bridge" as K2V #EEE
     collections "VerneMQ" as VMQ #EEE
     collections "Kafka" as Kf  #EEE
-    collections "Others services" as Ot #EEE 
+    collections "Dojot’s core components" as Ot #EEE
 }
 collections "Client" as Cli #EEE
 
 
-[Kf] -down-> [K2V] 
-[V2K] -up-> [Kf] 
-[Kf] <-right-> [Ot] 
+[Kf] -down-> [K2V]
+[V2K] -up-> [Kf]
+[Kf] <-right-> [Ot]
 
 [K2V]-right-> [VMQ] : MQTTS
 [VMQ]-right-> [V2K] : MQTTS
