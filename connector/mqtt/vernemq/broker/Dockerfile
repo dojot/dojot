@@ -27,7 +27,8 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" && \
     ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
 # Copy dojot plugins for vernemq from basis
-COPY --from=basis /build/plugins/* /vernemq/
+COPY --from=basis /build/plugins/dojot_acl_plugin/_build /vernemq/dojot_acl_plugin
+COPY --from=basis /build/plugins/dojot_disconnect_plugin/_build /vernemq/dojot_disconnect_plugin
 
 # Copy tls scripts
 COPY bin/vmq_dojot/scripts_tls/ /vernemq/scripts_tls
