@@ -1,0 +1,12 @@
+{
+  "env": {
+    "jest" : true,
+    "es6": true,
+    "node": true
+  },
+  "extends": "airbnb-base",
+  "rules": {
+    /* the rule import/no-unresolved is needed to avoid problems with the codefactor */
+    "import/no-unresolved": "off"
+  }
+}
