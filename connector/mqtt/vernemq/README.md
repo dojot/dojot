@@ -6,7 +6,7 @@ An IoTAgent is an adaptation service between physical devices and dojot’s core
 
 The IoTAgent MQTT is a extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features e services for dojot case. The **VerneMQ** receiving messages from devices and sending messages for them. The V2K-bridge service receives messages from VerneMQ via MQTT and send this messages to Kafka to be use in dojot’s core components. While the K2V-bridge service receives messages from dojot’s core components via Kafka and send them for VerneMQ via MQTT, and then the device receives this message. See this all flux in Fig. 1.
 
-The VerneMQ by default the protocol versions allowed are versions 3 and 4 (MQTT v3.1 and v3.1.1 respectively).
+The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respectively.
 
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt)
 
