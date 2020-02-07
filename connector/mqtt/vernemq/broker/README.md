@@ -20,7 +20,7 @@ CHECKEND_EXPIRATION_SEC  | When expiration check certificates run, renew if the 
 PLUGIN_ACL_CHAIN             | Plugin ACL - Use "y" if there is another plugin with the same hook and this other plugin will be executed after the ACL one    | "n"               | y or n
 PLUGIN_ACL_K2V_SERVICENAME   | Service name for k2v-bridge                                    | k2v-bridge-verne  | string
 PLUGIN_ACL_V2K_SERVICENAME       | Service name for v2k-bridge                                    | v2k-bridge-verne  | string
-PLUGIN_DISC_LIFETIME_SESSION | Plugin Disconnect -  session lifetime                          | 30 min            | integer (miliseconds)
+PLUGIN_DISC_LIFETIME_SESSION | Plugin Disconnect -  session lifetime                          | 1800000            | integer (miliseconds)
 
 
 ### **VerneMQ Configuration**
