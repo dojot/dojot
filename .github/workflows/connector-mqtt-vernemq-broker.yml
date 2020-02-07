@@ -25,11 +25,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
 
-    - name: build plugins
-      run: |
-        cd connector/mqtt/vernemq/broker/
-        ./bin/plugins_builder/plugin_builder.sh
-
     - name: Build and Push
       uses: elgohr/Publish-Docker-Github-Action@2.11
       with:
