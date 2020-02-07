@@ -1,7 +1,7 @@
 -module(dojot_acl).
 
--define(K2VBridge, erlang:list_to_binary(os:getenv("K2VBRIDGE_SERVICE_NAME", "k2v-bridge-verne"))).
--define(V2KBridge, erlang:list_to_binary(os:getenv("V2KBRIDGE_SERVICE_NAME", "v2k-bridge-verne"))).
+-define(K2VBridge, erlang:list_to_binary(os:getenv("PLUGIN_ACL_K2V_SERVICENAME", "k2v-bridge-verne"))).
+-define(V2KBridge, erlang:list_to_binary(os:getenv("PLUGIN_ACL_V2K_SERVICENAME", "v2k-bridge-verne"))).
 
 
 -export([
