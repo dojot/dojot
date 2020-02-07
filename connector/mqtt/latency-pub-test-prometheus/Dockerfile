@@ -2,18 +2,20 @@ FROM node:10.16.3-alpine
 
 WORKDIR /opt/prometheus
 
-RUN apk --no-cache add \
+RUN apk update && apk add --no-cache g++ \
+    make \
     bash \
-    g++ \
-    ca-certificates \
+    python \
     lz4-dev \
     musl-dev \
-    cyrus-sasl-dev \
+    ca-certificates \
     openssl-dev \
-    make \
-    python
-
-RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
+    libc6-compat \
+    krb5-dev  \
+    zlib-dev \
+    zeromq-dev \
+    gcc \
+    git
 
 COPY package.json .
 COPY package-lock.json .
@@ -21,8 +23,10 @@ COPY package-lock.json .
 COPY bin/entrypoint.sh ./entrypoint.sh
 
 COPY app ./app
+
 RUN npm install
 
-CMD  ["npm", "run","run-client"]
-
 ENTRYPOINT ["./entrypoint.sh"]
+
+
+CMD ["npm", "run", "run-client"]
