@@ -22,6 +22,9 @@ else
   echo "Certificate from CA has expired or will do so within ${CHECKEND_EXPIRATION_SEC}s!"
   echo "(or is invalid/not found)"
   echo "Renew:"
+
+  rm -f "${certDir}"/"${certCaFile}"
+
   . "${BASE_DIR}"/scripts_tls/retrieveCACertificate.sh && "${BASE_DIR}"/scripts_tls/checkCertificateChain.sh
 fi
 
