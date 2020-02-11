@@ -1,5 +1,7 @@
 -module(dojot_acl_plugin).
 
+-define(Chained, erlang:list_to_binary(os:getenv("PLUGIN_ACL_CHAIN", "n"))).
+
 -behaviour(auth_on_register_hook).
 -behaviour(auth_on_subscribe_hook).
 -behaviour(auth_on_publish_hook).
@@ -13,7 +15,6 @@ auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberI
 
 auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, Payload, IsRetain) ->
     Result  = dojot_acl:check_valid_topic(UserName, Topic),
-    Chained = erlang:list_to_binary([os:getenv("PLUGIN_ACL_CHAIN")]),
 
     case Result of
         % the topic match with config
@@ -22,7 +23,7 @@ auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, P
         % the topic match and is valid not config
         next ->
             % if there's other plugin with same hook
-            case Chained of
+            case ?Chained of
                 <<"y">> ->
                     next;
                 <<"n">> ->
