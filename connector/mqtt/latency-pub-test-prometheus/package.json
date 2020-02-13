@@ -1,20 +1,28 @@
 {
   "name": "latency-pub-test-prometheus",
-  "version": "1.0.0",
-  "description": "Service to collect latency between publication MQTT and Kafka with Dojot and expose to prometheus",
-  "main": "src/Index.js",
+  "version": "0.1.0",
+  "description": "Service to collect latency between publication MQTT and Kafka with Dojot, and expose to prometheus",
+  "main": "app/Index.js",
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/dojot/dojot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot.git"
+  },
+  "author": "@mprevide",
   "scripts": {
-    "test": "jest test/**/*.test.js --coverage",
-    "test:watch": "jest --watch test/**/*.test.js --coverage",
     "run-client": "node app/Index.js",
+    "test": "jest test/**/*.test.js",
+    "test:watch": "jest test/**/*.test.js --watchAll",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js ."
   },
   "keywords": [
     "prometheus",
-    "dojot"
+    "dojot",
+    "kafka",
+    "mqtt"
   ],
-  "license": "GPL-3.0",
   "dependencies": {
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
     "@dojot/dojot-module": "0.0.1-beta.8",
@@ -31,15 +39,27 @@
     "supertest": "^4.0.2"
   },
   "jest": {
+    "verbose": true,
     "collectCoverage": true,
+    "moduleDirectories": [
+      "node_modules",
+      "lib"
+    ],
     "collectCoverageFrom": [
-      "app/**/*.js",
       "!app/Index.js",
       "!Config.js"
     ],
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
-    ]
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
   }
 }

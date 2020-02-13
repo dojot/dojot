@@ -1,6 +1,3 @@
-
-const convertSecToMs = (startTimeSec) => parseInt(Math.floor(startTimeSec * 1000), 10);
-
 const extractPayload = (message) => {
   const messageContent = JSON.parse(message);
   const { attrs } = messageContent;
@@ -8,8 +5,11 @@ const extractPayload = (message) => {
   return attrs;
 };
 
+const killApplication = () => {
+  process.kill(process.pid, 'SIGTERM');
+};
 
 module.exports = {
-  convertSecToMs,
   extractPayload,
+  killApplication,
 };

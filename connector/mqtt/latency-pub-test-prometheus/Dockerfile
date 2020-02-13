@@ -1,32 +1,31 @@
-FROM node:10.16.3-alpine
+FROM node:10.16.3-alpine AS base
 
 WORKDIR /opt/prometheus
 
-RUN apk update && apk add --no-cache g++ \
-    make \
+RUN apk --no-cache add \
     bash \
-    python \
+    g++ \
+    ca-certificates \
     lz4-dev \
     musl-dev \
-    ca-certificates \
+    cyrus-sasl-dev \
     openssl-dev \
-    libc6-compat \
-    krb5-dev  \
-    zlib-dev \
-    zeromq-dev \
-    gcc \
-    git
+    make \
+    python
+
+RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
 
 COPY package.json .
 COPY package-lock.json .
-
-COPY bin/entrypoint.sh ./entrypoint.sh
 
 COPY app ./app
 
 RUN npm install
 
-ENTRYPOINT ["./entrypoint.sh"]
+FROM node:10.16.3-alpine
 
+WORKDIR /opt/prometheus
+
+COPY --from=base /opt/prometheus /opt/prometheus
 
 CMD ["npm", "run", "run-client"]

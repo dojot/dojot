@@ -1,10 +1,10 @@
-const metrics = require('../../app/Metrics');
+const metrics = require('../../app/LatencyStore');
+
 const KafkaMessenger = require('../../app/KafkaMessenger');
 
 jest.mock('@dojot/dojot-module');
 jest.mock('@dojot/dojot-module-logger');
-jest.mock('../../app/Config.js');
-jest.mock('../../app/Metrics');
+jest.mock('../../app/LatencyStore');
 
 const mockMessenger = {
   Messenger: {
@@ -22,9 +22,9 @@ jest.mock('../../app/Config.js', () => ({
   messenger: {
     dojot: {
       subjects: {
-        deviceData: process.env.DOJOT_SUBJECT_DEVICE_DATA || 'device-data',
-        devices: process.env.DOJOT_SUBJECT_DEVICES || 'dojot.device-manager.device',
-        tenancy: process.env.DOJOT_SUBJECT_TENANCY || 'dojot.tenancy',
+        deviceData: 'device-data',
+        devices: 'dojot.device-manager.device',
+        tenancy: 'dojot.tenancy',
       },
     },
   },
@@ -50,6 +50,8 @@ describe('Testing Dojot Kafka messenger', () => {
   it('Should not init correctly ', async () => {
     mockMessenger.Messenger.init = (jest.fn(() => Promise.reject(new Error('Msg error'))));
 
+    process.kill = jest.fn(() => { });
+
     await kafkaMessenger.init();
 
     expect(mockMessenger.Messenger.createChannel).not.toHaveBeenCalled();
@@ -60,11 +62,11 @@ describe('Testing Dojot Kafka messenger', () => {
     kafkaMessenger.init();
     const timestamp = Date.now();
 
-    const startSec = timestamp / 1000;
+    const startMS = timestamp;
 
     const msg = {
       attrs: {
-        timestamp: startSec,
+        timestamp: startMS,
       },
     };
 
@@ -73,66 +75,40 @@ describe('Testing Dojot Kafka messenger', () => {
       timestamp: endTimeMS,
     };
 
-    metrics.addTime.mockResolvedValue();
+    metrics.addLatency.mockResolvedValue();
 
     KafkaMessenger.kafkaOnMessage('admin', JSON.stringify(msg), extraInfo);
 
-    expect(metrics.addTime).toHaveBeenCalledWith(150);
+    expect(metrics.addLatency).toHaveBeenCalledWith(150);
   });
 
   it('kafkaOnMessage not correctly', () => {
     kafkaMessenger.init();
 
 
-    metrics.addTime.mockResolvedValue();
+    metrics.addLatency.mockResolvedValue();
 
     try {
       KafkaMessenger.kafkaOnMessage('admin', {}, {});
     } catch (e) {
-      expect(metrics.addTime).not.toHaveBeenCalledWith();
+      expect(metrics.addLatency).not.toHaveBeenCalledWith();
     }
-  });
-
-  it('kafkaOnMessage correctly', () => {
-    kafkaMessenger.init();
-    const timestamp = Date.now();
-
-    const startSec = timestamp / 1000;
-
-    const msg = {
-      attrs: {
-        timestamp: startSec,
-      },
-    };
-
-    const endTimeMS = timestamp + 150;
-    const extraInfo = {
-      timestamp: endTimeMS,
-    };
-
-    metrics.addTime.mockResolvedValue();
-
-    KafkaMessenger.kafkaOnMessage('admin', JSON.stringify(msg), extraInfo);
-
-    expect(metrics.addTime).toHaveBeenCalledWith(150);
   });
 
   it('kafkaOnMessage without timestamp in payload', () => {
     kafkaMessenger.init();
 
-
     const msg = {
       attrs: {
       },
     };
 
-
-    metrics.addTime.mockResolvedValue();
+    metrics.addLatency.mockResolvedValue();
 
     try {
       KafkaMessenger.kafkaOnMessage('admin', JSON.stringify(msg), {});
     } catch (e) {
-      expect(metrics.addTime).not.toHaveBeenCalledWith();
+      expect(metrics.addLatency).not.toHaveBeenCalledWith();
     }
   });
 });

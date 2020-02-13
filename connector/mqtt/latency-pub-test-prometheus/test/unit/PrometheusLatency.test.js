@@ -1,18 +1,18 @@
 const Prometheus = require('prom-client');
-const prometheusDojot = require('../../app/PrometheusDojot');
+const prometheusDojot = require('../../app/prometheus/ExposeLatency');
 
 jest.mock('@dojot/dojot-module-logger');
 jest.mock('prom-client');
 
-
 describe('Testing Metrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Prometheus.collectDefaultMetrics = (jest.fn(() => ''));
   });
 
   it('Check instance ', () => {
-    expect(prometheusDojot.dojotLatency).toBeDefined();
-    expect(prometheusDojot.dojotLatency instanceof Prometheus.Gauge).toBeTruthy();
+    expect(prometheusDojot.latency).toBeDefined();
+    expect(prometheusDojot.latency instanceof Prometheus.Gauge).toBeTruthy();
   });
 
   it('Check Sets ', () => {
@@ -22,6 +22,6 @@ describe('Testing Metrics', () => {
     prometheusDojot.setMin(555);
     prometheusDojot.setStandardDeviation(555);
 
-    expect(prometheusDojot.dojotLatency.set).toHaveBeenCalledTimes(5);
+    expect(prometheusDojot.latency.set).toHaveBeenCalledTimes(5);
   });
 });

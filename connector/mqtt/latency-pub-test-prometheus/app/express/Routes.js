@@ -2,26 +2,43 @@ const routes = require('express').Router();
 const { logger } = require('@dojot/dojot-module-logger');
 const util = require('util');
 
-const PrometheusDojot = require('../PrometheusDojot');
-const { getRegisterContentType, getRegisterMetrics } = require('../PrometheusUtils');
-const metrics = require('../Metrics');
+const ExposeLatency = require('../prometheus/ExposeLatency');
+
+const {
+  getRegisterContentTypePrometheus,
+  getAllRegistersMetricsPrometheus,
+  resetAllRegistersMetricsPrometheus,
+} = require('../prometheus/Utils');
+
+const latencyStore = require('../LatencyStore');
 
 const TAG = { filename: 'express/Routes' };
 
+/**
+ * Endpoint  for prometheus to consume metrics
+ */
 routes.get('/metrics', (req, res) => {
-  res.set('Content-Type', getRegisterContentType());
+  // set content type used for prometheus
+  res.set('Content-Type', getRegisterContentTypePrometheus());
 
-  PrometheusDojot.setMax(metrics.getMax());
-  PrometheusDojot.setMin(metrics.getMin());
-  PrometheusDojot.setAvg(metrics.getAvg());
-  PrometheusDojot.setMedian(metrics.getMedian());
-  PrometheusDojot.setStandardDeviation(metrics.getStandardDeviation());
+  // get store latencies and set in prometheus metrics
+  ExposeLatency.setMax(latencyStore.getMax());
+  ExposeLatency.setMin(latencyStore.getMin());
+  ExposeLatency.setAvg(latencyStore.getAvg());
+  ExposeLatency.setMedian(latencyStore.getMedian());
+  ExposeLatency.setStandardDeviation(latencyStore.getStandardDeviation());
 
-  logger.debug(`Expose metrics ${util.inspect(metrics.getAllTimes(), { depth: null })}`, TAG);
+  logger.debug(`Expose metrics ${util.inspect(latencyStore.getLatencies(), { depth: null })}`, TAG);
 
-  metrics.cleanAllTimes();
+  // clean store latencies
+  latencyStore.cleanLatencies();
 
-  res.end(getRegisterMetrics());
+  // pass a string to be sent to the client
+  res.end(getAllRegistersMetricsPrometheus());
+
+  logger.debug(`Expose metrics to prometheus ${getAllRegistersMetricsPrometheus()}`, TAG);
+
+  resetAllRegistersMetricsPrometheus();
 });
 
 module.exports = routes;

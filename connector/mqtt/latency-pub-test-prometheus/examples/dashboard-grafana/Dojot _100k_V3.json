@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 14,
-  "iteration": 1574444672330,
+  "iteration": 1582051657765,
   "links": [],
   "panels": [
     {
@@ -440,7 +440,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "Dojot_Statistics{kind=\"avg\"}",
+          "expr": "dojot_latency_pub_statistics{statistic_kind=\"average\"}",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -532,7 +532,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "Dojot_Statistics{kind=\"median\"}",
+          "expr": "dojot_latency_pub_statistics{statistic_kind=\"standard_deviation\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -613,7 +613,7 @@
             "h": 5,
             "w": 5,
             "x": 0,
-            "y": 44
+            "y": 2
           },
           "id": 15,
           "interval": null,
@@ -684,7 +684,7 @@
             "h": 5,
             "w": 6,
             "x": 5,
-            "y": 44
+            "y": 2
           },
           "id": 47,
           "legend": {
@@ -777,7 +777,7 @@
             "h": 5,
             "w": 6,
             "x": 11,
-            "y": 44
+            "y": 2
           },
           "id": 49,
           "legend": {
@@ -870,7 +870,7 @@
             "h": 5,
             "w": 6,
             "x": 17,
-            "y": 44
+            "y": 2
           },
           "id": 51,
           "legend": {
@@ -956,7 +956,7 @@
             "h": 6,
             "w": 11,
             "x": 0,
-            "y": 49
+            "y": 7
           },
           "id": 31,
           "legend": {
@@ -1055,7 +1055,7 @@
             "h": 9,
             "w": 11,
             "x": 13,
-            "y": 49
+            "y": 7
           },
           "id": 37,
           "legend": {
@@ -1170,7 +1170,7 @@
             "h": 5,
             "w": 11,
             "x": 0,
-            "y": 55
+            "y": 13
           },
           "id": 25,
           "legend": {
@@ -1286,7 +1286,7 @@
             "h": 6,
             "w": 13,
             "x": 11,
-            "y": 58
+            "y": 16
           },
           "id": 27,
           "legend": {
@@ -1407,7 +1407,7 @@
             "h": 5,
             "w": 13,
             "x": 11,
-            "y": 64
+            "y": 22
           },
           "id": 21,
           "legend": {
@@ -1530,7 +1530,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
@@ -1541,7 +1541,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "Dojot_Statistics{kind=\"median\"}",
+          "expr": "dojot_latency_pub_statistics{statistic_kind=\"median\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -1618,7 +1618,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
@@ -1629,7 +1629,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(Dojot_Statistics) by (avg) ",
+          "expr": "avg(dojot_latency_pub_statistics) by (average) ",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -1745,7 +1745,7 @@
     ]
   },
   "time": {
-    "from": "now-2h",
+    "from": "now-10m",
     "to": "now"
   },
   "timepicker": {
@@ -1769,5 +1769,5 @@
   "timezone": "browser",
   "title": "Dojot - 100k",
   "uid": "VLTC7nbWk",
-  "version": 3
+  "version": 8
 }

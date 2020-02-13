@@ -7,7 +7,13 @@ const routes = require('./Routes');
 
 const TAG = { filename: 'express/App' };
 
+/**
+ * Express Server
+ */
 class ExpressApp {
+  /**
+   * Init config for Express Server
+   */
   constructor() {
     logger.debug('Starting ExpressApp - Constructor ...', TAG);
 
@@ -20,6 +26,9 @@ class ExpressApp {
     this.app.use('/', routes);
   }
 
+  /**
+   * Init listening
+   */
   initListen() {
     logger.debug('Starting Listening on port...', TAG);
     this.httpServer = this.app.listen(config.prom.port, () => {
@@ -28,6 +37,9 @@ class ExpressApp {
     });
   }
 
+  /**
+   * Stop listening
+   */
   stop() {
     if (this.isInitialized) {
       logger.info('Stopping the server...', TAG);
