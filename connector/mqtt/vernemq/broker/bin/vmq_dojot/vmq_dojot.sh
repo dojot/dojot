@@ -163,15 +163,15 @@ main()
     touch "${BASE_DIR}"/crontab.tab
 
     ## create cron tab to update CRL
-    ##_cronTabCRL
+    _cronTabCRL
 
     ## create cron tab to check Expiration
-    ##_cronTabExpiration
+    _cronTabExpiration
 
     ## create cron tab to check Revoke
-    ##_cronTabCheckBrokerCertRevoke
+    _cronTabCheckBrokerCertRevoke
 
-   ## _startCronService
+    _startCronService
 
   if [ "${isK8sEnv}" = "n" ]
   then
