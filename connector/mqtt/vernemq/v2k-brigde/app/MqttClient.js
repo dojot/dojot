@@ -1,9 +1,11 @@
 const fs = require('fs');
+const path = require('path');
 const mqtt = require('mqtt');
+const uuid4 = require('uuid/v4');
 const { logger } = require('@dojot/dojot-module-logger');
 const defaultConfig = require('./config');
 
-const TAG = { filename: 'mqtt-client' };
+const TAG = { filename: 'MqttClient' };
 const AgentMessenger = require('./AgentMessenger');
 
 class MQTTClient {
@@ -12,18 +14,18 @@ class MQTTClient {
     this.isConnected = false;
     this.agentMessenger = null;
 
-    this.key = fs.readFileSync(`/opt/v2k_bridge/cert/${this.config.mqtt.mqttHost}.key`);
-    this.clientCrt = fs.readFileSync(`/opt/v2k_bridge/cert/${this.config.mqtt.mqttHost}.crt`);
-    this.caCrt = fs.readFileSync('/opt/v2k_bridge/cert/ca.crt');
+    this.clientId = `${this.config.mqtt.clientId}-${uuid4()}`;
+    this.username = this.config.mqtt.clientUsername;
 
-    /* set log level */
-    logger.setLevel(this.config.app.mqtt_log_level);
+    this.key = fs.readFileSync(path.join(__dirname, `${this.config.mqtt.hostname}.key`));
+    this.clientCrt = fs.readFileSync(path.join(__dirname, `${this.config.mqtt.hostname}.crt`));
+    this.caCrt = fs.readFileSync(path.join(__dirname, 'ca.crt'));
   }
 
   init() {
     const mqttOptions = {
-      username: this.config.mqtt.mqttHost,
-      clientId: this.config.mqtt.mqttHost,
+      username: this.username,
+      clientId: this.clientId,
       host: this.config.mqtt.host,
       port: this.config.mqtt.port,
       protocol: 'mqtts',
@@ -31,7 +33,7 @@ class MQTTClient {
       key: this.key,
       cert: this.clientCrt,
       keepAlive: this.config.mqtt.keepAlive,
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     };
 
     const onConnectBind = this.onConnect.bind(this);
@@ -46,7 +48,7 @@ class MQTTClient {
 
   onConnect() {
     this.isConnected = true;
-    logger.info('Client Connected successfully!', TAG);
+    logger.info(`Client ${this.clientId} connected successfully!`, TAG);
 
     if (this.agentMessenger === null) {
       this.agentMessenger = new AgentMessenger(this.config);

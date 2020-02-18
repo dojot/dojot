@@ -1,5 +1,5 @@
 # **V2K-bridge**
-The V2K-bridge service is the core between the communication of Vernemq broker and the Kafka broker. His basic actuation is to subscribe in "$share/group/+/attrs" topics and publish all the messages obtained to Kafka. The subscribe construction of the service is based in shared subscriptions. This construction enables the "V2K-bridges" services acts like an unique cluster. All the communication between the bridge and the vernemq broker is secure (MQTTS).
+The V2K-bridge service implements a bridge between VerneMQ broker and Kafka broker. Basically, it subscribes to some MQTT topics and forward the messages to some Kafka topics following the dojot's topics rules. In order to scale the bridge service, shared MQTT subscriptions are used, which allows to instantiate a group of consumers, i.e. a group of bridge instance, when necessary. The communication between the bridge and the VerneMQ is secured with mutual TLS. Soon, the communication with Kafka will also use mutual TLS.
 
 
 <p align="center"> 
@@ -20,12 +20,8 @@ EJBCA_PORT               | Port of the EJBCA broker                             
 AUTH_URL                 | Address of the auth service                                         | http://auth:5000    | hostname/IP    |
 DATA_BROKER              | Address of the data broker                                          | http://data-broker  | hostname/IP    |
 DATA_BROKER_PORT         | Port of the data broker                                             | 80                  | integer        |
-KAFKA_HOSTS              | Address of the kafka broker                                         |kafka-server:9092    | hostname/IP    |
+KAFKA_HOSTS              | Addresses of the kafka brokers separeted by a comma                 |kafka-server:9092    | hostname/IP    |
 DOJOT_MQTT_HOST          | Address of the verne broker                                         |vernemq-k8s          | hostname/IP    |
-DOJOT_MQTT_PORT          | Port of the verne broker                                            |1883                 | integer        |
+DOJOT_MQTT_PORT          | Port of the verne broker                                            |8883                 | integer        |
 SERVER_HOSTNAME          | DNS of the service                                                  |localhost            | hostname       |
 LOG_LEVEL                | Log level                                                           | info                | string         |
-
-# **Issues and help**
-
-If you found a problem or need help, leave an issue in the main [Dojot repository](https://github.com/dojot/dojot) and we will help you!

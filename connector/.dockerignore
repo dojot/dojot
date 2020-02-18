@@ -1,0 +1,17 @@
+# nodejs
+node_modules
+
+# Docker
+.dockerignore
+Dockerfile
+
+# git
+.git
+.github
+.gitignore
+
+# tests
+test
+
+# doc
+doc

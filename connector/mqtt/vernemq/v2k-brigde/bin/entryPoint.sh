@@ -1,44 +1,78 @@
 #!/bin/bash
 
-# set -ex
+# -e       Exit immediately if a command exits with a non-zero status.
+# -x       Print commands and their arguments as they are executed
+set -e
 
-DATA_BROKER="${DATA_BROKER_DNS}:${DATA_BROKER_PORT}"
+# DEBUG
+if [ ! -z "${DEBUG+x}" ]; then
+    set -x
+fi
 
-VERNE_WEBHOOK_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092"}
-VERNE_WEBHOOK_DATA_BROKER_HOST=${DATA_BROKER:-"data-broker:80"}
+# readonly variables
+readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONECTION_TRIES_TIMEOUT_SEC:-"3"}
+readonly V2K_VERNE_CONNECTION_TRIES_TIMEOUT=${CONECTION_TRIES_TIMEOUT_SEC:-"3"}
+readonly V2K_VERNE_DATA_BROKER_HOST=${DATA_BROKER:-"data-broker:80"}
+readonly V2K_VERNE_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092"}
 
-# check if kafka is up
-kafka_hosts=$(echo $VERNE_WEBHOOK_KAFKA_HOSTS | tr "," "\n")
+readonly BASE_DIR=${BASE_DIR:-"/opt/v2k-bridge"}
 
-for address in $kafka_hosts
+# Split kafka brokers by comma
+readonly LKAFKA_HOSTS=$(echo ${V2K_VERNE_KAFKA_HOSTS} | tr "," "\n")
+
+has_responded=false
+for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++)); 
 do
-    IFS=':' read -ra data <<< "$address"
-    echo "Trying to connect with *${data[0]}* on port *${data[1]}*"
-    RESPONSE=$(nc -zvv ${data[0]} ${data[1]} 2>&1 | grep open)
-    while [ -z "${RESPONSE}" ]; do
-        sleep 2
-        RESPONSE=$(nc -zvv ${data[0]} ${data[1]} 2>&1 | grep open)
+    for address in ${LKAFKA_HOSTS}; 
+    do
+        address_splited=($(echo ${address} | tr ":" "\n"))
+        echo "$((${i} + 1)) - Trying to connect with *${address_splited[0]}* on port *${address_splited[1]}*"
+        
+        # output 0 if port is open and 1 if it's closed
+        response=$(nc -zv ${address_splited[0]} ${address_splited[1]} &> /dev/null; echo $?)
+         
+        if [ "${response}" == 0 ]; then
+            has_responded=true
+            break
+        fi
     done
-    echo "Host: ${data[0]} - Port: ${data[1]} Connection established sucessfully!"
-done
-echo "All kafka Host are up!"
 
+    if [ "$has_responded" == true ]; then
+        break
+    fi
 
-# check if data-broker is up
-IFS=':' read -ra data_broker <<< $VERNE_WEBHOOK_DATA_BROKER_HOST
-echo "Trying to connect with *${data_broker[0]}* on port *${data_broker[1]}*"
-RESPONSE=$(nc -zvv ${data_broker[0]} ${data_broker[1]} 2>&1 | grep open)
-while [ -z "${RESPONSE}" ]; do
-    sleep 2
-    RESPONSE=$(nc -zvv ${data_broker[0]} ${data_broker[1]} 2>&1 | grep open)
+    sleep ${V2K_VERNE_CONNECTION_TRIES_TIMEOUT}
 done
 
+
+if [ "$has_responded" == false ]; then
+    echo "No Kafka brokers available, exiting ..."
+    exit 1
+fi
+echo -e "Connecttion established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
+
+#
+# Data broker
+
+data_broker_address_splited=($(echo ${V2K_VERNE_DATA_BROKER_HOST} | tr ":" "\n"))
+
+for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++)); 
+do
+    echo "$((${i} + 1)) - Trying to connect with *${data_broker_address_splited[0]}* on port *${data_broker_address_splited[1]}*"
+    DATA_BROKER_RESPONSE=$(nc -zv ${data_broker_address_splited[0]} ${data_broker_address_splited[1]} &> /dev/null; echo $?)
+    if [ "${DATA_BROKER_RESPONSE}" == 0 ]; then
+        echo -e "Connecttion established with **${data_broker_address_splited[0]}** on port **${data_broker_address_splited[1]}**\n"
+        break
+    elif ((i == ((${V2K_VERNE_CONNECTION_TRIES_COUNT}-1)))); then
+        exit 1
+    fi
+    sleep ${V2K_VERNE_CONNECTION_TRIES_TIMEOUT}
+done
+
+# 
+# Ejbca - to authentcate user
 echo "Trying to authenticate with CA.."
-
-/opt/v2k_bridge/bin/scripts_tls/ejbca_client.sh
-
+${BASE_DIR}/bin/scripts_tls/ejbca_client.sh
 echo "Authenticated!"
 
-echo "All hosts Up"
-npm run start
-
+exec "$@"

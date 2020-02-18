@@ -1,26 +1,49 @@
-FROM node:10.16.3-alpine
+#
+# ---- Base Image ----
+FROM node:10.16.3-alpine AS base
 
 WORKDIR /opt/v2k_bridge
 
-
-RUN apk add --no-cache g++ \
-      make \
+RUN apk --no-cache add \
       bash \
-      python \
-      lz4-dev \
-      musl-dev \
       ca-certificates \
+      cyrus-sasl-dev \
+      g++ \
+      lz4-dev \
+      make \
+      musl-dev \
       openssl-dev \
-      zlib-dev \
-      openssl \
-      curl \
-      jq \
-      zstd
+      python
+
+RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
 
 COPY package.json .
 COPY package-lock.json .
 
+#
+# ---- Install dependencies
 RUN npm install
-COPY . .
 
-ENTRYPOINT ["./bin/entryPoint.sh"]
+COPY ./bin/ ./bin
+COPY ./app ./app
+
+#
+# --- Production Image
+FROM node:10.16.3-alpine
+
+WORKDIR /opt/v2k_bridge
+ENV BASE_DIR="/opt/v2k_bridge"
+
+RUN apk --no-cache add \
+      bash \
+      curl \
+      cyrus-sasl-dev \
+      jq \
+      lz4-dev \
+      tini
+
+COPY --from=base /opt/v2k_bridge /opt/v2k_bridge
+
+ENTRYPOINT ["/sbin/tini", "--", "./bin/entryPoint.sh"]
+
+CMD [ "npm", "start", "client" ]

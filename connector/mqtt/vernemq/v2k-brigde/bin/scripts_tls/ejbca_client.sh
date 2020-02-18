@@ -22,9 +22,7 @@
 
 BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
 
-
 . "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
-
 
 _removeCRTDir()
 {

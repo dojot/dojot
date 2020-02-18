@@ -8,7 +8,7 @@ describe('Testing utils', () => {
   it('Should generate correctly the payload', () => {
     const topic = 'admin:deviceid/topic';
     const payload = 'data';
-    const data = utils.generatePayload(topic, payload);
+    const data = utils.generateDojotDeviceDataMessage(topic, payload);
 
     const { deviceid } = data.metadata;
     const { tenant } = data.metadata;

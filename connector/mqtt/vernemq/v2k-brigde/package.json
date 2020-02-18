@@ -1,15 +1,25 @@
 {
   "name": "v2kbridge",
   "version": "1.0.0",
-  "description": "service to bridge verne to kafka",
+  "private": true,
+  "description": "Service to bridge messages from VerneMQ to Apache Kafka according to dojot rules.",
+  "homepage": "https://github.com/dojot/dojot/tree/epic-100kMqttDevices/connector/mqtt/vernemq/v2k-bridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot/tree/epic-100kMqttDevices",
+    "directory": "connector/mqtt/vernemq/v2k-bridge"
+  },
   "main": "index.js",
   "scripts": {
     "start": "node app/index.js",
-    "test": "jest test/unit/*.js --coverage"
+    "test": "jest test/unit/*.js",
+    "coverage": "jest --collect-coverage"
   },
-  "keywords": [],
+  "keywords": [
+    "dojot, mqtt"
+  ],
   "author": "Jonaphael Aristil, Muhamed Avila",
-  "license": "ISC",
+  "license": "GPL-3.0, ISC",
   "dependencies": {
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
     "@dojot/iotagent-nodejs": "2.1.0-beta.8",
@@ -18,7 +28,7 @@
   },
   "jest": {
     "coverageDirectory": "./coverage/",
-    "collectCoverage": true,
+    "collectCoverage": false,
     "collectCoverageFrom": [
       "app/**/*.js",
       "utils/**/*.js",

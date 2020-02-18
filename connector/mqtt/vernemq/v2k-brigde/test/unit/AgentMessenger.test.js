@@ -28,7 +28,7 @@ const mockConfig = {
       subscribeTopic: 'topic',
     },
     app: {
-      mqtt_log_level: 'debug',
+      mqttLogLevel: 'debug',
     },
   },
 
@@ -93,7 +93,7 @@ describe('Testing AgentMessenger messenger', () => {
         deviceid: 'fake',
       },
     };
-    utils.generatePayload = jest.fn().mockReturnValue(generateDataFake);
+    utils.generateDojotDeviceDataMessage = jest.fn().mockReturnValue(generateDataFake);
 
     const fakeMessage = '{ "name":"John", "age":30, "city":"New York"}';
     mockedMessenger.sendMessage('test', fakeMessage);
@@ -111,7 +111,7 @@ describe('Testing AgentMessenger messenger', () => {
         deviceid: 'fake',
       },
     };
-    utils.generatePayload = jest.fn().mockReturnValue(generateDataFake);
+    utils.generateDojotDeviceDataMessage = jest.fn().mockReturnValue(generateDataFake);
     const fakeMessage = 'error format';
 
     try {

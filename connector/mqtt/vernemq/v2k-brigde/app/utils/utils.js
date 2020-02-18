@@ -1,6 +1,6 @@
 const moment = require('moment');
 
-const generatePayload = (topic, payload) => {
+const generateDojotDeviceDataMessage = (topic, payload) => {
   const username = topic.split('/')[0];
   const splitUsername = username.split(':');
 
@@ -17,4 +17,4 @@ const generatePayload = (topic, payload) => {
   };
 };
 
-module.exports = { generatePayload };
+module.exports = { generateDojotDeviceDataMessage };

@@ -10,7 +10,7 @@ const fakeConfig = {
     keepAlive: 0,
   },
   app: {
-    mqtt_log_level: 'debug',
+    mqttLogLevel: 'debug',
   },
 
 };
