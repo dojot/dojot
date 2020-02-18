@@ -23,9 +23,7 @@ else
   echo "(or is invalid/not found)"
   echo "Renew:"
 
-  rm -f "${certDir}"/"${certCaFile}"
-
-  . "${BASE_DIR}"/scripts_tls/retrieveCACertificate.sh && "${BASE_DIR}"/scripts_tls/checkCertificateChain.sh
+  . "${BASE_DIR}"/scripts_tls/retrieveCACertificate.sh
 fi
 
 

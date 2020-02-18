@@ -154,11 +154,6 @@ main()
     ## retrieve crl
     _retrieveCRLCertificate
 
-
-    #verifies certificate chains.
-    . "${BASE_DIR}"/scripts_tls/checkCertificateChain.sh
-
-
     ## create cron file
     touch "${BASE_DIR}"/crontab.tab
 

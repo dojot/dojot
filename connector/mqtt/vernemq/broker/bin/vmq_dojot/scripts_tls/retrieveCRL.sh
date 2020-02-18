@@ -13,10 +13,12 @@ certCrl=$(curl  -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}"/crl?update=true \
 echo "${certCrl}"
 echo "-----END X509 CRL-----"  ) > "${certDir}"/tempcrl.crl
 
-openssl crl -inform pem -in "${certDir}"/tempcrl.crl -out "${certDir}"/"${certCrlFile}"
+openssl crl -inform pem -in "${certDir}"/tempcrl.crl -out "${certDir}"/tempcrl2.crl
 
+mv "${certDir}"/tempcrl2.crl "${certDir}"/"${certCrlFile}"
 chmod +x "${certDir}"/"${certCrlFile}"
 
 rm  "${certDir}"/tempcrl.crl
+
 
 

@@ -19,3 +19,5 @@ signCertCa=$(curl -X POST "${certEjbcaApiUrl}"/sign/"${certCname}"/pkcs10 \
 }" | jq '.status.data' -r)
 
 _saveFormattedCRT "${certDir}/${certCertFile}" "${signCertCa}"
+
+. "${BASE_DIR}"/scripts_tls/checkCertificateChain.sh
