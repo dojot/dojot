@@ -2,11 +2,11 @@ jest.mock('@dojot/dojot-module');
 jest.mock('@dojot/dojot-module-logger');
 jest.mock('../../app/utils/utils');
 
+const mockProcess = require('jest-mock-process');
 const utils = require('../../app/utils/utils');
 const AgentMessenger = require('../../app/AgentMessenger');
 
-var mockProcess = require('jest-mock-process');
-var mockExit = mockProcess.mockProcessExit();
+const mockExit = mockProcess.mockProcessExit();
 
 /* MOCKS */
 const mockConfig = {
