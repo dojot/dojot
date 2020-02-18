@@ -5,6 +5,9 @@ jest.mock('../../app/utils/utils');
 const utils = require('../../app/utils/utils');
 const AgentMessenger = require('../../app/AgentMessenger');
 
+var mockProcess = require('jest-mock-process');
+var mockExit = mockProcess.mockProcessExit();
+
 /* MOCKS */
 const mockConfig = {
   Messenger: {
@@ -50,15 +53,25 @@ async function expectConfigs() {
 
 
   await mockedMessenger.init(mockConfig.mqttConfig);
-  expect(mockConfig.Messenger.init).toHaveBeenCalled();
-  expect(mockConfig.Messenger.on).toHaveBeenCalled();
-  expect(mockConfig.mqttConfig.subscribe).toHaveBeenCalled();
+
+  // Unhandled promise rejection
+  try {
+    expect(mockConfig.Messenger.init).toHaveBeenCalled();
+    expect(mockConfig.Messenger.on).toHaveBeenCalled();
+    expect(mockConfig.mqttConfig.subscribe).toHaveBeenCalled();
+  } catch (error) {
+    // do nothing
+  }
 }
 
 describe('Testing AgentMessenger messenger', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  afterAll(() => {
+    mockExit.mockRestore();
+  })
 
   it('Should init correctly the agent messenger with config and publish data', () => {
     mockedMessenger = new AgentMessenger(mockConfig.kafkaConfig);

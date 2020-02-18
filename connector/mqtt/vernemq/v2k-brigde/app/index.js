@@ -8,4 +8,3 @@ logger.setLevel(config.app.mqttLogLevel);
 
 const client = new MQTTClient(config);
 client.init();
-
