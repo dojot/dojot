@@ -1,0 +1,22 @@
+{application, dojot_acl_plugin,
+ [
+  {description, "An ACL plugin for dojot applications"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { dojot_acl_plugin_app, []}},
+  {env, [
+         %% this tells VerneMQ to look in the file 'vernemq_demo_plugin'
+         %% for the plugin hook functions. The format is:
+         %%  {ModuleName, HookName, Arity, Opts}
+         {vmq_plugin_hooks,
+          [
+           {dojot_acl_plugin, auth_on_register, 5, []},
+           {dojot_acl_plugin, auth_on_publish, 6, []},
+           {dojot_acl_plugin, auth_on_subscribe, 3, []}
+          ]}
+        ]}
+ ]}.
