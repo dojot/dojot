@@ -1,0 +1,22 @@
+{application, dojot_disconnect_plugin,
+ [
+  {description, "A plugin to disconnect outdated client sessions for dojot applications"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { dojot_disconnect_plugin_app, []}},
+  {env, [
+         %% this tells VerneMQ to look in the file 'vernemq_demo_plugin'
+         %% for the plugin hook functions. The format is:
+         %%  {ModuleName, HookName, Arity, Opts}
+         {vmq_plugin_hooks,
+          [
+           {dojot_disconnect_plugin, auth_on_register, 5, []},
+           {dojot_disconnect_plugin, auth_on_publish, 6, []},
+           {dojot_disconnect_plugin, auth_on_subscribe, 3, []}
+          ]}
+        ]}
+ ]}.
