@@ -12,8 +12,8 @@
   "author": "@mprevide",
   "scripts": {
     "run-client": "node app/Index.js",
-    "test": "jest test/**/*.test.js",
-    "test:watch": "jest test/**/*.test.js --watchAll",
+    "test": "jest test/**/*.test.js --coverage",
+    "test:watch": "jest test/**/*.test.js --watchAll --coverage",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js ."
   },
