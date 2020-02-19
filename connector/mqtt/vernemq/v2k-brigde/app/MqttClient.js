@@ -33,6 +33,7 @@ class MQTTClient {
       key: this.key,
       cert: this.clientCrt,
       keepAlive: this.config.mqtt.keepAlive,
+      clean: false,
       rejectUnauthorized: true,
     };
 

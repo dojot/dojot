@@ -71,7 +71,7 @@ describe('Testing AgentMessenger messenger', () => {
 
   afterAll(() => {
     mockExit.mockRestore();
-  })
+  });
 
   it('Should init correctly the agent messenger with config and publish data', () => {
     mockedMessenger = new AgentMessenger(mockConfig.kafkaConfig);
