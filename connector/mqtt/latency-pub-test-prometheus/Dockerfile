@@ -26,6 +26,10 @@ FROM node:10.16.3-alpine
 
 WORKDIR /opt/prometheus
 
-COPY --from=base /opt/prometheus /opt/prometheus
+RUN apk --no-cache add \
+    bash \
+    libsasl \
+    lz4-libs
 
-CMD ["npm", "run", "run-client"]
+COPY --from=base /opt/prometheus /opt/prometheus
+CMD ["npm", "run", "latency-pub-prometheus-client"]

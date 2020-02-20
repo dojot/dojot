@@ -36,7 +36,7 @@ class KafkaMessenger {
     this.messenger.init().then(() => {
       this.initKafka();
     }).catch((error) => {
-      logger.error(`... failed to initialize the latency-pub-test-prometheus messenger. Error: ${error}`);
+      logger.error(`... failed to initialize the latency-pub-test-prometheus messenger. Error: ${error.stack || error}`);
       killApplication();
     });
   }
@@ -80,7 +80,7 @@ class KafkaMessenger {
         latencyStore.addLatency(totalTime);
       }
     } catch (error) {
-      logger.error(`Error parsing Kafka message: ${error}`, TAG);
+      logger.error(`Error parsing Kafka message: ${error.stack || error}`, TAG);
     }
   }
 }

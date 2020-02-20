@@ -1,6 +1,7 @@
 {
   "name": "latency-pub-test-prometheus",
   "version": "0.1.0",
+  "private": true,
   "description": "Service to collect latency between publication MQTT and Kafka with Dojot, and expose to prometheus",
   "main": "app/Index.js",
   "license": "GPL-3.0",
@@ -11,7 +12,7 @@
   },
   "author": "@mprevide",
   "scripts": {
-    "run-client": "node app/Index.js",
+    "latency-pub-prometheus-client": "node app/Index.js",
     "test": "jest test/**/*.test.js --coverage",
     "test:watch": "jest --watch test/**/*.test.js --coverage",
     "lint": "eslint --ext .js .",
