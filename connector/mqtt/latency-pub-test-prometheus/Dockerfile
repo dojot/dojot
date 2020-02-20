@@ -27,7 +27,6 @@ FROM node:10.16.3-alpine
 WORKDIR /opt/prometheus
 
 RUN apk --no-cache add \
-    bash \
     libsasl \
     lz4-libs
 
