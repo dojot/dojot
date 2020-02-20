@@ -47,11 +47,11 @@ Example:
 ```
 # HELP dojot_latency_pub_statistics Latency between publication MQTT and Kafka with Prometheus and Dojot
 # TYPE dojot_latency_pub_statistics gauge
-dojot_latency_pub_statistics{statistic_kind="maximum",unit="ms"} 1
-dojot_latency_pub_statistics{statistic_kind="minimum",unit="ms"} 2
-dojot_latency_pub_statistics{statistic_kind="average",unit="ms"} 3
-dojot_latency_pub_statistics{statistic_kind="median",unit="ms"} 4
-dojot_latency_pub_statistics{statistic_kind="standard_deviation",unit="ms"} 5
+dojot_latency_pub_statistics{statistic_kind="maximum",unit="ms"} 300
+dojot_latency_pub_statistics{statistic_kind="minimum",unit="ms"} 100
+dojot_latency_pub_statistics{statistic_kind="average",unit="ms"} 150
+dojot_latency_pub_statistics{statistic_kind="median",unit="ms"} 145
+dojot_latency_pub_statistics{statistic_kind="standard_deviation",unit="ms"} 50
 ```
 
 ### Standard and runtime collectors
