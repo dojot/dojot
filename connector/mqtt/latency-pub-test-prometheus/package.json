@@ -13,7 +13,7 @@
   "scripts": {
     "run-client": "node app/Index.js",
     "test": "jest test/**/*.test.js --coverage",
-    "test:watch": "jest test/**/*.test.js --watchAll --coverage",
+    "test:watch": "jest --watch test/**/*.test.js --coverage",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js ."
   },
@@ -22,6 +22,12 @@
     "dojot",
     "kafka",
     "mqtt"
+  ],
+  "files": [
+    "package-lock.json",
+    "app/**/*.js",
+    "test/",
+    "!test/unit/coverage/"
   ],
   "dependencies": {
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
@@ -39,27 +45,15 @@
     "supertest": "^4.0.2"
   },
   "jest": {
-    "verbose": true,
     "collectCoverage": true,
-    "moduleDirectories": [
-      "node_modules",
-      "lib"
-    ],
     "collectCoverageFrom": [
+      "app/**/*.js",
       "!app/Index.js",
       "!Config.js"
     ],
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
-      }
-    }
+    ]
   }
 }
