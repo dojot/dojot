@@ -20,8 +20,20 @@ EJBCA_PORT               | Port of the EJBCA broker                             
 AUTH_URL                 | Address of the auth service                                         | http://auth:5000    | hostname/IP    |
 DATA_BROKER              | Address of the data broker                                          | http://data-broker  | hostname/IP    |
 DATA_BROKER_PORT         | Port of the data broker                                             | 80                  | integer        |
-KAFKA_HOSTS              | Addresses of the kafka brokers separeted by a comma                 |kafka-server:9092    | hostname/IP    |
-DOJOT_MQTT_HOST          | Address of the verne broker                                         |vernemq-k8s          | hostname/IP    |
-DOJOT_MQTT_PORT          | Port of the verne broker                                            |8883                 | integer        |
-SERVER_HOSTNAME          | DNS of the service                                                  |localhost            | hostname       |
+KAFKA_HOSTS              | Addresses of the kafka brokers separeted by a comma                 | kafka-server:9092   | hostname/IP    |
+DOJOT_MQTT_HOST          | Address of the verne broker                                         | vernemq-k8s         | hostname/IP    |
+DOJOT_MQTT_PORT          | Port of the verne broker                                            | 8883                | integer        |
+SERVER_HOSTNAME          | DNS of the service                                                  | localhost           | hostname       |
 LOG_LEVEL                | Log level                                                           | info                | string         |
+BASE_DIR                 | Base directoty where the project is located                         | /opt/v2k-bridge     | string         |
+V2K_MQTT_USERNAME        | Mqtt client username                                                | v2k-bridge-verne    | string         |
+V2K_MQTT_CLIENT_ID       | Mqtt client client id                                               | hostname            | hostname       |
+V2K_MQTT_HOST            | Mqtt broker host                                                    | localhost           | hostname/IP    |
+V2K_MQTT_PORT            | Mqtt broker port                                                    | 8883                | integer        |
+V2K_MQTT_KEEPALIVE       | Mqtt client keepalilve                                              | 60                  | integer        |
+V2K_MQTT_SECURE          | Mqtt client secure                                                  | false               | boolean/string/interger  |
+V2K_MQTT_SUBSCRIPTION_TOPIC | Mqtt client topic to subscribe                                   | $share/group/+/attrs| string         |
+V2K_MQTT_SUBSCRIPTION_QOS| Mqtt client Quality of service                                      | 1                   | integer        |
+V2K_MQTT_CA_FILE         | Mqtt client ca file                                                 | ${BASE_DIR}/app/verne/${HOSTNAME}.ca | string    |
+V2K_MQTT_CERT_FILE       | Mqtt client certificate file                                        | ${BASE_DIR}/app/verne/${HOSTNAME}.crt| string    |
+V2K_MQTT_KEY_FILE        | Mqtt client key file                                                | ${BASE_DIR}/app/verne/${HOSTNAME}.key| string    |
