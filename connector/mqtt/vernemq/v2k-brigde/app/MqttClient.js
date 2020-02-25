@@ -9,8 +9,6 @@ const TAG = { filename: 'MqttClient' };
 /**
  * BackPressure
  */
-const PARALLEL_HANDLERS = 1;
-const MAX_QUEUE_LENGTH = 1000;
 
 class MQTTClient {
   constructor(agentMessenger, config) {
@@ -32,6 +30,8 @@ class MQTTClient {
     // backPressure
     this.messageQueue = null;
     this.currentMessageQueueLenght = 0;
+    this.parallelHandlers = this.config.mqtt.parallelHandlers;
+    this.maxQueLength = this.config.mqtt.maxQueLength;
 
     // agent messenger
     this.agentMessenger = agentMessenger;
@@ -67,7 +67,7 @@ class MQTTClient {
     this.messageQueue = async.queue((data, done) => {
       this.asyncQueueWorker(data);
       done();
-    }, PARALLEL_HANDLERS);
+    }, this.parallelHandlers);
 
     /**
      * When processing was finalized, reconnect to broker
@@ -91,20 +91,22 @@ class MQTTClient {
     this.mqttc.reconnect();
   }
 
-  onMessage(topic, message) {
+  onMessage(topic, message, packet) {
     // pause
-    if (this.currentMessageQueueLenght > MAX_QUEUE_LENGTH) {
-      this.mqttc.end(true);
-      this.isConnected = false;
-      return;
+    if (this.isConnected) {
+      // check if message is duplicated
+      if (packet.dup === false) {
+        this.currentMessageQueueLenght += 1;
+        const data = { topic, message };
+        this.messageQueue.push(data, () => {
+          this.currentMessageQueueLenght -= 1;
+        });
+      }
     }
 
-    if (this.isConnected) {
-      this.currentMessageQueueLenght += 1;
-      const data = { topic, message };
-      this.messageQueue.push(data, () => {
-        this.currentMessageQueueLenght -= 1;
-      });
+    if (this.currentMessageQueueLenght > this.maxQueLength) {
+      this.mqttc.end(true);
+      this.isConnected = false;
     }
   }
 

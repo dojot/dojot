@@ -10,10 +10,10 @@ if [ ! -z "${DEBUG+x}" ]; then
 fi
 
 # readonly variables
-readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONNECTION_TRIES_TIMEOUT:-"3"}
+readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONNECTION_TRIES_COUNT:-"3"}
 readonly V2K_VERNE_CONNECTION_TRIES_TIMEOUT=${CONNECTION_TRIES_TIMEOUT:-"3"}
 readonly V2K_VERNE_DATA_BROKER_HOST=${DATA_BROKER:-"data-broker:80"}
-readonly V2K_VERNE_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092,jonasa:67"}
+readonly V2K_VERNE_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092"}
 
 readonly BASE_DIR=${BASE_DIR:-"/opt/v2k-bridge"}
 

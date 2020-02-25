@@ -28,6 +28,8 @@ const fakeConfig = {
     host: 'fake',
     port: 0,
     keepAlive: 0,
+    parallelHandlers: 1,
+    maxQueLength: 10,
     tls: {
       ca: {
         location: 'fake',
@@ -168,14 +170,14 @@ describe('Testing v2k bridge client', () => {
     expect(mockConfig.fakeMqtt.reconnect).toHaveBeenCalled();
   });
 
-  it('should push a message to the queue (callback)', () => {
+  it('should push a message to the queue (callback) once', () => {
     const agent = new AgentMessenger(fakeConfig);
     const client = new MQTTClient(agent, fakeConfig);
 
     client.init();
     client.isConnected = true;
-    client.onMessage();
-
+    client.onMessage('any', 'any', { dup: false });
+    client.onMessage('any', 'any', { dup: true });
     expect(mockAsyncQueue.push).toHaveBeenCalledTimes(1);
   });
 

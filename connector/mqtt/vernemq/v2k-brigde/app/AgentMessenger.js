@@ -23,7 +23,7 @@ class AgentMessenger {
       this.mqttClient.init();
     }).catch(() => {
       logger.error('An error occurred while initializing the IoTAgent. Bailing out!', TAG);
-      process.exit(0);
+      process.exit(1);
     });
   }
 
