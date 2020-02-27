@@ -4,8 +4,8 @@
  * @param tenant
  * @param deviceid
  */
-function generateActuationTopic(tenant, deviceid) {
-  return `${tenant}:${deviceid}/config`;
+function generateDojotActuationTopic(tenant, deviceid, suffix) {
+  return `${tenant}:${deviceid}${suffix}`;
 }
 
-module.exports = { generateActuationTopic };
+module.exports = { generateDojotActuationTopic };

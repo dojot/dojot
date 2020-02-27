@@ -1,4 +1,10 @@
-const App = require('./app');
+const { logger } = require('@dojot/dojot-module-logger');
+const config = require('./config');
+const MqttClient = require('./MqttClient');
 
-const app = new App();
-app.initApp();
+const mqttClient = new MqttClient();
+
+/* set log level */
+logger.setLevel(config.app.logLevel);
+
+mqttClient.init();

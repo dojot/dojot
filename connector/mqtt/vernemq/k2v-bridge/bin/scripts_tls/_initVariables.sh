@@ -35,7 +35,7 @@ export certCertFile=$CERT_CERT_FILE
 export certKeyFile=$CERT_KEY_FILE
 export certCsrFile=$CERT_CSR_FILE
 export certCrlFile=$CERT_CRL_FILE
-export certDir="$BASE_DIR/cert"
+export certDir="$BASE_DIR/app/cert"
 export keyLength=2048
 export password="dojot"
 

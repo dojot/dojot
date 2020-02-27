@@ -1,6 +1,3 @@
-# Binaries
-build
-
 # NodeJS
 node_modules
 
@@ -8,7 +5,8 @@ node_modules
 .dockerignore
 Dockerfile
 
-# Github
-.git
-.github
-.gitignore
+# test
+test
+
+# doc
+doc

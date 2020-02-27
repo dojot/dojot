@@ -1,20 +1,29 @@
 {
   "name": "k2v-bridge",
   "version": "1.0.0",
-  "description": "MQTT message transmitter",
+  "private": true,
+  "description": "Service to bridge messages from Apache Kafka to VerneMQ according to dojot rules.",
+  "homepage": "https://github.com/dojot/dojot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot",
+    "directory": "connector/mqtt/vernemq/k2v-bridge"
+  },
   "main": "index.js",
   "scripts": {
-    "test": "jest test/**/*.test.js --coverage",
-    "test:watch": "jest --watch tests/**/*.test.js --coverage",
-    "run-client": "node app/index.js"
+    "app": "node app/index.js",
+    "test": "jest test/**/*.test.js",
+    "coverage": "jest --collect-coverage"
   },
   "keywords": [
-    "node",
+    "dojot",
     "kafka",
-    "mqtt"
+    "mqtt",
+    "node",
+    "vernemq"
   ],
   "author": "Eduardo Garcia Misiuk, Muhamed Avila, Jonaphael Aristil",
-  "license": "GPL-3.0",
+  "license": "GPL-3.0, ISC",
   "dependencies": {
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
     "@dojot/iotagent-nodejs": "2.1.0-beta.8",
@@ -28,7 +37,7 @@
   },
   "jest": {
     "coverageDirectory": "./coverage/",
-    "collectCoverage": true,
+    "collectCoverage": false,
     "collectCoverageFrom": [
       "app/**/*.js",
       "!app/index.js"
