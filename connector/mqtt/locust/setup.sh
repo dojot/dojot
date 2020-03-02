@@ -30,7 +30,7 @@ then
   if [ -z "$JWT" ];then
       echo "--- There's no token! ---"
       exit 1
-  else 
+  else
       echo "... Got jwt token ${JWT}."
   fi
 
@@ -61,7 +61,7 @@ then
                 ]
       }' | jq '.template.id')
 
-  if [$? -ne 0]
+  if [ $? -ne 0 ]
   then
     echo "Could not create template."
     exit 1
@@ -83,11 +83,11 @@ then
     -H 'Content-Type:application/json' \
     -H "Authorization: Bearer ${JWT}" \
     -d  "{
-          \"templates\": [\"${TEMPLATE_ID}\"],
+          \"templates\": [ \"${TEMPLATE_ID}\" ],
           \"attrs\": {},
           \"label\": \"CargoContainer_${I}\"
         }" | jq '.devices[].id' | tr -d '"')
-    
+
     if [ $? -eq 0 ]
     then
       for DEVICE_ID in ${DEVICE_IDS}
@@ -128,6 +128,6 @@ else
     for KEY in $(seq ${DEVICE_SIZE} -1 ${NUMBER_OF_DEVICES})
     do
       echo "DEL $KEY" | redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" &> /dev/null
-    done  
+    done
   fi
 fi
