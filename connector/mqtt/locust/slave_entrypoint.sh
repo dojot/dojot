@@ -28,11 +28,11 @@ mkdir -p "${CERT_DIR}${REVOKE_CERT_DIR}"
 START_TIME=$(date +'%s')
 echo "Witing for Redis fully start. Host '${REDIS_HOST}', '${REDIS_PORT}'..."
 echo "Try ping Redis... "
-PONG=`redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" ping | grep PONG`
+PONG=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" ping | grep PONG)
 while [ -z "${PONG}" ]; do
     sleep 3
     echo "Retry Redis ping... "
-    PONG=`redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" ping | grep PONG`
+    PONG=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" ping | grep PONG)
 
     ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
     if [ ${ELAPSED_TIME} -gt 180 ]
@@ -47,11 +47,11 @@ echo "Redis at host '${REDIS_HOST}', port '${REDIS_PORT}' fully started."
 START_TIME=$(date +'%s')
 echo "Waiting for dojot MQTT Broker fully start. Host '${DOJOT_MQTT_HOST}', '${DOJOT_MQTT_PORT}'..."
 echo "Try to connect to dojot MQTT Broker ... "
-RESPONSE=`nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo ""`
+RESPONSE=$(nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo "")
 while [ -z "${RESPONSE}" ]; do
     sleep 3
     echo "Retry to connect to dojot MQTT broker ... "
-    RESPONSE=`nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo ""`
+    RESPONSE=$(nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo "")
 
     ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
     if [ ${ELAPSED_TIME} -gt 180 ]

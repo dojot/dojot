@@ -28,7 +28,7 @@ echo "Waiting for Redis fully start. Host '${REDIS_HOST}', '${REDIS_PORT}'..."
 while [ "${PONG}" != "PONG" ]; do
     sleep 3
     echo "Ping Redis... "
-    PONG=`redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" ping | grep PONG`
+    PONG=$(redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" ping | grep PONG)
 
     ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
     if [ ${ELAPSED_TIME} -gt 180 ]
@@ -45,11 +45,11 @@ then
     START_TIME=$(date +'%s')
     echo "Waiting for dojot API Gateway fully start. Host '${DOJOT_URL}'..."
     echo "Try to connect to dojot API Gateway... "
-    RESPONSE=`curl --fail -s ${DOJOT_URL} || echo ""`
+    RESPONSE=$(curl --fail -s ${DOJOT_URL} || echo "")
     while [ -z "${RESPONSE}" ]; do
         sleep 3
         echo "Retry to connect to dojot API Gateway ... "
-        RESPONSE=`curl --fail -s ${DOJOT_URL} || echo ""`
+        RESPONSE=$(curl --fail -s ${DOJOT_URL} || echo "")
 
         ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
         if [ ${ELAPSED_TIME} -gt 180 ]
@@ -65,11 +65,11 @@ fi
 START_TIME=$(date +'%s')
 echo "Waiting for dojot MQTT Broker fully start. Host '${DOJOT_MQTT_HOST}', '${DOJOT_MQTT_PORT}'..."
 echo "Try to connect to dojot MQTT Broker ... "
-RESPONSE=`nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo ""`
+RESPONSE=$(nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo "")
 while [ -z "${RESPONSE}" ]; do
     sleep 3
     echo "Retry to connect to dojot MQTT broker ... "
-    RESPONSE=`nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo ""`
+    RESPONSE=$(nc -zvv ${DOJOT_MQTT_HOST} ${DOJOT_MQTT_PORT} 2>&1 | grep succeeded || echo "")
 
     ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
     if [ ${ELAPSED_TIME} -gt 180 ]
@@ -84,7 +84,7 @@ echo "dojot MQTT broker at host '${DOJOT_MQTT_HOST}', port '${DOJOT_MQTT_PORT}' 
 
 if [ "${REDIS_BACKUP}" == "n" ]
 then
-    if [ ${GENERATE_IDS} -eq "1" -a "${DOJOT_ENV}" == "y" ]
+    if [ [${GENERATE_IDS} -eq "1"] && ["${DOJOT_ENV}" == "y"] ]
     then
         echo "Start flushing ..."
         bash flushall.sh

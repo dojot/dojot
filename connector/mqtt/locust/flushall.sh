@@ -22,7 +22,7 @@ JWT=$(curl --silent -X POST ${DOJOT_URL}/auth \
 if [ -z "$JWT" ];then
     echo "--- There's no token! ---"
     exit 1
-else 
+else
     echo "... Got jwt token ${JWT}."
 fi
 
@@ -58,8 +58,7 @@ fi
 #  fi
 #done
 echo "Deleting all devices ..."
-if [$(curl -X DELETE ${DOJOT_URL}/device \
--H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0]
+if [ $(curl -X DELETE ${DOJOT_URL}/device -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
 then
     echo "Could not complete request."
     exit 1
@@ -97,8 +96,7 @@ fi
 #  fi
 #done
 echo "Deleting all templated ..."
-if [$(curl --silent -X DELETE ${DOJOT_URL}/template \
--H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0]
+if [ $(curl --silent -X DELETE ${DOJOT_URL}/template -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
 then
     echo "Could not complete request."
     exit 1

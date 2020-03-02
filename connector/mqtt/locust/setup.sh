@@ -19,7 +19,7 @@ REDIS_PASSWD=${REDIS_PASSWD:-""}
 # Devices
 NUMBER_OF_DEVICES=${NUMBER_OF_DEVICES:-"10000"}
 
-if [ "${DOJOT_ENV}" == "y"]
+if [ "${DOJOT_ENV}" == "y" ]
 then
   # Get JWT Token
   echo 'Getting jwt token ...'
