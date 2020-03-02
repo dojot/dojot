@@ -2,9 +2,9 @@
 
 ## Overview
 
-An IoTAgent is an adaptation service between physical devices and dojot’s core components. The IoTAgents are responsible for receiving messages from physical devices (directly or through a gateway) and sending them commands in order to configure. The dojot platform can have multiple iot-agents, each one of them being specialized in a specific protocol like in this case MQTT. It is also responsible to ensure that it communicates with devices using secure channels.
+An IoTAgent is an adaptation service between physical devices and the dojot platform. The IoTAgents are responsible for receiving messages from physical devices (directly or through a gateway) and sending them commands in order to configure. The dojot platform can have multiple IoTAgents, each one of them being specialized in a specific protocol like in this case MQTT. It is also responsible to ensure that it communicates with devices using secure channels.
 
-The IoTAgent MQTT is a extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features e services for dojot case. The **VerneMQ** receiving messages from devices and sending messages for them. The V2K-bridge service receives messages from VerneMQ via MQTT and send this messages to Kafka to be use in dojot’s core components. While the K2V-bridge service receives messages from dojot’s core components via Kafka and send them for VerneMQ via MQTT, and then the device receives this message. See this all flux in Fig. 1.
+The IoTAgent MQTT is an extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features and services for dojot case. The VerneMQ receiving messages from devices and sending messages for them. The V2K-bridge service receives messages from VerneMQ via MQTT and send this messages to Kafka to be use in dojot’s core components. While the K2V-bridge service receives messages from dojot’s core components via Kafka and send them for VerneMQ via MQTT, and then the device receives this message. See this all flux in Fig. 1.
 
 The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respectively.
 
@@ -16,7 +16,7 @@ Fig. 1 - VerneMQ with Dojot (Whereas V2K-Bridge, K2V-Bridge, VerneMQ and Client 
 
 The VerneMQ Broker with Custom to Dojot has some additions of scripts to integration with our CA for communications via TLS and security.
 
-For more see [here](./broker)
+For more details, please check the documentation at [the service repository](./broker)
 
 ### V2K-bridge
 
@@ -39,7 +39,7 @@ An **ACL** (access-control list) based authorization is provided to manage permi
 - For subscription: ***tenant***_:_***device_id***_/config_
 
 Where ***tenant*** is the information context separation of dojot and ***device_id*** is a unique identification for the device.
-The junction (***tenant:device_id***) of *tenant* and  *device_id* must be unique.
+The junction (***tenant:device_id***) of *tenant* and  *device_id* always be unique.
 
 See more about [ACL Plugin](broker/src/dojot_acl_plugin) for VerneMQ.
 
@@ -61,11 +61,11 @@ The process of obtaining certificates for client (Fig. 2):
 
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_client)
 
-Fig. 2 - Client retrives certificates from PKI (EJBCA)
+Fig. 2 - Client retrieves certificates from PKI (EJBCA)
 
 The step by step on how to get a certificate for a client will be explained later.
 
-The process of obtaining certificates for K2V Brige and K2V-bridge instances follows the same steps as for the client.
+The process of obtaining certificates for V2K-Bridge and K2V-bridge instances follows the same steps as for the client.
 
 The process of obtaining certificates for VerneMQ instances follows the same steps as for the client, with some more followed by (Fig. 3):
 
@@ -77,7 +77,7 @@ The process of obtaining certificates for VerneMQ instances follows the same ste
 
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
 
-Fig. 3 - VerneMQ (Broker) retrive certificates from PKI (EJBCA)
+Fig. 3 - VerneMQ (Broker) retrieves certificates from PKI (EJBCA)
 
 The TLS connection has a maximum life time, see more about [Disconnect Plugin](broker/src/dojot_disconnect_plugin) for VerneMQ.
 The TLS connection also has a configurable timeout, which is a VerneMQ configuration.
