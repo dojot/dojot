@@ -464,15 +464,14 @@ class MQTTClient:
             self.is_revoked = True
             return True
 
-        else:
-            Utils.fire_locust_failure(
-                request_type=REQUEST_TYPE,
-                name=MESSAGE_TYPE_REVOKE,
-                response_time=0,
-                response_length=0,
-                exception=CertRevogationError("certificate not revoked")
-            )
-            return False
+        Utils.fire_locust_failure(
+            request_type=REQUEST_TYPE,
+            name=MESSAGE_TYPE_REVOKE,
+            response_time=0,
+            response_length=0,
+            exception=CertRevogationError("certificate not revoked")
+        )
+        return False
 
     def should_renew_now(self) -> bool:
         """
