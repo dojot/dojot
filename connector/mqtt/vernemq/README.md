@@ -26,7 +26,7 @@ For more see [here](./v2k-bridge)
 
 ### K2V-bridge
 
-The K2V-bridge service implements a bridge between Kafka broker and VerneMQ broker. It recevies messagens from some Kafka dojot's topics and publish the messages to some MQTT topics.
+The K2V-bridge service implements a bridge between Kafka broker and VerneMQ broker. It receives messagens from some Kafka dojot's topics and publish the messages to some MQTT topics.
 The communication between the bridge and the VerneMQ is secured with mutual TLS. Soon, the communication with Kafka will also use mutual TLS.
 
 For more see [here](./k2v-bridge)
