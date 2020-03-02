@@ -84,7 +84,7 @@ echo "dojot MQTT broker at host '${DOJOT_MQTT_HOST}', port '${DOJOT_MQTT_PORT}' 
 
 if [ "${REDIS_BACKUP}" == "n" ]
 then
-    if [ \( ${GENERATE_IDS} -eq "1" \) && \( "${DOJOT_ENV}" == "y" \) ]
+    if [ ${GENERATE_IDS} -eq "1" ] && [ "${DOJOT_ENV}" == "y" ]
     then
         echo "Start flushing ..."
         bash flushall.sh
