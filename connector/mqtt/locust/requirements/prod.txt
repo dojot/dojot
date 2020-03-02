@@ -1,0 +1,5 @@
+locustio==0.11.0
+redis==3.3.7
+paho-mqtt==1.4.0
+pylint==2.4.4
+pyopenssl==19.1.0

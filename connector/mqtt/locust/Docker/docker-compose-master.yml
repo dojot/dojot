@@ -1,0 +1,49 @@
+version: '3'
+services:
+  locust-master:
+    image: eduardogmisiuk/dojot-locust
+    depends_on:
+      - redis
+    environment:
+      # Don't forget to set the environment variables
+      DOJOT_URL: "http://10.202.70.102:8000"
+      DOJOT_USER: "admin"
+      DOJOT_PASSWD: "admin"
+      DOJOT_MQTT_HOST: "10.50.11.227"
+      # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
+      DOJOT_MQTT_PORT: "30011"
+      DOJOT_MQTT_TIMEOUT: "120"
+      LOCUST_LOG_DIR: "logs"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_PASSWD: ""
+      REDIS_BACKUP: "y"
+      NUMBER_OF_DEVICES: "100000"
+      GENERATE_IDS: "1"
+      DOJOT_ENV: "n"
+    command: bash master_entrypoint.sh
+    volumes:
+      - ..:/usr/src/app
+    ports:
+      - 8089:8089
+      - 5557:5557
+    healthcheck:
+      test: curl --fail -s http://localhost:8089 || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  redis:
+    image: redis:5.0.5-alpine3.10
+    restart: always
+    logging:
+      driver: json-file
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    ports:
+      - 6380:6379
+    volumes:
+      - ../db/:/data

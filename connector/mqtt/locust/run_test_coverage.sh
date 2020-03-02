@@ -1,0 +1,1 @@
+rm -rf htmlcov ; coverage run -m pytest tests/ ; coverage html

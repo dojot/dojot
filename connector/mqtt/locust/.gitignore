@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+logs/
+include
+bin
+lib
+lib64
+share
+pyvenv.cfg
+.coverage
+
+# Certificates
+cert
+db
+/htmlcov
