@@ -197,8 +197,8 @@ def map_device_ids() -> None:
         LOGGER.info("Beginning database mapping...")
 
         keys = cert_db.keys()
-        for i in range(len(keys)):
-            mapped_db.set(i+1, keys[i])
+        for i, key in enumerate(keys):
+            mapped_db.set(i+1, key)
 
     except Exception as exception:
         LOGGER.error(str(exception))
