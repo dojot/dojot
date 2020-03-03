@@ -41,7 +41,7 @@ jobs:
       with:
         token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612
         file: connector/mqtt/locust/coverage.xml
-        flags: unittests
+        flags: locust
         name: locust
 
   docker-hub:
