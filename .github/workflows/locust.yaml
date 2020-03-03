@@ -31,31 +31,33 @@ jobs:
         cd connector/mqtt/locust
         pip install -r requirements/dev.txt
         pip install -r requirements/prod.txt
+
     - name: pytest
       run: |
         cd connector/mqtt/locust
-        pytest tests/* --doctest-modules --junitxml=coverage/locust-unit-test.xml
+        coverage run -m pytest tests && coverage xml
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
-        file: connector/mqtt/locust/coverage/locust-unit-test.xml
-        flags: unittests # Flags allow you to isolate coverage reports for different tests
-        name: locust # Custom defined name for the upload
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: connector/mqtt/locust/coverage.xml
+        flags: unittests
+        name: locust
 
   docker-hub:
     needs: unit-tests
-    name: (connector/mqtt/locust) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    name: (connector/mqtt/locust) Build and Publish image to DockerHub
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/pull/') == false # # If this is a PR, it won't run
+    if: contains(github.ref, 'refs/pull/') == false
     steps:
-
     - name: Owner Repository
       id: get_owner
       run: |
         export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
         echo Current Owner is $OWNER
         echo ::set-output name=owner::$OWNER
+
     - name: Checkout
       uses: actions/checkout@v2
 
