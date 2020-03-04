@@ -1,4 +1,4 @@
-name: ${{ steps.get_owner.outputs.owner }}/pki-ejbca-server
+name: ejbca pki (pki/ejbca/server)
 
 # trigger when create a branch, push a tag or a branch, PR with changes in 'pki/ejbca/server/**'
 on:
@@ -26,7 +26,7 @@ jobs:
             - name: Build and Push
               uses: elgohr/Publish-Docker-Github-Action@2.11
               with:
-                name: ${{ steps.get_owner.outputs.owner }}/pki/ejbca/server
+                name: ${{ steps.get_owner.outputs.owner }}/pki-ejbca-server
                 username: ${{ secrets.DOCKER_USERNAME }}
                 password: ${{ secrets.DOCKER_PASSWORD }}
                 workdir: pki/ejbca/server
