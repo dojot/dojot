@@ -6,10 +6,6 @@ const defaultConfig = require('./config');
 
 const TAG = { filename: 'MqttClient' };
 
-/**
- * BackPressure
- */
-
 class MQTTClient {
   constructor(agentMessenger, config) {
     this.config = config || defaultConfig;
@@ -17,7 +13,6 @@ class MQTTClient {
 
     this.clientId = this.config.mqtt.clientId;
     this.host = this.config.mqtt.host;
-    this.hostname = this.config.app.hostname;
     this.keepAlive = this.config.mqtt.keepAlive;
     this.port = this.config.mqtt.port;
     this.username = this.config.mqtt.clientUsername;
@@ -29,9 +24,9 @@ class MQTTClient {
 
     // backPressure
     this.messageQueue = null;
-    this.currentMessageQueueLenght = 0;
+    this.currentMessageQueueLength = 0;
     this.parallelHandlers = this.config.mqtt.parallelHandlers;
-    this.maxQueLength = this.config.mqtt.maxQueLength;
+    this.maxQueueLength = this.config.mqtt.maxQueueLength;
 
     // agent messenger
     this.agentMessenger = agentMessenger;
@@ -49,7 +44,7 @@ class MQTTClient {
       cert: this.clientCrt,
       keepAlive: this.keepAlive,
       clean: false,
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     };
 
     const onConnectBind = this.onConnect.bind(this);
@@ -95,16 +90,17 @@ class MQTTClient {
     // pause
     if (this.isConnected) {
       // check if message is duplicated
+      const size = message.toString().length;
       if (packet.dup === false) {
-        this.currentMessageQueueLenght += 1;
+        this.currentMessageQueueLength += size;
         const data = { topic, message };
         this.messageQueue.push(data, () => {
-          this.currentMessageQueueLenght -= 1;
+          this.currentMessageQueueLength -= size;
         });
       }
     }
 
-    if (this.currentMessageQueueLenght > this.maxQueLength) {
+    if (this.currentMessageQueueLength > this.maxQueueLength) {
       this.mqttc.end(true);
       this.isConnected = false;
     }
@@ -112,6 +108,7 @@ class MQTTClient {
 
   connect() {
     if (this.isConnected === false) {
+      logger.debug(`Connecting to broker ${this.host} on port ${this.port} with protocol ${this.secureMode ? 'mqtts' : 'mqtt'}`, TAG);
       this.mqttc = mqtt.connect(this.mqttOptions);
     }
   }

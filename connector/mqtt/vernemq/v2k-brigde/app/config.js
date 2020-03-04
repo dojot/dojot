@@ -1,15 +1,15 @@
-const hostName = process.env.HOSTNAME || 'v2k-bridge-verne';
+const hostname = process.env.HOSTNAME || 'v2k-bridge-verne';
 const unsecuredMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 const app = {
-  mqttLogLevel: process.env.LOG_LEVEL || 'debug',
-  baseDir: process.env.BASE_DIR || '/opt/v2k-verne',
-  hostname: hostName,
+  logLevel: process.env.V2K_LOG_LEVEL || 'info',
+  baseDir: process.env.BASE_DIR || '/opt/v2k_bridge',
+  hostname,
 };
 
 const mqtt = {
   clientUsername: process.env.V2K_MQTT_USERNAME || 'v2k-bridge-verne',
-  clientId: process.env.V2K_MQTT_CLIENT_ID || hostName,
+  clientId: process.env.V2K_MQTT_CLIENT_ID || hostname,
   host: process.env.V2K_MQTT_HOST || 'vernemq-k8s',
   port: parseInt(process.env.V2K_MQTT_PORT, 0) || 8883,
   keepalive: parseInt(process.env.V2K_MQTT_KEEPALIVE, 0) || 60,
@@ -18,16 +18,16 @@ const mqtt = {
   subscribeTopic: process.env.V2K_MQTT_SUBSCRIPTION_TOPIC || '\$share/group/+/attrs',
   subscribeQos: parseInt(process.env.V2K_MQTT_SUBSCRIPTION_QOS, 0) || 1,
   parallelHandlers: parseInt(process.env.V2K_BACKPRESSURE_PARALLEL_HANDLERS, 0) || 1,
-  maxQueLength: parseInt(process.env.V2K_BACKPRESSURE_MAX_QUEUE_LENGTH, 0) || 1000,
+  maxQueueLength: parseInt(process.env.V2K_BACKPRESSURE_MAX_QUEUE_LENGTH, 0) || 1048576,
   tls: {
     ca: {
       location: process.env.V2K_MQTT_CA_FILE || `${app.baseDir}/app/cert/ca.crt`,
     },
     certificate: {
-      location: process.env.V2K_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${hostName}.crt`,
+      location: process.env.V2K_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${hostname}.crt`,
     },
     privateKey: {
-      location: process.env.V2K_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${hostName}.key`,
+      location: process.env.V2K_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${hostname}.key`,
     },
   },
 };

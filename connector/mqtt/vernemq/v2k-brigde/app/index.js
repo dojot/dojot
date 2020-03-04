@@ -4,7 +4,7 @@ const config = require('./config');
 const AgentMessenger = require('./AgentMessenger');
 
 /* set log level */
-logger.setLevel(config.app.mqttLogLevel);
+logger.setLevel(config.app.logLevel);
 
 const agentMessenger = new AgentMessenger(config);
 agentMessenger.init();

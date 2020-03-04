@@ -41,6 +41,7 @@ RUN apk --no-cache add \
       openssl \
       tini
 
+ENV BASE_DIR=/opt/v2k_bridge
 COPY --from=base /opt/v2k_bridge /opt/v2k_bridge
 
 ENTRYPOINT ["/sbin/tini", "--", "./bin/entryPoint.sh"]

@@ -29,7 +29,7 @@ const fakeConfig = {
     port: 0,
     keepAlive: 0,
     parallelHandlers: 1,
-    maxQueLength: 10,
+    maxQueueLength: 10,
     tls: {
       ca: {
         location: 'fake',
@@ -43,7 +43,7 @@ const fakeConfig = {
     },
   },
   app: {
-    mqttLogLevel: 'debug',
+    logLevel: 'debug',
     baseDir: 'fakeDir',
     hostname: 'fake',
   },
@@ -96,7 +96,6 @@ describe('Testing v2k bridge client', () => {
     expect(client.username).toEqual(config.mqtt.clientUsername);
     expect(client.host).toEqual(config.mqtt.host);
     expect(client.keepAlive).toEqual(config.mqtt.keepAlive);
-    expect(client.hostname).toEqual(config.app.hostname);
     expect(client.agentMessenger).toEqual(agent);
 
     expect(client.privateKey).not.toBeNull();
@@ -104,7 +103,7 @@ describe('Testing v2k bridge client', () => {
     expect(client.ca).not.toBeNull();
 
     expect(client.messageQueue).toBeNull();
-    expect(client.currentMessageQueueLenght).toEqual(0);
+    expect(client.currentMessageQueueLength).toEqual(0);
   };
 
   it('Should create a client sucessfully', () => {
@@ -153,6 +152,7 @@ describe('Testing v2k bridge client', () => {
   it('Should connect the client mqtt', () => {
     const agent = new AgentMessenger(fakeConfig);
     const client = new MQTTClient(agent, fakeConfig);
+    client.secureMode = true;
     client.connect();
     client.isConnected = true;
     client.connect();
@@ -186,7 +186,7 @@ describe('Testing v2k bridge client', () => {
     const client = new MQTTClient(agent, fakeConfig);
     client.init();
     client.onMessage();
-    client.currentMessageQueueLenght = 10 * 1000 * 10000;
+    client.currentMessageQueueLength = 10 * 1000 * 10000;
     client.onMessage();
 
     expect(mockAsyncQueue.push).not.toHaveBeenCalled();

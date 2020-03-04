@@ -32,7 +32,7 @@ const mockConfig = {
       subscribeTopic: 'topic',
     },
     app: {
-      mqttLogLevel: 'debug',
+      logLevel: 'debug',
     },
   },
 
