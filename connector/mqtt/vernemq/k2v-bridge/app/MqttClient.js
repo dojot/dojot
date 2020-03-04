@@ -14,7 +14,6 @@ class MqttClient {
 
     this.clientId = this.config.mqtt.clientId;
     this.host = this.config.mqtt.host;
-    this.hostname = this.config.app.hostname;
     this.keepAlive = this.config.mqtt.keepAlive;
     this.port = this.config.mqtt.port;
     this.username = this.config.mqtt.clientUsername;
@@ -42,15 +41,15 @@ class MqttClient {
     this.mqttOptions = {
       username: this.username,
       clientId: this.clientId,
-      host: '10.50.11.227',
-      port: '30010',
+      host: this.host,
+      port: this.port,
       protocol: this.secureMode ? 'mqtts' : 'mqtt',
       ca: this.ca,
       key: this.privateKey,
       cert: this.clientCrt,
       keepAlive: this.keepAlive,
       clean: false,
-      rejectUnauthorized: false,
+      rejectUnauthorized: true,
     };
 
     this.mqttc = mqtt.connect(this.mqttOptions);

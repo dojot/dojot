@@ -4,7 +4,7 @@ FROM node:10.16.3-alpine AS base
 
 WORKDIR /opt/k2v_bridge
 
-RUN apk add --no-cache \
+RUN apk --no-cache add \
       bash \
       ca-certificates \
       cyrus-sasl-dev \
@@ -13,6 +13,8 @@ RUN apk add --no-cache \
       make \
       musl-dev \
       python
+
+RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
 
 COPY package.json .
 COPY package-lock.json .
@@ -39,6 +41,7 @@ RUN apk --no-cache add \
       openssl \
       tini
 
+ENV BASE_DIR=/opt/k2v_bridge
 COPY --from=base /opt/k2v_bridge /opt/k2v_bridge
 
 ENTRYPOINT ["/sbin/tini", "--", "./bin/entryPoint.sh"]

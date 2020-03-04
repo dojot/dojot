@@ -37,7 +37,7 @@
   },
   "jest": {
     "coverageDirectory": "./coverage/",
-    "collectCoverage": false,
+    "collectCoverage": true,
     "collectCoverageFrom": [
       "app/**/*.js",
       "!app/index.js"

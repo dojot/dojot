@@ -75,7 +75,6 @@ describe('Testing MqttClient', () => {
     expect(client.username).toEqual(config.mqtt.clientUsername);
     expect(client.host).toEqual(config.mqtt.host);
     expect(client.keepAlive).toEqual(config.mqtt.keepAlive);
-    expect(client.hostname).toEqual(config.app.hostname);
 
     expect(client.privateKey).not.toBeNull();
     expect(client.clientCrt).not.toBeNull();

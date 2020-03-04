@@ -12,7 +12,7 @@ fi
 # readonly variables
 readonly K2V_VERNE_CONNECTION_TRIES_COUNT=${CONNECTION_TRIES_COUNT:-"3"}
 readonly K2V_VERNE_CONNECTION_TRIES_TIMEOUT=${CONNECTION_TRIES_TIMEOUT:-"3"}
-readonly K2V_VERNE_DATA_BROKER_HOST=${DATA_BROKER:-"data-broker:80"}
+readonly K2V_VERNE_DATA_BROKER_HOST=${DATA_BROKER_HOST:-"data-broker:80"}
 readonly K2V_VERNE_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092"}
 
 readonly BASE_DIR=${BASE_DIR:-"/opt/k2v-bridge"}

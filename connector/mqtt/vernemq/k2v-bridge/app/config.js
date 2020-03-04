@@ -1,30 +1,30 @@
-const hostName = process.env.HOSTNAME || 'k2v-bridge-verne';
+const hostname = process.env.HOSTNAME || 'k2v-bridge-verne';
 const toBoolean = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 const app = {
-  logLevel: process.env.LOG_LEVEL || 'info',
+  logLevel: process.env.K2V_LOG_LEVEL || 'info',
   baseDir: process.env.BASE_DIR || '/opt/k2v-verne',
-  hostname: hostName,
+  hostname,
 };
 
 const mqtt = {
   clientUsername: process.env.K2V_MQTT_USERNAME || 'k2v-bridge-verne',
-  clientId: process.env.k2V_MQTT_CLIENT_ID || hostName,
+  clientId: process.env.K2V_MQTT_CLIENT_ID || hostname,
   host: process.env.K2V_MQTT_HOST || 'vernemq-k8s',
   port: parseInt(process.env.K2V_MQTT_PORT, 0) || 8883,
   keepAlive: parseInt(process.env.K2V_MQTT_KEEPALIVE, 0) || 60,
   secure: toBoolean(process.env.K2V_MQTT_SECURE),
   publishTopicSuffix: process.env.K2V_MQTT_PUBLISH_TOPIC_SUFFIX || '/config',
-  publishQos: parseInt(process.env.K2V_MQTT_SUBSCRIPTION_QOS, 0) || 1,
+  publishQos: parseInt(process.env.K2V_MQTT_PUBLISH_QOS, 0) || 1,
   tls: {
     ca: {
       location: process.env.K2V_MQTT_CA_FILE || `${app.baseDir}/app/cert/ca.crt`,
     },
     certificate: {
-      location: process.env.K2V_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${hostName}.crt`,
+      location: process.env.K2V_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${hostname}.crt`,
     },
     privateKey: {
-      location: process.env.K2V_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${hostName}.key`,
+      location: process.env.K2V_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${hostname}.key`,
     },
   },
 };
