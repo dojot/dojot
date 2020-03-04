@@ -1,0 +1,34 @@
+name: ${{ steps.get_owner.outputs.owner }}/pki-ejbca-server
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'pki/ejbca/server/**'
+on:
+    create:
+    push:
+    pull_request:
+        paths:
+            - 'pki/ejbca/server/**'
+jobs:
+    docker-hub:
+        name: (pki/ejbca/server) Build and Publish image to DockerHUb # path to help identify in Status checks each job
+        runs-on: ubuntu-latest
+        if: contains(github.ref, 'refs/pull/') == false # # If this is a PR, it won't run
+        steps:
+            - name: Owner Repository
+              id: get_owner
+              run: |
+                export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+                echo Current Owner is $OWNER
+                echo ::set-output name=owner::$OWNER
+
+            - name: Checkout
+              uses: actions/checkout@v1
+
+            - name: Build and Push
+              uses: elgohr/Publish-Docker-Github-Action@2.11
+              with:
+                name: ${{ steps.get_owner.outputs.owner }}/pki/ejbca/server
+                username: ${{ secrets.DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_PASSWORD }}
+                workdir: pki/ejbca/server
+                buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+                tag_names: true # tag will be based in branch name or tag name
