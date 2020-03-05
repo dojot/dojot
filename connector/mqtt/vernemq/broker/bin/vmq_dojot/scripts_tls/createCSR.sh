@@ -19,7 +19,7 @@ fi
 
 echo "Create CSR for ${certCname}"
 openssl req -new  -sha256 -out "${certDir}"/"${certCsrFile}" -key "${certDir}"/"${certKeyFile}" \
-      -addext "subjectAltName = DNS.1:${certInternalDns}" \
+      -addext "subjectAltName = DNS.1:${certInternalDns}${subjectAltName}" \
       -addext "keyUsage = Digital Signature, Non Repudiation, Key Encipherment" \
       -addext "basicConstraints  =  CA:FALSE" \
       --subj "/CN=${certCname}"
