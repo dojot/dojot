@@ -1,4 +1,4 @@
-const hostname = process.env.HOSTNAME || 'v2k-bridge-verne';
+const hostname = process.env.HOSTNAME || 'v2k-bridge';
 const unsecuredMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 const app = {
@@ -8,7 +8,7 @@ const app = {
 };
 
 const mqtt = {
-  clientUsername: process.env.V2K_MQTT_USERNAME || 'v2k-bridge-verne',
+  clientUsername: process.env.V2K_MQTT_USERNAME || 'v2k-bridge',
   clientId: process.env.V2K_MQTT_CLIENT_ID || hostname,
   host: process.env.V2K_MQTT_HOST || 'vernemq-k8s',
   port: parseInt(process.env.V2K_MQTT_PORT, 0) || 8883,
@@ -17,7 +17,7 @@ const mqtt = {
   // eslint-disable-next-line no-useless-escape
   subscribeTopic: process.env.V2K_MQTT_SUBSCRIPTION_TOPIC || '\$share/group/+/attrs',
   subscribeQos: parseInt(process.env.V2K_MQTT_SUBSCRIPTION_QOS, 0) || 1,
-  parallelHandlers: parseInt(process.env.V2K_BACKPRESSURE_PARALLEL_HANDLERS, 0) || 1,
+  parallelHandlers: parseInt(process.env.V2K_BACKPRESSURE_PARALLEL_HANDLERS, 0) || 4,
   maxQueueLength: parseInt(process.env.V2K_BACKPRESSURE_MAX_QUEUE_LENGTH, 0) || 1048576,
   tls: {
     ca: {

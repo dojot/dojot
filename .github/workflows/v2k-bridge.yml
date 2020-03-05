@@ -60,7 +60,7 @@ jobs:
     - name: Build and Push
       uses: elgohr/Publish-Docker-Github-Action@2.11
       with:
-        name: ${{ steps.get_owner.outputs.owner }}/v2k-bridge-verne
+        name: ${{ steps.get_owner.outputs.owner }}/v2k-bridge
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         workdir: connector/mqtt/vernemq/v2k-brigde/

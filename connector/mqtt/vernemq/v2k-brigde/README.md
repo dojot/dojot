@@ -15,15 +15,13 @@ Before running the kubernetes environment with the V2K-bridge service, make sure
 Key                      | Purpose                                                             | Default Value       | Valid Values   |
 ------------------------ | ------------------------------------------------------------------- | ---------------     | -------------- |
 HOSTNAME                 | Hostname to be used in the certificate common name                  | broker              | hostname/IP    |
-EJBCA_HOSTNAME           | Address of the EJBCA broker                                         | localhost           | hostname/IP    |
-EJBCA_PORT               | Port of the EJBCA broker                                            | 5583                | integer        |
-AUTH_URL                 | Address of the auth service                                         | http://auth:5000    | hostname/IP    |
-DATA_BROKER_HOST         | Address of the data broker                                          | data-broker:80      | hostname/IP    |
-KAFKA_HOSTS              | Addresses of the kafka brokers separeted by a comma                 | kafka-server:9092   | hostname/IP    |
+EJBCA_ADDRESS            | Address of the EJBCA broker                                         | localhost:5583      | hostname/IP    |
+DATA_BROKER_ADDRESS      | Address of the data broker                                          | data-broker:80      | hostname/IP    |
+KAFKA_BROKER_LIST        | Addresses of the kafka brokers separeted by a comma                 | kafka-server:9092   | hostname/IP    |
 SERVER_HOSTNAME          | DNS of the service                                                  | localhost           | hostname       |
 V2K_LOG_LEVEL            | Log level                                                           | info                | string         |
 BASE_DIR                 | Base directoty where the project is located                         | /opt/v2k_bridge     | string         |
-V2K_MQTT_USERNAME        | Mqtt client username                                                | v2k-bridge-verne    | string         |
+V2K_MQTT_USERNAME        | Mqtt client username                                                | v2k-bridge          | string         |
 V2K_MQTT_CLIENT_ID       | Mqtt client client id                                               | hostname            | string         |
 V2K_MQTT_HOST            | Mqtt broker host                                                    | localhost           | hostname/IP    |
 V2K_MQTT_PORT            | Mqtt broker port                                                    | 8883                | integer        |
@@ -34,5 +32,5 @@ V2K_MQTT_SUBSCRIPTION_QOS| Mqtt client Quality of service                       
 V2K_MQTT_CA_FILE         | Mqtt client ca file                                                 | ${BASE_DIR}/app/verne/${HOSTNAME}.ca | string    |
 V2K_MQTT_CERT_FILE       | Mqtt client certificate file                                        | ${BASE_DIR}/app/verne/${HOSTNAME}.crt| string    |
 V2K_MQTT_KEY_FILE        | Mqtt client key file                                                | ${BASE_DIR}/app/verne/${HOSTNAME}.key| string    |
-V2K_BACKPRESSURE_MAX_QUEUE_LENGTH | Mqtt Client backpressure messages length in bytes          | 1048576                              | integer   |
-V2K_BACKPRESSURE_PARALLEL_HANDLERS| Mqtt Client parallel handlers                              | 1                                    | integer   |
+V2K_BACKPRESSURE_MAX_QUEUE_LENGTH | Maximum backpressure queue length in bytes                 | 1048576                              | integer   |
+V2K_BACKPRESSURE_PARALLEL_HANDLERS| Number of parallel handlers for processing the messages in the backpressure queue| 1              | integer   |
