@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: cron
+  name: cron
+  namespace: {{ dojot_namespace }}
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    name: cron
+    app: dojot

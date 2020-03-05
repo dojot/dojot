@@ -1,0 +1,11 @@
+# Default variables for Dojot's Kafka
+
+dojot_zk_client_port: 2181
+
+dojot_kafka_port: 9092
+
+dojot_kafka_cluster_size: 1
+
+dojot_kafka_persistent_volumes: false
+
+dojot_kafka_volume_size: 10Gi

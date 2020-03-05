@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vernemq-k8s-external-service
+  namespace: {{ dojot_namespace }}
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    vernemq: k8s
+  ports:
+    - name: mqtt
+      port: 1883
+      nodePort: 30310
+    - name: mqtts
+      port: 8883
+      nodePort: 30311
+  type: NodePort

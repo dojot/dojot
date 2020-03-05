@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: device-manager
+    app: dojot
+  name: device-manager
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: device-manager
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/device-manager:{{ dojot_devm_version }}
+        name: device-manager
+        env:
+        - name: DBHOST
+          value: postgres
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              name: devm-secret
+              key: user
+        - name: DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: devm-secret
+              key: password
+        - name: KAFKA_HOST
+          value: "kafka-server"
+        - name: KAFKA_PORT
+          value: "{{ dojot_kafka_port }}"
+        - name: DEV_MNGR_CRYPTO_PASS
+          valueFrom:
+            secretKeyRef:
+              name: devm-secret
+              key: crypto_pass
+        - name: DEV_MNGR_CRYPTO_IV
+          valueFrom:
+            secretKeyRef:
+              name: devm-secret
+              key: crypto_iv
+        - name: DEV_MNGR_CRYPTO_SALT
+          valueFrom:
+            secretKeyRef:
+              name: devm-secret
+              key: crypto_salt        
+      restartPolicy: Always

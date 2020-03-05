@@ -1,0 +1,22 @@
+## This role is responsible for deploying verneMq for dojot
+
+- name: dojot - verneMQ Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'vernemq_operator_deployment.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_operator_role.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_operator_roleBinding.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_operator_serviceAccount.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_operator_vernemqCustomResourceDefinition.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_external_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'vernemq_serviceAccount.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'z_vernemq_cluster.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'z_vernemq-serviceMonitor.yaml.j2') | from_yaml }}"

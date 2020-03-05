@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kong-migrate
+  namespace: {{ dojot_namespace }}
+spec:
+  template:
+    metadata:
+      name: kong-migrate
+    spec:
+      containers:
+      - name: kong-migrate
+        env:
+        - name: KONG_DATABASE
+          value: postgres
+        - name: KONG_PG_HOST
+          value: postgres
+        - name: KONG_PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: kong-secret
+              key: user
+        - name: KONG_PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kong-secret
+              key: password
+        - name: KONG_PG_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: kong-secret
+              key: db
+        image: dojot/kong:latest
+        args: ["kong",  "migrations", "up"]
+      restartPolicy: OnFailure

@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: persister
+    app: dojot
+  name: persister
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: persister
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/persister:{{ dojot_persister_version }}
+        name: persister
+        env:
+        - name: FALCON_SETTINGS_MODULE
+          value: history.settings.docker
+        - name: DOJOT_MANAGEMENT_USER
+          value: 'persister'
+        - name: KAFKA_GROUP_ID
+          value: 'persister-group'
+        - name: KAFKA_HOSTS
+          value: "kafka-server:{{ dojot_kafka_port }}"
+      restartPolicy: Always

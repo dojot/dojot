@@ -1,0 +1,4 @@
+---
+# Defines defaults values for gui role variables
+
+dojot_gui_version: "{{ dojot_version }}"

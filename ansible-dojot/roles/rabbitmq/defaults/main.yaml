@@ -1,0 +1,4 @@
+# Set default value for variables of RabbitMQ deployment
+
+# Variable that defines the container version to be used for rabbitmq
+dojot_rabbitmq_version: 3.7-alpine

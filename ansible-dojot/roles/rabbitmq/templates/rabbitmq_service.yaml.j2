@@ -1,0 +1,19 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: {{ dojot_namespace }}
+  name: rabbitmq
+  labels:
+    name: rabbitmq
+spec:
+  clusterIP: None
+  ports:
+  - name: rabbitmq-amqp
+    protocol: TCP
+    port: 5672
+    targetPort: 5672
+  selector:
+    name: rabbitmq
+    app: dojot
+
+# TODO: Add configuration for setting rabbitmq ports

@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: history
+    app: dojot
+  name: history
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: history
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/history:{{ dojot_history_version }}
+        name: history
+        env:
+        - name: FALCON_SETTINGS_MODULE
+          value: history.settings.docker
+        - name: DOJOT_MANAGEMENT_USER
+          value: 'history'
+      restartPolicy: Always

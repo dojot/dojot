@@ -1,0 +1,24 @@
+---
+# This tasks files is responsible for bootstraping the node where k8s api calls will be executed
+
+- name: dojot - Bootstrap - Install pip if necessary
+  when: ansible_python.version.major == 2 and dojot_bootstrap
+  become: true
+  package:
+    name: python-pip
+    state: present
+
+- name: dojot - Bootstrap - Install pip if necessary
+  when: ansible_python.version.major == 3 and dojot_bootstrap
+  become: true
+  package:
+    name: python3-pip
+    state: present
+
+# Bootstrap a node with openshift dependency if required
+- name: dojot - Bootstrap - Install openshift python library
+  when: dojot_bootstrap
+  become: true
+  pip:
+    name: openshift
+    version: 0.7.2

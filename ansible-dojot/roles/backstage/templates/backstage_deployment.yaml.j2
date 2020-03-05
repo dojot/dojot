@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: backstage
+    app: dojot
+  name: backstage
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: backstage
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/backstage:{{ dojot_version }}
+        name: backstage
+        env:
+        - name: LOCAL_URL
+          value: {{ kong_url }}
+      restartPolicy: Always

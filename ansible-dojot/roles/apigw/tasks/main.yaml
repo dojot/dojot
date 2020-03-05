@@ -1,0 +1,35 @@
+## This role is responsible for deploying Kong for dojot
+
+- name: dojot - API Gateway Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'apigw_internal_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'apigw_secrets.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'apigw_deployment.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'apigw_migration_job.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'apigw_routes_config_map.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'apigw_routes_config.yaml.j2') | from_yaml }}"
+
+- name: dojot - Gather the number of the node port for the ApiGW
+  register: api_gw_node_port
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    api_version: v1
+    kind: Service
+    namespace: "{{ dojot_namespace }}"
+    name: kong
+
+# Save this node ports data for later use
+- name: dojot - Save HTTP nodePort data
+  set_fact:
+    api_gw_http_node_port: "{{ api_gw_node_port.result.spec.ports  | selectattr('name', 'equalto', 'apigw-http') | map(attribute='nodePort') | join(' ') }}"
+
+# TODO: If the external is a LB, dont create a node port

@@ -1,0 +1,125 @@
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  labels:
+    name: zookeeper
+    app: dojot
+  name: zookeeper
+  namespace: {{ dojot_namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: dojot
+      name: zookeeper
+  serviceName: zookeeper-cluster
+  replicas: {{ dojot_zk_cluster_size }}
+  updateStrategy:
+    type: OnDelete
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      namespace: dojot
+      labels:
+        app: dojot
+        name: zookeeper
+    spec:
+      terminationGracePeriodSeconds: 1200
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      affinity:
+#        nodeAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            nodeSelectorTerms:
+#           - matchExpressions:
+#              - key: kubernetes.io/hostname
+#                operator: In
+#                values:
+#                - verne-kafka
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+           - topologyKey: "kubernetes.io/hostname"
+             labelSelector:
+               matchLabels:
+                 name: zookeeper
+                 app: dojot
+      containers:
+        - name: zookeeper
+          ## - https://github.com/kubernetes/contrib/tree/master/statefulsets/zookeeper
+          image: "gcr.io/google_samples/k8szk:v3"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -xec
+            - zkGenConfig.sh && exec zkServer.sh start-foreground
+          ports:
+            - containerPort: {{ dojot_zk_client_port }}
+              name: client
+            - containerPort: {{ dojot_zk_server_port }}
+              name: server
+            - containerPort: {{ dojot_zk_election_port }}
+              name: leader-election
+          livenessProbe:
+            exec:
+              command:
+                - zkOk.sh
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+          readinessProbe:
+            exec:
+              command:
+                - zkOk.sh
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 6
+            successThreshold: 1
+          env:
+            - name: ZK_REPLICAS
+              value: "{{ dojot_zk_cluster_size | string }}"
+            - name: ZK_CLIENT_PORT
+              value: "{{ dojot_zk_client_port }}"
+            - name: ZK_ELECTION_PORT
+              value: "{{ dojot_zk_election_port }}"
+            - name: ZK_SERVER_PORT
+              value: "{{ dojot_zk_server_port }}"
+            - name: ZK_HEAP_SIZE
+              value: "2G"
+            - name: ZK_INIT_LIMIT
+              value: "5"
+            - name: ZK_LOG_LEVEL
+              value: "INFO"
+            - name: ZK_MAX_CLIENT_CNXNS
+              value: "100"
+            - name: ZK_MAX_SESSION_TIMEOUT
+              value: "40000"
+            - name: ZK_MIN_SESSION_TIMEOUT
+              value: "4000"
+            - name: ZK_PURGE_INTERVAL
+              value: "0"
+            - name: ZK_SNAP_RETAIN_COUNT
+              value: "3"
+            - name: ZK_SYNC_LIMIT
+              value: "10"
+            - name: ZK_TICK_TIME
+              value: "2000"
+{% if dojot_zk_persistent_volumes %}
+          volumeMounts:
+            - name: zk-volume
+              mountPath: /var/lib/zookeeper 
+
+  volumeClaimTemplates:
+  - metadata:
+      name: zk-volume
+      namespace: {{ dojot_namespace }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ dojot_storage_class_name }}
+      resources:
+        requests:
+          storage: {{ dojot_zk_volume_size }}
+{% endif %}         

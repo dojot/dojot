@@ -1,0 +1,7 @@
+# Default variables value for the flowbroker service
+
+dojot_flowbroker_version: "{{ dojot_version }}"
+dojot_flowbroker_context_manager_version: "{{ dojot_version }}"
+
+dojot_kafka_port: 9092
+dojot_zk_client_port: 2181

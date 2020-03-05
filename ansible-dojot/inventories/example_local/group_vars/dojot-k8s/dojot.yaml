@@ -1,0 +1,34 @@
+# Set the dojot deployment namesapce
+dojot_namespace: dojot
+
+dojot_version: development
+
+dojot_domain_name: 10.50.11.235
+
+# Set kubernetes RBAC
+dojot_kubernetes_rbac: true
+
+# Set dojot configurations for Zookeeper
+dojot_zk_persistent_volumes: false
+
+# Set dojot configuration for postgreSQL
+dojot_psql_persistent_volumes: false
+
+# Set dojot configuration for mongoDB
+dojot_mongodb_persistent_volumes: false
+
+# Set Kafka configuration for dojot
+dojot_kafka_persistent_volumes: false
+
+# Set auth configuration
+dojot_auth_email_enabled: false
+
+# Set dojot docnfiguration for EJBCA
+dojot_ejbca_persistent_volumes: false
+
+dojot_storage_class_name: "local-storage"
+
+# Set number of replicas for vernemq-dojot, k2v-vernemq-dojot,
+# v2k-vernemq-dojot, data-broker {kafka - Partitions, not replicas},
+# latency-pub-test-prometheus
+dojot_vernemq_mqtt_replicas_to_scale: "4"

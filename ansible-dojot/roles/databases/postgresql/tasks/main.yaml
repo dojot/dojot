@@ -1,0 +1,27 @@
+## This role is responsible for deploying postgreSQL for dojot
+
+- name: dojot - PostgreSQL Persistent Volume Claim
+  when: dojot_psql_persistent_volumes
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ lookup('template', 'postgres_pvc.yaml.j2') | from_yaml }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+
+- name: dojot - PostgreSQL Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'postgres_secret.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'postgres_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'postgres_init_config_map.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'postgres_deployment.yaml.j2') | from_yaml }}"

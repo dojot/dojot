@@ -1,0 +1,71 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: auth
+    app: dojot
+  name: auth
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: auth
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/auth:{{ dojot_auth_version }}
+        name: auth
+        env:
+        - name: KAFKA_HOSTS
+          value: kafka-server:{{ dojot_kafka_port }}
+        - name: KAFKA_GROUP_ID
+          value: auth-group
+        - name: DOJOT_MANAGEMENT_USER
+          value: auth  
+        - name: AUTH_DB_HOST
+          value: postgres
+        - name: AUTH_DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-secret
+              key: user
+        - name: AUTH_DB_PWD
+          valueFrom:
+            secretKeyRef:
+              name: auth-secret
+              key: password
+        - name: AUTH_KONG_URL
+          value: http://kong:{{ dojot_internal_api_config_port }}
+        - name: AUTH_CACHE_NAME
+          value: redis
+        - name: AUTH_CACHE_HOST
+          value: localhost
+{% if dojot_auth_email_enabled %}
+        - name: AUTH_EMAIL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: auth-secret
+              key: email_host
+        - name: AUTH_EMAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-secret
+              key: email_user
+        - name: AUTH_EMAIL_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: auth-secret
+              key: email_passwd
+{% else %}
+        - name: AUTH_EMAIL_HOST
+          value: NOEMAIL
+{% endif %}
+        - name: AUTH_RESET_PWD_VIEW
+          value: https://{{ dojot_domain_name }}/#/setPassword/
+      - image: redis:alpine
+        name: redis
+        ports:
+        - containerPort: 6379
+      restartPolicy: Always

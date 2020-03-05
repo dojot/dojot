@@ -1,0 +1,38 @@
+## This role is responsible for deploying the FlowBroker Service for dojot
+
+- name: dojot - Flowbroker Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'flowbroker_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'flowbroker_service_account.yaml.j2') | from_yaml }}"
+
+- name: dojot - Flowbroker RBAC Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  when: dojot_kubernetes_rbac 
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'flowbroker_role.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'flowbroker_role_binding.yaml.j2') | from_yaml }}"
+
+- name: dojot - Flowbroker Deployment
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ lookup('template', 'flowbroker_deployment.yaml.j2') | from_yaml }}"

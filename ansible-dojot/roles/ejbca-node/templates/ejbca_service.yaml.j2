@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ejbca-wrapper
+  namespace: {{ dojot_namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app: ejbca-wrapper
+  ports:
+  - name: ejbca-wrapper
+    port: 5583

@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: iotagent-lwm2m
+  name: iotagent-lwm2m
+  namespace: {{ dojot_namespace }}
+spec:
+  type: NodePort
+  ports:
+  - name: lwm2m-one
+    protocol: UDP
+    port: 5683
+    targetPort: 5683
+    nodePort: 30011
+  - name: lwm2m-two
+    protocol: UDP
+    port: 5684
+    targetPort: 5684
+    nodePort: 30012
+  - name: lwm2m-three
+    protocol: UDP
+    port: 5693
+    targetPort: 5693
+    nodePort: 30013
+  - name: lwm2m-four
+    protocol: UDP
+    port: 5694
+    targetPort: 5694
+    nodePort: 30014
+  - name: lwm2m-http
+    protocol: TCP
+    port: 5896
+    targetPort: 5896
+    nodePort: 30015
+  - name: lwm2m-https
+    protocol: TCP
+    port: 5897
+    targetPort: 5897
+    nodePort: 30016        
+  selector:
+    name: iotagent-lwm2m
+    app: dojot

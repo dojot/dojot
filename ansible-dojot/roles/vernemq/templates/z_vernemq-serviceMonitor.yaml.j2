@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: vernemq
+  name: vernemq
+  namespace: dojot
+spec:
+  endpoints:
+  - interval: 1s #interval to consult metrics from vernemq
+    port: http
+  selector:
+    matchLabels:
+      vernemq: k8s

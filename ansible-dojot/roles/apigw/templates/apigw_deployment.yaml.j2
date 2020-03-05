@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: kong
+    app: dojot
+  name: kong
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: kong
+        app: dojot
+    spec:
+      containers:
+      - name: kong
+        image: dojot/kong:{{ dojot_apigw_version }}
+        env:
+        - name: KONG_DATABASE
+          value: postgres
+        - name: KONG_PG_HOST
+          value: postgres
+        - name: KONG_PG_USER
+          valueFrom:
+            secretKeyRef:
+              name: kong-secret
+              key: user
+        - name: KONG_PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kong-secret
+              key: password
+        - name: KONG_PG_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: kong-secret
+              key: db
+        ports:
+        - containerPort: {{ dojot_internal_http_port }}
+        - containerPort: {{ dojot_internal_api_config_port }}
+      restartPolicy: Always

@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kong-route-config
+  namespace: {{ dojot_namespace }}
+spec:
+  template:
+    metadata:
+      name: kong-route-config
+    spec:
+      containers:
+      - name: kong-route-config
+        image: byrnedo/alpine-curl
+        volumeMounts:
+        - mountPath: /config_file
+          name: kong-route-config
+        command: ['/bin/sh', '/config_file/kong-config.sh']
+      restartPolicy: OnFailure
+      volumes:
+      - name: kong-route-config
+        configMap:
+          name: kong-config

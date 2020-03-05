@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: flowbroker
+    app: dojot
+  name: flowbroker
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: flowbroker
+        app: dojot
+    spec:
+      serviceAccountName: flowbroker
+      containers:
+      - image: dojot/flowbroker:{{ dojot_flowbroker_version }}
+        name: flowbroker
+        env:
+        - name: FLOWBROKER_CACHE_HOST
+          value: localhost
+        - name: KAFKA_HOSTS
+          value: kafka-server:{{ dojot_kafka_port }}
+        - name: CONTEXT_MANAGER_ADDRESS
+          value: localhost
+        - name: DEPLOY_ENGINE
+          value: kubernetes
+        - name: KAFKA_GROUP_ID
+          value: flowbroker-group
+        - name: DOJOT_MANAGEMENT_USER
+          value: flowbroker
+      - name: flowbroker-redis
+        image: redis:alpine
+      - name: flowbroker-context-manager
+        image: dojot/flowbroker-context-manager:{{ dojot_flowbroker_context_manager_version }}
+        env:
+        - name: SERVICE_PORT
+          value: "8080"
+        - name: ZOOKEEPER_HOST
+          value: zookeeper
+        - name: ZOOKEEPER_PORT
+          value: "{{ dojot_zk_client_port }}"
+        - name: ZEROMQ_PORT
+          value: "5556"
+        - name: HOLD_LOCK_TIMEOUT
+          value: "10000"
+        - name: WAIT_LOCK_TIMEOUT
+          value: "30000"
+      restartPolicy: Always

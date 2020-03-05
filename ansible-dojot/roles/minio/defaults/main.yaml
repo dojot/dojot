@@ -1,0 +1,13 @@
+# Default variables for Minio
+
+dojot_minio_access_key: '9HEODSF6WQN5EZ39DM7Z'
+
+dojot_minio_secret_key: 'fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W'
+
+dojot_minio_port: 9000
+
+dojot_minio_cluster_size: 1
+
+dojot_minio_persistent_volumes: false
+
+dojot_minio_volume_size: 4Gi

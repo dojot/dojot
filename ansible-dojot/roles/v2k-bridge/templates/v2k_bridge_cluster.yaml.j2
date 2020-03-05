@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: v2k-bridge
+  namespace: {{ dojot_namespace }}
+spec:
+  serviceName: "v2k-bridge"
+  selector:
+    matchLabels:
+      app: v2k-bridge
+  replicas: {{ dojot_vernemq_mqtt_replicas_to_scale }}
+  template: #templates for the pods
+    metadata:
+      labels:
+        app: v2k-bridge
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - verne-kafka
+      containers:
+      - name: v2k-bridge
+        image: dojot/v2k-bridge:{{ dojot_v2k_version}}
+        env:
+        - name: AUTH_URL
+          value: "http://auth:5000"
+        - name: DATA_BROKER
+          value: "http://data-broker"
+        - name: DATA_BROKER_DNS
+          value: "data-broker"
+        - name: DATA_BROKER_PORT
+          value: "80"
+        - name: KAFKA_HOSTS
+          value: "kafka-server:9092"
+        - name: DOJOT_MQTT_HOST
+          value: "vernemq-k8s"
+        - name: DOJOT_MQTT_PORT
+          value: "8883"
+        - name: SERVER_HOSTNAME
+          value: "v2k-bridge"
+        - name: EJBCA_HOSTNAME
+          value: "ejbca-wrapper"
+        - name: EJBCA_PORT
+          value: "5583"
+        - name: LOG_LEVEL
+          value: "info"

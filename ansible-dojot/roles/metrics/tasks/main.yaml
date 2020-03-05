@@ -1,0 +1,54 @@
+- name: Metrics 
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  with_file:
+    - "templates/00namespace-namespace.yaml"
+    - "templates/0prometheus-operator-0prometheusCustomResourceDefinition.yaml"
+    - "templates/0prometheus-operator-0prometheusruleCustomResourceDefinition.yaml"
+    - "templates/0prometheus-operator-0servicemonitorCustomResourceDefinition.yaml"
+    - "templates/0prometheus-operator-clusterRole.yaml"
+    - "templates/0prometheus-operator-clusterRoleBinding.yaml"
+    - "templates/0prometheus-operator-deployment.yaml"
+    - "templates/0prometheus-operator-service.yaml"
+    - "templates/0prometheus-operator-serviceAccount.yaml"
+    - "templates/grafana-dashboardDatasources.yaml"
+    - "templates/grafana-dashboardDefinitions.yaml"
+    - "templates/grafana-dashboardSources.yaml"
+    - "templates/grafana-deployment.yaml"
+    - "templates/grafana-service.yaml"
+    - "templates/grafana-serviceAccount.yaml"
+    - "templates/kube-state-metrics-clusterRole.yaml"
+    - "templates/kube-state-metrics-clusterRoleBinding.yaml"
+    - "templates/kube-state-metrics-deployment.yaml"
+    - "templates/kube-state-metrics-role.yaml"
+    - "templates/kube-state-metrics-roleBinding.yaml"
+    - "templates/kube-state-metrics-service.yaml"
+    - "templates/kube-state-metrics-serviceAccount.yaml"
+    - "templates/node-exporter-clusterRole.yaml"
+    - "templates/node-exporter-clusterRoleBinding.yaml"
+    - "templates/node-exporter-daemonset.yaml"
+    - "templates/node-exporter-dserviceAccount.yaml"
+    - "templates/node-exporter-service.yaml"
+    - "templates/prometheus-clusterRole.yaml"
+    - "templates/prometheus-clusterRoleBinding.yaml"
+    - "templates/prometheus-roleBindingSpecificNamespaces.yaml"
+    - "templates/prometheus-roleConfig.yaml"
+    - "templates/prometheus-roleSpecificNamespaces.yaml"
+    - "templates/prometheus-rules.yaml"
+    - "templates/prometheus-service.yaml"
+    - "templates/prometheus-serviceAccount.yaml"
+    - "templates/prometheus-servicelprometheus.yaml"
+    - "templates/prometheus-serviceMonitorApiserver.yaml"
+    - "templates/prometheus-serviceMonitorCoreDNS.yaml"
+    - "templates/prometheus-serviceMonitorKubelet.yaml"
+    - "templates/z_kube-state-metrics-serviceMonitor.yaml"
+    - "templates/z_node-exporter-serviceMonitor.yaml"
+
+
+

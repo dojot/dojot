@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pub-laten-kafka-prom
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: {{ dojot_vernemq_mqtt_replicas_to_scale }}
+  selector:
+    matchLabels:
+      app: pub-laten-kafka-prom
+  template:
+    metadata:
+      labels:
+        app: pub-laten-kafka-prom
+    spec:
+      containers:
+      - name: pub-laten-kafka-prom
+        image: dojot/latency-pub-test-prometheus:{{ dojot_pub_kafka_prometheus_version }}
+        env:
+        - name: PROMETHEUS_PORT
+          value: "3055"
+        - name: AUTH_URL
+          value: "http://auth:5000"
+        - name: DATA_BROKER_URL
+          value: "http://data-broker"
+        - name: DATA_BROKER_DNS
+          value: "data-broker"
+        - name: DATA_BROKER_PORT
+          value: "80"
+        - name: KAFKA_HOSTS
+          value: "kafka-server:9092"
+        ports:
+        - name: http
+          containerPort: 3055

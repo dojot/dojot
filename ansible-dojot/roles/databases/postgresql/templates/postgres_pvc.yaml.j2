@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: psql-volume-claim
+  namespace: {{ dojot_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ dojot_psql_volume_size }}
+  storageClassName: {{ dojot_storage_class_name }}

@@ -1,0 +1,10 @@
+---
+all:
+  hosts:
+    localhost:
+        ansible_connection: local
+        ansible_python.version.major: 3
+  children:
+    dojot-k8s:
+      hosts:
+        localhost:

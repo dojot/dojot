@@ -1,0 +1,12 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ dojot_namespace }}
+  name: flowbroker-role
+rules:
+- apiGroups: ["extensions"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "create"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "create"]

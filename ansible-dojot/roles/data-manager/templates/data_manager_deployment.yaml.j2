@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: data-manager
+    app: dojot
+  name: data-manager
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: data-manager
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/data-manager:{{ dojot_data_manager_version }}
+        name: data-manager
+      restartPolicy: Always

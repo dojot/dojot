@@ -1,0 +1,4 @@
+---
+# Define defaults values for data manager role variables
+
+dojot_data_manager_version: "{{ dojot_version }}"

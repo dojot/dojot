@@ -1,0 +1,17 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: {{ dojot_namespace }}
+  name: postgres-pv-claim
+  labels:
+    app: postgres
+spec:
+  accessModes:
+    - ReadWriteOnce  
+  resources:
+    requests:
+      storage: {{ dojot_ejbca_psql_volume_size }}
+  storageClassName: {{ dojot_storage_class_name }}
+  selector:
+    matchLabels:
+      db: postgres

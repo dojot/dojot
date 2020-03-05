@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: ejbca-wrapper
+  namespace: {{ dojot_namespace }}
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: NotIn
+            values:
+            - verne-kafka
+  selector:
+    matchLabels:
+      app: ejbca-wrapper
+  replicas: 1
+  template: #templates for the pods
+    metadata:
+      labels:
+        app: ejbca-wrapper
+    spec:
+      hostname: localhost
+      containers:
+      - name: ejbca-wrapper
+        image: dojot/ejbca-wrapper:{{ dojot_version  }}  ## change to dojot_ejbca_version
+        env:
+        - name: DATABASE_JDBC_URL
+          value: "jdbc:postgresql://postgres-ejbca:5433/ejbca_db"
+        - name: DATABASE_USER
+          value: "youruser"
+        - name: DATABASE_PASSWORD
+          value: "yourpassword"
+        - name: LOG_LEVEL_APP
+          value: "ERROR"
+        - name: LOG_LEVEL_SERVER_SUBSYSTEMS
+          value: "ERROR"
+        - name: LOG_LEVEL_APP_WS_TRANSACTIONS
+          value: "ERROR"
+        - name: LOG_LEVEL_SERVER
+          value: "ERROR"
+        - name: LOG_LEVEL_APP_OCSP_TRANSACTIONS
+          value: "ERROR"

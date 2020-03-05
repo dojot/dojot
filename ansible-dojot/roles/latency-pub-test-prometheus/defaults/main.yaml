@@ -1,0 +1,4 @@
+---
+# Defines defaults values role variables
+
+dojot_pub_kafka_prometheus_version: "{{ dojot_version }}"

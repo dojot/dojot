@@ -1,0 +1,61 @@
+apiVersion: vernemq.com/v1alpha1
+kind: VerneMQ
+metadata:
+  labels:
+    vernemq: k8s
+  name: k8s
+  namespace: {{ dojot_namespace }}
+spec:
+  baseImage: dojot/vernemq-dojot
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: NotIn
+            values:
+            - verne-kafka
+  env:
+    - name: USE_VMQ_OPERATOR
+      value: "y"
+    - name: EJBCA_HOSTNAME
+      value: "ejbca-wrapper"
+    - name: EJBCA_PORT
+      value: "5583"
+    - name: CRL_UPDATE_TIME
+      value: "*/10 * * * *" #every 30 min
+    - name: CHECK_EXPIRATION_TIME
+      value: "*/10 * * * *" #every 30 min
+    - name: CHECK_BROKER_CERT_REVOKED_TIME
+      value: "*/10 * * * *" #every 30 min
+    - name: CHECKEND_EXPIRATION_SEC
+      value: "43200" #12h
+    - name: SERVER_HOSTNAME
+      value: "{{ dojot_domain_name }}"
+    - name: SERVER_IP
+      value: ""
+      ## BASE-64 config
+    - name: VERNEMQ_CONF
+      value: "YWNjZXB0X2V1bGEgPSB5ZXMKbWV0YWRhdGFfcGx1Z2luID0gdm1xX3N3YwpsaXN0ZW5lci52bXEuY2x1c3RlcmluZyA9ICRNWV9QT0RfSVA6NDQwNTMKbGlzdGVuZXIuaHR0cC5kZWZhdWx0ID0gMC4wLjAuMDo4ODg4CnBsdWdpbnMudm1xX3Bhc3N3ZCA9IG9mZgpwbHVnaW5zLnZtcV9hY2wgPSBvZmYKcGx1Z2lucy52bXFfazhzLnBhdGggPSAvdmVybmVtcS9wbHVnaW5zL19idWlsZC9kZWZhdWx0CnBsdWdpbnMudm1xX2s4cyA9IG9uCnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbi5wYXRoID0gL3Zlcm5lbXEvZG9qb3RfYWNsX3BsdWdpbi9kZWZhdWx0CnBsdWdpbnMuZG9qb3RfYWNsX3BsdWdpbiA9IG9uCmxldmVsZGIubWF4aW11bV9tZW1vcnkucGVyY2VudCA9IDIwCmxvZy5jb25zb2xlID0gY29uc29sZQpsaXN0ZW5lci5tYXhfY29ubmVjdGlvbnMgPSAyMDAwMDAKbGlzdGVuZXIubnJfb2ZfYWNjZXB0b3JzID0gMTAwCm1heF9pbmZsaWdodF9tZXNzYWdlcyA9IDIwCm1heF9vbmxpbmVfbWVzc2FnZXMgPSAxMDAwMApsaXN0ZW5lci5zc2wuZGVmYXVsdCA9IDAuMC4wLjA6ODg4MwpsaXN0ZW5lci5zc2wuZGVmYXVsdC5jYWZpbGUgPSAgL3Zlcm5lbXEvY2VydC9jYS5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQuY2VydGZpbGUgPSAvdmVybmVtcS9jZXJ0LyRIT1NUTkFNRS5jcnQKbGlzdGVuZXIuc3NsLmRlZmF1bHQua2V5ZmlsZSA9IC92ZXJuZW1xL2NlcnQvJEhPU1ROQU1FLmtleQpsaXN0ZW5lci5zc2wuZGVmYXVsdC5jcmxmaWxlID0gIC92ZXJuZW1xL2NlcnQvY2EuY3JsCmxpc3RlbmVyLnNzbC5kZWZhdWx0LnVzZV9pZGVudGl0eV9hc191c2VybmFtZSA9IG9uCmxpc3RlbmVyLnNzbC5kZWZhdWx0LnJlcXVpcmVfY2VydGlmaWNhdGUgPSBvbg=="
+  config:
+    configs:
+    - name: allow_register_during_netsplit
+      value: "on"
+    - name: allow_publish_during_netsplit
+      value: "on"
+    - name: allow_subscribe_during_netsplit
+      value: "on"
+    - name: allow_unsubscribe_during_netsplit
+      value: "on"
+    listeners:
+    - address: 0.0.0.0
+      port: 1883
+    - address: 0.0.0.0
+      port: 1888
+      websocket: true
+    plugins: []
+  serviceAccountName: vernemq-k8s
+  size: {{ dojot_vernemq_mqtt_replicas_to_scale }}
+  tag: {{ dojot_verne_version }}
+

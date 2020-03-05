@@ -1,0 +1,12 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mongodb-volume-claim
+  namespace: {{ dojot_namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ dojot_mongodb_volume_size }}
+  storageClassName: {{ dojot_storage_class_name }}

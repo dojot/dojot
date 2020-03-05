@@ -1,0 +1,12 @@
+---
+# Define the default value for the variables of the iot agent lwm2m service
+
+dojot_iotagent_lwm2m_version: "{{ dojot_version }}"
+
+dojot_file_server_address: "localhost"
+
+file_server_http_port: "30015"
+
+file_server_https_port: "30016"
+
+dojot_kafka_port: 9092

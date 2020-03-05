@@ -1,0 +1,16 @@
+## This role is responsible for deploying ZK for dojot
+# TODO: Add a disruption budget
+
+- name: dojot - Zookeeper Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'zk_cluster_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'zk_client_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'zk_statefulset.yaml.j2') | from_yaml }}"

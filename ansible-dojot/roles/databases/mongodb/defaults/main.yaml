@@ -1,0 +1,15 @@
+---
+
+# Define credentials for the mongo super user
+dojot_mongodb_super_user: mongodb
+dojot_mongodb_super_passwd: mongodb
+
+# Version of the mongo DB container for dojot
+dojot_mongodb_version: 3.2
+
+# Port to be used with the Mongo DB
+dojot_mongodb_port: 27017
+
+dojot_mongodb_volume_size: 30G
+
+dojot_mongodb_persistent_volumes: true

@@ -1,0 +1,16 @@
+## This role is responsible for deploying the RabbitMQ Service for dojot
+
+# TODO: Support a HA cluster
+
+- name: dojot - RAbbitMQ Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'rabbitmq_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'rabbitmq_deployment.yaml.j2') | from_yaml }}"

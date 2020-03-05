@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pub-laten-kafka-prom
+  namespace: {{ dojot_namespace }}
+spec:
+  endpoints:
+  - interval: 2s
+    port: http
+  selector:
+    matchLabels:
+      app: pub-laten-kafka-prom

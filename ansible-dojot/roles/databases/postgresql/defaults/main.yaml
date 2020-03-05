@@ -1,0 +1,27 @@
+---
+# Set the version of the postgres container to be used
+dojot_psql_version: 9.4-alpine
+
+# Define credentials for the postgres super user
+dojot_psql_super_user: postgres
+dojot_psql_super_passwd: postgres
+
+dojot_psql_kong_user: kong
+dojot_psql_kong_passwd: kong
+dojot_psql_kong_db: kong
+
+dojot_psql_auth_user: auth
+dojot_psql_auth_passwd: auth
+
+dojot_psql_devm_user: devm
+dojot_psql_devm_passwd: devm
+
+# Name of the default db created by postgres
+dojot_psql_default_db: postgres
+
+# Port to be used with the postgreSQL DB
+dojot_psql_port: 5432
+
+# Define if persistent volumes will be used
+dojot_psql_persistent_volumes: true
+dojot_psql_volume_size: 10G

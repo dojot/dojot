@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: device-manager-redis
+    app: dojot
+  name: device-manager-redis
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: device-manager-redis
+        app: dojot
+    spec:
+      containers:
+      - image: redis:alpine
+        name: device-manager-redis
+      restartPolicy: Always

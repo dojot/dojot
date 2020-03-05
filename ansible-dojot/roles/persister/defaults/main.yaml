@@ -1,0 +1,6 @@
+---
+# Default variable values for the persister service
+
+dojot_persister_version: "{{ dojot_version }}"
+
+dojot_kafka_port: 9092

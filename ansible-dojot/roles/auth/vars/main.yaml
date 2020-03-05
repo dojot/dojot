@@ -1,0 +1,6 @@
+# This file contains variables associated with the auth role
+
+# Email configuration for user registration
+#dojot_auth_email_host: smtp.email.com
+#dojot_auth_email_user: user@email.com
+#dojot_auth_email_passwd: user_passwd

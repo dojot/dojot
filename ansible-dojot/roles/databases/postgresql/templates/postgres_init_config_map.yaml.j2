@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: postgres-init
+    namespace: {{ dojot_namespace }}
+data:
+    init-db.sh: |
+        #!/usr/bin/env bash
+
+        set -e
+
+        psql -v ON_ERROR_STOP=1 -d ${POSTGRES_DB} -U ${POSTGRES_USER}  <<-EOSQL
+            CREATE database {{ dojot_psql_kong_db }};
+            CREATE USER {{ dojot_psql_kong_user }} WITH ENCRYPTED PASSWORD '{{ dojot_psql_kong_passwd}}';
+            GRANT ALL PRIVILEGES ON DATABASE {{ dojot_psql_kong_db }} TO {{ dojot_psql_kong_user }};
+            CREATE DATABASE {{ dojot_psql_auth_user }};
+            CREATE USER {{ dojot_psql_auth_user }} WITH ENCRYPTED PASSWORD '{{ dojot_psql_auth_passwd}}';
+            ALTER ROLE {{ dojot_psql_auth_user }} WITH CREATEDB;
+            CREATE DATABASE {{ dojot_psql_devm_user }};
+            CREATE USER {{ dojot_psql_devm_user }} WITH ENCRYPTED PASSWORD '{{ dojot_psql_devm_passwd}}';
+            ALTER ROLE {{ dojot_psql_devm_user }} WITH CREATEDB;
+        EOSQL

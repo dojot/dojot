@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: iotagent-lwm2m
+    app: dojot
+  name: iotagent-lwm2m
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: iotagent-lwm2m
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/iotagent-leshan:{{ dojot_iotagent_lwm2m_version }}
+        name: iotagent-lwm2m
+        env:
+        - name: FILE_SERVER_ADDRESS
+          value: "{{ dojot_file_server_address }}"
+        - name: FILE_SERVER_HTTP_PORT
+          value: "{{ file_server_http_port }}"
+        - name: FILE_SERVER_HTTPS_PORT
+          value: "{{ file_server_https_port }}"
+        - name: DOJOT_MANAGEMENT_USER
+          value: iotagent-lwm2m  
+        - name: KAFKA_GROUP_ID
+          value: iotagent-lwm2m-group
+        - name: KAFKA_HOSTS
+          value: kafka-server:{{ dojot_kafka_port }}
+        - name: KAFKA_ADDRESS
+          value: kafka-server:{{ dojot_kafka_port }}
+      restartPolicy: Always

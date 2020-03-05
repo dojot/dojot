@@ -1,0 +1,6 @@
+# Define default variable values for the kafka service
+
+dojot_data_broker_version: "{{ dojot_version }}"
+
+dojot_kafka_port: 9092
+dojot_zk_client_port: 2181

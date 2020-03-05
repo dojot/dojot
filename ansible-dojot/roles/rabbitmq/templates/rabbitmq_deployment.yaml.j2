@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: rabbitmq
+    app: dojot
+  name: rabbitmq
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: rabbitmq
+        app: dojot
+    spec:
+      containers:
+      - image: rabbitmq:{{ dojot_rabbitmq_version }}
+        name: rabbitmq
+      restartPolicy: Always

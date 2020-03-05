@@ -1,0 +1,21 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: data-broker-redis
+    app: dojot
+  name: data-broker-redis
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: data-broker-redis
+        app: dojot
+    spec:
+      containers:
+      - image: redis:alpine
+        name: data-broker-redis
+      restartPolicy: Always

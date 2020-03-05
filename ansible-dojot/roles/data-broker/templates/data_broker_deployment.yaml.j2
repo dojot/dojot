@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: data-broker
+    app: dojot
+  name: data-broker
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: data-broker
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/data-broker:{{ dojot_data_broker_version }}
+        name: data-broker
+        env:
+        - name: KAFKA_HOSTS
+          value: kafka-server:{{ dojot_kafka_port }}
+        - name: KAFKA_GROUP_ID
+          value: data-broker-group
+        - name: DATABROKER_ZOOKEEPER_HOST
+          value: zookeeper-client:{{ dojot_zk_client_port }}
+        - name: DATABROKER_KAFKA_ADDRESS
+          value: kafka-server
+        - name: DATABROKER_KAFKA_PORT
+          value: "{{ dojot_kafka_port }}"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "{{ dojot_vernemq_mqtt_replicas_to_scale }}"
+        - name: KAFKA_REPLICATION_FACTOR
+          value: "1"
+      restartPolicy: Always

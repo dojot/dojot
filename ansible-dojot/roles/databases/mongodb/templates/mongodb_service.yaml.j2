@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: mongodb
+  name: mongodb
+  namespace: {{ dojot_namespace }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ dojot_mongodb_port }}
+    targetPort: {{ dojot_mongodb_port }}
+  selector:
+    name: mongodb
+    app: dojot

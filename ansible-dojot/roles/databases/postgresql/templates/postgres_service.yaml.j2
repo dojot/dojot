@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: postgres
+  name: postgres
+  namespace: {{ dojot_namespace }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ dojot_psql_port }}
+    targetPort: {{ dojot_psql_port }}
+  selector:
+    name: postgres
+    app: dojot

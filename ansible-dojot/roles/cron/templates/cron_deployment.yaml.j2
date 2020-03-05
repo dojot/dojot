@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: cron
+    app: dojot
+  name: cron
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: cron
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/cron:{{ dojot_version }}
+        name: cron
+        env:
+        - name: KAFKA_HOSTS
+          value: {{ kafka_host }}
+      restartPolicy: Always

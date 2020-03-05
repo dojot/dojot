@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: backstage
+  name: backstage
+  namespace: {{ dojot_namespace }}
+spec:
+  ports:
+  - port: 3005
+    targetPort: 3005
+  selector:
+    name: backstage
+    app: dojot

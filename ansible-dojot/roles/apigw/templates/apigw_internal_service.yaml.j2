@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: kong
+  name: kong
+  namespace: {{ dojot_namespace }}
+spec:
+  type: NodePort
+  ports:
+  - name: "apigw-http"
+    port: {{ dojot_internal_http_port }}
+    targetPort: {{ dojot_internal_http_port }}
+    nodePort: 30001
+  - name: "apigw-config"
+    port: {{ dojot_internal_api_config_port }}
+    targetPort: {{ dojot_internal_api_config_port }}
+  selector:
+    name: kong
+    app: dojot

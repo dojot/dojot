@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: image-manager
+    app: dojot
+  name: image-manager
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: image-manager
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/image-manager:{{ dojot_image_manager_version }}
+        name: image-manager
+        env:
+        - name: S3URL
+          value: {{ s3_url }}
+        - name: S3ACCESSKEY
+          value: {{ s3_access_key }}  
+        - name: S3SECRETKEY
+          value: {{ s3_secret_key }}
+        - name: DBHOST
+          value: postgres
+        - name: DBUSER
+          valueFrom:
+            secretKeyRef:
+              name: image-manager-secret
+              key: user
+        - name: DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: image-manager-secret
+              key: password      
+      restartPolicy: Always

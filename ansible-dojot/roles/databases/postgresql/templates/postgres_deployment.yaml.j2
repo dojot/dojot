@@ -1,0 +1,52 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: postgres
+    app: dojot
+  name: postgres
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: postgres
+        app: dojot
+    spec:
+      restartPolicy: Always
+      containers:
+      - image: postgres:{{ dojot_psql_version }}
+        name: postgres
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: password
+          - name: POSTGRES_DB
+            value: {{ dojot_psql_default_db }}
+        volumeMounts:
+          - name: postgres-init
+            mountPath: /docker-entrypoint-initdb.d/
+{% if dojot_psql_persistent_volumes %}
+          - name: psql-volume
+            mountPath: /var/lib/postgresql/data
+{% endif %} 
+      volumes:
+      - name: postgres-init
+        configMap:
+          name: postgres-init
+{% if dojot_psql_persistent_volumes %}
+      - name: psql-volume
+        persistentVolumeClaim:
+          claimName: psql-volume-claim
+{% endif %} 
+
+# TODO: View deploy strategies

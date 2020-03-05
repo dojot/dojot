@@ -1,0 +1,13 @@
+- name: latency-pub-test-prometheus
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'pub-test-prometheus_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'pub-test-prometheus_monitor.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'pub-test-prometheus.yaml.j2') | from_yaml }}"

@@ -1,0 +1,10 @@
+---
+# Define defaults values for image manager role variables
+
+dojot_image_manager_version: "{{ dojot_version }}"
+
+s3_url: "minio:9000"
+
+s3_access_key: "9HEODSF6WQN5EZ39DM7Z"
+
+s3_secret_key: "fT5nAgHR9pkj0yYsBdc4p+PPq6ArjshcPdz0HA6W"

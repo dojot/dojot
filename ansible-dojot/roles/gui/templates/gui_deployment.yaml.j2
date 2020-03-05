@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: gui
+    app: dojot
+  name: gui
+  namespace: {{ dojot_namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: gui
+        app: dojot
+    spec:
+      containers:
+      - image: dojot/gui:{{ dojot_gui_version }}
+        name: gui
+      restartPolicy: Always

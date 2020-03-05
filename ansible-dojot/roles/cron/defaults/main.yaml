@@ -1,0 +1,4 @@
+---
+# Define defaults values for backstage role variables
+
+kafka_host: 'kafka-server:9092'

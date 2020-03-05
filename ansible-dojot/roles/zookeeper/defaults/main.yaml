@@ -1,0 +1,13 @@
+# Default variables for Dojot's Zookeeper
+
+dojot_zk_use_external: false
+
+dojot_zk_client_port: 2181 
+dojot_zk_server_port: 2888
+dojot_zk_election_port: 3888
+
+dojot_zk_cluster_size: 1
+
+dojot_zk_volume_size: 3G
+
+dojot_zk_persistent_volumes: true

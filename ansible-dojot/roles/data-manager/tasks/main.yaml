@@ -1,0 +1,14 @@
+## This role is responsible for deploying the Data Manager Service for dojot
+
+- name: dojot - Data Manager Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'data_manager_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'data_manager_deployment.yaml.j2') | from_yaml }}"

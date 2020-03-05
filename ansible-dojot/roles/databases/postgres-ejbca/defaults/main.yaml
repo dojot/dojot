@@ -1,0 +1,4 @@
+---
+# Define if persistent volumes will be used
+dojot_ejbca_psql_persistent_volumes: true
+dojot_ejbca_psql_volume_size: 4Gi

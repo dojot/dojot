@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-client
+  namespace: {{ dojot_namespace }}
+  labels:
+    app: dojot
+    name: zookeeper-client
+spec:
+  ports:
+  - port: {{ dojot_zk_client_port }}
+    name: client
+    targetPort: client
+  selector:
+    app: dojot
+    name: zookeeper

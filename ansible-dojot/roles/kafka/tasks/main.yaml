@@ -1,0 +1,15 @@
+## This role is responsible for deploying Kafka for dojot
+
+- name: dojot - Kafka Objects
+  k8s:
+    kubeconfig: "{{ dojot_kubeconfig_file_path | default(omit) }}"
+    state: present
+    definition: "{{ item }}"
+  register: result
+  until: result.failed == 0
+  retries: 30
+  delay: 10
+  loop:
+  - "{{ lookup('template', 'kafka_service.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'kafka_pdb.yaml.j2') | from_yaml }}"
+  - "{{ lookup('template', 'kafka_statefulset.yaml.j2') | from_yaml }}"
