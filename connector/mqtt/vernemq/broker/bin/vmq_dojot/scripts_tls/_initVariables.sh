@@ -18,7 +18,6 @@ export CERT_CERT_FILE="$HOSTNAME.crt"
 export CERT_KEY_FILE="$HOSTNAME.key"
 export CERT_CSR_FILE="$HOSTNAME.csr"
 export CERT_CANAME="${CA_NAME:-"IOTmidCA"}"
-
 #Read up on cron patterns here (http://crontab.org/)
 #By default will be updated every 2 hours
 export CRL_UPDATE_TIME="${CRL_UPDATE_TIME:-"0 */2 * * *"}"
