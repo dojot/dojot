@@ -35,9 +35,9 @@ Example of part of a yaml
       value: "YWNjZXB0X2V1bGEgPSB5ZXMKbWV0YW..." # just the beginning of base64
 ```
 
-See more about verneMQ configuration in [documentation](https://docs.vernemq.com/).
+NOTE: All configuration parameters available in [vernemq.conf] (./examples/vernemq.conf) can be defined using environment variables with the prefix DOCKER_VERNEMQ followed by the name of the configuration parameter. For example: allow_anonymous=on is "DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on" or allow_register_during_netsplit=on is "DOCKER_VERNEMQ_ALLOW_REGISTER_DURING_NETSPLIT=on".
 
-NOTE: All configuration parameters that are available in [vernemq.conf](./examples/vernemq.conf) can be defined using the DOCKER_VERNEMQ prefix followed by the confguration parameter name. E.g: allow_anonymous=on is -e "DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on" or allow_register_during_netsplit=on is -e "DOCKER_VERNEMQ_ALLOW_REGISTER_DURING_NETSPLIT=on".
+See more about verneMQ configuration in [documentation](https://docs.vernemq.com/).
 
 ### **Plugins Dojot for verneMQ**
 
