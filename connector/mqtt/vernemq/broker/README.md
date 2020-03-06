@@ -12,7 +12,7 @@ EJBCA_PORT               | Ejbca service port                                   
 USE_VMQ_OPERATOR         | yes if use with vmq-operator                                       | "n"            | y or n
 SERVER_HOSTNAME          | Server hostname (the host to connect external)                     | "localhost"    | hostname
 SERVER_IP                | Server IP (the IP to connect external)                             | ""             | IP
-INTERNAL_HOSTNAME        | Internal hostname (used to connect for vk2-bridge and k2v-bridge)  | "vernemq-k8s"  | hostname
+INTERNAL_DNS        | Internal hostname (used to connect for vk2-bridge and k2v-bridge)  | "vernemq-k8s"  | hostname
 CA_NAME                  | CA Name from EJBCA                                                 | "IOTmidCA"     | string
 CHECK_EXPIRATION_TIME    | Checks if the certificates expires every define time by cron       | "0 1 * * *"    | cron schedule expressions
 CHECK_BROKER_CERT_REVOKED_TIME  | Checks if the public certificate of broker has revoked every define time by cron  | "0 */3 * * *" | cron schedule expressions
