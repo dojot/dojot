@@ -64,16 +64,15 @@ DEBUG_MODE            | activate debug mode in shell scripts                    
 DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
 DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
 EJBCA_URL             | EJBCA address                                                  | http://localhost:5583 | hostname/IP:port                              |
-EJBCA_NUM_RETRIES     | number of retries when stablishing a connection with EJBCA     | 3                     | positive integer                              |
 LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
 MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
 MIN_TIME_RECONN       | min time (in seconds) to try to reconnect to the MQTT broker   | 1                     | integer                                       |
 PROBABILITY_TO_RENEW  | probability to renew a device                                  | 10                    | integer in [0, 100]                           |
 PROBABILITY_TO_REVOKE | probability to revoke a device                                 | 10                    | integer in [0, 100]                           |
 REDIS_BACKUP          | use a Redis dump with IDs instead of generating new ones       | y                     | y, n                                          |
-REDIS_CERTIFICATES_DB | database with the certificates                                 | 0                     | integer                                       |
+REDIS_CERTIFICATES_DB | database with the certificates                                 | 0                     | integer in [0, 15]                            |
 REDIS_HOST            | redis host                                                     | redis                 | hostname/IP                                   |
-REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1                     | integer                                       |
+REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1                     | integer in [0, 15]                            |
 REDIS_PASSWD          | redis password                                                 | none                  | passwords                                     |
 REDIS_PORT            | redis port                                                     | 6379                  | port value                                    |
 RENEW_DEVICES         | enable random renovation of devices (case insensitive)         | False                 | True, False                                   |
@@ -94,8 +93,6 @@ DOJOT_MQTT_HOST        | MQTT broker host                  | 127.0.0.1     | hos
 DOJOT_MQTT_PORT        | MQTT broker port                  | 1883          | port value   |
 DOJOT_MQTT_QOS         | MQTT broker QoS level             | 1             | 0, 1, 2      |
 DOJOT_MQTT_TIMEOUT     | MQTT broker timeout               | 60            | integer      |
-MQTT_PUBLISH_TIMEOUT   | publish timeout in milliseconds   | 40000         | integer      |
-MQTT_SUBSCRIBE_TIMEOUT | subscribe timeout in milliseconds | 40000         | integer      |
 
 ### **Dojot**
 
