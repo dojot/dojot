@@ -32,7 +32,6 @@ CONFIG = {
     'locust': {
         'task_min_time':        int(os.environ.get("TASK_MIN_TIME", 29500)),
         'task_max_time':        int(os.environ.get("TASK_MAX_TIME", 30000)),
-        'log_dir':              os.environ.get("LOCUST_LOG_DIR", "/log"),
         'redis': {
             'certificates_db':      int(os.environ.get("REDIS_CERTIFICATES_DB", 0)),
             'mapped_db':            int(os.environ.get("REDIS_MAPPED_DB", 1)),
@@ -46,7 +45,5 @@ CONFIG = {
         'port':         int(os.environ.get("DOJOT_MQTT_PORT", 1883)),
         'con_timeout':  int(os.environ.get("DOJOT_MQTT_TIMEOUT", 120)),
         'qos':          int(os.environ.get("DOJOT_MQTT_QOS", 1)),
-        'pub_timeout':  int(os.environ.get("MQTT_PUBLISH_TIMEOUT", 40000)),
-        'sub_timeout':  int(os.environ.get("MQTT_SUBSCRIBE_TIMEOUT", 40000)),
     },
 }
