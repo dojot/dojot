@@ -33,7 +33,7 @@ else
 fi
 
 echo "Deleting all devices ..."
-if [ $(curl -X DELETE "${DOJOT_URL}/device" -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
+if curl -X DELETE "${DOJOT_URL}/device" -H "Authorization: Bearer ${JWT}" &> /dev/null
 then
     echo "Could not complete request."
     exit 1
@@ -42,7 +42,7 @@ else
 fi
 
 echo "Deleting all templates ..."
-if [ $(curl --silent -X DELETE "${DOJOT_URL}/template" -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
+if curl --silent -X DELETE "${DOJOT_URL}/template" -H "Authorization: Bearer ${JWT}" &> /dev/null
 then
     echo "Could not complete request."
     exit 1
