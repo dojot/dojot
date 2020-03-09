@@ -64,6 +64,7 @@ DEBUG_MODE            | activate debug mode in shell scripts                    
 DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
 DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
 EJBCA_URL             | EJBCA address                                                  | http://localhost:5583 | hostname/IP:port                              |
+LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | 127.0.0.1             | hostname/IP                                   |
 LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
 MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
 MIN_TIME_RECONN       | min time (in seconds) to try to reconnect to the MQTT broker   | 1                     | integer                                       |
@@ -71,11 +72,14 @@ PROBABILITY_TO_RENEW  | probability to renew a device                           
 PROBABILITY_TO_REVOKE | probability to revoke a device                                 | 10                    | integer in [0, 100]                           |
 REDIS_BACKUP          | use a Redis dump with IDs instead of generating new ones       | y                     | y, n                                          |
 REDIS_CERTIFICATES_DB | database with the certificates                                 | 0                     | integer in [0, 15]                            |
+REDIS_CONN_TIMEOUT    | redis timeout                                                  | 180                   | integer                                       |
 REDIS_HOST            | redis host                                                     | redis                 | hostname/IP                                   |
 REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1                     | integer in [0, 15]                            |
 REDIS_PASSWD          | redis password                                                 | none                  | passwords                                     |
 REDIS_PORT            | redis port                                                     | 6379                  | port value                                    |
+RENEW_CERT_DIR        | directory where the certs to be renewed will be stored         | renew/                | directory name                                |
 RENEW_DEVICES         | enable random renovation of devices (case insensitive)         | False                 | True, False                                   |
+REVOKE_CERT_DIR       | directory where the certs to be revoked will be stored         | revoke/               | directory name                                |
 REVOKE_DEVICES        | enable random revocation of devices (case insensitive)         | False                 | True, False                                   |
 TASK_MAX_TIME         | max time of each Locust's tasks (ms)                           | 30000                 | integer                                       |
 TASK_MIN_TIME         | min time of each Locust's tasks (ms)                           | 29500                 | integer                                       |
@@ -98,13 +102,14 @@ DOJOT_MQTT_TIMEOUT     | MQTT broker timeout               | 60            | int
 
 Dojot integration configuration.
 
-Key          | Purpose                              | Default Value | Valid Values |
------------- | ------------------------------------ | ------------- | ------------ |
-DOJOT_ENV    | use a dojot instance                 | n             | y, n         |
-DOJOT_PASSWD | dojot user's password                | admin         | passwords    |
-DOJOT_URL    | dojot instance address               | 127.0.0.1     | hostname/IP  |
-DOJOT_USER   | dojot user                           | admin         | usernames    |
-GENERATE_IDS | activate the automatic ID generation | 1             | 0, 1         |
+Key                   | Purpose                              | Default Value | Valid Values |
+--------------------- | ------------------------------------ | ------------- | ------------ |
+DOJOT_ENV             | use a dojot instance                 | n             | y, n         |
+DOJOT_GATEWAY_TIMEOUT | dojot auth API timeout               | 180           | integer      |
+DOJOT_PASSWD          | dojot user's password                | admin         | passwords    |
+DOJOT_URL             | dojot instance address               | 127.0.0.1     | hostname/IP  |
+DOJOT_USER            | dojot user                           | admin         | usernames    |
+GENERATE_IDS          | activate the automatic ID generation | 1             | 0, 1         |
 
 ## **Operating System**
 
