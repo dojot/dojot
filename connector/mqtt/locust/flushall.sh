@@ -5,14 +5,14 @@
 readonly DEBUG_MODE=${DEBUG_MODE:-"0"}
 
 # Dojot parameters
-DOJOT_URL=${DOJOT_URL:-"http://127.0.0.1:8000"}
-DOJOT_USER=${DOJOT_USER:-"admin"}
-DOJOT_PASSWD=${DOJOT_PASSWD:-"admin"}
+readonly DOJOT_URL=${DOJOT_URL:-"http://127.0.0.1:8000"}
+readonly DOJOT_USER=${DOJOT_USER:-"admin"}
+readonly DOJOT_PASSWD=${DOJOT_PASSWD:-"admin"}
 
 # Redis parameters
-REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
-REDIS_PORT=${REDIS_PORT:-"6379"}
-REDIS_PASSWD=${REDIS_PASSWD:-""}
+readonly REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
+readonly REDIS_PORT=${REDIS_PORT:-"6379"}
+readonly REDIS_PASSWD=${REDIS_PASSWD:-""}
 
 if [ "${DEBUG_MODE}" == "1" ]
 then

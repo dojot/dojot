@@ -1,21 +1,25 @@
 #!/bin/bash
 
-# Dojot parameters
-LOCUST_MASTER_HOST=${LOCUST_MASTER_HOST:-"127.0.0.1"}
-DOJOT_MQTT_HOST=${DOJOT_MQTT_HOST:-"127.0.0.1"}
-DOJOT_MQTT_PORT=${DOJOT_MQTT_PORT:-"1883"}
 readonly DEBUG_MODE=${DEBUG_MODE:-"0"}
 
+# MQTT parameters
+readonly DOJOT_MQTT_HOST=${DOJOT_MQTT_HOST:-"127.0.0.1"}
+readonly DOJOT_MQTT_PORT=${DOJOT_MQTT_PORT:-"1883"}
+readonly DOJOT_MQTT_TIMEOUT=${DOJOT_MQTT_TIMEOUT:-"60"}
+
+# Locust parameters
+readonly LOCUST_MASTER_HOST=${LOCUST_MASTER_HOST:-"127.0.0.1"}
 
 # Redis parameters
-REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
-REDIS_PORT=${REDIS_PORT:-"6379"}
-REDIS_PASSWD=${REDIS_PASSWD:-""}
+readonly REDIS_CONN_TIMEOUT=${REDIS_CONN_TIMEOUT:-"180"}
+readonly REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
+readonly REDIS_PORT=${REDIS_PORT:-"6379"}
+readonly REDIS_PASSWD=${REDIS_PASSWD:-""}
 
 # Certificate directories
-CERT_DIR=${CERT_DIR:-"cert/"}
-RENEW_CERT_DIR=${RENEW_CERT_DIR:-"renew/"}
-REVOKE_CERT_DIR=${REVOKE_CERT_DIR:-"revoke/"}
+readonly CERT_DIR=${CERT_DIR:-"cert/"}
+readonly RENEW_CERT_DIR=${RENEW_CERT_DIR:-"renew/"}
+readonly REVOKE_CERT_DIR=${REVOKE_CERT_DIR:-"revoke/"}
 
 if [ "${DEBUG_MODE}" == "1" ]
 then
