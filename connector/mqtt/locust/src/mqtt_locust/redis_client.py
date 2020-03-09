@@ -31,6 +31,7 @@ class RedisClient():
 
         except Exception as exception:
             self.logger.error(str(exception))
+            raise
 
     def next_device_id(self) -> str:
         """
@@ -46,6 +47,7 @@ class RedisClient():
             return device_id.decode('utf-8')
         except Exception as exception:
             self.logger.error(str(exception))
+            raise
 
     def has_to_revoke(self) -> {bool, str}:
         """
