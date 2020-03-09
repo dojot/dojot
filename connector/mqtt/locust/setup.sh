@@ -76,37 +76,37 @@ then
     echo "... Created template ${TEMPLATE_ID}."
   fi
 
-    # Get JWT Token
-    echo 'Getting jwt token ...'
-    JWT=$(curl --silent -X POST ${DOJOT_URL}/auth \
-    -H "Content-Type:application/json" \
-    -d "{\"username\": \"${DOJOT_USER}\", \"passwd\" : \"${DOJOT_PASSWD}\"}" | jq '.jwt' | tr -d '"')
-    echo "... Got jwt token ${JWT}."
+  # Get JWT Token
+  echo 'Getting jwt token ...'
+  JWT=$(curl --silent -X POST "${DOJOT_URL}/auth" \
+  -H "Content-Type:application/json" \
+  -d "{\"username\": \"${DOJOT_USER}\", \"passwd\" : \"${DOJOT_PASSWD}\"}" | jq '.jwt' | tr -d '"')
+  echo "... Got jwt token ${JWT}."
 
-    # Create Template
-    echo 'Creating template ...'
-    TEMPLATE_ID=$(curl --silent -X POST ${DOJOT_URL}/template \
-    -H 'Content-Type:application/json' \
-    -H "Authorization: Bearer ${JWT}" \
-    -d  "{
-          \"templates\": [ \"${TEMPLATE_ID}\" ],
-          \"attrs\": {},
-          \"label\": \"CargoContainer_${I}\"
-        }" | jq '.devices[].id' | tr -d '"')
+  # Create Template
+  echo 'Creating template ...'
+  TEMPLATE_ID=$(curl --silent -X POST "${DOJOT_URL}/template" \
+  -H 'Content-Type:application/json' \
+  -H "Authorization: Bearer ${JWT}" \
+  -d  "{
+        \"templates\": [ \"${TEMPLATE_ID}\" ],
+        \"attrs\": {},
+        \"label\": \"CargoContainer_${I}\"
+      }" | jq '.devices[].id' | tr -d '"')
 
-    if [ $? -eq 0 ]
-    then
-      for DEVICE_ID in ${DEVICE_IDS}
-      do
-        echo "SET ${KEY} ${DEVICE_ID}" | redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" &> /dev/null
-        let KEY=KEY+1
-      done
-      echo "... Created ${N} devices from ${NUMBER_OF_DEVICES}"
-      let I=I+1
-    else
-      echo "Could not create devices."
-      exit 1
-    fi
+  if [ $? -eq 0 ]
+  then
+    for DEVICE_ID in ${DEVICE_IDS}
+    do
+      echo "SET ${KEY} ${DEVICE_ID}" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" &> /dev/null
+      let KEY=KEY+1
+    done
+    echo "... Created ${N} devices from ${NUMBER_OF_DEVICES}"
+    let I=I+1
+  else
+    echo "Could not create devices."
+    exit 1
+  fi
   done
 
 else
