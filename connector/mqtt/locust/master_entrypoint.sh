@@ -1,5 +1,6 @@
 #!/bin/bash
-set -ex
+
+readonly DEBUG_MODE=${DEBUG_MODE:-"0"}
 
 # Dojot parameters
 DOJOT_URL=${DOJOT_URL:-"http://127.0.0.1:8000"}
@@ -21,6 +22,11 @@ DOJOT_ENV=${DOJOT_ENV:-"n"}
 
 # Enables device ID generation when 1, disables when 0
 GENERATE_IDS=${GENERATE_IDS:-1}
+
+if [ "${DEBUG_MODE}" == "1" ]
+then
+    set -ex
+fi
 
 # Waiting for redis for at most 3 minutes
 START_TIME=$(date +'%s')

@@ -1,7 +1,8 @@
 #!/bin/bash
 # Flush all template and devices from dojot
 # Flush all redis data
-set -ex
+
+readonly DEBUG_MODE=${DEBUG_MODE:-"0"}
 
 # Dojot parameters
 DOJOT_URL=${DOJOT_URL:-"http://127.0.0.1:8000"}
@@ -12,6 +13,11 @@ DOJOT_PASSWD=${DOJOT_PASSWD:-"admin"}
 REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
 REDIS_PORT=${REDIS_PORT:-"6379"}
 REDIS_PASSWD=${REDIS_PASSWD:-""}
+
+if [ "${DEBUG_MODE}" == "1" ]
+then
+    set -ex
+fi
 
 # Get JWT Token
 echo "Getting jwt token ..."

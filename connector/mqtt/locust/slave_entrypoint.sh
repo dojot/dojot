@@ -1,10 +1,11 @@
 #!/bin/bash
-set -ex
 
 # Dojot parameters
 LOCUST_MASTER_HOST=${LOCUST_MASTER_HOST:-"127.0.0.1"}
 DOJOT_MQTT_HOST=${DOJOT_MQTT_HOST:-"127.0.0.1"}
 DOJOT_MQTT_PORT=${DOJOT_MQTT_PORT:-"1883"}
+readonly DEBUG_MODE=${DEBUG_MODE:-"0"}
+
 
 # Redis parameters
 REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
@@ -15,6 +16,11 @@ REDIS_PASSWD=${REDIS_PASSWD:-""}
 CERT_DIR=${CERT_DIR:-"cert/"}
 RENEW_CERT_DIR=${RENEW_CERT_DIR:-"renew/"}
 REVOKE_CERT_DIR=${REVOKE_CERT_DIR:-"revoke/"}
+
+if [ "${DEBUG_MODE}" == "1" ]
+then
+    set -ex
+fi
 
 # Removing renew and revoke cert directories
 rm -rf "${CERT_DIR}${RENEW_CERT_DIR}"

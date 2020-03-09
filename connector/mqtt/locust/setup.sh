@@ -1,7 +1,8 @@
 #!/bin/bash
 # Creates n devices into dojot using a pre-defined template and
 # adds the  device indentifiers into redis
-set -ex
+
+readonly DEBUG_MODE=${DEBUG_MODE:-"0"}
 
 # Dojot parameters
 DOJOT_URL=${DOJOT_URL:-"http://127.0.0.1:8000"}
@@ -15,6 +16,11 @@ DOJOT_ENV=${DOJOT_ENV:-"n"}
 REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
 REDIS_PORT=${REDIS_PORT:-"6379"}
 REDIS_PASSWD=${REDIS_PASSWD:-""}
+
+if [ "${DEBUG_MODE}" == "1" ]
+then
+    set -ex
+fi
 
 # Devices
 NUMBER_OF_DEVICES=${NUMBER_OF_DEVICES:-"10000"}
