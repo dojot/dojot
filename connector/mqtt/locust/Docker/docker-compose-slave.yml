@@ -7,7 +7,6 @@ services:
       - ..:/usr/src/app
     environment:
       # Don't forget to set the environment variables
-      DEBUG_MODE: "False"
       DOJOT_MQTT_HOST: "10.50.11.227"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "30011"
