@@ -29,7 +29,7 @@ if [ "${DOJOT_ENV}" == "y" ]
 then
   # Get JWT Token
   echo 'Getting jwt token ...'
-  JWT=$(curl --silent -X POST ${DOJOT_URL}/auth \
+  JWT=$(curl --silent -X POST "${DOJOT_URL}/auth" \
   -H "Content-Type:application/json" \
   -d "{\"username\": \"${DOJOT_USER}\", \"passwd\" : \"${DOJOT_PASSWD}\"}" | jq '.jwt' | tr -d '"')
 
@@ -42,7 +42,7 @@ then
 
   # Create Template
   echo 'Creating template ...'
-  TEMPLATE_ID=$(curl --silent -X POST ${DOJOT_URL}/template \
+  TEMPLATE_ID=$(curl --silent -X POST "${DOJOT_URL}/template" \
   -H 'Content-Type:application/json' \
   -H "Authorization: Bearer ${JWT}" \
   -d  '{
@@ -110,9 +110,8 @@ then
   done
 
 else
-
-# get the number of items already registered in redis
-  DEVICE_SIZE=$(echo "DBSIZE" | redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}")
+  # get the number of items already registered in redis
+  DEVICE_SIZE=$(echo "DBSIZE" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}")
   echo "Number of devices already saved in database: ${DEVICE_SIZE} devices."
   NUMBER_DEVICES_ADD="$(echo "$NUMBER_OF_DEVICES - $DEVICE_SIZE" | bc)"
 
@@ -121,9 +120,9 @@ else
     MORE_DEVICE=$(expr $DEVICE_SIZE + $NUMBER_DEVICES_ADD)
     echo "Creating devices ${NUMBER_DEVICES_ADD}."
     DEVICE_SIZE="$(echo "$DEVICE_SIZE + 1" | bc)"
-    for DEVICE_ID in $(seq ${DEVICE_SIZE} 1 ${MORE_DEVICE});
+    for DEVICE_ID in $(seq "${DEVICE_SIZE}" 1 "${MORE_DEVICE}");
     do
-      echo "SET ${DEVICE_ID} DEV${DEVICE_ID}" | redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" &> /dev/null
+      echo "SET ${DEVICE_ID} DEV${DEVICE_ID}" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" &> /dev/null
     done
   elif [ ${NUMBER_DEVICES_ADD} -eq 0 ]
   then
@@ -133,7 +132,7 @@ else
     NUMBER_OF_DEVICES="$(echo "$NUMBER_OF_DEVICES + 1" | bc)"
     for KEY in $(seq ${DEVICE_SIZE} -1 ${NUMBER_OF_DEVICES})
     do
-      echo "DEL $KEY" | redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} -a "${REDIS_PASSWD}" &> /dev/null
+      echo "DEL $KEY" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" &> /dev/null
     done
   fi
 fi

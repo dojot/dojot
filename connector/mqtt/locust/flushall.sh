@@ -21,7 +21,7 @@ fi
 
 # Get JWT Token
 echo "Getting jwt token ..."
-JWT=$(curl --silent -X POST ${DOJOT_URL}/auth \
+JWT=$(curl --silent -X POST "${DOJOT_URL}/auth" \
 -H "Content-Type:application/json" \
 -d "{\"username\": \"${DOJOT_USER}\", \"passwd\" : \"${DOJOT_PASSWD}\"}" | jq '.jwt' | tr -d '"')
 
@@ -33,7 +33,7 @@ else
 fi
 
 echo "Deleting all devices ..."
-if [ $(curl -X DELETE ${DOJOT_URL}/device -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
+if [ $(curl -X DELETE "${DOJOT_URL}/device" -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
 then
     echo "Could not complete request."
     exit 1
@@ -41,8 +41,8 @@ else
     echo "... All devices deleted"
 fi
 
-echo "Deleting all templated ..."
-if [ $(curl --silent -X DELETE ${DOJOT_URL}/template -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
+echo "Deleting all templates ..."
+if [ $(curl --silent -X DELETE "${DOJOT_URL}/template" -H "Authorization: Bearer ${JWT}" &> /dev/null) -ne 0 ]
 then
     echo "Could not complete request."
     exit 1
