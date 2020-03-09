@@ -66,6 +66,7 @@ class RedisClientNextDeviceId(unittest.TestCase):
     """
     def test_success(self, mock_utils, mock_redis, mock_logging):
         """
+        Should return a device ID.
         """
         client = RedisClient()
 
@@ -81,6 +82,7 @@ class RedisClientNextDeviceId(unittest.TestCase):
 
     def test_failure(self, mock_utils, mock_redis, mock_logging):
         """
+        Should not return a device ID.
         """
         mock_redis.Redis.return_value = MagicMock()
         client = RedisClient()
