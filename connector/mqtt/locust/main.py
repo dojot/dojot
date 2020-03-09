@@ -59,7 +59,7 @@ class ThingBehavior(TaskSet):
             if Utils.should_execute(CONFIG['security']['probability_to_revoke'] / 100.0):
                 self.client.revoke_cert()
 
-            elif Utils.should_execute(CONFIG['security']['probability_to_renew'] / 100.0):
+            if Utils.should_execute(CONFIG['security']['probability_to_renew'] / 100.0):
                 self.client.renew_cert()
 
             self.client.publish()
