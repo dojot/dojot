@@ -17,13 +17,14 @@ readonly REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
 readonly REDIS_PORT=${REDIS_PORT:-"6379"}
 readonly REDIS_PASSWD=${REDIS_PASSWD:-""}
 
+# Devices
+readonly NUMBER_OF_DEVICES=${NUMBER_OF_DEVICES:-"10000"}
+
 if [ "${DEBUG_MODE}" == "1" ]
 then
     set -ex
 fi
 
-# Devices
-NUMBER_OF_DEVICES=${NUMBER_OF_DEVICES:-"10000"}
 
 if [ "${DOJOT_ENV}" == "y" ]
 then
@@ -67,14 +68,8 @@ then
                 ]
       }' | jq '.template.id')
 
-  if [ $? -ne 0 ]
-  then
-    echo "Could not create template."
-    exit 1
-  else
-    echo "Create template exit code: $?"
-    echo "... Created template ${TEMPLATE_ID}."
-  fi
+  echo "Create template exit code: $?"
+  echo "... Created template ${TEMPLATE_ID}."
 
   # Get JWT Token
   echo 'Getting jwt token ...'
@@ -94,7 +89,7 @@ then
         \"label\": \"CargoContainer_${I}\"
       }" | jq '.devices[].id' | tr -d '"')
 
-  if [ $? -eq 0 ]
+  if [ "$?" -eq "0" ]
   then
     for DEVICE_ID in ${DEVICE_IDS}
     do
@@ -107,7 +102,6 @@ then
     echo "Could not create devices."
     exit 1
   fi
-  done
 
 else
   # get the number of items already registered in redis
