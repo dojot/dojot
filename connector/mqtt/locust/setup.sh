@@ -94,10 +94,10 @@ then
     for DEVICE_ID in ${DEVICE_IDS}
     do
       echo "SET ${KEY} ${DEVICE_ID}" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" &> /dev/null
-      let KEY=KEY+1
+      (( KEY=KEY+1 ))
     done
     echo "... Created ${N} devices from ${NUMBER_OF_DEVICES}"
-    let I=I+1
+    (( I=I+1 ))
   else
     echo "Could not create devices."
     exit 1
@@ -111,7 +111,7 @@ else
 
   if [ ${NUMBER_DEVICES_ADD} -gt 0 ]
   then
-    MORE_DEVICE=$(expr $DEVICE_SIZE + $NUMBER_DEVICES_ADD)
+    MORE_DEVICE=$(($DEVICE_SIZE + $NUMBER_DEVICES_ADD))
     echo "Creating devices ${NUMBER_DEVICES_ADD}."
     DEVICE_SIZE="$(echo "$DEVICE_SIZE + 1" | bc)"
     for DEVICE_ID in $(seq "${DEVICE_SIZE}" 1 "${MORE_DEVICE}");
