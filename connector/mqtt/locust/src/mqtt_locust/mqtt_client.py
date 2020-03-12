@@ -433,7 +433,7 @@ class MQTTClient:
         if self.should_revoke_now():
             self.should_revoke = not self.revoke_cert_and_emit_event()
 
-    def revoke_cert_and_emit_event(self) -> None:
+    def revoke_cert_and_emit_event(self) -> bool:
         """
         Revoke a certificate and emit an event whether it succeeded or not.
 
