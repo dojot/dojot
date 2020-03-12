@@ -5,8 +5,16 @@ const { logger } = require('@dojot/dojot-module-logger');
 const defaultConfig = require('./config');
 
 const TAG = { filename: 'MqttClient' };
-
+/**
+ * Class representing an MQTTClient
+ * @class
+ */
 class MQTTClient {
+  /**
+   * Create an MQTTClient
+   * @param {Object} agentMessenger - the client agent messenger
+   * @param {*} config - the client configuration
+   */
   constructor(agentMessenger, config) {
     this.config = config || defaultConfig;
     this.isConnected = false;
@@ -32,6 +40,11 @@ class MQTTClient {
     this.agentMessenger = agentMessenger;
   }
 
+  /**
+   * @function init
+   * Initialize the mqttClient loading it's attributes, registering
+   * it's callbacks and connecting to a broker
+   */
   init() {
     this.mqttOptions = {
       username: this.username,
@@ -74,18 +87,34 @@ class MQTTClient {
     });
   }
 
+  /**
+   * This function is reached when the MQTTClient
+   * connect successfully to the broker.
+   * @callback MqttClient~onConnect
+   */
   onConnect() {
     this.isConnected = true;
     logger.info(`Client ${this.clientId} connected successfully!`, TAG);
     this.subscribe();
   }
 
+  /**
+   * Reached when the MQTTClient disconnect from the broker.
+   * @callback MqttClient~onDisconnect
+   */
   onDisconnect() {
     logger.info(`Client ${this.clientId} disconnected, reconnecting ......`);
     this.isConnected = false;
     this.mqttc.reconnect();
   }
 
+  /**
+   * Reached when a message arrive on the topic
+   * @callback MqttClient~onMessage
+   * @param {string} topic
+   * @param {Object} message
+   * @param {Object} packet
+   */
   onMessage(topic, message, packet) {
     // pause
     if (this.isConnected) {
@@ -106,6 +135,10 @@ class MQTTClient {
     }
   }
 
+  /**
+   * @function connect
+   * Connect the MQTTClient to the broker
+   */
   connect() {
     if (this.isConnected === false) {
       logger.debug(`Connecting to broker ${this.host} on port ${this.port} with protocol ${this.secureMode ? 'mqtts' : 'mqtt'}`, TAG);
@@ -113,6 +146,10 @@ class MQTTClient {
     }
   }
 
+  /**
+   * @function subscribe
+   * Subscribe the client to it's topics
+   */
   subscribe() {
     logger.info(`Subscribing to topic ${this.config.mqtt.subscribeTopic}`, TAG);
     if (this.isConnected === true) {
@@ -120,6 +157,11 @@ class MQTTClient {
     }
   }
 
+  /**
+   * @private
+   * @function asyncQueueWorker
+   * @param {Object} data
+   */
   asyncQueueWorker(data) {
     const { topic, message } = data;
     this.agentMessenger.sendMessage(topic, message);

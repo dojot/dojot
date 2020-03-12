@@ -13,7 +13,7 @@ const mqtt = {
   host: process.env.V2K_MQTT_HOST || 'vernemq-k8s',
   port: parseInt(process.env.V2K_MQTT_PORT, 0) || 8883,
   keepalive: parseInt(process.env.V2K_MQTT_KEEPALIVE, 0) || 60,
-  secure: unsecuredMode(process.env.V2K_MQTT_SECURE),
+  secure: unsecuredMode(process.env.V2K_MQTT_SECURE || true),
   // eslint-disable-next-line no-useless-escape
   subscribeTopic: process.env.V2K_MQTT_SUBSCRIPTION_TOPIC || '\$share/group/+/attrs',
   subscribeQos: parseInt(process.env.V2K_MQTT_SUBSCRIPTION_QOS, 0) || 1,

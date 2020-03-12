@@ -8,7 +8,6 @@ EJBCA_ADDRESS=${EJBCA_ADDRESS:-"localhost:5583"}
 
 export CHECKEND_EXPIRATION_SEC="${CHECKEND_EXPIRATION_SEC:-43200}" #12h
 export CERT_EJBCA_URL="http://${EJBCA_ADDRESS}"
-export SERVER_HOSTNAME="${SERVER_HOSTNAME:-"vernemq-k8s"}"
 export CERT_CA_FILE='ca.crt'
 export CERT_CRL_FILE='ca.crl'
 export CERT_CERT_FILE="$HOSTNAME.crt"
@@ -28,7 +27,6 @@ export isK8sEnv=${USE_VMQ_OPERATOR:-"n"}
 export certCAName=$CERT_CANAME
 export certEjbcaApiUrl="${CERT_EJBCA_URL}"
 export certCname=$CERT_CNAME
-export certDns=$SERVER_HOSTNAME
 export certCaFile=$CERT_CA_FILE
 export certCertFile=$CERT_CERT_FILE
 export certKeyFile=$CERT_KEY_FILE

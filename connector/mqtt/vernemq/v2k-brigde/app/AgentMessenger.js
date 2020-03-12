@@ -6,7 +6,15 @@ const MQTTClient = require('./MqttClient');
 
 const TAG = { filename: 'AgentMessenger' };
 
+/**
+ * Class representing an AgentMessenger
+ * @class
+ */
 class AgentMessenger {
+  /**
+   * Create an agentMessenger
+   * @param {Object} config - the configuration
+   */
   constructor(config) {
     this.initialized = false;
     this.config = config || defaultConfig;
@@ -14,6 +22,12 @@ class AgentMessenger {
     this.mqttClient = new MQTTClient(this, this.config);
   }
 
+  /**
+   * @function init
+   * Initialize the agent messenger
+   * on success init mqttClient
+   * on error exit
+   */
   init() {
     this.iotagent.init().then(() => {
       logger.debug('... IoT agent was initialized', TAG);
@@ -27,6 +41,12 @@ class AgentMessenger {
     });
   }
 
+  /**
+   * @function sendMessage
+   * Produce a message a given message to a given topic
+   * @param {string} topic - topic to produce
+   * @param {Object} message - message to produce
+   */
   sendMessage(topic, message) {
     try {
       logger.debug('Sending messaged to kafka', TAG);

@@ -1,3 +1,9 @@
+/**
+ * @overview Initialize a v2k-client creating an Agent Messenger,
+ * then initialize it, also set log level for the service.
+ * @author Dojot
+ */
+
 const { logger } = require('@dojot/dojot-module-logger');
 
 const config = require('./config');
