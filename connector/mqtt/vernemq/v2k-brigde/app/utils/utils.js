@@ -1,5 +1,5 @@
 /**
- * A module contains helpers functions
+ * A module with helpers functions
  * @module utils
  */
 

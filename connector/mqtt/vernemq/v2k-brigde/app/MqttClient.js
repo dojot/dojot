@@ -88,7 +88,7 @@ class MQTTClient {
   }
 
   /**
-   * This function is reached when the MQTTClient
+   * Reached when the MQTTClient
    * connect successfully to the broker.
    * @callback MqttClient~onConnect
    */
