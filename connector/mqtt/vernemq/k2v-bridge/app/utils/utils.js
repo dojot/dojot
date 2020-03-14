@@ -1,11 +1,15 @@
 /**
+ * A module with helper functions
+ * @module utils
+ */
+
+/**
  * Creates the topic in which the MQTT client must publish to actuate in a device.
  *
- * @param tenant
- * @param deviceid
+ * @param {string} tenant
+ * @param {string} deviceid
+ * @param {string} suffix
  */
-function generateDojotActuationTopic(tenant, deviceid, suffix) {
-  return `${tenant}:${deviceid}${suffix}`;
-}
+const generateDojotActuationTopic = (tenant, deviceid, suffix) => `${tenant}:${deviceid}${suffix}`;
 
 module.exports = { generateDojotActuationTopic };

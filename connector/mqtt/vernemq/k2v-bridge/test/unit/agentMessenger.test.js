@@ -6,7 +6,7 @@
  * - @dojot/iotagent-nodejs
  */
 
-const AgentMessenger = require('../../app/AgentMesenger');
+const AgentMessenger = require('../../app/AgentMessenger');
 const MqttClient = require('../../app/MqttClient');
 const ProjectUtils = require('../../app/utils/utils');
 
@@ -26,7 +26,7 @@ const mockConfig = {
   },
   kafkaConfig: {
     test: 'testMock',
-    mesenger: {
+    messenger: {
       kafka: {
         dojot: {
           subject: {
@@ -55,7 +55,7 @@ describe('Test AgentMessenger', () => {
     jest.clearAllMocks();
   });
 
-  it('should create an agent messenger sucessfully without config', () => {
+  it('should create an agent messenger successfully without config', () => {
     const mqttClient = new MqttClient();
     const agentMessenger = new AgentMessenger(mqttClient);
 
@@ -64,7 +64,7 @@ describe('Test AgentMessenger', () => {
     expect(agentMessenger.iotagent).toEqual(null);
   });
 
-  it('should create an agent messenger sucessfully with a config', () => {
+  it('should create an agent messenger successfully with a config', () => {
     const mqttClient = new MqttClient();
     const agentMessenger = new AgentMessenger(mqttClient, mockDefaultConfig);
 
@@ -73,7 +73,7 @@ describe('Test AgentMessenger', () => {
     expect(agentMessenger.iotagent).toEqual(null);
   });
 
-  it('should init sucessfully the Agent Messenger', async () => {
+  it('should init successfully the Agent Messenger', async () => {
     mockConfig.Messenger.init.mockReturnValue(Promise.resolve());
     const mqttClient = new MqttClient();
     const agentMessenger = new AgentMessenger(mqttClient, mockDefaultConfig);

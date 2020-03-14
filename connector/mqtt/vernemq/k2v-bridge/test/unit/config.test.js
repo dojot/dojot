@@ -5,18 +5,18 @@
 const config = require('../../app/config');
 
 describe('Configuration', () => {
-  it('should test toBoolean when a number is given', () => {
-    expect(config.toBoolean('1')).toBe(true);
-    expect(config.toBoolean('0')).toBe(false);
-    expect(config.toBoolean('-100')).toBe(false);
-    expect(config.toBoolean('1000000')).toBe(true);
+  it('should test unsecuredMode when a number is given', () => {
+    expect(config.unsecuredMode('1')).toBe(true);
+    expect(config.unsecuredMode('0')).toBe(false);
+    expect(config.unsecuredMode('-100')).toBe(false);
+    expect(config.unsecuredMode('1000000')).toBe(true);
   });
 
-  it('should test toBoolean when a number is given', () => {
-    expect(config.toBoolean(true)).toBe(true);
-    expect(config.toBoolean(false)).toBe(false);
-    expect(config.toBoolean('true')).toBe(true);
-    expect(config.toBoolean('false')).toBe(false);
-    expect(config.toBoolean('test')).toBe(false);
+  it('should test unsecuredMode when a number is given', () => {
+    expect(config.unsecuredMode(true)).toBe(true);
+    expect(config.unsecuredMode(false)).toBe(false);
+    expect(config.unsecuredMode('true')).toBe(true);
+    expect(config.unsecuredMode('false')).toBe(false);
+    expect(config.unsecuredMode('test')).toBe(false);
   });
 });

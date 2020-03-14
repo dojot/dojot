@@ -4,12 +4,10 @@
 BASE_DIR=${BASE_DIR:-"/k2v_bridge"}
 HOSTNAME="${HOSTNAME:-"broker"}"
 CERT_CNAME="${HOSTNAME:-"broker"}"
-EJBCA_HOSTNAME=${EJBCA_HOSTNAME:-"ejbca-wrapper"}
-EJBCA_PORT=${EJBCA_PORT:-"5583"}
+EJBCA_ADDRESS=${EJBCA_ADDRESS:-"ejbca-wrapper:5583"}
 
 export CHECKEND_EXPIRATION_SEC="${CHECKEND_EXPIRATION_SEC:-43200}" #12h
-export CERT_EJBCA_URL="http://${EJBCA_HOSTNAME}"
-export SERVER_HOSTNAME="${SERVER_HOSTNAME:-"vernemq-k8s"}"
+export CERT_EJBCA_URL="http://${EJBCA_ADDRESS}"
 export CERT_CA_FILE='ca.crt'
 export CERT_CRL_FILE='ca.crl'
 export CERT_CERT_FILE="$HOSTNAME.crt"
@@ -27,9 +25,8 @@ export CHECK_BROKER_CERT_REVOKED_TIME="${CHECK_BROKER_CERT_REVOKED_TIME:-"0 */3 
 # variables for internal use in scripts
 export isK8sEnv=${USE_VMQ_OPERATOR:-"n"}
 export certCAName=$CERT_CANAME
-export certEjbcaApiUrl="${CERT_EJBCA_URL}:${EJBCA_PORT}"
+export certEjbcaApiUrl="${CERT_EJBCA_URL}"
 export certCname=$CERT_CNAME
-export certDns=$SERVER_HOSTNAME
 export certCaFile=$CERT_CA_FILE
 export certCertFile=$CERT_CERT_FILE
 export certKeyFile=$CERT_KEY_FILE

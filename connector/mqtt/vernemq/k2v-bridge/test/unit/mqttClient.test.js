@@ -23,7 +23,7 @@ jest.mock('mqtt', () => ({
   disconnect: jest.fn(),
 }));
 
-jest.mock('../../app/AgentMesenger', () => jest.fn(() => ({
+jest.mock('../../app/AgentMessenger', () => jest.fn(() => ({
   init: jest.fn(),
 })));
 
@@ -114,7 +114,7 @@ describe('Testing MqttClient', () => {
     mqttClient.init();
     const spyAgentMessengerInit = jest.spyOn(mqttClient.agentMessenger, 'init');
 
-    mqttClient.mqttOnConnect();
+    mqttClient.onConnect();
 
     expect(mqttClient.isConnected).toEqual(true);
     expect(spyAgentMessengerInit).toHaveBeenCalledTimes(1);
@@ -125,7 +125,7 @@ describe('Testing MqttClient', () => {
     const mqttClient = new MqttClient(mockDefaultConfig);
     mqttClient.init();
 
-    mqttClient.mqttOnDisconnect();
+    mqttClient.onDisconnect();
 
     expect(mqttClient.isConnected).toEqual(false);
     expect(mockMqtt.reconnect).toHaveBeenCalledTimes(1);
@@ -134,7 +134,7 @@ describe('Testing MqttClient', () => {
   it('should publish a message', () => {
     const mqttClient = new MqttClient(mockDefaultConfig);
     mqttClient.init();
-    mqttClient.mqttOnConnect();
+    mqttClient.onConnect();
     const fakeTopic = 'fake-topic';
     const fakeMessage = { key: 'value' };
 

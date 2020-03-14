@@ -3,11 +3,19 @@ const fs = require('fs');
 const mqtt = require('mqtt');
 
 const defaultConfig = require('./config');
-const AgentMessenger = require('./AgentMesenger');
+const AgentMessenger = require('./AgentMessenger');
 
 const TAG = { filename: 'MqttClient' };
 
+/**
+ * Class representing an MQTTClient
+ * @class
+ */
 class MqttClient {
+  /**
+   * Create an MQTTClient
+   * @param {Object} config - the client configuration
+   */
   constructor(config) {
     this.config = config || defaultConfig;
     this.isConnected = false;
@@ -30,7 +38,9 @@ class MqttClient {
   }
 
   /**
-   * Initializes the MQTT connection and the callbacks used by the client.
+   * @function init
+   * Initializes the mqttClient loading it's attributes, registering
+   * it's callbacks and connecting to a broker.
    */
   init() {
     logger.info('Connecting MQTT client...', TAG);
@@ -54,35 +64,41 @@ class MqttClient {
 
     this.mqttc = mqtt.connect(this.mqttOptions);
 
-    const mqttOnConnectBind = this.mqttOnConnect.bind(this);
-    const mqttOnDisconnectBind = this.mqttOnDisconnect.bind(this);
+    const mqttOnConnectBind = this.onConnect.bind(this);
+    const mqttOnDisconnectBind = this.onDisconnect.bind(this);
 
     logger.info('Binding event callbacks', TAG);
     this.mqttc.on('connect', mqttOnConnectBind);
     this.mqttc.on('disconnect', mqttOnDisconnectBind);
   }
 
-  /* MQTT Events */
-
-  mqttOnConnect() {
+  /**
+   * Reached when the MQTTClient
+   * connect successfully to the broker
+   * @callback MQTTClient~onConnect
+   */
+  onConnect() {
     logger.info('MQTT connection established', TAG);
     this.isConnected = true;
     this.agentMessenger.init();
   }
 
-  mqttOnDisconnect() {
+  /**
+   * Reached when the MQTTClient disconnect from the broker.
+   * @callback MQTTClient~onDisconnect
+   */
+  onDisconnect() {
     this.isConnected = false;
     logger.info('MQTT connection ended, trying to reconnect...', TAG);
     this.mqttc.reconnect();
     // TODO: agentMessenger (.pause or .stop)
   }
 
-  /* MQTT Functions */
-
   /**
-   * Publish a MQTT message.
-   * @param topic
-   * @param message
+   * Publish a message to a given topic.
+   * To configure the QOS the messages are published with check the MQTTClient configuration
+   * @param {string} topic
+   * @param {string} message
    */
   publishMessage(topic, message) {
     if (this.isConnected && this.mqttc) {
