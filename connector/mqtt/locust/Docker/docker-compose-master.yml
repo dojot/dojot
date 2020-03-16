@@ -1,7 +1,7 @@
 version: '3'
 services:
   locust-master:
-    image: eduardogmisiuk/dojot-locust
+    image: dojot/locust
     depends_on:
       - redis
     environment:
