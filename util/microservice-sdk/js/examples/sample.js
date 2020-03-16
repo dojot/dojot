@@ -13,7 +13,7 @@ const config = {
 const consumer = new ConsumerBackPressure(config);
 
 consumer.init().then(() => {
-    // topic the target kafka topic, it could be a String or a RegExp
+    // the target kafka topic, it could be a String or a RegExp
     const targetTopic = "topictest";
 
     // Register callback to process incoming device data
