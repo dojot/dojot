@@ -1,7 +1,6 @@
 /**
- * @override Initialize a k2v-client creating an Agent Messenger
- * then initialize it, also set log level for the service.
- * @author Dojot
+ * @override Initializes a k2v-bridge creating 'an Agent Messenger
+ * then initializes it, also set log level for the service.
  */
 
 const { logger } = require('@dojot/dojot-module-logger');

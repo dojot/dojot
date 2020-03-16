@@ -4,7 +4,7 @@
  */
 
 /**
- * Creates the topic in which the MQTT client must publish to actuate in a device.
+ * Generates the topic name in which the MQTT client must publish to actuate in a device.
  *
  * @param {string} tenant
  * @param {string} deviceid

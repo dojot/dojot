@@ -1,18 +1,20 @@
 const { logger } = require('@dojot/dojot-module-logger');
 const { IoTAgent } = require('@dojot/iotagent-nodejs');
+const nodeUtil = require('util');
 const defaultConfig = require('./config');
-const ProjectUtils = require('./utils/utils');
+const Utils = require('./utils/utils');
 
 const TAG = { filename: 'AgentMessenger' };
 
 /**
- * Class representing an AgentMessenger
+ * An agent to consume messages from pre-defined topics in Apache Kafka,
+ * format them and publish the formatted messages to pre-defined topics in VerneMQ
  * @class
  */
 class AgentMessenger {
   /**
-   *
-   * @param {Object} mqttClient - an MQTTClient to publish consumed messages.
+   * Creates an Agent Messenger
+   * @param {Object} mqttClient - a mqtt client to connect to VerneMQ broker.
    * @param {object} config - the agent configurations
    */
   constructor(mqttClient, config) {
@@ -23,8 +25,7 @@ class AgentMessenger {
 
   /**
    * @function init
-   * Initializes the agent messenger and register callbacks for incoming messages,
-   * calling the mqttClient to publish the messages
+   * Initializes the agent messenger and registers callbacks for incoming messages.
    */
   init() {
     this.iotagent = new IoTAgent();
@@ -32,17 +33,18 @@ class AgentMessenger {
       logger.info('IOT Agent initialized successfully', TAG);
 
       /* Actuation message handler */
-      this.iotagent.on('iotagent.device', 'device.configure', (tenant, event) => {
-        logger.debug(`Got device actuation message. Tenant is ${tenant}.`, TAG);
+      this.iotagent.on('iotagent.device', 'device.configure', (tenant, data) => {
+        logger.debug(`Got device actuation message. Tenant is ${tenant} with message ${nodeUtil.inspect(data)}.`, TAG);
 
         /* generate topic - dojot's style */
-        const configTopic = ProjectUtils.generateDojotActuationTopic(event.meta.service,
-          event.data.id, this.config.mqtt.publishTopicSuffix);
+        const configTopic = Utils.generateDojotActuationTopic(data.meta.service,
+          data.data.id, this.config.mqtt.publishTopicSuffix);
 
-        this.mqttClient.publishMessage(configTopic, JSON.stringify(event.data.attrs));
+        this.mqttClient.publishMessage(configTopic, JSON.stringify(data.data.attrs));
       });
     }).catch(() => {
       logger.error('An error occurred while initializing the IoTAgent. Bailing out!', TAG);
+      process.exit(1);
     });
   }
 }

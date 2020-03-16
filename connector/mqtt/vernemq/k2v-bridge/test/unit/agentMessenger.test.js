@@ -6,9 +6,10 @@
  * - @dojot/iotagent-nodejs
  */
 
+const mockProcess = require('jest-mock-process');
 const AgentMessenger = require('../../app/AgentMessenger');
 const MqttClient = require('../../app/MqttClient');
-const ProjectUtils = require('../../app/utils/utils');
+const Utils = require('../../app/utils/utils');
 
 const mockDefaultConfig = {
   mqtt: {
@@ -17,6 +18,8 @@ const mockDefaultConfig = {
 };
 
 const fakeArg = (arg1) => ({ meta: { service: arg1 }, data: { id: arg1, attrs: { atr1: 'attr1' } } });
+
+const mockExit = mockProcess.mockProcessExit();
 
 const mockConfig = {
   Messenger: {
@@ -55,6 +58,10 @@ describe('Test AgentMessenger', () => {
     jest.clearAllMocks();
   });
 
+  afterAll(() => {
+    mockExit.mockRestore();
+  });
+
   it('should create an agent messenger successfully without config', () => {
     const mqttClient = new MqttClient();
     const agentMessenger = new AgentMessenger(mqttClient);
@@ -78,7 +85,7 @@ describe('Test AgentMessenger', () => {
     const mqttClient = new MqttClient();
     const agentMessenger = new AgentMessenger(mqttClient, mockDefaultConfig);
     await agentMessenger.init();
-    expect(ProjectUtils.generateDojotActuationTopic).toHaveBeenCalledTimes(1);
+    expect(Utils.generateDojotActuationTopic).toHaveBeenCalledTimes(1);
     expect(agentMessenger.mqttClient.publishMessage).toHaveBeenCalledTimes(1);
   });
 
@@ -87,7 +94,7 @@ describe('Test AgentMessenger', () => {
     const mqttClient = new MqttClient();
     const agentMessenger = new AgentMessenger(mqttClient, mockDefaultConfig);
     await agentMessenger.init();
-    expect(ProjectUtils.generateDojotActuationTopic).not.toHaveBeenCalled();
+    expect(Utils.generateDojotActuationTopic).not.toHaveBeenCalled();
     expect(agentMessenger.mqttClient.publishMessage).not.toHaveBeenCalled();
   });
 });

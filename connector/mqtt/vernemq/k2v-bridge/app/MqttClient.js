@@ -13,9 +13,11 @@ const TAG = { filename: 'MqttClient' };
  */
 class MqttClient {
   /**
-   * Create an MQTTClient
+   * Creates a MQTTClient
    * @param {Object} config - the client configuration
    */
+
+  // implements back pressure
   constructor(config) {
     this.config = config || defaultConfig;
     this.isConnected = false;
@@ -74,7 +76,7 @@ class MqttClient {
 
   /**
    * Reached when the MQTTClient
-   * connect successfully to the broker
+   * connects successfully to the broker
    * @callback MQTTClient~onConnect
    */
   onConnect() {
@@ -95,8 +97,7 @@ class MqttClient {
   }
 
   /**
-   * Publish a message to a given topic.
-   * To configure the QOS the messages are published with check the MQTTClient configuration
+   * Publishes a message to a given topic.
    * @param {string} topic
    * @param {string} message
    */
