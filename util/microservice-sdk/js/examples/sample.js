@@ -14,7 +14,7 @@ const consumer = new ConsumerBackPressure(config);
 
 consumer.init().then(() => {
     // the target kafka topic, it could be a String or a RegExp
-    const targetTopic = "topictest";
+    const targetTopic = "admin.device-data";
 
     // Register callback to process incoming device data
     /* const idCallback = */ consumer.registerCallback(targetTopic, (data) => {
