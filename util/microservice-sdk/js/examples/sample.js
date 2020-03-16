@@ -1,5 +1,5 @@
-const ConsumerBackPressure = require('../lib/kafka/ConsumerBackPressure');
 const { logger } = require('@dojot/dojot-module-logger');
+const ConsumerBackPressure = require('../lib/kafka/ConsumerBackPressure');
 
 const TAG = { filename: 'sample' };
 
@@ -13,21 +13,17 @@ const config = {
 const consumer = new ConsumerBackPressure(config);
 
 consumer.init().then(() => {
-
-    //topic the target kafka topic, it could be a String or a RegExp
+    // topic the target kafka topic, it could be a String or a RegExp
     const targetTopic = "topictest";
 
     // Register callback to process incoming device data
-    /*const idCallback =*/ consumer.registerCallback(targetTopic, (data) => {
+    /* const idCallback = */ consumer.registerCallback(targetTopic, (data) => {
         const { value: payload } = data;
         logger.debug(`Payload: ${payload.toString()}`, TAG);
-
     });
 
-    //You can unregister a callback, for that call:
-    //consumer.unregisterCallback(idCallback);
-
+    // You can unregister a callback, for that call:
+    // consumer.unregisterCallback(idCallback);
 }).catch((error) => {
     logger.error(`Caught an error: ${error.stack || error}`, TAG);
 });
-
