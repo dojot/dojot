@@ -22,12 +22,12 @@ K2V_LOG_LEVEL            | Log level                                            
 BASE_DIR                 | Base directory where the project is located                         | /opt/k2v_bridge     | string         |
 K2V_MQTT_USERNAME        | Mqtt client username                                                | k2v-bridge          | string         |
 K2V_MQTT_CLIENT_ID       | Mqtt client client id                                               | hostname            | string         |
-K2V_MQTT_HOST            | Address of the verne broker                                         | vernemq-k8s         | hostname/IP:port |
+K2V_MQTT_HOST            | Address of the verne broker                                         | vernemq-k8s         | hostname/IP |
 K2V_MQTT_PORT            | Port of the verne broker                                            | 8883                | integer        |
 K2V_MQTT_KEEPALIVE       | Mqtt client keepalive                                               | 60                  | integer        |
 K2V_MQTT_SECURE          | Mqtt client secure                                                  | true                | boolean/string/integer  |
-K2V_MQTT_PUBLISH_TOPIC_SUFFIX   | Mqtt client topic to subscribe                               | /config             | string                   |
+K2V_MQTT_PUBLISH_TOPIC_SUFFIX   | Suffix of the mqtt topic to subscribe to                     | /config             | string                   |
 K2V_MQTT_PUBLISH_QOS     | Mqtt client quality of service                                      | 1                   | integer                  |
-K2V_MQTT_CA_FILE         | Mqtt client ca file                                                 | ${BASE_DIR}/app/verne/${HOSTNAME}.ca | string  |
-K2V_MQTT_CERT_FILE       | Mqtt client certificate file                                        | ${BASE_DIR}/app/verne/${HOSTNAME}.crt| string  |
-K2V_MQTT_KEY_FILE        | Mqtt client key file                                                | ${BASE_DIR}/app/verne/${HOSTNAME}.key| string  |
+K2V_MQTT_CA_FILE         | Mqtt client ca file location                                        | ${BASE_DIR}/app/verne/${HOSTNAME}.ca | string  |
+K2V_MQTT_CERT_FILE       | Mqtt client certificate file location                               | ${BASE_DIR}/app/verne/${HOSTNAME}.crt| string  |
+K2V_MQTT_KEY_FILE        | Mqtt client key file location                                       | ${BASE_DIR}/app/verne/${HOSTNAME}.key| string  |

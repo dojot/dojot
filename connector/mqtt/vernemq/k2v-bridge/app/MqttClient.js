@@ -8,7 +8,7 @@ const AgentMessenger = require('./AgentMessenger');
 const TAG = { filename: 'MqttClient' };
 
 /**
- * Class representing an MQTTClient
+ * Class representing a MQTTClient
  * @class
  */
 class MqttClient {
@@ -86,7 +86,7 @@ class MqttClient {
   }
 
   /**
-   * Reached when the MQTTClient disconnect from the broker.
+   * Reached when the MQTTClient disconnects from the broker.
    * @callback MQTTClient~onDisconnect
    */
   onDisconnect() {

@@ -2,7 +2,7 @@ const { logger } = require('@dojot/dojot-module-logger');
 const { IoTAgent } = require('@dojot/iotagent-nodejs');
 const nodeUtil = require('util');
 const defaultConfig = require('./config');
-const Utils = require('./utils/utils');
+const utils = require('./utils/utils');
 
 const TAG = { filename: 'AgentMessenger' };
 
@@ -37,7 +37,7 @@ class AgentMessenger {
         logger.debug(`Got device actuation message. Tenant is ${tenant} with message ${nodeUtil.inspect(data)}.`, TAG);
 
         /* generate topic - dojot's style */
-        const configTopic = Utils.generateDojotActuationTopic(data.meta.service,
+        const configTopic = utils.generateDojotActuationTopic(data.meta.service,
           data.data.id, this.config.mqtt.publishTopicSuffix);
 
         this.mqttClient.publishMessage(configTopic, JSON.stringify(data.data.attrs));

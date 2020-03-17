@@ -1,5 +1,5 @@
 const hostname = process.env.HOSTNAME || 'k2v-bridge';
-const unsecuredMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
+const parseSecureMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 const app = {
   logLevel: process.env.K2V_LOG_LEVEL || 'info',
@@ -13,7 +13,7 @@ const mqtt = {
   host: process.env.K2V_MQTT_HOST || 'vernemq-k8s',
   port: parseInt(process.env.K2V_MQTT_PORT, 10) || 8883,
   keepAlive: parseInt(process.env.K2V_MQTT_KEEPALIVE, 10) || 60,
-  secure: unsecuredMode(process.env.K2V_MQTT_SECURE || true),
+  secure: parseSecureMode(process.env.K2V_MQTT_SECURE || true),
   publishTopicSuffix: process.env.K2V_MQTT_PUBLISH_TOPIC_SUFFIX || '/config',
   publishQos: parseInt(process.env.K2V_MQTT_PUBLISH_QOS, 10) || 1,
   tls: {
@@ -29,4 +29,4 @@ const mqtt = {
   },
 };
 
-module.exports = { app, mqtt, unsecuredMode };
+module.exports = { app, mqtt, parseSecureMode };

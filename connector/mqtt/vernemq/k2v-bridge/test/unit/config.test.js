@@ -5,18 +5,18 @@
 const config = require('../../app/config');
 
 describe('Configuration', () => {
-  it('should test unsecuredMode when a number is given', () => {
-    expect(config.unsecuredMode('1')).toBe(true);
-    expect(config.unsecuredMode('0')).toBe(false);
-    expect(config.unsecuredMode('-100')).toBe(false);
-    expect(config.unsecuredMode('1000000')).toBe(true);
+  it('should test parseSecureMode when a number is given', () => {
+    expect(config.parseSecureMode('1')).toBe(true);
+    expect(config.parseSecureMode('0')).toBe(false);
+    expect(config.parseSecureMode('-100')).toBe(false);
+    expect(config.parseSecureMode('1000000')).toBe(true);
   });
 
-  it('should test unsecuredMode when a number is given', () => {
-    expect(config.unsecuredMode(true)).toBe(true);
-    expect(config.unsecuredMode(false)).toBe(false);
-    expect(config.unsecuredMode('true')).toBe(true);
-    expect(config.unsecuredMode('false')).toBe(false);
-    expect(config.unsecuredMode('test')).toBe(false);
+  it('should test parseSecureMode when a number is given', () => {
+    expect(config.parseSecureMode(true)).toBe(true);
+    expect(config.parseSecureMode(false)).toBe(false);
+    expect(config.parseSecureMode('true')).toBe(true);
+    expect(config.parseSecureMode('false')).toBe(false);
+    expect(config.parseSecureMode('test')).toBe(false);
   });
 });
