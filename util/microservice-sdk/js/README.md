@@ -9,3 +9,12 @@ library scoped to attend the dojot microservices necessities.
 ## Examples
 
 You can find out how to use each feature in the `examples` directory.
+
+## BackPressure 
+
+Before building, check examples/backPressure/config.js for necessary settings.
+You can build the example docker image by running:
+
+```
+sudo docker build -t sdk-backpressure:example -f examples/backPressure/Dockerfile  . 
+```

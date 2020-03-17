@@ -1,14 +1,8 @@
 const { logger } = require('@dojot/dojot-module-logger');
 const ConsumerBackPressure = require('../lib/kafka/ConsumerBackPressure');
+const config = require('./config');
 
 const TAG = { filename: 'sample' };
-
-const config = {
-    // Kafka's consumer group id
-    "group.id": process.env.KAFKA_GROUP_ID || "sdk-exampĺe",
-    // Addresses of the kafka brokers separated by a comma
-    "metadata.broker.list": process.env.KAFKA_HOSTS || "kafka:9092",
-};
 
 const consumer = new ConsumerBackPressure(config);
 
