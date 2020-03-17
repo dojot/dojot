@@ -19,8 +19,8 @@ COPY package.json package.json
 COPY npm-shrinkwrap.json npm-shrinkwrap.json
 
 COPY lib ./lib
-COPY examples/backPressure/sample.js ./app/sample.js
-COPY examples/backPressure/config.js ./app/config.js
+COPY examples/back-pressure/sample.js ./app/sample.js
+COPY examples/back-pressure/config.js ./app/config.js
 
 RUN npm install
 
