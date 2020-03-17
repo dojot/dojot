@@ -11,7 +11,7 @@ const TAG = { filename: 'MqttClient' };
  */
 class MQTTClient {
   /**
-   * Create an MQTTClient
+   * Creates an MQTTClient
    * @param {Object} agentMessenger - the client agent messenger
    * @param {*} config - the client configuration
    */
@@ -42,8 +42,8 @@ class MQTTClient {
 
   /**
    * @function init
-   * Initialize the mqttClient loading it's attributes, registering
-   * it's callbacks and connecting to a broker
+   * Initializes the mqttClient loading it's attributes, registering
+   * it's callbacks and connecting to a MQTT broker
    */
   init() {
     this.mqttOptions = {
@@ -70,7 +70,7 @@ class MQTTClient {
     this.mqttc.on('message', onMessageBind);
 
     /**
-     * Create async queue
+     * Creates the async queue
      */
     this.messageQueue = async.queue((data, done) => {
       this.asyncQueueWorker(data);
@@ -89,7 +89,7 @@ class MQTTClient {
 
   /**
    * Reached when the MQTTClient
-   * connect successfully to the broker.
+   * connects successfully to the MQTT broker.
    * @callback MqttClient~onConnect
    */
   onConnect() {
@@ -99,7 +99,7 @@ class MQTTClient {
   }
 
   /**
-   * Reached when the MQTTClient disconnect from the broker.
+   * Reached when the MQTTClient disconnects from the broker.
    * @callback MqttClient~onDisconnect
    */
   onDisconnect() {
@@ -109,7 +109,7 @@ class MQTTClient {
   }
 
   /**
-   * Reached when a message arrive on the topic
+   * Reached when a message arrives on the topic
    * @callback MqttClient~onMessage
    * @param {string} topic
    * @param {Object} message
@@ -137,7 +137,7 @@ class MQTTClient {
 
   /**
    * @function connect
-   * Connect the MQTTClient to the broker
+   * Connects the MQTTClient to a MQTT broker
    */
   connect() {
     if (this.isConnected === false) {
@@ -148,7 +148,7 @@ class MQTTClient {
 
   /**
    * @function subscribe
-   * Subscribe the client to it's topics
+   * Subscribes the client to it's topics
    */
   subscribe() {
     logger.info(`Subscribing to topic ${this.config.mqtt.subscribeTopic}`, TAG);

@@ -43,13 +43,13 @@ class AgentMessenger {
 
   /**
    * @function sendMessage
-   * Produce a message a given message to a given topic
+   * Produce a given message to a given topic
    * @param {string} topic - topic to produce
    * @param {Object} message - message to produce
    */
   sendMessage(topic, message) {
     try {
-      logger.debug('Sending messaged to kafka', TAG);
+      logger.debug('Sending message to kafka', TAG);
 
       const jsonPayload = JSON.parse(message);
       const deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);

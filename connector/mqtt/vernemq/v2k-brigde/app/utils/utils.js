@@ -1,5 +1,5 @@
 /**
- * A module with helpers functions
+ * A module with helper functions
  * @module utils
  */
 
@@ -8,7 +8,7 @@ const moment = require('moment');
 /**
  * @function generateDojotDeviceDataMessage
  *
- * Generate a payload for device Data topic for Dojot
+ * Generates a payload for device-data topic for Dojot
  *
  * @param {string} topic
  * @param {Object} payload

@@ -9,9 +9,9 @@
     "url": "https://github.com/dojot/dojot",
     "directory": "connector/mqtt/vernemq/v2k-bridge"
   },
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "app": "node app/index.js",
+    "app": "node app/app.js",
     "test": "jest test/unit/*.js",
     "coverage": "jest --collect-coverage"
   },
@@ -38,7 +38,7 @@
     "collectCoverageFrom": [
       "app/**/*.js",
       "utils/**/*.js",
-      "!app/index.js"
+      "!app/app.js"
     ]
   },
   "devDependencies": {
