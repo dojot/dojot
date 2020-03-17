@@ -1,0 +1,68 @@
+name: V2K Bridge (connector/mqtt/vernemq/v2k-brigde)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'connector/mqtt/vernemq/v2k-brigde/**'
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'connector/mqtt/vernemq/v2k-brigde/**'
+
+jobs:
+  unit-tests:
+    name: (connector/mqtt/vernemq/v2k-brigde) Unit Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: npm install, build, and test
+      run: |
+        cd connector/mqtt/vernemq/v2k-brigde/
+        npm ci
+        npm run build --if-present
+        npm test
+        npm run coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
+        file: connector/mqtt/vernemq/v2k-brigde/coverage/lcov.info # create when run npm run coverage
+        flags: V2KBridge # Flags allow you to isolate coverage reports for different tests
+        name: v2k-bridge # Custom defined name for the upload
+
+  docker-hub:
+    needs: unit-tests
+    name: (connector/mqtt/vernemq/v2k-brigde) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.11
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/v2k-bridge
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: connector/mqtt/vernemq/v2k-brigde/
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
