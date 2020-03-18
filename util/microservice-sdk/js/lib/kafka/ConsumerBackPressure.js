@@ -104,7 +104,7 @@ module.exports = class ConsumerBackPressure {
 
       // when the processing was finalized, we need to resume the consumer, if
       // it has been paused
-      this.msgQueue.drain(this.resumeConsumer);
+      this.msgQueue.drain(this.resumeConsumer.bind(this));
 
       this.consumer.connect(undefined, (error) => {
         if (error) {
@@ -306,7 +306,7 @@ module.exports = class ConsumerBackPressure {
           nextHoldOffTimeCandidate = nextHoldOffTimeCandidate > this.maxHoldOffTimeSubscription
             ? this.maxHoldOffTimeSubscription : nextHoldOffTimeCandidate;
           nextHoldOffTimeCandidate = nextHoldOffTimeCandidate
-          || this.holdOffTimeSubscription;
+            || this.holdOffTimeSubscription;
           // schedules the next attempt
           setTimeout(subscriptionProcedure, nextHoldOffTimeCandidate, nextHoldOffTimeCandidate);
         }
@@ -427,6 +427,7 @@ module.exports = class ConsumerBackPressure {
    * @access private
    */
   resumeConsumer() {
+    logger.debug(`Calling resume consumer; isPaused? ${this.isPaused}...`, TAG);
     if (this.isPaused) {
       this.consumer.resume(this.consumer.assignments());
       this.isPaused = false;
