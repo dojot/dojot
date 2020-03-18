@@ -1,143 +1,6 @@
 # **Dojot Load Test**
-The Dojot Load Test tool is an implementation using the open-source load testing tool Locust to generate traffic
-from/to Dojot.
+The Dojot Load Test tool is an implementation using the open-source load testing tool Locust to generate traffic from/to Dojot. Tested in Dojot's development images.
 
-
-# **Configuration**
-
-All the commands in this guide are meant to be executed in the `locust` directory, a.k.a the directory this README
-is on, unless otherwise told.
-
-## **Virtual environment**
-
-If you need to use any script from the `src/scripts` directory, the virtual environment must be activated and the project
-dependencies must be installed.
-First, make sure you have `virtualenv` installed:
-
-```shell
-pip3 install virtualenv
-```
-
-Now you need to create the environment:
-```shell
-cd ..
-python3 -m venv locust
-cd locust
-```
-
-To activate it:
-```shell
-source ./bin/activate
-```
-
-Install the packages inside the virtual environment:
-```shell
-pip3 install -r requirements/prod.txt
-```
-
-If you need to run the unit tests and/or develop, you need another packages too:
-```shell
-pip3 install -r requirements/dev.txt
-```
-
-With the environment activated, you can run the scripts or tests. When done, deactivate the environment:
-```shell
-deactivate
-```
-
-## **Environment Variables**
-
-Before running any tests using this tool, make sure you configure the environment variables to match your needs.
-
-When using Docker, you should pass the variables in the Dockerfile for the component you are running.
-The Dockerfile for the Locust master and slave are in the `Docker` directory.
-
-### **Locust**
-
-Locust behaviour and Redis configurations.
-
-Key                   | Purpose                                                        | Default Value         | Valid Values                                  |
---------------------- | -------------------------------------------------------------- | --------------------- | --------------------------------------------- |
-CA_CERT_FILE          | CA certificate file                                            | ca.crt                | file name                                     |
-CERT_DIR              | certificates and private keys directory                        | cert/                 | directory name                                |
-DEBUG_MODE            | activate debug mode in shell scripts                           | 0                     | 0, 1                                          |
-DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
-DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
-EJBCA_URL             | EJBCA address                                                  | http://localhost:5583 | hostname/IP:port                              |
-LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | 127.0.0.1             | hostname/IP                                   |
-LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
-MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
-MIN_TIME_RECONN       | min time (in seconds) to try to reconnect to the MQTT broker   | 1                     | integer                                       |
-PROBABILITY_TO_RENEW  | probability to renew a device                                  | 10                    | integer in [0, 100]                           |
-PROBABILITY_TO_REVOKE | probability to revoke a device                                 | 10                    | integer in [0, 100]                           |
-REDIS_BACKUP          | use a Redis dump with IDs instead of generating new ones       | y                     | y, n                                          |
-REDIS_CERTIFICATES_DB | database with the certificates                                 | 0                     | integer in [0, 15]                            |
-REDIS_CONN_TIMEOUT    | redis timeout                                                  | 180                   | integer                                       |
-REDIS_HOST            | redis host                                                     | redis                 | hostname/IP                                   |
-REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1                     | integer in [0, 15]                            |
-REDIS_PASSWD          | redis password                                                 | none                  | passwords                                     |
-REDIS_PORT            | redis port                                                     | 6379                  | port value                                    |
-RENEW_CERT_DIR        | directory where the certs to be renewed will be stored         | renew/                | directory name                                |
-RENEW_DEVICES         | enable random renovation of devices (case insensitive)         | False                 | True, False                                   |
-REVOKE_CERT_DIR       | directory where the certs to be revoked will be stored         | revoke/               | directory name                                |
-REVOKE_DEVICES        | enable random revocation of devices (case insensitive)         | False                 | True, False                                   |
-TASK_MAX_TIME         | max time of each Locust's tasks (ms)                           | 30000                 | integer                                       |
-TASK_MIN_TIME         | min time of each Locust's tasks (ms)                           | 29500                 | integer                                       |
-TENANT                | tenant that is publishing                                      | admin                 | string                                        |
-TIME_TO_RENEW         | time to renew the cert after the client initialization         | 1000                  | integer                                       |
-TIME_TO_REVOKE        | time to revoke the cert after the client initialization        | 1000                  | integer                                       |
-
-### **MQTT**
-
-Configurations related to MQTT communication.
-
-Key                    | Purpose                           | Default Value | Valid Values |
----------------------- | --------------------------------- | ------------- | ------------ |
-DOJOT_MQTT_HOST        | MQTT broker host                  | 127.0.0.1     | hostname/IP  |
-DOJOT_MQTT_PORT        | MQTT broker port                  | 1883          | port value   |
-DOJOT_MQTT_QOS         | MQTT broker QoS level             | 1             | 0, 1, 2      |
-DOJOT_MQTT_TIMEOUT     | MQTT broker timeout               | 60            | integer      |
-
-### **Dojot**
-
-Dojot integration configuration.
-
-Key                   | Purpose                              | Default Value | Valid Values |
---------------------- | ------------------------------------ | ------------- | ------------ |
-DOJOT_ENV             | use a dojot instance                 | n             | y, n         |
-DOJOT_GATEWAY_TIMEOUT | dojot auth API timeout               | 180           | integer      |
-DOJOT_PASSWD          | dojot user's password                | admin         | passwords    |
-DOJOT_URL             | dojot instance address               | 127.0.0.1     | hostname/IP  |
-DOJOT_USER            | dojot user                           | admin         | usernames    |
-GENERATE_IDS          | activate the automatic ID generation | 1             | 0, 1         |
-
-## **Operating System**
-
-While small tests can be run without problems, bigger ones create some obstacles.
-To create a lot of clients in only one machine, the default number of ports in the
-OS will not accomodate the required number of connections. To increase it, run:
-
-```shell
-sudo sysctl -w net/ipv4/ip_local_port_range="1024 65535"
-```
-
-# Development
-
-## Lint
-
-There is a lint in the repository that you should follow. To check the linting state in it, run:
-```shell
-pylint src tests
-```
-
-## Unit Tests
-
-To run the tests, you need to have installed the test dependencies. If you missed this step, you can see it
-[here](#virtual-environment).
-With the dependencies properly installed, you can get the complete tests' report by running:
-```shell
-pytest --cov=. -v tests
-```
 
 # **How to use**
 
@@ -148,7 +11,8 @@ its dependencies.
 
 ### **Generate Certificates**
 
-Generates the certificates in EJBCA, sending them to a Redis instance and exporting them in files.
+The main goal of this script is to generate certificates for devices. These can either be in Dojot or
+be virtual ones. It also is used to create test devices and clear devices/templates in Dojot.
 
 #### **Setup**
 
@@ -156,56 +20,22 @@ To run this script, you will need a Dojot's EJBCA instance running elsewhere. Yo
 run a full Dojot or a separate EJBCA instance. You can see [here](https://dojotdocs.readthedocs.io/en/stable/)
 for more info.
 
-When you are done, you must have a Redis instance running elsewhere too. You can accomplish
-this by either running a standalone Redis or by running the Locust master Docker Compose. The
-later is recommended, since the setup will be easier. See [here](#docker-compose) for more info.
-
-If you want to run a standalone Redis, you can do this by executing:
-```shell
-docker run --name <name> -d redis
-```
-
-To find the IP:
-```shell
-docker inspect <id> | grep "IPAddress"
-```
-
 #### **How to use**
 
-To keep the configuration centered in the `src/config.py` file, you must pass some environment
-variables before running the script. This can be done in two ways: exporting the variables and
-then running the script or passing them with the script command.
-
-The first way to run is:
+Run the Docker Compose file:
 ```shell
-export EJBCA_URL="http://1.1.1.1:5583"
-export REDIS_HOST="1.1.1.2"
-export REDIS_PORT="6380"
-python3 -m src.scripts.generate_certs --cert 100
+docker-compose -f Docker/scripts/generate_certs/docker-compose.yml up -d
 ```
 
-The second way is:
+You will have `Redis` and `generate_certs` containers running. Now enter in `generate_certs` container:
 ```shell
-EJBCA_URL="http://1.1.1.1:5583" REDIS_HOST="1.1.1.2" REDIS_PORT="6380" python3 -m src.scripts.generate_certs --cert 100
+docker-compose -f Docker/scripts/generate_certs/docker-compose.yml exec generate_certs bash
 ```
 
-The two options will create 100 certificates for the tenant `admin` in each thread.
-
-You should change the IPs and ports to your needs. To see the script's options and the defaults
-of each one, run:
+To run the script and check its options:
 ```shell
-python3 -m src.scripts.generate_certs -h
+python -m src.scripts.generate_certs -h
 ```
-
-There are other environment variables you can pass to customize the script too. They are optional.
-
-Key                   | Purpose                                                        | Default Value | Valid Values   |
---------------------- | -------------------------------------------------------------- | ------------- | -------------- |
-CA_CERT_FILE          | CA certificate file                                            | ca.crt        | file name      |
-CERT_DIR              | certificates and private keys directory                        | cert/         | directory name |
-REDIS_CERTIFICATES_DB | database with the certificates                                 | 0             | integer        |
-REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1             | integer        |
-TENANT                | tenant that is publishing                                      | admin         | string         |
 
 ## **Certificates**
 
@@ -214,14 +44,8 @@ If you don't have any certificates, you should first generate them. See the
 
 ### **Redis dump**
 
-After generating the certificates, you need to export the Redis dump and move it to the `db/`
-directory.
-
-If you generated the certificates using the Locust master, then there is no need to move the dump,
-because Redis will export it in the right place. You can skip to the next section.
-
-If you used another Redis, you should export the dump. In the machine you have the Redis instance running,
-execute:
+If for some reason you need the Redis `dump.rdb` file, you can retrieve it either from the `db/`
+directory or by running:
 ```shell
 docker exec -it $REDIS_CONTAINER_ID redis-cli save
 docker cp $REDIS_CONTAINER_ID:/data/dump.rdb .
@@ -229,14 +53,8 @@ docker cp $REDIS_CONTAINER_ID:/data/dump.rdb .
 
 To check the Redis container ID, you can run `docker ps`.
 
-By now, you should have the `dump.rdb` file in you current directory. You should move this to the
-`db` directory inside the `locust` directory of your Locust master node. Only the master will need it.
-
-Every time you change the Redis dump file, e.g. generated new certificates, you will need to map
-the certificates. This is done by simply setting the environment variable `MAP_DEVICE_IDS` to `True`
-in the Locust master Docker Compose file. You need to restart/start the Locust master to do the mapping.
-If you have a large quantity of certificates, it can be wise to disable the mapping after done to speed
-up the initialization.
+Be aware that every time you generate certificates, you should map the database. Check the
+[Generate Certificates](#generate-certificates) script for more info.
 
 ## **Docker-Compose**
 
@@ -336,6 +154,108 @@ from the broker for some reason
 - recv_message: the client received a message from the subscribed topic
 - renew: a certificate renovation request was sent to EJBCA
 - revoke: a certificate revocation request was sent to EJBCA
+
+
+# **Configuration**
+
+All the commands in this guide are meant to be executed in the `locust` directory, a.k.a the directory this README
+is on, unless otherwise told.
+
+## **Environment Variables**
+
+Before running any tests using this tool, make sure you configure the environment variables to match your needs.
+
+When using Docker, you should pass the variables in the Dockerfile for the component you are running.
+The Dockerfile for the Locust master and slave are in the `Docker` directory.
+
+### **Locust**
+
+Locust behaviour and Redis configurations.
+
+Key                   | Purpose                                                        | Default Value         | Valid Values                                  |
+--------------------- | -------------------------------------------------------------- | --------------------- | --------------------------------------------- |
+CA_CERT_FILE          | CA certificate file                                            | ca.crt                | file name                                     |
+CERT_DIR              | certificates and private keys directory                        | cert/                 | directory name                                |
+DEBUG_MODE            | activate debug mode in shell scripts                           | 0                     | 0, 1                                          |
+DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
+DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
+EJBCA_URL             | EJBCA address                                                  | http://localhost:5583 | hostname/IP:port                              |
+LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | 127.0.0.1             | hostname/IP                                   |
+LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
+MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
+MIN_TIME_RECONN       | min time (in seconds) to try to reconnect to the MQTT broker   | 1                     | integer                                       |
+PROBABILITY_TO_RENEW  | probability to renew a device                                  | 10                    | integer in [0, 100]                           |
+PROBABILITY_TO_REVOKE | probability to revoke a device                                 | 10                    | integer in [0, 100]                           |
+REDIS_BACKUP          | use a Redis dump with IDs instead of generating new ones       | y                     | y, n                                          |
+REDIS_CERTIFICATES_DB | database with the certificates                                 | 0                     | integer in [0, 15]                            |
+REDIS_CONN_TIMEOUT    | redis timeout                                                  | 180                   | integer                                       |
+REDIS_HOST            | redis host                                                     | redis                 | hostname/IP                                   |
+REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1                     | integer in [0, 15]                            |
+REDIS_PASSWD          | redis password                                                 | none                  | passwords                                     |
+REDIS_PORT            | redis port                                                     | 6379                  | port value                                    |
+RENEW_CERT_DIR        | directory where the certs to be renewed will be stored         | renew/                | directory name                                |
+RENEW_DEVICES         | enable random renovation of devices (case insensitive)         | False                 | True, False                                   |
+REVOKE_CERT_DIR       | directory where the certs to be revoked will be stored         | revoke/               | directory name                                |
+REVOKE_DEVICES        | enable random revocation of devices (case insensitive)         | False                 | True, False                                   |
+TASK_MAX_TIME         | max time of each Locust's tasks (ms)                           | 30000                 | integer                                       |
+TASK_MIN_TIME         | min time of each Locust's tasks (ms)                           | 29500                 | integer                                       |
+TENANT                | tenant that is publishing                                      | admin                 | string                                        |
+TIME_TO_RENEW         | time to renew the cert after the client initialization         | 1000                  | integer                                       |
+TIME_TO_REVOKE        | time to revoke the cert after the client initialization        | 1000                  | integer                                       |
+
+### **MQTT**
+
+Configurations related to MQTT communication.
+
+Key                    | Purpose                           | Default Value | Valid Values |
+---------------------- | --------------------------------- | ------------- | ------------ |
+DOJOT_MQTT_HOST        | MQTT broker host                  | 127.0.0.1     | hostname/IP  |
+DOJOT_MQTT_PORT        | MQTT broker port                  | 1883          | port value   |
+DOJOT_MQTT_QOS         | MQTT broker QoS level             | 1             | 0, 1, 2      |
+DOJOT_MQTT_TIMEOUT     | MQTT broker timeout               | 60            | integer      |
+
+### **Dojot**
+
+Dojot integration configuration.
+
+Key                   | Purpose                              | Default Value         | Valid Values |
+--------------------- | ------------------------------------ | --------------------- | ------------ |
+DOJOT_ENV             | use a dojot instance                 | n                     | y, n         |
+DOJOT_GATEWAY_TIMEOUT | dojot auth API timeout               | 180                   | integer      |
+DOJOT_PASSWD          | dojot user's password                | admin                 | passwords    |
+DOJOT_URL             | dojot instance address               | http://127.0.0.1:8000 | hostname/IP  |
+DOJOT_USER            | dojot user                           | admin                 | usernames    |
+GENERATE_IDS          | activate the automatic ID generation | 1                     | 0, 1         |
+
+## **Operating System**
+
+While small tests can be run without problems, bigger ones create some obstacles.
+To create a lot of clients in only one machine, the default number of ports in the
+OS will not accomodate the required number of connections. To increase it, run:
+
+```shell
+sudo sysctl -w net/ipv4/ip_local_port_range="1024 65535"
+```
+
+# Development
+
+## Lint
+
+There is a lint in the repository that you should follow. To check the linting state in it, run:
+```shell
+pylint src tests
+```
+
+## Unit Tests
+
+To run the tests, you can use the Docker Compose file provided for use with the `generate_certs` script. In case you missed it, you can see it [here](#generate-certificates).
+With the dependencies properly installed, you can get the complete tests' report by running:
+```shell
+coverage run -m pytest tests && coverage html
+```
+
+It will generate a HTML coverage report in the `htmlcov` directory.
+
 
 # **Machine specifications for tests**
 
