@@ -46,4 +46,10 @@ CONFIG = {
         'con_timeout':  int(os.environ.get("DOJOT_MQTT_TIMEOUT", 120)),
         'qos':          int(os.environ.get("DOJOT_MQTT_QOS", 1)),
     },
+
+    'dojot': {
+        'url':      os.environ.get("DOJOT_URL", "http://127.0.0.1:8000"),
+        'user':     os.environ.get("DOJOT_USER", "admin"),
+        'passwd':   os.environ.get("DOJOT_PASSWD", "admin"),
+    },
 }
