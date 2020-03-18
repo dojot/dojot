@@ -24,9 +24,6 @@ readonly REDIS_MAPPED_DB=${REDIS_MAPPED_DB:-"1"}
 #Environment
 readonly DOJOT_ENV=${DOJOT_ENV:-"n"}
 
-# Enables device ID generation when 1, disables when 0
-readonly GENERATE_IDS=${GENERATE_IDS:-1}
-
 if [ "${DEBUG_MODE}" == "1" ]
 then
     set -ex
@@ -89,27 +86,13 @@ while [ -z "${RESPONSE}" ]; do
 done
 echo "dojot MQTT broker at host '${DOJOT_MQTT_HOST}', port '${DOJOT_MQTT_PORT}' fully started."
 
-# Verifying whether it should delete all device IDs and then recreate
-
-if [ "${REDIS_BACKUP}" == "n" ]
+if [ "${REDIS_BACKUP}" == "y" ]
 then
-    if [ "${GENERATE_IDS}" -eq "1" ] && [ "${DOJOT_ENV}" == "y" ]
-    then
-        echo "Start flushing ..."
-        bash flushall.sh
-    fi
-
-    echo "Adding data ..."
-    bash setup.sh
-    echo "... Setup accomplished."
-else
     echo "Reading from backup."
     echo "SET device_count 0" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" -n ${REDIS_MAPPED_DB} &> /dev/null
     echo "SET devices_to_revoke 0" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" -n ${REDIS_MAPPED_DB} &> /dev/null
     echo "SET devices_to_renew 0" | redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" -n ${REDIS_MAPPED_DB} &> /dev/null
 fi
-
-
 
 echo "Starting locust master node ..." &&
 locust -f main.py -H "${DOJOT_MQTT_HOST}:${DOJOT_MQTT_PORT}" --master
