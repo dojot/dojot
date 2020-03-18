@@ -272,7 +272,6 @@ class GenerateCerts():
         elif self.parser_args.map:
             self.map_device_ids()
 
-        # TODO: TESTAR
         elif self.parser_args.export:
             # Exports the certificates' files
             self.export_certs()
@@ -571,4 +570,3 @@ class GenerateCerts():
 
 if __name__ == "__main__":
     GenerateCerts()
-
