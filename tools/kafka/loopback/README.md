@@ -1,25 +1,25 @@
-# 100K Loopback
+# Loopback service for 100K epic
 
-This service is a helper for 100k-epic, transfers incoming payload from a **device-data** topic to **device-manager** topic in the dojot style.
+This service is a helper for testing the 100k-epic. It's goal is to transform messages sent from devices to dojot into messages sent from dojot to devices. To implement this "loopback", it transfers incoming messages from **device-data** topic to **device-manager** topic adapting them according to dojot's message schema.
 
 # Configurations
 ## Environment Variables
 
 Key                      | Purpose                                                             | Default Value   			| Valid Values      |
 ------------------------ | ------------------------------------------------------------------- | -------------------------- | ----------------- |
-DOJOT_USERNAME           | username to login on auth and retrieve token						   | admin           			| string   		    |
-DOJOT_PASSWORD           | password to login on auth and retrieve token						   | admin           			| string   		    |
+DOJOT_USERNAME           | username to access dojot                 						   | admin           			| string   		    |
+DOJOT_PASSWORD           | password to access dojot                 						   | admin           			| string   		    |
 AUTH_ADDRESS             | Address of the auth service                                         | http://auth:5000           | hostname/IP:port  |
 DATA_BROKER_ADDRESS      | Address of the data broker service                                  | http://data-broker:80    	| hostname/IP:port  |
 KAFKA_BROKER_LIST        | Addresses of the kafka brokers separated by a comma                 | kafka-server:9092			| hostname/IP:port  |
 LOOPBACK_CONSUMER_GROUP  | Kafka consumer group                                                | loopback-group             | string            |
 DEVICE_DATA_TOPIC    	 | Topic to consume from                                               | device-data        		| string            |
-DEVICE_MANAGER_TOPIC     | Topic to produce the modified messages                              | dojot.device-manager.device| string            |
+DEVICE_MANAGER_TOPIC     | Topic to produce to                                                 | dojot.device-manager.device| string            |
 
 # Example
-As a specific component for dojot devices there is an example
+Bellow there is an example of the message received from the **device-data** topic and the modified message sent to **device-manager** topic.
 
-device-data received message
+Received message from device-data:
 ```
 {
     "metadata": { 
@@ -33,17 +33,20 @@ device-data received message
 }
 ```
 
-device-manager modified payload
+Sent message to device-manager:
 ```
 {
-    "metadata": {
-        "deviceid": "e33dada7ce5a4905819d8fb0606c613f",
-        "tenant":"admin",
-        "timestamp":1583939224 
-    },
+  "event": "configure",
+  "meta": {
+    "service": "admin",
+    "timestamp": 1583939224
+  },
+  "data": {
+    "id": "e33dada7ce5a4905819d8fb0606c613f",
     "attrs": {
         "timestamp": 1583939224072
     }
+  }
 }
 ```
 
