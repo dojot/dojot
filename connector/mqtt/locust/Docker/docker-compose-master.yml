@@ -1,25 +1,22 @@
 version: '3'
 services:
   locust-master:
-    image: dojot/locust
+    image: dojot/locust:development
     depends_on:
       - redis
     environment:
       # Don't forget to set the environment variables
-      DOJOT_URL: "http://10.202.70.102:8000"
+      DOJOT_URL: "http://127.0.0.1:8000"
       DOJOT_USER: "admin"
       DOJOT_PASSWD: "admin"
-      DOJOT_MQTT_HOST: "10.50.11.227"
+      DOJOT_MQTT_HOST: "127.0.0.1"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
-      DOJOT_MQTT_PORT: "30011"
+      DOJOT_MQTT_PORT: "1883"
       DOJOT_MQTT_TIMEOUT: "120"
-      LOCUST_LOG_DIR: "logs"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       REDIS_PASSWD: ""
       REDIS_BACKUP: "y"
-      NUMBER_OF_DEVICES: "100000"
-      GENERATE_IDS: "1"
       DOJOT_ENV: "n"
     command: bash master_entrypoint.sh
     volumes:
