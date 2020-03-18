@@ -1,5 +1,5 @@
 {
-  "name": "microservice-sdk",
+  "name": "@dojot/microservice-sdk",
   "version": "0.1.0",
   "description": "A SDK to help to build microservices for the dojot platform",
   "scripts": {
