@@ -31,23 +31,23 @@ readonly TOKEN=$(curl --silent -X POST ${AUTH_ADDRESS} -H "${JSON_CONTENT_TYPE}"
 if [ ! -z "$TOKEN" ]
 then
     echo "Retrived token sucessfully ..."
-    readonly LDEVICE_DATA_TOPIC=$(curl --silent -X GET "${DATA_BROKER_ADDRESS}/topic/${DEVICE_DATA_TOPIC}" -H "Authorization: Bearer ${TOKEN}" | jq '.topic' -r)
-    readonly LDEVICE_MANAGER_TOPIC=$(curl --silent -X GET "${DATA_BROKER_ADDRESS}/topic/${DEVICE_MANAGER_TOPIC}" -H "Authorization: Bearer ${TOKEN}" | jq '.topic' -r)
+    readonly LOCAL_DEVICE_DATA_TOPIC=$(curl --silent -X GET "${DATA_BROKER_ADDRESS}/topic/${DEVICE_DATA_TOPIC}" -H "Authorization: Bearer ${TOKEN}" | jq '.topic' -r)
+    readonly LOCAL_DEVICE_MANAGER_TOPIC=$(curl --silent -X GET "${DATA_BROKER_ADDRESS}/topic/${DEVICE_MANAGER_TOPIC}" -H "Authorization: Bearer ${TOKEN}" | jq '.topic' -r)
 
     if [ ! -z "${DEBUG+x}" ]; then
-        echo "${LDEVICE_DATA_TOPIC}"
-        echo "${LDEVICE_MANAGER_TOPIC}"
+        echo "${LOCAL_DEVICE_DATA_TOPIC}"
+        echo "${LOCAL_DEVICE_MANAGER_TOPIC}"
     fi
 
-    if [ ! -z "${LDEVICE_DATA_TOPIC}" ] && [ ! -z "${LDEVICE_MANAGER_TOPIC}" ]
+    if [ ! -z "${LOCAL_DEVICE_DATA_TOPIC}" ] && [ ! -z "${LOCAL_DEVICE_MANAGER_TOPIC}" ]
     then
 
         echo "Starting loopback ...."
-        kafkacat -C -b "${KAFKA_BROKER_LIST}" -q -f '{ "key": "%k" , "msg": %s }\n' -u -G "${LOOPBACK_CONSUMER_GROUP}" "${LDEVICE_DATA_TOPIC}" | \
-        unbuffer -p jq -r '"\(.key)@{\"event\": \"configure\",\"meta\": {\"service\": \"\(.msg.metadata.tenant)\",\"timestamp\": \(.msg.metadata.timestamp)},\"data\" : {\"id\" : \"\(.msg.metadata.deviceid)\",\"attrs\": \(.msg.attrs)}}"' \
-        |  kafkacat -P -b "${KAFKA_BROKER_LIST}" -t "${LDEVICE_MANAGER_TOPIC}" -K @ -l
+        kafkacat -C -b "${KAFKA_BROKER_LIST}" -q -f '{ "key": "%k" , "msg": %s }\n' -u -G "${LOOPBACK_CONSUMER_GROUP}" "${LOCAL_DEVICE_DATA_TOPIC}" \
+        | unbuffer -p jq -r '"\(.key)@{\"event\": \"configure\",\"meta\": {\"service\": \"\(.msg.metadata.tenant)\",\"timestamp\": \(.msg.metadata.timestamp)},\"data\" : {\"id\" : \"\(.msg.metadata.deviceid)\",\"attrs\": \(.msg.attrs)}}"' \
+        | kafkacat -P -b "${KAFKA_BROKER_LIST}" -t "${LOCAL_DEVICE_MANAGER_TOPIC}" -K @ -l
         
-        echo "Application Stopped restarting ..."
+        echo "Application Failed restarting ..."
     else
        echo "Restarting - unable to retrieve '${DEVICE_DATA_TOPIC}' and '${DEVICE_MANAGER_TOPIC}' topics"
     fi
