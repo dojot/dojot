@@ -7,7 +7,7 @@ The Dojot VerneMQ service is a extension of [VerneMQ](https://github.com/vernemq
 
 Key                      | Purpose                                                             | Default Value  | Accepted values
 -----------------------  | --------------------------------------------------------------      | -------------- |------------
-EJBCA_ADDRESS            | Address of the EJBCA broker                                         | "ejbca-wrapper"| IP or DNS
+EJBCA_ADDRESS            | Address of the EJBCA broker                                         | "ejbca-wrapper:5583"| IP or DNS
 USE_VMQ_OPERATOR         | Enables the broker for use with the vmq-operator                    | "n"            | y or n
 EXTERNAL_SERVER_HOSTNAME | Server hostname (the host to connect external)                      | "localhost"    | hostname
 EXTERNAL_SERVER_IP       | Server IP (the IP to connect external)                              | ""             | IP
