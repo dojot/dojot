@@ -4,7 +4,7 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 
 . "${BASE_DIR}"/scripts_tls/_initVariables.sh
 
-if openssl verify -CAfile "${certDir}"/"${certCaFile}" "${certDir}"/"${certCertFile}"
+if openssl verify -CAfile "${certDir}/${certCaFile}" "${certDir}/${certCertFile}"
 then
     echo "Certificate Chain - Verification OK"
 else

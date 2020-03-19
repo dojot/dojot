@@ -5,19 +5,18 @@ The Dojot VerneMQ service is a extension of [VerneMQ](https://github.com/vernemq
 
 ## **Environment variables**
 
-Key                      | Purpose                                                            | Default Value  | Accepted values
------------------------  | --------------------------------------------------------------     | -------------- |------------
-EJBCA_HOSTNAME           | Hostname of the EJBCA broker                                       | "ejbca-wrapper"| IP or DNSs
-EJBCA_PORT               | Ejbca service port                                                 | "5583"         | port values
-USE_VMQ_OPERATOR         | yes if use with vmq-operator                                       | "n"            | y or n
-SERVER_HOSTNAME          | Server hostname (the host to connect external)                     | "localhost"    | hostname
-SERVER_IP                | Server IP (the IP to connect external)                             | ""             | IP
-INTERNAL_DNS        | Internal hostname (used to connect for vk2-bridge and k2v-bridge)  | "vernemq-k8s"  | hostname
-CA_NAME                  | CA Name from EJBCA                                                 | "IOTmidCA"     | string
-CHECK_EXPIRATION_TIME    | Checks if the certificates expires every define time by cron       | "0 1 * * *"    | cron schedule expressions
-CHECK_BROKER_CERT_REVOKED_TIME  | Checks if the public certificate of broker has revoked every define time by cron  | "0 */3 * * *" | cron schedule expressions
-CRL_UPDATE_TIME          | Update CRL certificate every define time by cron                   | "0 */2 * * *" | cron schedule expressions
-CHECKEND_EXPIRATION_SEC  | When expiration check certificates run, renew if the certificates expires within the next arg seconds | 43200  | seconds
+Key                      | Purpose                                                             | Default Value  | Accepted values
+-----------------------  | --------------------------------------------------------------      | -------------- |------------
+EJBCA_ADDRESS            | Address of the EJBCA broker                                         | "ejbca-wrapper"| IP or DNS
+USE_VMQ_OPERATOR         | Enables the broker for use with the vmq-operator                    | "n"            | y or n
+EXTERNAL_SERVER_HOSTNAME | Server hostname (the host to connect external)                      | "localhost"    | hostname
+EXTERNAL_SERVER_IP       | Server IP (the IP to connect external)                              | ""             | IP
+INTERNAL_DNS             | Internal hostname (used to connect for vk2-bridge and k2v-bridge)   | "vernemq-k8s"  | hostname
+CA_NAME                  | CA Name from EJBCA                                                  | "IOTmidCA"     | string
+CHECK_EXPIRATION_TIME    | Check if the certificate has expired every time defined by this cron expression and renews them if necessary | "0 1 * * *"    | cron schedule expressions
+CHECK_BROKER_CERT_REVOKED_TIME  | Checks if the public certificate of broker has revoked every time defined by this cron expression and renews them if necessary  | "0 */3 * * *" | cron schedule expressions
+CRL_UPDATE_TIME          | Retrieve the new CRL every time defined by this cron expression | "0 */2 * * *" | cron schedule expressions
+CHECKEND_EXPIRATION_SEC  | Check the certificates states and renews them if they expire within the next arg seconds | 43200  | seconds
 
 
 ### **VerneMQ Configuration**
