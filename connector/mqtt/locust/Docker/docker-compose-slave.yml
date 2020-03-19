@@ -11,7 +11,7 @@ services:
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "1883"
       DOJOT_MQTT_TIMEOUT: "120"
-      LOCUST_MASTER_HOST: "127.0.0.1"
+      LOCUST_MASTER_HOST: "locust-master"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       REDIS_PASSWD: ""
@@ -29,3 +29,8 @@ services:
       DEVICES_TO_REVOKE: 1000
       TIME_TO_REVOKE: 1000
       PROBABILITY_TO_REVOKE: "10"
+
+networks:
+  default:
+    external:
+      name: docker_default

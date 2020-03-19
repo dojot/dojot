@@ -22,14 +22,20 @@ for more info.
 
 #### **How to use**
 
+First you will need some Redis container going on. The preferred way is to use the Locust master Redis.
+By using the same Redis, we can modify the database directly with the script.
+```shell
+docker-compose -f Docker/docker-compose-master.yml up -d
+```
+
 Run the Docker Compose file:
 ```shell
 docker-compose -f Docker/scripts/generate_certs/docker-compose.yml up -d
 ```
 
-You will have `Redis` and `generate_certs` containers running. Now enter in `generate_certs` container:
+You will have the `generate-certs` container running. Now enter in it:
 ```shell
-docker-compose -f Docker/scripts/generate_certs/docker-compose.yml exec generate_certs bash
+docker-compose -f Docker/scripts/generate_certs/docker-compose.yml exec generate-certs bash
 ```
 
 To run the script and check its options:
@@ -180,7 +186,7 @@ DEBUG_MODE            | activate debug mode in shell scripts                    
 DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
 DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
 EJBCA_URL             | EJBCA address                                                  | http://localhost:5583 | hostname/IP:port                              |
-LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | 127.0.0.1             | hostname/IP                                   |
+LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | locust-master         | hostname/IP                                   |
 LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
 MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
 MIN_TIME_RECONN       | min time (in seconds) to try to reconnect to the MQTT broker   | 1                     | integer                                       |

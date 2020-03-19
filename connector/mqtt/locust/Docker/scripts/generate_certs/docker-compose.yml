@@ -1,11 +1,9 @@
 version: "3"
 services:
-  generate_certs:
+  generate-certs:
     image: eduardogmisiuk/generate_certs:development
     volumes:
       - ../../..:/usr/src/app
-    depends_on:
-      - redis
     environment:
       DOJOT_URL: "http://127.0.0.1:8000"
       DOJOT_USER: "admin"
@@ -19,16 +17,7 @@ services:
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
 
-
-  redis:
-    image: redis:5.0.5-alpine3.10
-    restart: always
-    logging:
-      driver: json-file
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-    volumes:
-      - ../../../db/:/data
+networks:
+  default:
+    external:
+      name: docker_default
