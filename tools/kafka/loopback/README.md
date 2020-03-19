@@ -1,6 +1,6 @@
-# Loopback service for 100K epic
+# Loopback service for kafka
 
-This service is a helper for testing the 100k-epic. It's goal is to transform messages sent from devices to dojot into messages sent from dojot to devices. To implement this "loopback", it transfers incoming messages from **device-data** topic to **device-manager** topic adapting them according to dojot's message schema.
+This service is a helper for kafka. It's goal is to transform messages sent from devices to dojot into messages sent from dojot to devices. It transfers incoming messages from **device-data** topic to **device-manager** topic adapting them according to dojot's message schema.
 
 # Configurations
 ## Environment Variables
