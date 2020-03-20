@@ -20,12 +20,12 @@ process.on('unhandledRejection', (reason) => {
   // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
   // no error handler is attached to the promise within a turn of the event loop.
   logger.error(`Unhandled Rejection at: ${reason.stack || reason}. Bailing out!!`, TAG);
-  process.kill(process.pid, 'SIGTERM');
+  killApplication();
 }).on('uncaughtException', (ex) => {
   // The 'uncaughtException' event is emitted when an uncaught JavaScript
   // exception bubbles all the way back to the event loop.
   logger.error(`Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`, TAG);
-  process.kill(process.pid, 'SIGTERM');
+  killApplication();
 });
 
 try {
