@@ -1,5 +1,6 @@
 const { logger } = require('@dojot/dojot-module-logger');
-const ConsumerBackPressure = require('../lib/kafka/ConsumerBackPressure');
+const { Kafka: { ConsumerBackPressure } } = require('../index.js');
+
 const config = require('./config');
 
 const TAG = { filename: 'sample' };
