@@ -1,6 +1,7 @@
 jest.mock('@dojot/dojot-module');
 jest.mock('@dojot/dojot-module-logger');
 jest.mock('../../app/utils/utils');
+jest.mock('../../app/MqttClient.js');
 
 const mockProcess = require('jest-mock-process');
 const utils = require('../../app/utils/utils');
@@ -51,17 +52,10 @@ let mockedMessenger;
 async function expectConfigs() {
   mockConfig.Messenger.init.mockReturnValue(Promise.resolve());
 
+  await mockedMessenger.init();
 
-  await mockedMessenger.init(mockConfig.mqttConfig);
-
-  // Unhandled promise rejection
-  try {
-    expect(mockConfig.Messenger.init).toHaveBeenCalled();
-    expect(mockConfig.Messenger.on).toHaveBeenCalled();
-    expect(mockConfig.mqttConfig.subscribe).toHaveBeenCalled();
-  } catch (error) {
-    // do nothing
-  }
+  expect(mockConfig.Messenger.init).toHaveBeenCalled();
+  expect(mockedMessenger.mqttClient.init).toHaveBeenCalled();
 }
 
 describe('Testing AgentMessenger messenger', () => {
@@ -90,7 +84,7 @@ describe('Testing AgentMessenger messenger', () => {
     mockConfig.Messenger.init.mockReturnValue(Promise.reject(reason));
 
     try {
-      await mockedMessenger.init(mockConfig.mqttConfig);
+      await mockedMessenger.init();
     } catch (error) {
       expect(error).toEqual(reason);
     }

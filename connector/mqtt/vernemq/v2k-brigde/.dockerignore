@@ -5,11 +5,6 @@ node_modules
 .dockerignore
 Dockerfile
 
-# git
-.git
-.github
-.gitignore
-
 # tests
 test
 

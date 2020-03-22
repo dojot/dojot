@@ -12,7 +12,6 @@ RUN apk --no-cache add \
       lz4-dev \
       make \
       musl-dev \
-      openssl-dev \
       python
 
 RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
@@ -32,18 +31,18 @@ COPY ./app ./app
 FROM node:10.16.3-alpine
 
 WORKDIR /opt/v2k_bridge
-ENV BASE_DIR="/opt/v2k_bridge"
 
 RUN apk --no-cache add \
       bash \
       curl \
-      cyrus-sasl-dev \
       jq \
-      lz4-dev \
+      libsasl \
+      lz4-libs \
+      openssl \
       tini
 
 COPY --from=base /opt/v2k_bridge /opt/v2k_bridge
 
 ENTRYPOINT ["/sbin/tini", "--", "./bin/entryPoint.sh"]
 
-CMD [ "npm", "start", "client" ]
+CMD [ "npm", "run", "app" ]

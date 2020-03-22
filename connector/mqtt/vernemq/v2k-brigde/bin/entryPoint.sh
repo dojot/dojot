@@ -10,15 +10,15 @@ if [ ! -z "${DEBUG+x}" ]; then
 fi
 
 # readonly variables
-readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONECTION_TRIES_TIMEOUT_SEC:-"3"}
-readonly V2K_VERNE_CONNECTION_TRIES_TIMEOUT=${CONECTION_TRIES_TIMEOUT_SEC:-"3"}
+readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONNECTION_TRIES_TIMEOUT:-"3"}
+readonly V2K_VERNE_CONNECTION_TRIES_TIMEOUT=${CONNECTION_TRIES_TIMEOUT:-"3"}
 readonly V2K_VERNE_DATA_BROKER_HOST=${DATA_BROKER:-"data-broker:80"}
-readonly V2K_VERNE_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092"}
+readonly V2K_VERNE_KAFKA_HOSTS=${KAFKA_HOSTS:-"kafka-server:9092,jonasa:67"}
 
 readonly BASE_DIR=${BASE_DIR:-"/opt/v2k-bridge"}
 
 # Split kafka brokers by comma
-readonly LKAFKA_HOSTS=$(echo ${V2K_VERNE_KAFKA_HOSTS} | tr "," "\n")
+readonly LKAFKA_HOSTS=${V2K_VERNE_KAFKA_HOSTS//,/ }
 
 has_responded=false
 for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++)); 
@@ -49,7 +49,7 @@ if [ "$has_responded" == false ]; then
     echo "No Kafka brokers available, exiting ..."
     exit 1
 fi
-echo -e "Connecttion established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
+echo -e "Connection established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
 
 #
 # Data broker
@@ -61,7 +61,7 @@ do
     echo "$((${i} + 1)) - Trying to connect with *${data_broker_address_splited[0]}* on port *${data_broker_address_splited[1]}*"
     DATA_BROKER_RESPONSE=$(nc -zv ${data_broker_address_splited[0]} ${data_broker_address_splited[1]} &> /dev/null; echo $?)
     if [ "${DATA_BROKER_RESPONSE}" == 0 ]; then
-        echo -e "Connecttion established with **${data_broker_address_splited[0]}** on port **${data_broker_address_splited[1]}**\n"
+        echo -e "Connection established with **${data_broker_address_splited[0]}** on port **${data_broker_address_splited[1]}**\n"
         break
     elif ((i == ((${V2K_VERNE_CONNECTION_TRIES_COUNT}-1)))); then
         exit 1

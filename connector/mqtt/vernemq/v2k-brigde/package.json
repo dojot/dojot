@@ -3,28 +3,34 @@
   "version": "1.0.0",
   "private": true,
   "description": "Service to bridge messages from VerneMQ to Apache Kafka according to dojot rules.",
-  "homepage": "https://github.com/dojot/dojot/tree/epic-100kMqttDevices/connector/mqtt/vernemq/v2k-bridge",
+  "homepage": "https://github.com/dojot/dojot",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dojot/dojot/tree/epic-100kMqttDevices",
+    "url": "https://github.com/dojot/dojot",
     "directory": "connector/mqtt/vernemq/v2k-bridge"
   },
   "main": "index.js",
   "scripts": {
-    "start": "node app/index.js",
+    "app": "node app/index.js",
     "test": "jest test/unit/*.js",
     "coverage": "jest --collect-coverage"
   },
   "keywords": [
-    "dojot, mqtt"
+    "dojot",
+    "mqtt",
+    "vernemq",
+    "kafka"
   ],
   "author": "Jonaphael Aristil, Muhamed Avila",
   "license": "GPL-3.0, ISC",
   "dependencies": {
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
     "@dojot/iotagent-nodejs": "2.1.0-beta.8",
+    "async": "^3.1.1",
+    "md5": "^2.2.1",
     "moment": "^2.24.0",
-    "mqtt": "^3.0.0"
+    "mqtt": "^3.0.0",
+    "mqtt-packet": "^6.3.1"
   },
   "jest": {
     "coverageDirectory": "./coverage/",
@@ -32,8 +38,7 @@
     "collectCoverageFrom": [
       "app/**/*.js",
       "utils/**/*.js",
-      "!app/index.js",
-      "!app/config.js"
+      "!app/index.js"
     ]
   },
   "devDependencies": {
