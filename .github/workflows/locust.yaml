@@ -32,7 +32,9 @@ jobs:
         pip install -r requirements/prod.txt
 
     - name: pylint
-      run: pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc -E
+      run: |
+        cd connector/mqtt/locust
+        pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc -E
 
     - name: pytest
       run: |
