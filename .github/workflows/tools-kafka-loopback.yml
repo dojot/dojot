@@ -1,0 +1,36 @@
+name: Kafka Loopback (tools/kafka/loopback)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'tools/kafka/loopback/**'
+on:
+  create:
+  push:
+    paths:
+      - 'tools/kafka/loopback/**'
+
+jobs:
+  docker-hub:
+    name: (tools/kafka/loopback) Build  and Publish image with plugins to DockerHUb #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    # If this is a PR or commit with msg ci skip, it won't run
+    if: contains(github.ref, 'refs/pull/') == false || contains(github.event.head_commit.message, 'ci skip') == false
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.11
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/kafka-loopback
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: tools/kafka/loopback/
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
