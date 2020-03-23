@@ -48,7 +48,7 @@ jobs:
         name: locust
 
   docker-hub:
-    needs: unit-tests
+    needs: tests
     name: (connector/mqtt/locust) Build and Publish image to DockerHub
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false
