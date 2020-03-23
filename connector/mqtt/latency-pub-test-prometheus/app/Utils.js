@@ -6,7 +6,7 @@ const extractPayload = (message) => {
 };
 
 const killApplication = () => {
-  process.kill(process.pid, 'SIGTERM');
+  process.exit(1);
 };
 
 module.exports = {

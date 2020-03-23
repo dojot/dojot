@@ -16,18 +16,6 @@ const kafkaMessenger = new KafkaMessenger();
 
 logger.info('Starting Dojot Prometheus...', TAG);
 
-process.on('unhandledRejection', (reason) => {
-  // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
-  // no error handler is attached to the promise within a turn of the event loop.
-  logger.error(`Unhandled Rejection at: ${reason.stack || reason}. Bailing out!!`, TAG);
-  killApplication();
-}).on('uncaughtException', (ex) => {
-  // The 'uncaughtException' event is emitted when an uncaught JavaScript
-  // exception bubbles all the way back to the event loop.
-  logger.error(`Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`, TAG);
-  killApplication();
-});
-
 try {
   // Init express server Listen
   expressApp.initListen();
@@ -35,8 +23,8 @@ try {
   // Init kafka consume
   kafkaMessenger.init();
 } catch (error) {
-  // If a not trated expection throw,
-  // them stop express server and kill aplication
+  // If a not treated exception throw it,
+  // then stop express server and kill the application
 
   logger.error(`Caught an error: ${error.stack || error}`, TAG);
   expressApp.stop();

@@ -30,11 +30,13 @@ class ExpressApp {
    * Init listening
    */
   initListen() {
-    logger.debug('Starting Listening on port...', TAG);
-    this.httpServer = this.app.listen(config.prom.port, () => {
-      logger.info(`Listening on port ${config.prom.port}.`, TAG);
-      this.isInitialized = true;
-    });
+    if (!this.isInitialized) {
+      logger.debug('Starting Listening on port...', TAG);
+      this.httpServer = this.app.listen(config.prom.port, () => {
+        logger.info(`Listening on port ${config.prom.port}.`, TAG);
+        this.isInitialized = true;
+      });
+    }
   }
 
   /**

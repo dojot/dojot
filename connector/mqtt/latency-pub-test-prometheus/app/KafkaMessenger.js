@@ -7,7 +7,6 @@ const latencyStore = require('./LatencyStore');
 
 const {
   extractPayload,
-  killApplication,
 } = require('./Utils');
 
 const TAG = { filename: 'KafkaMessenger' };
@@ -37,7 +36,7 @@ class KafkaMessenger {
       this.initKafka();
     }).catch((error) => {
       logger.error(`... failed to initialize the latency-pub-test-prometheus messenger. Error: ${error.stack || error}`);
-      killApplication();
+      throw error;
     });
   }
 
@@ -60,7 +59,7 @@ class KafkaMessenger {
    * Callback to process incoming device data
    * @param {String} The tenant associated to the emitted message
    * @param {Object} Message The message (or object)
-   * @param {Object} extraInfo Informations from kafka: key, topic, offset, partition and timestamp
+   * @param {Object} extraInfo Information from kafka: key, topic, offset, partition and timestamp
    */
   static kafkaOnMessage(_tenant, message, extraInfo) {
     logger.debug(`The message is ${util.inspect(message, { depth: null })}`, TAG);

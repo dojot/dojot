@@ -3,7 +3,7 @@ const { logger } = require('@dojot/dojot-module-logger');
 
 const TAG = { filename: 'LatencyStore' };
 
-/** Class to store Latencys and calculate statistics * */
+/** Class to store latencies and calculate statistics * */
 class LatencyStore {
   /**
      *
@@ -49,7 +49,7 @@ class LatencyStore {
   }
 
   /**
-     * Update the attrs of classe min if param is less then current
+     * Update the attribute of classe min if param is less then current
      *
      * @param {number} Latency
      */
@@ -58,7 +58,7 @@ class LatencyStore {
   }
 
   /**
-     * Update the attrs of classe max if param is more then current
+     * Update the attribute of classe max if param is more then current
      *
      * @param {number} Latency
      */
@@ -75,8 +75,8 @@ class LatencyStore {
   }
 
   /**
-     * Get mininum value for all latencies stores
-     * @return {number} Mininum for all latencies stores
+     * Get minimum value for all latencies stores
+     * @return {number} minimum for all latencies stores
      */
   getMin() {
     return this.min;

@@ -91,7 +91,7 @@ describe('Testing Dojot Kafka messenger', () => {
     try {
       KafkaMessenger.kafkaOnMessage('admin', {}, {});
     } catch (e) {
-      expect(metrics.addLatency).not.toHaveBeenCalledWith();
+      expect(metrics.addLatency).not.toHaveBeenCalled();
     }
   });
 
@@ -108,7 +108,7 @@ describe('Testing Dojot Kafka messenger', () => {
     try {
       KafkaMessenger.kafkaOnMessage('admin', JSON.stringify(msg), {});
     } catch (e) {
-      expect(metrics.addLatency).not.toHaveBeenCalledWith();
+      expect(metrics.addLatency).not.toHaveBeenCalled();
     }
   });
 });

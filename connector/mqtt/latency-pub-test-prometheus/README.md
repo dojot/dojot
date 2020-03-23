@@ -2,7 +2,7 @@
 
 ### Latency between publication MQTT and Kafka with Prometheus and Dojot
 
-A [prometheus](https://github.com/prometheus/prometheus) client to measure the latency between publication MQTT and when payload arrives in Apache Kafka for dojot.
+A [prometheus](https://github.com/prometheus/prometheus) client to measure the payloads latencies between an MQTT broker and Apache Kafka for dojot..
 
 
 ### **How works**
@@ -11,11 +11,11 @@ Prometheus collects metrics from monitored targets by scraping metrics HTTP endp
 
 Every time that this client receives a message from Kafka It store a latency, like describe below:
 
- - The latency is measured with the diffence between final timestamp and start timestamp.
+ - The latency is measured with the difference between final timestamp and start timestamp.
 
- - The start timestamp in miliseconds must be within the  payload (publication MQTT) and data as follow: `{"attrs": {"timestamp": 1575978282524759 }}`
+ - The start timestamp in milliseconds must be within the  payload (publication MQTT) and data as follow: `{"attrs": {"timestamp": 1575978282524759 }}`
 
- - And the final timestamp in miliseconds is exposed by kafka in extra information.
+ - And the final timestamp in milliseconds is exposed by kafka in extra information.
 
 When the Prometheus collects the metrics, It collects the metrics such as average, maximum, minimum and standard deviation between the last collector and the current one.
 
@@ -27,7 +27,7 @@ Key                      | Purpose                                              
 ------------------------ | -------------------------------------------------------- | ---------------    | -----------  |
 AUTH_URL                 | Address of the auth service                              | http://auth:5000   | url          |
 DATA_BROKER_URL          | Address of the data broker                               | http://data-broker | url          |
-KAFKA_HOSTS              | Addresses of the kafka brokers separeted by a comma      | kafka-server:9092  | hostname/IP  |
+KAFKA_HOSTS              | Addresses of the kafka brokers separated by a comma      | kafka-server:9092  | hostname/IP  |
 LOG_LEVEL                | logger level                                             | info               | debug, error, warning, info  |
 PROMETHEUS_PORT          | Port of prometheus client                                | 3000               | integer       |
 
