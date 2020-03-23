@@ -9,8 +9,8 @@ on:
       - 'connector/mqtt/locust/**'
 
 jobs:
-  unit-tests:
-    name: (connector/mqtt/locust) Unit Tests #  path to help identify in Status checks each job
+  tests:
+    name: (connector/mqtt/locust) Tests #  path to help identify in Status checks each job
     if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
     runs-on: ubuntu-latest
     strategy:
@@ -30,6 +30,9 @@ jobs:
         cd connector/mqtt/locust
         pip install -r requirements/dev.txt
         pip install -r requirements/prod.txt
+
+    - name: pylint
+      run: pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc -E
 
     - name: pytest
       run: |
