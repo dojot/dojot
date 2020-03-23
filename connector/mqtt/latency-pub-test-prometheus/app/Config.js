@@ -16,7 +16,7 @@ const messenger = {
       dr_cb: true,
     },
     consumer: {
-      'group.id': process.env.KAFKA_GROUP_ID || "dojot-prom-mqtt-kafka",
+      'group.id': process.env.KAFKA_GROUP_ID || 'dojot-prom-mqtt-kafka',
       'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka-server:9092',
     },
     dojot: {
