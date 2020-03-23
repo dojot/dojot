@@ -3,11 +3,15 @@ const { logger } = require('@dojot/dojot-module-logger');
 
 const TAG = { filename: 'LatencyStore' };
 
-/** Class to store latencies and calculate statistics * */
+/* * *
+ * Class to store latencies and calculate statistics
+ * Export the instance of the class,
+ * that restricts the instantiation of a class to one "single" instance.
+ * * */
 class LatencyStore {
   /**
-     *
-     */
+  * Cannot construct outside this file
+  */
   constructor() {
     logger.debug('Init LatencyStore...', TAG);
 

@@ -26,6 +26,7 @@ Metrics are following the Prometheus conventions. They are available via HTTP en
 Key                      | Purpose                                                  | Default Value      | Valid Values |
 ------------------------ | -------------------------------------------------------- | ---------------    | -----------  |
 AUTH_URL                 | Address of the auth service                              | http://auth:5000   | url          |
+KAFKA_GROUP_ID           | The Kafka consumer group ID to be used                   | dojot-prom-mqtt-kafka  | String          |
 DATA_BROKER_URL          | Address of the data broker                               | http://data-broker | url          |
 KAFKA_HOSTS              | Addresses of the kafka brokers separated by a comma      | kafka-server:9092  | hostname/IP  |
 LOG_LEVEL                | logger level                                             | info               | debug, error, warning, info  |
