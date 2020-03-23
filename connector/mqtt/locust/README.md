@@ -6,19 +6,17 @@ The Dojot Load Test tool is an implementation using the open-source load testing
 
 ## **Scripts**
 
-As said before, to run the scripts you must activate the virtual environment and have installed
-its dependencies.
+This section will show how to use the scripts that are used to complement/help Locust tests.
 
 ### **Generate Certificates**
 
-The main goal of this script is to generate certificates for devices. These can either be in Dojot or
-be virtual ones. It also is used to create test devices and clear devices/templates in Dojot.
+The main goal of this script is to generate certificates for devices. These can either be in Dojot or be virtual ones. It also is used to create test devices and clear devices/templates in
+Dojot.
 
 #### **Setup**
 
 To run this script, you will need a Dojot's EJBCA instance running elsewhere. You can either
-run a full Dojot or a separate EJBCA instance. You can see [here](https://dojotdocs.readthedocs.io/en/stable/)
-for more info.
+run a full Dojot or a separate EJBCA instance. You can see [here](https://dojotdocs.readthedocs.io/en/stable/) for more info.
 
 #### **How to use**
 
@@ -185,7 +183,6 @@ CERT_DIR              | certificates and private keys directory                 
 DEBUG_MODE            | activate debug mode in shell scripts                           | 0                     | 0, 1                                          |
 DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
 DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
-EJBCA_URL             | EJBCA address                                                  | http://localhost:5583 | hostname/IP:port                              |
 LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | locust-master         | hostname/IP                                   |
 LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
 MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
@@ -224,14 +221,15 @@ DOJOT_MQTT_TIMEOUT     | MQTT broker timeout               | 60            | int
 
 Dojot integration configuration.
 
-Key                   | Purpose                              | Default Value         | Valid Values |
---------------------- | ------------------------------------ | --------------------- | ------------ |
-DOJOT_ENV             | use a dojot instance                 | n                     | y, n         |
-DOJOT_GATEWAY_TIMEOUT | dojot auth API timeout               | 180                   | integer      |
-DOJOT_PASSWD          | dojot user's password                | admin                 | passwords    |
-DOJOT_URL             | dojot instance address               | http://127.0.0.1:8000 | hostname/IP  |
-DOJOT_USER            | dojot user                           | admin                 | usernames    |
-GENERATE_IDS          | activate the automatic ID generation | 1                     | 0, 1         |
+Key                   | Purpose                              | Default Value         | Valid Values       |
+--------------------- | ------------------------------------ | --------------------- | ------------------ |
+DOJOT_ENV             | use a dojot instance                 | n                     | y, n               |
+DOJOT_GATEWAY_TIMEOUT | dojot auth API timeout               | 180                   | integer            |
+DOJOT_PASSWD          | dojot user's password                | admin                 | passwords          |
+DOJOT_URL             | dojot instance address               | http://127.0.0.1:8000 | hostname/IP        |
+DOJOT_USER            | dojot user                           | admin                 | usernames          |
+DOJOT_API_RETRIES     | number of retries for API calls      | 3                     | integer            |
+DOJOT_API_RETRY_TIME  | time to wait between retries         | 5000                  | float time in ms   |
 
 ## **Operating System**
 
