@@ -7,6 +7,7 @@ from OpenSSL import crypto
 
 from src.config import CONFIG
 from src.utils import Utils
+from src.mqtt_locust.redis_client import RedisClient
 
 class Certificate:
     """
@@ -16,6 +17,8 @@ class Certificate:
     def __init__(self, thing_id):
         self.logger = Utils.create_logger("certificate")
         Utils.validate_thing_id(thing_id)
+
+        self.jwt = RedisClient().get_jwt()
 
         self.c_name = thing_id
         self.key = {"raw": "", "pem": self.generate_private_key()}
@@ -56,10 +59,10 @@ class Certificate:
 
         dnsname = CONFIG['security']['dns_cert']
 
-        ss = []
+        dns = []
         for i in dnsname:
-            ss.append("DNS: %s" % i)
-        ss = ", ".join(ss)
+            dns.append("DNS: %s" % i)
+        dns = ", ".join(dns)
 
 
         req = crypto.X509Req()
@@ -78,8 +81,8 @@ class Certificate:
 
         x509_extensions = base_constraints
 
-        if ss:
-            san_constraint = crypto.X509Extension(b"subjectAltName", False, ss.encode("utf-8"))
+        if dns:
+            san_constraint = crypto.X509Extension(b"subjectAltName", False, dns.encode("utf-8"))
             x509_extensions.append(san_constraint)
 
         req.add_extensions(x509_extensions)
@@ -91,7 +94,6 @@ class Certificate:
 
         return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")
 
-
     def create_ejbca_user(self) -> None:
         """
         Makes a requisition to EJBCA to create a user.
@@ -101,13 +103,16 @@ class Certificate:
             "username": self.c_name
         })
 
-        default_header = {'content-type': 'application/json',
-                          'Accept': 'application/json'}
+        default_header = {
+            'content-type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer {0}'.format(self.jwt),
+        }
 
         response = None
         try:
             response = requests.post(
-                CONFIG['security']['ejbca_url'] + "/user",
+                CONFIG['dojot']['url'] + "/user",
                 headers=default_header,
                 data=req
             )
@@ -133,9 +138,12 @@ class Certificate:
             "certificate": cut_down_clr
         })
 
-        default_header = {'content-type': 'application/json',
-                          'Accept': 'application/json'}
-        url = CONFIG['security']['ejbca_url'] + "/sign/" + self.c_name + "/pkcs10"
+        default_header = {
+            'content-type': 'application/json',
+            'Accept': 'application/json',
+            "Authorization": "Bearer {0}".format(self.jwt),
+        }
+        url = CONFIG['dojot']['url'] + "/sign/" + self.c_name + "/pkcs10"
 
         response = None
         try:
@@ -163,10 +171,13 @@ class Certificate:
         Params:
             status: status to be set. Defaults to 10.
         """
-        url = CONFIG['security']['ejbca_url'] + "/user"
+        url = CONFIG['dojot']['url'] + "/user"
 
-        default_header = {'content-type': 'application/json',
-                          'Accept': 'application/json'}
+        default_header = {
+            'content-type': 'application/json',
+            'Accept': 'application/json',
+            "Authorization": "Bearer {0}".format(self.jwt),
+        }
 
         data = {
             "username": self.c_name,
