@@ -125,8 +125,8 @@ class GenerateCerts():
         parser.add_argument(
             "--processes",
             metavar="N",
-            help=f"number of processes to generate the random certificates, defaults to the number of\
-            cores in your machine, which is {os.cpu_count()}",
+            help=f"number of processes to generate the random certificates, defaults to the number \
+                of cores in your machine, which is {os.cpu_count()}",
             type=int,
             default=os.cpu_count()
         )
@@ -144,15 +144,10 @@ class GenerateCerts():
             action="store_true",
             default=False
         )
-        parser.add_argument(
-            "--map",
-            help="activates the mapping of device IDs in Redis after the certificates generation",
-            action="store_true",
-            default=False
-        )
 
     def config_redis_parser(self, parser):
         """
+        Configures the parser arguments for Redis parser.
         """
         parser.add_argument(
             "--map",
@@ -186,6 +181,7 @@ class GenerateCerts():
         """
         Runs the commands for each parser.
         """
+        self.jwt = DojotAPI.get_jwt()
         if self.parser_args.topic == "cert":
             self.cert_commands()
 
@@ -200,6 +196,7 @@ class GenerateCerts():
 
     def cert_commands(self):
         """
+        Certificate creation commands.
         """
         if self.parser_args.remove and os.path.exists(CONFIG['security']['cert_dir']):
             LOGGER.info("Removing certificates directory...")
@@ -215,28 +212,21 @@ class GenerateCerts():
 
             # Begins the certificate generation for random devices IDs
             self.generate_random_certs()
-            # Exports the certificates' files
-            self.export_certs()
-            # Retrieving the CA certificate
-            self.retrieve_ca_cert()
 
         if self.parser_args.ids is not None:
             # Begins the certificate generation
             self.generate_certs(self.parser_args.ids)
-            # Exports the certificates' files
-            self.export_certs()
-            # Retrieving the CA certificate
-            self.retrieve_ca_cert()
 
         if self.parser_args.dojot:
-            jwt = DojotAPI.get_jwt()
-            devices_ids = DojotAPI.get_devices(jwt)
-
+            devices_ids = DojotAPI.get_devices(self.jwt)
             self.generate_certs(devices_ids)
-            # Exports the certificates' files
-            self.export_certs()
-            # Retrieving the CA certificate
-            self.retrieve_ca_cert()
+
+        # Exports the certificates' files
+        self.export_certs()
+        # Retrieving the CA certificate
+        self.retrieve_ca_cert()
+        # Mapping the certificates
+        self.map_device_ids()
 
     def dojot_create_commands(self):
         """
@@ -248,17 +238,14 @@ class GenerateCerts():
         """
         """
         if self.parser_args.templates:
-            jwt = DojotAPI.get_jwt()
-            self.delete_templates(jwt)
+            self.delete_templates()
 
         elif self.parser_args.devices:
-            jwt = DojotAPI.get_jwt()
-            self.delete_devices(jwt)
+            self.delete_devices()
 
         elif self.parser_args.all:
-            jwt = DojotAPI.get_jwt()
-            self.delete_devices(jwt)
-            self.delete_templates(jwt)
+            self.delete_devices()
+            self.delete_templates()
 
     def redis_commands(self):
         """
@@ -268,6 +255,7 @@ class GenerateCerts():
 
         elif self.parser_args.clear:
             self.clear_db()
+            self.restore_db_state()
 
         elif self.parser_args.map:
             self.map_device_ids()
@@ -289,10 +277,9 @@ class GenerateCerts():
         Returns a list with device IDs.
         """
         try:
-            jwt = DojotAPI.get_jwt()
-            template_id = DojotAPI.create_template(jwt)
+            template_id = DojotAPI.create_template(self.jwt)
             DojotAPI.create_devices(
-                jwt,
+                self.jwt,
                 template_id,
                 self.parser_args.devices,
                 self.parser_args.batch
@@ -301,21 +288,22 @@ class GenerateCerts():
         except Exception as exception:
             LOGGER.error(str(exception))
 
-    def delete_devices(self, jwt: str) -> None:
+    def delete_devices(self) -> None:
         """
         Deletes all devices.
         """
-        DojotAPI.delete_devices(jwt)
+        DojotAPI.delete_devices(self.jwt)
 
-    def delete_templates(self, jwt: str) -> None:
+    def delete_templates(self,) -> None:
         """
         Deletes all devices.
         """
-        DojotAPI.delete_templates(jwt)
+        DojotAPI.delete_templates(self.jwt)
 
 
     ## Redis ##
-    def connect_to_redis(self, database=CONFIG["locust"]["redis"]["certificates_db"]) -> redis.Redis:
+    def connect_to_redis(self, database=CONFIG["locust"]["redis"]["certificates_db"]) -> \
+        redis.Redis:
         """
         Connects to Redis.
 
@@ -344,6 +332,8 @@ class GenerateCerts():
         redis_conn.set("devices_to_revoke", 0)
         redis_conn.set("devices_to_renew", 0)
         redis_conn.set("device_count", 0)
+        redis_conn.delete("jwt")
+        redis_conn.set("template_id", -1)
 
         redis_conn.save()
 
@@ -440,10 +430,13 @@ class GenerateCerts():
         """
         Retrieves the CA certificate and exports to a file.
         """
-
-        url = f"{CONFIG['security']['ejbca_url']}/ca/{CONFIG['security']['ejbca_ca_name']}"
-
-        res = requests.get(url).json()
+        res = requests.get(
+            url=f"{CONFIG['dojot']['url']}/ca/{CONFIG['security']['ejbca_ca_name']}",
+            headers={
+                "Authorization": "Bearer {0}".format(self.jwt)
+            },
+        )
+        res = res.json()
 
         if res["certificate"] is None:
             LOGGER.error("Error while retrieving the CA certificate.")
