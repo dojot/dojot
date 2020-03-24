@@ -7,6 +7,10 @@ from unittest.mock import patch, MagicMock
 import paho.mqtt.client as mqtt
 from src.mqtt_locust.mqtt_client import MQTTClient
 
+
+mqtt.Client = MagicMock()
+
+
 MOCK_CONFIG = {
     'app': {
         'tenant': 'tenant',
@@ -37,7 +41,6 @@ class MQTTClientConstructor(unittest.TestCase):
     """
     MQTTClient constructor() unit tests.
     """
-
     def test_constructor_success(self, mock_utils, _mock_paho):
         """
         Should create a MQTTClient instance.
