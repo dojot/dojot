@@ -7,6 +7,7 @@ import redis
 
 from src.config import CONFIG
 from src.utils import Utils
+from src.dojot.api import DojotAPI
 
 class RedisClient():
     """
@@ -81,7 +82,7 @@ class RedisClient():
                 if should_revoke == 1:
                     return {
                         "should_revoke": True,
-                        "device_id": str(uuid4()).replace("-", "")
+                        "device_id": self.get_device_id()
                     }
 
         except Exception as exception:
@@ -121,10 +122,57 @@ class RedisClient():
                 if should_renew == 1:
                     return {
                         "should_renew": True,
-                        "device_id": str(uuid4()).replace("-", "")
+                        "device_id": self.get_device_id()
                     }
 
         except Exception as exception:
             self.logger.error(str(exception))
 
         return None
+
+    def get_jwt(self):
+        """
+        Retrieves the JWT from the dadtabase or create a new one.
+        """
+        jwt = self.mapped.get('jwt')
+
+        if jwt:
+            return jwt.decode('utf-8')
+
+        jwt = DojotAPI.get_jwt()
+        self.mapped.set('jwt', jwt)
+
+        return jwt
+
+    def get_template_id(self):
+        """
+        Retrieves the test template ID from the database or create a new one.
+        """
+        template_id = self.mapped.get('template_id').decode('utf-8')
+
+        if template_id == "-1":
+            jwt = self.get_jwt()
+            template_id = DojotAPI.create_template(jwt)
+            self.mapped.set('template_id', template_id)
+
+        return template_id
+
+    def get_device_id(self):
+        """
+        Get the device ID.
+        """
+        device_id = None
+
+        if CONFIG['dojot']['env']:
+            jwt = DojotAPI.get_jwt()
+            template_id = self.get_template_id()
+            device_id = DojotAPI.create_device(
+                jwt,
+                template_id,
+                "CargoContainer_{0}".format(str(uuid4()).replace("-", ""))
+            )
+
+        else:
+            device_id = str(uuid4()).replace("-", "")
+
+        return device_id
