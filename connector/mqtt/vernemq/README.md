@@ -8,7 +8,7 @@ The IoT-Agent MQTT extends [VerneMQ](https://github.com/vernemq/vernemq) with so
 
 The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respectively.
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt_1)
 
 Fig. 1 - Data communication flows among the services that implement the IoT-Agent MQTT.
 
@@ -43,6 +43,8 @@ Where ***tenant*** is a context identifier into dojot and ***device_id*** is a i
 See more about [ACL Plugin](broker/src/dojot_acl_plugin) for VerneMQ.
 
 ## Security
+
+**Note: This topic will be updated soon. We are developing a new x509 identity solution at dojot.**
 
 We use **TLS** mutual authentication to provide secure communication between devices and broker [VerneMQ](https://github.com/vernemq/vernemq) through **MQTT**.  Transport Layer Security (**TLS**) is a cryptographic protocol designed to provide communications security over a computer network.
 
