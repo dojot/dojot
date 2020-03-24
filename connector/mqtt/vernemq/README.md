@@ -1,20 +1,20 @@
-# IoTAgent MQTT (VerneMQ)
+# IoT-Agent MQTT (VerneMQ)
 
 ## Overview
 
-An IoTAgent is an adaptation service between physical devices and the dojot platform. The IoTAgents are responsible for receiving messages from physical devices (directly or through a gateway) and sending them commands in order to configure. The dojot platform can have multiple IoTAgents, each one of them being specialized in a specific protocol like in this case MQTT. It is also responsible to ensure that it communicates with devices using secure channels.
+An IoT-Agent is an adaptation service between physical devices and the dojot platform. The IoT-Agents are responsible for receiving messages from physical devices (directly or through a gateway) and sending them commands in order to configure. The dojot platform can have multiple IoT-Agents, each one of them being specialized in a specific protocol like in this case MQTT. It is also responsible for ensuring secure communication with devices.
 
-The IoTAgent MQTT is an extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features and services for dojot case. The VerneMQ receiving messages from devices and sending messages for them. The V2K-bridge service receives messages from VerneMQ via MQTT and sends these messages to Kafka to be used in dojot’s core components. While the K2V-bridge service receives messages from dojot’s core components via Kafka and send them for VerneMQ via MQTT, and then the device receives this message. See this all flux in Fig. 1.
+The IoT-Agent MQTT extends [VerneMQ](https://github.com/vernemq/vernemq) with some features and services for dojot case. Basically, devices publishes MQTT messages in specific topics in VerneMQ. These messages are consumed by V2K-bridge service, which adapt them to the dojot's data model and forwards the modified messages to specific topics in Apache Kafka so that they can be consumed by other services. There is a reverse flow, where services publish messages to Apache Kafka in specific topics, these messages are consumed by the service K2V-bridge which adapts the messages and forwards the modified messages to VerneMQ so that they can be consumed by the devices. These data flows are depicted in Fig. 1.
 
 The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respectively.
 
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt)
 
-Fig. 1 - VerneMQ with Dojot (Whereas V2K-Bridge, K2V-Bridge, VerneMQ and Client already have certificates, can occur later communications between PKI and these services. This is better explained later.)
+Fig. 1 - Data communication flows among the services that implement the IoT-Agent MQTT.
 
 ### VerneMQ Broker with Custom to Dojot
 
-The VerneMQ Broker with Custom to Dojot has some additions of scripts to the integration with our CA for communications via TLS and security.
+The VerneMQ Broker with Custom to Dojot has some bash scripts were added to integrate VerneMQ with dojot's PKI. These scripts are responsible for things like providing a x509 certificate for the broker and periodically obtain the CRL with devices's revoked certificates
 
 For more details, please check the documentation at [the service repository](./broker)
 
@@ -31,15 +31,14 @@ The communication between the bridge and the VerneMQ is secured with mutual TLS.
 
 For more see [here](./k2v-bridge)
 
-## ACL (access-control list)
+## ACL (Access-Control List)
 
-An **ACL** (access-control list) based authorization is provided to manage permissions, so a device can only publish and subscribe to its own topic, the topics are:
+An **ACL** (Access-Control List) based authorization is provided to manage permissions so that a device only publish and subscribe to its own topics, which are:
 
-- For publish: ***tenant***_:_***device_id***_/attrs_
-- For subscription: ***tenant***_:_***device_id***_/config_
+- To publish: ***tenant***_:_***device_id***_/attrs_
+- To subscribe: ***tenant***_:_***device_id***_/config_
 
-Where ***tenant*** is the information context separation of dojot and ***device_id*** is a unique identification for the device.
-The junction (***tenant:device_id***) of *tenant* and  *device_id* always be unique.
+Where ***tenant*** is a context identifier into dojot and ***device_id*** is a identifier for the device in the corresponding context. Joining both identifiers (***tenant:device_id***), you have a unique identifier for the device into dojot.
 
 See more about [ACL Plugin](broker/src/dojot_acl_plugin) for VerneMQ.
 
@@ -84,14 +83,14 @@ The TLS connection also has a configurable timeout, which is a VerneMQ configura
 
 Environment variables mentioned above are more described in [here](./vernemq)
 
-## How to connect a device with the IoTAgent-MQTT with Security (via TLS)
+## How to connect a device with the IoT-Agent-MQTT with mutual TLS
 
 ### **Prerequisites**
 
 - Create a device in Dojot and get a tenant and a device ID.
 - Install [openssl](https://www.openssl.org/), [jq](https://stedolan.github.io/jq/) and [cURL](https://curl.haxx.se/).
 
-NOTE: Ports and address may change depending on the deployment
+NOTE: Ports and addresses may change depending on the deployment
 
 Environment variables
 
@@ -106,14 +105,6 @@ Change the value of the DOJOT_URL variable from the code block below and execute
 
 ```console
 export DOJOT_URL=http://myhost:8000
-```
-
-##### Server hostname
-
-Change the value of the DOJOT_DNS variable from the code block below and execute:
-
-```console
-export DOJOT_DNS=myhost
 ```
 
 ##### Certificate authority Name
@@ -163,8 +154,6 @@ Create a *client.key* file with a pair of keys.
 
 #### 5. Create entity in ejbca
 
-NOTE: Where ***tenant*** is the information context separation of dojot and ***device_id*** is a unique identification for the device.
-
 ##### Create environment variables with device unique identification
 
 Change the value of TENANT and DEVICE_ID variables from the block of code below and run:
@@ -190,7 +179,6 @@ Create CSR file (*client.csr*):
 
 ```console
 openssl req -new  -sha256 -out client.csr -key client.key \
-        -addext "subjectAltName = DNS: ${DOJOT_DNS}" \
         -addext "keyUsage = Digital Signature, Non Repudiation, Key Encipherment" \
         -addext "basicConstraints  =  CA:FALSE" \
         --subj "/CN=${TENANT}:${DEVICE_ID}"
@@ -251,7 +239,7 @@ echo "-----END CERTIFICATE-----" ) > root.crt
 
 ## Simulating a device with mosquitto
 
-NOTE: Ports and address may change depending on the deployment
+NOTE: Port and address may change depending on the deployment
 
 NOTE 2: The **tenant** is *admin* and **device_id** is *a1998e* for these examples. You must change them for your case.
 

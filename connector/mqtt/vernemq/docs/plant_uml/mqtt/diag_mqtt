@@ -1,14 +1,18 @@
 @startuml
 
 frame "Dojot" {
-    collections "V2K Bridge" as V2K #EEE
-    collections "K2V bridge" as K2V #EEE
-    collections "VerneMQ" as VMQ #EEE
-    collections "Kafka" as Kf  #EEE
-    collections "Dojot’s core components" as Ot #EEE
-}
-collections "Client" as Cli #EEE
 
+    collections "Kafka" as Kf  #EEE
+    collections "Services" as Ot #EEE
+
+    folder "IoT-Agent MQTT" {
+       collections "V2K-Bridge" as V2K #EEE
+        collections "K2V-Bridge" as K2V #EEE
+        collections "VerneMQ" as VMQ #EEE
+    }
+}
+
+collections "Client" as Cli #EEE
 
 [Kf] -down-> [K2V]
 [V2K] -up-> [Kf]
@@ -18,6 +22,7 @@ collections "Client" as Cli #EEE
 [VMQ]-right-> [V2K] : MQTTS
 
 [Cli] <-up-> [VMQ] : MQTTS
+
 
 @enduml
 
