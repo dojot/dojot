@@ -8,6 +8,7 @@ from OpenSSL import crypto
 from src.config import CONFIG
 from src.utils import Utils
 from src.ejbca.thing import Thing
+from src.mqtt_locust.redis_client import RedisClient
 
 
 LOGGER = Utils.create_logger("cert_utils")
@@ -83,11 +84,16 @@ class CertUtils:
         # Retrieves the Serial Number in Hexadecimal
         serial_number = hex(cert.get_serial_number())[2:]
         # URL to revoke a certificate
-        url = CONFIG["security"]["ejbca_url"] + \
+        url = CONFIG["dojot"]["url"] + \
             "/ca/CN={0},O=EJBCA/certificate/{1}".format(
                 CONFIG["security"]["ejbca_ca_name"], serial_number)
 
-        requests.delete(url)
+        requests.delete(
+            url=url,
+            headers={
+                "Authorization": "Bearer {0}".format(RedisClient().get_jwt())
+            },
+        )
 
     @staticmethod
     def has_been_revoked(thing: Thing) -> bool:
@@ -95,20 +101,25 @@ class CertUtils:
         Verifies whether the certificate has been revoked or not.
         """
         # Loads the certificate as a X509 object
-        cert: crypto.X509 = crypto.load_certificate(
-            crypto.FILETYPE_PEM, thing.thing_certificate)
+        cert: crypto.X509 = crypto.load_certificate(crypto.FILETYPE_PEM, thing.thing_certificate)
         # Retrieves the Serial Number in Hexadecimal
         serial_number = hex(cert.get_serial_number())[2:]
         # URL to verify the certificate status
-        url = CONFIG["security"]["ejbca_url"] + \
+        url = CONFIG["dojot"]["url"] + \
             "/ca/CN={0},O=EJBCA/certificate/{1}/status".format(
-                CONFIG["security"]["ejbca_ca_name"], serial_number)
+                CONFIG["security"]["ejbca_ca_name"], serial_number
+            )
 
-        res = requests.get(url)
-        res_json = res.json()
+        res = requests.get(
+            url=url,
+            headers={
+                "Authorization": "Bearer {0}".format(RedisClient().get_jwt())
+            }
+        )
+        res = res.json()
 
-        if res_json.get("status") and res_json["status"].get("return"):
-            return res_json["status"]["return"]["reason"] == 0
+        if res.get("status") and res["status"].get("return"):
+            return res["status"]["return"]["reason"] == 0
 
         LOGGER.error("Error: invalid response from EJBCA")
         return False
