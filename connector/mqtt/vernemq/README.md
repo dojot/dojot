@@ -48,7 +48,7 @@ See more about [ACL Plugin](broker/src/dojot_acl_plugin) for VerneMQ.
 
 We use **TLS** mutual authentication to provide secure communication between devices and broker [VerneMQ](https://github.com/vernemq/vernemq) through **MQTT**.  Transport Layer Security (**TLS**) is a cryptographic protocol designed to provide communications security over a computer network.
 
-In **TLS** each device and broker should be provisioned with a private key and corresponding public certificate sign from **CA** (certificate authority) and a root certificate (public certificate of **CA**), the **CA** is include in **PKI** (public key infrastructure). A **PKI**  ([EJBCA](./ejbca)) is a system for the creation, storage, and distribution of digital certificates.
+In **TLS** each device and broker should be provisioned with a private key and corresponding public certificate sign from **CA** (certificate authority) and a root certificate (public certificate of **CA**), the **CA** is include in **PKI** (public key infrastructure). A **PKI**  ([EJBCA](./pki/ejbca)) is a system for the creation, storage, and distribution of digital certificates.
 
 Also, a PKI includes the certificate revocation list (**CRL**), which is a list of certificates that have been revoked before reaching the expiration date of the certificate.
 
