@@ -3,9 +3,9 @@ Tests for DojotAPI class.
 """
 
 import unittest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock, ANY, PropertyMock
 
-from src.dojot.api import DojotAPI
+from src.dojot.api import APICallError, DojotAPI
 
 
 MOCK_CONFIG = {
@@ -17,215 +17,194 @@ MOCK_CONFIG = {
 }
 
 
-@patch('src.dojot.api.json')
-@patch('src.dojot.api.requests')
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG)
+@patch('src.dojot.api.json', autospec=True)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIGetJwt(unittest.TestCase):
     """
     DojotAPI get_jwt() tests.
     """
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
     def test_successfully_get_jwt(self, mock_requests, mock_json):
         """
         Should successfully get a JWT from Dojot.
         """
-        mock_json.loads.return_value = {"jwt": "testJWT"}
+        DojotAPI.call_api.return_value = {"jwt": "testJWT"}
 
         jwt = DojotAPI.get_jwt()
 
+        mock_json.dumps.assert_called_once()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.post, ANY)
         self.assertEqual(jwt, "testJWT")
 
-    def test_not_successfully_get_jwt(self, mock_requests, mock_json):
-        """
-        Should not successfully get a JWT from Dojot - rose an exception.
-        """
-        mock_requests.post.side_effect = Exception("test_exception")
-        jwt = None
 
-        with self.assertRaises(Exception) as context:
-            jwt = DojotAPI.get_jwt()
-
-        self.assertIsNotNone(context.exception)
-        mock_requests.post.assert_called_once()
-        mock_json.dumps.assert_called_once()
-        mock_json.loads.assert_not_called()
-        self.assertIsNone(jwt)
-
-
-@patch('src.dojot.api.json')
-@patch('src.dojot.api.requests')
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG)
+@patch('src.dojot.api.json', autospec=True)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPICreateDevices(unittest.TestCase):
     """
     DojotAPI create_devices() tests.
     """
-    def test_successfully_create_devices(self, mock_requests, mock_json):
-        """
-        Should successfully create the devices.
-        """
-        divide_loads = DojotAPI.divide_loads
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        self.divide_loads = DojotAPI.divide_loads
+
+        DojotAPI.call_api = MagicMock()
         DojotAPI.divide_loads = MagicMock()
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+        DojotAPI.divide_loads = self.divide_loads
+
+    def test_successfully_create_one_device_one_batch(self, mock_requests, mock_json):
+        """
+        Should successfully create one device in one batch.
+        """
         DojotAPI.divide_loads.return_value = [1]
 
         DojotAPI.create_devices("testJWT", "0", 1, 1)
 
-        mock_requests.post.assert_called_once()
+        DojotAPI.divide_loads.assert_called_once()
+        DojotAPI.divide_loads.assert_called_with(1, 1)
+        self.assertEqual(DojotAPI.divide_loads.return_value, [1])
         mock_json.dumps.assert_called_once()
-        mock_requests.post.return_value.raise_for_status.assert_called_once()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.post, ANY)
 
-        DojotAPI.divide_loads = divide_loads
-
-    def test_not_successfully_create_devices(self, mock_requests, mock_json):
+    def test_successfully_create_two_devices_two_batches(self, mock_requests, mock_json):
         """
-        Should not successfully create the devices - rose an exception.
+        Should successfully create two devices in two batches.
         """
-        divide_loads = DojotAPI.divide_loads
-        DojotAPI.divide_loads = MagicMock()
-        DojotAPI.divide_loads.return_value = [1]
-        mock_requests.post.side_effect = Exception("test_exception")
+        DojotAPI.divide_loads.return_value = [1, 1]
 
-        with self.assertRaises(Exception) as context:
-            DojotAPI.create_devices("testJWT", "0", 1, 1)
+        DojotAPI.create_devices("testJWT", "0", 2, 2)
 
-        self.assertIsNotNone(context.exception)
-        mock_requests.post.assert_called_once()
-        mock_json.dumps.assert_called_once()
-
-        DojotAPI.divide_loads = divide_loads
+        DojotAPI.divide_loads.assert_called_once()
+        DojotAPI.divide_loads.assert_called_with(2, 2)
+        self.assertEqual(DojotAPI.divide_loads.return_value, [1, 1])
+        self.assertEqual(mock_json.dumps.call_count, 2)
+        self.assertEqual(DojotAPI.call_api.call_count, 2)
+        for call in DojotAPI.call_api.mock_calls:
+            call.assert_called_with(mock_requests.post, ANY)
 
 
-@patch('src.dojot.api.json')
-@patch('src.dojot.api.requests')
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG)
+@patch('src.dojot.api.json', autospec=True)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPICreateTemplate(unittest.TestCase):
     """
     DojotAPI create_template() tests.
     """
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
     def test_successfully_create_template(self, mock_requests, mock_json):
         """
         Should successfully create the template.
         """
-        mock_json.loads.return_value = {"template": {"id": 1}}
+        DojotAPI.call_api.return_value = {"template": {"id": 1}}
 
         template_id = DojotAPI.create_template("testJWT")
 
-        mock_requests.post.assert_called_once()
         mock_json.dumps.assert_called_once()
-        mock_requests.post.return_value.raise_for_status.assert_called_once()
-        mock_json.loads.assert_called_once()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.post, ANY)
         self.assertEqual(template_id, 1)
 
-    def test_not_successfully_create_template(self, mock_requests, mock_json):
-        """
-        Should not successfully create the template - rose an exception.
-        """
-        mock_requests.post.side_effect = Exception("test_exception")
-        template_id = None
 
-        with self.assertRaises(Exception) as context:
-            template_id = DojotAPI.create_template("testJWT")
-
-        self.assertIsNotNone(context.exception)
-        mock_requests.post.assert_called_once()
-        mock_json.dumps.assert_called_once()
-        self.assertIsNone(template_id)
-
-
-@patch('src.dojot.api.json')
-@patch('src.dojot.api.requests')
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIDeleteDevices(unittest.TestCase):
     """
     DojotAPI delete_devices() tests.
     """
-    def test_successfully_delete_devices(self, mock_requests, mock_json):
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
+    def test_successfully_delete_devices(self, mock_requests):
         """
         Should successfully delete devices.
         """
-        mock_json.loads.return_value = {"template": {"id": 1}}
-
         DojotAPI.delete_devices("testJWT")
 
-        mock_requests.delete.assert_called_once()
-        mock_requests.delete.return_value.raise_for_status.assert_called_once()
-
-    def test_not_successfully_delete_devices(self, mock_requests, mock_json):
-        """
-        Should not successfully delete devices - rose an exception.
-        """
-        mock_requests.delete.side_effect = Exception("test_exception")
-
-        with self.assertRaises(Exception) as context:
-            DojotAPI.delete_devices("testJWT")
-
-        self.assertIsNotNone(context.exception)
-        mock_requests.delete.assert_called_once()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.delete, ANY)
 
 
-@patch('src.dojot.api.json')
-@patch('src.dojot.api.requests')
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIDeleteTemplates(unittest.TestCase):
     """
     DojotAPI delete_templates() tests.
     """
-    def test_successfully_delete_templates(self, mock_requests, mock_json):
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
+    def test_successfully_delete_templates(self, mock_requests):
         """
         Should successfully delete templates.
         """
-        mock_json.loads.return_value = {"template": {"id": 1}}
-
         DojotAPI.delete_templates("testJWT")
 
-        mock_requests.delete.assert_called_once()
-        mock_requests.delete.return_value.raise_for_status.assert_called_once()
-
-    def test_not_successfully_delete_devices(self, mock_requests, mock_json):
-        """
-        Should not successfully delete templates - rose an exception.
-        """
-        mock_requests.delete.side_effect = Exception("test_exception")
-
-        with self.assertRaises(Exception) as context:
-            DojotAPI.delete_templates("testJWT")
-
-        self.assertIsNotNone(context.exception)
-        mock_requests.delete.assert_called_once()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.delete, ANY)
 
 
-@patch('src.dojot.api.json')
-@patch('src.dojot.api.requests')
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIGetDevices(unittest.TestCase):
     """
     DojotAPI get_devices() tests.
     """
-    def test_successfully_get_devices(self, mock_requests, mock_json):
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
+    def test_successfully_get_devices(self, mock_requests):
         """
         Should successfully get devices.
         """
-        mock_json.loads.return_value = {"devices": [{"id": 0},{"id": 1}]}
+        DojotAPI.call_api.return_value = {"devices": [{"id": 0}, {"id": 1}]}
 
         devices = DojotAPI.get_devices("testJWT")
 
-        mock_requests.get.assert_called_once()
-        mock_json.loads.assert_called_once()
-        mock_requests.get.return_value.raise_for_status.assert_called_once()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.get, ANY)
         self.assertEqual(devices, [0, 1])
 
-    def test_not_successfully_get_devices(self, mock_requests, mock_json):
+    def test_successfully_no_devices(self, mock_requests):
         """
-        Should not successfully get templates - rose an exception.
+        Should successfully get an empty list of devices.
         """
-        mock_requests.get.side_effect = Exception("test_exception")
+        DojotAPI.call_api.return_value = {"devices": []}
 
-        devices = []
+        devices = DojotAPI.get_devices("testJWT")
 
-        with self.assertRaises(Exception) as context:
-            devices = DojotAPI.get_devices("testJWT")
-
-        self.assertIsNotNone(context.exception)
-        mock_requests.get.assert_called_once()
-        mock_json.loads.assert_not_called()
+        DojotAPI.call_api.assert_called_once()
+        DojotAPI.call_api.assert_called_with(mock_requests.get, ANY)
+        self.assertEqual(devices, [])
 
 
 class TestDojotAPIDivideLoads(unittest.TestCase):
@@ -255,3 +234,86 @@ class TestDojotAPIDivideLoads(unittest.TestCase):
         loads = DojotAPI.divide_loads(2, 4)
 
         self.assertEqual(loads, [2])
+
+
+@patch('src.dojot.api.gevent', autospec=True)
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict(
+    'src.dojot.api.CONFIG',
+    {'dojot': {'api': {'retries': 1, 'time': 5.0}}},
+    autospec=True
+)
+class TestDojotAPICallApi(unittest.TestCase):
+    """
+    Tests for call_api().
+    """
+    def test_should_get_response(self, mock_requests, mock_gevent):
+        """
+        Should successfully receive a response from a POST call.
+        """
+        mock_requests.post = MagicMock()
+        mock_requests.post.return_value.json = PropertyMock(return_value={"return": "testReturn"})
+
+        args = {
+            "url": "testURL",
+            "data": "\"testJson\": \"testData\"",
+            "headers": "testHeader"
+        }
+
+        res = DojotAPI.call_api(mock_requests.post, args)
+
+        mock_requests.post.assert_called_once_with(**args)
+        mock_gevent.sleep.assert_not_called()
+        mock_requests.post.return_value.json.assert_called_once()
+        self.assertEqual(res, {"return": "testReturn"})
+
+    def test_should_not_get_response(self, mock_requests, mock_gevent):
+        """
+        Should not receive a response from a POST call - exceptions rose.
+        """
+        mock_requests.post = MagicMock()
+        mock_requests.post.return_value.raise_for_status = MagicMock(side_effect=Exception())
+
+        args = {
+            "url": "testURL",
+            "data": "\"testJson\": \"testData\"",
+            "headers": "testHeader"
+        }
+
+        res = None
+        with self.assertRaises(APICallError) as context:
+            res = DojotAPI.call_api(mock_requests.post, args)
+
+        self.assertIsNotNone(context.exception)
+        self.assertIsInstance(type(context.exception), type(APICallError))
+        self.assertEqual(mock_requests.post.call_count, 2)
+        for call in mock_requests.post.mock_calls:
+            call.assert_called_with(**args)
+        self.assertEqual(mock_gevent.sleep.call_count, 2)
+        for call in mock_gevent.sleep.mock_calls:
+            call.assert_called_with(5.0)
+        self.assertIsNone(res)
+
+    def test_should_get_response_after_retry(self, mock_requests, mock_gevent):
+        """
+        Should successfully receive a response from a POST call in the second call.
+        """
+        mock_requests.post = MagicMock()
+        mock_requests.post.return_value.raise_for_status = MagicMock(
+            side_effect=[Exception(), None]
+        )
+        mock_requests.post.return_value.json = PropertyMock(return_value={"return": "testReturn"})
+
+        args = {
+            "url": "testURL",
+            "data": "\"testJson\": \"testData\"",
+            "headers": "testHeader"
+        }
+
+        res = DojotAPI.call_api(mock_requests.post, args)
+
+        self.assertEqual(mock_requests.post.call_count, 2)
+        for call in mock_requests.post.mock_calls:
+            call.assert_called_with(**args)
+        mock_gevent.sleep.assert_called_once_with(5.0)
+        self.assertEqual(res, {"return": "testReturn"})
