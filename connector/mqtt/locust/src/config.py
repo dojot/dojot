@@ -14,7 +14,6 @@ CONFIG = {
         'devices_to_revoke':          int(os.environ.get("DEVICES_TO_REVOKE", 1000)),
         'dns_cert':                   [],
         'ejbca_ca_name':              "IOTmidCA",
-        'ejbca_url':                  os.environ.get("EJBCA_URL", "http://localhost:5583"),
         'renew_devices':              Utils.str_to_bool(os.environ.get("RENEW_DEVICES", "False")),
         'revoke_devices':             Utils.str_to_bool(os.environ.get("REVOKE_DEVICES", "False")),
         'cert_dir':                   os.environ.get("CERT_DIR", "cert/"),
@@ -51,5 +50,10 @@ CONFIG = {
         'url':      os.environ.get("DOJOT_URL", "http://127.0.0.1:8000"),
         'user':     os.environ.get("DOJOT_USER", "admin"),
         'passwd':   os.environ.get("DOJOT_PASSWD", "admin"),
+        'env':      (str(os.environ.get("DOJOT_ENV", "n")).lower() == "y"),
+        'api': {
+            'retries':  int(os.environ.get("DOJOT_API_RETRIES", 3)),
+            'time':     float(os.environ.get("DOJOT_API_RETRY_TIME", 5000.0))  / 1000.0
+        }
     },
 }
