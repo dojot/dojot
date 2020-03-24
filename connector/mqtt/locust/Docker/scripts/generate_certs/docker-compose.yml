@@ -1,7 +1,7 @@
 version: "3"
 services:
   generate-certs:
-    image: eduardogmisiuk/generate_certs:development
+    image: dojot/generate_certs:development
     volumes:
       - ../../..:/usr/src/app
     environment:
