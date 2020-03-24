@@ -2,14 +2,17 @@
     Test CertUtils module
 """
 import unittest
-from mock import patch, MagicMock, mock_open, call
+from mock import patch, MagicMock, mock_open, call, ANY
 from src.ejbca.cert_utils import CertUtils
 
 MOCK_CONFIG = {
     'security': {
         'ejbca_url': 'url',
         'ejbca_ca_name': 'name'
-    }
+    },
+    'dojot': {
+        'url': "dojot",
+    },
 }
 
 
@@ -146,17 +149,86 @@ class TestCertUtils(unittest.TestCase):
         """
         mock_crypto.load_certificate.return_value = MagicMock()
         mock_crypto.load_certificate().get_serial_number.return_value = 0x000111222333
-        serial_number = hex(
-            mock_crypto.load_certificate().get_serial_number())[2:]
+        serial_number = hex(mock_crypto.load_certificate().get_serial_number())[2:]
 
-        url = MOCK_CONFIG["security"]["ejbca_url"] + "/ca/CN={0},O=EJBCA/certificate/{1}".format(
-            MOCK_CONFIG["security"]["ejbca_ca_name"], serial_number)
+        url = MOCK_CONFIG["dojot"]["url"] + "/ca/CN={0},O=EJBCA/certificate/{1}".format(
+            MOCK_CONFIG["security"]["ejbca_ca_name"], serial_number
+        )
 
         CertUtils.revoke_cert(mock_thing)
-        mock_request.delete.assert_called_with(url)
+        mock_request.delete.assert_called_with(
+            url=url,
+            headers=ANY
+        )
         mock_thing.reset_mock()
         mock_crypto.reset_mock()
         mock_request.reset_mock()
+
+    @patch('src.ejbca.cert_utils.requests')
+    @patch('src.ejbca.cert_utils.crypto')
+    @patch('src.ejbca.cert_utils.Thing')
+    @patch.dict('src.ejbca.certificate.CONFIG', MOCK_CONFIG)
+    def test_has_been_revoked_false_malformed_json(self, mock_thing, mock_crypto, mock_request):
+        """
+        has_been_revoked() should return False - malformed JSON
+        """
+        mock_crypto.load_certificate.return_value = MagicMock()
+        mock_crypto.load_certificate().get_serial_number.return_value = 0x000111222333
+        serial_number = hex(mock_crypto.load_certificate().get_serial_number())[2:]
+
+        url = "{0}/ca/CN={1},O=EJBCA/certificate/{2}/status".format(
+            MOCK_CONFIG["dojot"]["url"],
+            MOCK_CONFIG["security"]["ejbca_ca_name"],
+            serial_number
+        )
+
+        mock_request.get.return_value = MagicMock()
+        mock_request.get().json().get.return_value = MagicMock()
+        mock_request.get().json.return_value = {}
+
+        result = CertUtils.has_been_revoked(mock_thing)
+
+        mock_request.get.assert_called_with(
+            url=url,
+            headers=ANY
+        )
+        self.assertFalse(result)
+
+    @patch('src.ejbca.cert_utils.requests')
+    @patch('src.ejbca.cert_utils.crypto')
+    @patch('src.ejbca.cert_utils.Thing')
+    @patch.dict('src.ejbca.certificate.CONFIG', MOCK_CONFIG)
+    def test_has_been_revoked_false_reason(self, mock_thing, mock_crypto, mock_request):
+        """
+        has_been_revoked() should return False - reason is not 0
+        """
+        mock_crypto.load_certificate.return_value = MagicMock()
+        mock_crypto.load_certificate().get_serial_number.return_value = 0x000111222333
+        serial_number = hex(mock_crypto.load_certificate().get_serial_number())[2:]
+
+        url = "{0}/ca/CN={1},O=EJBCA/certificate/{2}/status".format(
+            MOCK_CONFIG["dojot"]["url"],
+            MOCK_CONFIG["security"]["ejbca_ca_name"],
+            serial_number
+        )
+
+        mock_request.get.return_value = MagicMock()
+        mock_request.get().json().get.return_value = MagicMock()
+        mock_request.get().json.return_value = {
+            'status': {
+                'return': {
+                    'reason': 1
+                },
+            },
+        }
+
+        result = CertUtils.has_been_revoked(mock_thing)
+
+        mock_request.get.assert_called_with(
+            url=url,
+            headers=ANY
+        )
+        self.assertFalse(result)
 
     @patch('src.ejbca.cert_utils.requests')
     @patch('src.ejbca.cert_utils.crypto')
@@ -168,13 +240,13 @@ class TestCertUtils(unittest.TestCase):
         """
         mock_crypto.load_certificate.return_value = MagicMock()
         mock_crypto.load_certificate().get_serial_number.return_value = 0x000111222333
-        serial_number = hex(
-            mock_crypto.load_certificate().get_serial_number())[2:]
+        serial_number = hex(mock_crypto.load_certificate().get_serial_number())[2:]
 
         url = "{0}/ca/CN={1},O=EJBCA/certificate/{2}/status".format(
-            MOCK_CONFIG["security"]["ejbca_url"],
+            MOCK_CONFIG["dojot"]["url"],
             MOCK_CONFIG["security"]["ejbca_ca_name"],
-            serial_number)
+            serial_number
+        )
 
         mock_request.get.return_value = MagicMock()
         mock_request.get().json().get.return_value = MagicMock()
@@ -187,13 +259,12 @@ class TestCertUtils(unittest.TestCase):
         }
 
         result = CertUtils.has_been_revoked(mock_thing)
-        mock_request.get.assert_called_with(url)
+
+        mock_request.get.assert_called_with(
+            url=url,
+            headers=ANY
+        )
         self.assertTrue(result)
-
-        mock_request.get().json.return_value = {}
-
-        result = CertUtils.has_been_revoked(mock_thing)
-        self.assertFalse(result)
 
 
 if __name__ == "__main__":
