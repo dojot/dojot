@@ -83,7 +83,7 @@ Fig. 3 - VerneMQ (Broker) retrieves certificates from PKI (EJBCA)
 The TLS connection has a maximum life time, see more about [Disconnect Plugin](broker/src/dojot_disconnect_plugin) for VerneMQ.
 The TLS connection also has a configurable timeout, which is a VerneMQ configuration.
 
-Environment variables mentioned above are more described in [here](./vernemq)
+Environment variables mentioned above are more described in [here](./broker)
 
 ## How to connect a device with the IoT-Agent-MQTT with mutual TLS
 
