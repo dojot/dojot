@@ -41,6 +41,43 @@ To run the script and check its options:
 python -m src.scripts.generate_certs -h
 ```
 
+#### **Example**
+
+The next sections will exemplify the use of the `generate_certs` script in the most common use cases
+it has.
+
+##### **Without Dojot**
+
+Generate the certificates:
+```shell
+python -m src.scripts.generate_certs cert --devices 100
+```
+
+This will create and map the certificates in Redis, retrieve the CA certificate in the file `ca.crt`
+and export all of them to `/cert` directory.
+
+##### **With Dojot**
+
+Generate test devices in Dojot:
+```shell
+python -m src.scripts.generate_certs dojot create --devices 100
+```
+
+Generate the certificates for those devices:
+```shell
+python -m src.scripts.generate_certs cert --dojot
+```
+
+##### **Redoing tests without stopping Locust containers**
+
+After pressing the Stop button in Locust GUI, go to the `generate_certs` script and run:
+```shell
+python -m src.scripts.generate_certs redis --restore
+```
+
+You can, of course, create another devices and certificates in the meantime, but you will always
+need to restore the database after stopping the test.
+
 ## **Certificates**
 
 If you don't have any certificates, you should first generate them. See the
