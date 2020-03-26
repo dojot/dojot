@@ -38,7 +38,11 @@ Example of part of a yaml
       value: "YWNjZXB0X2V1bGEgPSB5ZXMKbWV0YW..." # just the beginning of base64
 ```
 
-See more about verneMQ configuration in [documentation](https://docs.vernemq.com/).
+Beware that the order of the plugins in the configuration influences the result. If the order is incorrect,
+they can stop working. For instance, the correct order for our plugins is: `disconnect`, `acl`. If this
+order is changed, the `disconnect` plugin will not work.
+
+See more about VerneMQ configuration in [documentation](https://docs.vernemq.com/).
 
 ### **Plugins Dojot for verneMQ**
 
