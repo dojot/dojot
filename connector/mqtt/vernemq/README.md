@@ -40,7 +40,7 @@ An **ACL** (Access-Control List) based authorization is provided to manage permi
 
 Where ***tenant*** is a context identifier into dojot and ***device_id*** is a identifier for the device in the corresponding context. Joining both identifiers (***tenant:device_id***), you have a unique identifier for the device into dojot.
 
-See more about [ACL Plugin](broker/src/dojot_acl_plugin) for VerneMQ.
+See more about [ACL Plugin](./broker/src/dojot_acl_plugin) for VerneMQ.
 
 ## Security
 
@@ -80,7 +80,7 @@ The process of obtaining certificates for VerneMQ instances follows the same ste
 
 Fig. 3 - VerneMQ (Broker) retrieves certificates from PKI (EJBCA)
 
-The TLS connection has a maximum life time, see more about [Disconnect Plugin](broker/src/dojot_disconnect_plugin) for VerneMQ.
+The TLS connection has a maximum life time, see more about [Disconnect Plugin](./broker/src/dojot_disconnect_plugin) for VerneMQ.
 The TLS connection also has a configurable timeout, which is a VerneMQ configuration.
 
 Environment variables mentioned above are more described in [here](./broker)
