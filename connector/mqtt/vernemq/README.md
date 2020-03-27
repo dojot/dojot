@@ -4,7 +4,7 @@
 
 An IoT-Agent is an adaptation service between physical devices and the dojot platform. The IoT-Agents are responsible for receiving messages from physical devices (directly or through a gateway) and sending them commands in order to configure. The dojot platform can have multiple IoT-Agents, each one of them being specialized in a specific protocol like in this case MQTT. It is also responsible for ensuring secure communication with devices.
 
-The IoT-Agent MQTT extends [VerneMQ](https://github.com/vernemq/vernemq) with some features and services for dojot case. Basically, devices publishes MQTT messages in specific topics in VerneMQ. These messages are consumed by V2K-bridge service, which adapt them to the dojot's data model and forwards the modified messages to specific topics in Apache Kafka so that they can be consumed by other services. There is a reverse flow, where services publish messages to Apache Kafka in specific topics, these messages are consumed by the service K2V-bridge which adapts the messages and forwards the modified messages to VerneMQ so that they can be consumed by the devices. These data flows are depicted in Fig. 1.
+The IoT-Agent MQTT extends [VerneMQ](https://github.com/vernemq/vernemq) with some features and services for dojot case. Basically, devices publishes MQTT messages in specific topics in VerneMQ. These messages are consumed by V2K-bridge service, which adapt them to the dojot's data model and forwards the modified messages to specific topics in Apache Kafka so that they can be consumed by other services. There is a reverse flow, where services publish messages to Apache Kafka in specific topics, these messages are consumed by the K2V-bridge service, which adapts the messages and forwards the modified messages to VerneMQ so that they can be consumed by the devices. These data flows are depicted in Fig. 1.
 
 The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respectively.
 
@@ -12,15 +12,15 @@ The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respe
 
 Fig. 1 - Data communication flows among the services that implement the IoT-Agent MQTT.
 
-### VerneMQ Broker with Custom to Dojot
+### VerneMQ Broker with customizations for DOJOT
 
-The VerneMQ Broker with Custom to Dojot has some bash scripts were added to integrate VerneMQ with dojot's PKI. These scripts are responsible for providing an x509 certificate to the broker and periodically obtaining the CRL with revoked certificates.
+The VerneMQ Broker with customizations for DOJOT has some bash scripts were added to integrate VerneMQ with dojot's PKI. These scripts are responsible for providing an x509 certificate to the broker and periodically obtaining the CRL with revoked certificates.
 
 For more details, please check the documentation at [the service repository](./broker)
 
 ### V2K-bridge
 
-The V2K-bridge service implements a bridge between VerneMQ broker and Kafka broker. Basically, it subscribes to some MQTT topics and forwards the messages to some Kafka topics following the dojot's topics rules. In order to scale the bridge service, shared MQTT subscriptions are used, which allows to instantiating a group of consumers, i.e. a group of bridge instances, when necessary. The communication between the bridge and the VerneMQ is secured with mutual TLS. Soon, communication with Kafka will also use mutual TLS.
+The V2K-bridge service implements a bridge between VerneMQ broker and Kafka broker. Basically, it subscribes to some MQTT topics and forwards the messages to some Kafka topics following the dojot's topics rules. In order to scale the bridge service, shared MQTT subscriptions are used, which allows the instantiation of a group of consumers, i.e. a group of bridge instances, when necessary. The communication between the bridge and the VerneMQ is secured with mutual TLS. Soon, communication with Kafka will also use mutual TLS.
 
 For more see [here](./v2k-bridge)
 
@@ -38,7 +38,7 @@ An **ACL** (Access-Control List) based authorization is provided to manage permi
 - To publish: ***tenant***_:_***device_id***_/attrs_
 - To subscribe: ***tenant***_:_***device_id***_/config_
 
-Where ***tenant*** is a context identifier into dojot and ***device_id*** is a identifier for the device in the corresponding context. Joining both identifiers (***tenant:device_id***), you have a unique identifier for the device into dojot.
+Where ***tenant*** is a context identifier into dojot and ***device_id*** is a identifier for the device in the corresponding context. By joining both identifiers (***tenant:device_id***), you have a unique identifier for the device into dojot.
 
 See more about [ACL Plugin](./broker/src/dojot_acl_plugin) for VerneMQ.
 
@@ -48,7 +48,7 @@ See more about [ACL Plugin](./broker/src/dojot_acl_plugin) for VerneMQ.
 
 We use **TLS** mutual authentication to provide secure communication between devices and broker [VerneMQ](https://github.com/vernemq/vernemq) through **MQTT**.  Transport Layer Security (**TLS**) is a cryptographic protocol designed to provide communications security over a computer network.
 
-In **TLS** each device and broker should be provisioned with a private key and corresponding public certificate sign from **CA** (certificate authority) and a root certificate (public certificate of **CA**), the **CA** is include in **PKI** (public key infrastructure). A **PKI**  ([EJBCA](./pki/ejbca)) is a system for the creation, storage, and distribution of digital certificates.
+In **TLS** each device and broker should be provisioned with a private key and corresponding public certificate sign from **CA** (certificate authority) and a root certificate (public certificate of **CA**), the **CA** is included in **PKI** (public key infrastructure). A **PKI**  ([EJBCA](./pki/ejbca)) is a system for the creation, storage, and distribution of digital certificates.
 
 Also, a PKI includes the certificate revocation list (**CRL**), which is a list of certificates that have been revoked before reaching the expiration date of the certificate.
 
@@ -83,7 +83,7 @@ Fig. 3 - VerneMQ (Broker) retrieves certificates from PKI (EJBCA)
 The TLS connection has a maximum life time, see more about [Disconnect Plugin](./broker/src/dojot_disconnect_plugin) for VerneMQ.
 The TLS connection also has a configurable timeout, which is a VerneMQ configuration.
 
-Environment variables mentioned above are more described in [here](./broker)
+Environment variables mentioned above are described in greater detail in [here](./broker)
 
 ## How to connect a device with the IoT-Agent-MQTT with mutual TLS
 
@@ -101,7 +101,7 @@ Environment variables
 
 #### 1. Set variables environment
 
-##### Address of the dojot
+##### Dojot's address
 
 Change the value of the DOJOT_URL variable from the code block below and execute:
 
@@ -156,7 +156,7 @@ Create a *client.key* file with a pair of keys.
 
 #### 5. Create entity in ejbca
 
-##### Create environment variables with device unique identification
+##### Create environment variables with unique device identification
 
 Change the value of TENANT and DEVICE_ID variables from the block of code below and run:
 
@@ -267,7 +267,7 @@ In these examples, we will use [mosquitto](https://mosquitto.org/) client.
 
 ### With security: use TLS to communicate with VerneMQ
 
-The tree files are require: *client.crt*, *client.key* and *root.crt*. See example:
+The three files are require: *client.crt*, *client.key* and *root.crt*. See example:
 
 ##### Example on how to publish
 
