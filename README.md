@@ -52,7 +52,7 @@ If you find a bug and know how to fix it, please don't hesitate to contribute, r
 
 ### Feature Requests
 
-If you are demanding a specific feature, you may open an issue at <https://github.com/dojot/dojot/issues> describing it. Our team will analyse your needs, and it migh be added to our Roadmap.
+If you are demanding a specific feature, you may open an issue at <https://github.com/dojot/dojot/issues> describing it. Our team will analyse your needs, and it might be added to our Roadmap.
 
 You may also develop this feature and raise a pull-request, but before doing this, please open an issue to discuss with the dojot team the best solution. Without a previous discussion, your pull-request might be rejected.
 
