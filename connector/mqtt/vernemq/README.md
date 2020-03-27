@@ -14,7 +14,7 @@ Fig. 1 - Data communication flows among the services that implement the IoT-Agen
 
 ### VerneMQ Broker with Custom to Dojot
 
-The VerneMQ Broker with Custom to Dojot has some bash scripts were added to integrate VerneMQ with dojot's PKI. These scripts are responsible for things like providing a x509 certificate for the broker and periodically obtain the CRL with devices's revoked certificates
+The VerneMQ Broker with Custom to Dojot has some bash scripts were added to integrate VerneMQ with dojot's PKI. These scripts are responsible for providing an x509 certificate to the broker and periodically obtaining the CRL with revoked certificates.
 
 For more details, please check the documentation at [the service repository](./broker)
 
