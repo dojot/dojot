@@ -1,0 +1,36 @@
+version: '3'
+services:
+  locust-slave:
+    image: dojot/locust:development
+    command: bash slave_entrypoint.sh
+    volumes:
+      - ..:/usr/src/app
+    environment:
+      # Don't forget to set the environment variables
+      DOJOT_MQTT_HOST: "127.0.0.1"
+      # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
+      DOJOT_MQTT_PORT: "1883"
+      DOJOT_MQTT_TIMEOUT: "120"
+      LOCUST_MASTER_HOST: "locust-master"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      REDIS_PASSWD: ""
+      TASK_MIN_TIME: "29500"
+      TASK_MAX_TIME: "30000"
+      EJBCA_URL: "http://localhost:5583"
+      LOG_LEVEL: "info"
+
+      RENEW_DEVICES: "False"
+      DEVICES_TO_RENEW: 1000
+      TIME_TO_RENEW: 1000
+      PROBABILITY_TO_RENEW: "10"
+
+      REVOKE_DEVICES: "False"
+      DEVICES_TO_REVOKE: 1000
+      TIME_TO_REVOKE: 1000
+      PROBABILITY_TO_REVOKE: "10"
+
+networks:
+  default:
+    external:
+      name: docker_default

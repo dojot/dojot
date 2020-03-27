@@ -1,0 +1,76 @@
+name: Locust (connector/mqtt/locust)
+# trigger when create a branch, push a tag or a branch, PR with changes in 'connector/mqtt/latency-pub-test-prometheus/**'
+
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'connector/mqtt/locust/**'
+
+jobs:
+  tests:
+    name: (connector/mqtt/locust) Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6.x]
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: Use Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: pip install requirements
+      run: |
+        cd connector/mqtt/locust
+        pip install -r requirements/dev.txt
+        pip install -r requirements/prod.txt
+
+    - name: pylint
+      run: |
+        cd connector/mqtt/locust
+        pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc -E
+
+    - name: pytest
+      run: |
+        cd connector/mqtt/locust
+        coverage run -m pytest tests && coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612
+        file: connector/mqtt/locust/coverage.xml
+        flags: locust
+        name: locust
+
+  docker-hub:
+    needs: tests
+    name: (connector/mqtt/locust) Build and Publish image to DockerHub
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false
+    steps:
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.11
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/locust
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: connector/mqtt/locust
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
