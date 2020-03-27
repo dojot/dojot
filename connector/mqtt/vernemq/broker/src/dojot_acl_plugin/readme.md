@@ -29,10 +29,10 @@ the effect of this plugin.
 
 ## **Environment variables**
 
-Key                      | Purpose                                           | Default Value        | Accepted values
------------------------  | --------------------------------------------------| --------------       |----------------
-PLUGIN_ACL_K2V_SERVICENAME   | Service name for k2v-bridge-verne                       | k2v-bridge-verne     | string
-PLUGIN_ACL_V2K_SERVICENAME   | Service name for v2k-bridge-verne                       | v2k-bridge-verne     | string
+Key                          | Purpose                                           | Default Value  | Accepted values
+-----------------------      | --------------------------------------------------| -------------- |----------------
+PLUGIN_ACL_K2V_SERVICENAME   | Service name for k2v-bridge                   | k2v-bridge     | string
+PLUGIN_ACL_V2K_SERVICENAME   | Service name for v2k-bridge                   | v2k-bridge     | string
 PLUGIN_ACL_CHAIN             |  Plugin ACL - Use "y" if there is another plugin with the same hook and this other plugin will be executed after the ACL one    | "n"                  | y or n
 
 PLUGIN_ACL_K2V_SERVICENAME and PLUGIN_ACL_V2K_SERVICENAME are to avoid check for the brokers
