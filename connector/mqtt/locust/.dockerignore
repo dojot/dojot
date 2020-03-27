@@ -1,0 +1,29 @@
+# Docker
+Dockerfile
+Docker
+.dockerignore
+
+# Python
+__pycache__
+include
+bin
+lib
+lib64
+share
+pyvenv.cfg
+.pylintrc
+.coverage*
+tests
+
+# Github
+.git
+.github
+.gitignore
+README.md
+
+# Certificates
+db
+cert
+
+# Others
+docs
