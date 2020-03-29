@@ -1,0 +1,4 @@
+locustio==0.12.2
+redis==3.3.7
+paho-mqtt==1.4.0
+pyopenssl==19.1.0
