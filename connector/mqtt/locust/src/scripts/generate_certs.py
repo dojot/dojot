@@ -535,13 +535,14 @@ class GenerateCerts():
 
         return workload, ids_per_process
 
-    def register_thing(self, name: str, n_certs: int) -> None:
+    def register_thing(self, name: str, n_certs: int, id_list: List[str]) -> None:
         """
         Creates devices and exports them to a Redis database.
 
         Args:
             name: the process name.
             n_certs: number of certificates to generate.
+            id_list: list of IDs to be used by the certificates.
         """
         start_time = time.time()
 
@@ -559,7 +560,7 @@ class GenerateCerts():
                 pipe.execute()
                 pipe = redis_conn.pipeline()
 
-            thing_id = str(uuid.uuid4().hex)
+            thing_id = id_list[i]
             thing = None
 
             has_failed = True
