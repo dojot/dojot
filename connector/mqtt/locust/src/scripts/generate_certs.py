@@ -10,6 +10,7 @@ import shutil
 import sys
 import os
 import redis
+from typing import List, Tuple
 import requests
 
 from src.ejbca.thing import Thing
@@ -256,6 +257,7 @@ class GenerateCerts():
 
     def dojot_clear_commands(self):
         """
+        Dojot clear commands execution.
         """
         if self.parser_args.templates:
             self.delete_templates()
@@ -269,6 +271,7 @@ class GenerateCerts():
 
     def redis_commands(self):
         """
+        Redis commands execution.
         """
         if self.parser_args.restore:
             self.restore_db_state()
@@ -325,7 +328,7 @@ class GenerateCerts():
 
     ## Redis ##
     def connect_to_redis(self, database=CONFIG["locust"]["redis"]["certificates_db"]) -> \
-        redis.Redis:
+                         redis.Redis:
         """
         Connects to Redis.
 
