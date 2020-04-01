@@ -140,7 +140,7 @@ class RedisClient():
             return jwt.decode('utf-8')
 
         jwt = DojotAPI.get_jwt()
-        self.mapped.set('jwt', jwt)
+        self.mapped.setex('jwt', CONFIG['locust']['redis']['jwt_expire_time'], jwt)
 
         return jwt
 
