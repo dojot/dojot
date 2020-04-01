@@ -476,38 +476,17 @@ class GenerateCerts():
         with open(filename, "w") as ca_file:
             ca_file.write(certificate)
 
-    ## Cert ##
+
     def generate_certs(self, ids: list) -> None:
         """
-        Generates the certificates for the IDs.
-
-        Args:
-            ids: list of IDs.
+        Wrapper for certificate generation functions.
         """
-        start_time = time.time()
-
-        redis_conn = self.connect_to_redis()
-
-        for device_id in ids:
-            thing = Thing(CONFIG['app']['tenant'], device_id)
-            redis_conn.hmset(device_id, thing.get_args_in_dict())
-
-        end_time = time.time()
-        LOGGER.info("Generated %d IDs in %f", len(ids), end_time - start_time)
-        redis_conn.close()
-
-    def generate_random_certs(self) -> None:
-        """
-        Runs processes to generate the certificates.
-        """
-
-        start = time.time()
-        workload = self.calculate_process_load(self.parser_args.devices, self.parser_args.batch)
-
         processes = []
+        workload, id_list = self.calculate_process_load(self.parser_args.processes, ids)
+        start = time.time()
 
         for i in range(self.parser_args.processes):
-            proc = Process(target=self.register_thing, args=(str(i), workload[i]))
+            proc = Process(target=self.register_thing, args=(str(i), workload[i], id_list[i]))
             proc.start()
             processes.append(proc)
 
