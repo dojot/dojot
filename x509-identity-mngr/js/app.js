@@ -15,6 +15,6 @@ server.listen(port, hostname, () => {
 
 process.on('SIGTERM', () => {
     server.close(() => {
-        console.log('Process terminated')
-    })
-})
+        console.log('Process terminated');
+    });
+});
