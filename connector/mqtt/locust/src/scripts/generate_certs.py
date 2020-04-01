@@ -50,6 +50,8 @@ class GenerateCerts():
 
         self.parser_args = parser.parse_args()
 
+        self.jwt = None
+
         self.run()
 
 
@@ -181,11 +183,12 @@ class GenerateCerts():
         """
         Runs the commands for each parser.
         """
-        self.jwt = DojotAPI.get_jwt()
         if self.parser_args.topic == "cert":
+            self.jwt = DojotAPI.get_jwt()
             self.cert_commands()
 
         elif self.parser_args.topic == "dojot":
+            self.jwt = DojotAPI.get_jwt()
             if self.parser_args.dojot == "create":
                 self.dojot_create_commands()
             if self.parser_args.dojot == "clear":
@@ -278,6 +281,8 @@ class GenerateCerts():
             self.map_device_ids()
 
         elif self.parser_args.export:
+            # Retrieve JWT token
+            self.jwt = DojotAPI.get_jwt()
             # Exports the certificates' files
             self.export_certs()
             # Retrieving the CA certificate
