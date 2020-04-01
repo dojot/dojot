@@ -203,6 +203,23 @@ class GenerateCerts():
             shutil.rmtree(CONFIG['security']['cert_dir'])
             LOGGER.info("... Removed certificates directory")
 
+            LOGGER.info("Creating certificates directories...")
+            os.makedirs(CONFIG['security']['cert_dir'], exist_ok=True)
+            os.makedirs(
+                "{0}/{1}".format(
+                    CONFIG['security']['cert_dir'], CONFIG['security']['renew_cert_dir']
+                ),
+                exist_ok=True
+            )
+            os.makedirs(
+                "{0}/{1}".format(
+                    CONFIG['security']['cert_dir'], CONFIG['security']['revoke_cert_dir']
+                ),
+                exist_ok=True
+            )
+            LOGGER.info("... Created certificates directories")
+
+
         if self.parser_args.devices is not None:
             if self.parser_args.processes > self.parser_args.devices:
                 LOGGER.error(
