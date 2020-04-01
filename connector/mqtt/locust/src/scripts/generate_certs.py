@@ -230,9 +230,10 @@ class GenerateCerts():
                     "The number of certificates must be greather than the number of processes!"
                 )
                 sys.exit(1)
-
+            # Generating the random IDs
+            ids = [str(uuid.uuid4().hex) for _ in range(self.parser_args.devices)]
             # Begins the certificate generation for random devices IDs
-            self.generate_random_certs()
+            self.generate_certs(ids)
 
         if self.parser_args.ids is not None:
             # Begins the certificate generation
