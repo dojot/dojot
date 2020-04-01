@@ -3,6 +3,7 @@ API calls to Dojot.
 """
 import json
 from typing import Callable, List, Dict
+import sys
 import requests
 import gevent
 
@@ -193,16 +194,30 @@ class DojotAPI():
         LOGGER.debug("Retrieving devices...")
 
         args = {
-            "url": "{0}/device".format(CONFIG['dojot']['url']),
+            "url": "{0}/device?page_size={1}".format(
+                CONFIG['dojot']['url'],
+                CONFIG['dojot']['api']['page_size'],
+            ),
             "headers": {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
             },
         }
 
+        devices_ids = []
+
         res = DojotAPI.call_api(requests.get, args)
 
-        devices_ids = [device['id'] for device in res['devices']]
+        for i in range(res['pagination']['total']):
+            args['url'] = "{0}/device?idsOnly=true&page_size={1}&page_num={2}".format(
+                CONFIG['dojot']['url'],
+                CONFIG['dojot']['api']['page_size'],
+                i + 1
+            )
+
+            res = DojotAPI.call_api(requests.get, args)
+
+            devices_ids.extend(res)
 
         LOGGER.debug("... retrieved the devices")
 
@@ -242,12 +257,17 @@ class DojotAPI():
         """
         for _ in range(CONFIG['dojot']['api']['retries'] + 1):
             try:
-                res = func(**args)
+                res: requests.Response = func(**args)
                 res.raise_for_status()
 
             except Exception as exception:
                 LOGGER.debug(str(exception))
+                if res.status_code == 429:
+                    LOGGER.error("reached maximum number of requisitions to Dojot")
+                    sys.exit(1)
+
                 gevent.sleep(CONFIG['dojot']['api']['time'])
+
 
             else:
                 return res.json()
