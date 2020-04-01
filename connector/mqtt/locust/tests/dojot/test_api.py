@@ -315,7 +315,7 @@ class TestDojotAPICallApi(unittest.TestCase):
         """
         mock_requests.post = MagicMock()
         mock_requests.post.return_value.status_code = 429
-        mock_requests.post.return_value.raise_for_status =
+        mock_requests.post.return_value.raise_for_status = \
             MagicMock(side_effect=requests.exceptions.HTTPError())
 
         args = {
