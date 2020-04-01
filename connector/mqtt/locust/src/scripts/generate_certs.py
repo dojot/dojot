@@ -525,14 +525,9 @@ class GenerateCerts():
 
         ids_per_process = []
         prev = 0
-        print("ids: ", id_list)
         for load in workload:
-            print("in this load:", id_list[prev:prev + load])
             ids_per_process.append(id_list[prev:prev + load])
             prev += load
-
-        print("Workload: ", str(workload))
-        print("ids_per_process: ", str(ids_per_process))
 
         return workload, ids_per_process
 
