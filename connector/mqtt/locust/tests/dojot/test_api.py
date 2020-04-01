@@ -5,6 +5,8 @@ Tests for DojotAPI class.
 import unittest
 from unittest.mock import patch, MagicMock, ANY, PropertyMock
 
+import requests
+
 from src.dojot.api import APICallError, DojotAPI
 
 
@@ -13,6 +15,9 @@ MOCK_CONFIG = {
         'user': 'admin',
         'passwd': 'admin',
         'url': 'dojot_url',
+        'api': {
+            'page_size': 1,
+        }
     },
 }
 
@@ -186,11 +191,16 @@ class TestDojotAPIGetDevices(unittest.TestCase):
         """
         Should successfully get devices.
         """
-        DojotAPI.call_api.return_value = {"devices": [{"id": 0}, {"id": 1}]}
+        DojotAPI.call_api.side_effect = [{
+            "devices": [{"id": 0}, {"id": 1}],
+            "pagination": {
+                "total": 2
+            }
+        }, [0], [1]]
 
         devices = DojotAPI.get_devices("testJWT")
 
-        DojotAPI.call_api.assert_called_once()
+        self.assertEqual(DojotAPI.call_api.call_count, 3)
         DojotAPI.call_api.assert_called_with(mock_requests.get, ANY)
         self.assertEqual(devices, [0, 1])
 
@@ -198,7 +208,12 @@ class TestDojotAPIGetDevices(unittest.TestCase):
         """
         Should successfully get an empty list of devices.
         """
-        DojotAPI.call_api.return_value = {"devices": []}
+        DojotAPI.call_api.return_value = {
+            "devices": [],
+            "pagination": {
+                "total": 0
+            }
+        }
 
         devices = DojotAPI.get_devices("testJWT")
 
@@ -292,6 +307,31 @@ class TestDojotAPICallApi(unittest.TestCase):
         self.assertEqual(mock_gevent.sleep.call_count, 2)
         for call in mock_gevent.sleep.mock_calls:
             call.assert_called_with(5.0)
+        self.assertIsNone(res)
+
+    def test_should_not_get_response_limit_calls(self, mock_requests, mock_gevent):
+        """
+        Should not receive a response from a POST call - limit of calls to the API.
+        """
+        mock_requests.post = MagicMock()
+        mock_requests.post.return_value.status_code = 429
+        mock_requests.post.return_value.raise_for_status =
+            MagicMock(side_effect=requests.exceptions.HTTPError())
+
+        args = {
+            "url": "testURL",
+            "data": "\"testJson\": \"testData\"",
+            "headers": "testHeader"
+        }
+
+        res = None
+        with self.assertRaises(SystemExit) as context:
+            res = DojotAPI.call_api(mock_requests.post, args)
+
+        self.assertIsNotNone(context.exception)
+        self.assertIsInstance(type(context.exception), type(SystemExit))
+        mock_requests.post.assert_called_once_with(**args)
+        mock_gevent.sleep.assert_not_called()
         self.assertIsNone(res)
 
     def test_should_get_response_after_retry(self, mock_requests, mock_gevent):
