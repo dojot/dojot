@@ -149,10 +149,10 @@ class TestCertificate(unittest.TestCase):
         mock_requests.post().connection.close.assert_called()
 
     def test_reset_entity_status_exception(self,
-                                 _mock_json,
-                                 _mock_crypto,
-                                 _mock_utils,
-                                 mock_requests):
+                                           _mock_json,
+                                           _mock_crypto,
+                                           _mock_utils,
+                                           mock_requests):
         """
         Should not sign the cert, because rose an exception.
         """
