@@ -13,9 +13,12 @@
 #                                                                #
 ##################################################################
 
+# Redirect stderr to stdout to make output easier to consume by other tools
+exec 2>&1
+
 # Variables used by configuration scripts
-readonly BASE_DIR=$1
-readonly TEMP_DIR=$2
+readonly BASE_DIR="$1"
+readonly TEMP_DIR="$2"
 
 # By default, bash sets this to $' \n\t' - space, newline, tab.
 origIFS=${IFS}
@@ -37,19 +40,17 @@ function main() {
         while true ; do
             if getLock; then
 
-                configureMail
+                batchIssuanceConfig
 
                 importProfiles
 
                 createCAs
 
-                setupUsers
+                createServices
+
+                createAdminEntity
 
                 generateAppServerTLSCertificate
-
-                createDojotMicroserviceEndEntities
-
-                createServices
 
                 # removing the lock
                 rm -f "${LOCK_FILE}"
@@ -70,54 +71,51 @@ function main() {
 
 function loadScripts() {
 
-    # Load EJBCA CLI functions
-    if [ -f "${BASE_DIR}/bin/internal/functions-ejbca" ] ; then
-        source "${BASE_DIR}/bin/internal/functions-ejbca"
-    fi
+    local scriptsDir="${BASE_DIR}/bin/internal"
 
     # Load Application Server CLI functions
-    if [ -f "${BASE_DIR}/bin/internal/functions-appserver" ] ; then
-        source "${BASE_DIR}/bin/internal/functions-appserver"
+    if [ -f "${scriptsDir}/functions-appserver" ] ; then
+        source "${scriptsDir}/functions-appserver"
     fi
 
     # Load configuration variables
-    if [ -f "${BASE_DIR}/bin/internal/configuration-variables.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/configuration-variables.sh"
+    if [ -f "${scriptsDir}/dojot-custom/configuration-variables.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/configuration-variables.sh"
     fi
 
-    # Load the mail smtp setup script
-    if [ -f "${BASE_DIR}/bin/internal/smtp-mail-setup.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/smtp-mail-setup.sh"
+    # Load EJBCA CLI functions
+    if [ -f "${scriptsDir}/dojot-custom/ejbca-commands.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/ejbca-commands.sh"
+    fi
+
+    # Load the the script to configure batch certificate issuance
+    if [ -f "${scriptsDir}/dojot-custom/batch-issuance-configuration.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/batch-issuance-configuration.sh"
     fi
 
     # Load the the script to import certificates and end entities profiles
-    if [ -f "${BASE_DIR}/bin/internal/import-profiles.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/import-profiles.sh"
+    if [ -f "${scriptsDir}/dojot-custom/import-profiles.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/import-profiles.sh"
     fi
 
     # Load the certificate authorities creation script
-    if [ -f "${BASE_DIR}/bin/internal/certificate-authorities-creation.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/certificate-authorities-creation.sh"
-    fi
-
-    # Load the users setup creation script
-    if [ -f "${BASE_DIR}/bin/internal/users-setup-creation.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/users-setup-creation.sh"
-    fi
-
-    # Load the application server TLS certificate creation script
-    if [ -f "${BASE_DIR}/bin/internal/appserver-tls-certificate-generation.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/appserver-tls-certificate-generation.sh"
-    fi
-
-    # Load the microservices end-entities creation script
-    if [ -f "${BASE_DIR}/bin/internal/microservices-end-entities-creation.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/microservices-end-entities-creation.sh"
+    if [ -f "${scriptsDir}/dojot-custom/certificate-authorities-creation.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/certificate-authorities-creation.sh"
     fi
 
     # Load the EJBCA services creation script
-    if [ -f "${BASE_DIR}/bin/internal/services-creation.sh" ] ; then
-        source "${BASE_DIR}/bin/internal/services-creation.sh"
+    if [ -f "${scriptsDir}/dojot-custom/services-creation.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/services-creation.sh"
+    fi
+
+    # Load the admin creation script
+    if [ -f "${scriptsDir}/dojot-custom/admin-creation.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/admin-creation.sh"
+    fi
+
+    # Load the application server TLS certificate creation script
+    if [ -f "${scriptsDir}/dojot-custom/appserver-tls-certificate-generation.sh" ] ; then
+        source "${scriptsDir}/dojot-custom/appserver-tls-certificate-generation.sh"
     fi
 
 }
@@ -125,7 +123,7 @@ function loadScripts() {
 function getLock() {
     # breaks the lock after certain time to avoid deadlock
     # In practice, it removes the lock file if it has timed out
-    find "${SHARED_VOLUME}" -name ".lock" -mmin "+${LOCK_FILE_TIMEOUT}" -delete > /dev/null
+    find "${SHARED_VOLUME}/" -name ".lock" -mmin "+${LOCK_FILE_TIMEOUT}" -delete > /dev/null
 
     # try to create a new lock file, and if so, the return of the command will be = 0 and the lock will be
     # obtained by the container, if not, it means that there is already a lock file that has not yet reached
@@ -192,6 +190,23 @@ function convToMillis() {
     local milliseconds
     milliseconds=$(( (years * yearToMillis) + (months * monthToMillis) + (days * dayToMillis) + (hours * hourToMillis) + (minutes * minuteToMillis) + (seconds * secondToMillis) ))
     echo "${milliseconds}"
+}
+
+# Create console log similar to application server output
+log() {
+    # 2019-01-15 12:03:43,047
+    dateString="$(date +%Y-%m-%d' '%R:%S,%N%z | sed 's/\(.*\)......\(.....\)/\1\2/')"
+    logLevel=$(printf '%-5s' "${1:-INFO}")
+    className="$0"
+    processId="$$"
+    #threadId="$(ps H -o 'tid' $processId | tail -n 1| tr -d ' ')"
+    if [ -z "$2" ] ; then
+        while read line ; do
+            echo "$dateString $logLevel [$className] (process:$processId) ${line}"
+        done
+    else
+        echo "$dateString $logLevel [$className] (process:$processId) ${2}"
+    fi
 }
 
 # Remove ad EJBCA Enterprise message

@@ -1,0 +1,23 @@
+{
+  "name": "@dojot/x509-identity",
+  "version": "1.0.0",
+  "description": "API for issuing and managing x.509 certificates. Once these certificates are associated with IoT devices or third party applications, they become the identity of these elements to the dojot platform.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Thiago de Paula Ferreira",
+    "email": "thiagodepaulaferreira@gmail.com",
+    "url": "https://github.com/thiagodpf"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "~4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1"
+  }
+}

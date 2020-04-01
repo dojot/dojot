@@ -1,0 +1,10 @@
+js/node_modules
+js/test
+npm-debug.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.gitignore
+README.md
+.vscode
+.eslintrc.json

@@ -15,11 +15,11 @@
 
 function generateAppServerTLSCertificate() {
 
-    existingEndEntity=$(ejbca_command ra findendentity --username "${HOST_NAME}" 2>&1 | grep "Username: ${HOST_NAME}" | sed 's/.*Username: //g')
+    existingEndEntity=$(ejbca_cmd ra findendentity --username "${HOST_NAME}" 2>&1 | grep "Username: ${HOST_NAME}")
     if [ "x${existingEndEntity}" == "x" ] ; then
 
         echo
-        log "INFO" "Issuing TLS certificate for local instance using ${ROOT_CA}."
+        log "INFO" "Issuing TLS certificate for EJBCA Application Server."
 
         # Generates a random password for the KeyStore of the end entity
         local keyStorePassword
@@ -28,32 +28,34 @@ function generateAppServerTLSCertificate() {
         local endEntityUid
         endEntityUid="c-0$(dd if=/dev/urandom count=1 bs=8 2>/dev/null | hexdump -e '/1 "%02x"')"
 
-        # use the Root CA to generate a TLS certificate
-        ejbca_command ra addendentity \
+        echo
+        log "INFO" "Creating End Entity: ${HOST_NAME}"
+        ejbca_cmd ra addendentity \
             --username "${HOST_NAME}" \
-            --dn "\"CN=${HOST_NAME}${DISTNAME_O}${DISTNAME_OU},UID=${endEntityUid}\"" \
-            --caname "${ROOT_CA}" \
+            --dn "\"CN=${HOST_NAME},O=${DISTNAME_O},OU=${DISTNAME_OU},UID=${endEntityUid}\"" \
+            --caname "${APPSERVER_CERTIFICATE_ISSUER}" \
             --type 1 \
             --token JKS \
             --password "${keyStorePassword}" \
             --altname "dnsName=${HOST_NAME}" \
-            --certprofile SERVER
+            --certprofile "${APP_SERVER_CERT_PROFILE}" \
+            --eeprofile "${APP_SERVER_ENTITY_PROFILE}"
 
-        ejbca_command ra setendentitystatus \
+        ejbca_cmd ra setendentitystatus \
             --username "${HOST_NAME}" \
             -S 10
 
-        ejbca_command ra setclearpwd \
+        ejbca_cmd ra setclearpwd \
             --username "${HOST_NAME}" \
             --password "${keyStorePassword}"
 
-        ejbca_command batch \
+        ejbca_cmd batch \
             --username "${HOST_NAME}" \
             -dir "${TEMP_DIR}/"
 
         if [ ! -f "${TEMP_DIR}/${HOST_NAME}.jks" ] ; then
             echo
-            log "WARN" "Unable to issue TLS certificate for local instance using ${ROOT_CA}."
+            log "WARN" "Unable to issue TLS certificate for EJBCA Application Server."
         else
             local tlsHostDir="${BASE_DIR}/secrets/persistent/tls/${HOST_NAME}"
             local keyStoreJks="${tlsHostDir}/server.jks"

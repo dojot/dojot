@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+    ejbca-server:
+        build: .
+        depends_on:
+            - ejbca-db
+        restart: always
+        hostname: "ejbca-server"
+        domainname: "dojot.iot"
+        environment:
+            DATABASE_JDBC_URL: jdbc:postgresql://ejbca-db:5432/ejbca?characterEncoding=UTF-8
+            DATABASE_USER: ejbca
+            DATABASE_PASSWORD: ejbca
+            PERFORM_DOJOT_SETUP: "true"
+            EJBCA_EXTERNAL_ACCESS: "true"
+            ADMIN_USER: "true"
+        volumes:
+            - "ejbca-volume:/mnt/persistent"
+        networks:
+            - ejbca-bridge
+    ejbca-db:
+        image: "postgres:9.4.24-alpine"
+        restart: always
+        environment:
+            POSTGRES_DB: ejbca
+            POSTGRES_USER: ejbca
+            POSTGRES_PASSWORD: ejbca
+        volumes:
+            - "ejbca-db-volume:/var/lib/postgresql/data"
+        networks:
+            - ejbca-bridge
+volumes:
+    ejbca-volume:
+    ejbca-db-volume:
+networks:
+    ejbca-bridge:
+        driver: bridge

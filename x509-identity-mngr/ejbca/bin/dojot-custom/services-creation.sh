@@ -28,7 +28,7 @@ function createServices() {
         "${CA_RENEWER_SERVICE_INTERVAL_UNIT}" \
         "${CA_RENEWER_SERVICE_TIME_BEFORE_EXP}" \
         "${CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT}" \
-        "${ROOT_CA_ID};${SERVICES_CA_ID};${DEVICES_CA_ID}"
+        "${DEVICES_CA_ID};${SERVICES_CA_ID}"
 }
 
 function createCRLUpdaterService() {
@@ -37,7 +37,7 @@ function createCRLUpdaterService() {
     local intervalPeriodicalValue=$2
     local intervalPeriodicalUnit=$3
 
-    if ejbca_command service info "${serviceName}" > /dev/null; then
+    if ejbca_cmd service info "${serviceName}" > /dev/null; then
         echo
         log "INFO" "The service '${serviceName}' already exists!"
     else
@@ -50,7 +50,7 @@ function createCRLUpdaterService() {
         properties="${properties} interval.periodical.unit=${intervalPeriodicalUnit}"
         properties="${properties} active=true"
 
-        ejbca_command service create --service "${serviceName}" --properties "${properties}"
+        ejbca_cmd service create --service "${serviceName}" --properties "${properties}"
     fi
 }
 
@@ -62,7 +62,7 @@ function createCAsRenewerService() {
     local timeBeforeExpiring=$4
     local timeBeforeExpiringUnit=$5
 
-    if ejbca_command service info "${serviceName}" > /dev/null; then
+    if ejbca_cmd service info "${serviceName}" > /dev/null; then
         echo
         log "INFO" "The service '${serviceName}' already exists!"
     else
@@ -83,6 +83,6 @@ function createCAsRenewerService() {
         properties="${properties} interval.periodical.unit=${intervalPeriodicalUnit}"
         properties="${properties} actionClassPath=org.ejbca.core.model.services.actions.NoAction"
 
-        ejbca_command service create --service "${serviceName}" --properties "${properties}"
+        ejbca_cmd service create --service "${serviceName}" --properties "${properties}"
     fi
 }

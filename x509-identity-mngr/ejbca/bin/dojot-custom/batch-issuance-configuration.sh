@@ -13,18 +13,31 @@
 #                                                                #
 ##################################################################
 
-function importProfiles() {
-    # import into EJBCA the certificate profiles
-    if [ -d "${CERT_PROFILES_DIR}" ] && [ "$(ls -A "${CERT_PROFILES_DIR}")" ]; then
-        echo
-        log "INFO" "Importing certificate Profiles"
-        ejbca_command ca importprofiles -d "${CERT_PROFILES_DIR}"
-    fi
+function batchIssuanceConfig() {
+    echo
+    log "INFO" "Configuring batch issue properties (${BATCH_PROPS_FILE})"
 
-    # import into EJBCA the end entity profiles
-    if [ -d "${ENTITY_PROFILES_DIR}" ] && [ "$(ls -A "${ENTITY_PROFILES_DIR}")" ]; then
-        echo
-        log "INFO" "Importing end-entity Profiles"
-        ejbca_command ca importprofiles -d "${ENTITY_PROFILES_DIR}"
+    setBatchIssuanceProp "keys.alg" "${BATCH_KEY_ALGORITHM}"
+    setBatchIssuanceProp "keys.spec" "${BATCH_KEY_BIT_LENGTH}"
+}
+
+function setBatchIssuanceProp() {
+    local key=$1
+    local value=$2
+    local file="${BATCH_PROPS_FILE}"
+
+    # creates the file if it does not exist
+    touch "${file}"
+
+    if grep -qF "${key}=" "${file}"; then
+        # set the property
+        awk -v pattern="^${key}=" \
+            -v replacement="${key}=${value}" \
+            '{ if ($0 ~ pattern) print replacement; else print $0; }' \
+            "${file}" > "${file}.tmp"
+        mv "${file}.tmp" "${file}"
+    else
+        # add new property
+        echo "${key}=${value}" >> "${file}"
     fi
 }

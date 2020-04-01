@@ -21,196 +21,10 @@
      <int>0</int>
     </void>
     <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
      <int>0</int>
     </void>
     <void method="add">
      <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>1</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
-    </void>
-    <void method="add">
-     <int>0</int>
     </void>
     <void method="add">
      <int>0</int>
@@ -276,6 +90,192 @@
      <int>1</int>
     </void>
     <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>1</int>
+    </void>
+    <void method="add">
      <int>1</int>
     </void>
     <void method="add">
@@ -307,6 +307,15 @@
     </void>
     <void method="add">
      <int>1</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>0</int>
     </void>
    </object>
   </void>
@@ -315,15 +324,6 @@
    <object class="java.util.ArrayList">
     <void method="add">
      <int>500</int>
-    </void>
-    <void method="add">
-     <int>1200</int>
-    </void>
-    <void method="add">
-     <int>1100</int>
-    </void>
-    <void method="add">
-     <int>400</int>
     </void>
    </object>
   </void>
@@ -357,7 +357,7 @@
   </void>
   <void method="put">
    <int>20001</int>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <int>10001</int>
@@ -401,7 +401,7 @@
   </void>
   <void method="put">
    <int>5</int>
-   <string>Microservice Manager</string>
+   <string></string>
   </void>
   <void method="put">
    <int>20005</int>
@@ -433,7 +433,7 @@
   </void>
   <void method="put">
    <int>29</int>
-   <string>2006511141</string>
+   <string>1711483265</string>
   </void>
   <void method="put">
    <int>20029</int>
@@ -449,7 +449,7 @@
   </void>
   <void method="put">
    <int>30</int>
-   <string>2006511141</string>
+   <string>1711483265</string>
   </void>
   <void method="put">
    <int>20030</int>
@@ -481,7 +481,7 @@
   </void>
   <void method="put">
    <int>32</int>
-   <string>1;2;3;4</string>
+   <string>1</string>
   </void>
   <void method="put">
    <int>20032</int>
@@ -545,7 +545,7 @@
   </void>
   <void method="put">
    <int>37</int>
-   <string>-252804958</string>
+   <string>902736024</string>
   </void>
   <void method="put">
    <int>20037</int>
@@ -716,6 +716,15 @@
    <boolean>false</boolean>
   </void>
   <void method="put">
+   <int>40005</int>
+   <object class="java.util.LinkedHashMap">
+    <void method="put">
+     <string>org.ejbca.core.model.ra.raadmin.validators.RegexFieldValidator</string>
+     <string>^[0-9A-Za-z ]{1,255}$</string>
+    </void>
+   </object>
+  </void>
+  <void method="put">
    <int>28</int>
    <string>false</string>
   </void>
@@ -778,54 +787,6 @@
   <void method="put">
    <string>PRINTINGSVGFILENAME</string>
    <string></string>
-  </void>
-  <void method="put">
-   <int>12</int>
-   <string>Dojot IoT Platform</string>
-  </void>
-  <void method="put">
-   <int>20012</int>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
-   <int>10012</int>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
-   <int>30012</int>
-   <boolean>false</boolean>
-  </void>
-  <void method="put">
-   <int>11</int>
-   <string>Microservices</string>
-  </void>
-  <void method="put">
-   <int>20011</int>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
-   <int>10011</int>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
-   <int>30011</int>
-   <boolean>false</boolean>
-  </void>
-  <void method="put">
-   <int>4</int>
-   <string></string>
-  </void>
-  <void method="put">
-   <int>20004</int>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
-   <int>10004</int>
-   <boolean>true</boolean>
-  </void>
-  <void method="put">
-   <int>30004</int>
-   <boolean>true</boolean>
   </void>
  </object>
 </java>

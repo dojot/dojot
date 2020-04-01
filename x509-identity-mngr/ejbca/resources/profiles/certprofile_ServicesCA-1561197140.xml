@@ -7,7 +7,7 @@
   </void>
   <void method="put">
    <string>type</string>
-   <int>1</int>
+   <int>8</int>
   </void>
   <void method="put">
    <string>certversion</string>
@@ -15,7 +15,7 @@
   </void>
   <void method="put">
    <string>encodedvalidity</string>
-   <string>10d</string>
+   <string>30y</string>
   </void>
   <void method="put">
    <string>usecertificatevalidityoffset</string>
@@ -27,7 +27,7 @@
   </void>
   <void method="put">
    <string>useexpirationrestrictionforweekdays</string>
-   <boolean>false</boolean>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>expirationrestrictionforweekdaysbefore</string>
@@ -89,7 +89,7 @@
   </void>
   <void method="put">
    <string>storesubjectaltname</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>usebasicconstrants</string>
@@ -117,7 +117,7 @@
   </void>
   <void method="put">
    <string>usesubjectalternativename</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>subjectalternativenamecritical</string>
@@ -125,7 +125,7 @@
   </void>
   <void method="put">
    <string>useissueralternativename</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>issueralternativenamecritical</string>
@@ -133,11 +133,11 @@
   </void>
   <void method="put">
    <string>usecrldistributionpoint</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>usedefaultcrldistributionpoint</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>crldistributionpointcritical</string>
@@ -257,7 +257,7 @@
   </void>
   <void method="put">
    <string>signaturealgorithm</string>
-   <string>SHA256WithRSA</string>
+   <null/>
   </void>
   <void method="put">
    <string>usekeyusage</string>
@@ -266,6 +266,9 @@
   <void method="put">
    <string>keyusage</string>
    <object class="java.util.ArrayList">
+    <void method="add">
+     <boolean>true</boolean>
+    </void>
     <void method="add">
      <boolean>false</boolean>
     </void>
@@ -282,10 +285,7 @@
      <boolean>true</boolean>
     </void>
     <void method="add">
-     <boolean>false</boolean>
-    </void>
-    <void method="add">
-     <boolean>false</boolean>
+     <boolean>true</boolean>
     </void>
     <void method="add">
      <boolean>false</boolean>
@@ -305,18 +305,11 @@
   </void>
   <void method="put">
    <string>useextendedkeyusage</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>extendedkeyusage</string>
-   <object class="java.util.ArrayList">
-    <void method="add">
-     <string>1.3.6.1.5.5.7.3.2</string>
-    </void>
-    <void method="add">
-     <string>1.3.6.1.5.5.7.3.1</string>
-    </void>
-   </object>
+   <object class="java.util.ArrayList"/>
   </void>
   <void method="put">
    <string>extendedkeyusagecritical</string>
@@ -396,7 +389,7 @@
   </void>
   <void method="put">
    <string>usepathlengthconstraint</string>
-   <boolean>false</boolean>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>pathlengthconstraint</string>
@@ -496,7 +489,7 @@
   </void>
   <void method="put">
    <string>useauthorityinformationaccess</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>caissuers</string>
@@ -508,7 +501,7 @@
   </void>
   <void method="put">
    <string>usedefaultocspservicelocator</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>ocspservicelocatoruri</string>
@@ -528,14 +521,14 @@
     <void method="put">
      <object class="java.lang.Enum" method="valueOf">
       <class>org.cesecore.certificates.ca.ApprovalRequestType</class>
-      <string>KEYRECOVER</string>
+      <string>ADDEDITENDENTITY</string>
      </object>
      <int>-1</int>
     </void>
     <void method="put">
      <object class="java.lang.Enum" method="valueOf">
       <class>org.cesecore.certificates.ca.ApprovalRequestType</class>
-      <string>ADDEDITENDENTITY</string>
+      <string>KEYRECOVER</string>
      </object>
      <int>-1</int>
     </void>
@@ -570,7 +563,7 @@
   </void>
   <void method="put">
    <string>usesingleactivecertificateconstraint</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>overridableextensionoids</string>
@@ -586,10 +579,6 @@
   </void>
   <void method="put">
    <string>usecustomdnorderldap</string>
-   <boolean>false</boolean>
-  </void>
-  <void method="put">
-   <string>nameconstraintscritical</string>
    <boolean>false</boolean>
   </void>
  </object>

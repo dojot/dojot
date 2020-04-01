@@ -7,7 +7,7 @@
   </void>
   <void method="put">
    <string>type</string>
-   <int>1</int>
+   <int>8</int>
   </void>
   <void method="put">
    <string>certversion</string>
@@ -15,7 +15,7 @@
   </void>
   <void method="put">
    <string>encodedvalidity</string>
-   <string>1y</string>
+   <string>30y</string>
   </void>
   <void method="put">
    <string>usecertificatevalidityoffset</string>
@@ -27,7 +27,7 @@
   </void>
   <void method="put">
    <string>useexpirationrestrictionforweekdays</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>expirationrestrictionforweekdaysbefore</string>
@@ -137,7 +137,7 @@
   </void>
   <void method="put">
    <string>usedefaultcrldistributionpoint</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>crldistributionpointcritical</string>
@@ -179,6 +179,12 @@
    <string>availablekeyalgorithms</string>
    <object class="java.util.ArrayList">
     <void method="add">
+     <string>DSA</string>
+    </void>
+    <void method="add">
+     <string>ECDSA</string>
+    </void>
+    <void method="add">
      <string>RSA</string>
     </void>
    </object>
@@ -195,17 +201,59 @@
    <string>availablebitlengths</string>
    <object class="java.util.ArrayList">
     <void method="add">
+     <int>0</int>
+    </void>
+    <void method="add">
+     <int>192</int>
+    </void>
+    <void method="add">
+     <int>224</int>
+    </void>
+    <void method="add">
+     <int>239</int>
+    </void>
+    <void method="add">
+     <int>256</int>
+    </void>
+    <void method="add">
+     <int>384</int>
+    </void>
+    <void method="add">
+     <int>512</int>
+    </void>
+    <void method="add">
+     <int>521</int>
+    </void>
+    <void method="add">
+     <int>1024</int>
+    </void>
+    <void method="add">
+     <int>1536</int>
+    </void>
+    <void method="add">
+     <int>2048</int>
+    </void>
+    <void method="add">
+     <int>3072</int>
+    </void>
+    <void method="add">
      <int>4096</int>
+    </void>
+    <void method="add">
+     <int>6144</int>
+    </void>
+    <void method="add">
+     <int>8192</int>
     </void>
    </object>
   </void>
   <void method="put">
    <string>minimumavailablebitlength</string>
-   <int>4096</int>
+   <int>0</int>
   </void>
   <void method="put">
    <string>maximumavailablebitlength</string>
-   <int>4096</int>
+   <int>8192</int>
   </void>
   <void method="put">
    <string>signaturealgorithm</string>
@@ -225,7 +273,10 @@
      <boolean>false</boolean>
     </void>
     <void method="add">
-     <boolean>true</boolean>
+     <boolean>false</boolean>
+    </void>
+    <void method="add">
+     <boolean>false</boolean>
     </void>
     <void method="add">
      <boolean>false</boolean>
@@ -234,10 +285,7 @@
      <boolean>true</boolean>
     </void>
     <void method="add">
-     <boolean>false</boolean>
-    </void>
-    <void method="add">
-     <boolean>false</boolean>
+     <boolean>true</boolean>
     </void>
     <void method="add">
      <boolean>false</boolean>
@@ -257,15 +305,11 @@
   </void>
   <void method="put">
    <string>useextendedkeyusage</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>extendedkeyusage</string>
-   <object class="java.util.ArrayList">
-    <void method="add">
-     <string>1.3.6.1.5.5.7.3.2</string>
-    </void>
-   </object>
+   <object class="java.util.ArrayList"/>
   </void>
   <void method="put">
    <string>extendedkeyusagecritical</string>
@@ -345,7 +389,7 @@
   </void>
   <void method="put">
    <string>usepathlengthconstraint</string>
-   <boolean>false</boolean>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>pathlengthconstraint</string>
@@ -457,7 +501,7 @@
   </void>
   <void method="put">
    <string>usedefaultocspservicelocator</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>ocspservicelocatoruri</string>
@@ -519,7 +563,7 @@
   </void>
   <void method="put">
    <string>usesingleactivecertificateconstraint</string>
-   <boolean>true</boolean>
+   <boolean>false</boolean>
   </void>
   <void method="put">
    <string>overridableextensionoids</string>
@@ -535,10 +579,6 @@
   </void>
   <void method="put">
    <string>usecustomdnorderldap</string>
-   <boolean>false</boolean>
-  </void>
-  <void method="put">
-   <string>nameconstraintscritical</string>
    <boolean>false</boolean>
   </void>
  </object>
