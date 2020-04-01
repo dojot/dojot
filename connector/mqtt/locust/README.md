@@ -213,46 +213,48 @@ The Dockerfile for the Locust master and slave are in the `Docker` directory.
 
 Locust behaviour and Redis configurations.
 
-Key                   | Purpose                                                        | Default Value         | Valid Values                                  |
---------------------- | -------------------------------------------------------------- | --------------------- | --------------------------------------------- |
-CA_CERT_FILE          | CA certificate file                                            | ca.crt                | file name                                     |
-CERT_DIR              | certificates and private keys directory                        | cert/                 | directory name                                |
-DEBUG_MODE            | activate debug mode in shell scripts                           | 0                     | 0, 1                                          |
-DEVICES_TO_RENEW      | number of devices to renew randomly                            | 1000                  | integer                                       |
-DEVICES_TO_REVOKE     | number of devices to revoke randomly                           | 1000                  | integer                                       |
-LOCUST_MASTER_HOST    | Locust master IP/hostname                                      | locust-master         | hostname/IP                                   |
-LOG_LEVEL             | log level (case insensitive)                                   | info                  | notset, debug, info, warning, error, critical |
-MAX_TIME_RECONN       | max time (in seconds) to try to reconnect to the MQTT broker   | 600                   | integer                                       |
-MIN_TIME_RECONN       | min time (in seconds) to try to reconnect to the MQTT broker   | 1                     | integer                                       |
-PROBABILITY_TO_RENEW  | probability to renew a device                                  | 10                    | integer in [0, 100]                           |
-PROBABILITY_TO_REVOKE | probability to revoke a device                                 | 10                    | integer in [0, 100]                           |
-REDIS_BACKUP          | use a Redis dump with IDs instead of generating new ones       | y                     | y, n                                          |
-REDIS_CERTIFICATES_DB | database with the certificates                                 | 0                     | integer in [0, 15]                            |
-REDIS_CONN_TIMEOUT    | redis timeout                                                  | 180                   | integer                                       |
-REDIS_HOST            | redis host                                                     | redis                 | hostname/IP                                   |
-REDIS_MAPPED_DB       | database with the mapped device IDs from certificates database | 1                     | integer in [0, 15]                            |
-REDIS_PASSWD          | redis password                                                 | none                  | passwords                                     |
-REDIS_PORT            | redis port                                                     | 6379                  | port value                                    |
-RENEW_CERT_DIR        | directory where the certs to be renewed will be stored         | renew/                | directory name                                |
-RENEW_DEVICES         | enable random renovation of devices (case insensitive)         | False                 | True, False                                   |
-REVOKE_CERT_DIR       | directory where the certs to be revoked will be stored         | revoke/               | directory name                                |
-REVOKE_DEVICES        | enable random revocation of devices (case insensitive)         | False                 | True, False                                   |
-TASK_MAX_TIME         | max time of each Locust's tasks (ms)                           | 30000                 | integer                                       |
-TASK_MIN_TIME         | min time of each Locust's tasks (ms)                           | 29500                 | integer                                       |
-TENANT                | tenant that is publishing                                      | admin                 | string                                        |
-TIME_TO_RENEW         | time to renew the cert after the client initialization         | 1000                  | integer                                       |
-TIME_TO_REVOKE        | time to revoke the cert after the client initialization        | 1000                  | integer                                       |
+Key                          | Purpose                                                        | Default Value | Valid Values                                  |
+---------------------------- | -------------------------------------------------------------- | ------------- | --------------------------------------------- |
+CA_CERT_FILE                 | CA certificate file                                            | ca.crt        | file name                                     |
+CERT_DIR                     | certificates and private keys directory                        | cert/         | directory name                                |
+DEBUG_MODE                   | activate debug mode in shell scripts                           | 0             | 0, 1                                          |
+DEVICES_TO_RENEW             | number of devices to renew randomly                            | 1000          | integer                                       |
+DEVICES_TO_REVOKE            | number of devices to revoke randomly                           | 1000          | integer                                       |
+LOCUST_MASTER_HOST           | Locust master IP/hostname                                      | locust-master | hostname/IP                                   |
+LOG_LEVEL                    | log level (case insensitive)                                   | info          | notset, debug, info, warning, error, critical |
+MAX_TIME_RECONN              | max time (in seconds) to try to reconnect to the MQTT broker   | 600           | integer                                       |
+MIN_TIME_RECONN              | min time (in seconds) to try to reconnect to the MQTT broker   | 1             | integer                                       |
+PROBABILITY_TO_RENEW         | probability to renew a device                                  | 10            | integer in [0, 100]                           |
+PROBABILITY_TO_REVOKE        | probability to revoke a device                                 | 10            | integer in [0, 100]                           |
+REDIS_BACKUP                 | use a Redis dump with IDs instead of generating new ones       | y             | y, n                                          |
+REDIS_CERTIFICATES_DB        | database with the certificates                                 | 0             | integer in [0, 15]                            |
+REDIS_CONN_TIMEOUT           | redis timeout                                                  | 180           | integer                                       |
+REDIS_HOST                   | redis host                                                     | redis         | hostname/IP                                   |
+REDIS_MAPPED_DB              | database with the mapped device IDs from certificates database | 1             | integer in [0, 15]                            |
+REDIS_PASSWD                 | redis password                                                 | none          | passwords                                     |
+REDIS_PORT                   | redis port                                                     | 6379          | port value                                    |
+REDIS_STORED_JWT_EXPIRE_TIME | time (in seconds) to expire the cached JWT                     | 1800          | positive integer                              |
+RENEW_CERT_DIR               | directory where the certs to be renewed will be stored         | renew/        | directory name                                |
+RENEW_DEVICES                | enable random renovation of devices (case insensitive)         | False         | True, False                                   |
+REVOKE_CERT_DIR              | directory where the certs to be revoked will be stored         | revoke/       | directory name                                |
+REVOKE_DEVICES               | enable random revocation of devices (case insensitive)         | False         | True, False                                   |
+TASK_MAX_TIME                | max time of each Locust's tasks (ms)                           | 30000         | integer                                       |
+TASK_MIN_TIME                | min time of each Locust's tasks (ms)                           | 29500         | integer                                       |
+TENANT                       | tenant that is publishing                                      | admin         | string                                        |
+TIME_TO_RENEW                | time to renew the cert after the client initialization         | 1000          | integer                                       |
+TIME_TO_REVOKE               | time to revoke the cert after the client initialization        | 1000          | integer                                       |
 
 ### **MQTT**
 
 Configurations related to MQTT communication.
 
-Key                    | Purpose                           | Default Value | Valid Values |
----------------------- | --------------------------------- | ------------- | ------------ |
-DOJOT_MQTT_HOST        | MQTT broker host                  | 127.0.0.1     | hostname/IP  |
-DOJOT_MQTT_PORT        | MQTT broker port                  | 1883          | port value   |
-DOJOT_MQTT_QOS         | MQTT broker QoS level             | 1             | 0, 1, 2      |
-DOJOT_MQTT_TIMEOUT     | MQTT broker timeout               | 60            | integer      |
+Key                     | Purpose                    | Default Value | Valid Values      |
+----------------------- | -------------------------- | ------------- | ----------------- |
+DOJOT_DEVICES_PAGE_SIZE | /device endpoint page size | 20            | positive integers |
+DOJOT_MQTT_HOST         | MQTT broker host           | 127.0.0.1     | hostname/IP       |
+DOJOT_MQTT_PORT         | MQTT broker port           | 1883          | port value        |
+DOJOT_MQTT_QOS          | MQTT broker QoS level      | 1             | 0, 1, 2           |
+DOJOT_MQTT_TIMEOUT      | MQTT broker timeout        | 60            | integer           |
 
 ### **Dojot**
 
