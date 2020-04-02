@@ -2,7 +2,7 @@
   "name": "kafka2ftp",
   "version": "1.0.0",
   "private": true,
-  "description": "The kafka2ftp service provides a bridge/connector solution for forwarding messages from Apache Kafka to FTP servers",
+  "description": "The kafka2ftp service provides a connector solution for forwarding messages from Apache Kafka to FTP servers",
   "main": "app/Ftp.js",
   "scripts": {
     "kafka2ftp": "node app/Index.js",
