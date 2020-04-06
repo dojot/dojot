@@ -77,7 +77,7 @@ class DojotAPI():
             })
             args["url"] = "{0}/device?count={1}&verbose=false".format(CONFIG['dojot']['url'], load)
 
-            DojotAPI.call_api(requests.post, args)
+            DojotAPI.call_api(requests.post, args, False)
 
         LOGGER.debug("... created the devices")
 
@@ -159,7 +159,7 @@ class DojotAPI():
             },
         }
 
-        DojotAPI.call_api(requests.delete, args)
+        DojotAPI.call_api(requests.delete, args, False)
 
         LOGGER.debug("... deleted devices")
 
@@ -177,7 +177,7 @@ class DojotAPI():
             },
         }
 
-        DojotAPI.call_api(requests.delete, args)
+        DojotAPI.call_api(requests.delete, args, False)
 
         LOGGER.debug("... deleted templates")
 
