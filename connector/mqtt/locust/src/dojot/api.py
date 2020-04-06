@@ -275,6 +275,35 @@ class DojotAPI():
         res = DojotAPI.call_api(requests.post, args)
 
         return res['status']['data']
+
+    @staticmethod
+    def reset_entity_status(jwt: str, username: str, status: int = 10) -> None:
+        """
+        Changes the entity's status.
+
+        Params:
+            jwt: Dojot JWT token
+            username: dojot username
+            status: status to be set, defaults to 10
+        """
+        args = {
+            "url": CONFIG['dojot']['url'] + "/user",
+            "headers": {
+                "content-type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": json.dumps({
+                "username": username,
+                "password": "dojot",
+                "subjectDN": "CN=" + username,
+                "status": status
+            }),
+        }
+
+        DojotAPI.call_api(requests.post, args, False)
+
+
     @staticmethod
     def divide_loads(total: int, batch: int) -> List:
         """
