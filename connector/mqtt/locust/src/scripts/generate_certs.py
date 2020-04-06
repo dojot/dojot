@@ -556,13 +556,22 @@ class GenerateCerts():
         start_batch_time = start_time
         for i in range(n_certs):
 
-            if i % self.parser_args.batch == 0:
+            if (i != 0) and (i % self.parser_args.batch == 0):
                 end_batch_time = time.time()
                 diff = end_batch_time - start_batch_time
-                start_batch_time = end_batch_time
                 LOGGER.info("Execution time: %f secs by process %s with batch %s", diff, name, i)
+
                 pipe.execute()
                 pipe = redis_conn.pipeline()
+
+                LOGGER.debug(
+                    "Waiting %.1fs to start another batch...",
+                    self.parser_args.wait
+                )
+                time.sleep(self.parser_args.wait)
+                LOGGER.debug("... Resuming certificate generation")
+
+                start_batch_time = time.time()
 
             thing_id = id_list[i]
             thing = None
