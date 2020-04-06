@@ -210,13 +210,13 @@ class GenerateCerts():
             LOGGER.info("Creating certificates directories...")
             os.makedirs(CONFIG['security']['cert_dir'], exist_ok=True)
             os.makedirs(
-                "{0}/{1}".format(
+                "{0}{1}".format(
                     CONFIG['security']['cert_dir'], CONFIG['security']['renew_cert_dir']
                 ),
                 exist_ok=True
             )
             os.makedirs(
-                "{0}/{1}".format(
+                "{0}{1}".format(
                     CONFIG['security']['cert_dir'], CONFIG['security']['revoke_cert_dir']
                 ),
                 exist_ok=True
