@@ -10,8 +10,7 @@ This section will show how to use the scripts that are used to complement/help L
 
 ### **Generate Certificates**
 
-The main goal of this script is to generate certificates for devices. These can either be in Dojot or be virtual ones. It also is used to create test devices and clear devices/templates in
-Dojot.
+The main goal of this script is to generate certificates for devices. These can either be in Dojot or be virtual ones. It also is used to create test devices and clear devices/templates in Dojot.
 
 #### **Setup**
 
@@ -36,9 +35,14 @@ You will have the `generate-certs` container running. Now enter in it:
 docker-compose -f Docker/scripts/generate_certs/docker-compose.yml exec generate-certs bash
 ```
 
-To run the script and check its options:
+To facilitate the use of the script, we provide an alias for the actual command:
 ```shell
-python -m src.scripts.generate_certs -h
+generate_certs
+```
+
+To check the script help:
+```shell
+generate_certs -h
 ```
 
 #### **Example**
@@ -50,7 +54,7 @@ it has.
 
 Generate the certificates:
 ```shell
-python -m src.scripts.generate_certs cert --devices 100
+generate_certs cert --devices 100
 ```
 
 This will create and map the certificates in Redis, retrieve the CA certificate in the file `ca.crt`
@@ -60,19 +64,19 @@ and export all of them to `/cert` directory.
 
 Generate test devices in Dojot:
 ```shell
-python -m src.scripts.generate_certs dojot create --devices 100
+generate_certs dojot create --devices 100
 ```
 
 Generate the certificates for those devices:
 ```shell
-python -m src.scripts.generate_certs cert --dojot
+generate_certs cert --dojot
 ```
 
 ##### **Redoing tests without stopping Locust containers**
 
 After pressing the Stop button in Locust GUI, go to the `generate_certs` script and run:
 ```shell
-python -m src.scripts.generate_certs redis --restore
+generate_certs redis --restore
 ```
 
 You can, of course, create another devices and certificates in the meantime, but you will always
@@ -286,18 +290,22 @@ sudo sysctl -w net/ipv4/ip_local_port_range="1024 65535"
 
 There is a lint in the repository that you should follow. To check the linting state in it, run:
 ```shell
-pylint src tests
+run_lint
 ```
+
+The command `run_lint` is an alias of `pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc`.
 
 ## Unit Tests
 
 To run the tests, you can use the Docker Compose file provided for use with the `generate_certs` script. In case you missed it, you can see it [here](#generate-certificates).
 With the dependencies properly installed, you can get the complete tests' report by running:
 ```shell
-coverage run -m pytest tests && coverage html
+run_cov
 ```
 
 It will generate a HTML coverage report in the `htmlcov` directory.
+
+The command `run_cov` is an alias of `coverage run -m pytest tests && coverage html`.
 
 
 # **Machine specifications for tests**
