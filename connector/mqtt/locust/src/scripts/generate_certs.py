@@ -147,6 +147,14 @@ class GenerateCerts():
             action="store_true",
             default=False
         )
+        parser.add_argument(
+            "--wait",
+            metavar="N",
+            help="float time in seconds to wait between certificate generation batches, defaults\
+                to 5.0",
+            type=float,
+            default=5.0
+        )
 
     def config_redis_parser(self, parser):
         """
