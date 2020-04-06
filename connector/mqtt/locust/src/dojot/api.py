@@ -245,7 +245,8 @@ class DojotAPI():
         return loads
 
     @staticmethod
-    def call_api(func: Callable[..., requests.Response], args: dict) -> Dict:
+    def call_api(func: Callable[..., requests.Response], args: dict, return_json: bool = True) ->\
+        Dict:
         """
         Calls the Dojot API using `func` and `args`.
 
@@ -265,11 +266,15 @@ class DojotAPI():
                 if res.status_code == 429:
                     LOGGER.error("reached maximum number of requisitions to Dojot")
                     sys.exit(1)
+                else:
+                    LOGGER.error(str(exception))
 
                 gevent.sleep(CONFIG['dojot']['api']['time'])
 
-
             else:
-                return res.json()
+                if return_json:
+                    return res.json()
+                else:
+                    return
 
         raise APICallError("exceeded the number of retries to {0}".format(args['url']))
