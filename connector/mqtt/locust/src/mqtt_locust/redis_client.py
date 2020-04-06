@@ -164,7 +164,7 @@ class RedisClient():
         device_id = None
 
         if CONFIG['dojot']['env']:
-            jwt = DojotAPI.get_jwt()
+            jwt = self.get_jwt()
             template_id = self.get_template_id()
             device_id = DojotAPI.create_device(
                 jwt,
