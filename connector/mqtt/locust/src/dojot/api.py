@@ -224,6 +224,29 @@ class DojotAPI():
         return devices_ids
 
     @staticmethod
+    def create_ejbca_user(jwt: str, username: str) -> None:
+        """
+        Makes a requisition to EJBCA to create a user.
+
+        Parameters:
+            jwt: Dojot JWT token
+            username: dojot username
+        """
+        args = {
+            "url": CONFIG['dojot']['url'] + "/user",
+            "headers": {
+                'content-type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer {0}'.format(jwt),
+            },
+            "data": json.dumps({
+                "username": username
+            }),
+        }
+
+        DojotAPI.call_api(requests.post, args, False)
+
+    @staticmethod
     def divide_loads(total: int, batch: int) -> List:
         """
         Divides `n` in a list with each element being up to `batch`.

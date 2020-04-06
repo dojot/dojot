@@ -8,6 +8,7 @@ from OpenSSL import crypto
 from src.config import CONFIG
 from src.utils import Utils
 from src.mqtt_locust.redis_client import RedisClient
+from src.dojot.api import DojotAPI
 
 class Certificate:
     """
@@ -24,9 +25,8 @@ class Certificate:
         self.key = {"raw": "", "pem": self.generate_private_key()}
         self.csr = {"raw": "", "pem": self.generate_csr()}
         self.crt = {"raw": "", "pem": ""}
-
-        self.create_ejbca_user()
         self.sign_cert()
+        DojotAPI.create_ejbca_user(self.jwt, self.c_name)
         self.crt["pem"] = self.save_crt()
 
     def save_crt(self) -> str:
@@ -64,7 +64,6 @@ class Certificate:
             dns.append("DNS: %s" % i)
         dns = ", ".join(dns)
 
-
         req = crypto.X509Req()
         req.get_subject().CN = self.c_name
 
@@ -93,35 +92,6 @@ class Certificate:
         req.sign(key, "sha256")
 
         return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")
-
-    def create_ejbca_user(self) -> None:
-        """
-        Makes a requisition to EJBCA to create a user.
-        """
-        # create the ejbca user
-        req = json.dumps({
-            "username": self.c_name
-        })
-
-        default_header = {
-            'content-type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer {0}'.format(self.jwt),
-        }
-
-        response = None
-        try:
-            response = requests.post(
-                CONFIG['dojot']['url'] + "/user",
-                headers=default_header,
-                data=req
-            )
-            response.raise_for_status()
-        except Exception as exception:
-            self.logger.error(str(exception))
-            raise
-
-        response.connection.close()
 
     def sign_cert(self) -> None:
         """
