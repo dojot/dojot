@@ -247,6 +247,35 @@ class DojotAPI():
         DojotAPI.call_api(requests.post, args, False)
 
     @staticmethod
+    def sign_cert(jwt: str, username: str, passwd: str, csr: str) -> str:
+        """
+        Sign the certificates.
+
+        Parameters:
+            jwt: Dojot JWT token
+            username: dojot username
+            passwd: dojot user password
+            csr: CSR in PEM format
+
+        Returns the raw certificate.
+        """
+        args = {
+            "url": CONFIG['dojot']['url'] + "/sign/" + username + "/pkcs10",
+            "headers": {
+                "content-type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": json.dumps({
+                "passwd": passwd,
+                "certificate": csr
+            }),
+        }
+
+        res = DojotAPI.call_api(requests.post, args)
+
+        return res['status']['data']
+    @staticmethod
     def divide_loads(total: int, batch: int) -> List:
         """
         Divides `n` in a list with each element being up to `batch`.

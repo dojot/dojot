@@ -24,9 +24,9 @@ class Certificate:
         self.c_name = thing_id
         self.key = {"raw": "", "pem": self.generate_private_key()}
         self.csr = {"raw": "", "pem": self.generate_csr()}
-        self.crt = {"raw": "", "pem": ""}
-        self.sign_cert()
         DojotAPI.create_ejbca_user(self.jwt, self.c_name)
+        self.crt = {}
+        self.crt["raw"] = self.sign_cert()
         self.crt["pem"] = self.save_crt()
 
     def save_crt(self) -> str:
@@ -93,46 +93,9 @@ class Certificate:
 
         return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")
 
-    def sign_cert(self) -> None:
+    def sign_cert(self) -> str:
         """
         Sign the certificates.
-        """
-        csr = self.csr["pem"]
-        cut_down_clr = (csr[csr.find('-----BEGIN CERTIFICATE REQUEST-----')
-                            + len('-----BEGIN CERTIFICATE REQUEST-----'):
-                            csr.find("-----END CERTIFICATE REQUEST-----")]
-                        .replace("\n", ""))
-
-        req = json.dumps({
-            "passwd": "dojot",
-            "certificate": cut_down_clr
-        })
-
-        default_header = {
-            'content-type': 'application/json',
-            'Accept': 'application/json',
-            "Authorization": "Bearer {0}".format(self.jwt),
-        }
-        url = CONFIG['dojot']['url'] + "/sign/" + self.c_name + "/pkcs10"
-
-        response = None
-        try:
-            response = requests.post(
-                url,
-                headers=default_header,
-                data=req
-            )
-            response.raise_for_status()
-
-        except Exception as exception:
-            self.logger.error(str(exception))
-            raise
-
-        else:
-            self.crt["raw"] = json.loads(response.content)['status']['data']
-
-        response.connection.close()
-
 
     def reset_entity_status(self, status: int = 10) -> None:
         """
@@ -179,7 +142,8 @@ class Certificate:
         https://doc.primekey.com/ejbca/ejbca-operations/ejbca-operations-guide/ca-operations-guide/end-entities/certificate-renewal
         """
         self.reset_entity_status()
-        self.key["pem"] = self.generate_private_key()
-        self.csr["pem"] = self.generate_csr()
-        self.sign_cert()
+        self.key = {"raw": "", "pem": self.generate_private_key()}
+        self.csr = {"raw": "", "pem": self.generate_csr()}
+        self.crt = {}
+        self.crt["raw"] = self.sign_cert()
         self.crt["pem"] = self.save_crt()
