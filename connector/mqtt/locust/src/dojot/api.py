@@ -355,7 +355,6 @@ class DojotAPI():
             else:
                 if return_json:
                     return res.json()
-                else:
-                    return
+                return
 
         raise APICallError("exceeded the number of retries to {0}".format(args['url']))
