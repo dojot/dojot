@@ -1,8 +1,6 @@
 """
 Certificate generation.
 """
-import json
-import requests
 from OpenSSL import crypto
 
 from src.config import CONFIG
