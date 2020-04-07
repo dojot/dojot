@@ -23,7 +23,7 @@ producer.connect()
         timestamp: Date.now(),
       },
       attrs: {
-        attr_test: 'content_test2',
+        attr_test: 'value_test',
       },
     };
 
