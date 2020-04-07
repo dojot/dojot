@@ -360,20 +360,18 @@ class RedisClientGetDeviceId(unittest.TestCase):
         """
         Should get the template ID from the database.
         """
-        mock_api.get_jwt = MagicMock(return_value="testJWT")
         mock_api.create_device = MagicMock(return_value="4")
         mock_uuid.return_value = "test-UUID"
 
         client = RedisClient()
 
         client.get_template_id = MagicMock(return_value="3")
+        client.get_jwt = MagicMock(return_value="testJWT")
 
         device_id = client.get_device_id()
 
-        mock_api.get_jwt.assert_called_once()
         client.get_template_id.assert_called_once()
-        mock_api.create_device.assert_called_once()
-        mock_api.create_device.assert_called_with(
+        mock_api.create_device.assert_called_once_with(
             "testJWT",
             "3",
             "CargoContainer_testUUID"
