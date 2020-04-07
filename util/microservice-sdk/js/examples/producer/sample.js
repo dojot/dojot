@@ -13,7 +13,7 @@ producer.connect()
   .then(() => {
     logger.debug('Producer is connected', TAG);
 
-    // the target kafka topic, it be a String
+    // The target kafka topic, it be a String
     const targetTopic = 'admin.device-data';
 
     const message = {
@@ -30,13 +30,12 @@ producer.connect()
     producer.produce(targetTopic, JSON.stringify(message));
 
     // You can disconnect from producer, for that call:
-    /*
     producer.disconnect().then(() => {
       logger.debug('Producer is disconnected', TAG);
     }).catch((error) => {
       logger.error(`Caught an error in disconnect: ${error.stack || error}`, TAG);
     });
-    */
+
   })
   .catch((error) => {
     logger.error(`Caught an error: ${error.stack || error}`, TAG);
