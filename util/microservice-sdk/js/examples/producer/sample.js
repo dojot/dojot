@@ -35,7 +35,6 @@ producer.connect()
     }).catch((error) => {
       logger.error(`Caught an error in disconnect: ${error.stack || error}`, TAG);
     });
-
   })
   .catch((error) => {
     logger.error(`Caught an error: ${error.stack || error}`, TAG);
