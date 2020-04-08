@@ -1,0 +1,19 @@
+{
+  "name": "kafka-ws",
+  "version": "1.0.0",
+  "description": "Websocket service with conditional/partial data requests",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "websocket",
+    "kafka",
+    "nodejs"
+  ],
+  "author": "Eduardo Garcia Misiuk, Mariane Previde",
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "jest": "^25.2.7"
+  }
+}
