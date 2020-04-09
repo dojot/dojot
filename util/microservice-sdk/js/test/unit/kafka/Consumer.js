@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unresolved */
-// eslint-disable-next-line import/extensions
 const Consumer = require('kafka/Consumer.js');
 
 jest.mock('node-rdkafka');
@@ -427,13 +425,14 @@ describe('Refresh subscription', () => {
 
     consumer.consumer.subscribe = jest.fn();
 
-    // subscriptionProcedure(/*retries*/ 0) -> fails
-    // t = 1000 + random(0, 1000): subscriptionProcedure(/*retries*/ 1) -> fails
-    // t = 2000 + random(0, 1000): subscriptionProcedure(/*retries*/ 2) -> fails
-    // t = 4000 + random(0, 1000): subscriptionProcedure(/*retries*/ 3) -> fails
-    // t = 8000 + random(0, 1000): subscriptionProcedure(/*retries*/ 4) -> fails
-    // t = 10000: subscriptionProcedure(/*retries*/ 4) -> fails
-    // t = 10000: succeeded
+    // Expected calls:
+    // (1) subscriptionProcedure(/*retries*/ 0) -> fails
+    // (2) t = 1000 + random(0, 1000): subscriptionProcedure(/*retries*/ 1) -> fails
+    // (3) t = 2000 + random(0, 1000): subscriptionProcedure(/*retries*/ 2) -> fails
+    // (4) t = 4000 + random(0, 1000): subscriptionProcedure(/*retries*/ 3) -> fails
+    // (5) t = 8000 + random(0, 1000): subscriptionProcedure(/*retries*/ 4) -> fails
+    // (6) t = 10000: subscriptionProcedure(/*retries*/ 4) -> fails
+    // (7) t = 10000: succeeded
     consumer.consumer.subscribe
       .mockImplementationOnce(() => {
         throw Error('subscription mocked error');

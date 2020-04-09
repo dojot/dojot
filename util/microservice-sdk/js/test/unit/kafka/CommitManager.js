@@ -15,6 +15,27 @@ test('Basic initialization', async () => {
   expect(setInterval).toHaveBeenCalledWith(expect.any(Function), commitInterval);
 });
 
+test('Initilization with a preconfigured caller', async () => {
+  jest.useFakeTimers();
+  const commitCallback = jest.fn();
+  const commitInterval = 5000;
+  const commitManager = new CommitManager(commitCallback, commitInterval);
+
+  // fake caller
+  const fakeInterval = 1000;
+  commitManager.caller = setInterval(() => {}, fakeInterval);
+
+  // reset caller
+  commitManager.init();
+
+  jest.runOnlyPendingTimers();
+
+  expect(commitManager.caller).not.toBeNull();
+  expect(setInterval).toHaveBeenCalledWith(expect.any(Function), fakeInterval);
+  expect(setInterval).toHaveBeenCalledWith(expect.any(Function), commitInterval);
+  expect(clearInterval).toHaveBeenCalledTimes(1);
+});
+
 test('start processing', async () => {
   const commitCallback = jest.fn();
   const commitInterval = 5000;
