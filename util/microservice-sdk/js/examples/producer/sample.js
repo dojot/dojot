@@ -1,6 +1,6 @@
 const { logger } = require('@dojot/dojot-module-logger');
-const { Kafka: { Producer } } = require('../index.js');
 const util = require('util');
+const { Kafka: { Producer } } = require('../index.js');
 
 const TAG = { filename: 'sample-producer' };
 
@@ -28,7 +28,7 @@ producer.connect()
     logger.debug(`Producing message: ${util.inspect(message, { depth: null })} in topic ${targetTopic}`, TAG);
     producer.produce(targetTopic, JSON.stringify(message));
 
-    //Disconnect from producer:
+    // Disconnect from producer:
     producer.disconnect().then(() => {
       logger.debug('Producer is disconnected', TAG);
     }).catch((error) => {
