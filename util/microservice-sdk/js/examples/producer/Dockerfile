@@ -21,7 +21,6 @@ COPY npm-shrinkwrap.json npm-shrinkwrap.json
 COPY lib ./lib
 COPY index.js index.js
 COPY examples/producer/sample.js ./app/sample.js
-COPY examples/producer/config.js ./app/config.js
 
 RUN npm install
 

@@ -1,12 +1,14 @@
 const { logger } = require('@dojot/dojot-module-logger');
 const { Kafka: { Producer } } = require('../index.js');
-
-const config = require('./config');
+const util = require('util');
 
 const TAG = { filename: 'sample-producer' };
 
 
-const producer = new Producer(config);
+const producer = new Producer({
+  'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
+  'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+});
 
 
 producer.connect()
@@ -14,22 +16,19 @@ producer.connect()
     logger.debug('Producer is connected', TAG);
 
     // The target kafka topic, it be a String
-    const targetTopic = 'admin.device-data';
+    const targetTopic = process.env.KAFKA_TOPIC || 'producer.testing';
 
     const message = {
-      metadata: {
-        deviceid: '6d2457',
-        tenant: 'admin',
-        timestamp: Date.now(),
-      },
-      attrs: {
-        attr_test: 'value_test',
+      meta: {
+        meta_info: 'Test Producer Message',
+        ts: Date.now(),
       },
     };
 
+    logger.debug(`Producing message: ${util.inspect(message, { depth: null })} in topic ${targetTopic}`, TAG);
     producer.produce(targetTopic, JSON.stringify(message));
 
-    // You can disconnect from producer, for that call:
+    //Disconnect from producer:
     producer.disconnect().then(() => {
       logger.debug('Producer is disconnected', TAG);
     }).catch((error) => {
