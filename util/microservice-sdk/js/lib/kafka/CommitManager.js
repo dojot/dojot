@@ -2,6 +2,9 @@ const { logger } = require('@dojot/dojot-module-logger');
 
 const TAG = { filename: 'commit-mngr' };
 
+/**
+ * Default time interval for committing the processed messages.
+ */
 const DEFAULT_COMMIT_TIME_INTERVAL = 5000;
 
 /**
@@ -11,7 +14,7 @@ const DEFAULT_COMMIT_TIME_INTERVAL = 5000;
  */
 module.exports = class CommitManager {
   /**
-   * Creates a new instance of the CommitManager
+   * Creates a new instance of the CommitManager.
    * @param {*} commitCb the function to be called to commit the messages into Kafka.
    * @param {*} commitInterval the interval in ms that the consolidator should be called.
    */
@@ -67,7 +70,6 @@ module.exports = class CommitManager {
    * }.
    */
   notifyFinishedProcessing(data) {
-    // console.log(`finish ${JSON.stringify(data)}`);
     const { partition, offset, topic } = data;
     const topicPartitions = this.topics[topic];
     if (!topicPartitions) {
@@ -90,13 +92,23 @@ module.exports = class CommitManager {
   /**
    * This method should be invoked during the Kafka's rebalance procedure.
    * It clears the work tracking.
+   *
+   * Note: Once a rebalance occurs, the uncommited messages will be
+   * redelivered to the new assignee that is part of the consumer group.
    */
   onRebalance() {
     this.topics = {};
   }
 
   /**
-   * Consolidates the processed messages into Kafka
+   * Consolidates the processed messages into Kafka.
+   *
+   * The consolidation consists in computing the largest offset
+   * which all previous messages have been processed, and commits
+   * this offset. This is more efficient than committing
+   * every message once kafka considers all previous messages commited
+   * when an specific offset is commited.
+   *
    * @access private
    */
   async commitProcessedOffsets() {
@@ -139,6 +151,7 @@ module.exports = class CommitManager {
             partitionsToBeDeleted.push(partition);
           }
         });
+
         partitionsToBeDeleted.forEach((partition) => {
           delete this.topics[topic][partition];
         });
@@ -158,7 +171,7 @@ module.exports = class CommitManager {
 
       return Promise.resolve();
     } catch (error) {
-      logger.warn(`Failed on process commit. ${error}`, TAG);
+      logger.warn(`Failed on committing offsets. ${error}`, TAG);
       return Promise.reject(error);
     }
   }
