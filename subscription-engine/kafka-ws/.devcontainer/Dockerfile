@@ -3,8 +3,7 @@
 FROM dojot/kafka-ws:development
 
 # Configure apk and install packages
-RUN apk update \
-    && apk add curl \
+RUN apk --no-cache add curl \
     zsh \
     git
 
