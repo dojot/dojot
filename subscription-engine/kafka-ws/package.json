@@ -7,8 +7,8 @@
   "scripts": {
     "kafka-ws": "node app/Index.js",
     "dev": "nodemon app/Index.js",
-    "test": "jest test/**/*.test.js --coverage",
-    "test:watch": "jest --watch test/**/*.test.js --coverage",
+    "test": "jest test/**/*.test.js --coverage --passWithNoTests",
+    "test:watch": "jest --watch test/**/*.test.js --coverage --passWithNoTests",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js ."
   },
