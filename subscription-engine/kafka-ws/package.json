@@ -1,0 +1,58 @@
+{
+  "name": "kafka-ws",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Websocket service with conditional/partial data requests",
+  "main": "app/Index.js",
+  "scripts": {
+    "kafka-ws": "node app/Index.js",
+    "dev": "nodemon app/Index.js",
+    "test": "jest test/**/*.test.js --coverage",
+    "test:watch": "jest --watch test/**/*.test.js --coverage",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot"
+  },
+  "keywords": [
+    "dojot",
+    "kafka",
+    "nodejs",
+    "websocket"
+  ],
+  "files": [
+    "package-lock.json",
+    "app/**/*.js",
+    "test/",
+    "!test/unit/coverage/"
+  ],
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "jest": "^25.2.7",
+    "nodemon": "^2.0.3"
+  },
+  "dependencies": {
+    "@dojot/dojot-module-logger": "0.0.1-alpha.5",
+    "@dojot/microservice-sdk": "^0.1.1",
+    "express": "^4.17.1",
+    "json-mask": "^1.0.1",
+    "ws": "^7.2.3"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!app/Index.js"
+    ],
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "author": "@eduardogmisiuk, @mprevide",
+  "license": "GPL-3.0"
+}
