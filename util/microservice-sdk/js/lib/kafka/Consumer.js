@@ -139,7 +139,7 @@ module.exports = class Consumer {
    * @returns a Promise that is fullfil when the consumer becomes ready.
    */
   async init() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.consumer = new Kafka.KafkaConsumer(this.config.kafka);
       this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
         this.config['commit.interval.ms']);
@@ -174,7 +174,7 @@ module.exports = class Consumer {
       this.consumer.connect(undefined, (error) => {
         if (error) {
           logger.error(`Error on connect: ${error}`, TAG);
-          // TODO: check if it is necessary some error processing here!
+          reject(error);
         }
       });
     });
