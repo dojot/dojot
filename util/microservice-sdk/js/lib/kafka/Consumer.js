@@ -149,7 +149,6 @@ module.exports = class Consumer {
    */
   async init() {
     return new Promise((resolve, reject) => {
-
       // register handker for kafka events
       // error
       this.consumer.on('event.error', (event) => {
