@@ -61,4 +61,4 @@ All Standard and runtime collectors have prefix *dojot_latency_pub*, [read more]
 
 ### Grafana
 
-There is a dashboard configuration for use with this service in [dashboard](./examples/dashboard-grafana/Dojot _100k_V3.json).
+There is a dashboard configuration for use with this service in [dashboard] (./examples/dashboard-grafana/Dojot _100k_V3.json).
