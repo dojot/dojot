@@ -119,15 +119,24 @@ module.exports = class Consumer {
     );
 
     // internal data structures
+    // subscriptions
     this.isWaitingForRefreshSubscriptions = false;
     this.topicMap = {};
     this.topicRegExpArray = [];
-    this.consumer = null;
-    this.msgQueue = null;
+    // consumer
+    this.consumer = new Kafka.KafkaConsumer(this.config.kafka);
+    // commit manager
+    this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
+      this.config['commit.interval.ms']);
+    // processing queue
     this.isReady = false;
     this.currQueueBytes = 0;
     this.isPaused = false;
-    this.commitManager = null;
+    this.msgQueue = async.queue(async (data, done) => {
+      await this.invokeInterestedCallbacks(data);
+      done();
+    }, this.config['in.processing.max.messages']);
+    this.msgQueue.drain(this.resumeConsumer.bind(this));
 
     // log consumer settings
     logger.info(`Consumer configuration ${JSON.stringify(this.config)}`, TAG);
@@ -140,25 +149,15 @@ module.exports = class Consumer {
    */
   async init() {
     return new Promise((resolve, reject) => {
-      this.consumer = new Kafka.KafkaConsumer(this.config.kafka);
-      this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
-        this.config['commit.interval.ms']);
 
-      // create an async queue to deal with the messages in a parallel way
-      this.msgQueue = async.queue(async (data, done) => {
-        await this.invokeInterestedCallbacks(data);
-        done();
-      }, this.config['in.processing.max.messages']);
-
-      // when the processing was finalized, we need to resume the consumer, if
-      // it has been paused
-      this.msgQueue.drain(this.resumeConsumer.bind(this));
-
-      // error events
+      // register handker for kafka events
+      // error
       this.consumer.on('event.error', (event) => {
         logger.warn(`Kafka event.error: ${event}`, TAG);
       });
-
+      // data
+      this.consumer.on('data', this.onData.bind(this));
+      // ready
       // note: the ready function is called just once
       this.consumer.on('ready', () => {
         logger.info('Consumer is ready', TAG);
@@ -169,8 +168,7 @@ module.exports = class Consumer {
         return resolve();
       });
 
-      this.consumer.on('data', this.onData.bind(this));
-
+      // connect to kafka
       this.consumer.connect(undefined, (error) => {
         if (error) {
           logger.error(`Error on connect: ${error}`, TAG);

@@ -57,7 +57,7 @@ The following properties can be set for the Consumer:
 |subscription.backoff.min.ms|The initial backoff time (in miliseconds) for subscribing to topics in Kafka. Every time a callback is registered for a new topic, the subscriptions are updated to include this new one. Default value is 1000.|
 |subscription.backoff.max.ms|The maximum value for the backoff time (in miliseconds). The backoff time is incremented while it is above this value. Default value is 60000.|
 |subscription.backoff.delta.ms|The value that will be used for calculating a random delta time (in miliseconds) in the exponential delay between retries. Default value is 1000.|
-|commit.interval.ms|Time interval (in miliseconds) for commiting the processed messages into kafka. A message is commited if and only if all previous messages has been processed. Default values is 5000.|
+|commit.interval.ms|Time interval (in miliseconds) for commiting the processed messages into kafka. A message is commited if and only if all previous messages has been processed. Default value is 5000.|
 |kafka| An object with specific properties for the node-rdkafka consumer. For more details, see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md.|
 
 ## Code Examples

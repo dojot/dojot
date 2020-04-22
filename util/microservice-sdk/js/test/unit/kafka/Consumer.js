@@ -93,8 +93,11 @@ test('Constructor: default', () => {
     },
   };
 
-  // check configuration
+  // check
   expect(consumer.config).toMatchObject(expectedConfig);
+  expect(consumer.consumer).not.toBeNull();
+  expect(consumer.commitManager).not.toBeNull();
+  expect(consumer.msgQueue).not.toBeNull();
 });
 
 test('Constructor: divergent value for enable.auto.commit', () => {
@@ -111,8 +114,11 @@ test('Constructor: divergent value for enable.auto.commit', () => {
     },
   };
 
-  // check configuration
+  // check
   expect(consumer.config).toMatchObject(expectedConfig);
+  expect(consumer.consumer).not.toBeNull();
+  expect(consumer.commitManager).not.toBeNull();
+  expect(consumer.msgQueue).not.toBeNull();
 });
 
 test('Basic initialization', async () => {
@@ -124,6 +130,22 @@ test('Basic initialization', async () => {
   expect(consumer.isReady).toBe(true);
   expect(consumer.consumer.consume).toHaveBeenCalled();
   expect(consumer.refreshSubscriptions).toHaveBeenCalledTimes(1);
+});
+
+test('Failed initialization', async () => {
+  expect.assertions(2);
+  const consumer = new Consumer();
+  consumer.consumer.connect = jest.fn((_unused, callback) => {
+    callback(new Error('The kafka broker is not reachable.'));
+  });
+
+  try {
+    await consumer.init();
+  } catch (e) {
+    expect(e).toEqual(new Error('The kafka broker is not reachable.'));
+  }
+
+  expect(consumer.isReady).toBe(false);
 });
 
 describe('Validates registerCallback', () => {
@@ -486,7 +508,7 @@ describe('Refresh subscription', () => {
   });
 });
 
-describe('resume consumer', () => {
+describe('Resume consumer', () => {
   it('when paused', () => {
     const consumer = new Consumer({});
     consumer.isPaused = true;
@@ -509,7 +531,7 @@ describe('resume consumer', () => {
   });
 });
 
-test('revoke partitions', () => {
+test('Rebalance - revoke partitions', () => {
   const consumer = new Consumer({});
   consumer.consumer = new KafkaMock.KafkaConsumer();
   consumer.commitManager = new CommitManagerMock();
@@ -524,7 +546,7 @@ test('revoke partitions', () => {
   expect(consumer.isPaused).toBeFalsy();
 });
 
-test('revoke partitions: paused case', () => {
+test('Rebalance - revoke partitions: paused case', () => {
   const consumer = new Consumer({});
   consumer.consumer = new KafkaMock.KafkaConsumer();
   consumer.commitManager = new CommitManagerMock();
@@ -538,4 +560,11 @@ test('revoke partitions: paused case', () => {
   expect(consumer.msgQueue.remove).toHaveBeenCalledTimes(1);
   expect(consumer.consumer.resume).toHaveBeenCalledTimes(1);
   expect(consumer.isPaused).toBeFalsy();
+});
+
+test('Rebalance - assign partitions', () => {
+  const consumer = new Consumer({});
+  consumer.consumer.assign = jest.fn();
+  consumer.onRebalance({ code: KafkaMock.CODES.ERRORS.ERR__ASSIGN_PARTITIONS }, [1, 3, 5]);
+  expect(consumer.consumer.assign).toHaveBeenCalledWith([1, 3, 5]);
 });
