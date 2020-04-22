@@ -38,13 +38,14 @@ Beware that the order of the plugins in the configuration influences the result.
 they can stop working. For instance, the correct order for our plugins is: `disconnect`, `acl`. If this
 order is changed, the `disconnect` plugin will not work.
 
-NOTE: All configuration parameters available in [vernemq.conf] (./examples/vernemq.conf) can be defined using environment variables with the prefix DOCKER_VERNEMQ followed by the name of the configuration parameter. For example: allow_anonymous=on is "DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on" or allow_register_during_netsplit=on is "DOCKER_VERNEMQ_ALLOW_REGISTER_DURING_NETSPLIT=on".
+NOTE: All configuration parameters available in [vernemq.conf](./examples/vernemq.conf) can be defined using environment variables with the prefix DOCKER_VERNEMQ followed by the name of the configuration parameter. For example: allow_anonymous=on is "DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on" or allow_register_during_netsplit=on is "DOCKER_VERNEMQ_ALLOW_REGISTER_DURING_NETSPLIT=on".
 
 See more about VerneMQ configuration in [documentation](https://docs.vernemq.com/).
 
 ### **Plugins Dojot for verneMQ**
 
 Plugin verneMQ ACL for Dojot  [see here](./src/dojot_acl_plugin).
+
 Plugin verneMQ Disconnect for Dojot [see here](./src/dojot_disconnect_plugin).
 
 ### **Building Docker image with plugins**
