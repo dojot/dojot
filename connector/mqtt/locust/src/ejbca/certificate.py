@@ -1,13 +1,12 @@
 """
 Certificate generation.
 """
-import json
-import requests
 from OpenSSL import crypto
 
 from src.config import CONFIG
 from src.utils import Utils
 from src.mqtt_locust.redis_client import RedisClient
+from src.dojot.api import DojotAPI
 
 class Certificate:
     """
@@ -23,10 +22,9 @@ class Certificate:
         self.c_name = thing_id
         self.key = {"raw": "", "pem": self.generate_private_key()}
         self.csr = {"raw": "", "pem": self.generate_csr()}
-        self.crt = {"raw": "", "pem": ""}
-
-        self.create_ejbca_user()
-        self.sign_cert()
+        DojotAPI.create_ejbca_user(self.jwt, self.c_name)
+        self.crt = {}
+        self.crt["raw"] = self.sign_cert()
         self.crt["pem"] = self.save_crt()
 
     def save_crt(self) -> str:
@@ -64,7 +62,6 @@ class Certificate:
             dns.append("DNS: %s" % i)
         dns = ", ".join(dns)
 
-
         req = crypto.X509Req()
         req.get_subject().CN = self.c_name
 
@@ -94,112 +91,19 @@ class Certificate:
 
         return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")
 
-    def create_ejbca_user(self) -> None:
-        """
-        Makes a requisition to EJBCA to create a user.
-        """
-        # create the ejbca user
-        req = json.dumps({
-            "username": self.c_name
-        })
-
-        default_header = {
-            'content-type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer {0}'.format(self.jwt),
-        }
-
-        response = None
-        try:
-            response = requests.post(
-                CONFIG['dojot']['url'] + "/user",
-                headers=default_header,
-                data=req
-            )
-            response.raise_for_status()
-        except Exception as exception:
-            self.logger.error(str(exception))
-            raise
-
-        response.connection.close()
-
-    def sign_cert(self) -> None:
+    def sign_cert(self) -> str:
         """
         Sign the certificates.
+
+        Returns the raw certificate.
         """
         csr = self.csr["pem"]
-        cut_down_clr = (csr[csr.find('-----BEGIN CERTIFICATE REQUEST-----')
-                            + len('-----BEGIN CERTIFICATE REQUEST-----'):
-                            csr.find("-----END CERTIFICATE REQUEST-----")]
-                        .replace("\n", ""))
+        csr = (csr[csr.find('-----BEGIN CERTIFICATE REQUEST-----')
+                   + len('-----BEGIN CERTIFICATE REQUEST-----'):
+                   csr.find("-----END CERTIFICATE REQUEST-----")]
+               .replace("\n", ""))
 
-        req = json.dumps({
-            "passwd": "dojot",
-            "certificate": cut_down_clr
-        })
-
-        default_header = {
-            'content-type': 'application/json',
-            'Accept': 'application/json',
-            "Authorization": "Bearer {0}".format(self.jwt),
-        }
-        url = CONFIG['dojot']['url'] + "/sign/" + self.c_name + "/pkcs10"
-
-        response = None
-        try:
-            response = requests.post(
-                url,
-                headers=default_header,
-                data=req
-            )
-            response.raise_for_status()
-
-        except Exception as exception:
-            self.logger.error(str(exception))
-            raise
-
-        else:
-            self.crt["raw"] = json.loads(response.content)['status']['data']
-
-        response.connection.close()
-
-
-    def reset_entity_status(self, status: int = 10) -> None:
-        """
-        Changes the entity's status.
-
-        Params:
-            status: status to be set. Defaults to 10.
-        """
-        url = CONFIG['dojot']['url'] + "/user"
-
-        default_header = {
-            'content-type': 'application/json',
-            'Accept': 'application/json',
-            "Authorization": "Bearer {0}".format(self.jwt),
-        }
-
-        data = {
-            "username": self.c_name,
-            "password": "dojot",
-            "subjectDN": "CN=" + self.c_name,
-            "status": status
-        }
-
-        response = None
-        try:
-            response = requests.post(
-                url,
-                headers=default_header,
-                data=json.dumps(data)
-            )
-            response.raise_for_status()
-
-        except Exception as exception:
-            self.logger.error(str(exception))
-            raise
-
-        response.connection.close()
+        return DojotAPI.sign_cert(self.jwt, self.c_name, "dojot", csr)
 
     def renew_cert(self) -> None:
         """
@@ -208,8 +112,9 @@ class Certificate:
         The procedure made here is described in:
         https://doc.primekey.com/ejbca/ejbca-operations/ejbca-operations-guide/ca-operations-guide/end-entities/certificate-renewal
         """
-        self.reset_entity_status()
-        self.key["pem"] = self.generate_private_key()
-        self.csr["pem"] = self.generate_csr()
-        self.sign_cert()
+        DojotAPI.reset_entity_status(self.jwt, self.c_name)
+        self.key = {"raw": "", "pem": self.generate_private_key()}
+        self.csr = {"raw": "", "pem": self.generate_csr()}
+        self.crt = {}
+        self.crt["raw"] = self.sign_cert()
         self.crt["pem"] = self.save_crt()

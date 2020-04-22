@@ -140,7 +140,7 @@ class RedisClient():
             return jwt.decode('utf-8')
 
         jwt = DojotAPI.get_jwt()
-        self.mapped.set('jwt', jwt)
+        self.mapped.setex('jwt', CONFIG['locust']['redis']['jwt_expire_time'], jwt)
 
         return jwt
 
@@ -164,7 +164,7 @@ class RedisClient():
         device_id = None
 
         if CONFIG['dojot']['env']:
-            jwt = DojotAPI.get_jwt()
+            jwt = self.get_jwt()
             template_id = self.get_template_id()
             device_id = DojotAPI.create_device(
                 jwt,

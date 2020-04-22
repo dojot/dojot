@@ -36,6 +36,7 @@ CONFIG = {
             'mapped_db':            int(os.environ.get("REDIS_MAPPED_DB", 1)),
             'host':                 os.environ.get("REDIS_HOST", "127.0.0.1"),
             'port':                 int(os.environ.get("REDIS_PORT", 6379)),
+            'jwt_expire_time':      int(os.environ.get("REDIS_STORED_JWT_EXPIRE_TIME", 1800)),
         }
     },
 
@@ -52,8 +53,9 @@ CONFIG = {
         'passwd':   os.environ.get("DOJOT_PASSWD", "admin"),
         'env':      (str(os.environ.get("DOJOT_ENV", "n")).lower() == "y"),
         'api': {
-            'retries':  int(os.environ.get("DOJOT_API_RETRIES", 3)),
-            'time':     float(os.environ.get("DOJOT_API_RETRY_TIME", 5000.0))  / 1000.0
+            'retries':      int(os.environ.get("DOJOT_API_RETRIES", 3)),
+            'time':         float(os.environ.get("DOJOT_API_RETRY_TIME", 5000.0))  / 1000.0,
+            'page_size':    int(os.environ.get("DOJOT_DEVICES_PAGE_SIZE", 20))
         }
     },
 }

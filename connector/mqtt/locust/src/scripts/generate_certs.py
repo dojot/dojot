@@ -10,6 +10,7 @@ import shutil
 import sys
 import os
 import redis
+from typing import List, Tuple
 import requests
 
 from src.ejbca.thing import Thing
@@ -49,6 +50,8 @@ class GenerateCerts():
         self.config_redis_parser(redis_parser)
 
         self.parser_args = parser.parse_args()
+
+        self.jwt = None
 
         self.run()
 
@@ -144,6 +147,14 @@ class GenerateCerts():
             action="store_true",
             default=False
         )
+        parser.add_argument(
+            "--wait",
+            metavar="N",
+            help="float time in seconds to wait between certificate generation batches, defaults\
+                to 5.0",
+            type=float,
+            default=5.0
+        )
 
     def config_redis_parser(self, parser):
         """
@@ -181,11 +192,12 @@ class GenerateCerts():
         """
         Runs the commands for each parser.
         """
-        self.jwt = DojotAPI.get_jwt()
         if self.parser_args.topic == "cert":
+            self.jwt = DojotAPI.get_jwt()
             self.cert_commands()
 
         elif self.parser_args.topic == "dojot":
+            self.jwt = DojotAPI.get_jwt()
             if self.parser_args.dojot == "create":
                 self.dojot_create_commands()
             if self.parser_args.dojot == "clear":
@@ -203,15 +215,33 @@ class GenerateCerts():
             shutil.rmtree(CONFIG['security']['cert_dir'])
             LOGGER.info("... Removed certificates directory")
 
+            LOGGER.info("Creating certificates directories...")
+            os.makedirs(CONFIG['security']['cert_dir'], exist_ok=True)
+            os.makedirs(
+                "{0}{1}".format(
+                    CONFIG['security']['cert_dir'], CONFIG['security']['renew_cert_dir']
+                ),
+                exist_ok=True
+            )
+            os.makedirs(
+                "{0}{1}".format(
+                    CONFIG['security']['cert_dir'], CONFIG['security']['revoke_cert_dir']
+                ),
+                exist_ok=True
+            )
+            LOGGER.info("... Created certificates directories")
+
+
         if self.parser_args.devices is not None:
             if self.parser_args.processes > self.parser_args.devices:
                 LOGGER.error(
                     "The number of certificates must be greather than the number of processes!"
                 )
                 sys.exit(1)
-
+            # Generating the random IDs
+            ids = [str(uuid.uuid4().hex) for _ in range(self.parser_args.devices)]
             # Begins the certificate generation for random devices IDs
-            self.generate_random_certs()
+            self.generate_certs(ids)
 
         if self.parser_args.ids is not None:
             # Begins the certificate generation
@@ -236,6 +266,7 @@ class GenerateCerts():
 
     def dojot_clear_commands(self):
         """
+        Dojot clear commands execution.
         """
         if self.parser_args.templates:
             self.delete_templates()
@@ -249,6 +280,7 @@ class GenerateCerts():
 
     def redis_commands(self):
         """
+        Redis commands execution.
         """
         if self.parser_args.restore:
             self.restore_db_state()
@@ -261,6 +293,8 @@ class GenerateCerts():
             self.map_device_ids()
 
         elif self.parser_args.export:
+            # Retrieve JWT token
+            self.jwt = DojotAPI.get_jwt()
             # Exports the certificates' files
             self.export_certs()
             # Retrieving the CA certificate
@@ -303,7 +337,7 @@ class GenerateCerts():
 
     ## Redis ##
     def connect_to_redis(self, database=CONFIG["locust"]["redis"]["certificates_db"]) -> \
-        redis.Redis:
+                         redis.Redis:
         """
         Connects to Redis.
 
@@ -451,38 +485,17 @@ class GenerateCerts():
         with open(filename, "w") as ca_file:
             ca_file.write(certificate)
 
-    ## Cert ##
+
     def generate_certs(self, ids: list) -> None:
         """
-        Generates the certificates for the IDs.
-
-        Args:
-            ids: list of IDs.
+        Wrapper for certificate generation functions.
         """
-        start_time = time.time()
-
-        redis_conn = self.connect_to_redis()
-
-        for device_id in ids:
-            thing = Thing(CONFIG['app']['tenant'], device_id)
-            redis_conn.hmset(device_id, thing.get_args_in_dict())
-
-        end_time = time.time()
-        LOGGER.info("Generated %d IDs in %f", len(ids), end_time - start_time)
-        redis_conn.close()
-
-    def generate_random_certs(self) -> None:
-        """
-        Runs processes to generate the certificates.
-        """
-
-        start = time.time()
-        workload = self.calculate_process_load(self.parser_args.devices, self.parser_args.batch)
-
         processes = []
+        workload, id_list = self.calculate_process_load(self.parser_args.processes, ids)
+        start = time.time()
 
         for i in range(self.parser_args.processes):
-            proc = Process(target=self.register_thing, args=(str(i), workload[i]))
+            proc = Process(target=self.register_thing, args=(str(i), workload[i], id_list[i]))
             proc.start()
             processes.append(proc)
 
@@ -491,19 +504,26 @@ class GenerateCerts():
 
         LOGGER.info(
             "Total inserts %i in %is using %i processes",
-            self.parser_args.devices,
+            len(ids),
             (time.time() - start),
             self.parser_args.processes
         )
 
-    def calculate_process_load(self, certs: int, processes: int) -> list:
+    def calculate_process_load(self, processes: int, id_list: List[str]) -> \
+                               Tuple[List[int], List[List[str]]]:
         """
         Calculates the processes' workloads by dividing them equally between each one.
 
-        Returns: list with the workload of each process.
+        Parameters:
+            processes: number of processes to divide de workload
+            id_list: IDs to be divided in the processes
+
+        Returns:
+            list with the size of the workload of each process.
+            list with a list of IDs to be generated by each process.
         """
-        per_process = certs // processes
-        exceeding = certs % processes
+        per_process = len(id_list) // processes
+        exceeding = len(id_list) % processes
 
         workload = [per_process for _ in range(processes)]
 
@@ -511,15 +531,22 @@ class GenerateCerts():
         for i in range(exceeding):
             workload[i] = workload[i] + 1
 
-        return workload
+        ids_per_process = []
+        prev = 0
+        for load in workload:
+            ids_per_process.append(id_list[prev:prev + load])
+            prev += load
 
-    def register_thing(self, name: str, n_certs: int) -> None:
+        return workload, ids_per_process
+
+    def register_thing(self, name: str, n_certs: int, id_list: List[str]) -> None:
         """
         Creates devices and exports them to a Redis database.
 
         Args:
             name: the process name.
             n_certs: number of certificates to generate.
+            id_list: list of IDs to be used by the certificates.
         """
         start_time = time.time()
 
@@ -529,15 +556,24 @@ class GenerateCerts():
         start_batch_time = start_time
         for i in range(n_certs):
 
-            if i % self.parser_args.batch == 0:
+            if (i != 0) and (i % self.parser_args.batch == 0):
                 end_batch_time = time.time()
                 diff = end_batch_time - start_batch_time
-                start_batch_time = end_batch_time
                 LOGGER.info("Execution time: %f secs by process %s with batch %s", diff, name, i)
+
                 pipe.execute()
                 pipe = redis_conn.pipeline()
 
-            thing_id = str(uuid.uuid4().hex)
+                LOGGER.debug(
+                    "Waiting %.1fs to start another batch...",
+                    self.parser_args.wait
+                )
+                time.sleep(self.parser_args.wait)
+                LOGGER.debug("... Resuming certificate generation")
+
+                start_batch_time = time.time()
+
+            thing_id = id_list[i]
             thing = None
 
             has_failed = True
