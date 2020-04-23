@@ -9,8 +9,8 @@ const producer = new Producer({
   kafka: {
     'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
     'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
-    'dr_cb': true
-  }
+    'dr_cb': true,
+  },
 });
 
 
@@ -42,7 +42,6 @@ producer.connect()
     }).catch((error) => {
       logger.error(`Caught an error in disconnect: ${error.stack || error}`, TAG);
     });
-
   })
   .catch((error) => {
     logger.error(`Caught an error in connect: ${error.stack || error}`, TAG);

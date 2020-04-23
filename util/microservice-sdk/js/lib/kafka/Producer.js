@@ -51,7 +51,6 @@ class Producer {
   * see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
   */
   constructor(config) {
-
     // configuration
     this.config = config || {};
 
@@ -108,7 +107,6 @@ class Producer {
   connect() {
     logger.info('Connecting the producer...', TAG);
     const readyPromise = new Promise((resolve, reject) => {
-
       const timeoutTrigger = setTimeout(() => {
         logger.error('Failed to connect the producer.', TAG);
         reject(new Error('timed out'));
@@ -186,7 +184,6 @@ class Producer {
     logger.debug('Requesting message flushing before disconnect...', TAG);
 
     return new Promise((resolve, reject) => {
-
       this.producer.flush(this.config['producer.flush.timeout.ms'], (error) => {
         if (error) {
           return reject(error);
