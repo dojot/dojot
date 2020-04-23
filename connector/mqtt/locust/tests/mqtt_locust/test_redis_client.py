@@ -19,6 +19,7 @@ MOCK_CONFIG = {
             'port': 'mockPort',
             'certificates_db': 'mockCertDb',
             'mapped_db': 'mockMapDb',
+            'jwt_expire_time': 10,
         },
     },
 
@@ -248,6 +249,7 @@ class RedisClientHasToRenew(unittest.TestCase):
 
 @patch('src.mqtt_locust.redis_client.redis')
 @patch('src.mqtt_locust.redis_client.DojotAPI')
+@patch.dict('src.mqtt_locust.redis_client.CONFIG', MOCK_CONFIG)
 class RedisClientGetJwt(unittest.TestCase):
     """
     Tests for get_jwt().
@@ -257,7 +259,7 @@ class RedisClientGetJwt(unittest.TestCase):
         Should create a new JWT.
         """
         mock_redis.Redis().get = MagicMock(return_value=None)
-        mock_redis.Redis().set = MagicMock()
+        mock_redis.Redis().setex = MagicMock()
         mock_api.get_jwt = MagicMock(return_value="testJWT")
 
         client = RedisClient()
@@ -267,8 +269,12 @@ class RedisClientGetJwt(unittest.TestCase):
         mock_redis.Redis().get.assert_called_once()
         mock_redis.Redis().get.assert_called_with("jwt")
         mock_api.get_jwt.assert_called_once()
-        mock_redis.Redis().set.assert_called_once()
-        mock_redis.Redis().set.assert_called_with("jwt", "testJWT")
+        mock_redis.Redis().setex.assert_called_once()
+        mock_redis.Redis().setex.assert_called_with(
+            "jwt",
+            MOCK_CONFIG['locust']['redis']['jwt_expire_time'],
+            "testJWT"
+        )
         self.assertEqual(jwt, "testJWT")
 
     def test_get_jwt_from_db(self, _mock_api, mock_redis):
@@ -354,20 +360,18 @@ class RedisClientGetDeviceId(unittest.TestCase):
         """
         Should get the template ID from the database.
         """
-        mock_api.get_jwt = MagicMock(return_value="testJWT")
         mock_api.create_device = MagicMock(return_value="4")
         mock_uuid.return_value = "test-UUID"
 
         client = RedisClient()
 
         client.get_template_id = MagicMock(return_value="3")
+        client.get_jwt = MagicMock(return_value="testJWT")
 
         device_id = client.get_device_id()
 
-        mock_api.get_jwt.assert_called_once()
         client.get_template_id.assert_called_once()
-        mock_api.create_device.assert_called_once()
-        mock_api.create_device.assert_called_with(
+        mock_api.create_device.assert_called_once_with(
             "testJWT",
             "3",
             "CargoContainer_testUUID"

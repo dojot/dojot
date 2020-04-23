@@ -3,6 +3,7 @@ API calls to Dojot.
 """
 import json
 from typing import Callable, List, Dict
+import sys
 import requests
 import gevent
 
@@ -76,7 +77,7 @@ class DojotAPI():
             })
             args["url"] = "{0}/device?count={1}&verbose=false".format(CONFIG['dojot']['url'], load)
 
-            DojotAPI.call_api(requests.post, args)
+            DojotAPI.call_api(requests.post, args, False)
 
         LOGGER.debug("... created the devices")
 
@@ -158,7 +159,7 @@ class DojotAPI():
             },
         }
 
-        DojotAPI.call_api(requests.delete, args)
+        DojotAPI.call_api(requests.delete, args, False)
 
         LOGGER.debug("... deleted devices")
 
@@ -176,7 +177,7 @@ class DojotAPI():
             },
         }
 
-        DojotAPI.call_api(requests.delete, args)
+        DojotAPI.call_api(requests.delete, args, False)
 
         LOGGER.debug("... deleted templates")
 
@@ -193,20 +194,115 @@ class DojotAPI():
         LOGGER.debug("Retrieving devices...")
 
         args = {
-            "url": "{0}/device".format(CONFIG['dojot']['url']),
+            "url": "{0}/device?page_size={1}".format(
+                CONFIG['dojot']['url'],
+                CONFIG['dojot']['api']['page_size'],
+            ),
             "headers": {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
             },
         }
 
+        devices_ids = []
+
         res = DojotAPI.call_api(requests.get, args)
 
-        devices_ids = [device['id'] for device in res['devices']]
+        for i in range(res['pagination']['total']):
+            args['url'] = "{0}/device?idsOnly=true&page_size={1}&page_num={2}".format(
+                CONFIG['dojot']['url'],
+                CONFIG['dojot']['api']['page_size'],
+                i + 1
+            )
+
+            res = DojotAPI.call_api(requests.get, args)
+
+            devices_ids.extend(res)
 
         LOGGER.debug("... retrieved the devices")
 
         return devices_ids
+
+    @staticmethod
+    def create_ejbca_user(jwt: str, username: str) -> None:
+        """
+        Makes a requisition to EJBCA to create a user.
+
+        Parameters:
+            jwt: Dojot JWT token
+            username: dojot username
+        """
+        args = {
+            "url": CONFIG['dojot']['url'] + "/user",
+            "headers": {
+                'content-type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer {0}'.format(jwt),
+            },
+            "data": json.dumps({
+                "username": username
+            }),
+        }
+
+        DojotAPI.call_api(requests.post, args, False)
+
+    @staticmethod
+    def sign_cert(jwt: str, username: str, passwd: str, csr: str) -> str:
+        """
+        Sign the certificates.
+
+        Parameters:
+            jwt: Dojot JWT token
+            username: dojot username
+            passwd: dojot user password
+            csr: CSR in PEM format
+
+        Returns the raw certificate.
+        """
+        args = {
+            "url": CONFIG['dojot']['url'] + "/sign/" + username + "/pkcs10",
+            "headers": {
+                "content-type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": json.dumps({
+                "passwd": passwd,
+                "certificate": csr
+            }),
+        }
+
+        res = DojotAPI.call_api(requests.post, args)
+
+        return res['status']['data']
+
+    @staticmethod
+    def reset_entity_status(jwt: str, username: str, status: int = 10) -> None:
+        """
+        Changes the entity's status.
+
+        Params:
+            jwt: Dojot JWT token
+            username: dojot username
+            status: status to be set, defaults to 10
+        """
+        args = {
+            "url": CONFIG['dojot']['url'] + "/user",
+            "headers": {
+                "content-type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": json.dumps({
+                "username": username,
+                "password": "dojot",
+                "subjectDN": "CN=" + username,
+                "status": status
+            }),
+        }
+
+        DojotAPI.call_api(requests.post, args, False)
+
 
     @staticmethod
     def divide_loads(total: int, batch: int) -> List:
@@ -230,7 +326,8 @@ class DojotAPI():
         return loads
 
     @staticmethod
-    def call_api(func: Callable[..., requests.Response], args: dict) -> Dict:
+    def call_api(func: Callable[..., requests.Response], args: dict, return_json: bool = True) ->\
+        Dict:
         """
         Calls the Dojot API using `func` and `args`.
 
@@ -242,14 +339,22 @@ class DojotAPI():
         """
         for _ in range(CONFIG['dojot']['api']['retries'] + 1):
             try:
-                res = func(**args)
+                res: requests.Response = func(**args)
                 res.raise_for_status()
 
             except Exception as exception:
                 LOGGER.debug(str(exception))
+                if res.status_code == 429:
+                    LOGGER.error("reached maximum number of requisitions to Dojot")
+                    sys.exit(1)
+                else:
+                    LOGGER.error(str(exception))
+
                 gevent.sleep(CONFIG['dojot']['api']['time'])
 
             else:
-                return res.json()
+                if return_json:
+                    return res.json()
+                return
 
         raise APICallError("exceeded the number of retries to {0}".format(args['url']))
