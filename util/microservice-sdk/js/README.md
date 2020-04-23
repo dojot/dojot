@@ -17,7 +17,7 @@ sudo docker build -t sdk-backpressure:example -f examples/back-pressure/Dockerfi
 
 ### Producer
 
-To writer messages into Kafka, you use the Producer class, which is a wrapper over the node-rdkafka Producer.
+To write messages to Kafka, you use the Producer class, which is a wrapper over the node-rdkafka Producer.
 
 The following example illustrates how to use the Producer:
 
@@ -25,20 +25,26 @@ The following example illustrates how to use the Producer:
 const { Kafka: { Producer } } = require('@dojot/microservice-sdk');
 
 const producer = new Producer({
-  'client.id': 'sample-producer',
-  'metadata.broker.list': 'localhost:9092',
+  kafka: {
+    'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
+    'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+  }
 });
 
-
 producer.connect().then(() => {
-    // The target kafka topic, it be a String
+    // The target kafka topic, it must be a String
     const targetTopic = 'producer.example.test';
 
     //producing message in topic producer.example.test with content Message Example
-    producer.produce(targetTopic, "Message Example");
+    producer.produce(targetTopic, "Message Example").then(() => {
+      console.log('Successfully produced the message.');
+    }).catch((error) => {
+      console.error(`Caught an error in produce: ${error.stack || error}`);
+    });
+
   })
   .catch((error) => {
-    console.error(`Caught an error: ${error.stack || error}`, TAG);
+    console.error(`Caught an error in connect: ${error.stack || error}`);
   });
 
 ```
@@ -46,6 +52,19 @@ producer.connect().then(() => {
 #### Producer Configuration
 
 The following properties can be set for the Producer:
+
+|Property                      |Description             |
+|------------------------------|-------------------------------------------------|
+|producer.flush.timeout.ms     | Timeout in ms to flush the librdkafka internal queue, sending all messages. Default value is 2000.|
+|producer.poll.internval.ms    | Polls the producer on this interval, handling disconnections and reconnection. Set it to 0 to turn it off. Default value is 100.|
+|producer.connect.timeout.ms   | Timeout in ms to connect. Default value is 5000.|
+|producer.disconnect.timeout.ms| Timeout in ms to disconnect. Default value is 10000.|
+|**kafka**                     | An object with specific properties for the node-rdkafka producer. More details in Kafka Producer Configuration. |
+
+
+##### Kafka Producer Configuration
+
+Any property accepted by the producer of node-rdkafka can be set in object **kafka** above mentioned. The most relevant are listed below.
 
 |Property                      |Description|
 |-------                       |----------|

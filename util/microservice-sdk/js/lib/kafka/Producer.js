@@ -3,29 +3,94 @@ const { logger } = require('@dojot/dojot-module-logger');
 
 const TAG = { filename: 'producer' };
 
+
+/**
+ * Timeout in ms to flush the librdkafka internal queue, sending all messages.
+ *
+ * Property: producer.flush.timeout.ms
+ */
+const PRODUCER_FLUSH_TIMEOUT_MS = 2000;
+
+/**
+ * Polls the producer on this interval, handling disconnections and reconnection.
+ * Set it to 0 to turn it off.
+ *
+ * Property: producer.poll.internval.ms
+ */
+const PRODUCER_POLL_INTERNVAL_MS = 100;
+
+/**
+ * Timeout in ms to connect
+ *
+ * Property: producer.connect.timeout.ms
+ */
+const PRODUCER_CONNECT_TIMEOUT_MS = 5000;
+
+/**
+ * Timeout in ms to disconnect
+ *
+ * Property: producer.disconnect.timeout.ms
+ */
+const PRODUCER_DISCONNECT_TIMEOUT_MS = 10000;
+
 /**
  * Class wrapping a Kafka.KafkaProducer object.
  */
 class Producer {
   /**
-    * Builds a new Producer.
-    *
-    * It is important to realize that the `config`
-    * configuration are directly passed to node-rdkafka library (which will
-    * forward it to librdkafka). You should check [its
-    * documentation](https://github.com/edenhill/librdkafka/blob/0.11.1.x/CONFIGURATION.md)
-    * to know which are all the possible settings it offers.
-    * @param {config} config the configuration to be used by this object
-    */
+  * Instantiates a new Producer.
+  *
+  * @param {config} config the consumer Producer.
+  * It is an object with the following properties:
+  * - "producer.flush.timeout.ms": Timeout in ms to flush the librdkafka internal queue, sending all messages
+  * - "producer.poll.internval.ms": Polls the producer on this interval,
+  *    handling disconnections and reconnection. Set it to 0 to turn it off.
+  * - "producer.connect.timeout.ms":  Timeout  in ms  to connect
+  * - "producer.disconnect.timeout.ms":  Timeout  in ms  to disconnect
+  * - kafka: an object with specific properties for the node-rdkafka consumer. For more details,
+  * see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+  */
   constructor(config) {
-    logger.debug('Creating a new Kafka producer...', TAG);
-    this.isReady = false;
-    this.producer = new Kafka.Producer(config);
 
-    // This will set a callback to be executed everytime a message is published.
-    const resolveOnDeliveryReportBind = Producer.resolveOnDeliveryReport.bind(this);
-    this.producer.on('delivery-report', resolveOnDeliveryReportBind);
-    this.producer.setPollInterval(100);
+    // configuration
+    this.config = config || {};
+
+    // kafka consumer configuration
+    this.config.kafka = this.config.kafka || {};
+
+    this.config['producer.flush.timeout.ms'] = (
+      this.config['producer.flush.timeout.ms'] || PRODUCER_FLUSH_TIMEOUT_MS
+    );
+
+    this.config['producer.poll.internval.ms'] = (
+      this.config['producer.poll.internval.ms'] || PRODUCER_POLL_INTERNVAL_MS
+    );
+
+    this.config['producer.connect.timeout.ms'] = (
+      this.config['producer.connect.timeout.ms'] || PRODUCER_CONNECT_TIMEOUT_MS
+    );
+
+    this.config['producer.disconnect.timeout.ms'] = (
+      this.config['producer.disconnect.timeout.ms'] || PRODUCER_DISCONNECT_TIMEOUT_MS
+    );
+
+    logger.debug('Creating a new Kafka producer...', TAG);
+
+
+    this.isReady = false;
+    this.producer = new Kafka.Producer(this.config.kafka);
+
+
+    // To use the event 'delivery-report', you must set request.required.acks to 1 or -1 in topic
+    // configuration and dr_cb (or dr_msg_cb if you want the report to contain the message payload)
+    // to true in kafka options.
+    if (this.config.kafka.dr_cb || this.config.kafka.dr_msg_cb) {
+      // This will set a callback to be executed everytime a message is published.
+      const resolveOnDeliveryReportBind = Producer.resolveOnDeliveryReport.bind(this);
+      this.producer.on('delivery-report', resolveOnDeliveryReportBind);
+    }
+
+    this.producer.setPollInterval(this.config['producer.poll.internval.ms']);
     logger.debug('... a Kafka producer was successfully created.', TAG);
   }
 
@@ -43,10 +108,11 @@ class Producer {
   connect() {
     logger.info('Connecting the producer...', TAG);
     const readyPromise = new Promise((resolve, reject) => {
+
       const timeoutTrigger = setTimeout(() => {
         logger.error('Failed to connect the producer.', TAG);
         reject(new Error('timed out'));
-      }, 5000);
+      }, this.config['producer.connect.timeout.ms']);
 
       this.producer.on('ready', () => {
         logger.debug('Producer is ready.', TAG);
@@ -118,8 +184,10 @@ class Producer {
       return Promise.resolve();
     }
     logger.debug('Requesting message flushing before disconnect...', TAG);
+
     return new Promise((resolve, reject) => {
-      this.producer.flush(2000, (error) => {
+
+      this.producer.flush(this.config['producer.flush.timeout.ms'], (error) => {
         if (error) {
           return reject(error);
         }
@@ -128,7 +196,7 @@ class Producer {
         const timeoutTrigger = setTimeout(() => {
           logger.error('Unable to disconnect the producer. Timed out.', TAG);
           return reject(new Error('disconnection timeout'));
-        }, 10000);
+        }, this.config['producer.disconnect.timeout.ms']);
 
         return this.producer.disconnect((err) => {
           clearTimeout(timeoutTrigger);

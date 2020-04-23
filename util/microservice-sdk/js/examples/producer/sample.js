@@ -6,8 +6,11 @@ const TAG = { filename: 'sample-producer' };
 
 
 const producer = new Producer({
-  'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
-  'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+  kafka: {
+    'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
+    'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+    'dr_cb': true
+  }
 });
 
 
@@ -15,7 +18,7 @@ producer.connect()
   .then(() => {
     logger.debug('Producer is connected', TAG);
 
-    // The target kafka topic, it be a String
+    // The target kafka topic, it must be a String
     const targetTopic = process.env.KAFKA_TOPIC || 'producer.testing';
 
     const message = {
@@ -26,7 +29,12 @@ producer.connect()
     };
 
     logger.debug(`Producing message: ${util.inspect(message, { depth: null })} in topic ${targetTopic}`, TAG);
-    producer.produce(targetTopic, JSON.stringify(message));
+
+    producer.produce(targetTopic, JSON.stringify(message)).then(() => {
+      logger.debug('Successfully produced the message.', TAG);
+    }).catch((error) => {
+      logger.error(`Caught an error in produce: ${error.stack || error}`, TAG);
+    });
 
     // Disconnect from producer:
     producer.disconnect().then(() => {
@@ -34,7 +42,8 @@ producer.connect()
     }).catch((error) => {
       logger.error(`Caught an error in disconnect: ${error.stack || error}`, TAG);
     });
+
   })
   .catch((error) => {
-    logger.error(`Caught an error: ${error.stack || error}`, TAG);
+    logger.error(`Caught an error in connect: ${error.stack || error}`, TAG);
   });

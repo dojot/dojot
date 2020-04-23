@@ -15,10 +15,12 @@ const Producer = require('../../../lib/kafka/Producer');
 jest.mock('node-rdkafka');
 jest.useFakeTimers();
 
-
 describe('Kafka producer', () => {
   const mockConfig = {
-    'metadata.broker.list': 'kafka:9092',
+    kafka: {
+      'metadata.broker.list': 'kafka:9092',
+      'dr_cb': true
+    }
   };
   const mockKafka = {
     producer: {
