@@ -1,0 +1,20 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: 0.5%
+        base: auto
+        if_no_uploads: error
+        if_not_found: error
+        if_ci_failed: error
+        only_pulls: false
+    patch:
+      default:
+        target: 90%
+        threshold: 0.5%
+        base: auto
+        if_no_uploads: error
+        if_not_found: error
+        if_ci_failed: error
+        only_pulls: false
