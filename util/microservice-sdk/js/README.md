@@ -42,7 +42,7 @@ consumer.init().then(() => {
         console.log(`Payload: ${payload.toString()}`);
     });
 }).catch((error) => {
-    console.error(`Caught an error: ${error.stack || error}`, TAG);
+    console.error(`Caught an error: ${error.stack || error}`);
 });
 ```
 
