@@ -53,4 +53,4 @@ MAX_CONCURRENT_CONNECTIONS | The maximum number of FTP connections at the same t
 RETRIES      | The maximum amount of times to retry the upload          | 13                 | Natural number               |
 
 
-Note: Number of RETRIES resend in an "exponential backoff" strategy. When RETRIES=13 using an exponential backoff strategy, this means the last attempt is made after 2h 16m 31 sec. Total time in ms can be calculate with *Sum[1000*2^k, {k, 0, n-1}]* where *n=retries*.
+Note: Number of RETRIES resend in an "exponential backoff" strategy. When RETRIES=13 using an exponential backoff strategy, this means the last attempt is made after 2h 16m 31 sec. Total time in ms can be calculate with _Sum[1000*2^k, {k, 0, n-1}]_ where *n=retries*.
