@@ -22,30 +22,29 @@ To write messages to Kafka, you use the Producer class, which is a wrapper over 
 The following example illustrates how to use the Producer:
 
 ```js
-const { Kafka: { Producer } } = require('@dojot/microservice-sdk');
+(async () => {
 
-const producer = new Producer({
-  kafka: {
-    'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
-    'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
-  }
-});
-
-producer.connect().then(() => {
-    // The target kafka topic, it must be a String
-    const targetTopic = 'producer.example.test';
-
-    //producing message in topic producer.example.test with content Message Example
-    producer.produce(targetTopic, "Message Example").then(() => {
-      console.log('Successfully produced the message.');
-    }).catch((error) => {
-      console.error(`Caught an error in produce: ${error.stack || error}`);
-    });
-
-  })
-  .catch((error) => {
-    console.error(`Caught an error in connect: ${error.stack || error}`);
+  const producer = new Producer({
+    kafka: {
+      'client.id': 'sample-producer',
+      'metadata.broker.list': 'kafka:9092',
+      dr_cb: true
+    }
   });
+
+  // The target kafka topic, it must be a String
+  const targetTopic = 'producer.example.test';
+
+  // Connecting to Producer
+  await producer.connect();
+
+  // Producing message in topic producer.example.test with content Message Example
+  await producer.produce(targetTopic, "Message Example")
+  console.log('Successfully produced the message.');
+
+})().catch((error) => {
+  console.error(`Caught an error: ${error.stack || error}`);
+});
 
 ```
 

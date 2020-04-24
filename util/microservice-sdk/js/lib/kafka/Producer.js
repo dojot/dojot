@@ -5,7 +5,7 @@ const TAG = { filename: 'producer' };
 
 
 /**
- * Timeout in ms to flush the librdkafka internal queue, sending all messages.
+ * Timeout in ms to flush the librdkafka internal queue, sending all messages before disconnecting.
  *
  * Property: producer.flush.timeout.ms
  */
@@ -80,18 +80,28 @@ class Producer {
     this.isReady = false;
     this.producer = new Kafka.Producer(this.config.kafka);
 
-
-    // To use the event 'delivery-report', you must set request.required.acks to 1 or -1 in topic
-    // configuration and dr_cb (or dr_msg_cb if you want the report to contain the message payload)
-    // to true in kafka options.
-    if (this.config.kafka.dr_cb || this.config.kafka.dr_msg_cb) {
+    if (this.isDeliveryReportActived()) {
       // This will set a callback to be executed everytime a message is published.
       const resolveOnDeliveryReportBind = Producer.resolveOnDeliveryReport.bind(this);
       this.producer.on('delivery-report', resolveOnDeliveryReportBind);
     }
 
     this.producer.setPollInterval(this.config['producer.poll.internval.ms']);
+
     logger.debug('... a Kafka producer was successfully created.', TAG);
+  }
+
+  /**
+  * Check if the delivery report is active
+  *
+  * To use the event 'delivery-report', you must set request.required.acks to 1 or -1 in topic
+  * configuration and dr_cb (or dr_msg_cb if you want the report to contain the message payload)
+  * to true in kafka options.
+  *
+  * @private
+  */
+  isDeliveryReportActived() {
+    return this.config.kafka.dr_cb || this.config.kafka.dr_msg_cb;
   }
 
   /**
@@ -110,19 +120,25 @@ class Producer {
     const readyPromise = new Promise((resolve, reject) => {
       const timeoutTrigger = setTimeout(() => {
         logger.error('Failed to connect the producer.', TAG);
-        reject(new Error('timed out'));
+        return reject(new Error('timed out'));
       }, this.config['producer.connect.timeout.ms']);
 
       this.producer.on('ready', () => {
         logger.debug('Producer is ready.', TAG);
         clearTimeout(timeoutTrigger);
         this.isReady = true;
-        return resolve();
+        resolve();
       });
 
       this.producer.on('event.error', (error) => {
         logger.debug(`Error while creating producer: ${error}`, TAG);
-        return reject(error);
+
+        if (reject) {
+          return reject(error);
+        } else {
+          throw error;
+        }
+
       });
     });
 
@@ -147,20 +163,27 @@ class Producer {
    */
   produce(topic, message, key = null, partition = null) {
     return new Promise((resolve, reject) => {
-      const timeStamp = Date.now();
+      const timestamp = Date.now();
 
       const buffer = Buffer.from(message);
 
-      const callback = { resolve, reject };
+      let callback = null;
+      if (this.isDeliveryReportActived()) {
+        callback = { resolve, reject };
+      }
 
       // The callback object passed here will be used as an opaque object, that
       // is, the delivery report function (set in the constructor) will be
       // invoked with this object - it will resolve or reject the function
       // depending on the fallout of the produce operation.
-      this.producer.produce(topic, partition, buffer, key, timeStamp, { callback });
+      this.producer.produce(topic, partition, buffer, key, timestamp, { callback });
 
       // Poll events emit for delivery reports
       this.producer.poll();
+
+      if (!this.isDeliveryReportActived()) {
+        resolve();
+      }
     });
   }
 
