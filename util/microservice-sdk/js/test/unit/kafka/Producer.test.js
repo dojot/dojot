@@ -19,7 +19,7 @@ describe('Kafka producer', () => {
   const mockConfig = {
     kafka: {
       'metadata.broker.list': 'kafka:9092',
-      'dr_cb': true,
+      dr_cb: true,
     },
   };
   const mockKafka = {
