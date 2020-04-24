@@ -42,7 +42,8 @@ class Producer {
   *
   * @param {config} config the consumer Producer.
   * It is an object with the following properties:
-  * - "producer.flush.timeout.ms": Timeout in ms to flush the librdkafka internal queue, sending all messages
+  * - "producer.flush.timeout.ms": Timeout in ms to flush the librdkafka internal queue,
+  *    sending all messages
   * - "producer.poll.internval.ms": Polls the producer on this interval,
   *    handling disconnections and reconnection. Set it to 0 to turn it off.
   * - "producer.connect.timeout.ms":  Timeout  in ms  to connect
