@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 14,
-  "iteration": 1581419982296,
+  "iteration": 1587754496417,
   "links": [],
   "panels": [
     {
@@ -1865,7 +1865,7 @@
     ]
   },
   "time": {
-    "from": "2020-02-11T10:59:17.482Z",
+    "from": "now-2h",
     "to": "now"
   },
   "timepicker": {
