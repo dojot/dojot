@@ -1469,7 +1469,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "Dojot_Statistics{kind=\"median\"}",
+          "expr": "dojot_latency_pub_statistics{statistic_kind=\"standard_deviation\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Standard deviation",
@@ -1563,7 +1563,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "Dojot_Statistics{kind=\"avg\"}",
+          "expr": "dojot_latency_pub_statistics{statistic_kind=\"average\"}",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -1657,7 +1657,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "Dojot_Statistics{kind=\"median\"}",
+          "expr": "dojot_latency_pub_statistics{statistic_kind=\"median\"}",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Median",
@@ -1748,7 +1748,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "avg(Dojot_Statistics) by (avg) ",
+          "expr": "avg(dojot_latency_pub_statistics) by (avg) ",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Average",
