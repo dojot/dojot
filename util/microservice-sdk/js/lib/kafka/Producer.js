@@ -135,10 +135,8 @@ class Producer {
 
         if (reject) {
           return reject(error);
-        } else {
-          throw error;
         }
-
+          throw error;
       });
     });
 
