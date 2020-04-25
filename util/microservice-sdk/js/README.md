@@ -22,6 +22,8 @@ To write messages to Kafka, you use the Producer class, which is a wrapper over 
 The following example illustrates how to use the Producer:
 
 ```js
+const { Kafka: { Producer } } = require('@dojot/microservice-sdk');
+
 (async () => {
 
   const producer = new Producer({
