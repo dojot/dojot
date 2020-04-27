@@ -80,7 +80,7 @@ class Producer {
     this.isReady = false;
     this.producer = new Kafka.Producer(this.config.kafka);
 
-    if (this.isDeliveryReportActived()) {
+    if (this.isDeliveryReportEnabled()) {
       // This will set a callback to be executed everytime a message is published.
       const resolveOnDeliveryReportBind = Producer.resolveOnDeliveryReport.bind(this);
       this.producer.on('delivery-report', resolveOnDeliveryReportBind);
@@ -100,7 +100,7 @@ class Producer {
   *
   * @private
   */
-  isDeliveryReportActived() {
+  isDeliveryReportEnabled() {
     return this.config.kafka.dr_cb || this.config.kafka.dr_msg_cb;
   }
 
@@ -132,11 +132,6 @@ class Producer {
 
       this.producer.on('event.error', (error) => {
         logger.debug(`Error while creating producer: ${error}`, TAG);
-
-        if (reject) {
-          return reject(error);
-        }
-        throw error;
       });
     });
 
@@ -166,7 +161,7 @@ class Producer {
       const buffer = Buffer.from(message);
 
       let callback = null;
-      if (this.isDeliveryReportActived()) {
+      if (this.isDeliveryReportEnabled()) {
         callback = { resolve, reject };
       }
 
@@ -179,7 +174,7 @@ class Producer {
       // Poll events emit for delivery reports
       this.producer.poll();
 
-      if (!this.isDeliveryReportActived()) {
+      if (!this.isDeliveryReportEnabled()) {
         resolve();
       }
     });
