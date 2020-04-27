@@ -59,7 +59,7 @@ class Service {
     await this.kafkaFTPConsumers.unregisterCallbacks();
 
     await Promise.all(Object.keys(this.ftpConnections).map(async (tenant) => {
-      await this.ftpConnections[tenant].desployConnections();
+      await this.ftpConnections[tenant].destroyConnections();
     }));
 
     // stops the process immediately

@@ -92,8 +92,8 @@ class FTPClientPool {
   /**
    * Destroys all FTP connections
    */
-  async desployConnections() {
-    logger.debug('desployConnections: Destroys all FTP connections', this.tagLogger);
+  async destroyConnections() {
+    logger.debug('destroyConnections: Destroys all FTP connections', this.tagLogger);
     this.ftpConnections.forEach((ftpConnection) => {
       ftpConnection.disconnect();
     });

@@ -29,7 +29,7 @@ describe('Testing FTPClient', () => {
       uploadFile: jest.fn()
         .mockImplementationOnce(() => Promise.reject(new Error('Error')))
         .mockImplementation(() => Promise.resolve()),
-      desployConnections: jest.fn().mockImplementation(() => Promise.resolve()),
+      destroyConnections: jest.fn().mockImplementation(() => Promise.resolve()),
     });
     service = new Service(endpoints);
   });
@@ -63,7 +63,7 @@ describe('Testing FTPClient', () => {
     const abortMock = jest.fn();
     global.process = { ...realProcess, abort: abortMock };
     await service.stopService();
-    expect(service.ftpConnections.admin.desployConnections).toHaveBeenCalled();
+    expect(service.ftpConnections.admin.destroyConnections).toHaveBeenCalled();
     expect(abortMock).toHaveBeenCalled();
   });
 });

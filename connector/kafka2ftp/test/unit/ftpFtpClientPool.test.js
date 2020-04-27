@@ -116,7 +116,7 @@ describe('Testing FTPClientPool', () => {
   });
 
   it('Destroy connections', async () => {
-    await fTPClientPool.desployConnections();
+    await fTPClientPool.destroyConnections();
     const { maxConcurrentConnections } = ftpConfig;
     for (let i = 0; i < maxConcurrentConnections; i += 1) {
       expect(fTPClientPool.ftpConnections[i].disconnect).toHaveBeenCalled();
