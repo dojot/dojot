@@ -1646,7 +1646,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
@@ -1737,7 +1737,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "paceLength": 10,
       "percentage": false,
       "pointradius": 2,
@@ -1891,3 +1891,4 @@
   "uid": "VLTC7nbWk",
   "version": 1
 }
+
