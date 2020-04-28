@@ -1,24 +1,25 @@
 const { logger } = require('@dojot/dojot-module-logger');
-const { Kafka: { ConsumerBackPressure } } = require('../index.js');
+const { Kafka: { Consumer } } = require('../index.js');
 
-const config = require('./config');
+const consumer = new Consumer({
+  kafka: {
+    'group.id': process.env.KAFKA_GROUP_ID || 'sdk-consumer-example',
+    'metadata.broker.list': process.env.KAFKA_HOSTS || 'localhost:9092',
+    'auto.offset.reset': 'beginning',
+  },
+});
 
-const TAG = { filename: 'sample-consumer-back-pressure' };
-
-const consumer = new ConsumerBackPressure(config);
+const TAG = { filename: 'sample-consumer' };
 
 consumer.init().then(() => {
   // the target kafka topic, it could be a String or a RegExp
-  const targetTopic = 'admin.device-data';
+  const targetTopic = process.env.KAFKA_TOPIC || 'consumer.testing';
 
   // Register callback to process incoming device data
   /* const idCallback = */ consumer.registerCallback(targetTopic, (data) => {
     const { value: payload } = data;
     logger.debug(`Payload: ${payload.toString()}`, TAG);
   });
-
-  // You can unregister a callback, for that call:
-  // consumer.unregisterCallback(idCallback);
 }).catch((error) => {
   logger.error(`Caught an error: ${error.stack || error}`, TAG);
 });

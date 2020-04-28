@@ -1,6 +1,4 @@
-/* eslint-disable import/no-unresolved */
-// eslint-disable-next-line import/extensions
-const ConsumerBackPressure = require('kafka/ConsumerBackPressure.js');
+const Consumer = require('kafka/Consumer.js');
 
 jest.mock('node-rdkafka');
 jest.mock('kafka/CommitManager.js');
@@ -64,8 +62,67 @@ KafkaMock.KafkaConsumer = class {
   }
 };
 
+expect.extend({
+  toBeWithinRange(received, floor, ceiling) {
+    const pass = received >= floor && received <= ceiling;
+    if (pass) {
+      return {
+        message: () => `expected ${received} not to be within range ${floor} - ${ceiling}`,
+        pass: true,
+      };
+    }
+
+    return {
+      message: () => `expected ${received} to be within range ${floor} - ${ceiling}`,
+      pass: false,
+    };
+  },
+});
+
+test('Constructor: default', () => {
+  const consumer = new Consumer();
+  const expectedConfig = {
+    'in.processing.max.messages': 1,
+    'queued.max.messages.bytes': 10485760,
+    'subscription.backoff.min.ms': 1000,
+    'subscription.backoff.max.ms': 60000,
+    'subscription.backoff.delta.ms': 1000,
+    'commit.interval.ms': 5000,
+    kafka: {
+      'enable.auto.commit': false,
+    },
+  };
+
+  // check
+  expect(consumer.config).toMatchObject(expectedConfig);
+  expect(consumer.consumer).not.toBeNull();
+  expect(consumer.commitManager).not.toBeNull();
+  expect(consumer.msgQueue).not.toBeNull();
+});
+
+test('Constructor: divergent value for enable.auto.commit', () => {
+  const consumer = new Consumer({ kafka: { 'enable.auto.commit': true } });
+  const expectedConfig = {
+    'in.processing.max.messages': 1,
+    'queued.max.messages.bytes': 10485760,
+    'subscription.backoff.min.ms': 1000,
+    'subscription.backoff.max.ms': 60000,
+    'subscription.backoff.delta.ms': 1000,
+    'commit.interval.ms': 5000,
+    kafka: {
+      'enable.auto.commit': false, // it must be disabled!
+    },
+  };
+
+  // check
+  expect(consumer.config).toMatchObject(expectedConfig);
+  expect(consumer.consumer).not.toBeNull();
+  expect(consumer.commitManager).not.toBeNull();
+  expect(consumer.msgQueue).not.toBeNull();
+});
+
 test('Basic initialization', async () => {
-  const consumer = new ConsumerBackPressure({});
+  const consumer = new Consumer();
   consumer.refreshSubscriptions = jest.fn();
   await consumer.init();
 
@@ -75,9 +132,25 @@ test('Basic initialization', async () => {
   expect(consumer.refreshSubscriptions).toHaveBeenCalledTimes(1);
 });
 
+test('Failed initialization', async () => {
+  expect.assertions(2);
+  const consumer = new Consumer();
+  consumer.consumer.connect = jest.fn((_unused, callback) => {
+    callback(new Error('The kafka broker is not reachable.'));
+  });
+
+  try {
+    await consumer.init();
+  } catch (e) {
+    expect(e).toEqual(new Error('The kafka broker is not reachable.'));
+  }
+
+  expect(consumer.isReady).toBe(false);
+});
+
 describe('Validates registerCallback', () => {
   it('using explicit topic', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.refreshSubscriptions = jest.fn();
 
     const topicCallback = jest.fn();
@@ -99,7 +172,7 @@ describe('Validates registerCallback', () => {
   });
 
   it('using RegExp topic', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.refreshSubscriptions = jest.fn();
 
     const topicCallback = jest.fn();
@@ -120,7 +193,7 @@ describe('Validates registerCallback', () => {
   });
 
   it('registries on a repeated topic', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.refreshSubscriptions = jest.fn();
 
     const targetTopic = 'amazingTopic';
@@ -158,7 +231,7 @@ describe('Validates unregisterCallback', () => {
   const entryExp2 = 'user.ryu';
 
   beforeEach(() => {
-    consumer = new ConsumerBackPressure({});
+    consumer = new Consumer({});
     consumer.refreshSubscriptions = jest.fn();
     consumer.topicRegExpArray = [entryRegExp1, entryRegExp2];
     consumer.topicMap[entryExp1] = [entryExp1Elem1, entryExp1Elem2];
@@ -197,7 +270,7 @@ describe('Validates unregisterCallback', () => {
 
 describe('Message processing', () => {
   test('receives a new message', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.commitManager = new CommitManagerMock();
     consumer.msgQueue = AsyncMock.queue(jest.fn());
     consumer.consumer = new KafkaMock.KafkaConsumer();
@@ -220,7 +293,7 @@ describe('Message processing', () => {
   });
 
   test('receives a new message (queue overflow)', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.commitManager = new CommitManagerMock();
     consumer.msgQueue = AsyncMock.queue(jest.fn());
     consumer.consumer = new KafkaMock.KafkaConsumer();
@@ -246,7 +319,7 @@ describe('Message processing', () => {
 describe('handle kafka', () => {
   let consumer = null;
   beforeEach(() => {
-    consumer = new ConsumerBackPressure({});
+    consumer = new Consumer({});
     consumer.commitManager = new CommitManagerMock();
     consumer.topicRegExpArray = [
       { id: 'entry1', callback: jest.fn(), regExp: /^tenant\/.*/ },
@@ -325,55 +398,13 @@ describe('handle kafka', () => {
   });
 });
 
-describe('Validate setters', () => {
-  test('setHoldOffTimeSubscription', async () => {
-    const consumer = new ConsumerBackPressure({});
-
-    const holdOffTimeSubscription = 100;
-    consumer.setHoldOffTimeSubscription(holdOffTimeSubscription);
-    expect(consumer.holdOffTimeSubscription).toBe(holdOffTimeSubscription);
-  });
-
-  test('setHoldOffFactorTimeSubscription', async () => {
-    const consumer = new ConsumerBackPressure({});
-
-    const holdOffFactorTimeSubscription = 100.0;
-    consumer.setHoldOffFactorTimeSubscription(holdOffFactorTimeSubscription);
-    expect(consumer.holdOffFactorTimeSubscription).toBeCloseTo(holdOffFactorTimeSubscription);
-  });
-
-  test('setMaxHoldOffTimeSubscription', async () => {
-    const consumer = new ConsumerBackPressure({});
-
-    const maxHoldOffTimeSubscription = 100;
-    consumer.setMaxHoldOffTimeSubscription(maxHoldOffTimeSubscription);
-    expect(consumer.maxHoldOffTimeSubscription).toBe(maxHoldOffTimeSubscription);
-  });
-
-  test('setMaxParallelHandlers', async () => {
-    const consumer = new ConsumerBackPressure({});
-
-    const maxParallelHandlers = 10;
-    consumer.setMaxParallelHandlers(maxParallelHandlers);
-    expect(consumer.maxParallelHandlers).toBe(maxParallelHandlers);
-  });
-
-  test('setMaxQueueBytes', async () => {
-    const consumer = new ConsumerBackPressure({});
-
-    const maxQueueBytes = 30000;
-    consumer.setMaxQueueBytes(maxQueueBytes);
-    expect(consumer.maxQueueBytes).toBe(maxQueueBytes);
-  });
-});
-
 describe('Refresh subscription', () => {
-  test('Refresh subscription', async () => {
+  test('Refresh subscription', () => {
     // sets the fake timer to analyze the refreshSubscriptions
     jest.useFakeTimers();
 
     // test subject
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
 
     consumer.consumer = new KafkaMock.KafkaConsumer();
     consumer.isReady = true;
@@ -385,8 +416,7 @@ describe('Refresh subscription', () => {
     consumer.topicRegExpArray = [
       { id: 'entry2', callback: jest.fn(), regExp: regExpTopic },
     ];
-    const holdOffTime = 1000;
-    consumer.refreshSubscriptions(holdOffTime);
+    consumer.refreshSubscriptions();
 
     // execute the setTimeout callbacks
     jest.runOnlyPendingTimers();
@@ -396,16 +426,17 @@ describe('Refresh subscription', () => {
     expect(consumer.consumer.subscribe).toHaveBeenCalledWith([topic, regExpTopic]);
   });
 
-  test('Refresh subscription with retry', async (done) => {
+  test('Refresh subscription with retry', (done) => {
     // sets the fake timer to analyze the refreshSubscriptions
     jest.useFakeTimers();
 
-    // test subject
-    const consumer = new ConsumerBackPressure({});
-
-    consumer.holdOffTimeSubscription = 1000;
-    consumer.holdOffFactorTimeSubscription = 2.0;
-    consumer.maxHoldOffTimeSubscription = 3000;
+    const consumer = new Consumer(
+      {
+        'subscription.backoff.min.ms': 1000,
+        'subscription.backoff.max.ms': 10000,
+        'subscription.backoff.delta.ms': 1000,
+      },
+    );
 
     consumer.consumer = new KafkaMock.KafkaConsumer();
     consumer.isReady = true;
@@ -413,41 +444,73 @@ describe('Refresh subscription', () => {
     consumer.topicMap[topic] = [
       { id: 'entry', callback: jest.fn() },
     ];
-    consumer.refreshSubscriptions(0);
+
+    consumer.consumer.subscribe = jest.fn();
+
+    // Expected calls:
+    // (1) subscriptionProcedure(/*retries*/ 0) -> fails
+    // (2) t = 1000 + random(0, 1000): subscriptionProcedure(/*retries*/ 1) -> fails
+    // (3) t = 2000 + random(0, 1000): subscriptionProcedure(/*retries*/ 2) -> fails
+    // (4) t = 4000 + random(0, 1000): subscriptionProcedure(/*retries*/ 3) -> fails
+    // (5) t = 8000 + random(0, 1000): subscriptionProcedure(/*retries*/ 4) -> fails
+    // (6) t = 10000: subscriptionProcedure(/*retries*/ 4) -> fails
+    // (7) t = 10000: succeeded
+    consumer.consumer.subscribe
+      .mockImplementationOnce(() => {
+        throw Error('subscription mocked error');
+      })
+      .mockImplementationOnce(() => {
+        throw Error('subscription mocked error');
+      })
+      .mockImplementationOnce(() => {
+        throw Error('subscription mocked error');
+      })
+      .mockImplementationOnce(() => {
+        throw Error('subscription mocked error');
+      })
+      .mockImplementationOnce(() => {
+        throw Error('subscription mocked error');
+      })
+      .mockImplementationOnce(() => {
+        throw Error('subscription mocked error');
+      })
+      .mockImplementationOnce(() => {
+        done();
+      });
+
+    consumer.refreshSubscriptions();
 
     // check registerCallback behavior
     expect(consumer.isReady).toBe(true);
     expect(Object.keys(consumer.topicMap)).toHaveLength(1);
 
-    consumer.consumer.subscribe = jest.fn(() => {});
+    jest.runAllTimers();
 
-    consumer.consumer.subscribe.mockImplementationOnce(() => {
-      throw Error('subscription mocked error');
-    }).mockImplementationOnce(() => {
-      throw Error('subscription mocked error');
-    }).mockImplementationOnce(() => {
-      throw Error('subscription mocked error');
-    }).mockImplementationOnce(() => {
-      done();
-    });
+    expect(setTimeout).toHaveBeenCalledTimes(6);
+    expect(setTimeout).toHaveBeenCalledWith(
+      expect.any(Function), expect.toBeWithinRange(1000, 2000), 1,
+    );
+    expect(setTimeout).toHaveBeenCalledWith(
+      expect.any(Function), expect.toBeWithinRange(2000, 3000), 2,
+    );
+    expect(setTimeout).toHaveBeenCalledWith(
+      expect.any(Function), expect.toBeWithinRange(4000, 5000), 3,
+    );
+    expect(setTimeout).toHaveBeenCalledWith(
+      expect.any(Function), expect.toBeWithinRange(8000, 9000), 4,
+    );
+    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 10000, 5);
+    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 10000, 6);
 
-    jest.advanceTimersByTime(10000);
-
-    expect(setTimeout).toHaveBeenCalledTimes(4);
-    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 0, 0);
-    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 1000, 1000);
-    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 2000, 2000);
-    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 3000, 3000);
-
-    expect(consumer.consumer.unsubscribe).toHaveBeenCalledTimes(4);
-    expect(consumer.consumer.subscribe).toHaveBeenCalledTimes(4);
+    expect(consumer.consumer.unsubscribe).toHaveBeenCalledTimes(7);
+    expect(consumer.consumer.subscribe).toHaveBeenCalledTimes(7);
     expect(consumer.consumer.subscribe).toHaveBeenCalledWith([topic]);
   });
 });
 
-describe('resume consumer', () => {
+describe('Resume consumer', () => {
   it('when paused', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.isPaused = true;
     consumer.consumer = new KafkaMock.KafkaConsumer();
 
@@ -458,7 +521,7 @@ describe('resume consumer', () => {
   });
 
   it('when is not paused', () => {
-    const consumer = new ConsumerBackPressure({});
+    const consumer = new Consumer({});
     consumer.consumer = new KafkaMock.KafkaConsumer();
 
     consumer.resumeConsumer();
@@ -468,8 +531,8 @@ describe('resume consumer', () => {
   });
 });
 
-test('revoke partitions', () => {
-  const consumer = new ConsumerBackPressure({});
+test('Rebalance - revoke partitions', () => {
+  const consumer = new Consumer({});
   consumer.consumer = new KafkaMock.KafkaConsumer();
   consumer.commitManager = new CommitManagerMock();
   consumer.msgQueue = AsyncMock.queue(jest.fn());
@@ -483,8 +546,8 @@ test('revoke partitions', () => {
   expect(consumer.isPaused).toBeFalsy();
 });
 
-test('revoke partitions: paused case', () => {
-  const consumer = new ConsumerBackPressure({});
+test('Rebalance - revoke partitions: paused case', () => {
+  const consumer = new Consumer({});
   consumer.consumer = new KafkaMock.KafkaConsumer();
   consumer.commitManager = new CommitManagerMock();
   consumer.msgQueue = AsyncMock.queue(jest.fn());
@@ -497,4 +560,11 @@ test('revoke partitions: paused case', () => {
   expect(consumer.msgQueue.remove).toHaveBeenCalledTimes(1);
   expect(consumer.consumer.resume).toHaveBeenCalledTimes(1);
   expect(consumer.isPaused).toBeFalsy();
+});
+
+test('Rebalance - assign partitions', () => {
+  const consumer = new Consumer({});
+  consumer.consumer.assign = jest.fn();
+  consumer.onRebalance({ code: KafkaMock.CODES.ERRORS.ERR__ASSIGN_PARTITIONS }, [1, 3, 5]);
+  expect(consumer.consumer.assign).toHaveBeenCalledWith([1, 3, 5]);
 });
