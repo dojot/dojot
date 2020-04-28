@@ -140,7 +140,6 @@ class Producer {
         }
       });
     });
-
   }
 
   /**
@@ -159,7 +158,6 @@ class Producer {
    * message.
    */
   produce(topic, message, key = null, partition = null) {
-
     if (this.isReady === false) {
       logger.debug('It is not yet ready to produce.', TAG);
       return Promise.reject();
