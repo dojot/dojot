@@ -93,7 +93,7 @@ module.exports = class CommitManager {
    * This method should be invoked during the Kafka's rebalance procedure.
    * It clears the work tracking.
    *
-   * Note: Once a rebalance occurs, the uncommited messages will be
+   * Note: Once a rebalance occurs, the uncommitted messages will be
    * redelivered to the new assignee that is part of the consumer group.
    */
   onRebalance() {
@@ -106,8 +106,8 @@ module.exports = class CommitManager {
    * The consolidation consists in computing the largest offset
    * which all previous messages have been processed, and commits
    * this offset. This is more efficient than committing
-   * every message once kafka considers all previous messages commited
-   * when an specific offset is commited.
+   * every message once kafka considers all previous messages committed
+   * when an specific offset is committed.
    *
    * @access private
    */

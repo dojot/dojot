@@ -149,7 +149,7 @@ module.exports = class Consumer {
    */
   async init() {
     return new Promise((resolve, reject) => {
-      // register handker for kafka events
+      // register handler for kafka events
       // error
       this.consumer.on('event.error', (event) => {
         logger.warn(`Kafka event.error: ${event}`, TAG);
@@ -203,7 +203,7 @@ module.exports = class Consumer {
    * .
    *
    * @return an identifier (uuidv4 string) that represents the association between the
-   * topicand the callback. You need to store it if you intend to remove this association
+   * topic and the callback. You need to store it if you intend to remove this association
    * in some moment.
    *
    * @example subscribe(/^notifications\/.*\/critical/), handleAllCriticalNotifications)

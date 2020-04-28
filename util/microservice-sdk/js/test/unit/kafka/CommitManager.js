@@ -15,7 +15,7 @@ test('Basic initialization', async () => {
   expect(setInterval).toHaveBeenCalledWith(expect.any(Function), commitInterval);
 });
 
-test('Initilization with a preconfigured caller', async () => {
+test('Initialization with a preconfigured caller', async () => {
   jest.useFakeTimers();
   const commitCallback = jest.fn();
   const commitInterval = 5000;
