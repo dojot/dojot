@@ -163,34 +163,6 @@ describe('Kafka producer', () => {
       });
     });
 
-    it('should reject connection call if Kafka is not reachable', (done) => {
-      /**
-       * This is basically the same test as the previous one. The difference is
-       * that this time we will not call the registered callback simulating a
-       * problem in which Kafka can't be reached (and then the 'ready' event
-       * never happens).
-       */
-      // >> Tested code
-      const producer = new Producer(mockConfig);
-      const connectPromise = producer.connect();
-      // << Tested code
-
-      const callbackPromise = new Promise((resolve) => {
-        expect(mockKafka.producer.on).toHaveBeenCalled();
-        // This time, the callback won't be called - we want to test its
-        // timeout procedure
-        jest.runAllTimers();
-        resolve();
-      });
-      expect(mockKafka.producer.connect).toHaveBeenCalled();
-      Promise.all([connectPromise, callbackPromise]).then(() => {
-        done('error - producer timeout was expected');
-      }).catch((error) => {
-        expect(error.message).toEqual('timed out');
-        done();
-      });
-    });
-
     it('should disconnect from Kafka cleanly', (done) => {
       /**
        * This tests will check if the module can properly process a
@@ -368,6 +340,7 @@ describe('Kafka producer', () => {
     it('should call the produce function correctly', () => {
       // >> Tested code
       const producer = new Producer(mockConfig);
+      producer.isReady = true;
       producer.produce('sample-topic-prod', 'sample-msg-prod', 'sample-key', 'sample-partition');
       // << Tested code
 
@@ -382,6 +355,7 @@ describe('Kafka producer', () => {
     it('should produce messages with default key and partition', () => {
       // >> Tested code
       const producer = new Producer(mockConfig);
+      producer.isReady = true;
       producer.produce('sample-topic-prod-default', 'sample-msg-prod-default');
       // << Tested code
 

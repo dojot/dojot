@@ -119,17 +119,18 @@ class Producer {
     logger.info('Connecting the producer...', TAG);
 
     return new Promise((resolve, reject) => {
-      // register handler for kafka events
-      // error
-      this.producer.on('event.error', (event) => {
-        logger.warn(`Kafka event.error: ${event}`, TAG);
-      });
       // ready
       // note: the ready function is called just once
       this.producer.on('ready', () => {
         logger.info('Producer is ready', TAG);
         this.isReady = true;
         return resolve();
+      });
+
+      // register handler for kafka events
+      // error
+      this.producer.on('event.error', (event) => {
+        logger.warn(`Kafka event.error: ${event}`, TAG);
       });
 
       // connect to kafka
