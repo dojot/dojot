@@ -28,10 +28,11 @@ services:
     depends_on:
       - kafka
     restart: always
-    command: >
-      bash -c "
-        kafkacat -b kafka:9092 -C -c1 -t producer.example.test -f '\nKey (%K bytes): %k\t\nValue (%S bytes): %s\nTimestamp: %T\tPartition: %p\tOffset: %o\n--\n'
-      "
+    command:
+      - bash
+      - -c
+      - |
+        kafkacat -u -G sample -b kafka:9092 -C -t producer.example.test -f '\nKey (%K bytes): %k\t\nValue (%S bytes): %s\nTimestamp: %T\tPartition: %p\tOffset: %o\n--\n'
     logging:
       driver: json-file
       options:

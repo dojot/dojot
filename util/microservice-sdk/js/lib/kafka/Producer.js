@@ -117,32 +117,30 @@ class Producer {
    */
   connect() {
     logger.info('Connecting the producer...', TAG);
-    const readyPromise = new Promise((resolve, reject) => {
-      const timeoutTrigger = setTimeout(() => {
-        logger.error('Failed to connect the producer.', TAG);
-        return reject(new Error('timed out'));
-      }, this.config['producer.connect.timeout.ms']);
 
+    return new Promise((resolve, reject) => {
+      // register handler for kafka events
+      // error
+      this.producer.on('event.error', (event) => {
+        logger.warn(`Kafka event.error: ${event}`, TAG);
+      });
+      // ready
+      // note: the ready function is called just once
       this.producer.on('ready', () => {
-        logger.debug('Producer is ready.', TAG);
-        clearTimeout(timeoutTrigger);
+        logger.info('Producer is ready', TAG);
         this.isReady = true;
-        resolve();
+        return resolve();
       });
 
-      this.producer.on('event.error', (error) => {
-        logger.debug(`Error while creating producer: ${error}`, TAG);
-
-        if (reject) {
-          return reject(error);
+      // connect to kafka
+      this.producer.connect(undefined, (error) => {
+        if (error) {
+          logger.error(`Error on connect: ${error}`, TAG);
+          reject(error);
         }
-
-        throw error;
       });
     });
 
-    this.producer.connect(null);
-    return readyPromise;
   }
 
   /**
@@ -161,6 +159,12 @@ class Producer {
    * message.
    */
   produce(topic, message, key = null, partition = null) {
+
+    if (this.isReady === false) {
+      logger.debug('It is not yet ready to produce.', TAG);
+      return Promise.reject();
+    }
+
     return new Promise((resolve, reject) => {
       const timestamp = Date.now();
 
