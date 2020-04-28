@@ -134,7 +134,7 @@ class Producer {
         logger.debug(`Error while creating producer: ${error}`, TAG);
 
         if (reject) {
-          return reject(new Error('Error while creating producer'));
+          return reject(error);
         }
 
         throw error;
