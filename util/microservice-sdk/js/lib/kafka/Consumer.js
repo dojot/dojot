@@ -10,105 +10,168 @@ const CommitManager = require('./CommitManager.js');
 const TAG = { filename: 'kfk-consumer' };
 
 /**
- * Default value of parallel handlers to deal with the messages
+ * Default value for the maximum number of messages that might be
+ * processed simultaneously.
+ *
+ * Property: in.processing.max.messages
  */
-const DEFAULT_PARALLEL_HANDLERS = 1;
+const DEFAULT_IN_PROCESSING_MAX_MESSAGES = 1;
 /**
- * Default value of bytes supported by the 'msgQueue'
+ * Default value (in bytes) for the maximum size of the message queue
+ * used by the backpressure mechanism.
+ *
+ * Property: queued.max.messages.bytes
  */
-const DEFAULT_MAX_QUEUE_BYTES = 1048576; // 1 mb
+const DEFAULT_QUEUED_MAX_MESSAGES_BYTES = 10485760; // 10 mb
 /**
- * Default value of the hold off time for updating the subscripts (in ms)
+ * Default value (in ms) for the initial backoff time implemented by the
+ * subscription mechanism.
+ *
+ * Property: subscription.backoff.min.ms
  */
-const DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION = 1000;
+const DEFAULT_SUBSCRIPTION_BACKOFF_MIN_MS = 1000;
 /**
- * Default value of the maximum hold off time for updating the subscripts (in ms)
+ * Default value (in ms) for the maximum backoff time implemented by the
+ * subscription mechanism.
+ *
+ * Property: subscription.backoff.max.ms
  */
-const DEFAULT_MAX_HOLD_OFF_TIME_SUBSCRIPTION = 10000;
+const DEFAULT_SUBSCRIPTION_BACKOFF_MAX_MS = 60000;
 /**
- * Default value of the hold off time factor for updating the subscripts
+ * Default value (in ms) for the delta backoff time implemented by the
+ * subscription mechanism.
+ *
+ * Property: subscription.backoff.delta.ms
  */
-const DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION_FACTOR = 1.5;
+const DEFAULT_SUBSCRIPTION_BACKOFF_DELTA_MS = 1000;
 
 /**
- * This class is a wrapper over the node-rdkafka implementation. It adds:
- * - a register callback system for messages;
- * - a mechanism to control the processing flow that allows the consuming be
- * paused when a given watermark is reached;
- * - a commit management, ensuring that all message will be processed at least
- * once.
- * NOTE: Let's keep an healthy relationship, so please do not use the
- * class members, use the setters. Thanks :)
+ * Default value (in ms) for committing the messages into kafka.
+ *
+ * Property: commit.interval.ms
  */
-module.exports = class ConsumerBackPressure {
+const DEFAULT_COMMIT_INTERVAL_MS = 5000;
+/**
+ * This class is a wrapper over the node-rdkafka implementation.
+ * It adds the following features:
+ * - a register callback system with allows multiple callbacks to be registered
+ * for processing the same message.
+ * - a backpressure mechanism to control the consumption of messages from kafka
+ * according to the processing ratio.
+ * - a commit management that ensures that all messages will be procecessed at
+ * least once.
+ */
+module.exports = class Consumer {
   /**
-   * Instantiates a new kafka consumer.
-   * @param {*} consumerConfig the consumer configuration. For more details,
-   * please, refer to the node-rdkafka documentation.
+   * Instantiates a new consumer.
+   * @param {*} config the consumer configuration.
+   * It is an object with the following properties:
+   * - "in.processing.max.messages": the maximum number of messages being
+   * processed simultaneously. The processing callbacks are called in order but
+   * there is no guarantee regarding to the order of completion.
+   * - "queued.max.messages.bytes": the maximum amount (in bytes) of queued
+   * messages waiting for being processed. The same queue is shared by all callbacks.
+   * - "subscription.backoff.min.ms": the initial backoff time (in miliseconds) for
+   * subscribing to topics in Kafka. Every time a callback is registered for a new topic,
+   * the subscriptions are updated to include this new one.
+   * - "subscription.backoff.max.ms": the maximum value for the backoff time (in miliseconds).
+   * The backoff time is incremented while it is above this value.
+   * - "subscription.backoff.delta.ms": the value that will be used for calculating a random
+   * delta time (in miliseconds) in the exponential delay between retries.
+   * - "commit.interval.ms": time interval (in miliseconds) for commiting the processed messages
+   * into kafka. A message is commited if and only if all previous messages has been processed.
+   * - kafka: an object with specific properties for the node-rdkafka consumer. For more details,
+   * see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+   *
+   * ATTENTION: The property 'kafka["enable.auto.commit"]' is set to 'false' even if
+   * it is 'true' in the 'config' because the commits are managed by
+   * this consumer.
+   *
    */
-  constructor(consumerConfig) {
-    this.consumerConfig = JSON.parse(JSON.stringify(consumerConfig));
-    this.consumerConfig['enable.auto.commit'] = false;
-    this.consumerConfig.rebalance_cb = this.onRebalance.bind(this);
+  constructor(config) {
+    // TODO: Validate configuration file
+    // configuration
+    this.config = config || {};
 
+    // kafka consumer configuration
+    this.config.kafka = this.config.kafka || {};
+    this.config.kafka['enable.auto.commit'] = false;
+    this.config.kafka.rebalance_cb = this.onRebalance.bind(this);
+
+    // wrapper-specific configuration
+    this.config['in.processing.max.messages'] = (
+      this.config['in.processing.max.messages'] || DEFAULT_IN_PROCESSING_MAX_MESSAGES
+    );
+    this.config['queued.max.messages.bytes'] = (
+      this.config['queued.max.messages.bytes'] || DEFAULT_QUEUED_MAX_MESSAGES_BYTES
+    );
+    this.config['subscription.backoff.min.ms'] = (
+      this.config['subscription.backoff.min.ms'] || DEFAULT_SUBSCRIPTION_BACKOFF_MIN_MS
+    );
+    this.config['subscription.backoff.max.ms'] = (
+      this.config['subscription.backoff.max.ms'] || DEFAULT_SUBSCRIPTION_BACKOFF_MAX_MS
+    );
+    this.config['subscription.backoff.delta.ms'] = (
+      this.config['subscription.backoff.delta.ms'] || DEFAULT_SUBSCRIPTION_BACKOFF_DELTA_MS
+    );
+    this.config['commit.interval.ms'] = (
+      this.config['commit.interval.ms'] || DEFAULT_COMMIT_INTERVAL_MS
+    );
+
+    // internal data structures
+    // subscriptions
     this.isWaitingForRefreshSubscriptions = false;
-    this.holdOffTimeSubscription = DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION;
-    this.maxHoldOffTimeSubscription = DEFAULT_MAX_HOLD_OFF_TIME_SUBSCRIPTION;
-    this.holdOffFactorTimeSubscription = DEFAULT_HOLD_OFF_TIME_SUBSCRIPTION_FACTOR;
     this.topicMap = {};
     this.topicRegExpArray = [];
-    this.consumer = null;
-    this.msgQueue = null;
+    // consumer
+    this.consumer = new Kafka.KafkaConsumer(this.config.kafka);
+    // commit manager
+    this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
+      this.config['commit.interval.ms']);
+    // processing queue
     this.isReady = false;
-    this.maxParallelHandlers = DEFAULT_PARALLEL_HANDLERS;
-    this.maxQueueBytes = DEFAULT_MAX_QUEUE_BYTES;
     this.currQueueBytes = 0;
     this.isPaused = false;
-    this.commitManager = null;
+    this.msgQueue = async.queue(async (data, done) => {
+      await this.invokeInterestedCallbacks(data);
+      done();
+    }, this.config['in.processing.max.messages']);
+    this.msgQueue.drain(this.resumeConsumer.bind(this));
+
+    // log consumer settings
+    logger.info(`Consumer configuration ${JSON.stringify(this.config)}`, TAG);
     logger.info(`Kafka features: ${Kafka.features}`, TAG);
-    logger.info(`Consumer configuration: ${JSON.stringify(this.consumerConfig)}`);
   }
 
   /**
    * Initializes the consumer.
-   * @param {*} commitInterval the interval in ms that the message offset should be committed
    * @returns a Promise that is fullfil when the consumer becomes ready.
    */
-  async init(commitInterval) {
-    return new Promise((resolve) => {
-      this.consumer = new Kafka.KafkaConsumer(this.consumerConfig);
-      this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
-        commitInterval);
-
+  async init() {
+    return new Promise((resolve, reject) => {
+      // register handler for kafka events
+      // error
       this.consumer.on('event.error', (event) => {
         logger.warn(`Kafka event.error: ${event}`, TAG);
       });
-
+      // data
+      this.consumer.on('data', this.onData.bind(this));
+      // ready
       // note: the ready function is called just once
       this.consumer.on('ready', () => {
         logger.info('Consumer is ready', TAG);
         this.isReady = true;
         this.commitManager.init();
-        this.refreshSubscriptions(0);
+        this.refreshSubscriptions();
         this.consumer.consume();
         return resolve();
       });
 
-      this.consumer.on('data', this.onData.bind(this));
-
-      // create an async queue to deal with the messages in a parallel way
-      this.msgQueue = async.queue(async (data, done) => {
-        await this.invokeInterestedCallbacks(data);
-        done();
-      }, this.maxParallelHandlers);
-
-      // when the processing was finalized, we need to resume the consumer, if
-      // it has been paused
-      this.msgQueue.drain(this.resumeConsumer.bind(this));
-
+      // connect to kafka
       this.consumer.connect(undefined, (error) => {
         if (error) {
           logger.error(`Error on connect: ${error}`, TAG);
+          reject(error);
         }
       });
     });
@@ -118,12 +181,12 @@ module.exports = class ConsumerBackPressure {
    * Registers a callback to handle messages from a specific kafka topic.
    * If the kafka consumer is not subscribed on the given topic, it does.
    * Note that:
-   * - subscriptions are not made immediately, it waits the 'holdOffTimeSubscription'
-   * to do it;
-   * - any errors are given if the topic does not exist, if in the future
-   * the topic is created, the consumer will subscribe on it in
-   * 'topic.metadata.refresh.interval.ms' ms (configurable by consumerConfig on
-   * class constructor).
+   * - subscriptions are not made immediately, it waits the
+   * 'subscription.backoff.min.ms' to do it;
+   * - errors happens if the topic does not exist and auto creation is disabled,
+   * but in the future if the topic is created, the consumer will subscribe on it
+   * according to the 'kafka.topic.metadata.refresh.interval.ms'(configurable by
+   * config on constructor).
    *
    * @param {*} topic the target kafka topic, it could be a String or a RegExp
    * @param {*} callback async callback (data): Promise
@@ -139,8 +202,8 @@ module.exports = class ConsumerBackPressure {
    *   }
    * .
    *
-   * @return an identifier (String) that represents the association between the topic
-   * and the callback. You need to store it if you intend to remove this association
+   * @return an identifier (uuidv4 string) that represents the association between the
+   * topic and the callback. You need to store it if you intend to remove this association
    * in some moment.
    *
    * @example subscribe(/^notifications\/.*\/critical/), handleAllCriticalNotifications)
@@ -170,7 +233,7 @@ module.exports = class ConsumerBackPressure {
 
     // update kafka topic subscriptions
     if (needToRefreshSubscriptions) {
-      this.refreshSubscriptions(this.holdOffTimeSubscription);
+      this.refreshSubscriptions();
     }
 
     return id;
@@ -208,85 +271,50 @@ module.exports = class ConsumerBackPressure {
     }
 
     if (needToRefreshSubscriptions) {
-      this.refreshSubscriptions(this.holdOffTimeSubscription);
+      this.refreshSubscriptions();
     }
   }
 
   /**
-   * Configures the hold off time for updating the subscriptions.
-   * This is the time that a call for the 'registerCallback' will wait
-   * for refreshing the subscriptions with the kafka if a new topic is requested.
-   * The timer is not restarted if a new call to register is performed before a
-   * previous timer expires.
-   * @param {*} holdOffTimeSubscription the hold off time in ms
-   * @example
-   * This 'holdOffTimeSubscription' is configured with 2000 ms. Someone calls
-   * registerCallback('TopicOne', topicOneHandler), after 1000 ms the method
-   * is called again with other topic, something like
-   * registerCallback('TopicTwo', topicTwoHandler). In this scenario the subscription
-   * to both the topics, 'TopicOne' and 'TopicTwo', will be performed 2000 ms
-   * after the first call of the registerCallback.
+   * Computes a truncated exponential backoff with random delta.
+   * The waiting time for the next attempt is given by:
+   *
+   * min((maximum backoff),
+   *     (minimum backoff) * 2 ** retries + random * delta)
+   *
+   * @access private
+   * @param {*} retries the number of retries.
+   * @return the waiting time for the next attempt in miliseconds.
    */
-  setHoldOffTimeSubscription(holdOffTimeSubscription) {
-    this.holdOffTimeSubscription = holdOffTimeSubscription;
-  }
-
-  /**
-   * Configures the hold off time's increment factor in failure scenarios.
-   * @param {*} holdOffFactorTimeSubscription a scalar that represents the hold off increment factor
-   * @example
-   * Given the following scenario:
-   * - 'holdOffTimeSubscription' is 2000
-   * - 'holdOffFactorTimeSubscription' is 2.0
-   * - the regiterCallback is called at 60000 (a fictional time mark)
-   * The subscription is performed at 62000, but it fails, so a new try is
-   * scheduled for 66000 (62000 + 2.0 * 2000).
-   */
-  setHoldOffFactorTimeSubscription(holdOffFactorTimeSubscription) {
-    this.holdOffFactorTimeSubscription = holdOffFactorTimeSubscription;
-  }
-
-  /**
-   * Configures the maximum amount of time that the hold off time can reach in
-   * failure scenarios.
-   * @param {*} maxHoldOffTimeSubscription the value of the maximum hold off time in ms
-   */
-  setMaxHoldOffTimeSubscription(maxHoldOffTimeSubscription) {
-    this.maxHoldOffTimeSubscription = maxHoldOffTimeSubscription;
-  }
-
-  /**
-   * Configures the maximum of message handlers that should work in parallel
-   * @param {*} maxParallelHandlers the number maximum of parallel handlers
-   */
-  setMaxParallelHandlers(maxParallelHandlers) {
-    this.maxParallelHandlers = maxParallelHandlers;
-  }
-
-  /**
-   * Configures the maximum size in bytes that the message queue can handle. If
-   * this limit is exceeded the consumer is paused until all messages have been
-   * processed, so the consumer is resumed.
-   * @param {*} maxQueueBytes the maximum bytes that the processing queue can handle
-   */
-  setMaxQueueBytes(maxQueueBytes) {
-    this.maxQueueBytes = maxQueueBytes;
+  backoffWithRandomDelta(retries) {
+    const waitingTime = (
+      Math.min(
+        this.config['subscription.backoff.max.ms'],
+        (
+          this.config['subscription.backoff.min.ms'] * 2 ** retries
+          + this.config['subscription.backoff.delta.ms'] * Math.random()
+        ),
+      )
+    );
+    return waitingTime;
   }
 
   /**
    * Refreshes the subscription on kafka.
+   * To ensure that the consumer doesn't generate excessive load trying
+   * to refresh subscriptions immediately after a failure, a truncated
+   * exponential backoff with random delta is implemented.
+   *
    * @access private
-   * @param {*} holdOff the hold off time to call the subscription procedure
    */
-  refreshSubscriptions(holdOff) {
+  refreshSubscriptions() {
     // just schedule if does not have a previous timer scheduled and if
     // the consumer is ready
     if ((!this.isWaitingForRefreshSubscriptions) && (this.isReady)) {
       this.isWaitingForRefreshSubscriptions = true;
 
-      const subscriptionProcedure = (currentHoldOff) => {
+      const subscriptionProcedure = (retries = 0) => {
         logger.debug('Refreshing subscriptions', TAG);
-
         // According to the node-rdkafka documentation we need to call
         // the unsubscribe method before call the subscribe with new topics
         try {
@@ -301,23 +329,31 @@ module.exports = class ConsumerBackPressure {
           this.isWaitingForRefreshSubscriptions = false;
         } catch (error) {
           logger.warn(`Error while subscribing: ${error}`, TAG);
-          // computes the next hold off time
-          let nextHoldOffTimeCandidate = currentHoldOff * this.holdOffFactorTimeSubscription;
-          nextHoldOffTimeCandidate = nextHoldOffTimeCandidate > this.maxHoldOffTimeSubscription
-            ? this.maxHoldOffTimeSubscription : nextHoldOffTimeCandidate;
-          nextHoldOffTimeCandidate = nextHoldOffTimeCandidate
-            || this.holdOffTimeSubscription;
-          // schedules the next attempt
-          setTimeout(subscriptionProcedure, nextHoldOffTimeCandidate, nextHoldOffTimeCandidate);
+          // schedules the next retry
+          const timeout = this.backoffWithRandomDelta(retries);
+          setTimeout(
+            subscriptionProcedure,
+            timeout,
+            (retries + 1),
+          );
         }
       };
 
-      setTimeout(subscriptionProcedure, holdOff, holdOff);
+      // run immediately!
+      subscriptionProcedure();
     }
   }
 
   /**
    * Handles the kafka's rebalance event.
+   *
+   * Once a rebalance occurs, it's no longer needed to handle the remaining queued
+   * messages, as all uncommited messages will be redelivered to the new assignee
+   * that is part of the consumer group. Consequently, the processing queue is drained
+   * and the uncommitted offsets are discarded.
+   *
+   * ATTENTION: A message might be processed more than once if a rebalance occurs
+   * and some processed messages has not be commited.
    * @access private
    * @param {*} error the error code
    * @param {*} assignments the assignments
@@ -326,13 +362,9 @@ module.exports = class ConsumerBackPressure {
     if (error.code === Kafka.CODES.ERRORS.ERR__ASSIGN_PARTITIONS) {
       this.consumer.assign(assignments);
     } else if (error.code === Kafka.CODES.ERRORS.ERR__REVOKE_PARTITIONS) {
-      if (this.isPaused) {
-        this.consumer.resume(assignments);
-        this.isPaused = false;
-        logger.info('Consumer resumed', TAG);
-      }
+      this.resumeConsumer();
       // when partition are revoked we just abort queued tasks and do not
-      // commit any task that is in processing
+      // commit any processed task that is waiting for be commited into Kafka.
       this.msgQueue.remove(() => true);
       this.consumer.unassign();
       this.commitManager.onRebalance();
@@ -362,10 +394,11 @@ module.exports = class ConsumerBackPressure {
       this.currQueueBytes -= data.size;
     });
 
-    logger.debug(`Current queue utilization: ${this.currQueueBytes}/${this.maxQueueBytes} bytes`, TAG);
+    logger.debug(`Current queue utilization:
+    ${this.currQueueBytes}/${this.config['queued.max.messages.bytes']} bytes`, TAG);
 
     // checks is the queue is full or not
-    if (this.currQueueBytes > this.maxQueueBytes) {
+    if (this.currQueueBytes > this.config['queued.max.messages.bytes']) {
       logger.info('Consumer paused due to queue capacity overflow', TAG);
       this.consumer.pause(this.consumer.assignments());
       this.isPaused = true;
@@ -375,6 +408,10 @@ module.exports = class ConsumerBackPressure {
   /**
    * Given a kafka message this method invokes all interested callbacks based on
    * the message's topic
+   *
+   * A message is considered processed after all registered callbacks for it
+   * are executed (with success or not).
+   *
    * @access private
    * @param {*} data the kafka message with the following attributes:
    * {

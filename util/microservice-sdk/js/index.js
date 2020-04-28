@@ -1,5 +1,5 @@
-const ConsumerBackPressure = require('./lib/kafka/ConsumerBackPressure');
+const Consumer = require('./lib/kafka/Consumer');
 
 module.exports = {
-    Kafka: { ConsumerBackPressure },
+  Kafka: { Consumer },
 };
