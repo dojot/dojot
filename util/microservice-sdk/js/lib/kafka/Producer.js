@@ -132,6 +132,12 @@ class Producer {
 
       this.producer.on('event.error', (error) => {
         logger.debug(`Error while creating producer: ${error}`, TAG);
+
+        if (reject) {
+          return reject(new Error('Error while creating producer'));
+        }
+
+        throw error;
       });
     });
 
