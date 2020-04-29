@@ -1,0 +1,490 @@
+FORMAT: 1A
+
+# EJBCA NODE API
+
+Endpoints to perform user and certificate management
+
+# Group EJBCA system administration
+
+## EJBCA version [/ejbca/version]
+
+### get EJBCA version [GET]
+
+Get EJBCA version
+
++ Response 200 (application/json)
+
+          {
+            "version": "EJBCA 6.15.2.1 Community"
+          }
+
+# Group EJBCA CA management
+
+## Certification authorities management [/ca]
+
+### List all avaliable CAs [GET]
+
+
++ Response 400 (application/json)
+
+        {
+            "code": 400,
+            "message": "soap message: No CA available.",
+            "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
+
++ Response 200 (application/json)
+
+        {
+          "CAs": [
+              {
+                  "id": 576968287,
+                  "name": "IOTmidCA"
+              },
+              {
+                  "id": -1371917878,
+                  "name": "PROTOCOL"
+              }
+          ]
+        }
+
+## Get CA certificate [/ca/{cacn}]
+
+### Give the PEM certificate chain of the given CA [GET]
+
+The returned certificate is a base64 string with newline characters (so that it
+can match PEM format).
+
+To save the chain in a .CRT file, add the first and last line as shown below:
+```
+-----BEGIN CERTIFICATE-----
+[Certificate]
+-----END CERTIFICATE----- 
+```
+
+Be careful to properly copy the first and final line: the number of dashes (-)
+must be exactly as shown above.
+
+To view the contents of this certificate, execute the following command: 
+
+```bash
+openssl x509 -in ./Certificate.crt.pem -text -noout
+```
++ Parameters
+  + cacn: IOTmidCA (required, string): Certificate common name
+
+
++ Response 400 (application/json)
+
+        {
+            "code": 400,
+            "message": "soap message: CA with name abcde does not exist.",
+            "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "certificate": "*base64cert chain with linebreaks"
+        }
+
+
+
+## Certificate status [/ca/{cacn}/certificate/{certserial}/status]
+
+### Check if a certificate is revoked [GET]
+
++ Parameters
+  + cacn: CN=IOTmidCA,O=EJBCA IOT,C=SE (required, string): Certificate distinguished name
+  + certserial: 45A168F4EA978E7E (required, string): certificate serial number in hexadecimal
+
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: Could not find CA with name null and ID 1992101327",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+        
++ Response 200 (application/json)
+
+        {
+          "status": {
+              "date": "2017-08-21T17:26:03.322000+00:00",
+              "reason": "CERTIFICATEHOLD"
+          }
+        }
+
++ Response 200 (application/json)
+
+        {
+          "status": {
+              "date": "1969-12-31T23:59:59.999000+00:00",
+              "reason": "NOTREVOKED"
+          }
+        }
+
+## Certificate [/ca/{cacn}/certificate/{certserial}]
+### Get the base64 pem certificate [GET]
+
++ Parameters
+  + cacn: CN=IOTmidCA,O=EJBCA IOT,C=SE (required, string): Certificate distinguished name
+  + certserial: 45A168F4EA978E7E (required, string): certificate serial number in hexadecimal
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: Could not find CA with name null and ID 1992101327",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 404 (application/json)
+
+        {
+          "code": 404,
+          "message": "No certificate found",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "certificate": {
+              "certificate": null,
+              "keyStore": null,
+              "type": 0,
+              "certificateData": "MIICozCCAYugAwIBAgIIDbsv7z5yer..."
+          }
+        }
+
+### Revoke a certificate [DELETE /ca/{cacn}/certificate/{certserial}?{reason}]
+Removes a user certificate
+
++ Parameters
+  + cacn: CN=IOTmidCA,O=EJBCA IOT,C=SE (required, string): Certificate distinguished name
+  + certserial: 45A168F4EA978E7E (required, string): certificate serial number in hexadecimal
+  + reason: UNSPECIFIED (optional, enum) - one of REVOKATION_REASON enum values. default: UNSPECIFIED
+
+
++ Response 404 (application/json)
+
+        {
+          "code": 404,
+          "message": "Inexistent reason code",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: Could not find end entity certificate. Issuer CN=PROTOCOL, serialNo 4690394092950658023.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 400 (application/json)
+  
+        {
+          "code": 400,
+          "message": "soap message: Certificate is already revoked. Issuer: 'CN=PROTOCOL', serno: 5084496247959973.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+  
+        {
+          "status": 200,
+          "message": "ok"
+        }
+
+## CRL [/ca/{caname}/crl]
+
+### Create or update current CRL [PUT]
+
++ Parameters
+  + caname: IOTmidCA (required, string): Certificate Authority name
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: CA with name caname does not exist.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 201 (application/json)
+
+        {
+          "status": 201,
+          "message": "CRL Updated/Created"
+        }
+
+### get a CRL [GET /ca/{caname}/crl?{delta}]
+Use the command 
+
+.. code-block:: bash
+  openssl asn1parse -inform DER -in crl.der - dump 
+  
+to visualize the CRL
+
++ Parameters
+  + caname: IOTmidCA (required, string): Certificate Authority name
+  + delta: false (optional, boolean) - if a elta CRL should be used. default: false
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: CA with name caname does not exist.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "CRL": "MIICQjCCASoCAQEwDQYJKoZIhvcNAQEFBQAwEzERMA8GA1UEAwwIUF..."
+        }
+
+# Group EJBCA user management
+## Create or edit user [/user]
+### Create or edit a user [POST]
+
++ Request (application/json)
+  + Body
+
+            {
+                "username" : "device21"
+            }
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "username must have more than 3 characters.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 500 (application/json)
+
+        {
+          "code": 500,
+          "message": "Internal error.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "status": 200,
+          "message": "user created/edited with success."
+        }
+
+## User CRUD [/user/{username}]
+### get user data [GET]
+
++ Parameters
+  + username: IOTmidCA (required, string): user username
+
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: query exception.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 404 (application/json)
+
+        {
+          "code": 404,
+          "message": "User does not exist.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "user": [
+              {
+                  "caName": "PROTOCOL",
+                  "cardNumber": null,
+                  "certificateProfileName": "ENDUSER",
+                  "certificateSerialNumber": null,
+                  "clearPwd": false,
+                  "email": "device21@noemail.com",
+                  "endEntityProfileName": "EMPTY",
+                  "endTime": null,
+                  "extendedInformation": [
+                      {
+                          "name": "subjectdirattributes",
+                          "value": null
+                      },
+                      {
+                          "name": "somekey",
+                          "value": "somevalue"
+                      }
+                  ],
+                  "hardTokenIssuerName": null,
+                  "keyRecoverable": false,
+                  "password": null,
+                  "sendNotification": false,
+                  "startTime": null,
+                  "status": 40,
+                  "subjectAltName": null,
+                  "subjectDN": "CN=device21",
+                  "tokenType": "USERGENERATED",
+                  "username": "device21"
+              }
+          ]
+        }
+
+
+### Revoke all cerificates from a user [DELETE /user/{username}?{reason,delete}]
+
+
+The revokation reason that can be used in this endpoint are:
+
+```
+reasons: {
+  AACOMPROMISE: 10,
+  AFFILIATIONCHANGED: 3,
+  CACOMPROMISE: 2,
+  CERTIFICATEHOLD: 6,
+  CESSATIONOFOPERATION: 5,
+  KEYCOMPROMISE: 1,
+  PRIVILEGESWITHDRAWN: 9,
+  REMOVEFROMCRL: 8,
+  SUPERSEDED: 4,
+  UNSPECIFIED: 0,
+  NOTREVOKED: -1
+}
+```
+
++ Parameters
+  + username: IOTmidCA (required, string): user username
+  + reason: UNSPECIFIED (optional, enum) - one of REVOKATION_REASON enum values. default: UNSPECIFIED
+  + delete: false (optional, boolean) - True if the user should be deleted after the revocation. Default False
+
++ Response 404 (application/json)
+
+        {
+          "code": 404,
+          "message": "Inexistent reason code.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: query exception.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "status": 200,
+          "message": "user deleted with success."
+        }
+
+
+## List user valid certificates [/user/{username}/find]
+### List user certs [GET /user/{username}/find?{valid}]
+
++ Parameters
+  + username: IOTmidCA (required, string): user username
+  + valid: true (optional, boolean) - False if revoked certificates should be listed. Default True
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "soap message: query exception.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 404 (application/json)
+
+        {
+          "code": 404,
+          "message": "no certificates found",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        {
+          "certs": [
+              {
+                  "certificate": null,
+                  "keyStore": null,
+                  "type": 0,
+                  "certificateData": "MIICozCCAYugAwIBAgIIDbsv7z5yerMwDQ..."
+              }
+          ]
+        }
+
+## Sign a certificate for a user [/user/{username}/pkcs10]
+### Return the signed certificate [POST]
+
++ Parameters
+  + username: IOTmidCA (required, string): user username
+
++ Request (application/json)
+  In a csr file, generated with the command 'openssl req -new -out server.csr -key server.key'
+  The base64 certificate csr is between the tags '-----BEGIN CERTIFICATE REQUEST-----' and '-----END CERTIFICATE REQUEST-----'
+
+  + Body
+
+            {
+              "passwd": "pwd12",
+              "certificate": "MIIBmzCCAQQCAQAwWzELMAkGA1UEBhMCQlIxEzARBgNVMC..."
+            }
+
++ Response 400 (application/json)
+
+        {
+          "code": 400,
+          "message": "username must have more than 3 characters.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 400 (application/json)
+
+        {
+          "status": 400,
+          "message": "soap message: Got request with status GENERATED (40), NEW, FAILED or INPROCESS required: username.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 400 (application/json)
+
+        {
+          "status": 400,
+          "message": "soap message: query exception.",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 500 (application/json)
+
+        {
+          "status": 500,
+          "message": "Internal Error",
+          "moreinfo": "https://dojot.github.io/ejbca-rest/apiary_latest.html"
+        }
+
++ Response 200 (application/json)
+
+        Add a '-----BEGIN PKCS7-----' and '-----END PKCS7-----' before save the given certificate to a file.  
+
+        {
+          "status": {
+              "data": "MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGg...",
+              "responseType": "PKCS7"
+          }
+        }

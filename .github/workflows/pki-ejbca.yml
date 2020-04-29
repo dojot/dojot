@@ -1,0 +1,114 @@
+name: Ejbca Wrapper (pki/ejbca)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'pki/ejbca/**'
+on:
+  create:
+  push:
+    branches-ignore:
+      - 'gh-pages'
+  pull_request:
+    paths:
+      - 'pki/ejbca/**'
+
+jobs:
+  unit-tests:
+    name: (pki/ejbca) Unit Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: npm install, build, and test
+      run: |
+        cd pki/ejbca
+
+        npm ci
+        npm run build --if-present
+        npm test
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
+        file: pki/ejbca/coverage/lcov.info # create when run npm test
+        flags: pkiejbca # Flags allow you to isolate coverage reports for different tests
+        name: pkiejbca # Custom defined name for the upload
+
+  docker-hub:
+    needs: unit-tests
+    name: (pki/ejbca) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.11
+      if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/ejbca-wrapper
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: pki/ejbca
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
+
+  gh-pages:
+    needs: docker-hub
+    name: (pki/ejbca) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Version Doc
+      id: version_doc
+      env:
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_SHA: ${{ github.sha }}
+      run: |
+
+        export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
+        echo Documentation Version $TAG_VERSION
+        echo ::set-output name=version::$TAG_VERSION
+
+    - name: Generate docs
+      env:
+        FOLDER_TO_GH_PAGES: pki/ejbca
+        PATH_APIB: ./pki/ejbca/api-docs/apiary.apib
+        VERSION_NAME: ${{ steps.version_doc.outputs.version }}
+      run: |
+
+        sh .github/workflows/scripts/doc_aglio_api.sh
+
+    - name: Publish Documentation
+      uses: peaceiris/actions-gh-pages@v2
+      env:
+        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN_PAT }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./build-docs #fix when use .github/workflows/scripts/doc_aglio_api.sh
+      with:
+        keepFiles: true
+        emptyCommits: false

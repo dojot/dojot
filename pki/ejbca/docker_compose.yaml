@@ -1,0 +1,11 @@
+version: '2.1'
+services:
+  ejbca:
+    image: primekey/ejbca-ce
+    hostname: localhost
+    restart: always
+    environment:
+       TLS_SETUP_ENABLED: "simple"
+    ports:
+      - 80:8080 
+      - 443:8443
