@@ -102,7 +102,7 @@ The following properties can be set for the Producer:
 |Property                      |Description             |
 |------------------------------|-------------------------------------------------|
 |producer.flush.timeout.ms     | Timeout in ms to flush the librdkafka internal queue, sending all messages. Default value is 2000.|
-|producer.poll.internval.ms    | Polls the producer on this interval, handling disconnections and reconnection. Set it to 0 to turn it off. Default value is 100.|
+|producer.pool.invertal.ms    | Polls the producer on this interval, handling disconnections and reconnection. Set it to 0 to turn it off. Default value is 100.|
 |producer.connect.timeout.ms   | Timeout in ms to connect. Default value is 5000.|
 |producer.disconnect.timeout.ms| Timeout in ms to disconnect. Default value is 10000.|
 |**kafka**                     | An object with specific properties for the node-rdkafka producer. More details in Kafka Producer Configuration. |

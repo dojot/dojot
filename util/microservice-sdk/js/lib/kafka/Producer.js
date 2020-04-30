@@ -15,9 +15,9 @@ const PRODUCER_FLUSH_TIMEOUT_MS = 2000;
  * Polls the producer on this interval, handling disconnections and reconnection.
  * Set it to 0 to turn it off.
  *
- * Property: producer.poll.internval.ms
+ * Property: producer.pool.invertal.ms
  */
-const PRODUCER_POLL_INTERNVAL_MS = 100;
+const PRODUCER_POLL_INTERVAL_MS = 100;
 
 /**
  * Timeout in ms to connect
@@ -44,7 +44,7 @@ class Producer {
   * It is an object with the following properties:
   * - "producer.flush.timeout.ms": Timeout in ms to flush the librdkafka internal queue,
   *    sending all messages
-  * - "producer.poll.internval.ms": Polls the producer on this interval,
+  * - "producer.pool.invertal.ms": Polls the producer on this interval,
   *    handling disconnections and reconnection. Set it to 0 to turn it off.
   * - "producer.connect.timeout.ms":  Timeout  in ms  to connect
   * - "producer.disconnect.timeout.ms":  Timeout  in ms  to disconnect
@@ -62,8 +62,8 @@ class Producer {
       this.config['producer.flush.timeout.ms'] || PRODUCER_FLUSH_TIMEOUT_MS
     );
 
-    this.config['producer.poll.internval.ms'] = (
-      this.config['producer.poll.internval.ms'] || PRODUCER_POLL_INTERNVAL_MS
+    this.config['producer.pool.invertal.ms'] = (
+      this.config['producer.pool.invertal.ms'] || PRODUCER_POLL_INTERNVAL_MS
     );
 
     this.config['producer.connect.timeout.ms'] = (
@@ -86,7 +86,7 @@ class Producer {
       this.producer.on('delivery-report', resolveOnDeliveryReportBind);
     }
 
-    this.producer.setPollInterval(this.config['producer.poll.internval.ms']);
+    this.producer.setPollInterval(this.config['producer.pool.invertal.ms']);
 
     logger.debug('... a Kafka producer was successfully created.', TAG);
   }
@@ -155,7 +155,7 @@ class Producer {
    * @param { string } topic The topic to which the message will be published
    * @param { string } message The actual message
    * @param { string } key (optional) -The key to be used to selected a partition.
-   * @param { number } partition (optional) - The particion to be used when publishing the
+   * @param { number } partition (optional) - The partition to be used when publishing the
    * message.
    */
   produce(topic, message, key = null, partition = null) {
