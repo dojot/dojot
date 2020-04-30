@@ -107,11 +107,6 @@ class Producer {
   /**
    * Connects the Producer to a Kafka cluster.
    *
-   * This function will wait for 5 seconds in order to successfully connect to
-   * a broker instance. If there is any problem, then it will time out or
-   * node-rdkakfa will emit a event.error event, both of them triggering a
-   * rejection of the returned promise.
-   *
    * @returns { Promise } A promise which will be resolved if this Producer is
    * successfully connected to a Kafka broker, or reject if any errors occur.
    */
