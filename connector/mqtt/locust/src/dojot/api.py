@@ -338,13 +338,14 @@ class DojotAPI():
         Returns the response in a dictionary
         """
         for _ in range(CONFIG['dojot']['api']['retries'] + 1):
+            res = None
             try:
-                res: requests.Response = func(**args)
+                res = func(**args)
                 res.raise_for_status()
 
             except Exception as exception:
                 LOGGER.debug(str(exception))
-                if res.status_code == 429:
+                if res is not None and res.status_code == 429:
                     LOGGER.error("reached maximum number of requisitions to Dojot")
                     sys.exit(1)
                 else:
