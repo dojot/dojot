@@ -15,7 +15,7 @@ const PRODUCER_FLUSH_TIMEOUT_MS = 2000;
  * Polls the producer on this interval, handling disconnections and reconnection.
  * Set it to 0 to turn it off.
  *
- * Property: producer.pool.invertal.ms
+ * Property: producer.pool.interval.ms
  */
 const PRODUCER_POLL_INTERVAL_MS = 100;
 
@@ -44,7 +44,7 @@ class Producer {
   * It is an object with the following properties:
   * - "producer.flush.timeout.ms": Timeout in ms to flush the librdkafka internal queue,
   *    sending all messages
-  * - "producer.pool.invertal.ms": Polls the producer on this interval,
+  * - "producer.pool.interval.ms": Polls the producer on this interval,
   *    handling disconnections and reconnection. Set it to 0 to turn it off.
   * - "producer.connect.timeout.ms":  Timeout  in ms  to connect
   * - "producer.disconnect.timeout.ms":  Timeout  in ms  to disconnect
@@ -62,8 +62,8 @@ class Producer {
       this.config['producer.flush.timeout.ms'] || PRODUCER_FLUSH_TIMEOUT_MS
     );
 
-    this.config['producer.pool.invertal.ms'] = (
-      this.config['producer.pool.invertal.ms'] || PRODUCER_POLL_INTERVAL_MS
+    this.config['producer.pool.interval.ms'] = (
+      this.config['producer.pool.interval.ms'] || PRODUCER_POLL_INTERVAL_MS
     );
 
     this.config['producer.connect.timeout.ms'] = (
@@ -86,7 +86,7 @@ class Producer {
       this.producer.on('delivery-report', resolveOnDeliveryReportBind);
     }
 
-    this.producer.setPollInterval(this.config['producer.pool.invertal.ms']);
+    this.producer.setPollInterval(this.config['producer.pool.interval.ms']);
 
     logger.debug('... a Kafka producer was successfully created.', TAG);
   }
