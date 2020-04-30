@@ -63,7 +63,7 @@ class Producer {
     );
 
     this.config['producer.pool.invertal.ms'] = (
-      this.config['producer.pool.invertal.ms'] || PRODUCER_POLL_INTERNVAL_MS
+      this.config['producer.pool.invertal.ms'] || PRODUCER_POLL_INTERVAL_MS
     );
 
     this.config['producer.connect.timeout.ms'] = (
