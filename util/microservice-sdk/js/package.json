@@ -4,7 +4,8 @@
   "description": "A SDK to help to build microservices for the dojot platform",
   "scripts": {
     "test": "jest",
-    "lint": "node_modules/.bin/eslint lib/ test/unit/"
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js ."
   },
   "main": "index.js",
   "author": "Raul Negreiros",

@@ -9,7 +9,7 @@ const consumer = new Consumer({
   },
 });
 
-const TAG = { filename: 'sample' };
+const TAG = { filename: 'sample-consumer' };
 
 consumer.init().then(() => {
   // the target kafka topic, it could be a String or a RegExp
