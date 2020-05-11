@@ -21,6 +21,7 @@ COPY package-lock.json .
 COPY app ./app
 
 RUN npm install
+RUN npm run parser:compile
 
 FROM node:10.16.3-alpine
 
@@ -31,7 +32,5 @@ RUN apk --no-cache add \
     lz4-libs
 
 COPY --from=base /opt/kafka-ws /opt/kafka-ws
-
-RUN npm run parser:compile
 
 CMD ["npm", "run", "kafka-ws"]
