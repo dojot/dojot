@@ -1,6 +1,6 @@
 {
   "name": "kafka-ws",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Websocket service with conditional/partial data requests",
   "main": "app/Index.js",
@@ -20,7 +20,6 @@
   "keywords": [
     "dojot",
     "kafka",
-    "nodejs",
     "websocket"
   ],
   "files": [
