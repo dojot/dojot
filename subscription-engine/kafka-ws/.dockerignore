@@ -5,8 +5,22 @@ node_modules
 .dockerignore
 Dockerfile
 
-# test
+# Test
 test
+coverage
 
-# doc
+# Documentation
 doc
+README.md
+
+# IDEs
+.vscode
+.vscode-test
+.idea/*
+.devcontainer
+
+# Examples directory
+examples
+
+# ESLint
+.eslint*
