@@ -1,6 +1,7 @@
 name: Kafka WS (subscription-engine/kafka-ws)
 
-# trigger when create a branch, push a tag or a branch, PR with changes in 'subscription-engine/kafka-ws/**'
+# Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in
+# 'subscription-engine/kafka-ws/**' is submitted
 on:
   create:
   push:
@@ -10,8 +11,10 @@ on:
 
 jobs:
   unit-tests:
-    name: (subscription-engine/kafka-ws) Unit Tests #  path to help identify in Status checks each job
-    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    # Path to help identify each job in the status checks
+    name: (subscription-engine/kafka-ws) Unit Tests
+    # If the commit message contains 'ci skip', it is not necessary to run this job
+    if: contains(github.event.head_commit.message, 'ci skip') == false
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,16 +40,22 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
-        file: subscription-engine/kafka-ws/coverage/lcov.info # create when run npm test
-        flags: kafka-ws # Flags allow you to isolate coverage reports for different tests
-        name: kafka-ws # Custom defined name for the upload
+        # Keep in mind that secrets are not available in forks of repositories, that's the reason we use an open token
+        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612
+        # Created when 'npm test' was executed
+        file: subscription-engine/kafka-ws/coverage/lcov.info
+        # Flags allow you to isolate coverage reports for different tests
+        flags: kafka-ws
+        # Custom name for the upload
+        name: kafka-ws
 
   docker-hub:
     needs: unit-tests
-    name: (subscription-engine/kafka-ws) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    # Path to help identify each job in the status checks
+    name: (subscription-engine/kafka-ws) Build and Publish image to DockerHUb
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/pull/') == false # # If this is a PR, it won't run
+    # If this is a PR, it won't run
+    if: contains(github.ref, 'refs/pull/') == false
     steps:
 
     - name: Owner Repository
@@ -65,5 +74,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         workdir: subscription-engine/kafka-ws
-        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
-        tag_names: true # tag will be based in branch name or tag name
+        # Label with the built image's commit
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
+        # Whether tag will be based in the branch name or in the tag name
+        tag_names: true
