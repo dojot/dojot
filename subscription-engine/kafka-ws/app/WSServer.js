@@ -76,7 +76,7 @@ class WSServer {
         ws.close(error.ws_code, error.ws_reason);
       } else {
         logger.error(error, TAG);
-        ws.close(ErrorCodes.UNKNOWN, 'Unknown error');
+        ws.close(ErrorCodes.INTERNAL, 'Internal error');
       }
       return;
     }

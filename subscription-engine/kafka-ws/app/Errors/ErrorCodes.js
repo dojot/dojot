@@ -4,7 +4,7 @@ const ErrorCodes = {
   INVALID_ESCAPE_VALUE: 4002,
   INVALID_OPERATOR_ARITY: 4003,
   INVALID_VALUE: 4004,
-  UNKNOWN: 4999,
+  INTERNAL: 4999,
 };
 
 module.exports = { ErrorCodes };
