@@ -21,6 +21,7 @@ node_modules/
 .vscode
 .vscode-test
 .idea/*
+.devcontainer
 
 # Procedurally-generated files
 app/WhereProcessing/Parser.js
