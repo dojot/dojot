@@ -29,11 +29,11 @@ const setOperators = ['in', 'nin'];
  */
 function isNumber(value) {
   // Integer
-  if (value.match(/^[0-9]+$/)) return true;
+  if (value.match(/^-?[1-9][0-9]*$/)) return true;
   // Float with values before and after the dot
-  if (value.match(/^[0-9]+\.[0-9]*$/)) return true;
+  if (value.match(/^-?[1-9][0-9]*\.[0-9]*$/)) return true;
   // Float with values only after the dot
-  if (value.match(/^\.[0-9]+$/)) return true;
+  if (value.match(/^-?0?\.[0-9]+$/)) return true;
 
   return false;
 }
@@ -43,6 +43,5 @@ module.exports = {
   numericOperators,
   operators,
   setOperators,
-
   isNumber,
 };
