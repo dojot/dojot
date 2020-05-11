@@ -9,8 +9,6 @@ const ws = new WebSocket('http://localhost:8080/v1/websocket/kafka_topic?fields=
 // const ws = new WebSocket('http://localhost:8080/v1/websocket/kafka_topic?fields=temperature,a/*/e&where=data.temperature=lt:30.0;rain=10;bar=neq:20;');
 // const ws = new WebSocket('http://localhost:8080/v1/websocket/kafka_topic?fields=temperature,a/*/e&where=temperature=31.0;a.c.e=nin:a,1,h,2,3;');
 
-// let interval;
-
 ws.on('open', () => {
   console.log('Connected to the server.');
 });
