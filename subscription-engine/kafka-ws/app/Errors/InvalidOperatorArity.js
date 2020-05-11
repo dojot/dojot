@@ -9,7 +9,7 @@ const { ErrorCodes } = require('./ErrorCodes');
  */
 class _InvalidOperatorArity extends _WSError {
   constructor(operator, n) {
-    super(ErrorCodes.INVALID_OPERATOR_ARITY, `invalid operator '${operator}' for ${n} values`);
+    super(ErrorCodes.INVALID_OPERATOR_ARITY, `invalid arity ${n} for '${operator}'`);
   }
 }
 
