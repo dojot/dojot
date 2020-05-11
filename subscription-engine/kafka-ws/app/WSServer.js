@@ -82,27 +82,9 @@ class WSServer {
     }
 
     const {
-      rule: filter,
       fingerprint,
     } = this.processingRuleManager.addRule(fields, where, conditions, req.params.topic);
-    // TODO: add Kafka
-    const filtered = filter({
-      foo: '"',
-      temperature: 31.0,
-      rain: 10,
-      a: {
-        b: '\\',
-        c: {
-          d: 2,
-          e: 3,
-        },
-        f: {
-          d: 4,
-          g: 5,
-        },
-      },
-    });
-    ws.send(JSON.stringify(filtered));
+    // TODO: add Kafka message consumption
 
     ws.on('close', (code, reason) => this.onClose(code, reason, fingerprint));
   }
