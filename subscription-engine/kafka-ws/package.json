@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "Websocket service with conditional/partial data requests",
-  "main": "app/Index.js",
+  "main": "app/App.js",
   "scripts": {
-    "kafka-ws": "node app/Index.js",
-    "dev": "nodemon app/Index.js",
+    "kafka-ws": "node app/App.js",
+    "dev": "nodemon app/App.js",
     "test": "jest test/**/*.test.js --coverage --passWithNoTests",
     "test:watch": "jest --watch test/**/*.test.js --coverage --passWithNoTests",
     "lint": "eslint --ext .js .",
@@ -51,7 +51,7 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "app/**/*.js",
-      "!app/Index.js"
+      "!app/App.js"
     ],
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
