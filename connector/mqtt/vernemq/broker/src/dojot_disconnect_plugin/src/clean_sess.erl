@@ -1,8 +1,7 @@
 -module(clean_sess).
 
 % time defined in miliseconds (default 30 min)
--define(MAX_TIMEOUT, erlang:list_to_integer(os:getenv("PLUGIN_DISC_LIFETIME_SESSION", "1800000"))).
-
+-define(MAX_TIMEOUT, element(1, string:to_integer(os:getenv("PLUGIN_DISC_LIFETIME_SESSION", "1800000")))).
 
 -export([
     set_connection_timeout/1,
