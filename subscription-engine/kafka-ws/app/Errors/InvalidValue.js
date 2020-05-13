@@ -2,7 +2,7 @@ const { _WSError } = require('./WSError');
 const { ErrorCodes } = require('./ErrorCodes');
 
 /**
- * An invalid escape value has been passed to the condition.
+ * An invalid value has been passed to the condition.
  */
 class _InvalidValue extends _WSError {
   constructor(operator, value) {
