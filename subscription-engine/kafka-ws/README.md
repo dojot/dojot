@@ -18,6 +18,20 @@ language you want, as long as the client supports **RFC 6455** websockets.
 The connection is done via pure websockets in the `/v1/websocket/:topic` endpoint. See the
 [examples](./examples) directory for an example client.
 
+### **HTTP error codes**
+
+- `426`: occurs when the received connection is not a Websocket one.
+
+### **Websocket error codes**
+
+- `4000` - INVALID_SYNTAX: there is a syntatic problem with `where`
+- `4001` - INVALID_OPERATOR: an invalid operator has been passed to a condition, see the [list of
+operators](#applying-conditions) for more info
+- `4002` - INVALID_ESCAPE_VALUE: an unsupported escape character has been passed to a condition
+- `4003` - INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
+- `4004` - INVALID_VALUE: a value with an invalid type was passed to a condition
+- `4999` - INTERNAL: there is an error in the server
+
 ---
 
 ## **Understanding the URI parts**
