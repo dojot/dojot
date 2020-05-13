@@ -1,5 +1,3 @@
-const omit = require('lodash/omit');
-
 /**
  * Applies the greater than operator.
  *
@@ -13,7 +11,7 @@ const applyGt = (parameter, value, data) => {
   if (Number(data[parameter]) > value) {
     return data;
   }
-  return omit(data, parameter);
+  return {};
 };
 
 /**
@@ -29,7 +27,7 @@ const applyGte = (parameter, value, data) => {
   if (Number(data[parameter]) >= value) {
     return data;
   }
-  return omit(data, parameter);
+  return {};
 };
 
 
@@ -46,7 +44,7 @@ const applyLt = (parameter, value, data) => {
   if (Number(data[parameter]) < value) {
     return data;
   }
-  return omit(data, parameter);
+  return {};
 };
 
 /**
@@ -62,7 +60,7 @@ const applyLte = (parameter, value, data) => {
   if (Number(data[parameter]) <= value) {
     return data;
   }
-  return omit(data, parameter);
+  return {};
 };
 
 
@@ -80,7 +78,7 @@ const applyEq = (parameter, value, data) => {
     return data;
   }
 
-  return omit(data, parameter);
+  return {};
 };
 
 /**
@@ -97,7 +95,7 @@ const applyNeq = (parameter, value, data) => {
     return data;
   }
 
-  return omit(data, parameter);
+  return {};
 };
 
 /**
@@ -116,7 +114,7 @@ const applyIn = (parameter, values, data) => {
     }
   }
 
-  return omit(data, parameter);
+  return {};
 };
 
 /**
@@ -140,7 +138,7 @@ const applyNin = (parameter, values, data) => {
     return data;
   }
 
-  return omit(data, parameter);
+  return {};
 };
 
 module.exports = {

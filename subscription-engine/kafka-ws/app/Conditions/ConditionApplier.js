@@ -23,7 +23,7 @@ const ConditionApplier = (parameter, operator, values) => (data) => {
     filtered = Conditions[operator](parameter, values[0], filtered);
   }
 
-  return filtered;
+  return flat.unflatten(filtered);
 };
 
 module.exports = { ConditionApplier };

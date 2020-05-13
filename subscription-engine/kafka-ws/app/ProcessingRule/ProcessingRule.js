@@ -1,4 +1,5 @@
 const curryRight = require('lodash/curryRight');
+const isEmpty = require('lodash/isEmpty');
 const mask = require('json-mask');
 
 const { ConditionApplier } = require('../Conditions');
@@ -13,6 +14,10 @@ const { ConditionApplier } = require('../Conditions');
  */
 const ProcessingRule = (fields, conditions) => {
   const filters = [];
+
+  conditions.forEach((condition) => {
+    filters.push(ConditionApplier(condition.parameter, condition.operator, condition.values));
+  });
 
   /* A filter must be a function that follows the pattern:
    * (data: JSON) => JSON
@@ -34,18 +39,15 @@ const ProcessingRule = (fields, conditions) => {
    */
   filters.push(curryRight(mask)(fields));
 
-  conditions.forEach((condition) => {
-    filters.push(ConditionApplier(condition.parameter, condition.operator, condition.values));
-  });
-
   // Applying the filters when a JSON is passed
   return (data) => {
     let filtered = data;
 
     filters.forEach((filter) => {
-      if (filtered) {
-        filtered = filter(filtered);
+      if (isEmpty(filtered)) {
+        return;
       }
+      filtered = filter(filtered);
     });
 
     return filtered;
