@@ -1,9 +1,8 @@
 // const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const { logger } = require('@dojot/dojot-module-logger');
 
-const Crypto = require('crypto-js');
-
 const { ProcessingRule } = require('./ProcessingRule');
+const { createFingerprint } = require('../Utils');
 
 
 /**
@@ -20,15 +19,14 @@ class ProcessingRuleManager {
    * Creates a new ProcessingRule if there is no other rule with the same identification.
    *
    * @param {string} fields
-   * @param {string} where
-   * @param {{parameters: string, operator: string, values: string}[]} conditions
+   * @param {{parameter: string, operator: string, values: string[]}[]} conditions
    * @param {string} kafkaTopic
    *
    * @returns {{rule: (data: JSON) => JSON, fingerprint: string}}
    * function to process the data and its identification.
    */
-  addRule(fields, where, conditions, kafkaTopic) {
-    const fingerprint = Crypto.SHA1(fields + where).toString();
+  addRule(fields, conditions, kafkaTopic) {
+    const fingerprint = createFingerprint(fields, conditions);
     logger.debug(`Topic: ${kafkaTopic}`);
 
     if (this.rules[fingerprint]) {

@@ -40,8 +40,6 @@ class WSServer {
    * Handles the WebSocket connection received by http module.
    *
    * @param {IncomingMessage} request
-   * @param {Duplex} socket
-   * @param {Buffer} head
    */
   handleUpgrade(request) {
     this.wsServer.handleUpgrade(request, request.socket, request.headers, (ws) => {
@@ -83,7 +81,7 @@ class WSServer {
 
     const {
       fingerprint,
-    } = this.processingRuleManager.addRule(fields, where, conditions, req.params.topic);
+    } = this.processingRuleManager.addRule(fields, conditions, req.params.topic);
     // TODO: add Kafka message consumption
 
     ws.on('close', (code, reason) => this.onClose(code, reason, fingerprint));

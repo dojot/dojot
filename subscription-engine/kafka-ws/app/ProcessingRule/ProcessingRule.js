@@ -8,7 +8,7 @@ const { ConditionApplier } = require('../Conditions');
  * A processing rule that can be applied to any given JSON.
  *
  * @param {string} fields
- * @param {{parameters: string, operator: string, values: string}[]} conditions
+ * @param {{parameter: string, operator: string, values: string[]}[]} conditions
  *
  * @returns {(data: JSON) => JSON} a filter function that can be applied to a JSON
  */

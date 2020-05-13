@@ -18,7 +18,7 @@ const TAG = { filename: 'WhereParser' };
  *
  * @param {string} where where parameter passed in the URL
  *
- * @returns {(where: string) => {parameter: string, operator: string, values: []}[]} Parsing
+ * @returns {(where: string) => {parameter: string, operator: string, values: string[]}[]} Parsing
  * function that processes the where filter and returns its conditions.
  */
 const WhereParser = () => {
