@@ -16,7 +16,7 @@ language you want, as long as the client supports **RFC 6455** websockets.
 ## **Connecting to the service**
 
 The connection is done via pure websockets in the `/v1/websocket/:topic` endpoint. See the
-[examples](./examples) directory for an example client.
+[examples](./examples) directory for a client example.
 
 ### **HTTP error codes**
 
@@ -73,11 +73,29 @@ Where:
 ### **Examples**
 
 To ilustrate the parameters' usage, here are some examples of valid URIs:
+
+Retrieving full messages from `device-data` topic:
 ```
 /v1/websocket/device-data
+```
+
+Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
+```
 /v1/websocket/device-data?fields=sensor.status,temperature&where=sensor.status=in:failed,stopped
+```
+
+Retrieving the temperature and location:
+```
 /v1/websocket/device-data?fields=temperature,location
+```
+
+Retrieving full messages where 5.0 ≤ temperature < 10.0:
+```
 /v1/websocket/device-data?where=temperature=lt:10.0;temperature=gte:5.0;
+```
+
+Retrieving the temperature and rain when rain ≤ 15:
+```
 /v1/websocket/device-data?where=rain=lte:15;&fields=temperature,rain
 ```
 
@@ -87,7 +105,7 @@ To ilustrate the parameters' usage, here are some examples of valid URIs:
 
 The filtering happens right after a message is received in a Kafka topic that the client has
 requested to subscribe. The message is then filtered by `where` (if present) and then by `fields`
-(if present). This flux is better explained in the next image:
+(if present). This flow is better explained in the next image:
 
 ![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-kafka-ws/subscription-engine/kafka-ws/docs/plant_uml/message_flow)
 
