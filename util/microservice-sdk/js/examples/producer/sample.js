@@ -1,8 +1,13 @@
-const { logger } = require('@dojot/dojot-module-logger');
 const util = require('util');
-const { Kafka: { Producer } } = require('../index.js');
 
-const TAG = { filename: 'sample-producer' };
+const { Logger, Kafka: { Producer } } = require('../index.js');
+
+// Set the global logger properties
+// Add a console transport
+Logger.setTransport('console', { level: 'debug' });
+
+// Instantiate a logger wrapper for the application
+const logger = new Logger('sample-producer');
 
 (async () => {
   const producer = new Producer({
@@ -23,17 +28,17 @@ const TAG = { filename: 'sample-producer' };
     },
   };
 
-  logger.debug('Producer will be connected.', TAG);
+  logger.debug('Producer will be connected.');
   await producer.connect();
-  logger.debug('Producer is connected.', TAG);
+  logger.debug('Producer is connected.');
 
-  logger.debug(`Producer will send a message: ${util.inspect(message, { depth: null })} in topic ${targetTopic}`, TAG);
+  logger.debug(`Producer will send a message: ${util.inspect(message, { depth: null })} in topic ${targetTopic}`);
   await producer.produce(targetTopic, JSON.stringify(message));
-  logger.debug('Successfully produced the message.', TAG);
+  logger.debug('Successfully produced the message.');
 
-  logger.debug('Producer will be disconnected.', TAG);
+  logger.debug('Producer will be disconnected.');
   await producer.disconnect();
-  logger.debug('Producer is disconnected', TAG);
+  logger.debug('Producer is disconnected');
 })().catch((error) => {
-  logger.error(`Caught an error: ${error.stack || error}`, TAG);
+  logger.errorv(`Caught an error: ${error.stack || error}`);
 });

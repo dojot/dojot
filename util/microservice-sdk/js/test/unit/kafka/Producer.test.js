@@ -13,6 +13,7 @@ const Producer = require('../../../lib/kafka/Producer');
 // Mocking dependencies
 //
 jest.mock('node-rdkafka');
+jest.mock('logging/Logger.js');
 jest.useFakeTimers();
 
 describe('Kafka producer', () => {

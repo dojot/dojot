@@ -1,13 +1,13 @@
 const async = require('async');
 const Kafka = require('node-rdkafka');
 const uuidv4 = require('uuid/v4');
-const { logger } = require('@dojot/dojot-module-logger');
 const CommitManager = require('./CommitManager.js');
+const { Logger } = require('../logging/Logger');
 
 /**
- * The logger identifier
+ * Logger instance
  */
-const TAG = { filename: 'kfk-consumer' };
+const logger = new Logger('microservice-sdk:consumer');
 
 /**
  * Default value for the maximum number of messages that might be
@@ -139,8 +139,8 @@ module.exports = class Consumer {
     this.msgQueue.drain(this.resumeConsumer.bind(this));
 
     // log consumer settings
-    logger.info(`Consumer configuration ${JSON.stringify(this.config)}`, TAG);
-    logger.info(`Kafka features: ${Kafka.features}`, TAG);
+    logger.info(`Consumer configuration ${JSON.stringify(this.config)}`);
+    logger.info(`Kafka features: ${Kafka.features}`);
   }
 
   /**
@@ -152,14 +152,14 @@ module.exports = class Consumer {
       // register handler for kafka events
       // error
       this.consumer.on('event.error', (event) => {
-        logger.warn(`Kafka event.error: ${event}`, TAG);
+        logger.warnv(`Kafka event.error: ${event}`);
       });
       // data
       this.consumer.on('data', this.onData.bind(this));
       // ready
       // note: the ready function is called just once
       this.consumer.on('ready', () => {
-        logger.info('Consumer is ready', TAG);
+        logger.info('Consumer is ready');
         this.isReady = true;
         this.commitManager.init();
         this.refreshSubscriptions();
@@ -170,7 +170,7 @@ module.exports = class Consumer {
       // connect to kafka
       this.consumer.connect(undefined, (error) => {
         if (error) {
-          logger.error(`Error on connect: ${error}`, TAG);
+          logger.errorv(`Error on connect: ${error}`);
           reject(error);
         }
       });
@@ -209,7 +209,7 @@ module.exports = class Consumer {
    * @example subscribe(/^notifications\/.*\/critical/), handleAllCriticalNotifications)
    */
   registerCallback(topic, callback) {
-    logger.debug(`subscribing on topic: ${topic}`, TAG);
+    logger.debug(`subscribing on topic: ${topic}`);
 
     let needToRefreshSubscriptions = true;
     const id = uuidv4();
@@ -245,7 +245,7 @@ module.exports = class Consumer {
    * that you desire to remove
    */
   unregisterCallback(registerId) {
-    logger.debug(`unsubscribing id: ${registerId}`, TAG);
+    logger.debug(`unsubscribing id: ${registerId}`);
     let needToRefreshSubscriptions = false;
     const topicsToBeRemoved = [];
 
@@ -314,7 +314,7 @@ module.exports = class Consumer {
       this.isWaitingForRefreshSubscriptions = true;
 
       const subscriptionProcedure = (retries = 0) => {
-        logger.debug('Refreshing subscriptions', TAG);
+        logger.debug('Refreshing subscriptions');
         // According to the node-rdkafka documentation we need to call
         // the unsubscribe method before call the subscribe with new topics
         try {
@@ -328,7 +328,7 @@ module.exports = class Consumer {
           }
           this.isWaitingForRefreshSubscriptions = false;
         } catch (error) {
-          logger.warn(`Error while subscribing: ${error}`, TAG);
+          logger.warnv(`Error while subscribing: ${error}`);
           // schedules the next retry
           const timeout = this.backoffWithRandomDelta(retries);
           setTimeout(
@@ -369,7 +369,7 @@ module.exports = class Consumer {
       this.consumer.unassign();
       this.commitManager.onRebalance();
     } else {
-      logger.warn(`Rebalance error : ${error}`, TAG);
+      logger.warnv(`Rebalance error : ${error}`);
     }
   }
 
@@ -395,11 +395,11 @@ module.exports = class Consumer {
     });
 
     logger.debug(`Current queue utilization:
-    ${this.currQueueBytes}/${this.config['queued.max.messages.bytes']} bytes`, TAG);
+    ${this.currQueueBytes}/${this.config['queued.max.messages.bytes']} bytes`);
 
     // checks is the queue is full or not
     if (this.currQueueBytes > this.config['queued.max.messages.bytes']) {
-      logger.info('Consumer paused due to queue capacity overflow', TAG);
+      logger.info('Consumer paused due to queue capacity overflow');
       this.consumer.pause(this.consumer.assignments());
       this.isPaused = true;
     }
@@ -429,11 +429,11 @@ module.exports = class Consumer {
       // verifies if the topic does not matches with a regular expression
       this.topicRegExpArray.forEach(async (entry) => {
         if (entry.regExp.test(data.topic)) {
-          logger.debug(`Message on topic: ${data.topic} . Calling callback: ${entry.id}`, TAG);
+          logger.debug(`Message on topic: ${data.topic} . Calling callback: ${entry.id}`);
           try {
             await entry.callback(data);
           } catch (error) {
-            logger.warn(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`, TAG);
+            logger.warnv(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`);
           }
         }
       });
@@ -444,15 +444,15 @@ module.exports = class Consumer {
       }
       // iterates by the callbacks
       this.topicMap[data.topic].forEach(async (entry) => {
-        logger.debug(`Message on topic: ${data.topic} . Calling callback: ${entry.id}`, TAG);
+        logger.debug(`Message on topic: ${data.topic} . Calling callback: ${entry.id}`);
         try {
           await entry.callback(data);
         } catch (error) {
-          logger.warn(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`, TAG);
+          logger.warnv(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`);
         }
       });
     } catch (error) {
-      logger.warn(`Error during handle message calling: ${error}`, TAG);
+      logger.warnv(`Error during handle message calling: ${error}`);
     } finally {
       // successful or not the processing has been finalized
       this.commitManager.notifyFinishedProcessing(data);
@@ -464,11 +464,11 @@ module.exports = class Consumer {
    * @access private
    */
   resumeConsumer() {
-    logger.debug(`Calling resume consumer; isPaused? ${this.isPaused}...`, TAG);
+    logger.debug(`Calling resume consumer; isPaused? ${this.isPaused}...`);
     if (this.isPaused) {
       this.consumer.resume(this.consumer.assignments());
       this.isPaused = false;
-      logger.info('Consumer resumed', TAG);
+      logger.info('Consumer resumed');
     }
   }
 };
