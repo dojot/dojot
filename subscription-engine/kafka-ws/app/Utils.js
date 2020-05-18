@@ -40,19 +40,33 @@ function convertConditionToString(condition) {
 /**
  * Creates the fingerprint for a processing rule.
  *
+ * @param {string} topic Kafka topic
  * @param {string} fields
  * @param {{parameter: string, operator: string, values: string[]}[]} conditions
  *
  * @returns {string}
  */
-function createFingerprint(fields, conditions) {
-  const sortedFields = fields.split(',').sort().toString();
+function createFingerprint(topic, fields, conditions) {
+  let sortedFields;
+
+  if (fields) {
+    sortedFields = fields.split(',').sort().toString();
+  }
 
   const sortedConditions = conditions.map(
     (condition) => convertConditionToString(condition),
   ).sort().join('');
 
-  return Crypto.SHA1(`${sortedFields}&${sortedConditions}`).toString();
+  let fingerprint = topic;
+
+  if (sortedFields) {
+    fingerprint += `&${sortedFields}`;
+  }
+  if (sortedConditions) {
+    fingerprint += `&${sortedConditions}`;
+  }
+
+  return Crypto.SHA1(fingerprint).toString();
 }
 
 /**

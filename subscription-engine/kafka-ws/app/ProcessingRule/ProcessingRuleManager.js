@@ -26,7 +26,7 @@ class ProcessingRuleManager {
    * function to process the data and its identification.
    */
   addRule(fields, conditions, kafkaTopic) {
-    const fingerprint = createFingerprint(fields, conditions);
+    const fingerprint = createFingerprint(kafkaTopic, fields, conditions);
     logger.debug(`Topic: ${kafkaTopic}`);
 
     if (this.rules[fingerprint]) {
