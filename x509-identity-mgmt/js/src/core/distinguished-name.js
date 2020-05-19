@@ -144,24 +144,22 @@ function checkAttributeValues(attributes) {
 }
 
 function verify() {
-  const dnObj = this;
-  const attributes = Reflect.ownKeys(dnObj).filter(
-    ((attr) => typeof Reflect.get(dnObj, attr) !== 'function'), dnObj,
+  const attributes = Reflect.ownKeys(this).filter(
+    ((attr) => typeof Reflect.get(this, attr) !== 'function'),
   );
   checkAllowedAttributes(attributes);
   checkMandatoryAttributes(attributes);
   checkAttributeValues(attributes.map(
-    (attr) => ({ key: attr, value: Reflect.get(dnObj, attr) }),
+    (attr) => ({ key: attr, value: Reflect.get(this, attr) }),
   ));
-  return dnObj;
+  return this;
 }
 
 function stringify() {
-  const dnObj = this;
-  return Reflect.ownKeys(dnObj).filter(
-    ((attr) => typeof Reflect.get(dnObj, attr) !== 'function'), dnObj,
+  return Reflect.ownKeys(this).filter(
+    ((attr) => typeof Reflect.get(this, attr) !== 'function'),
   ).map(
-    ((attr) => [attr, Reflect.get(dnObj, attr)].join('=')), dnObj,
+    ((attr) => [attr, Reflect.get(this, attr)].join('=')),
   ).join(', ');
 }
 
