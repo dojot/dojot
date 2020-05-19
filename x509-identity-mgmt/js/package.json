@@ -4,6 +4,7 @@
     "description": "API for issuing and managing x.509 certificates. Once these certificates are associated with IoT devices or third party applications, they become the identity of these elements to the dojot platform.",
     "main": "index.js",
     "scripts": {
+        "lint": "./node_modules/.bin/eslint src/*.js",
         "start": "cross-env NODE_ENV=production node index",
         "dev": "cross-env NODE_ENV=development node --trace-sync-io index",
         "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request EJBCA_TLS_CLIENT_DIR=./tls EJBCA_CLIENT_USERNAME=ejbcaclient node --inspect-brk --trace-sync-io index",
