@@ -203,7 +203,7 @@ log() {
     processId="$$"
     #threadId="$(ps H -o 'tid' $processId | tail -n 1| tr -d ' ')"
     if [ -z "$2" ] ; then
-        while read line ; do
+        while read -r line ; do
             echo "$dateString $logLevel [$className] (process:$processId) ${line}"
         done
     else

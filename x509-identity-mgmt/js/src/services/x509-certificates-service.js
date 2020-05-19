@@ -36,7 +36,7 @@ async function generateCertificate({ csr: csrPem, belongsTo }, tenant) {
   return { certificateFingerprint, certificatePem };
 }
 
-async function registerCertificate({ certificatePem, belongsTo }, tenant) {
+async function registerCertificate(/* { certificatePem, belongsTo }, tenant */) {
   await Promise.reject(NotFound('This operation is not available yet'));
 }
 
