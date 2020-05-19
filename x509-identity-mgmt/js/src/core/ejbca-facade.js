@@ -146,7 +146,7 @@ const facade = {
     let endTime = null;
     if (validity) {
       const days = Math.abs(parseInt(validity, 10));
-      if (typeof days === 'number') {
+      if (!Number.isNaN(days)) {
         const notBefore = new Date();
         const notAfter = new Date(notBefore);
         notAfter.setDate(notAfter.getDate() + days);
