@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://www.dojot.com.br/schemas/ch-owner-cert",
+  "title": "Change ownership of a Certificate Schema",
+  "description": "Schema for validating the input body of route for change the ownership of a certificate'.",
+  "type": "object",
+  "default": {},
+  "properties": {
+    "belongsTo": {
+      "$ref": "http://www.dojot.com.br/schemas/defs#/definitions/belongsTo"
+    }
+  },
+  "required": [
+    "belongsTo"
+  ],
+  "additionalProperties": false
+}

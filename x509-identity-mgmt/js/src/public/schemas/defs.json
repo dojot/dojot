@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://www.dojot.com.br/schemas/defs",
+  "definitions": {
+    "cert-pem": {
+      "type": "string",
+      "title": "X509 Certificate PEM Schema",
+      "description": "Schema for validating an v3 x.509 certificate in PEM format.",
+      "contentEncoding": "base64",
+      "contentMediaType": "application/x-pem-file",
+      "maxLength": 65536,
+      "pattern": "^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5})+$"
+    },
+    "csr": {
+      "type": "string",
+      "title": "Certificate Signing Request (CSR) Schema",
+      "description": "Schema for validating an PKCS#10 CSR.",
+      "contentEncoding": "base64",
+      "contentMediaType": "application/pkcs10",
+      "maxLength": 65536,
+      "pattern": "^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}$"
+    },
+    "belongsTo": {
+      "type": "object",
+      "title": "Link between certificate and entity",
+      "description": "Object that associates the certificate with an entity.",
+      "default": {
+        "device": null
+      },
+      "additionalProperties": false,
+      "properties": {
+        "device": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "title": "Device UUID",
+          "description": "Identifies the device that the x.509 certificate is attached to.",
+          "maxLength": 36,
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        },
+        "application": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "title": "Application Identifier",
+          "description": "Identifies the type of application that owns the certificate.",
+          "maxLength": 64,
+          "enum": [
+            "kafka-consumer"
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "device"
+          ]
+        },
+        {
+          "required": [
+            "application"
+          ]
+        }
+      ],
+      "dependencies": {
+        "device": {
+          "not": {
+            "required": [
+              "application"
+            ]
+          }
+        },
+        "application": {
+          "not": {
+            "required": [
+              "device"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
