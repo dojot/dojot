@@ -16,6 +16,20 @@ const parseArray = (val) => {
   return val.split(',').map((el) => el.trim());
 };
 
+/* parse regex validator for values in SubjectDN allowed attributes */
+const parseAllowedAttrsRegex = (val) => {
+  if (typeof val !== 'string') return undefined;
+  return val.split(',').reduce((obj, attr) => {
+    const keyValue = attr.split('=').map((el) => el.trim());
+    const key = keyValue[0];
+    const value = new RegExp(keyValue[1]);
+    if (!Reflect.has(obj, key)) {
+      Reflect.set(obj, key, value);
+    }
+    return obj;
+  }, {});
+};
+
 module.exports = {
 
   nodeEnv: process.env.NODE_ENV || 'production',
@@ -112,7 +126,14 @@ module.exports = {
   certificate: {
     subject: {
       allowedAttrs: parseArray(process.env.CERT_ALW_ATTR) || ['CN'],
+
+      /* constraints on the values of the allowed attributes on SubjectDN */
+      allowedAttrsConstraints: parseAllowedAttrsRegex(process.env.CERT_ALW_ATTR_REGEX) || {
+        CN: /^[0-9A-Za-z ]{1,255}$/,
+      },
+
       mandatoryAttrs: parseArray(process.env.CERT_MDT_ATTR) || ['CN'],
+
       constantAttrs: {
         O: process.env.CERT_DN_O || 'dojot IoT Platform',
       },

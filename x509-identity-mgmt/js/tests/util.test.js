@@ -75,9 +75,15 @@ A8kqWCU6i7xXu3mHe0ahYzFdBm3Vq8Ze+aG8HGW51Q648378JRmeaOg9EmON0cRg
 JnGjd/T1dkjCRizV6Av/9vpHhM435Q==
 -----END CERTIFICATE-----`;
 
+/* defines the JWT token to be used for test requests */
+const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
+  + '.eyJzZXJ2aWNlIjoiYWRtaW4ifQ'
+  + '._HY-E8EFWIX-rfyMHktjQ7vzEc-0KqrwvIglQJoRbXo';
+
 module.exports = {
   generateCert,
   generateCSR,
   p256CSR,
   p256Cert,
+  token,
 };

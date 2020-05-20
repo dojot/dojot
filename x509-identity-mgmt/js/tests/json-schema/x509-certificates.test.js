@@ -3,17 +3,12 @@ const request = require('supertest');
 const faker = require('faker');
 
 const {
-  generateCert, generateCSR, p256CSR, p256Cert,
+  generateCert, generateCSR, p256CSR, p256Cert, token,
 } = require('../util.test');
 
 const app = require('../../src/app');
 
 const req = request(app);
-
-/* defines the JWT token to be used for test requests */
-const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
-  + '.eyJzZXJ2aWNlIjoiYWRtaW4ifQ'
-  + '._HY-E8EFWIX-rfyMHktjQ7vzEc-0KqrwvIglQJoRbXo';
 
 describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // --------------------

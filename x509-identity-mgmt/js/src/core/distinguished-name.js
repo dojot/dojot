@@ -5,6 +5,9 @@ const { BadRequest } = require('./errors');
 /* List of allowed attributes on SubjectDN */
 const allowed = [...certCfg.subject.allowedAttrs];
 
+/* constraints on the values of the allowed attributes on SubjectDN */
+const allowedRegex = certCfg.subject.allowedAttrsConstraints;
+
 /* List of mandatory attributes on SubjectDN */
 const mandatory = [...certCfg.subject.mandatoryAttrs];
 
@@ -49,7 +52,7 @@ const RDNs = [
   }, {
     OID: '2.5.4.10',
     name: 'organizationName',
-    identifier: 'O',
+    shortName: 'O',
   }, {
     OID: '2.5.4.11',
     name: 'organizationalUnit',
@@ -107,24 +110,23 @@ const RDNs = [
   },
 ];
 
-/* constraints on the values of the allowed attributes on SubjectDN */
-const commonNameRegex = /^[0-9A-Za-z ]{1,255}$/;
-const constraints = {
-  CN(value) {
-    if (!commonNameRegex.test(value)) {
-      const errorMsg = 'Error checking SubjectDN CommonName (CN) attribute in CSR. '
-                + `The value does not match the regular expression: ${commonNameRegex.toString()}. `
-                + `Found: ${value}; `;
+function performRegexInAttrValue(attr, value) {
+  if (Reflect.has(allowedRegex, attr)) {
+    const regex = Reflect.get(allowedRegex, attr);
+    if (regex instanceof RegExp && !regex.test(value)) {
+      const errorMsg = `Error checking SubjectDN '${attr}' attribute in CSR. `
+                  + `The value does not match the regular expression: ${regex.toString()}. `
+                  + `Found: ${value}`;
       throw BadRequest(errorMsg);
     }
-  },
-};
+  }
+}
 
 function checkAllowedAttributes(attributes) {
   if (!attributes.every((attr) => Reflect.has(constantAttrs, attr) || allowed.includes(attr))) {
     const errorMsg = 'Error checking SubjectDN allowed attributes in CSR. '
             + `Allowed: [${allowed.toString()}] `
-            + `Found: [${attributes.toString()}] `;
+            + `Found: [${attributes.toString()}]`;
     throw BadRequest(errorMsg);
   }
 }
@@ -133,14 +135,13 @@ function checkMandatoryAttributes(attributes) {
   if (!mandatory.every((mdAttr) => attributes.includes(mdAttr))) {
     const errorMsg = 'Error checking SubjectDN mandatory attributes in CSR. '
             + `Mandatory: [${mandatory.toString()}] `
-            + `Found: [${attributes.toString()}] `;
+            + `Found: [${attributes.toString()}]`;
     throw BadRequest(errorMsg);
   }
 }
 
 function checkAttributeValues(attributes) {
-  attributes.forEach(({ key, value }) => Reflect.has(constraints, key)
-            && Reflect.apply(Reflect.get(constraints, key), constraints, [value]));
+  attributes.forEach(({ attr, value }) => performRegexInAttrValue(attr, value));
 }
 
 function verify() {
@@ -150,7 +151,7 @@ function verify() {
   checkAllowedAttributes(attributes);
   checkMandatoryAttributes(attributes);
   checkAttributeValues(attributes.map(
-    (attr) => ({ key: attr, value: Reflect.get(this, attr) }),
+    (attr) => ({ attr, value: Reflect.get(this, attr) }),
   ));
   return this;
 }

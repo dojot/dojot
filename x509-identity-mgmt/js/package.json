@@ -9,7 +9,7 @@
         "dev": "cross-env NODE_ENV=development node --trace-sync-io index",
         "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request EJBCA_TLS_CLIENT_DIR=./tls EJBCA_CLIENT_USERNAME=ejbcaclient node --inspect-brk --trace-sync-io index",
         "test": "cross-env NODE_ENV=test jest --verbose",
-        "debugtest": "cross-env NODE_ENV=test DEBUG=express:* node --inspect-brk node_modules/.bin/jest --runInBand"
+        "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand"
     },
     "author": {
         "name": "Thiago de Paula Ferreira",
