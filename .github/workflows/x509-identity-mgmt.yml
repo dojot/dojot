@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Build and Push
-        uses: elgohr/Publish-Docker-Github-Action@2.11
+        uses: elgohr/Publish-Docker-Github-Action@2.16
         with:
           name: ${{ steps.get_owner.outputs.owner }}/x509-identity-mgmt
           username: ${{ secrets.DOCKER_USERNAME }}
