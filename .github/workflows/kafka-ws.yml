@@ -68,7 +68,7 @@ jobs:
       uses: actions/checkout@v1
 
     - name: Build and Push
-      uses: elgohr/Publish-Docker-Github-Action@2.11
+      uses: elgohr/Publish-Docker-Github-Action@2.16
       with:
         name: ${{ steps.get_owner.outputs.owner }}/kafka-ws
         username: ${{ secrets.DOCKER_USERNAME }}
@@ -77,4 +77,3 @@ jobs:
         # Label with the built image's commit
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
         # Whether tag will be based in the branch name or in the tag name
-        tag_names: true
