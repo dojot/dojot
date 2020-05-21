@@ -134,6 +134,7 @@ class FTPClient {
         logger.error(`upload: Caught ${filename}: ${error.stack}`, this.tagLogger);
         throw error;
       } else {
+        logger.warn(`upload: Caught ${filename}: ${error.stack}`, this.tagLogger);
         logger.debug('upload: Will retry', this.tagLogger);
         await this.uploadRetry(filename, stream);
       }
