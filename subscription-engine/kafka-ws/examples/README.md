@@ -1,9 +1,9 @@
-# Examples
+# Kafka-ws example with ws clients
 
-## Client
+It is provided a Docker Compose file with the whole environment to see the Kafka-ws in action, including a service that publishes messages to kafka every 10 seconds for two diferents topics (ws.example.test and ws2.example.test) and two ws clients.
 
-Run the service as shown in the [repository main page](../README.md).
-Then, you can run the test client:
+To run this example, type:
+
 ```shell
-node ws_client/Client.js
+docker-compose up
 ```

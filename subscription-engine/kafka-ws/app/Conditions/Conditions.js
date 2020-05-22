@@ -3,12 +3,12 @@
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string} value value to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyGt = (parameter, value, data) => {
-  if (Number(data[parameter]) > value) {
+  if (data[parameter] && Number(data[parameter]) > value) {
     return data;
   }
   return {};
@@ -19,12 +19,12 @@ const applyGt = (parameter, value, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string} value value to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyGte = (parameter, value, data) => {
-  if (Number(data[parameter]) >= value) {
+  if (data[parameter] && Number(data[parameter]) >= value) {
     return data;
   }
   return {};
@@ -36,12 +36,12 @@ const applyGte = (parameter, value, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string} value value to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyLt = (parameter, value, data) => {
-  if (Number(data[parameter]) < value) {
+  if (data[parameter] && Number(data[parameter]) < value) {
     return data;
   }
   return {};
@@ -52,12 +52,12 @@ const applyLt = (parameter, value, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string} value value to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyLte = (parameter, value, data) => {
-  if (Number(data[parameter]) <= value) {
+  if (data[parameter] && Number(data[parameter]) <= value) {
     return data;
   }
   return {};
@@ -69,12 +69,12 @@ const applyLte = (parameter, value, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string} value value to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyEq = (parameter, value, data) => {
-  if (Number(data[parameter]) === value) {
+  if (data[parameter] && Number(data[parameter]) === value) {
     return data;
   }
 
@@ -86,12 +86,12 @@ const applyEq = (parameter, value, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string} value value to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyNeq = (parameter, value, data) => {
-  if (Number(data[parameter]) !== value) {
+  if (data[parameter] && Number(data[parameter]) !== value) {
     return data;
   }
 
@@ -103,13 +103,13 @@ const applyNeq = (parameter, value, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string[]} values values to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyIn = (parameter, values, data) => {
   for (let i = 0; i < values.length; i += 1) {
-    if (data[parameter].toString().match(values[i])) {
+    if (data[parameter] && data[parameter].toString().match(values[i])) {
       return data;
     }
   }
@@ -122,14 +122,14 @@ const applyIn = (parameter, values, data) => {
  *
  * @param {string} parameter parameter that will be analysed
  * @param {string[]} values values to be compared
- * @param {JSON} data the data to be filtered
+ * @param {object} data the data to be filtered
  *
- * @returns {JSON} filtered data.
+ * @returns {object} filtered data.
  */
 const applyNin = (parameter, values, data) => {
   let i = 0;
   for (i = 0; i < values.length; i += 1) {
-    if (data[parameter].toString().match(values[i])) {
+    if (data[parameter] && data[parameter].toString().match(values[i])) {
       break;
     }
   }

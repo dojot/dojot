@@ -3,10 +3,15 @@ module.exports = {
     log_level: process.env.LOG_LEVEL || 'info',
   },
   kafka: {
-    host: process.env.KAFKA_HOSTS || 'kafka:9092',
+    consumer: {
+      kafka: {
+        'group.id': process.env.KAFKA_GROUP_ID || 'kafka-ws',
+        'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+      },
+    },
   },
   server: {
-    host: process.env.KAFKA_WS_HOST || 'localhost',
+    host: process.env.KAFKA_WS_HOST || '0.0.0.0',
     port: parseInt(process.env.KAFKA_WS_PORT, 10) || 8080,
   },
 };

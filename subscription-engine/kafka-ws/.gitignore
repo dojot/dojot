@@ -25,3 +25,6 @@ node_modules/
 
 # Procedurally-generated files
 app/WhereProcessing/Parser.js
+
+# Dependency directories for example
+examples/WSClient/node_modules/

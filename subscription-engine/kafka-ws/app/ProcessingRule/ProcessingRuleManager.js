@@ -1,7 +1,7 @@
 // const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const { logger } = require('@dojot/dojot-module-logger');
 
-const { ProcessingRule } = require('./ProcessingRule');
+const { processingRule } = require('./ProcessingRule');
 const { createFingerprint } = require('../Utils');
 
 
@@ -36,15 +36,9 @@ class ProcessingRuleManager {
       return { rule: this.rules[fingerprint].rule, fingerprint };
     }
 
-    const rule = ProcessingRule(fields, conditions);
-    const consumer = null;
-    // TODO
-    // const consumer = new Consumer({
-    //   'group.id': kafkaTopic,
-    //   'metadata.broker.list': `${Config.kafka.host}:${Config.kafka.port}`,
-    //   'auto.offset.reset': 'beginning',
-    // });
-    this.rules[fingerprint] = { count: 1, rule, consumer };
+    const rule = processingRule(fields, conditions);
+
+    this.rules[fingerprint] = { count: 1, rule };
 
     return { rule, fingerprint };
   }
@@ -55,7 +49,7 @@ class ProcessingRuleManager {
    * @param {string} fingerprint rule identification
    */
   removeRule(fingerprint) {
-    if (this.rules[fingerprint]) {
+    if (this.hasRule(fingerprint)) {
       if (this.rules[fingerprint].count > 1) {
         this.rules[fingerprint] = Object.assign(
           this.rules[fingerprint], { count: this.rules[fingerprint].count - 1 },
@@ -64,6 +58,17 @@ class ProcessingRuleManager {
         delete this.rules[fingerprint];
       }
     }
+  }
+
+  /**
+   * Check whether has the rule
+   *
+   * @param {string} fingerprint rule identification
+   *
+   * @returns {bool} boolean indicating whether has the rule
+   */
+  hasRule(fingerprint) {
+    return (!!this.rules[fingerprint]);
   }
 }
 

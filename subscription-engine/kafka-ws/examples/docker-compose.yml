@@ -1,0 +1,93 @@
+version: '3.7'
+services:
+
+  zookeeper:
+    image: dojot/zookeeper:3.4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka:
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    depends_on:
+      - zookeeper
+    restart: always
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_TOPICS: 'ws.example.test,ws2.example.test'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafkacat-producer:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    restart: always
+    command: /bin/bash -c "/kafkacat-producer.sh"
+    volumes:
+      - ./kafkacat-producer.sh:/kafkacat-producer.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka-ws-example:
+    build:
+      context: ./../
+      dockerfile: ./Dockerfile
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      KAFKA_GROUP_ID: kafka-ws-example2
+      LOG_LEVEL: debug
+      KAFKA_WS_PORT: 5000
+      KAFKA_WS_HOST: 0.0.0.0
+    restart: always
+    ports:
+      - 5000:5000
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    # to dev
+    volumes:
+     - ../app/:/opt/kafka-ws/app/:Z # need to run 'npm run parser:compile' before
+    command: ["npm", "run", "dev"]
+
+  ws-client-sample-0:
+    build:
+      context: ./WSClient/
+      dockerfile: ./Dockerfile
+    environment:
+      WS_HOST: "kafka-ws-example"
+      WS_PORT: 5000
+    depends_on:
+      - kafka-ws-example
+    restart: always
+    command: ["node", "Client.js","0"]
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  ws-client-sample-1:
+    build:
+      context: ./WSClient/
+      dockerfile: ./Dockerfile
+    environment:
+      WS_HOST: "kafka-ws-example"
+      WS_PORT: 5000
+    depends_on:
+      - kafka-ws-example
+    restart: always
+    command: ["node", "Client.js","1"]
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m

@@ -32,26 +32,28 @@
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
-    "jest": "^25.2.7",
-    "nodemon": "^2.0.3"
+    "jest": "^25.5.4",
+    "nodemon": "^2.0.4"
   },
   "dependencies": {
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
-    "@dojot/microservice-sdk": "^0.1.1",
+    "@dojot/microservice-sdk": "^0.1.2",
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
     "flat": "^5.0.0",
     "json-mask": "^1.0.1",
     "lodash": "^4.17.15",
     "moo": "^0.5.1",
-    "nearley": "^2.19.2",
-    "ws": "^7.2.3"
+    "nearley": "^2.19.3",
+    "uuid": "^8.1.0",
+    "ws": "^7.3.0"
   },
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
       "app/**/*.js",
-      "!app/Index.js"
+      "!app/Index.js",
+      "!app/Config.js"
     ],
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
@@ -59,5 +61,8 @@
     ]
   },
   "author": "@eduardogmisiuk",
+  "contributors": [
+    "@mprevide"
+  ],
   "license": "GPL-3.0"
 }

@@ -87,6 +87,8 @@ function isNumber(value) {
   return false;
 }
 
+const isObjectEmpty = (object) => Object.keys(object).length === 0;
+
 module.exports = {
   escapeChars,
   numericOperators,
@@ -94,4 +96,5 @@ module.exports = {
   setOperators,
   createFingerprint,
   isNumber,
+  isObjectEmpty,
 };

@@ -3,12 +3,17 @@ const { logger } = require('@dojot/dojot-module-logger');
 const WebSocket = require('ws');
 const url = require('url');
 
+const { v4: uuidv4 } = require('uuid');
+
 const { WSError } = require('./Errors').Errors;
 const { ErrorCodes } = require('./Errors');
 const { ProcessingRuleManager } = require('./ProcessingRule');
 const { WhereParser } = require('./WhereProcessing');
 
-const TAG = { filename: 'WSServer' };
+const KafkaTopicsCallbacksMgmt = require('./Kafka/KafkaTopicsConsumerCallbacksMgmt');
+const { isObjectEmpty } = require('./Utils');
+
+const TAG = { filename: 'app/WSServer' };
 
 
 /**
@@ -33,7 +38,20 @@ class WSServer {
     logger.info('Initialized ProcessingRuleManager', TAG);
     logger.info('...WebSocket Server initialized', TAG);
 
+    this.kafkaTopicsCallbacksMgmt = new KafkaTopicsCallbacksMgmt();
+
     return Object.seal(this);
+  }
+
+  /**
+   * Inicializes Kafka dependencies
+   */
+  async init() {
+    try {
+      await this.kafkaTopicsCallbacksMgmt.init();
+    } catch (error) {
+      logger.error(`init: Caught ${error.stack}`, TAG);
+    }
   }
 
   /**
@@ -79,26 +97,49 @@ class WSServer {
       return;
     }
 
-    const {
-      fingerprint,
-    } = this.processingRuleManager.addRule(fields, conditions, req.params.topic);
-    // TODO: add Kafka message consumption
+    const { params: { topic: kafkaTopic } } = req;
 
-    ws.on('close', (code, reason) => this.onClose(code, reason, fingerprint));
+    const {
+      rule: filter,
+      fingerprint,
+    } = this.processingRuleManager.addRule(fields, conditions, kafkaTopic);
+
+    // create a unique ID for this instance of ws
+    const idWs = uuidv4();
+
+    // create callback to call the filter and send the message via ws
+    const boundSend = ws.send.bind(ws);
+    this.kafkaTopicsCallbacksMgmt.addCallback(kafkaTopic,
+      idWs,
+      (data) => {
+        try {
+          const objectFiltered = filter(data);
+          // If the filtered object is empty,
+          // it does not send a message to ws
+          if (!isObjectEmpty(objectFiltered)) {
+            boundSend(JSON.stringify(objectFiltered));
+          }
+        } catch (error) {
+          logger.error(`Caught ${error.stack}`, TAG);
+        }
+      });
+
+    ws.on('close', (code, reason) => this.onClose(code, reason, kafkaTopic, fingerprint, idWs));
   }
 
   /**
    * 'close' event callback.
-   *
    * @param {number} code
-   * @param {string} reason
-   * @param {string} fields
-   * @param {string} where
+   * @param {string reason
+   * @param {string} kafkaTopic
+   * @param {string} idWs
    */
-  onClose(code, reason, fingerprint) {
+  onClose(code, reason, kafkaTopic, fingerprint, idWs) {
     logger.debug('Closed connection.', TAG);
     logger.debug(`Code: ${code}\nReason: ${reason}`, TAG);
+
     this.processingRuleManager.removeRule(fingerprint);
+    this.kafkaTopicsCallbacksMgmt.removeCallback(kafkaTopic, idWs);
   }
 }
 

@@ -81,7 +81,7 @@ Retrieving full messages from `device-data` topic:
 
 Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
 ```
-/v1/websocket/device-data?fields=sensor.status,temperature&where=sensor.status=in:failed,stopped
+/v1/websocket/device-data?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the temperature and location:
