@@ -5,8 +5,6 @@ const readline = require('readline');
 const { logger } = require('@dojot/dojot-module-logger');
 const { ejbca: ejbcaCfg } = require('../config');
 
-const fsPromises = fs.promises;
-
 /* SOAP client responsible for communicating with the EJBCA server */
 let ejbcaClient = null;
 
@@ -16,13 +14,13 @@ let creatingEjbcaClient = false;
 
 async function checkSecurityFiles() {
   try {
-    await fsPromises.access(ejbcaCfg.pkcs12, fs.constants.F_OK);
+    await fs.promises.access(ejbcaCfg.pkcs12, fs.constants.F_OK);
   } catch (err) {
     logger.debug(`PKCS#12 binary file not found in: ${ejbcaCfg.pkcs12}`);
     throw err;
   }
   try {
-    await fsPromises.access(ejbcaCfg.pkcs12secret, fs.constants.F_OK);
+    await fs.promises.access(ejbcaCfg.pkcs12secret, fs.constants.F_OK);
   } catch (err) {
     logger.debug(`PKCS#12 passphrase file not found in: ${ejbcaCfg.pkcs12secret}`);
     throw err;
@@ -54,13 +52,13 @@ async function createSoapClient() {
   await checkSecurityFiles();
 
   /* loads PKCS#12 binary file (standard ASN.1 - DER encoding) */
-  const p12Der = await fsPromises.readFile(ejbcaCfg.pkcs12);
+  const p12Der = await fs.promises.readFile(ejbcaCfg.pkcs12);
 
   /* retrieves the PKCS#12 passphrase */
   const passphrase = await getFirstLine(ejbcaCfg.pkcs12secret);
 
   /* loads the trusted CA PEM encoded certificate */
-  const trustedCA = await fsPromises.readFile(ejbcaCfg.trustedCA);
+  const trustedCA = await fs.promises.readFile(ejbcaCfg.trustedCA);
 
   /* Creates a SOAP client based on the WSDL provided by the EJBCA server */
   ejbcaClient = await soap.createClientAsync(ejbcaCfg.wsdl, {

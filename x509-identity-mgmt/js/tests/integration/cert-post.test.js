@@ -8,6 +8,8 @@ const soap = require('soap');
 const readline = require('readline');
 const request = require('supertest');
 const db = require('../../src/db');
+const app = require('../../src/app');
+const { token } = require('../util.test');
 
 const csr = `-----BEGIN CERTIFICATE REQUEST-----
 MIHgMIGIAgEAMCYxJDAiBgNVBAMMG0VDQyBwcmltZTI1NnYxIFRoaWFnbyBUZXN0
@@ -58,9 +60,6 @@ fs.promises = {
   access: jest.fn().mockReturnValue(Promise.resolve(true)),
   readFile: jest.fn().mockReturnValue(Promise.resolve('')),
 };
-
-const app = require('../../src/app');
-const { token } = require('../util.test');
 
 fs.createReadStream.mockReturnValue({
   close: jest.fn().mockReturnValue(true),

@@ -5,8 +5,10 @@ const parseUint = (val) => val && Math.abs(parseInt(val, 10));
 
 /* parse boolean */
 const parseBool = (val, def = false) => {
-  if (val === 'true' || val === 'TRUE' || val === '1') return true;
-  if (val === 'false' || val === 'FALSE' || val === '0') return false;
+  if (typeof val === 'string') {
+    if (val.toUpperCase() === 'TRUE' || val === '1') return true;
+    if (val.toUpperCase() === 'FALSE' || val === '0') return false;
+  }
   return def;
 };
 
@@ -19,7 +21,7 @@ const parseArray = (val) => {
 /* parse regex validator for values in SubjectDN allowed attributes */
 const parseAllowedAttrsRegex = (val) => {
   if (typeof val !== 'string') return undefined;
-  return val.split(',').reduce((obj, attr) => {
+  return val.split(';').reduce((obj, attr) => {
     const keyValue = attr.split('=').map((el) => el.trim());
     const key = keyValue[0];
     const value = new RegExp(keyValue[1]);

@@ -12,21 +12,21 @@ router.route('/trusted-cas')
   })
   /* List Trusted CA Certificates */
   .get((req, res) => {
-    res.send('OK!');
+    res.sendStatus(200);
   });
 
 router.route('/trusted-cas/:caCertificateFingerprint')
   /* Delete Trusted CA Certificate */
   .delete((req, res) => {
-    res.send('OK!');
+    res.sendStatus(204);
   })
   /* Update Trusted CA Certificate */
   .patch(validateUpdTrustedCA(), (req, res) => {
-    res.send('OK!');
+    res.sendStatus(204);
   })
   /* Get Trusted CA Certificate */
   .get((req, res) => {
-    res.send('OK!');
+    res.sendStatus(200);
   });
 
 module.exports = router;
