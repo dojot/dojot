@@ -36,8 +36,6 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
-db.healthCheck.mockResolvedValue(true);
-
 const server = http.createServer(app);
 const req = request(server);
 terminus.setup(server, db, ejbca);
@@ -48,6 +46,8 @@ describe('Service Health Check - GET integrations', () => {
   beforeEach(() => { http.get = originalGet; });
 
   it('should be healthy', () => {
+    db.healthCheck.mockResolvedValue(true);
+
     http.get = jest.fn((url, cb1) => {
       cb1({
         on: jest.fn((event, cb2) => {
@@ -69,6 +69,62 @@ describe('Service Health Check - GET integrations', () => {
           status: 'ok',
           mongodb: 'ok',
           ejbca: 'ok',
+        });
+      });
+  });
+
+  it('should indicate that the MongoDB is not OK', () => {
+    db.healthCheck.mockResolvedValue(false);
+
+    http.get = jest.fn((url, cb1) => {
+      cb1({
+        on: jest.fn((event, cb2) => {
+          if (event === 'data') {
+            cb2('ALLOK');
+          } else {
+            cb2();
+          }
+        }),
+      });
+    });
+
+    return req.get('/healthcheck')
+      .set('Authorization', `Bearer ${token}`)
+      .send()
+      .expect(503)
+      .then((res) => {
+        expect(res.body).toEqual({
+          details: 'Problem connecting to MongoDB',
+          error: 'Problem connecting to MongoDB',
+          status: 'error',
+        });
+      });
+  });
+
+  it('should indicate that the EJBCA is not OK', () => {
+    db.healthCheck.mockResolvedValue(true);
+
+    http.get = jest.fn((url, cb1) => {
+      cb1({
+        on: jest.fn((event, cb2) => {
+          if (event === 'data') {
+            cb2('NOTOK');
+          } else {
+            cb2();
+          }
+        }),
+      });
+    });
+
+    return req.get('/healthcheck')
+      .set('Authorization', `Bearer ${token}`)
+      .send()
+      .expect(503)
+      .then((res) => {
+        expect(res.body).toEqual({
+          details: 'Problem with the EJBCA server',
+          error: 'Problem with the EJBCA server',
+          status: 'error',
         });
       });
   });

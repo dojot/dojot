@@ -109,4 +109,17 @@ describe('X509 Certificates - POST integrations', () => {
           expect(res.body).toEqual(resp);
         });
     });
+
+  it('should say that the operation is not yet available',
+    () => req.post('/v1/x509-certificates')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
+      })
+      .expect(404)
+      .then((res) => {
+        expect(res.body).toEqual({
+          message: 'This operation is not available yet',
+        });
+      }));
 });

@@ -33,4 +33,24 @@ describe('X509 Certificates - PATCH integrations', () => {
           expect(res.body).toEqual({});
         });
     });
+
+  it('should not find any certificate to patch',
+    () => {
+      const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
+      db.certificate.model.exec.mockResolvedValue(null);
+
+      return req.patch(`/v1/x509-certificates/${fingerprint}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          belongsTo: {
+            application: 'kafka-consumer',
+          },
+        })
+        .expect(404)
+        .then((res) => {
+          expect(res.body).toEqual({
+            message: `No records found for the following parameters: {"fingerprint":"${fingerprint}","tenant":"admin"}`,
+          });
+        });
+    });
 });

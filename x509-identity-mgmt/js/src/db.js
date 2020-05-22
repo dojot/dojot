@@ -41,7 +41,7 @@ certificateSchema.index({ tenant: 1, fingerprint: 1 });
 
 const connect = () => {
   logger.info('Establishing connection with MongoDB');
-  mongoose.connect(connCfg.uri, connCfg.options)
+  return mongoose.connect(connCfg.uri, connCfg.options)
     .catch((err) => {
       logger.error(`Mongoose connect() failed with error: ${err.message}`);
     });
