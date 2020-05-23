@@ -1,9 +1,27 @@
 
 const express = require('express');
 
+const HttpStatus = require('http-status-codes');
+
+const service = require('../services/trusted-cas-service');
+
 const { validateNewTrustedCA, validateUpdTrustedCA } = require('../core/schema-validator');
 
 const router = express.Router();
+
+router.route('/ca')
+  /* Root CA Certificate */
+  .get(async (req, res) => {
+    const result = await service.getRootCertificate();
+    res.status(HttpStatus.OK).json(result);
+  });
+
+router.route('/ca/crl')
+  /* Latest CRL issued by the Root CA */
+  .get(async (req, res) => {
+    const result = await service.getRootCRL();
+    res.status(HttpStatus.OK).json(result);
+  });
 
 router.route('/trusted-cas')
   /* Register Trusted CA Certificate */

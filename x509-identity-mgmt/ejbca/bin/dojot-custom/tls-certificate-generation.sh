@@ -175,6 +175,7 @@ function setupClientTLSRoleMember() {
         ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/administrator/" --state 'ACCEPT'
         ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/ca/${DEVICES_CA}/" --state 'ACCEPT'
         ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/ca_functionality/create_certificate/" --state 'ACCEPT'
+        ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/ca_functionality/create_crl/" --state 'ACCEPT'
         ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/endentityprofilesrules/${DEVICES_ENTITY_PROFILE}/create_end_entity/" --state 'ACCEPT'
         ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/endentityprofilesrules/${DEVICES_ENTITY_PROFILE}/edit_end_entity/" --state 'ACCEPT'
         ejbca_cmd roles changerule --name "${EJBCA_CLIENT_ROLE}" --rule "/endentityprofilesrules/${DEVICES_ENTITY_PROFILE}/revoke_end_entity/" --state 'ACCEPT'

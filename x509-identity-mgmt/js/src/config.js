@@ -122,6 +122,12 @@ module.exports = {
     trustedCA: (process.env.EJBCA_TLS_CLIENT_DIR
       ? `${process.env.EJBCA_TLS_CLIENT_DIR}/${process.env.EJBCA_CLIENT_USERNAME}-trustedca.pem`
       : '/opt/tls/ejbcaclient-trustedca.pem'),
+
+    forceCRLCreation: parseBool(process.env.EJBCA_CRL_FORCE_CREATION),
+
+    rootCA: process.env.EJBCA_DEVICES_CA || 'X509 Identity CA',
+
+    innerRootCA: process.env.EJBCA_SERVICES_CA || 'Services CA',
   },
 
   /* Settings related to certificate control */

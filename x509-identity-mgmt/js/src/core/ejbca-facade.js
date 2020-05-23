@@ -199,13 +199,13 @@ const facade = {
      * it will be added otherwise it will be overwritten.
      * Status is automatically set to STATUS_NEW.
      *
-     * Parameters
-     * - userData     : the user
-     * - requestData  : the PKCS10/CRMF/SPKAC/PUBLICKEY request in base64
-     * - requestType  : PKCS10, CRMF, SPKAC or PUBLICKEY request as specified
+     * Parameters:
+     * - userData     = the user
+     * - requestData  = the PKCS10/CRMF/SPKAC/PUBLICKEY request in base64
+     * - requestType  = PKCS10, CRMF, SPKAC or PUBLICKEY request as specified
      *                  by CertificateHelper.CERT_REQ_TYPE_ parameters.
-     * - hardTokenSN  : Hard Token support was dropped since 7.1.0. Use null as this parameter
-     * - responseType : indicating which type of answer that should be returned,
+     * - hardTokenSN  = Hard Token support was dropped since 7.1.0. Use null as this parameter
+     * - responseType = indicating which type of answer that should be returned,
      *                  on of the CertificateHelper.RESPONSETYPE_ parameters.
      *
      * Doc URL:
@@ -252,14 +252,14 @@ const facade = {
      *
      * Revokes a user certificate.
      *
-     * Parameters
-     * - issuerDN      : The issuer field identifies the entity that has signed
+     * Parameters:
+     * - issuerDN      = The issuer field identifies the entity that has signed
      *                   and issued the certificate. The issuer field MUST contain
      *                   a non-empty distinguished name (DN).
-     * - certificateSN : The serial number MUST be a positive integer assigned by
+     * - certificateSN = The serial number MUST be a positive integer assigned by
      *                   the CA to each certificate.
      *                   It MUST be unique for each certificate issued by a given CA.
-     * - reason        : -1, "NOT_REVOKED",           "The Certificate Is Not Revoked"
+     * - reason        = -1, "NOT_REVOKED",           "The Certificate Is Not Revoked"
      *                   0, "UNSPECIFIED",            "Unspecified"
      *                   1, "KEY_COMPROMISE",         "Key Compromise"
      *                   2, "CA_COMPROMISE",          "CA Compromise"
@@ -280,6 +280,101 @@ const facade = {
       arg2: 4, /* Superseded */
     };
     await ejbcaClient.revokeCertAsync(args);
+  },
+
+  async getRootCertificate(caName) {
+    /**
+     * EJBCA SOAP Operation: getLastCAChain
+     *
+     * Retrieves the current certificate chain for a CA.
+     *
+     * Parameters:
+     * - caname = the unique name of the CA whose certificate chain should be returned
+     *
+     * https://download.primekey.se/docs/EJBCA-Enterprise/latest/ws/org/ejbca/core/protocol/ws/client/gen/EjbcaWS.html#getLastCAChain(java.lang.String)
+     */
+    const args = {
+      arg0: caName,
+    };
+
+    /* performs the operation of the SOAP web service and
+     * retrieves the certificate x509 described in ASN1 and encoded in DER.
+     * represented in Base64 so that it could be transferred via web service */
+    const [result] = (await ejbcaClient.getLastCAChainAsync(args));
+
+    /* The EJBCA SOAP web service encodes the certificate in Base64, but stores
+     * it in a byte[] instead of a String, so the Java-XML conversion lib has to
+     * encode the byte[] again in Base64 and this time stores the result in a
+     * String to be able to insert in the response xml. Because of this, it is
+     * necessary to decode the response in Base64 in order to have access to the
+     * certificate encoded in Base64. Somewhat confused and careless by the EJBCA
+     * to encode the certificate in base64 twice... */
+    const certBase64encoded = Buffer.from(result.return.pop().certificateData, 'base64').toString('utf-8');
+
+    /* PEM format is just the DER binary data that has been base64 encoded,
+     * split into 64 character lines, and wrapped between:
+     * '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' */
+    const certPemWrapped = [
+      '-----BEGIN CERTIFICATE-----',
+      certBase64encoded,
+      '-----END CERTIFICATE-----',
+    ].join('\n');
+
+    /* returns the certificate wrapped in PEM format */
+    return certPemWrapped;
+  },
+
+  async getCRL(caname, deltaCRL = false) {
+    if (ejbcaCfg.forceCRLCreation) {
+      /**
+       * EJBCA SOAP Operation: createCRL
+       *
+       * Generates a CRL for the given CA.
+       *
+       * Parameters:
+       * caname = the name in EJBCA of the CA that should have a new CRL generated
+       *
+       * https://download.primekey.se/docs/EJBCA-Enterprise/latest/ws/org/ejbca/core/protocol/ws/client/gen/EjbcaWS.html#createCRL(java.lang.String)
+       */
+      const args1 = {
+        arg0: caname,
+      };
+      await ejbcaClient.createCRLAsync(args1);
+    }
+
+    /**
+     * EJBCA SOAP Operation: getLatestCRL
+     *
+     * Retrieves the latest CRL issued by the given CA.
+     *
+     * Parameters:
+     * - caname   = the name in EJBCA of the CA that issued the desired CRL
+     * - deltaCRL = false to fetch a full CRL, true to fetch a deltaCRL (if issued)
+     *
+     * https://download.primekey.se/docs/EJBCA-Enterprise/latest/ws/org/ejbca/core/protocol/ws/client/gen/EjbcaWS.html#getLatestCRL(java.lang.String,boolean)
+     */
+    const args2 = {
+      arg0: caname,
+      arg1: deltaCRL,
+    };
+
+    /* performs the operation of the SOAP web service and
+     * retrieves the CRL described in ASN1 and encoded in DER.
+     * represented in Base64 so that it could be transferred via web service */
+    const [result] = await ejbcaClient.getLatestCRLAsync(args2);
+    const crlBase64encoded = result.return.match(/.{1,64}/g).join('\n');
+
+    /* PEM format is just the DER binary data that has been base64 encoded,
+     * split into 64 character lines, and wrapped between:
+     * '-----BEGIN X509 CRL-----' and '-----END X509 CRL-----' */
+    const crlPemWrapped = [
+      '-----BEGIN X509 CRL-----',
+      crlBase64encoded,
+      '-----END X509 CRL-----',
+    ].join('\n');
+
+    /* returns the CRL wrapped in PEM format */
+    return crlPemWrapped;
   },
 };
 

@@ -65,8 +65,8 @@ readonly DEVICES_CERT_PROFILE_ID="$(find "${PROFILES_DIR}" -name "certprofile_${
 readonly PKI_VALIDITY=${PKI_VALIDITY:-"30y"} # about 30 years
 readonly DISTNAME_O=${DISTNAME_O:-"dojot IoT Platform"}
 readonly DISTNAME_OU=${DISTNAME_OU:-"Certificate Issuer"}
-readonly DEVICES_CA=${DEVICES_CA:-"X509 Identity CA"}
-readonly SERVICES_CA=${SERVICES_CA:-"Services CA"}
+readonly DEVICES_CA=${EJBCA_DEVICES_CA:-"X509 Identity CA"}
+readonly SERVICES_CA=${EJBCA_SERVICES_CA:-"Services CA"}
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
