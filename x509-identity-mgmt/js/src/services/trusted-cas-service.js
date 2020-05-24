@@ -5,11 +5,11 @@ const { ejbca: ejbcaCfg } = require('../config');
 const { getFingerprint } = require('../core/pki-utils');
 
 async function getRootCertificate() {
-  const certificatePem = await ejbcaFacade.getRootCertificate(ejbcaCfg.rootCA);
+  const caPem = await ejbcaFacade.getRootCertificate(ejbcaCfg.rootCA);
 
-  const certificateFingerprint = getFingerprint(certificatePem);
+  const certificateFingerprint = getFingerprint(caPem);
 
-  return { certificateFingerprint, certificatePem };
+  return { certificateFingerprint, caPem };
 }
 
 async function getRootCRL() {
