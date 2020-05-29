@@ -1,10 +1,15 @@
 -module(dojot_disconnect_plugin).
 
 -behaviour(on_register_hook).
+-behaviour(on_client_offline_hook).
+-behaviour(on_client_gone_hook).
 
--export([on_register/3]).
+-export([on_register/3,
+        on_client_offline/1,
+        on_client_gone/1
+]).
 
-on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName) ->
+on_register(_, {_MountPoint, _ClientId} = SubscriberId, UserName) ->
 
     case clean_sess:is_dojot_user(UserName) of
         is_user ->
@@ -13,3 +18,9 @@ on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, Us
         not_user ->
             ok
     end.
+
+on_client_offline(SubscriberId) ->
+    clean_sess:cancel_timeout(SubscriberId).
+
+on_client_gone(SubscriberId) ->
+    clean_sess:cancel_timeout(SubscriberId).

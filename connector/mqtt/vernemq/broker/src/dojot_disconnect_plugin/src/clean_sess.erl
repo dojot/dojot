@@ -1,4 +1,5 @@
 -module(clean_sess).
+-import(lists,[member/2]). 
 
 % time defined in miliseconds (default 30 min)
 -define(MAX_TIMEOUT, element(1, string:to_integer(os:getenv("PLUGIN_DISC_LIFETIME_SESSION", "1800000")))).
@@ -6,7 +7,8 @@
 -export([
     set_connection_timeout/1,
     disconnect_client/1,
-    is_dojot_user/1
+    is_dojot_user/1,
+    cancel_timeout/1
 ]).
 
 is_dojot_user(Username) ->
@@ -26,5 +28,22 @@ disconnect_client(SubId) ->
     vernemq_dev_api:disconnect_by_subscriber_id(SubId, []).
 
 set_connection_timeout(SubId) ->
-    timer:apply_after(?MAX_TIMEOUT, ?MODULE, disconnect_client, [SubId]),
+
+    case member(?MODULE, ets:all()) of
+        false ->
+            ets:new(?MODULE, [ set, public, named_table])
+    end,
+    
+    TableId = ets:whereis(?MODULE),
+    { _, Tref } = timer:apply_after(?MAX_TIMEOUT, ?MODULE, disconnect_client, [SubId]),       
+    { _, ClientId } = SubId,
+    ets:insert(TableId, { ClientId, Tref }),
+    ok.
+
+cancel_timeout(SubId) ->
+    error_logger:info_msg("Cancel timeout due to disconnect: ~p ~n", [SubId]),
+    TableId = ets:whereis(?MODULE),
+    { _, ClientId } = SubId,
+    timerId = ets:match(TableId, ClientId),
+    timer:cancel(timerId),
     ok.

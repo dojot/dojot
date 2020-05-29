@@ -14,7 +14,9 @@
          %%  {ModuleName, HookName, Arity, Opts}
          {vmq_plugin_hooks,
           [
-           {dojot_disconnect_plugin, on_register, 3, []}
+           {dojot_disconnect_plugin, on_register, 3, []},
+           {dojot_disconnect_plugin, on_client_offline, 1, []},
+           {dojot_disconnect_plugin, on_client_gone, 1, []}
           ]}
         ]}
  ]}.
