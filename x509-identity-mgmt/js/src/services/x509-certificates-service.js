@@ -17,7 +17,10 @@ async function generateCertificate({ csr: csrPem, belongsTo }, tenant) {
 
   checkPublicKey(csr.subjectPublicKeyInfo);
 
-  const subjectDN = DN.from(csr.subject).verify().stringify();
+  const subjectDN = DN.from(csr.subject)
+    .verify()
+    .cnamePrefix(tenant)
+    .stringify();
 
   const certificatePem = await ejbcaFacade.generateCertificate(
     subjectDN, certCfg.validity, csrPem,

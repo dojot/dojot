@@ -164,6 +164,14 @@ function stringify() {
   ).join(', ');
 }
 
+function cnamePrefix(prefix) {
+  if (typeof prefix === 'string' && Reflect.has(this, 'CN')) {
+    const cname = Reflect.get(this, 'CN');
+    Reflect.set(this, 'CN', `${prefix}:${cname}`);
+  }
+  return this;
+}
+
 /**
  * Generates a DN object from a sequence of Relative Distinguished Names.
  * @param {pkijs.RelativeDistinguishedNames} relativeDNs - https://tools.ietf.org/html/rfc5280#section-4.1.2.4
@@ -185,6 +193,7 @@ function from(relativeDNs) {
       ...constantAttrs,
       verify,
       stringify,
+      cnamePrefix,
     },
   );
 }
