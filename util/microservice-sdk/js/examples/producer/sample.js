@@ -6,6 +6,9 @@ const { Logger, Kafka: { Producer } } = require('../index.js');
 // Add a console transport
 Logger.setTransport('console', { level: 'debug' });
 
+// Enable verbose mode
+Logger.setVerbose(true);
+
 // Instantiate a logger wrapper for the application
 const logger = new Logger('sample-producer');
 
@@ -40,5 +43,5 @@ const logger = new Logger('sample-producer');
   await producer.disconnect();
   logger.debug('Producer is disconnected');
 })().catch((error) => {
-  logger.errorv(`Caught an error: ${error.stack || error}`);
+  logger.error(`Caught an error: ${error.stack || error}`);
 });

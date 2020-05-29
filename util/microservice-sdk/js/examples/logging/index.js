@@ -1,4 +1,5 @@
-const { Logger } = require('../index.js');
+const { Logger } = require('@dojot/microservice-sdk');
+const { logSampleMessages } = require('./SampleModule');
 
 // By default, no transport is enabled; so you need to
 // set at least one before to log the messages.
@@ -43,42 +44,16 @@ Logger.setTransport('file', {
   filename: 'sample-app-%DATE%.log',
 });
 
-// Instantiate a logger with the service/module name
-const logger = new Logger('sample-app');
+// Instantiate a logger for the main application
+// No package/custom name is given, so it'll get
+// the package name 'sample-logging-app' from the
+// package.json.
+const logger = new Logger();
+logger.info('Started sample logging application ...');
 
 setInterval(() => {
-  // log simple message with different logging levels
-  logger.debug('message #1');
-  logger.info('message #2');
-  logger.warn('message #3');
-  logger.error('message #4');
-
-  // log message with filename and line metadata (verbose mode)
-  logger.debugv('message #5');
-  logger.infov('message #6');
-  logger.warnv('message #7');
-  logger.errorv('message #8');
-
-  // log message with additional metadata
-  // you can also use the verbose version
-  logger.debug('message #9', {
-    rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d',
-    src_ip: '192.168.127.99',
-    tenant: 'admin',
-  });
-  logger.info('message #10', {
-    rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d',
-    src_ip: '192.168.127.99',
-    tenant: 'admin',
-  });
-  logger.warn('message #11', {
-    rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d',
-    src_ip: '192.168.127.99',
-    tenant: 'admin',
-  });
-  logger.error('message #12', {
-    rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d',
-    src_ip: '192.168.127.99',
-    tenant: 'admin',
-  });
+  logger.info('Changing logging verbose mode ...');
+  Logger.setVerbose(!Logger.getVerbose());
+  logger.info('Logging sample messages ...');
+  logSampleMessages();
 }, 5000);

@@ -152,7 +152,7 @@ module.exports = class Consumer {
       // register handler for kafka events
       // error
       this.consumer.on('event.error', (event) => {
-        logger.warnv(`Kafka event.error: ${event}`);
+        logger.warn(`Kafka event.error: ${event}`);
       });
       // data
       this.consumer.on('data', this.onData.bind(this));
@@ -170,7 +170,7 @@ module.exports = class Consumer {
       // connect to kafka
       this.consumer.connect(undefined, (error) => {
         if (error) {
-          logger.errorv(`Error on connect: ${error}`);
+          logger.error(`Error on connect: ${error}`);
           reject(error);
         }
       });
@@ -328,7 +328,7 @@ module.exports = class Consumer {
           }
           this.isWaitingForRefreshSubscriptions = false;
         } catch (error) {
-          logger.warnv(`Error while subscribing: ${error}`);
+          logger.warn(`Error while subscribing: ${error}`);
           // schedules the next retry
           const timeout = this.backoffWithRandomDelta(retries);
           setTimeout(
@@ -369,7 +369,7 @@ module.exports = class Consumer {
       this.consumer.unassign();
       this.commitManager.onRebalance();
     } else {
-      logger.warnv(`Rebalance error : ${error}`);
+      logger.warn(`Rebalance error : ${error}`);
     }
   }
 
@@ -433,7 +433,7 @@ module.exports = class Consumer {
           try {
             await entry.callback(data);
           } catch (error) {
-            logger.warnv(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`);
+            logger.warn(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`);
           }
         }
       });
@@ -448,11 +448,11 @@ module.exports = class Consumer {
         try {
           await entry.callback(data);
         } catch (error) {
-          logger.warnv(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`);
+          logger.warn(`Error on user's callback ${entry.id} topic: ${data.topic}: ${error}`);
         }
       });
     } catch (error) {
-      logger.warnv(`Error during handle message calling: ${error}`);
+      logger.war(`Error during handle message calling: ${error}`);
     } finally {
       // successful or not the processing has been finalized
       this.commitManager.notifyFinishedProcessing(data);

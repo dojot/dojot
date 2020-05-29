@@ -171,7 +171,7 @@ module.exports = class CommitManager {
 
       return Promise.resolve();
     } catch (error) {
-      logger.warnv(`Failed on committing offsets. ${error}`);
+      logger.warn(`Failed on committing offsets. ${error}`);
       return Promise.reject(error);
     }
   }

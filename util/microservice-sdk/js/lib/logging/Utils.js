@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 /**
  * @overview Internal utility functions for being used in the logging module.
  */
@@ -39,8 +42,8 @@ function extractFileAndLineFromStack(index) {
  * @param {string} message log message with line and number info.
  */
 function addFileAndLineToMetadata(metadata) {
-  // Probably the logging call is at index 1 of the call stack
-  const stackInfo = extractFileAndLineFromStack(1);
+  // Probably the logging call is at index 2 of the call stack
+  const stackInfo = extractFileAndLineFromStack(2);
   if (stackInfo) {
     const newMetadata = metadata;
     newMetadata.file = stackInfo.file;
@@ -50,6 +53,27 @@ function addFileAndLineToMetadata(metadata) {
   return metadata;
 }
 
+function getRootPackageName() {
+  // 1) if the application starts with 'npm start', it will get the
+  // package name from the env
+  let rootPackageName = process.env.npm_package_name;
+
+  // 2) try to locate the root package.json in the directory
+  // where the main application is running
+  if (!rootPackageName) {
+    const pjsonDir = path.dirname(require.main.filename);
+    const pjsonPath = path.join(pjsonDir, 'package.json');
+    try {
+      const pjsonObj = JSON.parse(fs.readFileSync(pjsonPath));
+      rootPackageName = pjsonObj.name;
+    } catch (err) {
+      rootPackageName = null;
+    }
+  }
+
+  return rootPackageName;
+}
+
 module.exports = {
-  addFileAndLineToMetadata,
+  addFileAndLineToMetadata, getRootPackageName,
 };

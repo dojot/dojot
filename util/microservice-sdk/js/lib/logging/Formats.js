@@ -8,15 +8,14 @@ const jsonStringify = require('fast-safe-stringify');
 const { sdkLevels } = require('./Levels');
 
 // text format
-// ts -- sid -- LEVEL: [rid] message (file:line) {extra}
+// ts -- sid -- LEVEL: (file:line) [rid] message {extra}
 // where:
 // ts: timestamp in ISO format
 // sid: service identification
-// rid: request identification (optional metadata)
 // level: error, warn, info or debug
+// (file:line): file and line of the log message (optional metadata)
 // [rid]: request identifier (optional metadata)
 // message: message in string format
-// (file:line): file and line of the log message (optional metadata)
 // extra: any additional data - user specific (optional metadada)
 const textFormat = winston.format.combine(
   winston.format.timestamp(),
@@ -41,9 +40,9 @@ const textFormat = winston.format.combine(
 
     // text to be logged
     const text = `${info.timestamp} -- ${info.sid} -- ${info.level}:${
+      (info.file && info.line) ? ` (${info.file}:${info.line})` : ''}${
       info.rid ? ` [${info.rid}]` : ''} ${
       info.message}${
-      (info.file && info.line) ? ` (${info.file}:${info.line})` : ''}${
       (stringifiedExtra !== '{}') ? ` ${stringifiedExtra}` : ''}`;
 
     return text;
@@ -64,7 +63,6 @@ const textFormat = winston.format.combine(
 // }
 // ts: timestamp in unix format
 // sid: service identification
-// rid: request identification (optional metadata)
 // level: error, warn, info or debug
 // rid: request identifier (optional metadata)
 // message: message in string format

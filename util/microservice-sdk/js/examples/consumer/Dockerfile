@@ -18,11 +18,11 @@ RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-he
 COPY package.json package.json
 COPY npm-shrinkwrap.json npm-shrinkwrap.json
 
+RUN npm install
+
 COPY lib ./lib
 COPY index.js index.js
 COPY examples/consumer/sample.js ./app/sample.js
-
-RUN npm install
 
 FROM node:10.16.3-alpine
 

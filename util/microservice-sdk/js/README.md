@@ -16,21 +16,20 @@ library. It supports logging messages to both 'console' and 'file' which is rota
 The messages are logged in the 'console' using the following format:
 
 ```bash
-ts -- sid -- LEVEL: [rid] message (file:line) {extra}
+ts -- sid -- LEVEL: (file:line) [rid] message {extra}
 ```
 
 Where:
 
 * ts: timestamp in ISO format
 * sid: service identification
-* rid: request identification (optional metadata)
 * level: error, warn, info or debug
+* (file:line): file and line of the log message (optional metadata)
 * [rid]: request identifier (optional metadata)
 * message: message in string format
-* (file:line): file and line of the log message (optional metadata)
-* extra: any additional data - user specific (optional metadada)
+* extra: any additional data aggregated in an object - user specific (optional metadada)
 
-The messages are logged in the 'file' using the following format:
+The messages are logged in the 'file' using the following json format:
 
 ```js
 {
@@ -49,13 +48,12 @@ Where:
 
 * ts: timestamp in unix format
 * sid: service identification
-* rid: request identification (optional metadata)
 * level: error, warn, info or debug
 * rid: request identifier (optional metadata)
 * message: message in string format
-* fine: file of the log message (optional metadata)
+* file: file of the log message (optional metadata)
 * line: line of the log message (optional metadata)
-* extra: any additional data - user specific (optional metadada)
+* extra: any additional data aggregated in an object - user specific (optional metadada)
 
 The transports ('console' and 'file') are shared by all instances of the wrapper. So,
 any change in the transports will affect all instances.
@@ -63,7 +61,7 @@ any change in the transports will affect all instances.
 By default, no transport is set, so it is necessary to do this as part of the configuration
 or initialization of the microservice.
 
-It is usage is very simple and is shown by the following example:
+It's usage is very simple and is shown by the following example:
 
 ```js
 const { Logger } = require('@dojot/microservice-sdk');
@@ -111,7 +109,15 @@ Logger.setTransport('file', {
   filename: 'sample-app-%DATE%.log',
 });
 
-// Instantiate a logger with the service/module name
+// Enables the verbose mode. This should be avoided in
+// production and only used for debugging purposes.
+// When enabled, file:line information is added to each
+// logging message
+Logger.setVerbose(true);
+
+// Instantiate a logger with a custom service/module name
+// If no name is given, it tries to discover the package name
+// defined in the package.json
 const logger = new Logger('sample-app');
 
 // log message with different logging levels
@@ -120,14 +126,7 @@ logger.info('message #2');
 logger.warn('message #3');
 logger.error('message #4');
 
-// log message with filename and line metadata (verbose mode)
-logger.debugv('message #5');
-logger.infov('message #6');
-logger.warnv('message #7');
-logger.errorv('message #8');
-
-// log message with additional metadata
-// you can also use the verbose version
+// log message with additional (service-specific) metadata
 logger.debug('message #9', { rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d', src_ip: '192.168.127.99'});
 logger.info('message #10', { rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d', src_ip: '192.168.127.99'});
 logger.warn('message #11', { rid: '7e921802-aa06-46c7-b4ba-1f6c2812d01d', src_ip: '192.168.127.99'});

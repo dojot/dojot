@@ -51,17 +51,17 @@ jest.mock('winston-daily-rotate-file');
 // include libraries
 const winston = require('winston');
 
-const { Logger, wlogger } = require('../../../lib/logging/Logger');
+const { Logger } = require('../../../lib/logging/Logger');
 const { textFormat, jsonFormat } = require('../../../lib/logging/Formats');
 
 // setup
 // teardown
 afterEach(() => {
-  wlogger.transports = {
+  Logger.sharedLogger.transports = {
     console: null,
     file: null,
   };
-  wlogger.logger.transports = {
+  Logger.sharedLogger.wlogger.transports = {
     console: { level: null },
     file: { level: null },
   };
@@ -86,7 +86,7 @@ describe('Logger configuration', () => {
         format: textFormat,
       }),
     );
-    expect(wlogger.logger.add.mock.calls.length).toBe(1);
+    expect(Logger.sharedLogger.wlogger.add.mock.calls.length).toBe(1);
     expect(Logger.isTransportSet('console')).toBeTruthy();
   });
 
@@ -105,7 +105,7 @@ describe('Logger configuration', () => {
         format: jsonFormat,
       }),
     );
-    expect(wlogger.logger.add.mock.calls.length).toBe(1);
+    expect(Logger.sharedLogger.wlogger.add.mock.calls.length).toBe(1);
     expect(Logger.isTransportSet('file')).toBeTruthy();
   });
 
@@ -123,7 +123,7 @@ describe('Logger configuration', () => {
     Logger.unsetTransport('file');
 
     // expected
-    expect(wlogger.logger.remove.mock.calls.length).toBe(2);
+    expect(Logger.sharedLogger.wlogger.remove.mock.calls.length).toBe(2);
     expect(Logger.isTransportSet('console')).toBeFalsy();
     expect(Logger.isTransportSet('file')).toBeFalsy();
   });
@@ -210,19 +210,27 @@ describe('Logger configuration', () => {
 
     // change console level to debug
     Logger.setLevel('console', 'debug');
-    expect(wlogger.transports.console.level).toBe('debug');
+    expect(Logger.sharedLogger.transports.console.level).toBe('debug');
+    Logger.setLevel('console', 'DEBUG');
+    expect(Logger.sharedLogger.transports.console.level).toBe('debug');
 
     // change console level to info
     Logger.setLevel('console', 'info');
-    expect(wlogger.transports.console.level).toBe('info');
+    expect(Logger.sharedLogger.transports.console.level).toBe('info');
+    Logger.setLevel('console', 'INFO');
+    expect(Logger.sharedLogger.transports.console.level).toBe('info');
 
     // change console level to warn
     Logger.setLevel('console', 'warn');
-    expect(wlogger.transports.console.level).toBe('warn');
+    expect(Logger.sharedLogger.transports.console.level).toBe('warn');
+    Logger.setLevel('console', 'WARN');
+    expect(Logger.sharedLogger.transports.console.level).toBe('warn');
 
     // change console level to error
     Logger.setLevel('console', 'error');
-    expect(wlogger.transports.console.level).toBe('error');
+    expect(Logger.sharedLogger.transports.console.level).toBe('error');
+    Logger.setLevel('console', 'ERROR');
+    expect(Logger.sharedLogger.transports.console.level).toBe('error');
   });
 
   test('Set a valid logging level - file', () => {
@@ -231,19 +239,27 @@ describe('Logger configuration', () => {
 
     // change file level to debug
     Logger.setLevel('file', 'debug');
-    expect(wlogger.transports.file.level).toBe('debug');
+    expect(Logger.sharedLogger.transports.file.level).toBe('debug');
+    Logger.setLevel('file', 'DEBUG');
+    expect(Logger.sharedLogger.transports.file.level).toBe('debug');
 
     // change file level to info
     Logger.setLevel('file', 'info');
-    expect(wlogger.transports.file.level).toBe('info');
+    expect(Logger.sharedLogger.transports.file.level).toBe('info');
+    Logger.setLevel('file', 'INFO');
+    expect(Logger.sharedLogger.transports.file.level).toBe('info');
 
     // change file level to warn
     Logger.setLevel('file', 'warn');
-    expect(wlogger.transports.file.level).toBe('warn');
+    expect(Logger.sharedLogger.transports.file.level).toBe('warn');
+    Logger.setLevel('file', 'WARN');
+    expect(Logger.sharedLogger.transports.file.level).toBe('warn');
 
     // change file level to error
     Logger.setLevel('file', 'error');
-    expect(wlogger.transports.file.level).toBe('error');
+    expect(Logger.sharedLogger.transports.file.level).toBe('error');
+    Logger.setLevel('file', 'ERROR');
+    expect(Logger.sharedLogger.transports.file.level).toBe('error');
   });
 
   test('Set logging level with invalid parameter - level', () => {
@@ -296,6 +312,45 @@ describe('Logger configuration', () => {
       Logger.setLevel('file', 'error');
     }).toThrow('Transport has\'nt been set.');
   });
+
+  test('Enable verbose mode', () => {
+    // set verbose = true
+    Logger.setVerbose(true);
+    expect(Logger.sharedLogger.verbose).toBe(true);
+  });
+
+  test('Disable verbose mode', () => {
+    // set verbose = false
+    Logger.setVerbose(false);
+    expect(Logger.sharedLogger.verbose).toBe(false);
+  });
+
+  test('Getting verbose mode', () => {
+    // verbose = false
+    Logger.sharedLogger.verbose = false;
+    expect(Logger.getVerbose()).toBe(false);
+
+    // verbose = true
+    Logger.sharedLogger.verbose = true;
+    expect(Logger.getVerbose()).toBe(true);
+  });
+
+  test('Trying to set verbose mode with invalid parameter', () => {
+    // no parameter
+    expect(() => {
+      Logger.setVerbose();
+    }).toThrow('The parameter enable must be a boolean.');
+
+    // number
+    expect(() => {
+      Logger.setVerbose(1);
+    }).toThrow('The parameter enable must be a boolean.');
+
+    // string
+    expect(() => {
+      Logger.setVerbose('true');
+    }).toThrow('The parameter enable must be a boolean.');
+  });
 });
 
 describe('Logger wrapper instantiation', () => {
@@ -303,8 +358,8 @@ describe('Logger wrapper instantiation', () => {
     const logger = new Logger('microservice-sdk');
 
     // expected
-    expect(wlogger.logger.child.mock.calls.length).toBe(1);
-    expect(wlogger.logger.child).toBeCalledWith({ sid: 'microservice-sdk' });
+    expect(Logger.sharedLogger.wlogger.child.mock.calls.length).toBe(1);
+    expect(Logger.sharedLogger.wlogger.child).toBeCalledWith({ sid: 'microservice-sdk' });
     expect(logger.logger).toBeDefined();
   });
 
@@ -323,8 +378,11 @@ describe('Logger wrapper instantiation', () => {
   });
 });
 
-describe('Logging messages', () => {
-  test('Log error messages w/o file and line metadata', () => {
+describe('Logging messages (verbose mode: disabled)', () => {
+  // setup
+  beforeEach(() => Logger.setVerbose(false));
+
+  test('Log error messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
@@ -346,7 +404,7 @@ describe('Logging messages', () => {
       }));
   });
 
-  test('Log warning messages w/o file and line metadata', () => {
+  test('Log warning messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
@@ -368,7 +426,7 @@ describe('Logging messages', () => {
       }));
   });
 
-  test('Log info messages w/o file and line metadata', () => {
+  test('Log info messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
@@ -390,7 +448,7 @@ describe('Logging messages', () => {
       }));
   });
 
-  test('Log debug messages w/o file and line metadata', () => {
+  test('Log debug messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
@@ -411,14 +469,19 @@ describe('Logging messages', () => {
         file: expect.any(String),
       }));
   });
+});
 
-  test('Log error messages with file and line metadata', () => {
+describe('Logging messages (verbose mode: enabled)', () => {
+  // setup
+  beforeEach(() => Logger.setVerbose(true));
+
+  test('Log error messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
     // log error messages
-    logger.errorv('message #1');
-    logger.errorv('message #2', { rid: '1' });
+    logger.error('message #1');
+    logger.error('message #2', { rid: '1' });
 
     // expected
     expect(logger.logger.error.mock.calls.length).toBe(2);
@@ -434,13 +497,13 @@ describe('Logging messages', () => {
       }));
   });
 
-  test('Log warning messages with file and line metadata', () => {
+  test('Log warning messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
     // log warning messages
-    logger.warnv('message #1');
-    logger.warnv('message #2', { rid: '1' });
+    logger.warn('message #1');
+    logger.warn('message #2', { rid: '1' });
 
     // expected
     expect(logger.logger.warn.mock.calls.length).toBe(2);
@@ -456,13 +519,13 @@ describe('Logging messages', () => {
       }));
   });
 
-  test('Log info messages with file and line metadata', () => {
+  test('Log info messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
     // log info messages
-    logger.infov('message #1');
-    logger.infov('message #2', { rid: '1' });
+    logger.info('message #1');
+    logger.info('message #2', { rid: '1' });
 
     // expected
     expect(logger.logger.info.mock.calls.length).toBe(2);
@@ -478,13 +541,13 @@ describe('Logging messages', () => {
       }));
   });
 
-  test('Log debug messages with file and line metadata', () => {
+  test('Log debug messages', () => {
     // instantiate
     const logger = new Logger('microservice-sdk');
 
     // log debug messages
-    logger.debugv('message #1');
-    logger.debugv('message #2', { rid: '1' });
+    logger.debug('message #1');
+    logger.debug('message #2', { rid: '1' });
 
     // expected
     expect(logger.logger.debug.mock.calls.length).toBe(2);

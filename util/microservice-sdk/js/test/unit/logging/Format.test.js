@@ -56,7 +56,7 @@ describe('Text logging format', () => {
     // resulting message
     // timestamp -- sid -- level: [rid] message
     expect(textFormat.transform(info)[MESSAGE])
-      .toMatch(/.* -- microservice-sdk -- .*error.*: \[1\] .*Message #1.*\(xyz.js:123\)/);
+      .toMatch(/.* -- microservice-sdk -- .*error.*: \(xyz.js:123\) \[1\].*Message #1.*/);
   });
 
   test('Message with rid and extra metadata', () => {

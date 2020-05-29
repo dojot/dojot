@@ -4,6 +4,9 @@ const { Logger, Kafka: { Consumer } } = require('../index.js');
 // Add a console transport
 Logger.setTransport('console', { level: 'debug' });
 
+// Enable verbose mode
+Logger.setVerbose(true);
+
 // instantiate a logger wrapper for the application
 const logger = new Logger('sample-consumer');
 
@@ -26,5 +29,5 @@ consumer.init().then(() => {
     logger.debug(`Payload: ${payload.toString()}`);
   });
 }).catch((error) => {
-  logger.errorv(`Caught an error: ${error.stack || error}`);
+  logger.error(`Caught an error: ${error.stack || error}`);
 });

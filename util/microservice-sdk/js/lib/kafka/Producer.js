@@ -128,13 +128,13 @@ class Producer {
       // register handler for kafka events
       // error
       this.producer.on('event.error', (event) => {
-        logger.warnv(`Kafka event.error: ${event}`);
+        logger.warn(`Kafka event.error: ${event}`);
       });
 
       // connect to kafka
       this.producer.connect(undefined, (error) => {
         if (error) {
-          logger.errorv(`Error on connect: ${error}`);
+          logger.error(`Error on connect: ${error}`);
           reject(error);
         }
       });
@@ -215,14 +215,14 @@ class Producer {
         logger.debug('... all messages were flushed.');
 
         const timeoutTrigger = setTimeout(() => {
-          logger.errorv('Unable to disconnect the producer. Timed out.');
+          logger.error('Unable to disconnect the producer. Timed out.');
           return reject(new Error('disconnection timeout'));
         }, this.config['producer.disconnect.timeout.ms']);
 
         return this.producer.disconnect((err) => {
           clearTimeout(timeoutTrigger);
           if (err) {
-            logger.errorv(`Error while disconnecting producer: ${err}`);
+            logger.error(`Error while disconnecting producer: ${err}`);
             return reject(err);
           }
           logger.debug('Successfully disconnected producer from Kafka.');

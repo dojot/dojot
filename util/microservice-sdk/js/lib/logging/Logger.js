@@ -3,26 +3,9 @@
  *
  */
 const winston = require('winston');
-const { addFileAndLineToMetadata } = require('./Utils');
+const { addFileAndLineToMetadata, getRootPackageName } = require('./Utils');
 const { sdkLevels, isLevelValid } = require('./Levels');
 const { isTransportValid, createWinstonTransport } = require('./Transports');
-
-// Internal winston logger shared by all instances of the logger wrapper.
-// This could be a static property of the wrapper, but es6 doesn't support that.
-const wlogger = {
-  // Winston transports set to the logger
-  transports: {
-    console: null,
-    file: null,
-  },
-  // Winston logger
-  logger: winston.createLogger({
-    // exitOnError: if false, handled exceptions will not cause process.exit
-    exitOnError: false,
-    // custom levels: error, warn, info, debug
-    levels: sdkLevels.levels,
-  }),
-};
 
 // Logger wrapper over the shared winston logger instance
 class Logger {
@@ -31,19 +14,27 @@ class Logger {
    * Creates a child logger for the given service/module from
    * a shared winston logger instance.
    *
-   * @param { string } sid service/module identification.
+   * @param { string } sid service/module identification. If not given,
+   * it'll try to get from the root package.json.
    */
   constructor(sid) {
-    // parameters validation
-    if (typeof sid !== 'string') {
+    let tmpSid = sid;
+
+    // if not defined, it'll try to get from the package.json,
+    // otherwise, it'll validate whether the given string is not empty
+    if (typeof tmpSid === 'undefined') {
+      tmpSid = getRootPackageName();
+      if (!tmpSid) {
+        throw new Error('Cannot discover the package name.');
+      }
+    } else if (typeof tmpSid !== 'string') {
       throw new Error('The sid must be a string value.');
-    }
-    if (sid === '') {
+    } else if (tmpSid === '') {
       throw new Error('The sid must be a non-empty string.');
     }
 
     // creates a child logger
-    this.logger = wlogger.logger.child({ sid });
+    this.logger = Logger.sharedLogger.wlogger.child({ sid: tmpSid });
   }
 
   /**
@@ -56,17 +47,25 @@ class Logger {
    * or 'debug'.
    */
   static setLevel(transport, level) {
+    let levelLower;
+
     // validate parameters
     if (!isTransportValid(transport)) {
       throw new Error('The transport value is not valid.');
     }
-    if (!isLevelValid(level)) {
+    // force lower case for logging level
+    try {
+      levelLower = level.toLowerCase();
+    } catch (error) {
+      throw new Error('The level value is not valid.');
+    }
+    if (!isLevelValid(levelLower)) {
       throw new Error('The level value is not valid.');
     }
 
     // set level
-    if (wlogger.transports[transport]) {
-      wlogger.transports[transport].level = level;
+    if (Logger.sharedLogger.transports[transport]) {
+      Logger.sharedLogger.transports[transport].level = levelLower;
     } else {
       throw new Error('Transport has\'nt been set.');
     }
@@ -86,7 +85,7 @@ class Logger {
     }
 
     // checks if it set
-    if (wlogger.transports[transport]) {
+    if (Logger.sharedLogger.transports[transport]) {
       return true;
     }
     return false;
@@ -119,8 +118,8 @@ class Logger {
     const newTransport = createWinstonTransport(transport, config);
 
     // set the new transport
-    wlogger.transports[transport] = newTransport;
-    wlogger.logger.add(wlogger.transports[transport]);
+    Logger.sharedLogger.transports[transport] = newTransport;
+    Logger.sharedLogger.wlogger.add(Logger.sharedLogger.transports[transport]);
   }
 
   /**
@@ -137,10 +136,38 @@ class Logger {
     }
 
     // remove existing transport
-    if (wlogger.transports[transport]) {
-      wlogger.logger.remove(wlogger.transports[transport]);
-      wlogger.transports[transport] = null;
+    if (Logger.sharedLogger.transports[transport]) {
+      Logger.sharedLogger.wlogger.remove(Logger.sharedLogger.transports[transport]);
+      Logger.sharedLogger.transports[transport] = null;
     }
+  }
+
+  /**
+   * Enables/Disables verbose mode.
+   * In verbose mode, file and line of where the logging method has been
+   * called are added as metadata to the logging message. It should be
+   * avoid in production once it's time and resource consuming.
+   * Only enable verbose mode for debugging purposes.
+   *
+   * @param {*} enable
+   */
+  static setVerbose(enable) {
+    // validate parameters
+    if (typeof enable !== 'boolean') {
+      throw new Error('The parameter enable must be a boolean.');
+    }
+
+    Logger.sharedLogger.verbose = enable;
+  }
+
+  /**
+   * Gets whether the verbose mode is enabled or not.
+   *
+   * @return { boolean } true whether the verbose mode is enabled,
+   * otherwise, false.
+   */
+  static getVerbose() {
+    return Logger.sharedLogger.verbose;
   }
 
   /**
@@ -151,7 +178,7 @@ class Logger {
    * in the final logging message (optional).
    */
   error(message, metadata = {}) {
-    return this.logger.error(message, metadata);
+    return this.logger.error(message, Logger.sharedLogger.handleMetadata(metadata));
   }
 
   /**
@@ -162,7 +189,7 @@ class Logger {
    * in the final logging message (optional).
    */
   warn(message, metadata = {}) {
-    return this.logger.warn(message, metadata);
+    return this.logger.warn(message, Logger.sharedLogger.handleMetadata(metadata));
   }
 
   /**
@@ -173,7 +200,7 @@ class Logger {
    * in the final logging message (optional).
    */
   info(message, metadata = {}) {
-    return this.logger.info(message, metadata);
+    return this.logger.info(message, Logger.sharedLogger.handleMetadata(metadata));
   }
 
   /**
@@ -184,64 +211,30 @@ class Logger {
    * in the final logging message (optional).
    */
   debug(message, metadata = {}) {
-    return this.logger.debug(message, metadata);
-  }
-
-  /**
-   *  Writes a verbose error logging message to the pre-defined transports.
-   *  It adds to the final logging message the file and line where this
-   *  method has been called. It should be avoid in production once it's
-   *  time and resource consuming.
-   *
-   * @param { string } message the logging message.
-   * @param { object } metadata additional information to be included
-   * in the final logging message (optional).
-   */
-  errorv(message, metadata = {}) {
-    return this.logger.error(message, addFileAndLineToMetadata(metadata));
-  }
-
-  /**
-   *  Writes a verbose warning logging message to the pre-defined transports.
-   *  It adds to the final logging message the file and line where this
-   *  method has been called. It should be avoid in production once it's
-   *  time and resource consuming.
-   *
-   * @param { string } message the logging message.
-   * @param { object } metadata additional information to be included
-   * in the final logging message (optional).
-   */
-  warnv(message, metadata = {}) {
-    return this.logger.warn(message, addFileAndLineToMetadata(metadata));
-  }
-
-  /**
-   *  Writes a verbose information logging message to the pre-defined transports.
-   *  It adds to the final logging message the file and line where this
-   *  method has been called. It should be avoid in production once it's
-   *  time and resource consuming.
-   *
-   * @param { string } message the logging message.
-   * @param { object } metadata additional information to be included
-   * in the final logging message (optional).
-   */
-  infov(message, metadata = {}) {
-    return this.logger.info(message, addFileAndLineToMetadata(metadata));
-  }
-
-  /**
-   *  Writes a verbose debug logging message to the pre-defined transports.
-   *  It adds to the final logging message the file and line where this
-   *  method has been called. It should be avoid in production once it's
-   *  time and resource consuming.
-   *
-   * @param { string } message the logging message.
-   * @param { object } metadata additional information to be included
-   * in the final logging message (optional).
-   */
-  debugv(message, metadata = {}) {
-    return this.logger.debug(message, addFileAndLineToMetadata(metadata));
+    return this.logger.debug(message, Logger.sharedLogger.handleMetadata(metadata));
   }
 }
 
-module.exports = { Logger, wlogger };
+// Internal winston logger shared by all instances of the logger wrapper.
+// This could be a native static property of the wrapper, but es6 doesn't support that.
+Logger.sharedLogger = {
+  // Winston transports set to the logger
+  transports: {
+    console: null,
+    file: null,
+  },
+  // Winston logger
+  wlogger: winston.createLogger({
+    // exitOnError: if false, handled exceptions will not cause process.exit
+    exitOnError: false,
+    // custom levels: error, warn, info, debug
+    levels: sdkLevels.levels,
+  }),
+  // true to add file/line metadata to the logging messages, otherwise, false.
+  verbose: true,
+  // handle metadata
+  handleMetadata: (metadata) => (Logger.sharedLogger.verbose
+    ? addFileAndLineToMetadata(metadata) : metadata),
+};
+
+module.exports = { Logger };
