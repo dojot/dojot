@@ -92,6 +92,20 @@ async function deleteCertificate(certRecord) {
   }
 }
 
+async function throwAwayCertificate({ csr: csrPem }) {
+  const csr = parseCSR(csrPem);
+
+  const subjectDN = DN.from(csr.subject).stringify();
+
+  const certificatePem = await ejbcaFacade.generateCertificate(
+    subjectDN, certCfg.validity, csrPem,
+  );
+
+  const certificateFingerprint = getFingerprint(certificatePem);
+
+  return { certificateFingerprint, certificatePem };
+}
+
 module.exports = {
   generateCertificate,
   registerCertificate,
@@ -99,4 +113,5 @@ module.exports = {
   getCertificate,
   listCertificates,
   deleteCertificate,
+  throwAwayCertificate,
 };

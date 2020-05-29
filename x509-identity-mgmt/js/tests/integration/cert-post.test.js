@@ -122,4 +122,31 @@ describe('X509 Certificates - POST integrations', () => {
           message: 'This operation is not available yet',
         });
       }));
+
+  it('should issue and throw away a certificate given a CSR',
+    () => {
+      const resp = {
+        certificateFingerprint: '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD',
+        certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
+      };
+
+      return req.post('/v1/throw-away')
+        .send({ csr })
+        .expect(201)
+        .then((res) => {
+          expect(res.body).toEqual(resp);
+        });
+    });
+
+  it('should not issue and throw away a certificate given a Certificate PEM',
+    () => req.post('/v1/throw-away')
+      .send({
+        certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual({
+          message: 'It is necessary to inform the CSR for the certificate to be issued',
+        });
+      }));
 });
