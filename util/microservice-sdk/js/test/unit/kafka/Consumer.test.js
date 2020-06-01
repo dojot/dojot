@@ -1,9 +1,9 @@
 const Consumer = require('kafka/Consumer.js');
 
 jest.mock('node-rdkafka');
+jest.mock('logging/Logger.js');
 jest.mock('kafka/CommitManager.js');
 jest.mock('async');
-jest.mock('@dojot/dojot-module-logger');
 jest.mock('uuid/v4');
 
 const uuidMock = require('uuid/v4');

@@ -1,7 +1,10 @@
 const Kafka = require('node-rdkafka');
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('../logging/Logger');
 
-const TAG = { filename: 'producer' };
+/**
+ * Logger instance
+ */
+const logger = new Logger('microservice-sdk:producer');
 
 
 /**
@@ -74,7 +77,7 @@ class Producer {
       this.config['producer.disconnect.timeout.ms'] || PRODUCER_DISCONNECT_TIMEOUT_MS
     );
 
-    logger.debug('Creating a new Kafka producer...', TAG);
+    logger.debug('Creating a new Kafka producer...');
 
 
     this.isReady = false;
@@ -88,7 +91,7 @@ class Producer {
 
     this.producer.setPollInterval(this.config['producer.pool.interval.ms']);
 
-    logger.debug('... a Kafka producer was successfully created.', TAG);
+    logger.debug('... a Kafka producer was successfully created.');
   }
 
   /**
@@ -111,13 +114,13 @@ class Producer {
    * successfully connected to a Kafka broker, or reject if any errors occur.
    */
   connect() {
-    logger.info('Connecting the producer...', TAG);
+    logger.info('Connecting the producer...');
 
     return new Promise((resolve, reject) => {
       // ready
       // note: the ready function is called just once
       this.producer.on('ready', () => {
-        logger.info('Producer is ready', TAG);
+        logger.info('Producer is ready');
         this.isReady = true;
         return resolve();
       });
@@ -125,13 +128,13 @@ class Producer {
       // register handler for kafka events
       // error
       this.producer.on('event.error', (event) => {
-        logger.warn(`Kafka event.error: ${event}`, TAG);
+        logger.warn(`Kafka event.error: ${event}`);
       });
 
       // connect to kafka
       this.producer.connect(undefined, (error) => {
         if (error) {
-          logger.error(`Error on connect: ${error}`, TAG);
+          logger.error(`Error on connect: ${error}`);
           reject(error);
         }
       });
@@ -155,7 +158,7 @@ class Producer {
    */
   produce(topic, message, key = null, partition = null) {
     if (this.isReady === false) {
-      logger.debug('It is not yet ready to produce.', TAG);
+      logger.debug('It is not yet ready to produce.');
       return Promise.reject();
     }
 
@@ -197,22 +200,22 @@ class Producer {
    * @returns Promise that will be resolve
    */
   disconnect() {
-    logger.debug('Disconnecting from Kafka...', TAG);
+    logger.debug('Disconnecting from Kafka...');
     if (this.isReady === false) {
-      logger.debug('... already disconnected. Aborting operation.', TAG);
+      logger.debug('... already disconnected. Aborting operation.');
       return Promise.resolve();
     }
-    logger.debug('Requesting message flushing before disconnect...', TAG);
+    logger.debug('Requesting message flushing before disconnect...');
 
     return new Promise((resolve, reject) => {
       this.producer.flush(this.config['producer.flush.timeout.ms'], (error) => {
         if (error) {
           return reject(error);
         }
-        logger.debug('... all messages were flushed.', TAG);
+        logger.debug('... all messages were flushed.');
 
         const timeoutTrigger = setTimeout(() => {
-          logger.error('Unable to disconnect the producer. Timed out.', TAG);
+          logger.error('Unable to disconnect the producer. Timed out.');
           return reject(new Error('disconnection timeout'));
         }, this.config['producer.disconnect.timeout.ms']);
 
@@ -222,7 +225,7 @@ class Producer {
             logger.error(`Error while disconnecting producer: ${err}`);
             return reject(err);
           }
-          logger.debug('Successfully disconnected producer from Kafka.', TAG);
+          logger.debug('Successfully disconnected producer from Kafka.');
           this.isReady = false;
           return resolve();
         });

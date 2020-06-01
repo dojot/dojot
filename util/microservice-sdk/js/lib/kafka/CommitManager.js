@@ -1,6 +1,6 @@
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('../logging/Logger');
 
-const TAG = { filename: 'commit-mngr' };
+const logger = new Logger('microservice-sdk:commit-mngr');
 
 /**
  * Default time interval for committing the processed messages.
@@ -165,13 +165,13 @@ module.exports = class CommitManager {
       });
 
       if (offsetsToCommit.length > 0) {
-        logger.debug(`Submitting a commit to Kafka: ${JSON.stringify(offsetsToCommit)}`, TAG);
+        logger.debug(`Submitting a commit to Kafka: ${JSON.stringify(offsetsToCommit)}`);
         this.commitCb(offsetsToCommit);
       }
 
       return Promise.resolve();
     } catch (error) {
-      logger.warn(`Failed on committing offsets. ${error}`, TAG);
+      logger.warn(`Failed on committing offsets. ${error}`);
       return Promise.reject(error);
     }
   }

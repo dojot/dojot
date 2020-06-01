@@ -13,16 +13,21 @@ RUN apk --no-cache add \
     make \
     python
 
+
 RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
 
-COPY package.json package.json
-COPY npm-shrinkwrap.json npm-shrinkwrap.json
+# library (essential files)
+COPY package.json microservice-sdk-pkg/
+COPY npm-shrinkwrap.json microservice-sdk-pkg/
+COPY lib microservice-sdk-pkg/lib
+COPY index.js microservice-sdk-pkg/
+
+# example application
+COPY examples/logging/package*.json ./
 
 RUN npm install
 
-COPY lib ./lib
-COPY index.js index.js
-COPY examples/consumer/sample.js ./app/sample.js
+COPY examples/logging/*.js ./
 
 FROM node:10.16.3-alpine
 
@@ -32,5 +37,6 @@ RUN apk --no-cache add \
     libsasl \
     lz4-libs
 
-COPY --from=base /opt/example /opt/example
-CMD ["node", "app/sample.js"]
+COPY --from=base /opt/example .
+
+CMD ["node", "index.js"]

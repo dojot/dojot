@@ -1,6 +1,7 @@
 const CommitManager = require('../../../lib/kafka/CommitManager.js');
 
-jest.mock('@dojot/dojot-module-logger');
+// mocking dependencies
+jest.mock('logging/Logger.js');
 
 test('Basic initialization', async () => {
   jest.useFakeTimers();

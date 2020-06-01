@@ -1,5 +1,14 @@
-const { logger } = require('@dojot/dojot-module-logger');
-const { Kafka: { Consumer } } = require('../index.js');
+const { Logger, Kafka: { Consumer } } = require('../index.js');
+
+// Set the global logger properties
+// Add a console transport
+Logger.setTransport('console', { level: 'debug' });
+
+// Enable verbose mode
+Logger.setVerbose(true);
+
+// instantiate a logger wrapper for the application
+const logger = new Logger('sample-consumer');
 
 const consumer = new Consumer({
   kafka: {
@@ -9,17 +18,16 @@ const consumer = new Consumer({
   },
 });
 
-const TAG = { filename: 'sample-consumer' };
-
 consumer.init().then(() => {
+  logger.info('Application is ready to receive messages from kafka!');
   // the target kafka topic, it could be a String or a RegExp
   const targetTopic = process.env.KAFKA_TOPIC || 'consumer.testing';
 
   // Register callback to process incoming device data
   /* const idCallback = */ consumer.registerCallback(targetTopic, (data) => {
     const { value: payload } = data;
-    logger.debug(`Payload: ${payload.toString()}`, TAG);
+    logger.debug(`Payload: ${payload.toString()}`);
   });
 }).catch((error) => {
-  logger.error(`Caught an error: ${error.stack || error}`, TAG);
+  logger.error(`Caught an error: ${error.stack || error}`);
 });
