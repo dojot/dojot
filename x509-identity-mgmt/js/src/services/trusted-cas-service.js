@@ -12,8 +12,8 @@ async function getRootCertificate() {
   return { certificateFingerprint, caPem };
 }
 
-async function getRootCRL() {
-  const crl = await ejbcaFacade.getCRL(ejbcaCfg.rootCA);
+async function getRootCRL(renew = false) {
+  const crl = await ejbcaFacade.getCRL(ejbcaCfg.rootCA, renew);
   return { crl };
 }
 

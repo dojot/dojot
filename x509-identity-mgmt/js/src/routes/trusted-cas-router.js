@@ -23,6 +23,22 @@ router.route('/ca/crl')
     res.status(HttpStatus.OK).json(result);
   });
 
+router.route('/throw-away/ca')
+  /* retrieves the certificate from the root CA without needing the JWT token.
+   * Used only by services behind the API gateway */
+  .get(async (req, res) => {
+    const result = await service.getRootCertificate();
+    res.status(HttpStatus.OK).json(result);
+  });
+
+router.route('/throw-away/ca/crl')
+  /* Latest CRL issued by the Root CA without needing the JWT token.
+   * Used only by services behind the API gateway */
+  .get(async (req, res) => {
+    const result = await service.getRootCRL(req.query.update === 'true');
+    res.status(HttpStatus.OK).json(result);
+  });
+
 router.route('/trusted-cas')
   /* Register Trusted CA Certificate */
   .post(validateNewTrustedCA(), (req, res) => {

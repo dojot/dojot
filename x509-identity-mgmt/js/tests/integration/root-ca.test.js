@@ -35,13 +35,16 @@ readline.createInterface.mockReturnValue({
 
 soap.createClientAsync.mockReturnValue({
   setSecurity: jest.fn().mockReturnValue(true),
-  getLastCAChainAsync: jest.fn().mockResolvedValue([
-    {
-      return: [{
-        certificateData: caCertEjbcaSoapResp,
-      }],
-    },
-  ]),
+  getLastCAChainAsync: jest.fn().mockImplementation(() => {
+    const value = [
+      {
+        return: [{
+          certificateData: caCertEjbcaSoapResp,
+        }],
+      },
+    ];
+    return Promise.resolve(value);
+  }),
   createCRLAsync: jest.fn().mockResolvedValue(),
   getLatestCRLAsync: jest.fn().mockResolvedValue([
     {
@@ -70,6 +73,27 @@ describe('Root CA - integrations', () => {
   it('should get a latest CRL from Root CA',
     async () => req.get('/v1/ca/crl')
       .set('Authorization', `Bearer ${token}`)
+      .send()
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toEqual({
+          crl: caCRL,
+        });
+      }));
+
+  it('should get a Root CA Certificate without needing the JWT token.',
+    async () => req.get('/v1/throw-away/ca')
+      .send()
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toEqual({
+          certificateFingerprint: caFingerprint,
+          caPem: caCert,
+        });
+      }));
+
+  it('should get a latest CRL from Root CA without needing the JWT token.',
+    async () => req.get('/v1/throw-away/ca/crl')
       .send()
       .expect(200)
       .then((res) => {

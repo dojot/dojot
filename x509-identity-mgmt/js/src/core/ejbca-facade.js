@@ -324,8 +324,8 @@ const facade = {
     return certPemWrapped;
   },
 
-  async getCRL(caname, deltaCRL = false) {
-    if (ejbcaCfg.forceCRLCreation) {
+  async getCRL(caname, renew = false, deltaCRL = false) {
+    if (renew || ejbcaCfg.forceCRLRenew) {
       /**
        * EJBCA SOAP Operation: createCRL
        *
