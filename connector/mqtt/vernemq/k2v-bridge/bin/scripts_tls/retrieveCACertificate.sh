@@ -8,9 +8,11 @@ BASE_DIR=${BASE_DIR:-"/k2v_bridge"}
 
 . "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
-echo "Retrieve cert for  ${certCAName} CA : ${certEjbcaApiUrl}/ca/${certCAName}"
-certCa=$(curl --silent -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}" \
+echo
+echo "Retrieve certificate of trusted CA : ${certEjbcaApiUrl}/v1/throw-away/ca "
+
+certCa=$(curl -X GET "${certEjbcaApiUrl}"/v1/throw-away/ca \
 -H "Content-Type:application/json" \
--H "Accept:application/json" | jq '.certificate' -r )
+-H "Accept:application/json" | jq '.caPem' -r )
 
 _saveFormattedCRT "${certDir}/${certCaFile}" "${certCa}"
