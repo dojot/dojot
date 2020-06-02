@@ -45,7 +45,7 @@ jobs:
         # Created when 'npm test' was executed
         file: subscription-engine/kafka-ws/coverage/lcov.info
         # Flags allow you to isolate coverage reports for different tests
-        flags: kafka-ws
+        flags: kafkaWs
         # Custom name for the upload
         name: kafka-ws
 
