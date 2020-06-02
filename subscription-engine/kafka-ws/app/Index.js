@@ -54,7 +54,7 @@ process.on('uncaughtException', async (ex) => {
 });
 
 (async () => {
-  ws.init();
+  await ws.init();
 })().catch((error) => {
   logger.error(`Caught an error: ${error.stack || error}`);
 });
