@@ -19,5 +19,9 @@ module.exports = {
   server: {
     host: process.env.KAFKA_WS_HOST || '0.0.0.0',
     port: parseInt(process.env.KAFKA_WS_PORT, 10) || 8080,
+    tls: parseBoolean(process.env.KAFKA_WS_TLS || false),
+    ca_file: process.env.KAFKA_WS_TLS_CA_FILE || '/opt/kafka-ws/certs/ca-cert.pem',
+    key_file: process.env.KAFKA_WS_TLS_KEY_FILE || '/opt/kafka-ws/certs/server-key.pem',
+    cert_file: process.env.KAFKA_WS_TLS_CERT_FILE || '/opt/kafka-ws/certs/server-cert.pem',
   },
 };

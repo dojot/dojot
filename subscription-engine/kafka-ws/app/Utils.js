@@ -89,6 +89,7 @@ function isNumber(value) {
 
 const isObjectEmpty = (object) => Object.keys(object).length === 0;
 
+
 module.exports = {
   escapeChars,
   numericOperators,

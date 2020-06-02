@@ -58,8 +58,8 @@ class WSServer {
    *
    * @param {IncomingMessage} request
    */
-  handleUpgrade(request) {
-    this.wsServer.handleUpgrade(request, request.socket, request.headers, (ws) => {
+  handleUpgrade(request, socket, head) {
+    this.wsServer.handleUpgrade(request, socket, head, (ws) => {
       this.wsServer.emit('connection', ws, request);
     });
   }
@@ -104,12 +104,12 @@ class WSServer {
     } = this.processingRuleManager.addRule(fields, conditions, kafkaTopic);
 
     // create a unique ID for this instance of ws
-    const idWs = uuidv4();
+    const idWsConnection = uuidv4();
 
     // create callback to call the filter and send the message via ws
     const boundSend = ws.send.bind(ws);
     this.kafkaTopicsCallbacksMgmt.addCallback(kafkaTopic,
-      idWs,
+      idWsConnection,
       (data) => {
         try {
           const objectFiltered = filter(data);
@@ -123,7 +123,7 @@ class WSServer {
         }
       });
 
-    ws.on('close', (code, reason) => this.onClose(code, reason, kafkaTopic, fingerprint, idWs));
+    ws.on('close', (code, reason) => this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection));
   }
 
   /**
@@ -133,12 +133,12 @@ class WSServer {
    * @param {string} kafkaTopic
    * @param {string} idWs
    */
-  onClose(code, reason, kafkaTopic, fingerprint, idWs) {
+  onClose(code, reason, kafkaTopic, fingerprint, idWsConnection) {
     logger.debug('Closed connection.');
     logger.debug(`Code: ${code}\nReason: ${reason}`);
 
     this.processingRuleManager.removeRule(fingerprint);
-    this.kafkaTopicsCallbacksMgmt.removeCallback(kafkaTopic, idWs);
+    this.kafkaTopicsCallbacksMgmt.removeCallback(kafkaTopic, idWsConnection);
   }
 }
 
