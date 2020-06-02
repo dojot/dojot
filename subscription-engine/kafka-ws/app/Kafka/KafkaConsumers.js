@@ -1,8 +1,9 @@
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
+
 const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const { kafka: { consumer: consumerConfig } } = require('../Config');
 
-const TAG = { filename: 'kafka-ws:app/Kafka/KafkaConsumers' };
+const logger = new Logger();
 
 /**
  * Consume kafka messages from kafka topics
@@ -12,7 +13,7 @@ class KafkaConsumers {
   * Instance KafkaConsumers
   */
   constructor() {
-    logger.debug('constructor: Instance KafkaConsumers', TAG);
+    logger.debug('constructor: Instance KafkaConsumers');
     this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
@@ -23,11 +24,11 @@ class KafkaConsumers {
   */
   async init() {
     try {
-      logger.info('init: Kafka starting...', TAG);
+      logger.info('init: Kafka starting...');
       await this.consumer.init();
-      logger.info('init: ...Kafka started ', TAG);
+      logger.info('init: ...Kafka started ');
     } catch (error) {
-      logger.error(`init: Error starting kafka ${error.stack}`, TAG);
+      logger.error(`init: Error starting kafka ${error.stack}`);
       throw error;
     }
   }
@@ -41,14 +42,14 @@ class KafkaConsumers {
   */
   registerCallback(kafkaTopic, callback) {
     if (!this.registeredCallbacks.has(kafkaTopic)) {
-      logger.debug(`registerCallback: Register Callback for topic ${kafkaTopic}`, TAG);
+      logger.debug(`registerCallback: Register Callback for topic ${kafkaTopic}`);
       const idCallback = this.consumer.registerCallback(kafkaTopic, callback);
       this.registeredCallbacks.set(kafkaTopic, idCallback);
     } else {
       throw new Error(`registerCallback: Callback for topic ${kafkaTopic} already exist`);
     }
 
-    logger.debug(`registerCallback: All Registered Callbacks ${[...this.registeredCallbacks]}`, TAG);
+    logger.debug(`registerCallback: All Registered Callbacks ${[...this.registeredCallbacks]}`);
   }
 
   /**
@@ -57,7 +58,7 @@ class KafkaConsumers {
    */
   unregisterCallback(kafkaTopic) {
     if (this.registeredCallbacks.has(kafkaTopic)) {
-      logger.debug(`unregisterCallbacks: Unregister Callback for topic ${kafkaTopic}`, TAG);
+      logger.debug(`unregisterCallbacks: Unregister Callback for topic ${kafkaTopic}`);
       const idCallback = this.registeredCallbacks.get(kafkaTopic);
       this.consumer.unregisterCallback(idCallback);
       this.registeredCallbacks.delete(kafkaTopic);
@@ -65,14 +66,14 @@ class KafkaConsumers {
       throw new Error(`unregisterCallbacks: Doesn't exist Callback to unregister for topic ${kafkaTopic}`);
     }
 
-    logger.debug(`unregisterCallbacks: All Registered Callbacks ${[...this.registeredCallbacks]}`, TAG);
+    logger.debug(`unregisterCallbacks: All Registered Callbacks ${[...this.registeredCallbacks]}`);
   }
 
   /**
   * Unregister All Callbacks
   */
   unregisterAllCallbacks() {
-    logger.debug('unregisterCallbacks: Unregister All Callbacks', TAG);
+    logger.debug('unregisterCallbacks: Unregister All Callbacks');
 
     this.registeredCallbacks.forEach((idCallback) => {
       this.consumer.unregisterCallback(idCallback);

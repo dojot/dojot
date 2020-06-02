@@ -74,29 +74,29 @@ Where:
 
 To ilustrate the parameters' usage, here are some examples of valid URIs:
 
-Retrieving full messages from `device-data` topic:
+Retrieving full messages from `topic.example` topic:
 ```
-/v1/websocket/device-data
+/v1/websocket/topic.example
 ```
 
 Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
 ```
-/v1/websocket/device-data?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+/v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the temperature and location:
 ```
-/v1/websocket/device-data?fields=temperature,location
+/v1/websocket/topic.example?fields=temperature,location
 ```
 
 Retrieving full messages where 5.0 ≤ temperature < 10.0:
 ```
-/v1/websocket/device-data?where=temperature=lt:10.0;temperature=gte:5.0;
+/v1/websocket/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
 ```
 
 Retrieving the temperature and rain when rain ≤ 15:
 ```
-/v1/websocket/device-data?where=rain=lte:15;&fields=temperature,rain
+/v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
 ---
@@ -179,6 +179,9 @@ Before proceeding, **make sure you configure your environment**.
 Key           | Purpose                                         | Default Value     | Valid Values             |
 ------------- | ----------------------------------------------- | ----------------- | ------------------------ |
 LOG_LEVEL     | log level                                       | info              | info, warn, debug, error |
+LOG_VERBOSE   | Enables verbose mode for logging                    | false              | string: "true" or "false" |
+LOG_FILE   | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false              | string: "true" or "false" |
+LOG_FILE_LEVEL     | Log level to log on files                                     | debug              | info, warn, debug, error |
 KAFKA_HOSTS   | comma-separated list of Kafka hosts (with port) | kafka-server:9092 | list of hostname:port    |
 KAFKA_WS_HOST | Kafka WS address                                | localhost         | hostname                 |
 KAFKA_WS_PORT | Kafka WS port                                   | 8080              | valid port               |

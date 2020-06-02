@@ -1,4 +1,4 @@
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const WebSocket = require('ws');
 const url = require('url');
@@ -13,8 +13,7 @@ const { WhereParser } = require('./WhereProcessing');
 const KafkaTopicsCallbacksMgmt = require('./Kafka/KafkaTopicsConsumerCallbacksMgmt');
 const { isObjectEmpty } = require('./Utils');
 
-const TAG = { filename: 'app/WSServer' };
-
+const logger = new Logger();
 
 /**
   * WebSocket Server.
@@ -24,19 +23,19 @@ const TAG = { filename: 'app/WSServer' };
   */
 class WSServer {
   constructor() {
-    logger.info('Initializing WebSocket Server...', TAG);
+    logger.info('Initializing WebSocket Server...');
     // We initialize with `noServer: true` so we can add this server to a specific path in the HTTP
     // server
     this.wsServer = new WebSocket.Server({ noServer: true });
     this.wsServer.on('connection', (ws, req) => this.onConnection(ws, req));
-    logger.info('Registered WebSocket connection event', TAG);
+    logger.info('Registered WebSocket connection event');
 
     this.whereParser = WhereParser();
-    logger.info('Initialized WhereParser', TAG);
+    logger.info('Initialized WhereParser');
 
     this.processingRuleManager = new ProcessingRuleManager();
-    logger.info('Initialized ProcessingRuleManager', TAG);
-    logger.info('...WebSocket Server initialized', TAG);
+    logger.info('Initialized ProcessingRuleManager');
+    logger.info('...WebSocket Server initialized');
 
     this.kafkaTopicsCallbacksMgmt = new KafkaTopicsCallbacksMgmt();
 
@@ -50,7 +49,7 @@ class WSServer {
     try {
       await this.kafkaTopicsCallbacksMgmt.init();
     } catch (error) {
-      logger.error(`init: Caught ${error.stack}`, TAG);
+      logger.error(`init: Caught ${error.stack}`);
     }
   }
 
@@ -73,7 +72,7 @@ class WSServer {
    */
   onConnection(ws, req) {
     logger.debug(
-      `Received connection from ${req.connection.remoteAddress}:${req.connection.remotePort}`, TAG,
+      `Received connection from ${req.connection.remoteAddress}:${req.connection.remotePort}`,
     );
 
     const { fields, where } = url.parse(req.url, true).query;
@@ -84,14 +83,14 @@ class WSServer {
     } catch (error) {
       if (error instanceof WSError) {
         logger.debug(
-          `Closing connection ${req.connection.remoteAddress}:${req.connection.remotePort}`, TAG,
+          `Closing connection ${req.connection.remoteAddress}:${req.connection.remotePort}`,
         );
         logger.error(
-          `Error while parsing, code: ${error.ws_code}, reason: ${error.ws_reason}`, TAG,
+          `Error while parsing, code: ${error.ws_code}, reason: ${error.ws_reason}`,
         );
         ws.close(error.ws_code, error.ws_reason);
       } else {
-        logger.error(error, TAG);
+        logger.error(error);
         ws.close(ErrorCodes.INTERNAL, 'Internal error');
       }
       return;
@@ -120,7 +119,7 @@ class WSServer {
             boundSend(JSON.stringify(objectFiltered));
           }
         } catch (error) {
-          logger.error(`Caught ${error.stack}`, TAG);
+          logger.error(`Caught ${error.stack}`);
         }
       });
 
@@ -135,8 +134,8 @@ class WSServer {
    * @param {string} idWs
    */
   onClose(code, reason, kafkaTopic, fingerprint, idWs) {
-    logger.debug('Closed connection.', TAG);
-    logger.debug(`Code: ${code}\nReason: ${reason}`, TAG);
+    logger.debug('Closed connection.');
+    logger.debug(`Code: ${code}\nReason: ${reason}`);
 
     this.processingRuleManager.removeRule(fingerprint);
     this.kafkaTopicsCallbacksMgmt.removeCallback(kafkaTopic, idWs);

@@ -1,4 +1,4 @@
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const nearley = require('nearley');
 
@@ -11,7 +11,8 @@ const {
   InvalidValue,
 } = require('../Errors').Errors;
 
-const TAG = { filename: 'WhereParser' };
+
+const logger = new Logger();
 
 /**
  * Parses the `where` query parameter.
@@ -199,7 +200,7 @@ const WhereParser = () => {
       parser.feed(where);
     } catch (error) {
       if (String(error.message).includes('invalid syntax')) {
-        logger.error(error.message, TAG);
+        logger.error(error.message);
         throw new InvalidSyntax();
       } else {
         throw error;

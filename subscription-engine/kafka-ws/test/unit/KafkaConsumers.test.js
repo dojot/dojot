@@ -2,7 +2,6 @@ const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const KafkaWSConsumers = require('../../app/Kafka/KafkaConsumers');
 
 jest.mock('@dojot/microservice-sdk');
-jest.mock('@dojot/dojot-module-logger');
 
 jest.mock('../../app/Config.js', () => ({
   kafka: {

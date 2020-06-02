@@ -1,8 +1,9 @@
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
+
 const KafkaWSConsumers = require('./KafkaConsumers');
 
-const TAG = { filename: 'kafka-ws:app/Kafka/KafkaTopicsCallbacksMgmt' };
+const logger = new Logger();
 
 /**
 * Manages n callbacks for a single kafka topic,
@@ -12,7 +13,7 @@ class KafkaTopicsConsumerCallbacksMgmt {
     * Instance KafkaTopicsCallbacksMgmt
     */
   constructor() {
-    logger.debug('constructor: Instance KafkaTopicsCallbacksMgmt', TAG);
+    logger.debug('constructor: Instance KafkaTopicsCallbacksMgmt');
     // only one callback by topic
     this.topic = new Map();
     this.kafka = new KafkaWSConsumers();
@@ -23,10 +24,10 @@ class KafkaTopicsConsumerCallbacksMgmt {
    */
   async init() {
     try {
-      logger.debug('init: Starting KafkaTopicsCallbacksMgmt', TAG);
+      logger.debug('init: Starting KafkaTopicsCallbacksMgmt');
       await this.kafka.init();
     } catch (error) {
-      logger.error(`init: Error starting KafkaTopicsCallbacksMgmt ${error.stack}`, TAG);
+      logger.error(`init: Error starting KafkaTopicsCallbacksMgmt ${error.stack}`);
       throw error;
     }
   }
@@ -39,18 +40,16 @@ class KafkaTopicsConsumerCallbacksMgmt {
    * @param {function} callback
    */
   addCallback(topic, idCallback, callback) {
-    logger.debug(`addCallbackToTopic: Topic=${topic} idCallback=${idCallback}`, TAG);
+    logger.debug(`addCallbackToTopic: Topic=${topic} idCallback=${idCallback}`);
 
     if (this.topic.has(topic)) {
       const callbackMap = this.topic.get(topic);
       callbackMap.set(idCallback, callback);
-      logger.debug(`addCallbackToTopic: All Registered Callbacks for Topic ${topic}: ${[...callbackMap]}`, TAG);
       this.topic.set(topic, callbackMap);
     } else {
       const callbackMap = new Map();
       callbackMap.set(idCallback, callback);
       this.topic.set(topic, callbackMap);
-      logger.debug(`addCallbackToTopic: All Registered Callbacks for Topic ${topic}: ${[...callbackMap]}`, TAG);
     }
 
     if (!this.kafka.registeredCallbacks.has(topic)) {
@@ -65,7 +64,7 @@ class KafkaTopicsConsumerCallbacksMgmt {
    * @param {string} idCallback This id must be unique within a topic's callback list.
    */
   removeCallback(topic, idCallback) {
-    logger.debug(`removeCallbackToTopic: Topic=${topic} idCallback=${idCallback}`, TAG);
+    logger.debug(`removeCallbackToTopic: Topic=${topic} idCallback=${idCallback}`);
 
     if (this.topic.has(topic)) {
       const callbackMap = this.topic.get(topic);
@@ -99,13 +98,13 @@ class KafkaTopicsConsumerCallbacksMgmt {
           const { value: payloadEncoded } = data;
           const payload = JSON.parse(payloadEncoded.toString());
 
-          logger.debug(`createCallbackKafka: Topic=${topic} Payload=${util.inspect(payload, { depth: null })}`, TAG);
+          logger.debug(`createCallbackKafka: Topic=${topic} Payload=${util.inspect(payload, { depth: null })}`);
 
           callbackMap.forEach((callback) => {
             callback(payload);
           });
         } catch (error) {
-          logger.error(`createCallbackKafka: Caught ${error.stack}`, TAG);
+          logger.error(`createCallbackKafka: Caught ${error.stack}`);
         }
       };
     }

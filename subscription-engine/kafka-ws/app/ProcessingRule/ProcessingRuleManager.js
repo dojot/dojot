@@ -1,9 +1,9 @@
-// const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const { processingRule } = require('./ProcessingRule');
 const { createFingerprint } = require('../Utils');
 
+const logger = new Logger();
 
 /**
  * Manages ProcessingRule instances.

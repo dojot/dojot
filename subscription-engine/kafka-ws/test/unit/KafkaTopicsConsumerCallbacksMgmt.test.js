@@ -1,6 +1,5 @@
 const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 
-jest.mock('@dojot/dojot-module-logger');
 jest.mock('../../app/Kafka/KafkaConsumers');
 
 
