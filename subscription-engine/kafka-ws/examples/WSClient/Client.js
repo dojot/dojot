@@ -15,7 +15,7 @@ switch (args[0]) {
     url = url + 'ws.example.test?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;';
     break;
   case '1':
-    url = url + 'ws2.example.test?fields=location&where=sensor.status=in:failed,stopped;temperature=gte:20';
+    url = url + 'ws2.example.test?fields=location&where=sensor.status=in:failed,stopped;temperature=gte:20;';
     break;
   default:
     url = url + 'ws.example.test';

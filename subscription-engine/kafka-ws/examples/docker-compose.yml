@@ -56,9 +56,9 @@ services:
       options:
         max-size: 100m
     # to dev
-    volumes:
-     - ../app/:/opt/kafka-ws/app/:Z # need to run 'npm run parser:compile' before
-    command: ["npm", "run", "dev"]
+    # volumes:
+    #  - ../app/:/opt/kafka-ws/app/:Z # need to run 'npm run parser:compile' before
+    # command: ["npm", "run", "dev"]
 
   ws-client-sample-0:
     build:
