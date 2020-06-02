@@ -11,7 +11,7 @@ _saveFormattedCRT()
 
   echo "Saving CRT ${nameFile}"
 
-    echo "${rawCRT}" > "${certDir}"/tempfile.crt
+  echo "${rawCRT}" > "${certDir}"/tempfile.crt
 
   openssl x509 -inform pem -in "${certDir}"/tempfile.crt -out "${nameFile}"
 
