@@ -10,15 +10,15 @@ BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
 
 . "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
-echo "Signing cert for entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/sign/${certCname}/pkcs10 "
-csrContent=$(<  "${certDir}"/"${certCsrFile}"  sed '1,1d;$ d' | tr -d '\r\n')
+echo
+echo "Signing cert : ${certEjbcaApiUrl}/v1/throw-away "
 
-signCertCa=$(curl --silent -X POST "${certEjbcaApiUrl}"/sign/"${certCname}"/pkcs10 \
+csrContent=$(while IFS= read -r line; do printf '%s\\n' "$line"; done <"${certDir}/${certCsrFile}")
+csrContent=${csrContent:0:(-2)}
+
+signCertCa=$(curl -X POST "${certEjbcaApiUrl}"/v1/throw-away \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" \
--d  "{
-\"passwd\": \"${password}\",
-\"certificate\": \"${csrContent}\"
-}" | jq '.status.data' -r)
+--data-binary "{ \"csr\": \"${csrContent}\" }" | jq '.certificatePem' -r)
 
 _saveFormattedCRT "${certDir}/${certCertFile}" "${signCertCa}"

@@ -13,7 +13,7 @@
 # export CHECKEND_EXPIRATION_SEC='43200'
 # export CHECK_EXPIRATION_TIME='*/30 * * * *'
 # export CHECK_BROKER_CERT_REVOKED_TIME='*/30 * * * *'
-# 
+#
 #########################################################
 
 
@@ -43,12 +43,12 @@ _connectEJBCA()
   START_TIME=$(date +'%s')
   echo "Waiting for dojot EJBCA Broker fully start. Adress '${EJBCA_ADDRESS}'..."
   echo "Try to connect to dojot EJBCA Broker ... "
-  RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/ejbca/version || echo "")
+  RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/healthcheck || echo "" | jq '.status')
   echo "$RESPONSE"
-  while [ -z "${RESPONSE}" ]; do
+  while [ -z "${RESPONSE}" ] || [ "${RESPONSE}" = '"ok"' ]; do
       sleep 30
       echo "Retry to connect to dojot EJBCA broker ... "
-      RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/ejbca/version || echo "")
+      RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/healthcheck || echo "" | jq '.status')
 
       ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
       if [ ${ELAPSED_TIME} -gt 180 ]
@@ -73,16 +73,6 @@ _generateKeyPair()
 _createCSR()
 {
     sh "${BASE_DIR}"/bin/scripts_tls/createCSR.sh
-}
-
-##create entity in ejbca
-_createEntity()
-{
-    echo "Create Entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/user"
-    $(curl --silent -X POST "${certEjbcaApiUrl}"/user \
-    -H "Content-Type:application/json" \
-    -H "Accept:application/json" \
-    -d  "{\"username\": \"${certCname}\"}")
 }
 
 ##sign csr in ejbca
@@ -124,7 +114,6 @@ _generateCertificates()
     _createCRTDir
     _generateKeyPair
     _createCSR
-    _createEntity
     _signCert
 }
 
