@@ -30,4 +30,13 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   };
 };
 
-module.exports = { generateDojotDeviceDataMessage };
+const unsecuredMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
+
+/**
+ * Transforms a string into a boolean (case insensitive).
+ *
+ * @param {string} value
+ */
+const toBoolean = (value) => value && (value.toString().toLowerCase() === 'true');
+
+module.exports = { generateDojotDeviceDataMessage, toBoolean, unsecuredMode };
