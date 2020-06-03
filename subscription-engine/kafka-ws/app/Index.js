@@ -72,6 +72,7 @@ try {
     await ws.init();
   })().catch((error) => {
     logger.error(`Caught an error when trying init WSServer ${error.stack || error}`);
+    throw error;
   });
 
   server.on('upgrade', (request, socket, head) => {
