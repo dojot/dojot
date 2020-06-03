@@ -4,13 +4,15 @@
  * @author Dojot
  */
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
-const config = require('./config');
+const { app: appConfig } = require('./config');
 const AgentMessenger = require('./AgentMessenger');
 
-/* set log level */
-logger.setLevel(config.app.logLevel);
+// Logger configuration
+Logger.setTransport('console', appConfig.logger.transports.console);
+Logger.setVerbose(appConfig.logger.verbose);
 
-const agentMessenger = new AgentMessenger(config);
+const agentMessenger = new AgentMessenger();
+
 agentMessenger.init();
