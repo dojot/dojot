@@ -1,53 +1,29 @@
-/**
- * file: MqttClient.test.js
- * dependencies: [
- *                 @dojot/dojot-module,
- *                 @dojot/iotagent-nodejs,
- *                 @dojot/dojot-module-logger,
- *                 fs
- *                ]
- * Author: dojot
- */
-
-/**
- * Dependencies mock
- */
 jest.mock('fs');
-jest.mock('@dojot/dojot-module');
-jest.mock('@dojot/dojot-module-logger');
-jest.mock('@dojot/iotagent-nodejs');
+jest.mock('@dojot/microservice-sdk');
 jest.mock('../../app/AgentMessenger');
 
 /**
  * Mocks
  */
-const fakeConfig = {
-  mqtt: {
-    clientUsername: 'fake',
-    clientId: 'fake',
-    host: 'fake',
-    port: 0,
-    keepAlive: 0,
-    parallelHandlers: 1,
-    maxQueueLength: 10,
-    tls: {
-      ca: {
-        location: 'fake',
-      },
-      certificate: {
-        location: 'fake',
-      },
-      privateKey: {
-        location: 'fake',
-      },
+const fakeMqttConfig = {
+  clientUsername: 'fake',
+  clientId: 'fake',
+  host: 'fake',
+  port: 0,
+  keepAlive: 0,
+  parallelHandlers: 1,
+  maxQueueLength: 10,
+  tls: {
+    ca: {
+      location: 'fake',
+    },
+    certificate: {
+      location: 'fake',
+    },
+    privateKey: {
+      location: 'fake',
     },
   },
-  app: {
-    logLevel: 'debug',
-    baseDir: 'fakeDir',
-    hostname: 'fake',
-  },
-
 };
 
 const mockConfig = {
@@ -79,7 +55,7 @@ jest.mock('async', () => ({
 }));
 
 const mqtt = require('mqtt');
-const defaultConfig = require('../../app/config');
+const { mqtt: mqttConfig } = require('../../app/config');
 const MQTTClient = require('../../app/MqttClient');
 const AgentMessenger = require('../../app/AgentMessenger');
 
@@ -88,14 +64,14 @@ describe('Testing v2k bridge client', () => {
     jest.clearAllMocks();
   });
 
-  const expectClientInitialization = (client, agent, config = defaultConfig) => {
+  const expectClientInitialization = (client, agent, config = mqttConfig) => {
     expect(client.config).toEqual(config);
     expect(client.isConnected).toEqual(false);
 
-    expect(client.clientId).toEqual(config.mqtt.clientId);
-    expect(client.username).toEqual(config.mqtt.clientUsername);
-    expect(client.host).toEqual(config.mqtt.host);
-    expect(client.keepAlive).toEqual(config.mqtt.keepAlive);
+    expect(client.clientId).toEqual(config.clientId);
+    expect(client.username).toEqual(config.clientUsername);
+    expect(client.host).toEqual(config.host);
+    expect(client.keepAlive).toEqual(config.keepAlive);
     expect(client.agentMessenger).toEqual(agent);
 
     expect(client.privateKey).not.toBeNull();
@@ -107,20 +83,20 @@ describe('Testing v2k bridge client', () => {
   };
 
   it('Should create a client sucessfully', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
-    expectClientInitialization(client, agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
+    expectClientInitialization(client, agent, fakeMqttConfig);
   });
 
   it('Should create a client sucessfully without config', () => {
-    const agent = new AgentMessenger(fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
     const client = new MQTTClient(agent);
     expectClientInitialization(client, agent);
   });
 
   it('Should init sucessfully the client', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     const connectSpy = jest.spyOn(client, 'connect');
     const asyncQueueWorkerSpy = jest.spyOn(client, 'asyncQueueWorker');
 
@@ -137,8 +113,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('Should connect the client (callback)', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     client.init();
     const subscribeSpy = jest.spyOn(client, 'subscribe');
 
@@ -150,8 +126,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('Should connect the client mqtt', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     client.secureMode = true;
     client.connect();
     client.isConnected = true;
@@ -161,8 +137,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('Should reconnect the client after disconnect', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
 
     client.init();
     client.onDisconnect();
@@ -171,8 +147,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('should push a message to the queue (callback) once', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
 
     client.init();
     client.isConnected = true;
@@ -182,8 +158,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('should not push a message to the queue (callback)', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     client.init();
     client.onMessage();
     client.currentMessageQueueLength = 10 * 1000 * 10000;
@@ -194,8 +170,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('should not subscribe to topic', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     client.init();
     client.isConnected = false;
     client.subscribe();
@@ -203,8 +179,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('should subscribe to topic', () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     client.init();
     client.isConnected = true;
     client.subscribe();
@@ -212,8 +188,8 @@ describe('Testing v2k bridge client', () => {
   });
 
   it('The agent should send message when asyncQueueWorker runs', async () => {
-    const agent = new AgentMessenger(fakeConfig);
-    const client = new MQTTClient(agent, fakeConfig);
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
     client.init();
     const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
     const { topic, message } = fakeMessage;
