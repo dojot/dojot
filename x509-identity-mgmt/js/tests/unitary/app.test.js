@@ -1,12 +1,12 @@
 jest.mock('rotating-file-stream');
-jest.mock('../../src/services/x509-certificates-service');
+jest.mock('../../src/services/certificates-service');
 
 process.env.TRUST_PROXY = 'true';
 process.env.USE_LOG_FILE = 'true';
 
 const request = require('supertest');
 const app = require('../../src/app');
-const certServ = require('../../src/services/x509-certificates-service');
+const certServ = require('../../src/services/certificates-service');
 const { token } = require('../util.test');
 
 const req = request(app);
@@ -14,7 +14,7 @@ const req = request(app);
 
 describe('unit testing of the App object', () => {
   it('should complain about a missing JWT',
-    () => req.get('/v1/x509-certificates')
+    () => req.get('/v1/certificates')
       .send()
       .expect(401)
       .then((res) => {
@@ -24,7 +24,7 @@ describe('unit testing of the App object', () => {
       }));
 
   it('should complain about a invalid JWT',
-    () => req.get('/v1/x509-certificates')
+    () => req.get('/v1/certificates')
       .set('Authorization', `${token}`)
       .send()
       .expect(401)
@@ -48,7 +48,7 @@ describe('unit testing of the App object', () => {
   it('should issue an internal error',
     () => {
       certServ.listCertificates.mockRejectedValue('Internal error simulation');
-      return req.get('/v1/x509-certificates')
+      return req.get('/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(500)

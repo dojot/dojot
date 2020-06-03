@@ -101,7 +101,7 @@ describe('X509 Certificates - POST integrations', () => {
         certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
       };
 
-      return req.post('/v1/x509-certificates')
+      return req.post('/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send({ csr })
         .expect(201)
@@ -111,7 +111,7 @@ describe('X509 Certificates - POST integrations', () => {
     });
 
   it('should say that the operation is not yet available',
-    () => req.post('/v1/x509-certificates')
+    () => req.post('/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,

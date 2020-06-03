@@ -101,7 +101,7 @@ app.use((req, res, next) => {
 /* records the routes available through the service */
 app.use('/v1',
   require('./routes/trusted-cas-router'),
-  require('./routes/x509-certificates-router'));
+  require('./routes/certificates-router'));
 
 /* The express.static serves the file contents
  * The serveIndex is this module serving the directory */

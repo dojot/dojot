@@ -6,7 +6,7 @@ const paginate = require('express-paginate');
 
 const { validateRegOrGenCert, validateChangeOwnerCert } = require('../core/schema-validator');
 
-const service = require('../services/x509-certificates-service');
+const service = require('../services/certificates-service');
 
 const { certificate: parser } = require('../db');
 
@@ -14,7 +14,7 @@ const { BadRequest } = require('../core/errors');
 
 const router = express.Router();
 
-router.route('/x509-certificates')
+router.route('/certificates')
   /* Generate x.509 Certificate from CSR
    * (or also)
    * Register x.509 Certificate Issued by an External CA */
@@ -52,7 +52,7 @@ router.route('/x509-certificates')
     });
   });
 
-router.route('/x509-certificates/:certificateFingerprint')
+router.route('/certificates/:certificateFingerprint')
   /* Delete x.509 certificate */
   .delete(async (req, res) => {
     const fingerprint = req.params.certificateFingerprint.toUpperCase();
