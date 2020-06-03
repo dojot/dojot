@@ -1,15 +1,25 @@
-const hostname = process.env.HOSTNAME || 'v2k-bridge';
-const unsecuredMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
+const { toBoolean, unsecuredMode } = require('./utils');
 
 const app = {
-  logLevel: process.env.V2K_LOG_LEVEL || 'info',
   baseDir: process.env.BASE_DIR || '/opt/v2k_bridge',
-  hostname,
+  hostname: process.env.HOSTNAME || 'v2k-bridge',
+  logger: {
+    transports: {
+      console: {
+        level: process.env.V2K_CONSOLE_LOG_LEVEL || 'info',
+      },
+    },
+    verbose: (toBoolean(process.env.V2K_LOG_VERBOSE) === 'true') || true,
+  },
+};
+
+const messenger = {
+  kafkaTopic: process.env.V2K_KAFKA_PRODUCE_TOPIC || 'device-data',
 };
 
 const mqtt = {
   clientUsername: process.env.V2K_MQTT_USERNAME || 'v2k-bridge',
-  clientId: process.env.V2K_MQTT_CLIENT_ID || hostname,
+  clientId: process.env.V2K_MQTT_CLIENT_ID || app.hostname,
   host: process.env.V2K_MQTT_HOST || 'vernemq-k8s',
   port: parseInt(process.env.V2K_MQTT_PORT, 0) || 8883,
   keepalive: parseInt(process.env.V2K_MQTT_KEEPALIVE, 0) || 60,
@@ -24,12 +34,41 @@ const mqtt = {
       location: process.env.V2K_MQTT_CA_FILE || `${app.baseDir}/app/cert/ca.crt`,
     },
     certificate: {
-      location: process.env.V2K_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${hostname}.crt`,
+      location: process.env.V2K_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${app.hostname}.crt`,
     },
     privateKey: {
-      location: process.env.V2K_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${hostname}.key`,
+      location: process.env.V2K_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${app.hostname}.key`,
     },
   },
 };
 
-module.exports = { app, mqtt, unsecuredMode };
+const producer = {
+  'producer.flush.timeout.ms': parseFloat(process.env.V2K_PRODUCER_FLUSH_TIMEOUT_MS, 0) || 2000,
+  'producer.pool.interval.ms': parseFloat(process.env.V2K_PRODUCER_POOL_INTERVAL_MS, 0) || 100,
+  'producer.connect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_CONNECT_TIMEOUT_MS, 0) || 5000,
+  'producer.disconnect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_DISCONNECT_TIMEOUT_MS, 0)
+    || 10000,
+  kafka: {
+    'client.id': process.env.V2K_KAFKA_CLIENT_ID || app.hostname,
+    'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST || 'kafka-server:9092',
+    'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE) === 'true')
+      || false,
+    acks: parseInt(process.env.V2K_KAFKA_ACKS, 0) || -1,
+    retries: parseInt(process.env.V2K_KAFKA_RETRIES, 0) || 2,
+    'max.in.flight.requests.per.connection':
+      parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 0) || 1000000,
+    'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 0) || 100,
+    'socket.keepalive.enable':
+      (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE) === 'true') || false,
+    'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 0)
+      || 1048576,
+    'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS) || 0.5,
+    'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 0) || 10000,
+    'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC || 'none',
+    dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB) === 'true') || true,
+  },
+};
+
+module.exports = {
+  app, messenger, mqtt, producer,
+};
