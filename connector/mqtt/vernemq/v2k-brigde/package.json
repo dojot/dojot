@@ -12,8 +12,7 @@
   "main": "app.js",
   "scripts": {
     "app": "node app/app.js",
-    "test": "jest test/unit/*.js",
-    "coverage": "jest --collect-coverage"
+    "test": "jest test/unit/*.js"
   },
   "keywords": [
     "dojot",
@@ -24,8 +23,7 @@
   "author": "Jonaphael Aristil, Muhamed Avila",
   "license": "GPL-3.0, ISC",
   "dependencies": {
-    "@dojot/dojot-module-logger": "0.0.1-alpha.5",
-    "@dojot/iotagent-nodejs": "2.1.0-beta.8",
+    "@dojot/microservice-sdk": "0.1.3",
     "async": "^3.1.1",
     "md5": "^2.2.1",
     "moment": "^2.24.0",
@@ -34,7 +32,7 @@
   },
   "jest": {
     "coverageDirectory": "./coverage/",
-    "collectCoverage": false,
+    "collectCoverage": true,
     "collectCoverageFrom": [
       "app/**/*.js",
       "utils/**/*.js",
