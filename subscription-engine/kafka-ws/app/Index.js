@@ -112,4 +112,5 @@ try {
   server.listen(Config.server.port, Config.server.host);
 } catch (error) {
   logger.error(`Caught a final error: ${error.stack || error}`);
+  process.kill(process.pid, 'SIGTERM');
 }
