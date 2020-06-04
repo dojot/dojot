@@ -31,21 +31,21 @@ const req = request(app);
 describe('Trusted CAs - GET/POST/PATCH/DELETE integrations', () => {
   it('should get a HTTP status code = 201',
     async () => {
-      const res = await req.post('/v1/trusted-cas')
+      const res = await req.post('/api/v1/trusted-cas')
         .set('Authorization', `Bearer ${token}`)
         .send({ caPem });
       expect(res.statusCode).toEqual(201);
     });
   it('should get a HTTP status code = 200 for list of trusted CAs',
     async () => {
-      const res = await req.get('/v1/trusted-cas')
+      const res = await req.get('/api/v1/trusted-cas')
         .set('Authorization', `Bearer ${token}`)
         .send();
       expect(res.statusCode).toEqual(200);
     });
   it('should get a HTTP status code = 200',
     async () => {
-      const res = await req.get('/v1/trusted-cas/AB:CD:EF:01:23:45:67:89')
+      const res = await req.get('/api/v1/trusted-cas/AB:CD:EF:01:23:45:67:89')
         .set('Authorization', `Bearer ${token}`)
         .send();
       expect(res.statusCode).toEqual(200);
@@ -53,14 +53,14 @@ describe('Trusted CAs - GET/POST/PATCH/DELETE integrations', () => {
 
   it('should get a HTTP status code = 204 for PATCH',
     async () => {
-      const res = await req.patch('/v1/trusted-cas/AB:CD:EF:01:23:45:67:89')
+      const res = await req.patch('/api/v1/trusted-cas/AB:CD:EF:01:23:45:67:89')
         .set('Authorization', `Bearer ${token}`)
         .send({ allowAutoRegistration: false });
       expect(res.statusCode).toEqual(204);
     });
   it('should get a HTTP status code = 204 for DELETE',
     async () => {
-      const res = await req.delete('/v1/trusted-cas/AB:CD:EF:01:23:45:67:89')
+      const res = await req.delete('/api/v1/trusted-cas/AB:CD:EF:01:23:45:67:89')
         .set('Authorization', `Bearer ${token}`)
         .send();
       expect(res.statusCode).toEqual(204);

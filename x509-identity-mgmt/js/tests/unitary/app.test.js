@@ -14,7 +14,7 @@ const req = request(app);
 
 describe('unit testing of the App object', () => {
   it('should complain about a missing JWT',
-    () => req.get('/v1/certificates')
+    () => req.get('/api/v1/certificates')
       .send()
       .expect(401)
       .then((res) => {
@@ -24,7 +24,7 @@ describe('unit testing of the App object', () => {
       }));
 
   it('should complain about a invalid JWT',
-    () => req.get('/v1/certificates')
+    () => req.get('/api/v1/certificates')
       .set('Authorization', `${token}`)
       .send()
       .expect(401)
@@ -35,7 +35,7 @@ describe('unit testing of the App object', () => {
       }));
 
   it('should complain about a invalid URL',
-    () => req.get('/v1/invalidURL')
+    () => req.get('/api/v1/invalidURL')
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(404)
@@ -48,7 +48,7 @@ describe('unit testing of the App object', () => {
   it('should issue an internal error',
     () => {
       certServ.listCertificates.mockRejectedValue('Internal error simulation');
-      return req.get('/v1/certificates')
+      return req.get('/api/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(500)

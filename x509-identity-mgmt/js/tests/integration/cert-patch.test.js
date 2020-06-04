@@ -21,7 +21,7 @@ describe('X509 Certificates - PATCH integrations', () => {
       };
       db.certificate.model.exec.mockResolvedValue(queryResult);
 
-      return req.patch(`/v1/certificates/${fingerprint}`)
+      return req.patch(`/api/v1/certificates/${fingerprint}`)
         .set('Authorization', `Bearer ${token}`)
         .send({
           belongsTo: {
@@ -39,7 +39,7 @@ describe('X509 Certificates - PATCH integrations', () => {
       const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
       db.certificate.model.exec.mockResolvedValue(null);
 
-      return req.patch(`/v1/certificates/${fingerprint}`)
+      return req.patch(`/api/v1/certificates/${fingerprint}`)
         .set('Authorization', `Bearer ${token}`)
         .send({
           belongsTo: {

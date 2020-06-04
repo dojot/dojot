@@ -59,7 +59,7 @@ const req = request(app);
 
 describe('Root CA - integrations', () => {
   it('should get a Root CA Certificate',
-    async () => req.get('/v1/ca')
+    async () => req.get('/api/v1/ca')
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(200)
@@ -71,7 +71,7 @@ describe('Root CA - integrations', () => {
       }));
 
   it('should get a latest CRL from Root CA',
-    async () => req.get('/v1/ca/crl')
+    async () => req.get('/api/v1/ca/crl')
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(200)
@@ -82,7 +82,7 @@ describe('Root CA - integrations', () => {
       }));
 
   it('should get a Root CA Certificate without needing the JWT token.',
-    async () => req.get('/v1/throw-away/ca')
+    async () => req.get('/internal/api/v1/throw-away/ca')
       .send()
       .expect(200)
       .then((res) => {
@@ -93,7 +93,7 @@ describe('Root CA - integrations', () => {
       }));
 
   it('should get a latest CRL from Root CA without needing the JWT token.',
-    async () => req.get('/v1/throw-away/ca/crl')
+    async () => req.get('/internal/api/v1/throw-away/ca/crl')
       .send()
       .expect(200)
       .then((res) => {

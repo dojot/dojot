@@ -18,7 +18,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
   // test required fields
   // --------------------
   it("should have required property 'caPem'",
-    () => req.post('/v1/trusted-cas')
+    () => req.post('/api/v1/trusted-cas')
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(400)
@@ -44,7 +44,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
   // test all field types
   // --------------------
   it("should 'caPem' be string and 'allowAutoRegistration' be boolean",
-    () => req.post('/v1/trusted-cas')
+    () => req.post('/api/v1/trusted-cas')
       .set('Authorization', `Bearer ${token}`)
       .send({
         caPem: null,
@@ -81,7 +81,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
   // test all field limits
   // ---------------------
   it("should 'caPem' NOT be longer than 65536 characters",
-    () => req.post('/v1/trusted-cas')
+    () => req.post('/api/v1/trusted-cas')
       .set('Authorization', `Bearer ${token}`)
       .send({
         caPem: generateCert(65536 + 1), /* (+1 to test) */
@@ -109,7 +109,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
   // test all field regex
   // --------------------
   it("should 'caPem' should match the regex pattern",
-    () => req.post('/v1/trusted-cas')
+    () => req.post('/api/v1/trusted-cas')
       .set('Authorization', `Bearer ${token}`)
       .send({
         caPem: '',
@@ -138,7 +138,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
   // test required fields
   // --------------------
   it("should have required property 'allowAutoRegistration'",
-    () => req.patch(`/v1/trusted-cas/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/trusted-cas/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(400)
@@ -164,7 +164,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
   // test all field types
   // --------------------
   it("should 'allowAutoRegistration' be boolean",
-    () => req.patch(`/v1/trusted-cas/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/trusted-cas/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         allowAutoRegistration: null,

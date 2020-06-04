@@ -97,7 +97,7 @@ describe('X509 Certificates - DELETE integrations', () => {
       db.certificate.model.exec.mockResolvedValueOnce(queryResult);
       db.certificate.model.exec.mockResolvedValueOnce({});
 
-      return req.delete(`/v1/certificates/${fingerprint}`)
+      return req.delete(`/api/v1/certificates/${fingerprint}`)
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(204)

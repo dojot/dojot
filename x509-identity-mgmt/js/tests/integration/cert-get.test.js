@@ -27,7 +27,7 @@ describe('X509 Certificates - GET integrations', () => {
       };
       db.certificate.model.exec.mockResolvedValue(queryResult);
 
-      return req.get(`/v1/certificates/${fingerprint}?fields=fingerprint`)
+      return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerprint`)
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(200)
@@ -41,7 +41,7 @@ describe('X509 Certificates - GET integrations', () => {
       const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
       db.certificate.model.exec.mockResolvedValue(null);
 
-      return req.get(`/v1/certificates/${fingerprint}?fields=fingerprint`)
+      return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerprint`)
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(404)
@@ -65,7 +65,7 @@ describe('X509 Certificates - GET integrations', () => {
       db.certificate.model.exec.mockResolvedValue(results);
       db.certificate.model.count.mockResolvedValue(3);
 
-      return req.get('/v1/certificates?fields=fingerprint')
+      return req.get('/api/v1/certificates?fields=fingerprint')
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(200)
@@ -76,7 +76,7 @@ describe('X509 Certificates - GET integrations', () => {
               totalPages: 1,
               itemLimitPerPage: 25,
               totalItems: 3,
-              pages: [{ number: 1, url: '/v1/certificates?fields=fingerprint&page=1&limit=25' }],
+              pages: [{ number: 1, url: '/api/v1/certificates?fields=fingerprint&page=1&limit=25' }],
             },
             certificates: results,
           });
@@ -96,7 +96,7 @@ describe('X509 Certificates - GET integrations', () => {
       db.certificate.model.exec.mockResolvedValue(results);
       db.certificate.model.count.mockResolvedValue(3);
 
-      return req.get('/v1/certificates?limit=0;fields=fingerprint')
+      return req.get('/api/v1/certificates?limit=0;fields=fingerprint')
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(200)
@@ -110,15 +110,15 @@ describe('X509 Certificates - GET integrations', () => {
               pages: [
                 {
                   number: 1,
-                  url: '/v1/certificates?limit=1&page=1',
+                  url: '/api/v1/certificates?limit=1&page=1',
                 },
                 {
                   number: 2,
-                  url: '/v1/certificates?limit=1&page=2',
+                  url: '/api/v1/certificates?limit=1&page=2',
                 },
                 {
                   number: 3,
-                  url: '/v1/certificates?limit=1&page=3',
+                  url: '/api/v1/certificates?limit=1&page=3',
                 },
               ],
             },

@@ -10,8 +10,6 @@ const service = require('../services/certificates-service');
 
 const { certificate: parser } = require('../db');
 
-const { BadRequest } = require('../core/errors');
-
 const router = express.Router();
 
 router.route('/certificates')
@@ -76,20 +74,6 @@ router.route('/certificates/:certificateFingerprint')
     const filterFields = parser.getConditionFields({ fingerprint }, req.tenant);
     await service.changeOwnership(filterFields, req.body.belongsTo);
     res.sendStatus(HttpStatus.NO_CONTENT);
-  });
-
-
-router.route('/throw-away')
-  /* issue and throw away a certificate given a CSR.
-   * Used only by services behind the API gateway */
-  .post(validateRegOrGenCert(), async (req, res) => {
-    let result = null;
-    if (req.body.csr) {
-      result = await service.throwAwayCertificate(req.body);
-    } else {
-      throw BadRequest('It is necessary to inform the CSR for the certificate to be issued');
-    }
-    res.status(HttpStatus.CREATED).json(result);
   });
 
 module.exports = router;

@@ -98,15 +98,18 @@ app.use((req, res, next) => {
   return next(err);
 });
 
-/* records the routes available through the service */
-app.use('/v1',
+/* Private API - Internal use routes for services running behind API Gateway */
+app.use('/internal/api/v1', require('./routes/throw-away'));
+
+/* Open API - Routes available through the API Gateway */
+app.use('/api/v1',
   require('./routes/trusted-cas-router'),
   require('./routes/certificates-router'));
 
 /* The express.static serves the file contents
  * The serveIndex is this module serving the directory */
 const schemasDir = path.join(__dirname, 'public/schemas');
-app.use('/v1/schemas',
+app.use('api/v1/schemas',
   express.static(schemasDir),
   serveIndex(schemasDir));
 

@@ -101,7 +101,7 @@ describe('X509 Certificates - POST integrations', () => {
         certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
       };
 
-      return req.post('/v1/certificates')
+      return req.post('/api/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send({ csr })
         .expect(201)
@@ -111,7 +111,7 @@ describe('X509 Certificates - POST integrations', () => {
     });
 
   it('should say that the operation is not yet available',
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
@@ -130,7 +130,7 @@ describe('X509 Certificates - POST integrations', () => {
         certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
       };
 
-      return req.post('/v1/throw-away')
+      return req.post('/internal/api/v1/throw-away')
         .send({ csr })
         .expect(201)
         .then((res) => {
@@ -139,7 +139,7 @@ describe('X509 Certificates - POST integrations', () => {
     });
 
   it('should not issue and throw away a certificate given a Certificate PEM',
-    () => req.post('/v1/throw-away')
+    () => req.post('/internal/api/v1/throw-away')
       .send({
         certificatePem: `-----BEGIN CERTIFICATE-----\n${ejbcaResp}\n-----END CERTIFICATE-----`,
       })

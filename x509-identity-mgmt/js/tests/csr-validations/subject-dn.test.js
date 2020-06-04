@@ -27,7 +27,7 @@ Mc8WWOEIxYQ5lMKL86sVt5iWVrkvbsandaIP/6VWW3GMVXN4ET+XkcbWRzS6FfJS
 tQhSy0m/R1mP
 -----END CERTIFICATE REQUEST-----`;
 
-      return req.post('/v1/certificates')
+      return req.post('/api/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send({ csr })
         .expect(400)
@@ -56,7 +56,7 @@ Qd+6d3b4Ym9PqhhFpbkgUddRHAdIFC/Z26cc9UT+ckB+6pBX1nk5y4B7VnvUliD7
 9Wjw1cMWtRrkyvxQsOCk5jKcG0jmRU6aww==
 -----END CERTIFICATE REQUEST-----`;
 
-      return req.post('/v1/certificates')
+      return req.post('/api/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send({ csr })
         .expect(400)
@@ -85,7 +85,7 @@ gwG7C/QdNJyCYMcsGUi9SDND0uyFhWAY/DXKC5kqiVfjKY+Ff8KpoUws39i5wXrg
 TE2PQzRz0/pJNLXOtzkBoaKevQsrYJPP4FWwaQ+nk6L6vQHo4Fk=
 -----END CERTIFICATE REQUEST-----`;
 
-      return req.post('/v1/certificates')
+      return req.post('/api/v1/certificates')
         .set('Authorization', `Bearer ${token}`)
         .send({ csr })
         .expect(400)

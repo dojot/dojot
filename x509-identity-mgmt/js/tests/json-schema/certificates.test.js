@@ -15,7 +15,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // test required fields
   // --------------------
   it("should have required property 'certificatePem' or 'csr'",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(400)
@@ -55,7 +55,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should match exactly one schema in oneOf ('certificatePem' or 'csr')",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: p256Cert,
@@ -97,7 +97,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: p256Cert,
@@ -145,7 +145,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // test all field types
   // --------------------
   it("should 'certificatePem' be string",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: null,
@@ -169,7 +169,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should 'csr' be string",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         csr: null,
@@ -193,7 +193,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should 'belongsTo.device' be string",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: p256Cert,
@@ -220,7 +220,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should 'belongsTo.application' be an enumerated string",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: p256Cert,
@@ -262,7 +262,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // test all field limits
   // ---------------------
   it("should 'certificatePem' NOT be longer than 65536 characters",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: generateCert(65536 + 1), /* (+1 to test) */
@@ -285,7 +285,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should 'csr' NOT be longer than 65536 characters",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         csr: generateCSR(65536 + 1), /* (+1 to test) */
@@ -312,7 +312,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // test all field regex
   // --------------------
   it("should 'certificatePem' match the regex pattern",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: '',
@@ -336,7 +336,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should 'csr' match the regex pattern",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         csr: '',
@@ -360,7 +360,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       }));
 
   it("should 'belongsTo.device' match the regex pattern",
-    () => req.post('/v1/certificates')
+    () => req.post('/api/v1/certificates')
       .set('Authorization', `Bearer ${token}`)
       .send({
         certificatePem: p256Cert,
@@ -392,7 +392,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // test required fields
   // --------------------
   it("should have required property 'belongsTo'",
-    () => req.patch(`/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(400)
@@ -414,7 +414,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
       }));
 
   it("should 'belongsTo' match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
-    () => req.patch(`/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
@@ -491,7 +491,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // test all field types
   // --------------------
   it("should 'belongsTo' be object",
-    () => req.patch(`/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: null,
@@ -528,7 +528,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
 
 
   it("should 'belongsTo.device' should be string",
-    () => req.patch(`/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
@@ -554,7 +554,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
       }));
 
   it("should 'belongsTo.application' be an enumerated string",
-    () => req.patch(`/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
@@ -595,7 +595,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // test all field regex
   // --------------------
   it("should 'belongsTo.device' match the regex pattern",
-    () => req.patch(`/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
+    () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
