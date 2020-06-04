@@ -162,14 +162,14 @@ module.exports = {
       uri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/x509-identity-mgmt',
       options: {
 
-        /* The username for auth */
-        user: process.env.MONGO_USER || 'root',
+        /* The username for auth (e.g. 'root') */
+        user: process.env.MONGO_USER || undefined,
 
-        /* The password for auth */
-        pass: process.env.MONGO_PASS || 'pass',
+        /* The password for auth (e.g. 'pass') */
+        pass: process.env.MONGO_PASS || undefined,
 
-        /* Define the database to authenticate against */
-        authSource: process.env.MONGO_AUTH_DB || 'admin',
+        /* Define the database to authenticate against (e.g. 'admin') */
+        authSource: process.env.MONGO_AUTH_DB || undefined,
 
         /* By default, mongoose will automatically build indexes defined in
          * your schema when it connects. This is great for development, but

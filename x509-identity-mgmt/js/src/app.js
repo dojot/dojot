@@ -109,7 +109,7 @@ app.use('/api/v1',
 /* The express.static serves the file contents
  * The serveIndex is this module serving the directory */
 const schemasDir = path.join(__dirname, 'public/schemas');
-app.use('api/v1/schemas',
+app.use('/api/v1/schemas',
   express.static(schemasDir),
   serveIndex(schemasDir));
 
