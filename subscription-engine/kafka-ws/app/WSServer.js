@@ -1,8 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
-
 const WebSocket = require('ws');
 const url = require('url');
-
 const { v4: uuidv4 } = require('uuid');
 
 const { WSError } = require('./Errors').Errors;
@@ -11,29 +9,38 @@ const { ProcessingRuleManager } = require('./ProcessingRule');
 const { WhereParser } = require('./WhereProcessing');
 
 const KafkaTopicsCallbacksMgmt = require('./Kafka/KafkaTopicsConsumerCallbacksMgmt');
-const { isObjectEmpty } = require('./Utils');
+const {
+  checkAndParseURLPathname,
+  parseTenantAndExpTimeFromToken,
+  checkTopicBelongsTenant,
+  isObjectEmpty,
+} = require('./Utils');
+const { server: serverConfig } = require('./Config');
 
 const logger = new Logger();
 
 /**
   * WebSocket Server.
   *
-  * @param {http.Server} server HTTP server to be used
-  * @param {string} path URL path that will accept WebSocket connections
   */
 class WSServer {
+  /**
+   * @constructor
+   */
   constructor() {
     logger.info('Initializing WebSocket Server...');
-    // We initialize with `noServer: true` so we can add this server to a specific path in the HTTP
-    // server
+    // We initialize with `noServer: true` so we can add
+    // this server to a specific path in the HTTP server
     this.wsServer = new WebSocket.Server({ noServer: true });
     this.wsServer.on('connection', (ws, req) => this.onConnection(ws, req));
+
     logger.info('Registered WebSocket connection event');
 
     this.whereParser = WhereParser();
     logger.info('Initialized WhereParser');
 
     this.processingRuleManager = new ProcessingRuleManager();
+
     logger.info('Initialized ProcessingRuleManager');
     logger.info('...WebSocket Server initialized');
 
@@ -50,6 +57,7 @@ class WSServer {
       await this.kafkaTopicsCallbacksMgmt.init();
     } catch (error) {
       logger.error(`init: Caught ${error.stack}`);
+      throw error;
     }
   }
 
@@ -75,6 +83,22 @@ class WSServer {
       `Received connection from ${req.connection.remoteAddress}:${req.connection.remotePort}`,
     );
 
+    let parsedRoute = null;
+    // check if the url has the expected pattern with the topic
+    try {
+      parsedRoute = checkAndParseURLPathname(req.url, '/v1/websocket/:topic');
+    } catch (e) {
+      logger.error(e);
+      ws.close(ErrorCodes.INVALID_PATHNAME, e);
+    }
+    // get the topic of pathname
+    const kafkaTopic = parsedRoute[1];
+
+    // if the jwt usage setting is active, make the checks
+    if (serverConfig.jwt_header_auth) {
+      WSServer.tokenJwtHandle(req, ws, kafkaTopic);
+    }
+
     const { fields, where } = url.parse(req.url, true).query;
 
     let conditions;
@@ -96,8 +120,6 @@ class WSServer {
       return;
     }
 
-    const { params: { topic: kafkaTopic } } = req;
-
     const {
       rule: filter,
       fingerprint,
@@ -117,6 +139,7 @@ class WSServer {
           // it does not send a message to ws
           if (!isObjectEmpty(objectFiltered)) {
             boundSend(JSON.stringify(objectFiltered));
+            logger.debug(`Sending ${objectFiltered}`);
           }
         } catch (error) {
           logger.error(`Caught ${error.stack}`);
@@ -125,6 +148,38 @@ class WSServer {
 
     ws.on('close', (code, reason) => this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection));
   }
+
+  /**
+   * Checks on jwt
+   * - check if jwt is present in the header
+   * - make sure the tenant can access this topic
+   * - sets the connection timeout
+   *
+   * @param {*} req
+   * @param {*} ws
+   * @param {*} kafkaTopic
+   */
+  static tokenJwtHandle(req, ws, kafkaTopic) {
+    const { headers: { authorization: rawToken } } = req;
+
+    // takes the tenant and the expiration time in ms of the jwt token
+    let parsedToken = null;
+    try {
+      parsedToken = parseTenantAndExpTimeFromToken(rawToken);
+    } catch (e) {
+      logger.error('Can\'t parse JWT to get exp and tenant');
+      ws.close(ErrorCodes.INVALID_TOKEN_JWT, e);
+    }
+
+    const { tenant } = parsedToken;
+
+    // make sure the tenant can access this topic
+    if (!checkTopicBelongsTenant(kafkaTopic, tenant)) {
+      logger.error(`Tenant ${tenant} can't access topic ${kafkaTopic}`);
+      ws.close(ErrorCodes.FORBIDDEN_TOPIC, 'Tenant can\'t access this topic');
+    }
+  }
+
 
   /**
    * 'close' event callback.

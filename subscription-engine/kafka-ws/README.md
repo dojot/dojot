@@ -30,6 +30,9 @@ operators](#applying-conditions) for more info
 - `4002` - INVALID_ESCAPE_VALUE: an unsupported escape character has been passed to a condition
 - `4003` - INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
 - `4004` - INVALID_VALUE: a value with an invalid type was passed to a condition
+- `4400` - INVALID_PATHNAME: a Malformed URI was passed
+- `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the jwt token
+- `4403` - FORBIDDEN_TOPIC: the tenant sent in the token jwt cannot access the kafka topic passed
 - `4999` - INTERNAL: there is an error in the server
 
 ---
@@ -189,7 +192,31 @@ KAFKA_WS_TLS | Kafka-ws secure - enables TLS ( Needs: KAFKA_WS_TLS_CA_FILE, KAFK
 KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-cert.pem              | valid path               |
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
+KAFKA_WS_JWT_HEADER_AUTH   | Enables use token jwt in authorization header | false              | string: "true" or "false" |
 
+Note: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JWT token can access the kafka topic, generally topics start with `tenant.*`
+
+### **Token JWT**
+
+When KAFKA_WS_JWT_HEADER_AUTH is true, it is necessary to provide a JWT in the Header on the Autorization field, as in this example in js below:
+
+```js
+
+const makeJwtToken = (tenant) => {
+  const payload = {
+    service: tenant,
+  };
+  return `${Buffer.from('jwt schema').toString('base64')}.${
+    Buffer.from(JSON.stringify(payload)).toString('base64')}.${
+    Buffer.from('dummy signature').toString('base64')}`;
+};
+
+new WebSocket('ws://localhost:8080/tenant.ws.example.test', {
+  headers: {
+    Authorization: `Bearer ${makeJwtToken('tenant')}`,
+  },
+});
+```
 
 ### **Parser compilation**
 

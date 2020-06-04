@@ -3,6 +3,18 @@
 const fs = require('fs');
 const WebSocket = require('ws');
 
+const getTenant = (arg) => {
+  let tenant = 'tenant1';
+  switch (arg) {
+    case '1':
+      tenant = 'tenant2';
+      break;
+    default:
+      tenant = 'tenant1';
+  }
+  return tenant;
+};
+
 const createURL = (arg, host, port, tls) => {
   let urlCreate = '';
   if (tls) {
@@ -13,17 +25,27 @@ const createURL = (arg, host, port, tls) => {
   urlCreate = `${urlCreate}${host}:${port}/v1/websocket/`;
   switch (arg) {
     case '0':
-      urlCreate = `${urlCreate}ws.example.test/?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;`;
+      urlCreate = `${urlCreate}tenant1.ws.example.test/?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;`;
       break;
     case '1':
-      urlCreate = `${urlCreate}ws2.example.test?fields=location&where=temperature=gte:20;`;
+      urlCreate = `${urlCreate}tenant2.ws.example.test?fields=location&where=temperature=gte:20;`;
       break;
     default:
-      urlCreate = `${urlCreate}ws.example.test`;
+      urlCreate = `${urlCreate}tenant1.ws.example.test`;
   }
   return urlCreate;
 };
 
+const makeJwtToken = (tenant, expSeconds, user = 'test') => {
+  const payload = {
+    service: tenant,
+    username: user,
+    exp: expSeconds,
+  };
+  return `${Buffer.from('jwt schema').toString('base64')}.${
+    Buffer.from(JSON.stringify(payload)).toString('base64')}.${
+    Buffer.from('dummy signature').toString('base64')}`;
+};
 
 const parseBoolean = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
@@ -42,6 +64,10 @@ const url = createURL(args[0], host, port, tls);
 
 console.info(`Trying to connect ${url}`);
 
+const tenant = getTenant(args[0]);
+
+const token = makeJwtToken(tenant, 720, 'user');
+
 let ws = null;
 if (tls) {
   ws = new WebSocket(url, {
@@ -50,9 +76,16 @@ if (tls) {
     ca: [fs.readFileSync(caFile)],
     rejectUnauthorized: true,
     requestCert: true,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 } else {
-  ws = new WebSocket(url);
+  ws = new WebSocket(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 }
 
 // Other test websockets with different conditions:

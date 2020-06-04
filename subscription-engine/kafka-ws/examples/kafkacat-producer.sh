@@ -24,13 +24,13 @@ do
 
 
     echo "{ \"sensor\": { \"status\": \"${STATUS}\"}, \"temperature\": ${TEMP} }"  |\
-    kafkacat -b kafka:9092 -P -t ws.example.test
+    kafkacat -b kafka:9092 -P -t tenant1.ws.example.test
 
     echo "{ \"temperature\": ${TEMP+2}, \"rain\": ${RAIN} }"  |\
-    kafkacat -b kafka:9092 -P -t ws.example.test
+    kafkacat -b kafka:9092 -P -t tenant1.ws.example.test
 
     echo "{ \"location\": \"${LOCA}\", \"temperature\": ${TEMP}}"  |\
-    kafkacat -b kafka:9092 -P -t ws2.example.test
+    kafkacat -b kafka:9092 -P -t tenant2.ws.example.test
 
-    sleep 10
+    sleep 20
 done

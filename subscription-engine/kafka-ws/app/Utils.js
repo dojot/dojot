@@ -1,4 +1,6 @@
 const Crypto = require('crypto-js');
+const url = require('url');
+const { pathToRegexp } = require('path-to-regexp');
 
 /* Constants */
 
@@ -87,7 +89,79 @@ function isNumber(value) {
   return false;
 }
 
+/**
+ * Check if object if empty, like {}
+ *
+ * @param {object} object
+ * @returns {boolean} true if it is empty
+ */
 const isObjectEmpty = (object) => Object.keys(object).length === 0;
+
+/**
+ * Parse JWT and get expiratonTime (ms) and tenant
+ * @param {string} rawToken
+ *
+ * @returns {object} obj like {expiratonTime: 123, tenant: example}
+ */
+const parseTenantAndExpTimeFromToken = (rawToken) => {
+  if (!rawToken) {
+    throw new Error('There is no authorization token in the header');
+  }
+
+  const tokenSplit = rawToken.split('.');
+
+  if (tokenSplit.length !== 3) {
+    throw new Error('Invalid token');
+  }
+
+  const tokenData = JSON.parse((Buffer.from(tokenSplit[1], 'base64')).toString());
+  const { service: tenant, exp: expirationTimeSec } = tokenData;
+
+  if (!tenant) {
+    throw new Error('Tentant is not inside the token.');
+  }
+
+  return {
+    tenant,
+    expirationTime: expirationTimeSec ? expirationTimeSec * 1000 : 0, // to ms
+  };
+};
+
+/**
+ * Checks if the topic belongs to tenant,
+ *  for that the topic must be started with {tenant}.
+ *
+ * @param {string} topic
+ * @param {string} tenant
+ *
+ * @returns {boolean} true if the topic starts with {tenant}.
+ */
+const checkTopicBelongsTenant = (topic, tenant) => {
+  if (topic && tenant) {
+    return (topic
+      .toLowerCase()
+      .startsWith(`${tenant.toLowerCase()}.`));
+  }
+  return false;
+};
+
+/**
+ * Parse parthname from a URL in substring matches
+ *
+ * @param {string} fullUrl ex: http://google.com
+ * @param {string} pathToRegex ex: /v1/websocket/:topic
+ *
+ * @returns {array} substring matches
+ */
+const checkAndParseURLPathname = (fullUrl, pathToRegex) => {
+  const { pathname } = url.parse(fullUrl);
+  const regexpRoute = pathToRegexp(pathToRegex);
+  const parsedRoute = regexpRoute.exec(pathname);
+  if (!parsedRoute) {
+    throw new Error('Malformed Pathname');
+  }
+  return parsedRoute;
+};
 
 
 module.exports = {
@@ -98,4 +172,7 @@ module.exports = {
   createFingerprint,
   isNumber,
   isObjectEmpty,
+  parseTenantAndExpTimeFromToken,
+  checkTopicBelongsTenant,
+  checkAndParseURLPathname,
 };
