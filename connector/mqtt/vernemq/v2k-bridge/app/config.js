@@ -43,15 +43,15 @@ const mqtt = {
 };
 
 const producer = {
-  'producer.flush.timeout.ms': parseFloat(process.env.V2K_PRODUCER_FLUSH_TIMEOUT_MS, 0) || 2000,
-  'producer.pool.interval.ms': parseFloat(process.env.V2K_PRODUCER_POOL_INTERVAL_MS, 0) || 100,
-  'producer.connect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_CONNECT_TIMEOUT_MS, 0) || 5000,
-  'producer.disconnect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_DISCONNECT_TIMEOUT_MS, 0)
+  'producer.flush.timeout.ms': parseFloat(process.env.V2K_PRODUCER_FLUSH_TIMEOUT_MS) || 2000,
+  'producer.pool.interval.ms': parseFloat(process.env.V2K_PRODUCER_POOL_INTERVAL_MS) || 100,
+  'producer.connect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_CONNECT_TIMEOUT_MS) || 5000,
+  'producer.disconnect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_DISCONNECT_TIMEOUT_MS)
     || 10000,
   kafka: {
     'client.id': process.env.V2K_KAFKA_CLIENT_ID || app.hostname,
     'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST || 'kafka-server:9092',
-    'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE) === 'true')
+    'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE))
       || false,
     acks: parseInt(process.env.V2K_KAFKA_ACKS, 0) || -1,
     retries: parseInt(process.env.V2K_KAFKA_RETRIES, 0) || 2,
@@ -59,13 +59,13 @@ const producer = {
       parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 0) || 1000000,
     'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 0) || 100,
     'socket.keepalive.enable':
-      (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE) === 'true') || false,
+      (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)) || false,
     'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 0)
       || 1048576,
     'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS) || 0.5,
     'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 0) || 10000,
     'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC || 'none',
-    dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB) === 'true') || true,
+    dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB)) || true,
   },
 };
 
