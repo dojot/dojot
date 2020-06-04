@@ -7,9 +7,9 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 . "${BASE_DIR}"/scripts_tls/saveFormattedCRT.sh
 
 echo
-echo "Retrieve certificate of trusted CA : ${certEjbcaApiUrl}/v1/throw-away/ca "
+echo "Retrieve certificate of trusted CA : ${certEjbcaApiUrl}/internal/api/v1/throw-away/ca "
 
-certCa=$(curl -X GET "${certEjbcaApiUrl}"/v1/throw-away/ca \
+certCa=$(curl -X GET "${certEjbcaApiUrl}"/internal/api/v1/throw-away/ca \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" | jq '.caPem' -r )
 

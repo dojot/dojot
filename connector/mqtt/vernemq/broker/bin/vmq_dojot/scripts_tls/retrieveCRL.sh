@@ -5,9 +5,9 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 . "${BASE_DIR}"/scripts_tls/_initVariables.sh
 
 echo
-echo "Retrieve CRL of trusted CA : ${certEjbcaApiUrl}/v1/throw-away/ca/crl "
+echo "Retrieve CRL of trusted CA : ${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl "
 
-certCrl=$(curl  -X GET "${certEjbcaApiUrl}/v1/throw-away/ca/crl?update=true" \
+certCrl=$(curl  -X GET "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl?update=true" \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" | jq '.crl' -r)
 
