@@ -12,6 +12,8 @@ const moment = require('moment');
  *
  * @param {string} topic
  * @param {Object} payload
+ *
+ * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
  */
 const generateDojotDeviceDataMessage = (topic, payload) => {
   const username = topic.split('/')[0];
@@ -30,13 +32,11 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   };
 };
 
-const unsecuredMode = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
-
 /**
  * Transforms a string into a boolean (case insensitive).
  *
  * @param {string} value
  */
-const toBoolean = (value) => value && (value.toString().toLowerCase() === 'true');
+const toBoolean = (value) => value && (value.toString().toLowerCase().trim() === 'true');
 
-module.exports = { generateDojotDeviceDataMessage, toBoolean, unsecuredMode };
+module.exports = { generateDojotDeviceDataMessage, toBoolean };

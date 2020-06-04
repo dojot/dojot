@@ -29,7 +29,7 @@ V2K_MQTT_KEEPALIVE                 | Mqtt client keepalilve                     
 V2K_MQTT_KEY_FILE                  | Mqtt client key file                                                             | ${BASE_DIR}/app/verne/${HOSTNAME}.key| string                                            |
 V2K_MQTT_USERNAME                  | Mqtt client username                                                             | v2k-bridge                           | string                                            |
 V2K_MQTT_PORT                      | Mqtt broker port                                                                 | 8883                                 | integer                                           |
-V2K_MQTT_SECURE                    | Mqtt client secure                                                               | true                                 | boolean/string/integer                            |
+V2K_MQTT_SECURE                    | Mqtt client secure                                                               | true                                 | true, false (case insensitive)                    |
 V2K_MQTT_SUBSCRIPTION_QOS          | Mqtt client Quality of service                                                   | 1                                    | integer                                           |
 V2K_MQTT_SUBSCRIPTION_TOPIC        | Mqtt client topic to subscribe                                                   | $share/group/+/attrs                 | string                                            |
 

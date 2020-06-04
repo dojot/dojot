@@ -21,22 +21,6 @@ describe('Testing utils', () => {
     });
   });
 
-  describe('unsecuredMode', () => {
-    it('Should correctly evaluate the mode', () => {
-      expect(utils.unsecuredMode()).toBe(false);
-      expect(utils.unsecuredMode(1)).toBe(true);
-      expect(utils.unsecuredMode(0)).toBe(false);
-      expect(utils.unsecuredMode(-24)).toBe(false);
-      expect(utils.unsecuredMode('true')).toBe(true);
-      expect(utils.unsecuredMode('TruE')).toBe(true);
-      expect(utils.unsecuredMode('false')).toBe(false);
-      expect(utils.unsecuredMode('test')).toBe(false);
-      expect(utils.unsecuredMode('FalSe')).toBe(false);
-      expect(utils.unsecuredMode('15245')).toBe(true);
-      expect(utils.unsecuredMode(15245)).toBe(true);
-    });
-  });
-
   describe('toBoolean', () => {
     it('Should return the correct value', () => {
       expect(utils.toBoolean('true')).toBe(true);
