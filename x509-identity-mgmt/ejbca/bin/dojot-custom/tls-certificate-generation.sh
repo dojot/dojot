@@ -91,16 +91,16 @@ function generateCertServerTLS() {
 
 function generateCertClientTLS() {
 
+    local enrollmentCode
+    enrollmentCode="$(dd if="${SECURE_RANDOM_SOURCE}" count=1 bs=18 2>/dev/null | base64 -w 0)"
+
     local existingClient
     existingClient=$(ejbca_cmd ra findendentity --username "${EJBCA_CLIENT_USERNAME}" 2>&1 | grep "Username: ${EJBCA_CLIENT_USERNAME}" || true)
 
     if [ "x$existingClient" == "x" ] ; then
 
         echo
-        log "INFO" "Issuing TLS certificate for EJBCA Client Application."
-
-        local enrollmentCode
-        enrollmentCode="$(dd if="${SECURE_RANDOM_SOURCE}" count=1 bs=18 2>/dev/null | base64 -w 0)"
+        log "INFO" "Creating an End-Entity for EJBCA Client Application."
 
         local endEntityUid
         endEntityUid="c-0$(dd if=/dev/urandom count=1 bs=8 2>/dev/null | hexdump -e '/1 "%02x"')"
@@ -119,9 +119,9 @@ function generateCertClientTLS() {
         # configure the access permissions of the EJBCA Client
         setupClientTLSRoleMember
 
-        log "INFO" "TLS certificate for EJBCA Client Application setup completed!"
+        log "INFO" "End-Entity for EJBCA Client Application created!"
     else
-        log "WARN" "EJBCA Client Application already exists!"
+        log "WARN" "End-Entity for EJBCA Client Application already exists!"
     fi
 
     # creates the TLS directory for EJBCA Client if it doesn't already exist
@@ -130,6 +130,10 @@ function generateCertClientTLS() {
     # If the directory is empty, it generates the necessary files for the
     # TLS connection between the client application and the EJBCA
     if ! find "${EJBCA_TLS_CLIENT_DIR}" -mindepth 1 | read -r ; then
+
+        echo
+        log "INFO" "Issuing TLS certificate for EJBCA Client Application."
+
         ejbca_cmd ra setendentitystatus \
             --username "${EJBCA_CLIENT_USERNAME}" \
             -S 10
@@ -150,6 +154,10 @@ function generateCertClientTLS() {
         ejbca_cmd ca getcacert \
             --caname "${SERVICES_CA}" \
             -f "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem"
+
+        log "INFO" "TLS certificate for EJBCA Client Application setup completed!"
+    else
+        log "WARN" "TLS certificate for EJBCA Client Application already exists!"
     fi
 }
 
