@@ -9,7 +9,7 @@ const app = {
         level: process.env.V2K_CONSOLE_LOG_LEVEL || 'info',
       },
     },
-    verbose: (toBoolean(process.env.V2K_LOG_VERBOSE) === 'true') || true,
+    verbose: (toBoolean(process.env.V2K_LOG_VERBOSE)) || true,
   },
 };
 
