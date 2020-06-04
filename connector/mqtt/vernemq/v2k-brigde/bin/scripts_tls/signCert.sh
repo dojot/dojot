@@ -1,11 +1,14 @@
 #!/bin/bash
 
-BASE_DIR=${BASE_DIR:-"/vernemq"}
+#########################################################
+#########################################################
 
-. "${BASE_DIR}"/scripts_tls/_initVariables.sh
+BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
+
+. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
 
 
-. "${BASE_DIR}"/scripts_tls/saveFormattedCRT.sh
+. "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
 echo
 echo "Signing cert : ${certEjbcaApiUrl}/internal/api/v1/throw-away "

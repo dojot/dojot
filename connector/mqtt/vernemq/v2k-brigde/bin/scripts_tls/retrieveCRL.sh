@@ -1,13 +1,17 @@
 #!/bin/bash
 
-BASE_DIR=${BASE_DIR:-"/vernemq"}
+#########################################################
+#########################################################
 
-. "${BASE_DIR}"/scripts_tls/_initVariables.sh
+
+BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
+
+. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
 
 echo
 echo "Retrieve CRL of trusted CA : ${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl "
 
-certCrl=$(curl  -X GET "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl?update=true" \
+certCrl=$(curl  -X GET "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl" \
 -H "Content-Type:application/json" \
 -H "Accept:application/json" | jq '.crl' -r)
 
