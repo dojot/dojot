@@ -39,7 +39,7 @@ function generateCertServerTLS() {
             --type 1 \
             --token JKS \
             --password "${keyStorePassword}" \
-            --altname "dnsName=${HOST_NAME}, iPAddress=127.0.0.1" \
+            --altname "iPAddress=127.0.0.1" \
             --certprofile "${APP_SERVER_CERT_PROFILE}" \
             --eeprofile "${APP_SERVER_ENTITY_PROFILE}"
 

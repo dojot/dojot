@@ -130,7 +130,6 @@ readonly CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT=${CA_RENEWER_SERVICE_TIME_BEFOR
 # In this case the parameters "hostname" and "domainname" must be
 # defined in docker-compose.yml
 readonly HOST_NAME="$(hostname --fqdn)"
-readonly DOMAIN_NAME="$(hostname -d)"
 #
 # The container IP is defined by the docker in the file /etc/hosts
 readonly CONTAINER_IP="$(grep "${HOST_NAME}" /etc/hosts | cut -f1)"
