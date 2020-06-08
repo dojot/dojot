@@ -1,0 +1,233 @@
+FORMAT: 1A
+HOST: https://localhost:8000/x509/v1
+
+# X.509 Identity Management
+
+API documentation for X.509 Identity Management
+
+# Group X.509
+
+API to provide x.509 identification for final dojot entities, that is, IoT devices that communicate with the dojot IoT platform.
+
+## Endpoint for certificates in general [/certificates{?page,limit,fields,keyVal}]
+
+### Create x.509 Certificate from CSR [POST]
+
+Creates a X.509 certificate using the specified Certificate Signing Request (CSR).
+
+The SubjectDN only needs to contain the CN field, limited to 255 characters, being A-Z, a-z, 0-9 and space.
+
+The CSR must include a public key that is either an RSA key with a length of at least 2048 bits or an ECC key from NIST recommended curves: P-256, P-384 or P-521.
+
++ csr (string) - The CSR in PEM Format
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
+    + Body
+
+            {
+                "csr": "[[CSR in PEM Format]]"
+            }
+
+    + Schema
+
+            {
+                "$schema": "http://json-schema.org/draft-07/schema",
+                "type": "object",
+                "default": {},
+                "additionalProperties": false,
+                "properties": {
+                    "csr": {
+                        "type": "string",
+                        "title": "Certificate Signing Request (CSR) Schema",
+                        "description": "Schema for validating an PKCS#10 CSR.",
+                        "contentEncoding": "base64",
+                        "contentMediaType": "application/pkcs10",
+                        "maxLength": 65536,
+                        "pattern": "^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}$"
+                    }
+                }
+            }
+
++ Response 201 (application/json)
+
+    + Attributes (object)
+        - certificateFingerprint: D3:20:80:C7:89:B6:5D:B9:83:BF:D1:7E:93:6A:F2:CB:0B:57:CF:33:30:ED:9E:4A:7C:05:4D:D4:D0:8E:3D:2F (string)
+
+            Fingerprint (as SHA256) of the certificate, where each pair of bytes (represented by hexadecimal characters) are separated by a colon.
+
+        - certificatePem: `-----BEGIN CERTIFICATE-----[[Certificate Base64 Encoded em PEM Format]]-----END CERTIFICATE-----` (string)
+
+            The PEM format consists of a header and a footer, the Certificate is encoded in *Base64* in the middle.
+            Note that each line has a maximum of 64 bytes. As the file is in JSON payload, it is necessary to represent the line breaks with the `\r\n` markers.
+
+### List X.509 Certificates [GET]
+
+Lists the x.509 certificates registered for your tenant.
+The results might be filtered and are paginated with a default page size of 25.
+
++ Parameters
+
+    + page (number, optional) - It is a metadata for paginated results.
+        - Default: 1
+
+    + limit (number, optional) - The maximum number of results to return per page.
+        - Default: 25
+
+    + fields (string, optional) - List of keys (comma-separated) that should be included in the result. If the fields parameter is not set, all keys will be kept in the result.
+
+    + keyVal (string, optional) - Filters the returned documents by the given key=val. If more than one key=val pair is set; the returned documents must contain all of them.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "paging": {
+                    "currentPage": 1,
+                    "totalPages": 11,
+                    "itemLimitPerPage": 5,
+                    "totalItems": 55,
+                    "pages": [
+                        {
+                            "number": 1,
+                            "url": "/api/v1/certificates?limit=5&page=1"
+                        },
+                        {
+                            "number": 2,
+                            "url": "/api/v1/certificates?limit=5&page=2"
+                        },
+                        {
+                            "number": 3,
+                            "url": "/api/v1/certificates?limit=5&page=3"
+                        }
+                    ]
+                },
+                "certificates": [
+                    {
+                        "issuedByDojotPki": true,
+                        "autoRegistered": false,
+                        "fingerprint": "01:89:B9:85:55:38:34:B6:43:12:57:EC:09:08:0B:22:31:BC:FC:3D:AF:C8:00:94:C0:89:60:89:54:63:17:F0",
+                        "pem": "-----BEGIN CERTIFICATE-----\nMIIGZDCCBEygAwIBAgIUG/kCnjE/+o1Gd7fJ5uROnUA8PAYwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSsw\nKQYDVQQDDCJhZG1pbjpUZXN0ZSBkZSBjaGF2ZSBFQ0Mgc2VjcDM4NHIxMHYwEAYH\nKoZIzj0CAQYFK4EEACIDYgAEHWk7X3/gQAUZ9jV1adKr6V9W08C2/+R47WX2f5J8\nOzggEJISeAR0XDCo5ezglsOkd8v7rJ1h/lGfoCjKzc61V4htK2ILHAcGuf6YdvyQ\n9sJhq//JHScVygwWI+ARzk0So4ICvjCCArowDAYDVR0TAQH/BAIwADAfBgNVHSME\nGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYDVR0uBIHUMIHRMIHOoIHLoIHI\nhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1Ymxp\nY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0YWNybCZpc3N1ZXI9VUlEJTNE\nYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUwOSUyMElkZW50aXR5JTIwQ0El\nMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJDTyUzRGRvam90JTIwSW9UJTIw\nUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMIIBWgYDVR0f\nBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1jcmwm\naXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1MTklMkNDTiUzRFg1MDklMjBJ\nZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0ZSUyMElzc3VlciUyQ08lM0Rk\nb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMwIQYKCZImiZPyLGQBAQwTYy0w\nZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkG\nA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxh\ndGZvcm0wHQYDVR0OBBYEFDZLtrE9HG9wXzzAWu6QQBchA5gOMA4GA1UdDwEB/wQE\nAwID6DANBgkqhkiG9w0BAQsFAAOCAgEAh8Hd+81mvVpBkCFifUAyu8JKuACbDsRA\nLlOpA1i0oj+gMGyhkHPjo3+tuPWAsiHq7/4GucnCd29/jXO97M2YM0u1tAs8rQmu\nTnJR75H9O0mYbB+CNAJV9ZgcjZspFb8JVcMumA0nlcJHg7yHEZ7Awy5g+FsDiE9b\nckkSo90o0UPt1toXgGqVNQwT7wXVOTFJgEee9C2/oO/AgR5mWxZMAVI7afgGddbM\n/FsSUAmfjq6Cay5d56aJrfKEV480Mp0YevEdBmRHF4nHx+9xtnouc0FaPBvU7DXB\nw+h3VLUuIi5l2Ro9MvnUWMNNqdvXD+5HeaQbIbP2tQ+rE/Pg2w1txuxm+XbnMbCr\nh3NV8gZk3nwyKXa9L64DJaTNu1ZScxm0GqhVSbLLTDqraK3IGVQ5uDcCaU0jH9o5\na0ZjanmcICBKuttyKcWm20E/KmmS7frBFxvmrOE0tb3XVy4Nt8cF8oScxJKC0hAx\nAgjomVslurKCT33TBlv4GJwamalHoaH8RGrkfMGpFe6r9N+Sv8aEAajFidd0vF0a\nle9jNrO88BrEADYXc+KSTJR5YNV2L/zMYBGMv8dB8ZadmJjUNlZEsFddeqGiwuIG\nB1HJ23q/kF3dwI/lnl1kYXtsweEdgAmiaSqgEOG4eRbV9UBS2cqDvHuhYJhoY47J\n61vg0s7WFh0=\n-----END CERTIFICATE-----",
+                        "belongsTo": {},
+                        "tenant": "admin",
+                        "createdAt": "2020-06-06T21:13:36.448Z"
+                    },
+                    {
+                        "issuedByDojotPki": true,
+                        "autoRegistered": false,
+                        "fingerprint": "05:5B:91:45:81:93:55:92:AD:7A:0A:40:F4:05:05:0C:6F:31:14:97:D9:01:87:86:90:50:5C:F8:7B:97:F9:78",
+                        "pem": "-----BEGIN CERTIFICATE-----\nMIIGRjCCBC6gAwIBAgIUWaMM+XRlf4mugbY6bjC7fEOjfEwwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMDcwMFoX\nDTIxMDYwNjIxMDcwMFowSTEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSow\nKAYDVQQDDCFhZG1pbjpFQ0MgcHJpbWUyNTZ2MSBUaGlhZ28gVGVzdGUwWTATBgcq\nhkjOPQIBBggqhkjOPQMBBwNCAAScpvJvi3wQGER+b2CQ3/E+Nw+ddTCu2fv5sF/E\nBqVe0tWQu1rWPDmrwmjkIOM33e1fo0SzeNaDrDurPEx7OTAOo4ICvjCCArowDAYD\nVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYD\nVR0uBIHUMIHRMIHOoIHLoIHIhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0\nYWNybCZpc3N1ZXI9VUlEJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUw\nOSUyMElkZW50aXR5JTIwQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJD\nTyUzRGRvam90JTIwSW9UJTIwUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIG\nCCsGAQUFBwMEMIIBWgYDVR0fBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3\nMi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0\nL2NlcnRkaXN0P2NtZD1jcmwmaXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1\nMTklMkNDTiUzRFg1MDklMjBJZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0\nZSUyMElzc3VlciUyQ08lM0Rkb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMw\nIQYKCZImiZPyLGQBAQwTYy0wZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUw\nOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYD\nVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0wHQYDVR0OBBYEFD1vcBmX/6Of+o7t8eis\nKz8AyLtgMA4GA1UdDwEB/wQEAwID6DANBgkqhkiG9w0BAQsFAAOCAgEALwyxbhhT\nPbZelxPYPZc7uTwtYOi4Ha4npk2iPWa48c5p37o0qID5wk0evoGJgjwngDfGEBfs\nG4dYipFjxSi+bkjhV6Bll8VXasMM/U4YaftQu3uEsTnjbGVXEY3jQmetXQ+hPcn6\nqlj9jqQPBwI6ieoXuLXBdBB8eLtCxIwjBeXWT75m6ILRUw9csDEkt+tjZx913jWe\nh8skZ280EbfJnketd0oayzU3exsoaHXuHXEdEJBjUptl5eLBoVGGsgV6rMATeZ/a\n64BeyFV4uaQWYVphz12xplysxOc/SemkZPZEci3lkct163FQuRdazWJnikjWg3ht\n9dJh9jiXwCuGL/hwFNjHrFil0dKhI53TOpqO+lgtxZwnImVwvXrf+UtmJ+YdGeJu\ntAuJdehJ6O/lHD4GUhFWAWD1LCyOPxi+wgUGrH43qLcybvQferNxqZPnnpmn2EjP\nhl+4OWoryhjXUR8UpV2MLr0P6QRvl6y159oISFNxa4JjBGXBmWF770ccp6FTukUg\nvC8MSMLtgnBJqJ/UyYF8QKKTdnfwoQQQOeyOeJ59zIQxjeic8bRywZxLHrHMNYYc\n/+jQiqMc7K/+3Cmn8GiUcPJtUv+qlcD3bJMv6RxDaj/OLUVA6vSOwKEepFueb71b\nDpsr30AtcONH8L8ujiO/ZMil/6KJG00glr8=\n-----END CERTIFICATE-----",
+                        "belongsTo": {},
+                        "tenant": "admin",
+                        "createdAt": "2020-06-06T21:07:56.765Z"
+                    },
+                    {
+                        "issuedByDojotPki": true,
+                        "autoRegistered": false,
+                        "fingerprint": "06:F6:68:C7:97:D0:8D:2D:BD:81:00:64:70:28:50:CE:FA:3B:54:C1:D2:6E:56:F7:1A:F0:6C:D5:19:AA:A1:94",
+                        "pem": "-----BEGIN CERTIFICATE-----\nMIIGZDCCBEygAwIBAgIUZmlG21/XH0EoRo3IpaDpB1JnPK4wDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSsw\nKQYDVQQDDCJhZG1pbjpUZXN0ZSBkZSBjaGF2ZSBFQ0Mgc2VjcDM4NHIxMHYwEAYH\nKoZIzj0CAQYFK4EEACIDYgAEHWk7X3/gQAUZ9jV1adKr6V9W08C2/+R47WX2f5J8\nOzggEJISeAR0XDCo5ezglsOkd8v7rJ1h/lGfoCjKzc61V4htK2ILHAcGuf6YdvyQ\n9sJhq//JHScVygwWI+ARzk0So4ICvjCCArowDAYDVR0TAQH/BAIwADAfBgNVHSME\nGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYDVR0uBIHUMIHRMIHOoIHLoIHI\nhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1Ymxp\nY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0YWNybCZpc3N1ZXI9VUlEJTNE\nYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUwOSUyMElkZW50aXR5JTIwQ0El\nMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJDTyUzRGRvam90JTIwSW9UJTIw\nUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMIIBWgYDVR0f\nBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1jcmwm\naXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1MTklMkNDTiUzRFg1MDklMjBJ\nZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0ZSUyMElzc3VlciUyQ08lM0Rk\nb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMwIQYKCZImiZPyLGQBAQwTYy0w\nZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkG\nA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxh\ndGZvcm0wHQYDVR0OBBYEFDZLtrE9HG9wXzzAWu6QQBchA5gOMA4GA1UdDwEB/wQE\nAwID6DANBgkqhkiG9w0BAQsFAAOCAgEAG3QPbes/2ufPlehHmr7exfZ7ZwhuWlDp\nFGTbL/VKsciBDZBZ5ZPUPTrmcDKVdXs/lN/AzxifQUZ2AWlLv6h8P6uoJ2MCgxNp\n/7TW3IMKMiPcuBowPPmxaXP/DCnGhuZ9sxxh5zUYyqzOK2qJTaGqK1rI+MjE2Efh\nw5ULlqw5MddwXuGBmsKfmfW65Ix8n+5cUMW0X6APkG5iX2P+57BDHSt6v8UbzMAS\nzwRQZ9oec5KwS7icZTREfqJ50edNpqLuoZ+UCnjkgoCpyG9TvH3SiihQo6W9CQ9J\nA6Z1K2TMW56dIdc0PDQ9uiV/xuVtkxyDQxgEGsWw0ecN7JeM2vGMR00c//NdVXq9\nnyuJWLbhBAiZDit2kn0sXtCZS0uXp46f+iIwNfVt6HhSVxDtI0WPPjq4+RqaUbIA\nkmR/gv2QAjp6XqTHPX+wXv2iQz9WF96EAPL2n1Wj4WEhlmP3t7uSGQj5ITiPqbX9\nJgxNFI6xZkIjeJZuvsZWekhbZ4ULRngF8a1KdkKvomTZhEYtm7SjCop565InLo0+\n3/MDhNKIIHQC58kV0wqw2Q6S3twKzOnxdYMWaXN/UZYIiJxkIQ+6breaKO8geZ74\ncDIwplNG5Dze2NfOwY7R8YMpYYNCLbygx7+TqkCAYlls7bNgjDZ8ch/1a4aYFtHl\n9K1e9s4zjdw=\n-----END CERTIFICATE-----",
+                        "belongsTo": {},
+                        "tenant": "admin",
+                        "createdAt": "2020-06-06T21:13:37.619Z"
+                    },
+                    {
+                        "issuedByDojotPki": true,
+                        "autoRegistered": false,
+                        "fingerprint": "14:61:7A:C9:41:47:47:35:E1:37:E4:35:C4:3E:CE:BE:62:28:CB:B2:CF:A5:6F:1A:E5:30:64:F8:CC:74:39:78",
+                        "pem": "-----BEGIN CERTIFICATE-----\nMIIGijCCBHKgAwIBAgIUA5KTnZU3BV/W1Y8azQ5+4qW2e5swDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSsw\nKQYDVQQDDCJhZG1pbjpUZXN0ZSBkZSBjaGF2ZSBFQ0Mgc2VjcDUyMXIxMIGbMBAG\nByqGSM49AgEGBSuBBAAjA4GGAAQAnBJFrKXkqraaEEpxxvJRx9NUU/NzyPKQkX2f\nnaUQxn6e9Q88BtskqrvkpNeEd6BJP43EuGsrG54wmCmG/HeTAD0BHcvIpcbPgEd7\nUcS4LHtt3DPKuqazet7tD8zlLShs6dCSM3djr+kArxcSjNCJG0iPgEME53Er3jbK\nWbhznLHMUZ2jggK+MIICujAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFFjCckdw\nxGbsWEEv3h/+sy1Cz5RgMIHcBgNVHS4EgdQwgdEwgc6ggcuggciGgcVodHRwOi8v\nMTcyLjE4LjAuMwoxNzIuMTkuMC40OjgwODAvZWpiY2EvcHVibGljd2ViL3dlYmRp\nc3QvY2VydGRpc3Q/Y21kPWRlbHRhY3JsJmlzc3Vlcj1VSUQlM0RjLTBmYTM5YjMz\nZTU2ZTA2NTE5JTJDQ04lM0RYNTA5JTIwSWRlbnRpdHklMjBDQSUyQ09VJTNEQ2Vy\ndGlmaWNhdGUlMjBJc3N1ZXIlMkNPJTNEZG9qb3QlMjBJb1QlMjBQbGF0Zm9ybTAd\nBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwQwggFaBgNVHR8EggFRMIIBTTCC\nAUmggcaggcOGgcBodHRwOi8vMTcyLjE4LjAuMwoxNzIuMTkuMC40OjgwODAvZWpi\nY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/Y21kPWNybCZpc3N1ZXI9VUlE\nJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUwOSUyMElkZW50aXR5JTIw\nQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJDTyUzRGRvam90JTIwSW9U\nJTIwUGxhdGZvcm2ifqR8MHoxIzAhBgoJkiaJk/IsZAEBDBNjLTBmYTM5YjMzZTU2\nZTA2NTE5MRkwFwYDVQQDDBBYNTA5IElkZW50aXR5IENBMRswGQYDVQQLDBJDZXJ0\naWZpY2F0ZSBJc3N1ZXIxGzAZBgNVBAoMEmRvam90IElvVCBQbGF0Zm9ybTAdBgNV\nHQ4EFgQUKf1jtwgfqvEOnc4mHsYdeVSjSJMwDgYDVR0PAQH/BAQDAgPoMA0GCSqG\nSIb3DQEBCwUAA4ICAQAc6QkunA0A7hyQhGlilvtzdeCvbvyX6e2LpPR+IZ8fd8Be\nGPYyMiwE/u5IK+N8yuBSadT/q0MgM1xJ5o8995SxV66a3DB5vB6kaPvC5af6+mjS\nPkvnkCvUEUQ306f8fStDfBxHj9Cwyc810RG5fg4iHPDTpe/Wpf+qYDWTWA45oein\niLMG+FuFuERwYteydHlS8jZNr5kWNYjihDZ7K5kKbHEwdMW0exnUWXBDwkvL45hH\nV+iw1AMzO1SA9YpQCJtbRaMkDA8QIa1MPNOp6xIpSPrAWaq8nJjZQ8VZi+I3tD6Z\nylfJ9Dw0hj9iuiTBkIWUU2FHTZnFLA35Tm+TyfJ2JKJB9asKJiumHAep6g3+o2Ws\nOMCgXY6O4LQAdcxyqWArbKy0A/jng8Rpk1LemidvCxm3b+qUjKjIFBVG1ne5Rl6J\niqBLxOPo1En2PGas/ZV4nwgAS+3Z2VyckGeL3OsiqZ+UKXyNhu3P3fFk9GgBiPHi\nDUsgojmupyhYiSHTvT220abJtrdubusjw+KuxOG6/R6XXyF8xXFa86vYRJz2lWgc\nmJ9rqwF0sDf9DReaaewnBEjgX2lgZyfE3digQzsmNvmCnNGDpoHJX9BMr/K9sY6E\n8N8CUnY2toEjV3WFx08yerg3LaubVBZSMYnxKkn7r5jGzlqvKWmnIl6aZzD9mA==\n-----END CERTIFICATE-----",
+                        "belongsTo": {},
+                        "tenant": "admin",
+                        "createdAt": "2020-06-06T21:13:32.490Z"
+                    },
+                    {
+                        "issuedByDojotPki": true,
+                        "autoRegistered": false,
+                        "fingerprint": "1A:76:96:74:59:BB:A2:FD:04:3C:7E:8C:D6:72:6D:9A:B2:36:D6:3B:38:C2:CF:3F:F8:FA:EE:97:E6:CD:B6:B3",
+                        "pem": "-----BEGIN CERTIFICATE-----\nMIIGRjCCBC6gAwIBAgIUBT0AjgZAzJO2U+vs4MZXXpEF6SUwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSTEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSow\nKAYDVQQDDCFhZG1pbjpFQ0MgcHJpbWUyNTZ2MSBUaGlhZ28gVGVzdGUwWTATBgcq\nhkjOPQIBBggqhkjOPQMBBwNCAAScpvJvi3wQGER+b2CQ3/E+Nw+ddTCu2fv5sF/E\nBqVe0tWQu1rWPDmrwmjkIOM33e1fo0SzeNaDrDurPEx7OTAOo4ICvjCCArowDAYD\nVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYD\nVR0uBIHUMIHRMIHOoIHLoIHIhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0\nYWNybCZpc3N1ZXI9VUlEJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUw\nOSUyMElkZW50aXR5JTIwQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJD\nTyUzRGRvam90JTIwSW9UJTIwUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIG\nCCsGAQUFBwMEMIIBWgYDVR0fBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3\nMi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0\nL2NlcnRkaXN0P2NtZD1jcmwmaXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1\nMTklMkNDTiUzRFg1MDklMjBJZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0\nZSUyMElzc3VlciUyQ08lM0Rkb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMw\nIQYKCZImiZPyLGQBAQwTYy0wZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUw\nOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYD\nVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0wHQYDVR0OBBYEFD1vcBmX/6Of+o7t8eis\nKz8AyLtgMA4GA1UdDwEB/wQEAwID6DANBgkqhkiG9w0BAQsFAAOCAgEALw1cbCNE\nG9f47gbzD/XVbA1En+tGp+GSCcqboNZuCWZlMMwP9EdGIttnZg4cH/L7k0eiobNP\nVYc+2A6kP4mbDvz4usyxMvczca6+XN8sPxc7mZirUCxEZisoecwq23mNmgLVuR4b\nrS935ZcgCaK+1rbggBgC4SH6RJhrHcwDuSOq22CZIR80834Xjo6TQdMMNJf6CAzH\negeV6qFf6wA91SYpfSv8rVh+vaXfHEKtVfxm0J7fpLTUa2rDoOKuyi3OPkryETAy\nBmGJdvZCZU/CSjYc3Z0RsOPt7qwPbY31gzfJQbc3Qqiq0X+Ws/hilagQxCsEvkXC\nS33rRRxiWS6PGGJf3TliVQNKWnxW0jhtzuYMc0VEoTdjbmqSaQ7Lo8YloPvBvHYS\n5Vdl9Y1uuZQnHvBuy9LhKNS69WDZTEMu5DXrJypSRqnuw6Nywb43cIffbvtvRWCs\njZ8rNEkcGSoUE9Yb7fM6pwirl+QSjvsKa/k++rSp9VeSB8fKgmaneNScipXBcIl/\n5eYLIjobnXb/7SGwxLKtTm96cX2TG+GhXi4xTxd4xbLsq0FNxMhsBwHkMoygYWTY\nhCvnb3mDv4zbC0Vy/LN0gFXkDIvURh0gb8mosP5mB+0Rv1uW0WzIgDuQU22k2vqH\npvuMCXOKhOBlsDD2Qfk7e4M3ps/T498bNCo=\n-----END CERTIFICATE-----",
+                        "belongsTo": {},
+                        "tenant": "admin",
+                        "createdAt": "2020-06-06T21:13:30.316Z"
+                    }
+                ]
+            }
+
+## Endpoint for a specific certificate [/certificates/{fingerprint}{?fields}]
+
+### Get X.509 Certificate [GET]
+
+Gets a certificate.
+
++ Parameters
+
+    + fingerprint (string) - Fingerprint (as SHA256) of the certificate, where each pair of bytes (represented by hexadecimal characters) are separated by a colon.
+
+    + fields (string, optional) - List of keys (comma-separated) that should be included in the result. If the fields parameter is not set, all keys will be kept in the result.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "issuedByDojotPki": true,
+                "autoRegistered": false,
+                "fingerprint": "27:98:B3:A2:69:28:2C:C3:00:E2:2C:7D:48:50:94:C4:4A:F7:A2:1C:63:B8:06:7F:69:15:01:F6:EA:09:34:2D",
+                "pem": "-----BEGIN CERTIFICATE-----\nMIIG/DCCBOSgAwIBAgIUGeK2VFaRPpGRlBrJjwipf6Eds1YwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNTIwMDEwMFoX\nDTIxMDYwNTIwMDEwMFowNDEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMRUw\nEwYDVQQDDAxhZG1pbjoxMjM0NTYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQDFu7NweJ79eNKwTkU30Zxd19lsABkNYAXJDqfyrsuT68eeR3nGz0uyQpEE\nSQs0Ob8o62JXvL0DnnAa5MK8yt+p9TiltJEOQXTMbrovFJnDR85BrZFQEbyCKyrz\n9WQTDwCEqv362dnkcwLBd2DObD8OvRg/UzuVoSA7tlsQzaASzpItUJFCuGKzHa0t\nb3Ttrhgz4Q9WPXgOOdKsLg6pouyGSEaXKyIhAcrLUjvnOcSjJbo46+y5iTemW5km\n3gNdbINVluCG3HVQ7zZpLoaYv447WUvFPMMSeRAYNRz2QoBOt8seofcwVvurcctm\ntL5WFlYNCH+eDkdFHUy3xdVrsibTAgMBAAGjggK+MIICujAMBgNVHRMBAf8EAjAA\nMB8GA1UdIwQYMBaAFFjCckdwxGbsWEEv3h/+sy1Cz5RgMIHcBgNVHS4EgdQwgdEw\ngc6ggcuggciGgcVodHRwOi8vMTcyLjE4LjAuMwoxNzIuMTkuMC40OjgwODAvZWpi\nY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/Y21kPWRlbHRhY3JsJmlzc3Vl\ncj1VSUQlM0RjLTBmYTM5YjMzZTU2ZTA2NTE5JTJDQ04lM0RYNTA5JTIwSWRlbnRp\ndHklMjBDQSUyQ09VJTNEQ2VydGlmaWNhdGUlMjBJc3N1ZXIlMkNPJTNEZG9qb3Ql\nMjBJb1QlMjBQbGF0Zm9ybTAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwQw\nggFaBgNVHR8EggFRMIIBTTCCAUmggcaggcOGgcBodHRwOi8vMTcyLjE4LjAuMwox\nNzIuMTkuMC40OjgwODAvZWpiY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/\nY21kPWNybCZpc3N1ZXI9VUlEJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNE\nWDUwOSUyMElkZW50aXR5JTIwQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVy\nJTJDTyUzRGRvam90JTIwSW9UJTIwUGxhdGZvcm2ifqR8MHoxIzAhBgoJkiaJk/Is\nZAEBDBNjLTBmYTM5YjMzZTU2ZTA2NTE5MRkwFwYDVQQDDBBYNTA5IElkZW50aXR5\nIENBMRswGQYDVQQLDBJDZXJ0aWZpY2F0ZSBJc3N1ZXIxGzAZBgNVBAoMEmRvam90\nIElvVCBQbGF0Zm9ybTAdBgNVHQ4EFgQUuNRRFLrgvwwHe8ShOhMWRISTXZYwDgYD\nVR0PAQH/BAQDAgPoMA0GCSqGSIb3DQEBCwUAA4ICAQCLOCwNFlG6lM3P3+ToiwLA\n33q+ZRnMTXIOzzOKpiaOWfBv55y3nZnHIKuTlNMsP0qiOfDdrdvtQTs5NVmwSfa+\nK0uNH+wFTO8XLgs+Ii7OvAB+UX7+Vo8uxFxPKAgJHOUBFjIZq0y2Le4p+PNtuEQR\ntB3cisT++sUVc6NCgmoRUsEjGxNXnyPVU40GJ9DlNYtlBu4h+FaxaAeeEz3xduU7\neXLjlXpSWSIcRzfGo+6wobENZordAvqz6Hp5o3sHSXhiXkNeO1B2A421bkkUhA7W\nWjE8IknN5QjlquFp5rQZABLTx2Qw7YqiRkLqAXLXM20+XnqKBQ3HjNgklC9CpBZi\nM/KJlEm8muiODENwUBZ6YSo1nsgWAO/YBJ8NAbzT6sUQybsSnCBp9DAOf0amdqYn\na45C0gOWSBXMcxjXXOcVxFdNCfVpFAi9c7Y/bCeYbWVXY8jQ6e3nKwvbvILXORl9\n+Pyqqw6qhToHbcOqdCWqoZoEBRRg06Vkm6r0d6yh/UcE/UHyKlgnRGFZdpFYlSvZ\nTB+4Paeq3wOKxAkjUs2SlFHZYT43+NKmsiSTf1yyKruwh1yMR0hAfRM9GCooOjvr\n5PokzscdSyNwWh/LrkUAvKnB/XgpgqeN+ngK8jVotieV4vLc7ji/i6ME1Czi0g9I\nLPSCByr/Jf5/sLD6GXNh4w==\n-----END CERTIFICATE-----",
+                "belongsTo": {},
+                "tenant": "admin",
+                "createdAt": "2020-06-05T20:01:11.286Z"
+            }
+
+
+### Delete X.509 Certificate [DELETE]
+
+Deletes a x.509 certificate.
+
++ Parameters
+
+    + fingerprint (string) - Fingerprint (as SHA256) of the certificate, where each pair of bytes (represented by hexadecimal characters) are separated by a colon.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
++ Response 204
+
+## Endpoint for the root CA [/ca]
+
+### Get Root CA [GET]
+
+Obtains the CA of the dojot platform used to sign the device certificates.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "certificateFingerprint": "B9:7C:88:EE:A4:13:3E:64:99:44:C5:35:61:9D:4E:15:B7:70:A4:FD:78:61:70:22:D2:27:BC:74:15:AA:C5:CC",
+                "caPem": "-----BEGIN CERTIFICATE-----\n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\n-----END CERTIFICATE-----"
+            }

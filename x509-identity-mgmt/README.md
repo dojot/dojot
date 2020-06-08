@@ -121,7 +121,7 @@ In practice, we will have something similar to this:
 In the example above, we have two important observations to make:
 
  - The first is related to the *fingerprint* of the generated certificate: **A certificate's fingerprint is the unique identifier of the certificate.** Microsoft Internet Explorer calls it *Thumbprint*. Browsers tend to display it as if it were a part of the certificate. It is not a part of the certificate, but it is computed from it.
-A fingerprint is the *digest* of the DER-Encoded Certificate Info (which is an ASN.1 type specified as part of the X.509 specification). The Certificate Fingerprint is a digest (hash function) of a certificate in x509 binary format. It can be calculated by different algorithms, such as MD5 or SHA1, **but we chose to work with SHA256**. Note that each pair of hexadecimal characters has been separated by semicolons. The result of the SHA256 hash function does not include this separation, but we chose to work with it as this is how the fingerprint is presented to the user.
+A fingerprint is the *digest* of the DER-Encoded Certificate Info (which is an ASN.1 type specified as part of the X.509 specification). The Certificate Fingerprint is a digest (hash function) of a certificate in x509 binary format. It can be calculated by different algorithms, such as MD5 or SHA1, **but we chose to work with SHA256**. Note that each pair of hexadecimal characters has been separated by colons. The result of the SHA256 hash function does not include this separation, but we chose to work with it as this is how the fingerprint is presented to the user.
  - The second is related to the certificate, notice that the line break markers are present there, however for the certificate to be used, it is necessary that these markers be replaced by the correct bytes that represent the line break. Note that it is the user's responsibility to save the certificate in [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail), respecting the limit of 64 bytes per line.
 
 After extracting the response payload certificate and saving it to disk in a text file (PEM format), we will have the following result:
@@ -359,7 +359,7 @@ The syntax for revoking a certificate issued by the dojot platform is as follows
 
     Authorization: Bearer JWT
 
-The `certificateFingerprint` is the same as that informed when the certificate was issued. Of course, it is also possible to calculate it using the SHA256 hash function, note that the dojot platform works with the semicolon character as a separator for each pair of bytes (represented in the hexadecimal base).
+The `certificateFingerprint` is the same as that informed when the certificate was issued. Of course, it is also possible to calculate it using the SHA256 hash function, note that the dojot platform works with the colon character as a separator for each pair of bytes (represented in the hexadecimal base).
 
 In practice, we would have something like this:
 

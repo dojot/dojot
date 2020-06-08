@@ -108,10 +108,15 @@ app.use('/api/v1',
 
 /* The express.static serves the file contents
  * The serveIndex is this module serving the directory */
-const schemasDir = path.join(__dirname, 'public/schemas');
+const mainDir = path.dirname(require.main.filename);
+const schemasDir = path.join(mainDir, 'schemas');
 app.use('/api/v1/schemas',
   express.static(schemasDir),
   serveIndex(schemasDir));
+
+const apidocs = path.join(mainDir, 'apidocs/docs.html');
+app.use('/api/v1/docs', express.static(apidocs));
+
 
 /* catch 404 and forward to error handler */
 app.use((req, res, next) => {

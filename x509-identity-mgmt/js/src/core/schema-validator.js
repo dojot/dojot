@@ -1,11 +1,11 @@
 const createError = require('http-errors');
 
 const Ajv = require('ajv');
-const defsSchema = require('../public/schemas/defs.json');
-const regTrustCaSchema = require('../public/schemas/register-trusted-ca-certificate.json');
-const updTrustCaSchema = require('../public/schemas/update-trusted-ca-certificate.json');
-const regOrGenCertSchema = require('../public/schemas/register-or-generate-certificate.json');
-const chOwnCertSchema = require('../public/schemas/change-owner-certificate.json');
+const defsSchema = require('../../schemas/defs.json');
+const regTrustCaSchema = require('../../schemas/register-trusted-ca-certificate.json');
+const updTrustCaSchema = require('../../schemas/update-trusted-ca-certificate.json');
+const regOrGenCertSchema = require('../../schemas/register-or-generate-certificate.json');
+const chOwnCertSchema = require('../../schemas/change-owner-certificate.json');
 
 const ajv = new Ajv({
   allErrors: true,
