@@ -211,9 +211,11 @@ const makeJwtToken = (tenant) => {
     Buffer.from('dummy signature').toString('base64')}`;
 };
 
+// Unix time, time in seconds since the epoch.
+const expirationTime = 1591369727;
 new WebSocket('ws://localhost:8080/tenant.ws.example.test', {
   headers: {
-    Authorization: `Bearer ${makeJwtToken('tenant')}`,
+    Authorization: `Bearer ${makeJwtToken('tenant', expirationTime)}`,
   },
 });
 ```

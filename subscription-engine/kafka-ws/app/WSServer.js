@@ -64,7 +64,9 @@ class WSServer {
   /**
    * Handles the WebSocket connection received by http module.
    *
-   * @param {IncomingMessage} request
+   * @param {http.IncomingMessage} request
+   * @param {stream.Duplex} socket
+   * @param {Buffer} head
    */
   handleUpgrade(request, socket, head) {
     this.wsServer.handleUpgrade(request, socket, head, (ws) => {

@@ -66,7 +66,11 @@ console.info(`Trying to connect ${url}`);
 
 const tenant = getTenant(args[0]);
 
-const token = makeJwtToken(tenant, 720, 'user');
+const timestampInSec = Math.round(new Date().getTime() / 1000);
+const tokenLiveSec = 720;
+const timestampExpirationSec = timestampInSec + tokenLiveSec;
+
+const token = makeJwtToken(tenant, timestampExpirationSec, 'user');
 
 let ws = null;
 if (tls) {
