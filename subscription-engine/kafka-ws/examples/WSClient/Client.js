@@ -4,7 +4,7 @@ const fs = require('fs');
 const WebSocket = require('ws');
 
 const getTenant = (arg) => {
-  let tenant = 'tenant1';
+  let tenant = null;
   switch (arg) {
     case '1':
       tenant = 'tenant2';
