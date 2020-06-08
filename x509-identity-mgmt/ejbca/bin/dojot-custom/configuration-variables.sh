@@ -37,20 +37,20 @@ readonly SHARED_VOLUME="/mnt/persistent"
 # (cert|entity)profile_<name>-<id>.xml
 #
 # The directory where the XML files are located
-readonly PROFILES_DIR=${PROFILES_DIR:-"${SHARED_VOLUME}/profiles"}
+readonly PROFILES_DIR=${EJBCA_PROFILES_DIR:-"${SHARED_VOLUME}/profiles"}
 #
 # The name of the profiles must not contain spaces!!!
 #
 # Certificate profiles
-readonly DEVICES_CA_CERT_PROFILE=${DEVICES_CA_CERT_PROFILE:-"X509IdentitiesCA"}
-readonly SERVICES_CA_CERT_PROFILE=${SERVICES_CA_CERT_PROFILE:-"ServicesCA"}
-readonly APP_SERVER_CERT_PROFILE=${APP_SERVER_CERT_PROFILE:-"ApplicationServerEJBCA"}
-readonly DEVICES_CERT_PROFILE=${DEVICES_CERT_PROFILE:-"X509Identity"}
-readonly SERVICES_CERT_PROFILE=${SERVICES_CERT_PROFILE:-"Service"}
+readonly DEVICES_CA_CERT_PROFILE=${EJBCA_DEVICES_CA_CERT_PROFILE:-"X509IdentitiesCA"}
+readonly SERVICES_CA_CERT_PROFILE=${EJBCA_SERVICES_CA_CERT_PROFILE:-"ServicesCA"}
+readonly APP_SERVER_CERT_PROFILE=${EJBCA_APP_SERVER_CERT_PROFILE:-"ApplicationServerEJBCA"}
+readonly DEVICES_CERT_PROFILE=${EJBCA_DEVICES_CERT_PROFILE:-"X509Identity"}
+readonly SERVICES_CERT_PROFILE=${EJBCA_SERVICES_CERT_PROFILE:-"Service"}
 # End-Entity profiles
-readonly APP_SERVER_ENTITY_PROFILE=${APP_SERVER_ENTITY_PROFILE:-"ApplicationServerEJBCA"}
-readonly DEVICES_ENTITY_PROFILE=${DEVICES_ENTITY_PROFILE:-"X509Identity"}
-readonly SERVICES_ENTITY_PROFILE=${SERVICES_ENTITY_PROFILE:-"Service"}
+readonly APP_SERVER_ENTITY_PROFILE=${EJBCA_APP_SERVER_ENTITY_PROFILE:-"ApplicationServerEJBCA"}
+readonly DEVICES_ENTITY_PROFILE=${EJBCA_DEVICES_ENTITY_PROFILE:-"X509Identity"}
+readonly SERVICES_ENTITY_PROFILE=${EJBCA_SERVICES_ENTITY_PROFILE:-"Service"}
 #
 # The profile ID is only retrieved from the xml file name
 readonly DEVICES_CERT_PROFILE_ID="$(find "${PROFILES_DIR}" -name "certprofile_${DEVICES_CERT_PROFILE}-[0-9]*\.xml" \
@@ -62,9 +62,9 @@ readonly DEVICES_CERT_PROFILE_ID="$(find "${PROFILES_DIR}" -name "certprofile_${
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 # -------------------- CERTIFICATION AUTHORITIES --------------------
-readonly PKI_VALIDITY=${PKI_VALIDITY:-"30y"} # about 30 years
-readonly DISTNAME_O=${DISTNAME_O:-"dojot IoT Platform"}
-readonly DISTNAME_OU=${DISTNAME_OU:-"Certificate Issuer"}
+readonly PKI_VALIDITY=${EJBCA_PKI_VALIDITY:-"30y"} # about 30 years
+readonly DISTNAME_O=${EJBCA_DISTNAME_O:-"dojot IoT Platform"}
+readonly DISTNAME_OU=${EJBCA_DISTNAME_OU:-"Certificate Issuer"}
 readonly DEVICES_CA=${EJBCA_DEVICES_CA:-"X509 Identity CA"}
 readonly SERVICES_CA=${EJBCA_SERVICES_CA:-"Services CA"}
 
@@ -91,16 +91,16 @@ readonly SERVICES_CA=${EJBCA_SERVICES_CA:-"Services CA"}
 #                      issued if this period is larger than 0.
 #
 # "X509 Identity CA"
-readonly CRL_EXPIRE_PERIOD_DEVICES_CA=$(convToMillis "${CRL_EXPIRE_PERIOD_DEVICES_CA:-1d}")
-readonly CRL_ISSUE_INTERVAL_DEVICES_CA=$(convToMillis "${CRL_ISSUE_INTERVAL_DEVICES_CA:-0m}")
-readonly CRL_OVERLAP_TIME_DEVICES_CA=$(convToMillis "${CRL_OVERLAP_TIME_DEVICES_CA:-10m}")
-readonly DELTA_CRL_PERIOD_DEVICES_CA=$(convToMillis "${DELTA_CRL_PERIOD_DEVICES_CA:-1h}")
+readonly CRL_EXPIRE_PERIOD_DEVICES_CA=$(convToMillis "${EJBCA_CRL_EXPIRE_PERIOD_DEVICES_CA:-1d}")
+readonly CRL_ISSUE_INTERVAL_DEVICES_CA=$(convToMillis "${EJBCA_CRL_ISSUE_INTERVAL_DEVICES_CA:-0m}")
+readonly CRL_OVERLAP_TIME_DEVICES_CA=$(convToMillis "${EJBCA_CRL_OVERLAP_TIME_DEVICES_CA:-10m}")
+readonly DELTA_CRL_PERIOD_DEVICES_CA=$(convToMillis "${EJBCA_DELTA_CRL_PERIOD_DEVICES_CA:-1h}")
 #
 # "Services CA"
-readonly CRL_EXPIRE_PERIOD_SERVICES_CA=$(convToMillis "${CRL_EXPIRE_PERIOD_SERVICES_CA:-1d}")
-readonly CRL_ISSUE_INTERVAL_SERVICES_CA=$(convToMillis "${CRL_ISSUE_INTERVAL_SERVICES_CA:-0m}")
-readonly CRL_OVERLAP_TIME_SERVICES_CA=$(convToMillis "${CRL_OVERLAP_TIME_SERVICES_CA:-10m}")
-readonly DELTA_CRL_PERIOD_SERVICES_CA=$(convToMillis "${DELTA_CRL_PERIOD_SERVICES_CA:-1h}")
+readonly CRL_EXPIRE_PERIOD_SERVICES_CA=$(convToMillis "${EJBCA_CRL_EXPIRE_PERIOD_SERVICES_CA:-1d}")
+readonly CRL_ISSUE_INTERVAL_SERVICES_CA=$(convToMillis "${EJBCA_CRL_ISSUE_INTERVAL_SERVICES_CA:-0m}")
+readonly CRL_OVERLAP_TIME_SERVICES_CA=$(convToMillis "${EJBCA_CRL_OVERLAP_TIME_SERVICES_CA:-10m}")
+readonly DELTA_CRL_PERIOD_SERVICES_CA=$(convToMillis "${EJBCA_DELTA_CRL_PERIOD_SERVICES_CA:-1h}")
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -110,18 +110,18 @@ readonly DELTA_CRL_PERIOD_SERVICES_CA=$(convToMillis "${DELTA_CRL_PERIOD_SERVICE
 # and only supports the periodical interval.
 # For more details:
 # https://doc.primekey.com/ejbca6152/ejbca-operations/ejbca-concept-guide/services#Services-CRL_Updater_Service
-readonly CRL_UPDATER_SERVICE_NAME=${CRL_UPDATER_SERVICE_NAME:-"CRL Updater"}
-readonly CRL_UPDATER_SERVICE_INTERVAL_VALUE=${CRL_UPDATER_SERVICE_INTERVAL_VALUE:-"30"}
-readonly CRL_UPDATER_SERVICE_INTERVAL_UNIT=${CRL_UPDATER_SERVICE_INTERVAL_UNIT:-"MINUTES"}
+readonly CRL_UPDATER_SERVICE_NAME=${EJBCA_CRL_UPDATER_SERVICE_NAME:-"CRL Updater"}
+readonly CRL_UPDATER_SERVICE_INTERVAL_VALUE=${EJBCA_CRL_UPDATER_SERVICE_INTERVAL_VALUE:-"30"}
+readonly CRL_UPDATER_SERVICE_INTERVAL_UNIT=${EJBCA_CRL_UPDATER_SERVICE_INTERVAL_UNIT:-"MINUTES"}
 #
 # The renew CA service can be used to automatically renew CAs that are about to expire.
 # For more details:
 # https://doc.primekey.com/ejbca6152/ejbca-operations/ejbca-concept-guide/services#Services-RenewCAService
-readonly CA_RENEWER_SERVICE_NAME=${CA_RENEWER_SERVICE_NAME:-"CAs Renewer"}
-readonly CA_RENEWER_SERVICE_INTERVAL_VALUE=${CA_RENEWER_SERVICE_INTERVAL_VALUE:-"1"}
-readonly CA_RENEWER_SERVICE_INTERVAL_UNIT=${CA_RENEWER_SERVICE_INTERVAL_UNIT:-"DAYS"}
-readonly CA_RENEWER_SERVICE_TIME_BEFORE_EXP=${CA_RENEWER_SERVICE_TIME_BEFORE_EXP:-"10"}
-readonly CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT=${CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT:-"DAYS"}
+readonly CA_RENEWER_SERVICE_NAME=${EJBCA_CA_RENEWER_SERVICE_NAME:-"CAs Renewer"}
+readonly CA_RENEWER_SERVICE_INTERVAL_VALUE=${EJBCA_CA_RENEWER_SERVICE_INTERVAL_VALUE:-"1"}
+readonly CA_RENEWER_SERVICE_INTERVAL_UNIT=${EJBCA_CA_RENEWER_SERVICE_INTERVAL_UNIT:-"DAYS"}
+readonly CA_RENEWER_SERVICE_TIME_BEFORE_EXP=${EJBCA_CA_RENEWER_SERVICE_TIME_BEFORE_EXP:-"10"}
+readonly CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT=${EJBCA_CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT:-"DAYS"}
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -154,20 +154,20 @@ readonly EJBCA_TLS_CLIENT_DIR=${EJBCA_TLS_CLIENT_DIR:-"/opt/tls"}
 readonly LOCK_FILE="${SHARED_VOLUME}/.lock"
 #
 # Lock file timeout (in minutes)
-readonly LOCK_FILE_TIMEOUT=${LOCK_FILE_TIMEOUT:-10}
+readonly LOCK_FILE_TIMEOUT=${EJBCA_LOCK_FILE_TIMEOUT:-10}
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 # ------------------------- SUPER ADMIN USER ------------------------
-readonly ADMIN_USERNAME=${ADMIN_USERNAME:-"admin"}
-readonly ADMIN_COMMONNAME=${ADMIN_COMMONNAME:-"Super Admin"}
+readonly ADMIN_USERNAME=${EJBCA_ADMIN_USERNAME:-"admin"}
+readonly ADMIN_COMMONNAME=${EJBCA_ADMIN_COMMONNAME:-"Super Admin"}
 #
 # This Role is the initial one defined by the EJBCA, it must NOT be changed
 readonly ADMIN_ROLE="Super Administrator Role"
 readonly ROLE_MEMBER_WITH="CertificateAuthenticationToken:WITH_COMMONNAME"
 #
-readonly ENROLLMENT_INFO_DIR=${ENROLLMENT_INFO_DIR:-"${SHARED_VOLUME}/private"}
-readonly ENROLLMENT_INFO=${ENROLLMENT_INFO:-"enrollment-info.txt"}
+readonly ENROLLMENT_INFO_DIR=${EJBCA_ENROLLMENT_INFO_DIR:-"${SHARED_VOLUME}/private"}
+readonly ENROLLMENT_INFO="enrollment-info.txt"
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*

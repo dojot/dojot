@@ -33,7 +33,7 @@ function main() {
     # only consume time verifying if the configurations have already been made, so it
     # is interesting to skip the configuration process to obtain performance in the
     # initialization of the container.
-    if [ "x${PERFORM_DOJOT_SETUP}" == "xtrue" ] ; then
+    if [ "x${EJBCA_PERFORM_DOJOT_SETUP}" == "xtrue" ] ; then
 
         loadScripts
 

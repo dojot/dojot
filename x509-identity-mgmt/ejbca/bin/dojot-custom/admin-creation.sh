@@ -14,7 +14,7 @@
 ##################################################################
 
 function createAdminEntity() {
-    if [ "${ADMIN_USER}" == "true" ] ; then
+    if [ "${EJBCA_ADMIN_USER}" == "true" ] ; then
         createSuperAdmin
     fi
 }

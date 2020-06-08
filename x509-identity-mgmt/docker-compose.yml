@@ -12,9 +12,9 @@ services:
             DATABASE_JDBC_URL: jdbc:postgresql://ejbca-db:5432/ejbca?characterEncoding=UTF-8
             DATABASE_USER: ejbca
             DATABASE_PASSWORD: ejbca
-            PERFORM_DOJOT_SETUP: "true"
+            EJBCA_PERFORM_DOJOT_SETUP: "true"
             EJBCA_EXTERNAL_ACCESS: "true"
-            ADMIN_USER: "true"
+            EJBCA_ADMIN_USER: "true"
             NODE_ENV: production
             MONGO_URI: "mongodb://mongo-db:27017/x509-identity-mgmt"
             MONGO_USER: root
