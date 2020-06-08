@@ -7,6 +7,8 @@ The platform keeps track of the device associated with an X.509 certificate. The
 
 Certificates issued by the dojot platform are signed by an internal CA, so it is also necessary for the device to recognize the dojot CA as being trusted. In a simplified way, the device must have installed the certificate issued to it and the certificate of the CA that signed it. The details are part of the [TLS protocol](https://tools.ietf.org/html/rfc5246).
 
+It is important that you also see the [README](./ejbca/README.md) of the custom EJBCA server for a dojot platform.
+
 ## Usage
 
 ### How to obtain a certificate
