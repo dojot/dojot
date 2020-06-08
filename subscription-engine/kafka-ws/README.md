@@ -33,6 +33,7 @@ operators](#applying-conditions) for more info
 - `4400` - INVALID_PATHNAME: a Malformed URI was passed
 - `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the jwt token
 - `4403` - FORBIDDEN_TOPIC: the tenant sent in the token jwt cannot access the kafka topic passed
+- `4408` - EXPIRATION_CONNECT: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
 
 ---
@@ -193,8 +194,15 @@ KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-c
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
 KAFKA_WS_JWT_HEADER_AUTH   | Enables use token jwt in authorization header | false              | string: "true" or "false" |
+KAFKA_WS_JWT_EXP_TIME   | Enables use exp, expiration time,  from jwt (Needs KAFKA_WS_JWT_HEADER_AUTH)                     | false               | string: "true" or "false" |
+KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 720              | seconds |
+REDIS_HOST       | Redis host                   | redis                              | string |
+REDIS_PORT       | Redis port                   | 6379                               | number |
+REDIS_DATABASE   | Redis database               | 1                                  | number |
 
-Note: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JWT token can access the kafka topic, generally topics start with `tenant.*`
+Note1: Maximum lifetime of a connection will be the highest value between the timeout calculate from expiration time provided by the jwt token (if KAFKA_WS_JWT_EXP_TIME is true) and KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_MAX_LIFE_TIME is 0, it will be the value provided in the timeout calculate from expiration time (if KAFKA_WS_JWT_EXP_TIME is true), otherwise there would be no maximum connection lifetime.
+
+Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JWT token can access the kafka topic, generally topics start with `tenant.*`
 
 ### **Token JWT**
 

@@ -10,6 +10,11 @@ module.exports = {
       log_file_filename: 'kafka-ws-logs-%DATE%.log',
     },
   },
+  redis: {
+    host: process.env.REDIS_HOST || 'redis',
+    port: process.env.REDIS_PORT || 6379,
+    database: process.env.REDIS_DATABASE || 1,
+  },
   kafka: {
     consumer: {
       kafka: {
@@ -27,5 +32,7 @@ module.exports = {
     tls_key_file: process.env.KAFKA_WS_TLS_KEY_FILE || '/opt/kafka-ws/certs/server-key.pem',
     tls_cert_file: process.env.KAFKA_WS_TLS_CERT_FILE || '/opt/kafka-ws/certs/server-cert.pem',
     jwt_header_auth: parseBoolean(process.env.KAFKA_WS_JWT_HEADER_AUTH || false),
+    jwt_exp_time: parseBoolean(process.env.KAFKA_WS_JWT_EXP_TIME || false),
+    connection_max_life_time: parseInt(process.env.KAFKA_WS_MAX_LIFE_TIME, 10) || 7200,
   },
 };

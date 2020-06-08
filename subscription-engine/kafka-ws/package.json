@@ -31,7 +31,7 @@
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-import": "^2.21.1",
     "jest": "^25.5.4",
     "nodemon": "^2.0.4"
   },
@@ -45,6 +45,7 @@
     "moo": "^0.5.1",
     "nearley": "^2.19.3",
     "path-to-regexp": "^6.1.0",
+    "redis": "^3.0.2",
     "uuid": "^8.1.0",
     "ws": "^7.3.0"
   },

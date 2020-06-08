@@ -67,8 +67,10 @@ console.info(`Trying to connect ${url}`);
 const tenant = getTenant(args[0]);
 
 const timestampInSec = Math.round(new Date().getTime() / 1000);
-const tokenLiveSec = 720;
+const tokenLiveSec = 60;
 const timestampExpirationSec = timestampInSec + tokenLiveSec;
+
+console.info('The jwt token will expirate at', timestampExpirationSec, 'sec');
 
 const token = makeJwtToken(tenant, timestampExpirationSec, 'user');
 

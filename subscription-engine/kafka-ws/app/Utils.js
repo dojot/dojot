@@ -89,6 +89,7 @@ function isNumber(value) {
   return false;
 }
 
+
 /**
  * Check if object if empty, like {}
  *
@@ -98,10 +99,10 @@ function isNumber(value) {
 const isObjectEmpty = (object) => Object.keys(object).length === 0;
 
 /**
- * Parse JWT and get expiratonTime (ms) and tenant
+ * Parse JWT and get expirationTimestamp (sec) and tenant
  * @param {string} rawToken
  *
- * @returns {object} obj like {expiratonTime: 123, tenant: example}
+ * @returns {object} obj like {expirationTimestamp: 1591638638 , tenant: 'example'}
  */
 const parseTenantAndExpTimeFromToken = (rawToken) => {
   if (!rawToken) {
@@ -120,10 +121,13 @@ const parseTenantAndExpTimeFromToken = (rawToken) => {
   if (!tenant) {
     throw new Error('Tentant is not inside the token.');
   }
+  if (!expirationTimeSec) {
+    throw new Error('Expiration Time is not inside the token.');
+  }
 
   return {
     tenant,
-    expirationTime: expirationTimeSec ? expirationTimeSec * 1000 : 0, // to ms
+    expirationTimestamp: expirationTimeSec,
   };
 };
 
@@ -163,6 +167,13 @@ const checkAndParseURLPathname = (fullUrl, pathToRegex) => {
   return parsedRoute;
 };
 
+/**
+ * adds seconds to the current timestamp and returns in seconds
+ *
+ * @param {number} addSec
+ */
+const timestampNowAddSeconds = (addSec) => Math.round(new Date().getTime() / 1000)
+  + addSec;
 
 module.exports = {
   escapeChars,
@@ -175,4 +186,5 @@ module.exports = {
   parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
   checkAndParseURLPathname,
+  timestampNowAddSeconds,
 };
