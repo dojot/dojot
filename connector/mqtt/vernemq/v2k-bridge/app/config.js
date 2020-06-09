@@ -9,12 +9,12 @@ const app = {
         level: process.env.V2K_CONSOLE_LOG_LEVEL || 'info',
       },
     },
-    verbose: (toBoolean(process.env.V2K_LOG_VERBOSE)) || true,
+    verbose: (toBoolean(process.env.V2K_LOG_VERBOSE)) || false,
   },
 };
 
 const messenger = {
-  kafkaTopic: process.env.V2K_KAFKA_PRODUCE_TOPIC || 'device-data',
+  kafkaTopic: process.env.V2K_KAFKA_PRODUCE_TOPIC_SUFFIX || 'device-data',
 };
 
 const mqtt = {
