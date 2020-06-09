@@ -1,5 +1,6 @@
 const redis = require('redis');
 const { Logger } = require('@dojot/microservice-sdk');
+
 const logger = new Logger();
 const { redis: redisConfig } = require('../Config');
 
@@ -24,7 +25,7 @@ class RedisExpireMgmt {
       host: redisConfig.host,
       port: redisConfig.port,
       db: redisConfig.database,
-      //tls: tls_options
+      // tls: tls_options
     };
 
     this.clients = {
@@ -37,7 +38,7 @@ class RedisExpireMgmt {
    * Initializes Publisher
    */
   initPublisher() {
-    //TODO: improve handle errors
+    // TODO: improve handle errors
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
     });
@@ -63,8 +64,7 @@ class RedisExpireMgmt {
    * Initializes Subscribe
    */
   initSubscribe() {
-
-    //TODO: improve handle errors
+    // TODO: improve handle errors
     this.clients.sub.on('Error', (error) => {
       logger.error(`sub: onError: ${error}`);
     });

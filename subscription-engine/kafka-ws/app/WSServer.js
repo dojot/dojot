@@ -174,7 +174,8 @@ class WSServer {
     // create a unique ID for this instance of connection
     const idWsConnection = uuidv4();
 
-    //TODO: create a class to handle info about the connection and  set things like expirate, kafkatopic, etc
+    // TODO: create a class to handle info about the connection and
+    // set things like expirate, kafkatopic, etc
 
     // get the topic of pathname
     const kafkaTopic = getKafkaTopicFromPathname(req.url,
@@ -238,7 +239,7 @@ class WSServer {
   setExpiration(ws, expirationTimestampFromJWT, idWsConnection) {
     if (serverConfig.jwt_exp_time || serverConfig.connection_max_life_time > 0) {
       const boundClose = ws.close.bind(ws);
-      //TODO: add something like refresh tokens instead of maximum lifetime
+      // TODO: add something like refresh tokens instead of maximum lifetime
       const expirationMax = getMaxLifetime(expirationTimestampFromJWT);
       logger.debug(`Setting expiration connection to ${expirationMax} sec`);
       this.redisExpirationMgmt.addConnection(idWsConnection, expirationMax, () => {

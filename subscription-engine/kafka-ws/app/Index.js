@@ -42,7 +42,7 @@ process.on('uncaughtException', async (ex) => {
   // The 'uncaughtException' event is emitted when an uncaught JavaScript
   // exception bubbles all the way back to the event loop.
   logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
-  //TODO: stop server (connection redis, kafka consumer, etc.)
+  // TODO: stop server (connection redis, kafka consumer, etc.)
   process.exit(1);
 });
 
@@ -57,6 +57,6 @@ try {
   });
 } catch (error) {
   logger.error(`Caught a final error: ${error.stack || error}`);
-  //TODO: stop server (connection redis, kafka consumer, etc.)
+  // TODO: stop server (connection redis, kafka consumer, etc.)
   process.exit(1);
 }
