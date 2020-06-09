@@ -29,7 +29,7 @@ class ProcessingRuleManager {
     const fingerprint = createFingerprint(kafkaTopic, fields, conditions);
     logger.debug(`Topic: ${kafkaTopic}`);
 
-    if (this.rules[fingerprint]) {
+    if (this.hasRule(fingerprint)) {
       this.rules[fingerprint] = Object.assign(
         this.rules[fingerprint], { count: this.rules[fingerprint].count + 1 },
       );

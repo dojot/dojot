@@ -57,11 +57,6 @@ class Server {
    * @param {Buffer} head
    */
   onUpgrade(request, socket, head) {
-    if (serverConfig.tls && !request.client.authorized) {
-      socket.write(`HTTP/1.1 401 ${STATUS_CODES[401]}\r\n\r\n`);
-      logger.error(`${STATUS_CODES[401]}: Invalid client certificate authentication.`);
-      socket.destroy();
-    }
     if (request.headers.upgrade === 'websocket') {
       this.ws.handleUpgrade(request, socket, head);
     } else {

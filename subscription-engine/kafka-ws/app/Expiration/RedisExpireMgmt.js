@@ -32,6 +32,10 @@ class RedisExpireMgmt {
       pub: redis.createClient(redisOptions),
       sub: redis.createClient(redisOptions),
     };
+    this.connect = {
+      pub: false,
+      sub: false,
+    }
   }
 
   /**
@@ -41,9 +45,11 @@ class RedisExpireMgmt {
     // TODO: improve handle errors
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
+      this.connect.pub = false;
     });
     this.clients.pub.on('end', (error) => {
       logger.info(`pub: onEnd: ${error}`);
+      this.connect.pub = false;
     });
     this.clients.pub.on('warning', (error) => {
       logger.warn(`pub: onWarning: ${error}`);
@@ -55,8 +61,10 @@ class RedisExpireMgmt {
     this.clients.pub.on('connect', (error) => {
       if (error) {
         logger.error(`pub: Error on connect: ${error}`);
+      } else {
+        this.connect.pub = true;
+        logger.info('pub: Connect');
       }
-      logger.info('pub: Connect');
     });
   }
 
@@ -65,11 +73,13 @@ class RedisExpireMgmt {
    */
   initSubscribe() {
     // TODO: improve handle errors
-    this.clients.sub.on('Error', (error) => {
+    this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
+      this.connect.sub = false;
     });
     this.clients.sub.on('end', (error) => {
       logger.info(`sub: onEnd: ${error}`);
+      this.connect.sub = false;
     });
     this.clients.sub.on('warning', (error) => {
       logger.warn(`sub: onWarning: ${error}`);
@@ -78,8 +88,10 @@ class RedisExpireMgmt {
     this.clients.sub.on('connect', (error) => {
       if (error) {
         logger.error(`sub: Error on connect: ${error}`);
+      } else {
+        this.connect.sub = true;
+        logger.info('sub: Connect');
       }
-      logger.info('sub: Connect');
     });
 
     return new Promise((resolve, reject) => {
@@ -121,15 +133,19 @@ class RedisExpireMgmt {
    * @param {funcion} callback  callback to be called when the lifetime is over
    */
   addConnection(idConnection, timestampSec, callback) {
-    logger.debug(`addConnection: ${idConnection}  ${timestampSec}`);
-    if (!this.expirationMap.has(idConnection)) {
-      this.expirationMap.set(idConnection, callback);
-      // NX = SET if Not eXists
-      this.clients.pub.set(idConnection, '', 'NX');
-      // Set a timeout on key, unix timestamp in seconds
-      this.clients.pub.expireat(idConnection, timestampSec);
+    if (this.connect.pub && this.connect.sub) {
+      logger.debug(`addConnection: ${idConnection}  ${timestampSec}`);
+      if (!this.expirationMap.has(idConnection)) {
+        this.expirationMap.set(idConnection, callback);
+        // NX = SET if Not eXists
+        this.clients.pub.set(idConnection, '', 'NX');
+        // Set a timeout on key, unix timestamp in seconds
+        this.clients.pub.expireat(idConnection, timestampSec);
+      } else {
+        logger.warn(`addConnection: ${idConnection} already exist`);
+      }
     } else {
-      logger.warn(`addConnection: ${idConnection} already exist`);
+      logger.warn(`addConnection: not connected with redis`);
     }
   }
 
@@ -138,12 +154,16 @@ class RedisExpireMgmt {
    * @param {string} idConnection unique id for a connection
    */
   removeConnection(idConnection) {
-    logger.debug(`removeConnection: ${idConnection}`);
-    if (this.expirationMap.has(idConnection)) {
-      this.clients.pub.del(idConnection);
-      this.expirationMap.delete(idConnection);
+    if (this.connect.pub && this.connect.sub) {
+      logger.debug(`removeConnection: ${idConnection}`);
+      if (this.expirationMap.has(idConnection)) {
+        this.clients.pub.del(idConnection);
+        this.expirationMap.delete(idConnection);
+      } else {
+        logger.warn(`removeConnection: ${idConnection} doesn't exist`);
+      }
     } else {
-      logger.warn(`removeConnection: ${idConnection} doesn't exist`);
+      logger.warn(`removeConnection: not connected with redis`);
     }
   }
 
@@ -170,8 +190,8 @@ class RedisExpireMgmt {
    */
   end() {
     this.clients.sub.unsubscribe();
-    this.clients.pub.end();
-    this.clients.sub.end();
+    this.clients.pub.quit();
+    this.clients.sub.quit();
   }
 }
 

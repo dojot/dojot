@@ -199,6 +199,7 @@ class WSServer {
 
     const { fields, where } = url.parse(req.url, true).query;
 
+
     let conditions;
     try {
       conditions = this.whereParser(where);

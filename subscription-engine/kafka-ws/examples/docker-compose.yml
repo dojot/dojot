@@ -84,9 +84,9 @@ services:
     # volumes:
     #  - ./certs/server/:/certs/:Z
     # to dev
-    # volumes:
-    #  - ../app/:/opt/kafka-ws/app/:Z # need to run before 'npm run parser:compile'
-    # command: ["npm", "run", "dev"]
+    volumes:
+     - ../app/:/opt/kafka-ws/app/:Z # need to run before 'npm run parser:compile'
+    command: ["npm", "run", "dev"]
 
   ws-client-sample-0:
     build:

@@ -96,7 +96,7 @@ function isNumber(value) {
  * @param {object} object
  * @returns {boolean} true if it is empty
  */
-const isObjectEmpty = (object) => Object.keys(object).length === 0;
+const isObjectEmpty = (object) => typeof object !== 'object' || object !== null && Object.keys(object).length === 0;
 
 /**
  * Parse JWT and get expirationTimestamp (sec) and tenant

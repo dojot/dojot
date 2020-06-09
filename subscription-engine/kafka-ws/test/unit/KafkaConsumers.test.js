@@ -21,7 +21,7 @@ describe('Testing KafkaWSConsumers - works fine', () => {
       registerCallback: jest.fn()
         .mockReturnValueOnce('idCallback1'),
       unregisterCallback: jest.fn()
-        .mockImplementationOnce(() => Promise.resolve()),
+        .mockImplementationOnce(() => { return () => Promise.resolve() }),
     });
     kafkaWSConsumers = new KafkaWSConsumers();
   });
