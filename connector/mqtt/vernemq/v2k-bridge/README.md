@@ -11,27 +11,28 @@ The V2K-bridge service implements a bridge between VerneMQ broker and Kafka brok
 
 Before running the V2K-bridge service within your environment, make sure you configure the environment variables to match your needs.
 
-Key                                | Purpose                                                                          | Default Value                        | Valid Values                                      |
----------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------- |
-BASE_DIR                           | Base directory where the project is located                                      | /opt/v2k_bridge                      | string                                            |
-DATA_BROKER_ADDRESS                | Address of the data broker service                                               | data-broker:80                       | hostname/IP:port                                  |
-EJBCA_ADDRESS                      | Address of the EJBCA service                                                     | localhost:5583                       | hostname/IP:port                                  |
-HOSTNAME                           | Hostname to be used in the certificate common name                               | broker                               | hostname/IP                                       |
-KAFKA_BROKER_LIST                  | Addresses of the kafka brokers separated by a comma                              | kafka-server:9092                    | hostname/IP:port                                  |
-V2K_BACKPRESSURE_MAX_QUEUE_LENGTH  | Maximum backpressure queue length in bytes                                       | 1048576                              | integer                                           |
-V2K_BACKPRESSURE_PARALLEL_HANDLERS | Number of parallel handlers for processing the messages in the backpressure queue| 1                                    | integer                                           |
-V2K_LOG_LEVEL                      | Log level                                                                        | info                                 | silly, debug, verbose, http, info, warning, error |
-V2K_MQTT_CA_FILE                   | Mqtt client ca file                                                              | ${BASE_DIR}/app/verne/${HOSTNAME}.ca | string                                            |
-V2K_MQTT_CERT_FILE                 | Mqtt client certificate file                                                     | ${BASE_DIR}/app/verne/${HOSTNAME}.crt| string                                            |
-V2K_MQTT_CLIENT_ID                 | Mqtt client client id                                                            | hostname                             | string                                            |
-V2K_MQTT_HOST                      | Mqtt broker host                                                                 | vernemq-k8s                          | hostname/IP                                       |
-V2K_MQTT_KEEPALIVE                 | Mqtt client keepalilve                                                           | 60                                   | integer                                           |
-V2K_MQTT_KEY_FILE                  | Mqtt client key file                                                             | ${BASE_DIR}/app/verne/${HOSTNAME}.key| string                                            |
-V2K_MQTT_USERNAME                  | Mqtt client username                                                             | v2k-bridge                           | string                                            |
-V2K_MQTT_PORT                      | Mqtt broker port                                                                 | 8883                                 | integer                                           |
-V2K_MQTT_SECURE                    | Mqtt client secure                                                               | true                                 | true, false (case insensitive)                    |
-V2K_MQTT_SUBSCRIPTION_QOS          | Mqtt client Quality of service                                                   | 1                                    | integer                                           |
-V2K_MQTT_SUBSCRIPTION_TOPIC        | Mqtt client topic to subscribe                                                   | $share/group/+/attrs                 | string                                            |
+Key                                | Purpose                                                                           | Default Value                         | Valid Values                   |
+---------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------ |
+BASE_DIR                           | Base directory where the project is located                                       | /opt/v2k_bridge                       | string                         |
+EJBCA_ADDRESS                      | Address of the EJBCA service                                                      | localhost:5583                        | hostname/IP:port               |
+HOSTNAME                           | Hostname to be used in the certificate common name                                | broker                                | hostname/IP                    |
+KAFKA_BROKER_LIST                  | Addresses of the kafka brokers separated by a comma                               | kafka-server:9092                     | hostname/IP:port               |
+V2K_BACKPRESSURE_MAX_QUEUE_LENGTH  | Maximum backpressure queue length in bytes                                        | 1048576                               | integer                        |
+V2K_BACKPRESSURE_PARALLEL_HANDLERS | Number of parallel handlers for processing the messages in the backpressure queue | 1                                     | integer                        |
+V2K_CONSOLE_LOG_LEVEL              | Console log level                                                                 | info                                  | debug, info, warn, error       |
+V2K_LOG_VERBOSE                    | Activate the verbose log mode                                                     | false                                 | true, false (case insensitive) |
+V2K_KAFKA_PRODUCE_TOPIC_SUFFIX     | Kafka produce topic suffix                                                        | device-data                           | string                         |
+V2K_MQTT_CA_FILE                   | MQTT client ca file                                                               | ${BASE_DIR}/app/verne/${HOSTNAME}.ca  | string                         |
+V2K_MQTT_CERT_FILE                 | MQTT client certificate file                                                      | ${BASE_DIR}/app/verne/${HOSTNAME}.crt | string                         |
+V2K_MQTT_CLIENT_ID                 | MQTT client client id                                                             | hostname                              | string                         |
+V2K_MQTT_HOST                      | MQTT broker host                                                                  | vernemq-k8s                           | hostname/IP                    |
+V2K_MQTT_KEEPALIVE                 | MQTT client keepalilve                                                            | 60                                    | integer                        |
+V2K_MQTT_KEY_FILE                  | MQTT client key file                                                              | ${BASE_DIR}/app/verne/${HOSTNAME}.key | string                         |
+V2K_MQTT_USERNAME                  | MQTT client username                                                              | v2k-bridge                            | string                         |
+V2K_MQTT_PORT                      | MQTT broker port                                                                  | 8883                                  | integer                        |
+V2K_MQTT_SECURE                    | MQTT client secure                                                                | true                                  | true, false (case insensitive) |
+V2K_MQTT_SUBSCRIPTION_QOS          | MQTT client Quality of service                                                    | 1                                     | integer                        |
+V2K_MQTT_SUBSCRIPTION_TOPIC        | MQTT client topic to subscribe                                                    | $share/group/+/attrs                  | string                         |
 
 You can configure the Kafka Producer with variables from the Microservice SDK and librdkafka.
 For more details on these configurations,
