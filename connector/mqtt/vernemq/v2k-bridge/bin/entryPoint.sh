@@ -4,7 +4,7 @@
 # -x       Print commands and their arguments as they are executed
 set -e
 
-# DEBUG
+# Debug mode
 if [ ! -z "${DEBUG+x}" ]; then
     set -x
 fi
@@ -12,7 +12,6 @@ fi
 # readonly variables
 readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONNECTION_TRIES_COUNT:-"3"}
 readonly V2K_VERNE_CONNECTION_TRIES_TIMEOUT=${CONNECTION_TRIES_TIMEOUT:-"3"}
-readonly V2K_VERNE_DATA_BROKER_ADDRESS=${DATA_BROKER_ADDRESS:-"data-broker:80"}
 readonly V2K_VERNE_KAFKA_BROKER_LIST=${KAFKA_BROKER_LIST:-"kafka-server:9092"}
 
 readonly BASE_DIR=${BASE_DIR:-"/opt/v2k_bridge"}
@@ -21,16 +20,16 @@ readonly BASE_DIR=${BASE_DIR:-"/opt/v2k_bridge"}
 readonly LKAFKA_BROKER_LIST=${V2K_VERNE_KAFKA_BROKER_LIST//,/ }
 
 has_responded=false
-for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++)); 
+for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++));
 do
-    for address in ${LKAFKA_BROKER_LIST}; 
+    for address in ${LKAFKA_BROKER_LIST};
     do
         address_splited=($(echo ${address} | tr ":" "\n"))
         echo "$((${i} + 1)) - Trying to connect with *${address_splited[0]}* on port *${address_splited[1]}*"
-        
+
         # output 0 if port is open and 1 if it's closed
         response=$(nc -zv ${address_splited[0]} ${address_splited[1]} &> /dev/null; echo $?)
-         
+
         if [ "${response}" == 0 ]; then
             has_responded=true
             break
@@ -52,24 +51,6 @@ fi
 echo -e "Connection established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
 
 #
-# Data broker
-
-data_broker_address_splited=($(echo ${V2K_VERNE_DATA_BROKER_ADDRESS} | tr ":" "\n"))
-
-for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++)); 
-do
-    echo "$((${i} + 1)) - Trying to connect with *${data_broker_address_splited[0]}* on port *${data_broker_address_splited[1]}*"
-    DATA_BROKER_RESPONSE=$(nc -zv ${data_broker_address_splited[0]} ${data_broker_address_splited[1]} &> /dev/null; echo $?)
-    if [ "${DATA_BROKER_RESPONSE}" == 0 ]; then
-        echo -e "Connection established with **${data_broker_address_splited[0]}** on port **${data_broker_address_splited[1]}**\n"
-        break
-    elif ((i == ((${V2K_VERNE_CONNECTION_TRIES_COUNT}-1)))); then
-        exit 1
-    fi
-    sleep ${V2K_VERNE_CONNECTION_TRIES_TIMEOUT}
-done
-
-# 
 # Ejbca - to authentcate user
 echo "Trying to authenticate with CA.."
 ${BASE_DIR}/bin/scripts_tls/ejbca_client.sh
