@@ -20,7 +20,7 @@
     "vernemq",
     "kafka"
   ],
-  "author": "Jonaphael Aristil, Muhamed Avila",
+  "author": "Eduardo Garcia Misiuk, Jonaphael Aristil, Muhamed Avila",
   "license": "GPL-3.0, ISC",
   "dependencies": {
     "@dojot/microservice-sdk": "0.1.3",
