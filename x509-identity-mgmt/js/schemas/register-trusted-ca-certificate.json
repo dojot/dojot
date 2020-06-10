@@ -16,7 +16,7 @@
     "allowAutoRegistration": {
       "type": "boolean",
       "title": "Allow Auto Registration",
-      "description": "Allows the CA certificate to be used for auto-registration of 'things' certificate.",
+      "description": "Allows the CA certificate to be used for auto-registration of 'things' in the Device Management.",
       "default": false
     }
   }

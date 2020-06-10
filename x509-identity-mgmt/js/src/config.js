@@ -39,7 +39,6 @@ module.exports = {
   /* HTTP Server settings */
   server: {
     port: parseUint(process.env.NODE_APP_PORT) || 3000,
-    apiURL: process.env.EJBCA_API_URL || 'https://dojot.github.io/ejbca-rest/apiary_latest.html',
   },
 
   /* By enabling the trust proxy feature, the IP address will be
@@ -98,11 +97,11 @@ module.exports = {
   /* https://github.com/godaddy/terminus settings */
   terminus: {
     /* use object returned from /healthcheck in response */
-    verbatim: parseBool(process.env.TRMNS_VERBTM, true),
+    verbatim: parseBool(process.env.TERMINUS_VERBATIM, true),
     /* number of milliseconds before forceful exiting */
-    timeout: parseUint(process.env.TRMNS_TMOUT) || 5000,
+    timeout: parseUint(process.env.TERMINUS_TMOUT_MS) || 5000,
     /* array of signals to listen for relative to shutdown */
-    signals: parseArray(process.env.TRMNS_SIGNLS) || ['SIGINT', 'SIGTERM'],
+    signals: parseArray(process.env.TERMINUS_SIGNALS) || ['SIGINT', 'SIGTERM'],
   },
 
   /* EJBCA Integration settings */
@@ -182,14 +181,14 @@ module.exports = {
         poolSize: parseUint(process.env.MONGO_POOL) || 100,
 
         /* How long to wait for a connection to be established before timing out */
-        serverSelectionTimeoutMS: parseUint(process.env.MONGO_CONN_TIMEOUT) || 30000,
+        serverSelectionTimeoutMS: parseUint(process.env.MONGO_CONN_TIMEOUT_MS) || 30000,
 
         /* controls when the driver checks the state of the MongoDB deployment.
          * Specify the interval (in milliseconds) between checks */
-        heartbeatFrequencyMS: parseUint(process.env.MONGO_HB_FREQ) || 10000,
+        heartbeatFrequencyMS: parseUint(process.env.MONGO_HB_FREQ_MS) || 10000,
 
         /* How long a send or receive on a socket can take before timing out */
-        socketTimeoutMS: parseUint(process.env.MONGO_SOCKET_TIMEOUT) || 360000,
+        socketTimeoutMS: parseUint(process.env.MONGO_SOCKET_TIMEOUT_MS) || 360000,
 
         /* Version of IP stack. Can be 4, 6 or 0 (default).
          * if 0, will attempt to connect with IPv6, and
@@ -200,7 +199,7 @@ module.exports = {
     query: {
       /* Sets the maxTimeMS option. This will tell the MongoDB server to abort
        * if the query or write op has been running for more than ms milliseconds. */
-      maxTimeMS: parseUint(process.env.MONGO_QUERY_MAX_TIME) || 30000,
+      maxTimeMS: parseUint(process.env.MONGO_QUERY_MAX_TIME_MS) || 30000,
     },
   },
 };

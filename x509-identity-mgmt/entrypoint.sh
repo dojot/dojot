@@ -11,8 +11,9 @@
 # Start the nodejs service
 cd /opt/x509-identity-mgmt || exit
 node index.js &
-export NODEJS_PID=$!
 status=$?
+export NODEJS_PID=$!
+
 if [ $status -ne 0 ]; then
     echo "Failed to start nodejs app: $status"
     exit $status
@@ -21,8 +22,9 @@ fi
 # Start the ejbca process
 cd /opt/primekey/bin || exit
 ./start.sh &
-export EJBCA_PID=$!
 status=$?
+export EJBCA_PID=$!
+
 if [ $status -ne 0 ]; then
     echo "Failed to start EJBCA process: $status"
     exit $status

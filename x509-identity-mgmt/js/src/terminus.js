@@ -11,9 +11,11 @@ const { terminus: terminusCfg } = require('./config');
 function setup(server, db, ejbca) {
   const healthCheck = async () => {
     const checkDB = await db.healthCheck();
-    const checkEJBCA = await ejbca.healthCheck();
     if (!checkDB) throw new HealthCheckError('MongoDB healthCheck', 'Problem connecting to MongoDB');
+
+    const checkEJBCA = await ejbca.healthCheck();
     if (!checkEJBCA) throw new HealthCheckError('EJBCA healthCheck', 'Problem with the EJBCA server');
+
     return { mongodb: 'ok', ejbca: 'ok' };
   };
 
@@ -33,7 +35,7 @@ function setup(server, db, ejbca) {
       });
     });
 
-    return Promise.all([closeConnProm]);
+    return closeConnProm;
   };
 
   const onShutdown = () => {

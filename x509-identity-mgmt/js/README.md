@@ -12,9 +12,9 @@ Settings of the Node.js application that implements the business rules of the x.
 | REQ_MAX_BODY_SIZE | Express [BodyParser](https://expressjs.com/en/resources/middleware/body-parser.html) *limit* setting.<br>**Default**: 100kb |
 | REQ_PGNT_LIMIT | Express [Paginate](https://github.com/expressjs/express-paginate#arguments) *limit* setting.<br>**Default**: 25 |
 | REQ_PGNT_MAX_LIMIT | Express [Paginate](https://github.com/expressjs/express-paginate#arguments) *max limit* setting.<br>**Default**: 250 |
-| TRMNS_VERBTM | [Terminus](https://github.com/godaddy/terminus) *verbatim* setting, used to return the custom object from */healthcheck* in response.<br>**Default**: true |
-| TRMNS_TMOUT | [Terminus](https://github.com/godaddy/terminus) *timeout* setting, define the number of milliseconds before forceful exiting.<br>**Default**: 5000 |
-| TRMNS_SIGNLS | [Terminus](https://github.com/godaddy/terminus) *signals* setting, signals to listen for relative to shutdown. Must be separated by commas.<br>**Default**: SIGINT,SIGTERM |
+| TERMINUS_VERBATIM | [Terminus](https://github.com/godaddy/terminus) *verbatim* setting, used to return the custom object from */healthcheck* in response.<br>**Default**: true |
+| TERMINUS_TMOUT_MS | [Terminus](https://github.com/godaddy/terminus) *timeout* setting, define the number of milliseconds before forceful exiting.<br>**Default**: 5000 |
+| TERMINUS_SIGNALS | [Terminus](https://github.com/godaddy/terminus) *signals* setting, signals to listen for relative to shutdown. Must be separated by commas.<br>**Default**: SIGINT,SIGTERM |
 | EJBCA_HEALTHCHECK | EJBCA Server Health Check URL. <br>Useful when in a development environment.<br>**Default**: http://127.0.0.1:8080/ejbca/publicweb/healthcheck/ejbcahealth' |
 | EJBCA_WSDL | URL for the WSDL that describes the operations available on the EJBCA via SOAP.<br>Useful when in the development environment. <br>**Default**: https://127.0.0.1:8443/ejbca/ejbcaws/ejbcaws?wsdl |
 | EJBCA_TLS_CLIENT_DIR | Directory where the [PKCS#12](https://en.wikipedia.org/wiki/PKCS_12) file will be generated so that the client application can establish communication with the EJBCA server. <br>**Default**: /opt/tls |
@@ -33,8 +33,8 @@ Settings of the Node.js application that implements the business rules of the x.
 | MONGO_AUTH_DB | Define the database to authenticate against (e.g. 'admin').<br>**Default**: undefined |
 | MONGO_AUTO_IDX | By default, [mongoose](https://mongoosejs.com/docs/connections.html#options) will automatically build indexes defined in the schemas when it connects. This is great for development, but not ideal for large production deployments (where a more improved DB update strategy should be employed), because index builds can cause performance degradation. If you set autoIndex to false, mongoose will not automatically build indexes for any model.<br>**Default**: true |
 | MONGO_POOL | The maximum number of sockets the [MongoDB driver](http://mongodb.github.io/node-mongodb-native/3.5/api/MongoClient.html#.connect) will keep open.<br>**Default**: 100 |
-| MONGO_CONN_TIMEOUT | How long (in milliseconds) to wait for a connection to be established before timing out.<br>**Default**: 30000 |
-| MONGO_SOCKET_TIMEOUT | How long (in milliseconds) a send or receive on a socket can take before timing out.<br>**Default**: 360000 |
-| MONGO_HB_FREQ | controls when the [MongoDB driver](http://mongodb.github.io/node-mongodb-native/3.5/api/MongoClient.html#.connect) checks the state of the MongoDB deployment (heartbeat Frequency).<br>Specify the interval (in milliseconds) between checks.<br>**Default**: 10000 |
+| MONGO_CONN_TIMEOUT_MS | How long (in milliseconds) to wait for a connection to be established before timing out.<br>**Default**: 30000 |
+| MONGO_SOCKET_TIMEOUT_MS | How long (in milliseconds) a send or receive on a socket can take before timing out.<br>**Default**: 360000 |
+| MONGO_HB_FREQ_MS | controls when the [MongoDB driver](http://mongodb.github.io/node-mongodb-native/3.5/api/MongoClient.html#.connect) checks the state of the MongoDB deployment (heartbeat Frequency).<br>Specify the interval (in milliseconds) between checks.<br>**Default**: 10000 |
 | MONGO_CONN_IPV | Version of IP stack. Can be 4, 6 or 0.<br>If 0, will attempt to connect with IPv6, and will fall back to IPv4 on failure.<br>**Default**: 0 |
-| MONGO_QUERY_MAX_TIME | Sets the maxTimeMS option. This will tell the MongoDB server to abort if the query or write op has been running for more than ms milliseconds.<br>**Default**: 30000 |
+| MONGO_QUERY_MAX_TIME_MS | Sets the maxTimeMS option. This will tell the MongoDB server to abort if the query or write op has been running for more than ms milliseconds.<br>**Default**: 30000 |

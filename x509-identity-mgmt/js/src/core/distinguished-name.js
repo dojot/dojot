@@ -110,6 +110,12 @@ const RDNs = [
   },
 ];
 
+/**
+ * Apply the correct RegExp to the value according to the given attribute
+ *
+ * @param {string} attr Name of a field in SubjectDN
+ * @param {string} value value of a field in SubjectDN
+ */
 function performRegexInAttrValue(attr, value) {
   if (Reflect.has(allowedRegex, attr)) {
     const regex = Reflect.get(allowedRegex, attr);
@@ -122,6 +128,11 @@ function performRegexInAttrValue(attr, value) {
   }
 }
 
+/**
+ * Checks whether the SubjectDN has only allowed fields, otherwise it does not pass validation.
+ *
+ * @param {Object} attributes SubjectDN fields
+ */
 function checkAllowedAttributes(attributes) {
   if (!attributes.every((attr) => Reflect.has(constantAttrs, attr) || allowed.includes(attr))) {
     const errorMsg = 'Error checking SubjectDN allowed attributes in CSR. '
@@ -131,6 +142,11 @@ function checkAllowedAttributes(attributes) {
   }
 }
 
+/**
+ * Checks whether the SubjectDN has the attributes considered mandatory.
+ *
+ * @param {Object} attributes SubjectDN fields
+ */
 function checkMandatoryAttributes(attributes) {
   if (!mandatory.every((mdAttr) => attributes.includes(mdAttr))) {
     const errorMsg = 'Error checking SubjectDN mandatory attributes in CSR. '
@@ -140,10 +156,21 @@ function checkMandatoryAttributes(attributes) {
   }
 }
 
+/**
+ * Checks whether the values of the SubjectDN fields meet the input validation RegExp.
+ *
+ * @param {Object} attributes SubjectDN fields
+ */
 function checkAttributeValues(attributes) {
   attributes.forEach(({ attr, value }) => performRegexInAttrValue(attr, value));
 }
 
+/**
+ * Performs checks on SubjectDN to ensure this meets the
+ * rules of the platform before issuing the certificate.
+ *
+ * @throws exceptions if this does not pass the validations.
+ */
 function verify() {
   const attributes = Reflect.ownKeys(this).filter(
     ((attr) => typeof Reflect.get(this, attr) !== 'function'),
@@ -156,6 +183,9 @@ function verify() {
   return this;
 }
 
+/**
+ * Converts SubjectDN fields to a string
+ */
 function stringify() {
   return Reflect.ownKeys(this).filter(
     ((attr) => typeof Reflect.get(this, attr) !== 'function'),
@@ -164,6 +194,10 @@ function stringify() {
   ).join(', ');
 }
 
+/**
+ * Adds a prefix to the SubjectDN Common Name field
+ * @param {string} prefix CommonName (CN) prefix
+ */
 function cnamePrefix(prefix) {
   if (typeof prefix === 'string' && Reflect.has(this, 'CN')) {
     const cname = Reflect.get(this, 'CN');

@@ -1,7 +1,7 @@
 process.env.NODE_APP_PORT = -10000;
 process.env.CERT_CHECK_PUBLIC_KEY = 'true';
-process.env.TRMNS_VERBTM = '0';
-process.env.TRMNS_SIGNLS = 'SIGINT, SIGTERM, SIGHUP';
+process.env.TERMINUS_VERBATIM = '0';
+process.env.TERMINUS_SIGNALS = 'SIGINT, SIGTERM, SIGHUP';
 process.env.CERT_ALW_ATTR_REGEX = 'O = ^[A-Z]{1,10}$ ; OU = ^[0-9]{1,5}$';
 
 const config = require('../../src/config');

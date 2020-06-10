@@ -34,10 +34,10 @@
             "string",
             "null"
           ],
-          "title": "Device UUID",
+          "title": "Device ID",
           "description": "Identifies the device that the x.509 certificate is attached to.",
-          "maxLength": 36,
-          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          "maxLength": 10,
+          "pattern": "^[0-9a-fA-F]{10}$"
         },
         "application": {
           "type": [

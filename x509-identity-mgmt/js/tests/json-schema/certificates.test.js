@@ -102,7 +102,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       .send({
         certificatePem: p256Cert,
         belongsTo: {
-          device: '00000000-0000-0000-0000-000000000000',
+          device: '1234567890',
           application: 'kafka-consumer',
         },
       })
@@ -378,9 +378,9 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+                pattern: '^[0-9a-fA-F]{10}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"',
+              message: 'should match pattern "^[0-9a-fA-F]{10}$"',
             },
           ],
         });
@@ -612,9 +612,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+                pattern: '^[0-9a-fA-F]{10}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"',
+              message: 'should match pattern "^[0-9a-fA-F]{10}$"',
             },
           ],
         });
