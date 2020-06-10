@@ -65,7 +65,7 @@ Below are the commands needed to generate each of these curves:
 #### Submit the CSR to the dojot platform
 
 CSR submission must be done at endpoint `/api/v1/certificates` of the *X.509 Identity Management* component, but as in practice the component is behind an API Gateway, the URI becomes `http://localhost:8000/x509/v1/certificates`.
-Therefore, we must send the CSR according to the syntax:
+Therefore, you must send the CSR according to the syntax:
 
     POST <base-url>/v1/certificates
     Authorization: Bearer JWT
@@ -213,7 +213,7 @@ There are two ways to obtain certificates issued by the dojot platform.
 
 ##### The first and simplest, is just to inform the certificate fingerprint in a GET request according to the syntax:
 
-    GET <base-url>/v1/x509-certificates/<certificateFingerprint>?fields=<list>
+    GET <base-url>/v1/certificates/<certificateFingerprint>?fields=<list>
 
 In practice, we would have something like this:
 
@@ -281,15 +281,15 @@ The response syntax would be as follows:
             "pages": [
                 {
                     "number": 1,
-                    "url": "/v1/x509-certificates?limit=3&page=1"
+                    "url": "/v1/certificates?limit=3&page=1"
                 },
                 {
                     "number": 2,
-                    "url": "/v1/x509-certificates?limit=3&page=2"
+                    "url": "/v1/certificates?limit=3&page=2"
                 },
                 {
                     "number": 3,
-                    "url": "/v1/x509-certificates?limit=3&page=3"
+                    "url": "/v1/certificates?limit=3&page=3"
                 }
             ]
         },
