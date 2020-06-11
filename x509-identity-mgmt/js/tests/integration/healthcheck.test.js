@@ -94,9 +94,13 @@ describe('Service Health Check - GET integrations', () => {
       .expect(503)
       .then((res) => {
         expect(res.body).toEqual({
-          details: 'Problem connecting to MongoDB',
-          error: 'Problem connecting to MongoDB',
           status: 'error',
+          details: [
+            'Problem connecting to MongoDB',
+          ],
+          error: [
+            'Problem connecting to MongoDB',
+          ],
         });
       });
   });
@@ -122,9 +126,13 @@ describe('Service Health Check - GET integrations', () => {
       .expect(503)
       .then((res) => {
         expect(res.body).toEqual({
-          details: 'Problem with the EJBCA server',
-          error: 'Problem with the EJBCA server',
           status: 'error',
+          details: [
+            'Problem with the EJBCA server',
+          ],
+          error: [
+            'Problem with the EJBCA server',
+          ],
         });
       });
   });
