@@ -6,24 +6,16 @@ jest.mock('../../app/AgentMessenger');
  * Mocks
  */
 const fakeMqttConfig = {
-  clientUsername: 'fake',
-  clientId: 'fake',
-  host: 'fake',
-  port: 0,
-  keepAlive: 0,
-  parallelHandlers: 1,
-  maxQueueLength: 10,
-  tls: {
-    ca: {
-      location: 'fake',
-    },
-    certificate: {
-      location: 'fake',
-    },
-    privateKey: {
-      location: 'fake',
-    },
-  },
+  'backpressure.handlers': 1,
+  'backpressure.queue.length.max': 10,
+  'client.keepalive': 0,
+  'client.id': 'fake',
+  'client.username': 'fake',
+  'server.address': 'fake',
+  'server.port': 0,
+  'tls.ca.file': 'fake',
+  'tls.certificate.file': 'fake',
+  'tls.key.file': 'fake',
 };
 
 const mockConfig = {
@@ -68,10 +60,10 @@ describe('Testing v2k bridge client', () => {
     expect(client.config).toEqual(config);
     expect(client.isConnected).toEqual(false);
 
-    expect(client.clientId).toEqual(config.clientId);
-    expect(client.username).toEqual(config.clientUsername);
-    expect(client.host).toEqual(config.host);
-    expect(client.keepAlive).toEqual(config.keepAlive);
+    expect(client.clientId).toEqual(config['client.id']);
+    expect(client.username).toEqual(config['client.username']);
+    expect(client.host).toEqual(config['server.address']);
+    expect(client.keepAlive).toEqual(config['client.keepalive']);
     expect(client.agentMessenger).toEqual(agent);
 
     expect(client.privateKey).not.toBeNull();

@@ -2,11 +2,11 @@
 
 #########################################################
 #########################################################
-BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
+V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/v2k_bridge"}
 
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
-. "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
+. "${V2K_APP_BASEDIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
 echo "Retrieve cert for  ${certCAName} CA : ${certEjbcaApiUrl}/ca/${certCAName}"
 certCa=$(curl --silent -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}" \

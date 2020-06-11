@@ -4,9 +4,9 @@
 #########################################################
 
 
-BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
+V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/v2k_bridge"}
 
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 echo "Retrieve crl from  ${certCAName} CA : ${certEjbcaApiUrl}/ca/${certCAName}/crl?update=true"
 certCrl=$(curl --silent -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}"/crl?update=true \

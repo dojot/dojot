@@ -4,9 +4,9 @@
 
 #########################################################
 
-BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
+V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/v2k_bridge"}
 
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 if openssl x509 -checkend "${CHECKEND_EXPIRATION_SEC}" -noout -in "${certDir}"/"${certCertFile}"
 then
@@ -15,7 +15,7 @@ else
   echo "Certificate for broker has expired or will do so within ${CHECKEND_EXPIRATION_SEC}s!"
   echo "(or is invalid/not found)"
   echo "Renew:"
-  . "${BASE_DIR}"/bin/scripts_tls/ejbca_client.sh
+  . "${V2K_APP_BASEDIR}"/bin/scripts_tls/ejbca_client.sh
 fi
 
 
@@ -26,9 +26,9 @@ else
   echo "Certificate from CA has expired or will do so within ${CHECKEND_EXPIRATION_SEC}s!"
   echo "(or is invalid/not found)"
   echo "Renew:"
-  . "${BASE_DIR}"/bin/scripts_tls/retrieveCACertificate.sh
+  . "${V2K_APP_BASEDIR}"/bin/scripts_tls/retrieveCACertificate.sh
 
-  . "${BASE_DIR}"/bin/scripts_tls/checkCertificateChain.sh
+  . "${V2K_APP_BASEDIR}"/bin/scripts_tls/checkCertificateChain.sh
 fi
 
 

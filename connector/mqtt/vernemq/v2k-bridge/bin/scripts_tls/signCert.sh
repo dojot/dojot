@@ -3,12 +3,12 @@
 #########################################################
 #########################################################
 
-BASE_DIR=${BASE_DIR:-"/v2k_bridge"}
+V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/v2k_bridge"}
 
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 
-. "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
+. "${V2K_APP_BASEDIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
 echo "Signing cert for entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/sign/${certCname}/pkcs10 "
 csrContent=$(<  "${certDir}"/"${certCsrFile}"  sed '1,1d;$ d' | tr -d '\r\n')
