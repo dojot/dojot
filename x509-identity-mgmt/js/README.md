@@ -13,7 +13,7 @@ Settings of the Node.js application that implements the business rules of the x.
 | REQ_PGNT_LIMIT | Express [Paginate](https://github.com/expressjs/express-paginate#arguments) *limit* setting.<br>**Default**: 25 |
 | REQ_PGNT_MAX_LIMIT | Express [Paginate](https://github.com/expressjs/express-paginate#arguments) *max limit* setting.<br>**Default**: 250 |
 | TERMINUS_VERBATIM | [Terminus](https://github.com/godaddy/terminus) *verbatim* setting, used to return the custom object from */healthcheck* in response.<br>**Default**: true |
-| TERMINUS_TMOUT_MS | [Terminus](https://github.com/godaddy/terminus) *timeout* setting, define the number of milliseconds before forceful exiting.<br>**Default**: 5000 |
+| TERMINUS_TIMEOUT_MS | [Terminus](https://github.com/godaddy/terminus) *timeout* setting, define the number of milliseconds before forceful exiting.<br>**Default**: 5000 |
 | TERMINUS_SIGNALS | [Terminus](https://github.com/godaddy/terminus) *signals* setting, signals to listen for relative to shutdown. Must be separated by commas.<br>**Default**: SIGINT,SIGTERM |
 | EJBCA_HEALTHCHECK | EJBCA Server Health Check URL. <br>Useful when in a development environment.<br>**Default**: http://127.0.0.1:8080/ejbca/publicweb/healthcheck/ejbcahealth' |
 | EJBCA_WSDL | URL for the WSDL that describes the operations available on the EJBCA via SOAP.<br>Useful when in the development environment. <br>**Default**: https://127.0.0.1:8443/ejbca/ejbcaws/ejbcaws?wsdl |

@@ -99,7 +99,7 @@ module.exports = {
     /* use object returned from /healthcheck in response */
     verbatim: parseBool(process.env.TERMINUS_VERBATIM, true),
     /* number of milliseconds before forceful exiting */
-    timeout: parseUint(process.env.TERMINUS_TMOUT_MS) || 5000,
+    timeout: parseUint(process.env.TERMINUS_TIMEOUT_MS) || 5000,
     /* array of signals to listen for relative to shutdown */
     signals: parseArray(process.env.TERMINUS_SIGNALS) || ['SIGINT', 'SIGTERM'],
   },

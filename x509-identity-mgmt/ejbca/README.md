@@ -15,7 +15,7 @@ For the settings related to the EJBCA server to take effect, it is necessary to 
 
 ## Settings to enable the super admin user to access the EJBCA
 
-During the EJBCA configuration process at container startup, it is possible to enable the creation of the super admin user. this option is interesting in a development environment, but not advisable in production environments for security reasons.
+During the EJBCA configuration process at container startup, it is possible to enable the creation of the super admin user. This option is interesting in a development environment, but not advisable in production environments for security reasons.
 
 | Variable | Description |
 |----------|-------------|

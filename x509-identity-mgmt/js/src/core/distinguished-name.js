@@ -111,7 +111,7 @@ const RDNs = [
 ];
 
 /**
- * Apply the correct RegExp to the value according to the given attribute
+ * Applies the correct RegExp to the value according to the given attribute
  *
  * @param {string} attr Name of a field in SubjectDN
  * @param {string} value value of a field in SubjectDN
