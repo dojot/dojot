@@ -200,7 +200,7 @@ REDIS_HOST       | Redis host                   | redis                         
 REDIS_PORT       | Redis port                   | 6379                               | number |
 REDIS_DATABASE   | Redis database               | 1                                  | number |
 
-Note1: Maximum lifetime of a connection will be the highest value between the time calculate from expiration timestamp provided by the jwt token (if KAFKA_WS_JWT_EXP_TIME is true) and KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_MAX_LIFE_TIME is -1, it will be the value provided in the time calculate from expiration timestamp (if KAFKA_WS_JWT_EXP_TIME is true), otherwise there would be no maximum connection lifetime.
+Note1: Maximum lifetime of a connection will be the highest value between the time calculate from expiration timestamp provided by the jwt token (if KAFKA_WS_JWT_EXP_TIME is true) and KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_MAX_LIFE_TIME is -1, it will be the value provided in the time calculate from expiration timestamp provided by the jwt token (if KAFKA_WS_JWT_EXP_TIME is true), otherwise there would be no maximum connection lifetime.
 
 Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JWT token can access the kafka topic, generally topics start with `tenant.*`
 
