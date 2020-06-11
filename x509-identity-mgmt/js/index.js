@@ -1,6 +1,6 @@
 const http = require('http');
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const cfg = require('./src/config');
 
@@ -13,6 +13,8 @@ const ejbca = require('./src/core/ejbca-facade');
 const terminus = require('./src/terminus');
 
 const server = http.createServer(app);
+
+const logger = new Logger();
 
 /* The server must be available even if there is not yet a connection to the database,
  * this is because it must be possible to consult the health check of the application

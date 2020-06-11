@@ -2,8 +2,10 @@ const http = require('http');
 const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 const { ejbca: ejbcaCfg } = require('../config');
+
+const logger = new Logger();
 
 /* SOAP client responsible for communicating with the EJBCA server */
 let ejbcaClient = null;

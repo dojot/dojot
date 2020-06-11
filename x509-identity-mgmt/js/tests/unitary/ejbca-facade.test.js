@@ -1,35 +1,50 @@
+/*
+ * A limitation with the factory parameter is that, since calls to jest.mock()
+ * are hoisted to the top of the file, it's not possible to first define a
+ * variable and then use it in the factory. An exception is made for variables
+ * that start with the word 'mock'.
+ */
+const mockLogMessages = [];
+
 jest.mock('fs');
 jest.mock('soap');
 jest.mock('readline');
-jest.mock('@dojot/dojot-module-logger');
+jest.mock('@dojot/microservice-sdk', () => {
+  const Logger = jest.fn().mockImplementation(() => {
+    const logOnArray = (error) => {
+      if (typeof error === 'string') {
+        mockLogMessages.push(error);
+      } else if (error instanceof Error) {
+        mockLogMessages.push(error.message);
+      }
+    };
+    const logger = {};
+    logger.error = jest.fn().mockImplementation(logOnArray);
+    logger.warn = jest.fn().mockImplementation(logOnArray);
+    logger.info = jest.fn().mockImplementation(logOnArray);
+    logger.debug = jest.fn().mockImplementation(logOnArray);
+    return logger;
+  });
+  return { Logger };
+});
 
 const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
-const { logger } = require('@dojot/dojot-module-logger');
 const { ejbca: ejbcaCfg } = require('../../src/config');
 const ejbcaFacade = require('../../src/core/ejbca-facade');
 
-let logMessages = [];
-const logOnArray = (error) => {
-  if (typeof error === 'string') {
-    logMessages.push(error);
-  } else if (error instanceof Error) {
-    logMessages.push(error.message);
-  }
-};
-logger.debug.mockImplementation(logOnArray);
-logger.error.mockImplementation(logOnArray);
 
 describe('testing internal functions of the EJBCA Facade', () => {
   beforeEach(() => {
-    logMessages = [];
+    // clear the array
+    mockLogMessages.splice(0, mockLogMessages.length);
   });
 
   it('should fail to find the .p12 file', async () => {
     await expect(ejbcaFacade.generateCertificate())
       .rejects.toThrow('Failure to establish communication with the certification authority');
-    expect(logMessages).toContain(`PKCS#12 binary file not found in: ${ejbcaCfg.pkcs12}`);
+    expect(mockLogMessages).toContain(`PKCS#12 binary file not found in: ${ejbcaCfg.pkcs12}`);
   });
 
   it('should fail to find the passphrase file', async () => {
@@ -40,7 +55,7 @@ describe('testing internal functions of the EJBCA Facade', () => {
     };
     await expect(ejbcaFacade.generateCertificate())
       .rejects.toThrow('Failure to establish communication with the certification authority');
-    expect(logMessages).toContain(`PKCS#12 passphrase file not found in: ${ejbcaCfg.pkcs12secret}`);
+    expect(mockLogMessages).toContain(`PKCS#12 passphrase file not found in: ${ejbcaCfg.pkcs12secret}`);
   });
 
   it('should fail to perform operation on EJBCA', async () => {
@@ -70,6 +85,6 @@ describe('testing internal functions of the EJBCA Facade', () => {
 
     await expect(ejbcaFacade.revokeCertificate(null, null))
       .rejects.toThrow('Failure to perform operation on the certification authority');
-    expect(logMessages).toContain(logErrorMsg);
+    expect(mockLogMessages).toContain(logErrorMsg);
   });
 });

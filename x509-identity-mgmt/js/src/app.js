@@ -10,9 +10,7 @@ const morgan = require('morgan');
 
 const path = require('path');
 
-const rfs = require('rotating-file-stream');
-
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const serveIndex = require('serve-index');
 
@@ -24,6 +22,10 @@ const { pagingMiddleware } = require('./core/paginate');
 
 /* This library is about what happens when you hit an async error. */
 require('express-async-errors');
+
+Logger.setTransport('console');
+
+const logger = new Logger();
 
 const app = express();
 
@@ -48,15 +50,6 @@ logger.stream = {
 morgan.token('id', (req) => req.id);
 
 app.use(morgan(cfg.logFormat, { stream: logger.stream }));
-
-/* If defined, the app will log all requests to a log file in the log/ directory */
-if (cfg.logToFile) {
-  const accessLogStream = rfs.createStream(
-    cfg.rotatingFileStream.filename,
-    cfg.rotatingFileStream.options,
-  );
-  app.use(morgan(cfg.logFormat, { stream: accessLogStream }));
-}
 
 /* Use a middleware that parses JSON and only looks at requests
  * where the Content-Type header matches the type "application/json"

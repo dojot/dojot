@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 
 const MongoQS = require('mongo-querystring');
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const { mongo: { conn: connCfg } } = require('./config');
 
 const { Schema } = mongoose;
+
+const logger = new Logger();
 
 const on = mongoose.connection.on.bind(mongoose.connection);
 

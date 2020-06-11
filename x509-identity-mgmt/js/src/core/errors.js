@@ -1,6 +1,8 @@
 const createError = require('http-errors');
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
+
+const logger = new Logger();
 
 /* default module error */
 function httpError(code, message) {

@@ -71,17 +71,6 @@ module.exports = {
     '":referrer"',
     '":user-agent"',
   ]).join(' '),
-  logToFile: parseBool(process.env.USE_LOG_FILE),
-  rotatingFileStream: {
-    filename: 'access.log',
-    options: {
-      size: '10M', // rotate every 10 MegaBytes written
-      interval: '1d', // rotate daily
-      maxFiles: 30, // the maximum number of rotated files to be kept
-      compress: 'gzip', // compress rotated files
-      path: path.join(__dirname, 'log'),
-    },
-  },
 
   /* Express BodyParser settings */
   bodyParser: {

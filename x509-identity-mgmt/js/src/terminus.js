@@ -4,9 +4,11 @@
 // https://github.com/godaddy/terminus
 const { createTerminus, HealthCheckError } = require('@godaddy/terminus');
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const { terminus: terminusCfg } = require('./config');
+
+const logger = new Logger();
 
 function setup(server, db, ejbca) {
   const healthCheck = async () => {
