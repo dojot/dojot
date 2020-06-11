@@ -14,13 +14,13 @@ const rfs = require('rotating-file-stream');
 
 const { logger } = require('@dojot/dojot-module-logger');
 
-const paginate = require('express-paginate');
-
 const serveIndex = require('serve-index');
 
 const jwtDecode = require('jwt-decode');
 
 const cfg = require('./config');
+
+const { pagingMiddleware } = require('./core/paginate');
 
 /* This library is about what happens when you hit an async error. */
 require('express-async-errors');
@@ -66,13 +66,7 @@ if (cfg.logToFile) {
 app.use(express.json(cfg.bodyParser));
 
 /* Paginate middleware */
-app.use(
-  paginate.middleware(cfg.paginate.limit, cfg.paginate.maxLimit),
-  (req, res, next) => {
-    if (req.query.limit < 1) req.query.limit = 1;
-    next();
-  },
-);
+app.use('/', pagingMiddleware(cfg.paginate.limit, cfg.paginate.maxLimit));
 
 /* Decodes the JWT token that must be sent with the request.
  * The token validation is not performed, as it is expected

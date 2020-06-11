@@ -72,11 +72,15 @@ describe('X509 Certificates - GET integrations', () => {
         .then((res) => {
           expect(res.body).toEqual({
             paging: {
-              currentPage: 1,
-              totalPages: 1,
-              itemLimitPerPage: 25,
+              previous: null,
+              current: {
+                number: 1,
+                url: '/api/v1/certificates?fields=fingerprint&page=1&limit=25',
+              },
+              next: null,
               totalItems: 3,
-              pages: [{ number: 1, url: '/api/v1/certificates?fields=fingerprint&page=1&limit=25' }],
+              totalPages: 1,
+              limitPerPage: 25,
             },
             certificates: results,
           });
@@ -96,31 +100,28 @@ describe('X509 Certificates - GET integrations', () => {
       db.certificate.model.exec.mockResolvedValue(results);
       db.certificate.model.count.mockResolvedValue(3);
 
-      return req.get('/api/v1/certificates?limit=0;fields=fingerprint')
+      return req.get('/api/v1/certificates?page=2&limit=0')
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(200)
         .then((res) => {
           expect(res.body).toEqual({
             paging: {
-              currentPage: 1,
-              totalPages: 3,
-              itemLimitPerPage: 1,
+              previous: {
+                number: 1,
+                url: '/api/v1/certificates?page=1&limit=1',
+              },
+              current: {
+                number: 2,
+                url: '/api/v1/certificates?page=2&limit=1',
+              },
+              next: {
+                number: 3,
+                url: '/api/v1/certificates?page=3&limit=1',
+              },
               totalItems: 3,
-              pages: [
-                {
-                  number: 1,
-                  url: '/api/v1/certificates?limit=1&page=1',
-                },
-                {
-                  number: 2,
-                  url: '/api/v1/certificates?limit=1&page=2',
-                },
-                {
-                  number: 3,
-                  url: '/api/v1/certificates?limit=1&page=3',
-                },
-              ],
+              totalPages: 3,
+              limitPerPage: 1,
             },
             certificates: results,
           });

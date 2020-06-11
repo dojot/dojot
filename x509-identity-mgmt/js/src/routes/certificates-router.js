@@ -2,8 +2,6 @@ const express = require('express');
 
 const HttpStatus = require('http-status-codes');
 
-const paginate = require('express-paginate');
-
 const { validateRegOrGenCert, validateChangeOwnerCert } = require('../core/schema-validator');
 
 const service = require('../services/certificates-service');
@@ -36,18 +34,9 @@ router.route('/certificates')
     const { itemCount, results } = await service.listCertificates(
       queryFields, filterFields, req.query.limit, req.offset,
     );
-    const pageCount = Math.ceil(itemCount / req.query.limit);
 
-    res.status(HttpStatus.OK).json({
-      paging: {
-        currentPage: req.query.page,
-        totalPages: pageCount,
-        itemLimitPerPage: req.query.limit,
-        totalItems: itemCount,
-        pages: paginate.getArrayPages(req)(null, pageCount, req.query.page),
-      },
-      certificates: results,
-    });
+    const paging = req.getPaging(itemCount);
+    res.status(HttpStatus.OK).json({ paging, certificates: results });
   });
 
 router.route('/certificates/:certificateFingerprint')

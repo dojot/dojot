@@ -274,24 +274,21 @@ The response syntax would be as follows:
 
     {
         "paging": {
-            "currentPage": 2,
-            "totalPages": 4,
-            "itemLimitPerPage": 3,
-            "totalItems": 12,
-            "pages": [
-                {
-                    "number": 1,
-                    "url": "/v1/certificates?limit=3&page=1"
-                },
-                {
-                    "number": 2,
-                    "url": "/v1/certificates?limit=3&page=2"
-                },
-                {
-                    "number": 3,
-                    "url": "/v1/certificates?limit=3&page=3"
-                }
-            ]
+            "previous": {
+                "number": 1,
+                "url": "/x509/v1/certificates?page=1&..."
+            },
+            "current": {
+                "number": 2,
+                "url": "/x509/v1/certificates?page=2&..."
+            },
+            "next": {
+                "number": 3,
+                "url": "/x509/v1/certificates?page=3&..."
+            },
+            "totalItems": 60,
+            "totalPages": 12,
+            "limitPerPage": 5
         },
         "certificates": [
             ... same as Get x.509 Certificate ...
@@ -303,7 +300,7 @@ Response Elements
 | Key | Description |
 |--|--|
 | certificates | List of x509 certificates according to the query parameters. Each element of the array is the same as specified by Get x509 Certificate. Type: Array |
-| paging | Metadata for controlling paginated results. It contains the URIs for the *previous*, *current* and *next* page. The *previous* and *next* will not be displayed when there is no page. Type: Document with keys previous and next. |
+| paging | Metadata for controlling paginated results. It contains the URIs for the *previous*, *current* and *next* page. The *previous* and *next* will assume *null* value when there is no page. Type: Document with keys previous and next. |
 
 A practical example query would be:
 
@@ -318,24 +315,21 @@ The platform's response could be something like:
 
     {
       "paging": {
-        "currentPage": 2,
-        "totalPages": 3,
-        "itemLimitPerPage": 3,
+        "previous": {
+          "number": 1,
+          "url": "/x509/v1/certificates?page=1&limit=3&fields=pem%2Cfingerprint&fingerprint=~%3A44"
+      },
+        "current": {
+          "number": 2,
+          "url": "/x509/v1/certificates?page=2&limit=3&fields=pem%2Cfingerprint&fingerprint=~%3A44"
+        },
+        "next": {
+          "number": 3,
+          "url": "/x509/v1/certificates?page=3&limit=3&fields=pem%2Cfingerprint&fingerprint=~%3A44"
+        },
         "totalItems": 9,
-        "pages": [
-          {
-            "number": 1,
-            "url": "/api/v1/certificates?page=1&limit=3&fields=pem%2Cfingerprint&fingerprint=~%3A44"
-          },
-          {
-            "number": 2,
-            "url": "/api/v1/certificates?page=2&limit=3&fields=pem%2Cfingerprint&fingerprint=~%3A44"
-          },
-          {
-            "number": 3,
-            "url": "/api/v1/certificates?page=3&limit=3&fields=pem%2Cfingerprint&fingerprint=~%3A44"
-          }
-        ]
+        "totalPages": 3,
+        "limitPerPage": 3
       },
       "certificates": [
         {
