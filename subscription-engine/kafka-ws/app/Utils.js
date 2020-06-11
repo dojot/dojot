@@ -59,16 +59,16 @@ function createFingerprint(topic, fields, conditions) {
     (condition) => convertConditionToString(condition),
   ).sort().join('');
 
-  let fingerprint = topic;
+  let processingRule = topic;
 
   if (sortedFields) {
-    fingerprint += `&${sortedFields}`;
+    processingRule += `&${sortedFields}`;
   }
   if (sortedConditions) {
-    fingerprint += `&${sortedConditions}`;
+    processingRule += `&${sortedConditions}`;
   }
 
-  return Crypto.SHA1(fingerprint).toString();
+  return Crypto.SHA1(processingRule).toString();
 }
 
 /**
@@ -91,15 +91,16 @@ function isNumber(value) {
 
 
 /**
- * Check if object if empty, like {}
+ * Checks if the given object is empty, like {}
  *
  * @param {object} object
  * @returns {boolean} true if it is empty
  */
-const isObjectEmpty = (object) => typeof object !== 'object' || object !== null && Object.keys(object).length === 0;
+const isObjectEmpty = (object) => (typeof object !== 'object') || (object !== null && Object.keys(object).length === 0);
 
 /**
- * Parse JWT and get expirationTimestamp (sec) and tenant
+ * Parses JWT and gets expiration (sec) and tenant values.
+ *
  * @param {string} rawToken
  *
  * @returns {object} obj like {expirationTimestamp: 1591638638 , tenant: 'example'}
@@ -150,7 +151,7 @@ const checkTopicBelongsTenant = (topic, tenant) => {
 };
 
 /**
- * Parse parthname from a URL in substring matches
+ *  Parses pathname from a given URL into substring matches
  *
  * @param {string} fullUrl ex: http://google.com
  * @param {string} pathToRegex ex: /v1/websocket/:topic
@@ -168,11 +169,11 @@ const checkAndParseURLPathname = (fullUrl, pathToRegex) => {
 };
 
 /**
- * adds seconds to the current timestamp and returns in seconds
+ * Adds a given amount of seconds to the current time, and returns it in seconds.
  *
  * @param {number} addSec
  */
-const timestampNowAddSeconds = (addSec) => Math.round(new Date().getTime() / 1000)
+const addTimeFromNow = (addSec) => Math.round(new Date().getTime() / 1000)
   + addSec;
 
 module.exports = {
@@ -186,5 +187,5 @@ module.exports = {
   parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
   checkAndParseURLPathname,
-  timestampNowAddSeconds,
+  addTimeFromNow,
 };

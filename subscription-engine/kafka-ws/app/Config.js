@@ -3,7 +3,7 @@ const parseBoolean = (mode) => ((mode || false) && (mode.toString().toLowerCase(
 module.exports = {
   app: {
     log: {
-      log_level: process.env.LOG_LEVEL || 'info',
+      log_console_level: process.env.LOG_LEVEL || 'info',
       log_verbose: parseBoolean(process.env.LOG_VERBOSE || false),
       log_file: parseBoolean(process.env.LOG_FILE || false),
       log_file_level: process.env.LOG_FILE_LEVEL || 'debug',

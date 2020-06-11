@@ -2,7 +2,7 @@ const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCal
 
 jest.mock('@dojot/microservice-sdk');
 
-jest.mock('../../app/Kafka/KafkaConsumers');
+jest.mock('../../app/Kafka/KafkaConsumer');
 
 
 let kafkaTopicsCallbacksMgmt = null;

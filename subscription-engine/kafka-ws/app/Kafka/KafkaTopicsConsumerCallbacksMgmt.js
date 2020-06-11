@@ -1,7 +1,7 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
 
-const KafkaWSConsumers = require('./KafkaConsumers');
+const KafkaWSConsumers = require('./KafkaConsumer');
 
 const logger = new Logger();
 

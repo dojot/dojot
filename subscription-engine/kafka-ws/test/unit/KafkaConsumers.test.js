@@ -1,5 +1,5 @@
 const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
-const KafkaWSConsumers = require('../../app/Kafka/KafkaConsumers');
+const KafkaWSConsumers = require('../../app/Kafka/KafkaConsumer');
 
 jest.mock('@dojot/microservice-sdk');
 
@@ -21,7 +21,7 @@ describe('Testing KafkaWSConsumers - works fine', () => {
       registerCallback: jest.fn()
         .mockReturnValueOnce('idCallback1'),
       unregisterCallback: jest.fn()
-        .mockImplementationOnce(() => { return () => Promise.resolve() }),
+        .mockImplementationOnce(() => () => Promise.resolve()),
     });
     kafkaWSConsumers = new KafkaWSConsumers();
   });

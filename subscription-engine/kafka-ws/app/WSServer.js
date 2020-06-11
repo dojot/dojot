@@ -8,7 +8,7 @@ const { ErrorCodes } = require('./Errors');
 const { ProcessingRuleManager } = require('./ProcessingRule');
 const { WhereParser } = require('./WhereProcessing');
 
-const RedisExpirationMgmt = require('./Expiration/RedisExpireMgmt');
+const RedisExpirationMgmt = require('./Redis/RedisExpireMgmt');
 
 const KafkaTopicsCallbacksMgmt = require('./Kafka/KafkaTopicsConsumerCallbacksMgmt');
 const {
@@ -16,7 +16,7 @@ const {
   parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
   isObjectEmpty,
-  timestampNowAddSeconds,
+  addTimeFromNow,
 } = require('./Utils');
 const { server: serverConfig } = require('./Config');
 
@@ -24,7 +24,7 @@ const logger = new Logger();
 
 
 /**
- * Get the topic kafka from url
+ * Gets the kafka topic from the given url
  * TODO: put this function in a more appropriate place, as a class to handle connections
  *
  * @param {string} fullUrl
@@ -46,6 +46,7 @@ const getKafkaTopicFromPathname = (fullUrl, cbError) => {
  * Checks the settings set in the deployment for maximum connection life,
  * and returns a maximum possible lifetime of a connection
  * TODO: put this function in a more appropriate place, as a class to handle connections
+ * TODO: temporary solution while we cannot generate JWT tokens with customized expiration date
  *
  * @param {number} expirationTimestampJWT expiration timestamp extracted from jwt
  */
@@ -61,7 +62,7 @@ const getMaxLifetime = (expirationTimestampJWT) => {
   // the maximum connection life setting if configured to use it (>0).
   // TODO: find a better way to do this
   const expirationMaxLifetime = serverConfig.connection_max_life_time > 0
-    ? timestampNowAddSeconds(serverConfig.connection_max_life_time) : 0;
+    ? addTimeFromNow(serverConfig.connection_max_life_time) : 0;
   // get the highest value between the configured expiration and the jwt expiration
   const expirationMax = expirationMaxLifetime > expirationJWT
     ? expirationMaxLifetime : expirationJWT;
@@ -70,7 +71,7 @@ const getMaxLifetime = (expirationTimestampJWT) => {
 };
 
 /**
- * Checks whether the tenant can access the past topic
+ * Checks whether the tenant can access the given topic
  * TODO: put this function in a more appropriate place, as a class to handle connections
  *
  * @param {string} kafkaTopic
@@ -222,7 +223,7 @@ class WSServer {
     const {
       rule: filter,
       fingerprint,
-    } = this.processingRuleManager.addRule(fields, conditions, kafkaTopic);
+    } = this.processingRuleManager.addRule(kafkaTopic, fields, conditions);
 
     // create callback to call the filter and send the message via ws
     this.createCallbackSendMessage(ws, kafkaTopic, idWsConnection, filter);
@@ -241,12 +242,14 @@ class WSServer {
     if (serverConfig.jwt_exp_time || serverConfig.connection_max_life_time > 0) {
       const boundClose = ws.close.bind(ws);
       // TODO: add something like refresh tokens instead of maximum lifetime
+      // TODO: temporary solution while we cannot generate JWT tokens
+      // with customized expiration date
       const expirationMax = getMaxLifetime(expirationTimestampFromJWT);
       logger.debug(`Setting expiration connection to ${expirationMax} sec`);
       this.redisExpirationMgmt.addConnection(idWsConnection, expirationMax, () => {
         try {
           logger.debug('Closing');
-          boundClose(ErrorCodes.EXPIRATION_CONNECT, 'Connection lifetime');
+          boundClose(ErrorCodes.EXPIRED_CONNECTION, 'Connection lifetime');
         } catch (error) {
           logger.error(`Caught ${error.stack}`);
         }

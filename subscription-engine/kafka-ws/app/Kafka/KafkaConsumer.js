@@ -8,12 +8,12 @@ const logger = new Logger();
 /**
  * Consume kafka messages from kafka topics
  */
-class KafkaConsumers {
+class KafkaConsumer {
   /**
-  * Instance KafkaConsumers
+  * Instance KafkaConsumer
   */
   constructor() {
-    logger.debug('constructor: Instance KafkaConsumers');
+    logger.debug('constructor: Instance KafkaConsumer');
     this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
@@ -83,4 +83,4 @@ class KafkaConsumers {
   }
 }
 
-module.exports = KafkaConsumers;
+module.exports = KafkaConsumer;

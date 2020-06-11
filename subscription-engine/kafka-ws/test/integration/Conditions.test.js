@@ -1,174 +1,141 @@
 const { ConditionApplier } = require('../../app/Conditions');
+
 jest.mock('@dojot/microservice-sdk');
 
 describe('Testing Conditions', () => {
-    beforeAll(() => {
-    });
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+  beforeAll(() => {
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
 
-    it('in with data', () => {
+  it('in with data', () => {
+    const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
+    const object = { sensor: { status: 'failed' }, temperature: 35 };
+    const filterData = filter(object);
 
-        const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
-        const object = { sensor: { status: 'failed' }, temperature: 35 };
-        const filterData = filter(object);
+    expect(filterData).toMatchObject({ sensor: { status: 'failed' }, temperature: 35 });
+  });
 
-        expect(filterData).toMatchObject({ sensor: { status: 'failed' }, temperature: 35 });
+  it('in with no data', () => {
+    const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
+    const object = { sensor: { status: 'started' }, temperature: 35 };
+    const filterData = filter(object);
 
-    });
+    expect(filterData).toMatchObject({});
+  });
 
-    it('in with no data', () => {
+  it('nin with data', () => {
+    const filter = ConditionApplier('sensor.status', 'nin', ['failed', 'stopped']);
+    const object = { sensor: { status: 'failed' }, temperature: 35 };
+    const filterData = filter(object);
 
-        const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
-        const object = { sensor: { status: 'started' }, temperature: 35 };
-        const filterData = filter(object);
+    expect(filterData).toMatchObject({});
+  });
 
-        expect(filterData).toMatchObject({});
+  it('nin with no data', () => {
+    const filter = ConditionApplier('sensor.status', 'nin', ['failed', 'stopped']);
+    const object = { sensor: { status: 'started' }, temperature: 35 };
+    const filterData = filter(object);
 
-    });
+    expect(filterData).toMatchObject({ sensor: { status: 'started' }, temperature: 35 });
+  });
 
-    it('nin with data', () => {
+  it('gte with data ', () => {
+    const filter = ConditionApplier('temperature', 'gte', [20]);
+    const object = { location: 'x', temperature: 20 };
+    const filterData = filter(object);
 
-        const filter = ConditionApplier('sensor.status', 'nin', ['failed', 'stopped']);
-        const object = { sensor: { status: 'failed' }, temperature: 35 };
-        const filterData = filter(object);
+    expect(filterData).toMatchObject({ location: 'x' });
+  });
 
-        expect(filterData).toMatchObject({});
+  it('gte with no data ', () => {
+    const filter = ConditionApplier('temperature', 'gte', [21]);
+    const object = { location: 'x', temperature: 20 };
+    const filterData = filter(object);
 
-    });
+    expect(filterData).toMatchObject({});
+  });
 
-    it('nin with no data', () => {
+  it('gt with data', () => {
+    const filter = ConditionApplier('temperature', 'gt', [20]);
+    const object = { location: 'x', temperature: 21 };
+    const filterData = filter(object);
 
-        const filter = ConditionApplier('sensor.status', 'nin', ['failed', 'stopped']);
-        const object = { sensor: { status: 'started' }, temperature: 35 };
-        const filterData = filter(object);
+    expect(filterData).toMatchObject({ location: 'x' });
+  });
 
-        expect(filterData).toMatchObject({ sensor: { status: 'started' }, temperature: 35 });
+  it('gt with no data', () => {
+    const filter = ConditionApplier('temperature', 'gt', [21]);
+    const object = { location: 'x', temperature: 21 };
+    const filterData = filter(object);
 
-    });
+    expect(filterData).toMatchObject({});
+  });
 
-    it('gte with data ', () => {
 
-        const filter = ConditionApplier('temperature', 'gte', [20]);
-        const object = { location: 'x', temperature: 20 };
-        const filterData = filter(object);
+  it('lt with data', () => {
+    const filter = ConditionApplier('temperature', 'lt', [20]);
+    const object = { location: 'x', temperature: 19 };
+    const filterData = filter(object);
 
-        expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toMatchObject({ location: 'x' });
+  });
 
-    });
+  it('lt with no data', () => {
+    const filter = ConditionApplier('temperature', 'lt', [20]);
+    const object = { location: 'x', temperature: 21 };
+    const filterData = filter(object);
 
-    it('gte with no data ', () => {
+    expect(filterData).toMatchObject({});
+  });
 
-        const filter = ConditionApplier('temperature', 'gte', [21]);
-        const object = { location: 'x', temperature: 20 };
-        const filterData = filter(object);
+  it('lte with data', () => {
+    const filter = ConditionApplier('temperature', 'lte', [19]);
+    const object = { location: 'x', temperature: 19 };
+    const filterData = filter(object);
 
-        expect(filterData).toMatchObject({});
+    expect(filterData).toMatchObject({ location: 'x' });
+  });
 
-    });
+  it('lte with no data', () => {
+    const filter = ConditionApplier('temperature', 'lte', [20]);
+    const object = { location: 'x', temperature: 21 };
+    const filterData = filter(object);
 
-    it('gt with data', () => {
+    expect(filterData).toMatchObject({});
+  });
 
-        const filter = ConditionApplier('temperature', 'gt', [20]);
-        const object = { location: 'x', temperature: 21 };
-        const filterData = filter(object);
+  it('eq with data', () => {
+    const filter = ConditionApplier('temperature', 'eq', [19]);
+    const object = { location: 'x', temperature: 19 };
+    const filterData = filter(object);
 
-        expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toMatchObject({ location: 'x' });
+  });
 
-    });
+  it('eq with no data', () => {
+    const filter = ConditionApplier('temperature', 'eq', [20]);
+    const object = { location: 'x', temperature: 21 };
+    const filterData = filter(object);
 
-    it('gt with no data', () => {
+    expect(filterData).toMatchObject({});
+  });
 
-        const filter = ConditionApplier('temperature', 'gt', [21]);
-        const object = { location: 'x', temperature: 21 };
-        const filterData = filter(object);
+  it('neq with data', () => {
+    const filter = ConditionApplier('temperature', 'neq', [20]);
+    const object = { location: 'x', temperature: 19 };
+    const filterData = filter(object);
 
-        expect(filterData).toMatchObject({});
+    expect(filterData).toMatchObject({ location: 'x' });
+  });
 
-    });
+  it('neq with no data', () => {
+    const filter = ConditionApplier('temperature', 'neq', [20]);
+    const object = { location: 'x', temperature: 20 };
+    const filterData = filter(object);
 
-
-
-    it('lt with data', () => {
-
-        const filter = ConditionApplier('temperature', 'lt', [20]);
-        const object = { location: 'x', temperature: 19 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({ location: 'x' });
-
-    });
-
-    it('lt with no data', () => {
-
-        const filter = ConditionApplier('temperature', 'lt', [20]);
-        const object = { location: 'x', temperature: 21 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({});
-
-    });
-
-    it('lte with data', () => {
-
-        const filter = ConditionApplier('temperature', 'lte', [19]);
-        const object = { location: 'x', temperature: 19 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({ location: 'x' });
-
-    });
-
-    it('lte with no data', () => {
-
-        const filter = ConditionApplier('temperature', 'lte', [20]);
-        const object = { location: 'x', temperature: 21 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({});
-
-    });
-
-    it('eq with data', () => {
-
-        const filter = ConditionApplier('temperature', 'eq', [19]);
-        const object = { location: 'x', temperature: 19 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({ location: 'x' });
-
-    });
-
-    it('eq with no data', () => {
-
-        const filter = ConditionApplier('temperature', 'eq', [20]);
-        const object = { location: 'x', temperature: 21 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({});
-
-    });
-
-    it('neq with data', () => {
-
-        const filter = ConditionApplier('temperature', 'neq', [20]);
-        const object = { location: 'x', temperature: 19 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({ location: 'x' });
-
-    });
-
-    it('neq with no data', () => {
-
-        const filter = ConditionApplier('temperature', 'neq', [20]);
-        const object = { location: 'x', temperature: 20 };
-        const filterData = filter(object);
-
-        expect(filterData).toMatchObject({});
-
-    });
-
+    expect(filterData).toMatchObject({});
+  });
 });

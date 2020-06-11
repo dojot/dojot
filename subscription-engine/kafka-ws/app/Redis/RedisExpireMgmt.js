@@ -32,10 +32,6 @@ class RedisExpireMgmt {
       pub: redis.createClient(redisOptions),
       sub: redis.createClient(redisOptions),
     };
-    this.connect = {
-      pub: false,
-      sub: false,
-    }
   }
 
   /**
@@ -45,11 +41,9 @@ class RedisExpireMgmt {
     // TODO: improve handle errors
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
-      this.connect.pub = false;
     });
     this.clients.pub.on('end', (error) => {
       logger.info(`pub: onEnd: ${error}`);
-      this.connect.pub = false;
     });
     this.clients.pub.on('warning', (error) => {
       logger.warn(`pub: onWarning: ${error}`);
@@ -62,7 +56,6 @@ class RedisExpireMgmt {
       if (error) {
         logger.error(`pub: Error on connect: ${error}`);
       } else {
-        this.connect.pub = true;
         logger.info('pub: Connect');
       }
     });
@@ -75,11 +68,9 @@ class RedisExpireMgmt {
     // TODO: improve handle errors
     this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
-      this.connect.sub = false;
     });
     this.clients.sub.on('end', (error) => {
       logger.info(`sub: onEnd: ${error}`);
-      this.connect.sub = false;
     });
     this.clients.sub.on('warning', (error) => {
       logger.warn(`sub: onWarning: ${error}`);
@@ -89,7 +80,6 @@ class RedisExpireMgmt {
       if (error) {
         logger.error(`sub: Error on connect: ${error}`);
       } else {
-        this.connect.sub = true;
         logger.info('sub: Connect');
       }
     });
@@ -133,7 +123,7 @@ class RedisExpireMgmt {
    * @param {funcion} callback  callback to be called when the lifetime is over
    */
   addConnection(idConnection, timestampSec, callback) {
-    if (this.connect.pub && this.connect.sub) {
+    if (this.clients.sub.connected && this.clients.pub.connected) {
       logger.debug(`addConnection: ${idConnection}  ${timestampSec}`);
       if (!this.expirationMap.has(idConnection)) {
         this.expirationMap.set(idConnection, callback);
@@ -145,7 +135,7 @@ class RedisExpireMgmt {
         logger.warn(`addConnection: ${idConnection} already exist`);
       }
     } else {
-      logger.warn(`addConnection: not connected with redis`);
+      logger.warn('addConnection: not connected with redis');
     }
   }
 
@@ -154,7 +144,7 @@ class RedisExpireMgmt {
    * @param {string} idConnection unique id for a connection
    */
   removeConnection(idConnection) {
-    if (this.connect.pub && this.connect.sub) {
+    if (this.clients.sub.connected && this.clients.pub.connected) {
       logger.debug(`removeConnection: ${idConnection}`);
       if (this.expirationMap.has(idConnection)) {
         this.clients.pub.del(idConnection);
@@ -163,7 +153,7 @@ class RedisExpireMgmt {
         logger.warn(`removeConnection: ${idConnection} doesn't exist`);
       }
     } else {
-      logger.warn(`removeConnection: not connected with redis`);
+      logger.warn('removeConnection: not connected with redis');
     }
   }
 

@@ -1,9 +1,5 @@
-const { Logger } = require('@dojot/microservice-sdk');
-
-const { processingRule } = require('./ProcessingRule');
+const { processRule } = require('./ProcessingRule');
 const { createFingerprint } = require('../Utils');
-
-const logger = new Logger();
 
 /**
  * Manages ProcessingRule instances.
@@ -25,9 +21,8 @@ class ProcessingRuleManager {
    * @returns {{rule: (data: JSON) => JSON, fingerprint: string}}
    * function to process the data and its identification.
    */
-  addRule(fields, conditions, kafkaTopic) {
+  addRule(kafkaTopic, fields, conditions) {
     const fingerprint = createFingerprint(kafkaTopic, fields, conditions);
-    logger.debug(`Topic: ${kafkaTopic}`);
 
     if (this.hasRule(fingerprint)) {
       this.rules[fingerprint] = Object.assign(
@@ -36,7 +31,7 @@ class ProcessingRuleManager {
       return { rule: this.rules[fingerprint].rule, fingerprint };
     }
 
-    const rule = processingRule(fields, conditions);
+    const rule = processRule(fields, conditions);
 
     this.rules[fingerprint] = { count: 1, rule };
 
@@ -61,7 +56,7 @@ class ProcessingRuleManager {
   }
 
   /**
-   * Check whether has the rule
+   * Checks whether a ProcessingRule exists.
    *
    * @param {string} fingerprint rule identification
    *

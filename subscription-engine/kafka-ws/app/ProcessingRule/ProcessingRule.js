@@ -12,7 +12,7 @@ const { ConditionApplier } = require('../Conditions');
  *
  * @returns {(data: Object) => Object} a filter function that can be applied to a JSON
  */
-const processingRule = (fields, conditions) => {
+const processRule = (fields, conditions) => {
   const filters = [];
 
   conditions.forEach((condition) => {
@@ -54,4 +54,4 @@ const processingRule = (fields, conditions) => {
   };
 };
 
-module.exports = { processingRule };
+module.exports = { processRule };

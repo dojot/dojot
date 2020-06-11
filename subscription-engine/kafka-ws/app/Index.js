@@ -5,7 +5,7 @@ const Server = require('./Server');
 
 
 Logger.setTransport('console', {
-  level: logConfig.log_level,
+  level: logConfig.log_console_level,
 });
 
 if (logConfig.log_file) {
