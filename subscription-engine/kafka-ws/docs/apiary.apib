@@ -1,0 +1,214 @@
+FORMAT: 1A
+
+
+# Kafka WS
+
+The Kafka WS service provides support for pure WebSocket connections to retrieve data directly
+from Kafka.
+
+# Group WebSocket
+
+**Kafka WebSocket service** allows the user to retrieve conditional and/or partial data from a topic
+in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
+language you want, as long as the client supports **RFC 6455** websockets.
+
+## Retrieving conditional and/or partial messages from topic: [/v1/websocket/{topic}?fields={selector}&where={conditions}]
+
+### **Where**
+
+The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
+conditions.
+
+Grammar:
+- `where → expression:*`
+- `expression → condition:+`
+- `condition → selector=(operator:):?values;`
+- `selector → parameter | parameter.selector`
+- `operator → `[see more](#header-applying-conditions)
+- `values → value | value,values`
+
+Where:
+- `:*` - zero or more
+- `:+` - one or more
+- `:?` - zero or one
+
+#### **Examples**
+
+To ilustrate the parameters' usage, here are some examples of valid URIs:
+
+Retrieving full messages from `topic.example` topic:
+```
+/v1/websocket/topic.example
+```
+
+Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
+```
+/v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+```
+
+Retrieving the temperature and location:
+```
+/v1/websocket/topic.example?fields=temperature,location
+```
+
+Retrieving full messages where 5.0 ≤ temperature < 10.0:
+```
+/v1/websocket/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
+```
+
+Retrieving the temperature and rain when rain ≤ 15:
+```
+/v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
+```
+
+---
+
+### **Selecting parameters**
+
+The rules to select parameters from a message are:
+- `a,b,c`: select multiple parameters
+- `a/b/c`: select a parameter from its parent
+- `a(b,c)`: select multiple parameters from a specific parameter
+- `a/*/c`: wildcard selection
+
+Examples:
+```
+{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
+{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
+{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
+{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
+```
+
+---
+
+### **Applying conditions**
+
+The conditions can be applied to any parameter in the message. The permitted operators are:
+
+#### **Set operators**
+
+Applied to a parameter via a set of values. These operators are applied to N possible values.
+- `in`: returns the parameter if the value is in the list
+- `nin`: returns the parameter if the value is not in the list
+
+Examples:
+```
+{ a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
+{ a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
+```
+
+#### **Arythmetic operators**
+
+Applied to a parameter via one value. These operators are applied to 1 possible value.
+- `neq`: not equal
+- `gt`: greater than
+- `gte`: greater or equal to
+- `lt`: less than
+- `lte`: less or equal to
+
+**Obs.:** if you do not pass an operator, it is equal.
+
+If no query string is set, then all values are returned.
+
+Examples:
+```
+{ rain: 10, temperature: 30.0 } → f(rain=11) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=neq:11) → continue to process
+{ rain: 10, temperature: 30.0 } → f(rain=gt:10) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=gte:10) → continue to process
+{ rain: 10, temperature: 30.0 } → f(rain=lt:10) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=lte:10) → continue to process
+```
+
++ Parameters
+    + topic:topic.example (required, string) - The `topic` parameter is the Kafka topic that you want to receive data from.
+    + selector:sensor/status,temperature (optional, string) - The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
+    + conditions: sensor.status=in:failed,stopped; (optional, string) - The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
+conditions.
+
+
+### Retrieve kafka data [GET]
++ Request
+  + Headers
+
+            Authorization: Bearer JWT
+
++ Response 200
+
+  + body
+
+            {"sensor":{"status":"failed"},"temperature":35}
+
++ Response 426 (text/plain)
+
+         Invalid request - non-WebSocket connection received in WS endpoint
+
++ Response 4000
+  **Websocket error**
+
+  + body
+
+            INVALID_SYNTAX: there is a syntatic problem with `where`
+
++ Response 4001
+  **Websocket error**
+
+  + body
+
+            INVALID_OPERATOR: an invalid operator has been passed to a condition
+
++ Response 4002
+  **Websocket error**
+
+  + body
+
+            INVALID_ESCAPE_VALUE: an unsupported escape character has been passed to a condition
+
++ Response 4003
+  **Websocket error**
+
+  + body
+
+            INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
+
++ Response 4004
+  **Websocket error**
+
+  + body
+
+            INVALID_VALUE: a value with an invalid type was passed to a condition
+
++ Response 4400
+  **Websocket error**
+
+  + body
+
+            INVALID_PATHNAME: a Malformed URI was passed
+
++ Response 4401
+  **Websocket error**
+
+  + body
+
+            INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the jwt
+
++ Response 4403
+  **Websocket error**
+
+  + body
+
+            FORBIDDEN_TOPIC: the tenant sent in the token jwt cannot access the kafka topic passed
+
++ Response 4408
+  **Websocket error**
+
+  + body
+
+            EXPIRED_CONNECTION: connection lifetime is over
+
++ Response 4999
+  **Websocket error**
+
+  + body
+
+            INTERNAL: there is an error in the server

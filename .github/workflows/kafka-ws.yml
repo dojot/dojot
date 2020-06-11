@@ -77,3 +77,40 @@ jobs:
         # Label with the built image's commit
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
         # Whether tag will be based in the branch name or in the tag name
+
+
+  gh-pages:
+    needs: docker-hub
+    name: (pki/ejbca) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Version Doc
+      id: version_doc
+      env:
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_SHA: ${{ github.sha }}
+      run: |
+        export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
+        echo Documentation Version $TAG_VERSION
+        echo ::set-output name=version::$TAG_VERSION
+    - name: Generate docs
+      env:
+        FOLDER_TO_GH_PAGES: subscription-engine/kafka-ws/
+        PATH_APIB: ./subscription-engine/kafka-ws/docs/apiary.apib
+        VERSION_NAME: ${{ steps.version_doc.outputs.version }}
+      run: |
+        sh .github/workflows/scripts/doc_aglio_api.sh
+    - name: Publish Documentation
+      uses: peaceiris/actions-gh-pages@v2
+      env:
+        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN_PAT }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./build-docs #fix when use .github/workflows/scripts/doc_aglio_api.sh
+      with:
+        keepFiles: true
+        emptyCommits: false
