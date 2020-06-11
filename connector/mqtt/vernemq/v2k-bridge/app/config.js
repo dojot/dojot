@@ -1,74 +1,71 @@
 const { toBoolean } = require('./utils');
 
 const app = {
-  baseDir: process.env.BASE_DIR || '/opt/v2k_bridge',
-  hostname: process.env.HOSTNAME || 'v2k-bridge',
-  logger: {
-    transports: {
-      console: {
-        level: process.env.V2K_CONSOLE_LOG_LEVEL || 'info',
-      },
-    },
-    verbose: (toBoolean(process.env.V2K_LOG_VERBOSE)) || false,
-  },
+  basedir: process.env.V2K_APP_BASEDIR,
+  'connection.retry.count': parseInt(process.env.V2K_APP_CONNECTION_RETRY_COUNT, 0),
+  'connection.retry.timeout': parseInt(process.env.V2K_APP_CONNECTION_RETRY_TIMEOUT, 0),
+  'ejbca.address': process.env.V2K_APP_EJBCA_ADDRESS,
+  hostname: process.env.V2K_APP_HOSTNAME,
+};
+
+const logger = {
+  'transports.console.level': process.env.V2K_LOGGER_TRANSPORTS_CONSOLE_LEVEL,
+  verbose: toBoolean(process.env.V2K_LOGGER_VERBOSE),
 };
 
 const messenger = {
-  kafkaTopic: process.env.V2K_KAFKA_PRODUCE_TOPIC_SUFFIX || 'device-data',
+  'produce.topic.suffix': process.env.V2K_MESSENGER_PRODUCE_TOPIC_SUFFIX,
 };
 
 const mqtt = {
-  clientUsername: process.env.V2K_MQTT_USERNAME || 'v2k-bridge',
-  clientId: process.env.V2K_MQTT_CLIENT_ID || app.hostname,
-  host: process.env.V2K_MQTT_HOST || 'vernemq-k8s',
-  port: parseInt(process.env.V2K_MQTT_PORT, 0) || 8883,
-  keepalive: parseInt(process.env.V2K_MQTT_KEEPALIVE, 0) || 60,
-  secure: toBoolean(process.env.V2K_MQTT_SECURE) || true,
+  // Backpressure
+  'backpressure.handlers': parseInt(process.env.V2K_MQTT_BACKPRESSURE_HANDLERS, 0),
+  'backpressure.queue.length.max': parseInt(process.env.V2K_MQTT_BACKPRESSURE_QUEUE_LENGTH_MAX, 0),
+
+  // Client
+  'client.id': process.env.V2K_MQTT_CLIENT_ID,
+  'client.keepalive': parseInt(process.env.V2K_MQTT_CLIENT_KEEPALIVE, 0),
+  'client.secure': toBoolean(process.env.V2K_MQTT_CLIENT_SECURE),
+  'client.subscription.qos': parseInt(process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_QOS, 0),
   // eslint-disable-next-line no-useless-escape
-  subscribeTopic: process.env.V2K_MQTT_SUBSCRIPTION_TOPIC || '\$share/group/+/attrs',
-  subscribeQos: parseInt(process.env.V2K_MQTT_SUBSCRIPTION_QOS, 0) || 1,
-  parallelHandlers: parseInt(process.env.V2K_BACKPRESSURE_PARALLEL_HANDLERS, 0) || 4,
-  maxQueueLength: parseInt(process.env.V2K_BACKPRESSURE_MAX_QUEUE_LENGTH, 0) || 1048576,
-  tls: {
-    ca: {
-      location: process.env.V2K_MQTT_CA_FILE || `${app.baseDir}/app/cert/ca.crt`,
-    },
-    certificate: {
-      location: process.env.V2K_MQTT_CERT_FILE || `${app.baseDir}/app/cert/${app.hostname}.crt`,
-    },
-    privateKey: {
-      location: process.env.V2K_MQTT_KEY_FILE || `${app.baseDir}/app/cert/${app.hostname}.key`,
-    },
-  },
+  'client.subscription.topic': process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_TOPIC,
+  'client.username': process.env.V2K_MQTT_CLIENT_USERNAME,
+
+  // Server
+  'server.address': process.env.V2K_MQTT_SERVER_ADDRESS,
+  'server.port': parseInt(process.env.V2K_MQTT_SERVER_PORT, 0),
+
+  // TLS
+  'tls.ca.file': process.env.V2K_MQTT_TLS_CA_FILE,
+  'tls.certificate.file': process.env.V2K_MQTT_TLS_CERTIFICATE_FILE,
+  'tls.key.file': process.env.V2K_MQTT_TLS_KEY_FILE,
 };
 
-const producer = {
-  'producer.flush.timeout.ms': parseFloat(process.env.V2K_PRODUCER_FLUSH_TIMEOUT_MS) || 2000,
-  'producer.pool.interval.ms': parseFloat(process.env.V2K_PRODUCER_POOL_INTERVAL_MS) || 100,
-  'producer.connect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_CONNECT_TIMEOUT_MS) || 5000,
-  'producer.disconnect.timeout.ms': parseFloat(process.env.V2K_PRODUCER_DISCONNECT_TIMEOUT_MS)
-    || 10000,
-  kafka: {
-    'client.id': process.env.V2K_KAFKA_CLIENT_ID || app.hostname,
-    'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST || 'kafka-server:9092',
-    'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE))
-      || false,
-    acks: parseInt(process.env.V2K_KAFKA_ACKS, 0) || -1,
-    retries: parseInt(process.env.V2K_KAFKA_RETRIES, 0) || 2,
-    'max.in.flight.requests.per.connection':
-      parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 0) || 1000000,
-    'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 0) || 100,
-    'socket.keepalive.enable':
-      (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)) || false,
-    'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 0)
-      || 1048576,
-    'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS) || 0.5,
-    'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 0) || 10000,
-    'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC || 'none',
-    dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB)) || true,
-  },
+const sdk = {
+  'producer.connect.timeout.ms': parseFloat(process.env.V2K_SDK_PRODUCER_CONNECT_TIMEOUT_MS),
+  'producer.disconnect.timeout.ms': parseFloat(process.env.V2K_SDK_PRODUCER_DISCONNECT_TIMEOUT_MS),
+  'producer.flush.timeout.ms': parseFloat(process.env.V2K_SDK_PRODUCER_FLUSH_TIMEOUT_MS),
+  'producer.pool.interval.ms': parseFloat(process.env.V2K_SDK_PRODUCER_POOL_INTERVAL_MS),
+};
+
+const kafka = {
+  acks: parseInt(process.env.V2K_KAFKA_ACKS, 0),
+  'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 0),
+  'client.id': process.env.V2K_KAFKA_CLIENT_ID,
+  'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC,
+  dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB)),
+  'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE)),
+  'max.in.flight.requests.per.connection':
+    parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 0),
+  'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST,
+  retries: parseInt(process.env.V2K_KAFKA_RETRIES, 0),
+  'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 0),
+  'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS),
+  'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 0),
+  'socket.keepalive.enable':
+    (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
 };
 
 module.exports = {
-  app, messenger, mqtt, producer,
+  app, kafka, logger, messenger, mqtt, sdk,
 };

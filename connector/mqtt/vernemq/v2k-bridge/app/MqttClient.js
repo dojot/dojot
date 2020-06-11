@@ -21,22 +21,22 @@ class MQTTClient {
     this.config = config || mqttConfig;
     this.isConnected = false;
 
-    this.clientId = this.config.clientId;
-    this.host = this.config.host;
-    this.keepAlive = this.config.keepAlive;
-    this.port = this.config.port;
-    this.username = this.config.clientUsername;
-    this.secureMode = this.config.secure;
+    this.clientId = this.config['client.id'];
+    this.host = this.config['server.address'];
+    this.keepAlive = this.config['client.keepalive'];
+    this.port = this.config['server.port'];
+    this.username = this.config['client.username'];
+    this.secureMode = this.config['client.secure'];
 
-    this.privateKey = fs.readFileSync(`${this.config.tls.privateKey.location}`);
-    this.clientCrt = fs.readFileSync(`${this.config.tls.certificate.location}`);
-    this.ca = fs.readFileSync(`${this.config.tls.ca.location}`);
+    this.privateKey = fs.readFileSync(`${this.config['tls.key.file']}`);
+    this.clientCrt = fs.readFileSync(`${this.config['tls.certificate.file']}`);
+    this.ca = fs.readFileSync(`${this.config['tls.ca.file']}`);
 
     // Back pressure
     this.messageQueue = null;
     this.currentMessageQueueLength = 0;
-    this.parallelHandlers = this.config.parallelHandlers;
-    this.maxQueueLength = this.config.maxQueueLength;
+    this.parallelHandlers = this.config['backpressure.handlers'];
+    this.maxQueueLength = this.config['backpressure.queue.length.max'];
 
     // Agent messenger
     this.agentMessenger = agentMessenger;
@@ -157,9 +157,9 @@ class MQTTClient {
    * @function subscribe
    */
   subscribe() {
-    this.logger.info(`Subscribing to topic ${this.config.subscribeTopic}`);
+    this.logger.info(`Subscribing to topic ${this.config['client.subscription.topic']}`);
     if (this.isConnected === true) {
-      this.mqttc.subscribe(this.config.subscribeTopic, { qos: this.config.subscribeQos });
+      this.mqttc.subscribe(this.config['client.subscription.topic'], { qos: this.config['client.subscription.qos'] });
     }
   }
 

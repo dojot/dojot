@@ -1,7 +1,9 @@
 const { Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
-const { messenger, producer: sdkConfig, mqtt: mqttConfig } = require('./config');
+
+const appConfig = require('./config');
 const Utils = require('./utils');
 const MQTTClient = require('./MqttClient');
+
 
 /**
  * Class representing an AgentMessenger
@@ -16,8 +18,8 @@ class AgentMessenger {
    */
   constructor(config) {
     this.initialized = false;
-    this.producer = new Producer(sdkConfig);
-    this.mqttClient = new MQTTClient(this, config || mqttConfig);
+    this.producer = new Producer(Object.assign(appConfig.sdk, { kafka: appConfig.kafka }));
+    this.mqttClient = new MQTTClient(this, config || appConfig.mqtt);
     this.logger = new Logger('AgentMessenger');
   }
 
@@ -58,7 +60,9 @@ class AgentMessenger {
       jsonPayload = JSON.parse(message);
       deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);
       messageKey = `${deviceDataMessage.metadata.tenant}:${deviceDataMessage.metadata.deviceid}`;
-      kafkaTopic = `${deviceDataMessage.metadata.tenant}.${messenger.kafkaTopic}`;
+      kafkaTopic = `
+        ${deviceDataMessage.metadata.tenant}.${appConfig.messenger['produce.topic.suffix']}
+      `;
       deviceDataMessage = JSON.stringify(deviceDataMessage);
     } catch (error) {
       this.logger.error(`Failed to create the message. Error: ${error}`);

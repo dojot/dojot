@@ -1,16 +1,18 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
 const util = require('util');
+const { unflatten } = require('flat');
 
-const Config = require('./config');
+const config = require('./config');
 const AgentMessenger = require('./AgentMessenger');
 
 // Logger configuration
-Logger.setTransport('console', Config.app.logger.transports.console);
-Logger.setVerbose(Config.app.logger.verbose);
+const logConfig = unflatten(config.logger);
+Logger.setTransport('console', logConfig.transports.console);
+Logger.setVerbose(logConfig.verbose);
 const logger = new Logger('app');
 
-logger.info(`Configuration:\n${util.inspect(Config, false, 5, true)}`);
+logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
 const agentMessenger = new AgentMessenger();
 
