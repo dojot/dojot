@@ -1,5 +1,3 @@
-const path = require('path');
-
 /* parse unsigned integer */
 const parseUint = (val) => val && Math.abs(parseInt(val, 10));
 
