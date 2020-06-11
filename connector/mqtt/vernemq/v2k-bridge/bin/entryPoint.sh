@@ -9,20 +9,15 @@ if [ ! -z "${DEBUG+x}" ]; then
     set -x
 fi
 
-# readonly variables
-readonly V2K_VERNE_CONNECTION_TRIES_COUNT=${CONNECTION_TRIES_COUNT:-"3"}
-readonly V2K_VERNE_CONNECTION_TRIES_TIMEOUT=${CONNECTION_TRIES_TIMEOUT:-"3"}
-readonly V2K_VERNE_KAFKA_BROKER_LIST=${KAFKA_BROKER_LIST:-"kafka-server:9092"}
-
-readonly BASE_DIR=${BASE_DIR:-"/opt/v2k_bridge"}
+source ./bin/setEnvironmentVariables.sh
 
 # Split kafka brokers by comma
-readonly LKAFKA_BROKER_LIST=${V2K_VERNE_KAFKA_BROKER_LIST//,/ }
+readonly KAFKA_BROKERS=${V2K_APP_KAFKA_BROKER_LIST//,/ }
 
 has_responded=false
-for ((i = 0; (i < ${V2K_VERNE_CONNECTION_TRIES_COUNT}); i++));
+for ((i = 0; (i < ${V2K_APP_CONNECTION_RETRY_COUNT}); i++));
 do
-    for address in ${LKAFKA_BROKER_LIST};
+    for address in ${KAFKA_BROKERS};
     do
         address_splited=($(echo ${address} | tr ":" "\n"))
         echo "$((${i} + 1)) - Trying to connect with *${address_splited[0]}* on port *${address_splited[1]}*"
@@ -40,7 +35,7 @@ do
         break
     fi
 
-    sleep ${V2K_VERNE_CONNECTION_TRIES_TIMEOUT}
+    sleep ${V2K_APP_CONNECTION_RETRY_TIMEOUT}
 done
 
 
@@ -53,7 +48,7 @@ echo -e "Connection established with **${address_splited[0]}** on port **${addre
 #
 # Ejbca - to authentcate user
 echo "Trying to authenticate with CA.."
-${BASE_DIR}/bin/scripts_tls/ejbca_client.sh
+${V2K_APP_BASEDIR}/bin/scripts_tls/ejbca_client.sh
 echo "Authenticated!"
 
 exec "$@"
