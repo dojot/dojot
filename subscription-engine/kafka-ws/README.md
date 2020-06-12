@@ -31,7 +31,7 @@ operators](#applying-conditions) for more info
 - `4003` - INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
 - `4004` - INVALID_VALUE: a value with an invalid type was passed to a condition
 - `4400` - INVALID_PATHNAME: a Malformed URI was passed
-- `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the jwt token
+- `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the JSON Web Token (JWT) 
 - `4403` - FORBIDDEN_TOPIC: the tenant sent in the token jwt cannot access the kafka topic passed
 - `4408` - EXPIRED_CONNECTION: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
@@ -200,19 +200,20 @@ REDIS_HOST       | Redis host                   | redis                         
 REDIS_PORT       | Redis port                   | 6379                               | number |
 REDIS_DATABASE   | Redis database               | 1                                  | number |
 
-Note1: Maximum lifetime of a connection will be the highest value between the time calculate from expiration timestamp provided by the jwt token (if KAFKA_WS_JWT_EXP_TIME is true) and KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_MAX_LIFE_TIME is -1, it will be the value provided in the time calculate from expiration timestamp provided by the jwt token (if KAFKA_WS_JWT_EXP_TIME is true), otherwise there would be no maximum connection lifetime.
+Note1: Maximum lifetime of a connection will be the highest value between the time calculate from expiration timestamp provided by the JSON Web Token (JWT)  (if KAFKA_WS_JWT_EXP_TIME is true) and KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_MAX_LIFE_TIME is -1, it will be the value provided in the time calculate from expiration timestamp provided by the JSON Web Token (JWT)  (if KAFKA_WS_JWT_EXP_TIME is true), otherwise there would be no maximum connection lifetime.
 
-Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JWT token can access the kafka topic, generally topics start with `tenant.*`
+Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) can access the kafka topic, generally topics start with `tenant.*`
 
-### **JWT Token**
+### ** JSON Web Token (JWT) **
 
-When KAFKA_WS_JWT_HEADER_AUTH is true, it is necessary to provide a JWT token in the Header on the Autorization field, as in this example in js below:
+When KAFKA_WS_JWT_HEADER_AUTH is true, it is necessary to provide a JSON Web Token (JWT)  in the Header on the Autorization field, as in this example in js below  (see more https://tools.ietf.org/html/rfc7519#section-4):
 
 ```js
 
-const makeJwtToken = (tenant) => {
+const makeJwtToken = (tenant, expirationTime) => {
   const payload = {
     service: tenant,
+    exp: expirationTime,
   };
   return `${Buffer.from('jwt schema').toString('base64')}.${
     Buffer.from(JSON.stringify(payload)).toString('base64')}.${

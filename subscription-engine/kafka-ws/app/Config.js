@@ -12,8 +12,8 @@ module.exports = {
   },
   redis: {
     host: process.env.REDIS_HOST || 'redis',
-    port: process.env.REDIS_PORT || 6379,
-    database: process.env.REDIS_DATABASE || 1,
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    database: parseInt(process.env.REDIS_DATABASE, 10) || 1,
   },
   kafka: {
     consumer: {
