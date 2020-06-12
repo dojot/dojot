@@ -81,7 +81,7 @@ jobs:
 
   gh-pages:
     needs: docker-hub
-    name: (pki/ejbca) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job
+    name: (subscription-engine/kafka-ws) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
     steps:
