@@ -32,7 +32,7 @@ operators](#applying-conditions) for more info
 - `4004` - INVALID_VALUE: a value with an invalid type was passed to a condition
 - `4400` - INVALID_PATHNAME: a Malformed URI was passed
 - `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the JSON Web Token (JWT) 
-- `4403` - FORBIDDEN_TOPIC: the tenant sent in the token jwt cannot access the kafka topic passed
+- `4403` - FORBIDDEN_TOPIC: the tenant sent in JSON Web Token (JWT) cannot access the kafka topic passed
 - `4408` - EXPIRED_CONNECTION: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
 
