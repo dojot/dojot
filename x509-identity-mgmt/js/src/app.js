@@ -101,10 +101,6 @@ app.use('/api/v1/schemas',
   express.static(schemasDir),
   serveIndex(schemasDir));
 
-const apidocs = path.join(mainDir, 'apidocs/docs.html');
-app.use('/api/v1/docs', express.static(apidocs));
-
-
 /* catch 404 and forward to error handler */
 app.use((req, res, next) => {
   next(new createError.NotFound());

@@ -13,17 +13,24 @@ RUN mkdir -p /opt/tls \
 
 # Install Node.js
 RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
-    && yum install -y nodejs
+    && yum install -y nodejs \
+    && yum install -y gcc-c++ make \
+    && yum clean packages
 
 # A wildcard is used to ensure both package.json AND
 # package-lock.json are copied where available (npm@5+)
 COPY --chown=10001:0 js/package*.json /opt/x509-identity-mgmt/
 
+WORKDIR /opt/x509-identity-mgmt
+
+# node-gyp configuration: SDK download directory
+ENV npm_config_devdir=/opt/x509-identity-mgmt/.node-gyp
+
 # installs the dependencies of the nodejs application before copying the
 # application files to the container, this way we avoid unnecessary rebuild
 # of intermediate images and optimize the creation time of the final image
 # (not install modules listed in devDependencies)
-RUN npm install --production --prefix /opt/x509-identity-mgmt
+RUN npm install --unsafe-perm --production
 
 # Bundle app source
 COPY --chown=10001:0 js /opt/x509-identity-mgmt
@@ -37,6 +44,8 @@ COPY --chown=10001:0 ejbca/bin/ /opt/primekey/bin/internal/
 # Copy the entrypoint script
 COPY --chown=10001:0 entrypoint.sh /opt/
 RUN chmod 700 /opt/entrypoint.sh
+
+WORKDIR /opt/primekey
 
 # User 'ejbca'
 USER 10001

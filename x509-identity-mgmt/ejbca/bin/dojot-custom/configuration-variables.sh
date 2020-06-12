@@ -132,7 +132,7 @@ readonly CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT=${EJBCA_CA_RENEWER_SERVICE_TIME
 readonly HOST_NAME="$(hostname --fqdn)"
 #
 # The container IP is defined by the docker in the file /etc/hosts
-readonly CONTAINER_IP="$(grep "${HOST_NAME}" /etc/hosts | cut -f1)"
+readonly CONTAINER_IP="$(grep -m1 "${HOST_NAME}" /etc/hosts | cut -f1)"
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*

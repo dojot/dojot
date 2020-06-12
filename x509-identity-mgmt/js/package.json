@@ -49,7 +49,6 @@
         "soap": "^0.31.0"
     },
     "devDependencies": {
-        "aglio": "^2.3.0",
         "cross-env": "^7.0.2",
         "eslint": "^6.8.0",
         "eslint-config-airbnb-base": "^14.1.0",
