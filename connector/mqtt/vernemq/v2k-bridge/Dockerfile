@@ -43,6 +43,6 @@ RUN apk --no-cache add \
 
 COPY --from=base /opt/v2k_bridge /opt/v2k_bridge
 
-ENTRYPOINT ["/sbin/tini", "--", "./bin/entryPoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD [ "npm", "run", "app" ]
+CMD ["./bin/entryPoint.sh", "npm", "run", "app"]
