@@ -18,7 +18,7 @@ class AgentMessenger {
    */
   constructor(config) {
     this.initialized = false;
-    this.producer = new Producer(Object.assign(appConfig.sdk, { kafka: appConfig.kafka }));
+    this.producer = new Producer({ ...appConfig.sdk, kafka: appConfig.kafka });
     this.mqttClient = new MQTTClient(this, config || appConfig.mqtt);
     this.logger = new Logger('AgentMessenger');
   }
@@ -60,9 +60,8 @@ class AgentMessenger {
       jsonPayload = JSON.parse(message);
       deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);
       messageKey = `${deviceDataMessage.metadata.tenant}:${deviceDataMessage.metadata.deviceid}`;
-      kafkaTopic = `
-        ${deviceDataMessage.metadata.tenant}.${appConfig.messenger['produce.topic.suffix']}
-      `;
+      kafkaTopic = `${deviceDataMessage.metadata.tenant}.${
+        appConfig.messenger['produce.topic.suffix']}`;
       deviceDataMessage = JSON.stringify(deviceDataMessage);
     } catch (error) {
       this.logger.error(`Failed to create the message. Error: ${error}`);
