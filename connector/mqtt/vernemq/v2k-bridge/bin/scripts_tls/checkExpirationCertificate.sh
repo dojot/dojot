@@ -4,8 +4,6 @@
 
 #########################################################
 
-V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/v2k_bridge"}
-
 . "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 if openssl x509 -checkend "${CHECKEND_EXPIRATION_SEC}" -noout -in "${certDir}"/"${certCertFile}"

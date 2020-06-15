@@ -3,11 +3,7 @@
 #########################################################
 #########################################################
 
-V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/v2k_bridge"}
-
 . "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
-
-
 . "${V2K_APP_BASEDIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
 echo "Signing cert for entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/sign/${certCname}/pkcs10 "
