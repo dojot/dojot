@@ -65,7 +65,7 @@
   </void>
   <void method="put">
    <string>allowextensionoverride</string>
-   <boolean>false</boolean>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>allowdnoverride</string>
@@ -89,7 +89,7 @@
   </void>
   <void method="put">
    <string>storesubjectaltname</string>
-   <boolean>false</boolean>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>usebasicconstrants</string>
@@ -117,7 +117,7 @@
   </void>
   <void method="put">
    <string>usesubjectalternativename</string>
-   <boolean>false</boolean>
+   <boolean>true</boolean>
   </void>
   <void method="put">
    <string>subjectalternativenamecritical</string>
@@ -577,7 +577,11 @@
   </void>
   <void method="put">
    <string>overridableextensionoids</string>
-   <object class="java.util.LinkedHashSet"/>
+   <object class="java.util.LinkedHashSet">
+    <void method="add">
+     <string>2.5.29.17</string>
+    </void>
+   </object>
   </void>
   <void method="put">
    <string>nonoverridableextensionoids</string>
