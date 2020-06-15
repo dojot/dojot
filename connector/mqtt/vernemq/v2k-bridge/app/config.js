@@ -27,7 +27,6 @@ const mqtt = {
   'client.keepalive': parseInt(process.env.V2K_MQTT_CLIENT_KEEPALIVE, 0),
   'client.secure': toBoolean(process.env.V2K_MQTT_CLIENT_SECURE),
   'client.subscription.qos': parseInt(process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_QOS, 0),
-  // eslint-disable-next-line no-useless-escape
   'client.subscription.topic': process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_TOPIC,
   'client.username': process.env.V2K_MQTT_CLIENT_USERNAME,
 
@@ -62,8 +61,7 @@ const kafka = {
   'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 0),
   'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS),
   'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 0),
-  'socket.keepalive.enable':
-    (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
+  'socket.keepalive.enable': (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
 };
 
 module.exports = {
