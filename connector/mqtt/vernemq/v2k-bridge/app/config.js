@@ -2,8 +2,8 @@ const { toBoolean } = require('./utils');
 
 const app = {
   basedir: process.env.V2K_APP_BASEDIR,
-  'connection.retry.count': parseInt(process.env.V2K_APP_CONNECTION_RETRY_COUNT, 0),
-  'connection.retry.timeout': parseInt(process.env.V2K_APP_CONNECTION_RETRY_TIMEOUT, 0),
+  'connection.retry.count': parseInt(process.env.V2K_APP_CONNECTION_RETRY_COUNT, 10),
+  'connection.retry.timeout': parseInt(process.env.V2K_APP_CONNECTION_RETRY_TIMEOUT, 10),
   'ejbca.address': process.env.V2K_APP_EJBCA_ADDRESS,
   hostname: process.env.V2K_APP_HOSTNAME,
 };
@@ -19,20 +19,20 @@ const messenger = {
 
 const mqtt = {
   // Backpressure
-  'backpressure.handlers': parseInt(process.env.V2K_MQTT_BACKPRESSURE_HANDLERS, 0),
-  'backpressure.queue.length.max': parseInt(process.env.V2K_MQTT_BACKPRESSURE_QUEUE_LENGTH_MAX, 0),
+  'backpressure.handlers': parseInt(process.env.V2K_MQTT_BACKPRESSURE_HANDLERS, 10),
+  'backpressure.queue.length.max': parseInt(process.env.V2K_MQTT_BACKPRESSURE_QUEUE_LENGTH_MAX, 10),
 
   // Client
   'client.id': process.env.V2K_MQTT_CLIENT_ID,
-  'client.keepalive': parseInt(process.env.V2K_MQTT_CLIENT_KEEPALIVE, 0),
+  'client.keepalive': parseInt(process.env.V2K_MQTT_CLIENT_KEEPALIVE, 10),
   'client.secure': toBoolean(process.env.V2K_MQTT_CLIENT_SECURE),
-  'client.subscription.qos': parseInt(process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_QOS, 0),
+  'client.subscription.qos': parseInt(process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_QOS, 10),
   'client.subscription.topic': process.env.V2K_MQTT_CLIENT_SUBSCRIPTION_TOPIC,
   'client.username': process.env.V2K_MQTT_CLIENT_USERNAME,
 
   // Server
   'server.address': process.env.V2K_MQTT_SERVER_ADDRESS,
-  'server.port': parseInt(process.env.V2K_MQTT_SERVER_PORT, 0),
+  'server.port': parseInt(process.env.V2K_MQTT_SERVER_PORT, 10),
 
   // TLS
   'tls.ca.file': process.env.V2K_MQTT_TLS_CA_FILE,
@@ -48,19 +48,19 @@ const sdk = {
 };
 
 const kafka = {
-  acks: parseInt(process.env.V2K_KAFKA_ACKS, 0),
-  'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 0),
+  acks: parseInt(process.env.V2K_KAFKA_ACKS, 10),
+  'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 10),
   'client.id': process.env.V2K_KAFKA_CLIENT_ID,
   'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC,
   dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB)),
   'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE)),
   'max.in.flight.requests.per.connection':
-    parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 0),
+    parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 10),
   'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST,
-  retries: parseInt(process.env.V2K_KAFKA_RETRIES, 0),
-  'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 0),
+  retries: parseInt(process.env.V2K_KAFKA_RETRIES, 10),
+  'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 10),
   'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS),
-  'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 0),
+  'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 10),
   'socket.keepalive.enable': (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
 };
 
