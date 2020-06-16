@@ -91,7 +91,7 @@ class MQTTClient {
   /**
    * Reached when the MQTTClient connects successfully to the MQTT broker.
    *
-   * @callback MqttClient~onConnect
+   * @callback MQTTClient~onConnect
    */
   onConnect() {
     this.isConnected = true;
@@ -102,7 +102,7 @@ class MQTTClient {
   /**
    * Reached when the MQTTClient disconnects from the broker.
    *
-   * @callback MqttClient~onDisconnect
+   * @callback MQTTClient~onDisconnect
    */
   onDisconnect() {
     this.logger.info(`Client ${this.clientId} disconnected, reconnecting ......`);
@@ -113,7 +113,7 @@ class MQTTClient {
   /**
    * Reached when a message arrives on the topic.
    *
-   * @callback MqttClient~onMessage
+   * @callback MQTTClient~onMessage
    *
    * @param {string} topic
    * @param {Object} message
