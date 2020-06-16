@@ -39,7 +39,7 @@ Key                                    | Purpose                                
 -------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- | ------------------------------ |
 V2K_MQTT_BACKPRESSURE_QUEUE_LENGTH_MAX | Maximum backpressure queue length in bytes                | 1048576                                             | integer                        |
 V2K_MQTT_BACKPRESSURE_HANDLERS         | Number of parallel handlers backpressure queue processing | 1                                                   | integer                        |
-V2K_MQTT_CLIENT_KEEPALIVE              | MQTT client keepalilve                                    | 60                                                  | integer                        |
+V2K_MQTT_CLIENT_KEEPALIVE              | MQTT client keepalive                                     | 60                                                  | integer                        |
 V2K_MQTT_CLIENT_ID                     | MQTT client client id                                     | hostname                                            | string                         |
 V2K_MQTT_CLIENT_SECURE                 | MQTT client secure                                        | true                                                | true, false (case insensitive) |
 V2K_MQTT_CLIENT_SUBSCRIPTION_QOS       | MQTT client Quality of service                            | 1                                                   | integer                        |
