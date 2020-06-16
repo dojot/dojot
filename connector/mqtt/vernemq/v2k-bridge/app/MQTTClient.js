@@ -146,7 +146,7 @@ class MQTTClient {
    */
   connect() {
     if (this.isConnected === false) {
-      this.logger.debug(`Connecting to broker ${this.host} on port ${this.port} with protocol ${this.secureMode ? 'mqtts' : 'mqtt'}`);
+      this.logger.info(`Connecting to broker ${this.host}:${this.port} with protocol ${this.secureMode ? 'MQTTS' : 'MQTT'}`);
       this.mqttc = mqtt.connect(this.mqttOptions);
     }
   }

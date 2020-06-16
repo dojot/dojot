@@ -48,7 +48,7 @@ jest.mock('async', () => ({
 
 const mqtt = require('mqtt');
 const { mqtt: mqttConfig } = require('../../app/config');
-const MQTTClient = require('../../app/MqttClient');
+const MQTTClient = require('../../app/MQTTClient');
 const AgentMessenger = require('../../app/AgentMessenger');
 
 describe('Testing v2k bridge client', () => {

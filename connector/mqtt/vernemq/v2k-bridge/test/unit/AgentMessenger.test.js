@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-unused-vars */
 jest.mock('../../app/utils');
-jest.mock('../../app/MqttClient.js');
+jest.mock('../../app/MQTTClient.js');
 
 const mockProcess = require('jest-mock-process');
 const utils = require('../../app/utils');
