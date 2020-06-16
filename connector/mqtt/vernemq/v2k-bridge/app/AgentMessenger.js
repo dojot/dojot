@@ -2,7 +2,7 @@ const { Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
 
 const appConfig = require('./config');
 const Utils = require('./utils');
-const MQTTClient = require('./MqttClient');
+const MQTTClient = require('./MQTTClient');
 
 
 /**
@@ -29,12 +29,12 @@ class AgentMessenger {
    * @function init
    */
   init() {
-    this.logger.debug('Initializing Kafka Producer...');
+    this.logger.info('Initializing Kafka Producer...');
     this.producer.connect().then(() => {
-      this.logger.debug('... Kafka Producer was initialized');
+      this.logger.info('... Kafka Producer was initialized');
 
       // initializing mqtt client
-      this.logger.debug('Initializing MQTTClient');
+      this.logger.info('Initializing MQTTClient');
       this.mqttClient.init();
     }).catch(() => {
       this.logger.error('An error occurred while initializing the Kafka Producer. Bailing out!');
