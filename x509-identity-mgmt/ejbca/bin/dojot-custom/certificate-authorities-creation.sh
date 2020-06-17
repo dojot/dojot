@@ -45,6 +45,7 @@ function createDevicesCA() {
         commonEditCA "${DEVICES_CA}" "${CRL_EXPIRE_PERIOD_DEVICES_CA}" "${CRL_ISSUE_INTERVAL_DEVICES_CA}" "${CRL_OVERLAP_TIME_DEVICES_CA}" "${DELTA_CRL_PERIOD_DEVICES_CA}"
         ejbca_cmd ca editca --caname "${DEVICES_CA}" --field 'doEnforceUniquePublicKeys' --value 'false'
         ejbca_cmd ca editca --caname "${DEVICES_CA}" --field 'doEnforceUniqueDistinguishedName' --value 'false'
+        ejbca_cmd ca editca --caname "${DEVICES_CA}" --field 'useUserStorage' --value 'false'
         ejbca_cmd ca editca --caname "${DEVICES_CA}" --field 'useCertificateStorage' --value 'false'
         ejbca_cmd ca editca --caname "${DEVICES_CA}" --field 'acceptRevocationNonExistingEntry' --value 'true'
         ejbca_cmd ca editca --caname "${DEVICES_CA}" --field 'defaultCertificateProfileId' --value "${DEVICES_CERT_PROFILE_ID}"
@@ -110,7 +111,7 @@ function createServicesCA() {
 
 function commonEditCA() {
     local caName=$1
-    local host=${CONTAINER_IP}
+    local host=${HOST_NAME}
     local httpPort=8080
     local subjectDN
     local encodedDN
