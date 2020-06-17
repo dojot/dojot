@@ -1,8 +1,6 @@
 #!/bin/bash
 
-BASE_DIR=${BASE_DIR:-"/k2v_bridge"}
-
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${K2V_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 _saveFormattedCRT()
 {
