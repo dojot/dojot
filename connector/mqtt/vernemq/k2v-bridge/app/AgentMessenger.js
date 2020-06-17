@@ -1,10 +1,6 @@
-const { logger } = require('@dojot/dojot-module-logger');
-const { IoTAgent } = require('@dojot/iotagent-nodejs');
-const nodeUtil = require('util');
-const defaultConfig = require('./config');
-const utils = require('./utils/utils');
+const { Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
 
-const TAG = { filename: 'AgentMessenger' };
+const config = require('./config');
 
 /**
  * An agent to consume messages from pre-defined topics in Apache Kafka,
@@ -14,37 +10,39 @@ const TAG = { filename: 'AgentMessenger' };
 class AgentMessenger {
   /**
    * Creates an Agent Messenger
+   * @access public
+   * @constructor
+   *
    * @param {Object} mqttClient - a mqtt client to connect to VerneMQ broker.
-   * @param {object} config - the agent configurations
    */
-  constructor(mqttClient, config) {
-    this.config = config || defaultConfig;
+  constructor(mqttClient) {
     this.mqttClient = mqttClient;
-    this.iotagent = null;
+    this.consumer = new Consumer({ ...config.sdk, kafka: config.kafka });
+    this.logger = new Logger('AgentMessenger');
   }
 
   /**
-   * @function init
    * Initializes the agent messenger and registers callbacks for incoming messages.
+   * @access public
+   * @function init
+   *
+   * @returns {Promise<void | Error>}
    */
   init() {
-    this.iotagent = new IoTAgent();
-    this.iotagent.init().then(() => {
-      logger.info('IOT Agent initialized successfully', TAG);
+    this.logger.info('Initializing Kafka Consumer...');
+    this.consumer.init().then(() => {
+      // eslint-disable-next-line no-useless-escape
+      const topic = new RegExp(`^.+${config.messenger['consume.topic.suffix'].replace('.', '\.')}`);
 
-      /* Actuation message handler */
-      this.iotagent.on('iotagent.device', 'device.configure', (tenant, data) => {
-        logger.debug(`Got device actuation message. Tenant is ${tenant} with message ${nodeUtil.inspect(data)}.`, TAG);
-
-        /* generate topic - dojot's style */
-        const configTopic = utils.generateDojotActuationTopic(data.meta.service,
-          data.data.id, this.config.mqtt.publishTopicSuffix);
-
-        this.mqttClient.publishMessage(configTopic, JSON.stringify(data.data.attrs));
+      this.consumer.registerCallback(topic, (data) => {
+        this.mqttClient.publishMessage(data);
       });
-    }).catch(() => {
-      logger.error('An error occurred while initializing the IoTAgent. Bailing out!', TAG);
-      process.exit(1);
+
+      this.logger.info('... Kafka Consumer was initialized');
+      return Promise.resolve();
+    }).catch((error) => {
+      this.logger.error('Error while initializing the Kafka Consumer');
+      return Promise.reject(error);
     });
   }
 }
