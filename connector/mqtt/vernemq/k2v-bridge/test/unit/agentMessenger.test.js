@@ -1,6 +1,5 @@
 const AgentMessenger = require('../../app/AgentMessenger');
 const MQTTClient = require('../../app/MqttClient');
-const Utils = require('../../app/utils');
 
 const mockConfig = {
   Kafka: {
