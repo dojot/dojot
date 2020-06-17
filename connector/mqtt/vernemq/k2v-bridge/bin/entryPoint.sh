@@ -96,24 +96,6 @@ fi
 echo -e "Connection established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
 
 #
-# Data broker
-
-data_broker_address_splited=($(echo ${K2V_VERNE_DATA_BROKER_ADDRESS} | tr ":" "\n"))
-
-for ((i = 0; (i < ${K2V_VERNE_CONNECTION_TRIES_COUNT}); i++)); 
-do
-    echo "$((${i} + 1)) - Trying to connect with *${data_broker_address_splited[0]}* on port *${data_broker_address_splited[1]}*"
-    DATA_BROKER_RESPONSE=$(nc -zv ${data_broker_address_splited[0]} ${data_broker_address_splited[1]} &> /dev/null; echo $?)
-    if [ "${DATA_BROKER_RESPONSE}" == 0 ]; then
-        echo -e "Connection established with **${data_broker_address_splited[0]}** on port **${data_broker_address_splited[1]}**\n"
-        break
-    elif ((i == ((${K2V_VERNE_CONNECTION_TRIES_COUNT}-1)))); then
-        exit 1
-    fi
-    sleep ${K2V_VERNE_CONNECTION_TRIES_TIMEOUT}
-done
-
-# 
 # EJBCA - to authenticate user
 echo "Trying to authenticate with CA.."
 ${K2V_APP_BASEDIR}/bin/scripts_tls/ejbca_client.sh
