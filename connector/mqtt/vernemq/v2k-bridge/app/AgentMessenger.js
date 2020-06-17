@@ -64,7 +64,7 @@ class AgentMessenger {
         appConfig.messenger['produce.topic.suffix']}`;
       deviceDataMessage = JSON.stringify(deviceDataMessage);
     } catch (error) {
-      this.logger.error(`Failed to create the message. Error: ${error}`);
+      this.logger.error(`Failed to create the message. Error: ${error.stack || error}`);
       return;
     }
 
