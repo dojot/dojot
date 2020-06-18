@@ -31,8 +31,7 @@ class AgentMessenger {
   init() {
     this.logger.info('Initializing Kafka Consumer...');
     this.consumer.init().then(() => {
-      // eslint-disable-next-line no-useless-escape
-      const topic = new RegExp(`^.+${config.messenger['consume.topic.suffix'].replace('.', '\.')}`);
+      const topic = new RegExp(`^.+${config.messenger['consume.topic.suffix'].replace(/\./g, '\\.')}`);
 
       this.consumer.registerCallback(topic, (data) => {
         this.mqttClient.publishMessage(data);
