@@ -1,6 +1,7 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
 const fs = require('fs');
+const util = require('util');
 const mqtt = require('mqtt');
 
 const { mqtt: mqttConfig } = require('./config');
@@ -116,7 +117,15 @@ class MQTTClient {
           mqttConfig['client.publish.topic.suffix'],
         );
 
-        this.mqttc.publish(topic, JSON.stringify(value.data.attrs), { qos: this.publishQos });
+        this.mqttc.publish(
+          topic,
+          JSON.stringify(value.data.attrs),
+          { qos: this.publishQos },
+          (error, packet) => {
+            this.logger.error(error.stack || error);
+            this.logger.error(`Packet that caused the error: ${util.inspect(packet)}`);
+          },
+        );
       } else {
         this.logger.error('Client not connected');
       }
