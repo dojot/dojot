@@ -41,7 +41,6 @@ class TestCertificate(unittest.TestCase):
         mock_utils.validate_thing_id.assert_called_once_with(self.thing_id)
         self.assertEqual(certificate.c_name, self.thing_id)
         self.assertEqual(certificate.jwt, self.jwt)
-        mock_api.create_ejbca_user.assert_called_once_with(self.jwt, self.thing_id)
 
     def test_save_cert(self, _mock_crypto, _mock_utils, _mock_redis, _mock_api):
         """

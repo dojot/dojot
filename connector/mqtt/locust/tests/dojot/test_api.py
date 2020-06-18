@@ -329,59 +329,6 @@ class TestDojotAPIGetDevices(unittest.TestCase):
         DojotAPI.call_api.assert_called_with(mock_requests.get, ANY)
         self.assertEqual(devices, [])
 
-
-@patch('src.dojot.api.requests', autospec=True)
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
-class TestDojotAPICreateEjbcaUser(unittest.TestCase):
-    """
-    DojotAPI create_ejbca_user() tests.
-    """
-    def setUp(self):
-        self.call_api = DojotAPI.call_api
-        DojotAPI.call_api = MagicMock()
-
-        self.jwt = "testJWT"
-        self.username = "testUser"
-        self.args = {
-            "url": MOCK_CONFIG['dojot']['url'] + "/user",
-            "headers": {
-                'content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer {0}'.format(self.jwt),
-            },
-            "data": json.dumps({
-                "username": self.username
-            }),
-        }
-
-    def tearDown(self):
-        DojotAPI.call_api = self.call_api
-
-    def test_create_ejbca_user(self, mock_requests):
-        """
-        Should successfully call a POPST to create a EJBCA user.
-        """
-        mock_requests.post = MagicMock()
-
-        DojotAPI.create_ejbca_user(self.jwt, self.username)
-
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
-
-    def test_create_ejbca_user_exception(self, mock_requests):
-        """
-        Should not create a user, because rose an exception.
-        """
-        DojotAPI.call_api.side_effect = APICallError()
-
-        with self.assertRaises(Exception) as context:
-            DojotAPI.create_ejbca_user(self.jwt, self.username)
-
-        self.assertIsNotNone(context.exception)
-        self.assertIsInstance(context.exception, APICallError)
-
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
-
-
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPISignCert(unittest.TestCase):
