@@ -13,17 +13,17 @@ class Certificate:
     Generates a certificate and private key for a device.
     """
 
-    def __init__(self, thing_id):
+    def __init__(self, device_id):
         self.logger = Utils.create_logger("certificate")
-        Utils.validate_thing_id(thing_id)
+        # Utils.validate_thing_id(thing_id)
 
         self.jwt = RedisClient().get_jwt()
 
-        self.c_name = thing_id
+        self.c_name = device_id
         self.key = {"pem": self.generate_private_key()}
         self.csr = {"pem": self.generate_csr()}
         self.crt = {}
-        self.crt["fingerprint"], self.crt["pem"] = self.sign_cert()
+        self.crt["fingerprint"], self.crt["pem"] = self.generate_certificate()
 
     def generate_private_key(self) -> str:
         """
@@ -55,26 +55,23 @@ class Certificate:
 
         return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")
 
-    def sign_cert(self) -> str:
+    def generate_certificate(self) -> str:
         """
-        Sign the certificates.
+        Generate the certificates.
 
         Returns the pem certificate.
         """
-        # we remove the last from the csr \n
+        # Remove \n from CSR
         csr = self.csr["pem"][:-1]
-        return DojotAPI.sign_cert(self.jwt, csr)
+        return DojotAPI.generate_certificate(self.jwt, csr)
 
     def renew_cert(self) -> None:
         """
         Renew a certificate.
-
-        The procedure made here is described in:
-        https://doc.primekey.com/ejbca/ejbca-operations/ejbca-operations-guide/ca-operations-guide/end-entities/certificate-renewal
         """
-        DojotAPI.reset_entity_status(self.jwt, self.crt["fingerprint"])
+        DojotAPI.revoke_certificate(self.jwt, self.crt["fingerprint"])
 
         self.key = {"pem": self.generate_private_key()}
         self.csr = {"pem": self.generate_csr()}
         self.crt = {}
-        self.crt["pem"] = self.sign_cert()
+        self.crt["fingerprint"], self.crt["pem"] = self.generate_certificate()

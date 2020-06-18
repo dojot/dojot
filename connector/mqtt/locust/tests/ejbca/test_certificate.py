@@ -33,14 +33,13 @@ class TestCertificate(unittest.TestCase):
         """
         Certificate class tests.
         """
-        mock_api.sign_cert.return_value = ('fingerprint', 'pem')
+        mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_redis.return_value.get_jwt = MagicMock(return_value=self.jwt)
         mock_utils.validate_thing_id.return_value = None
 
         certificate = Certificate(self.thing_id)
 
         mock_utils.create_logger.assert_called_once_with("certificate")
-        mock_utils.validate_thing_id.assert_called_once_with(self.thing_id)
         self.assertEqual(certificate.c_name, self.thing_id)
         self.assertEqual(certificate.jwt, self.jwt)
 
@@ -49,7 +48,7 @@ class TestCertificate(unittest.TestCase):
         Test generate private cert
         """
 
-        mock_api.sign_cert.return_value = ('fingerprint', 'pem')
+        mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_crypto.dump_privatekey.return_value = MagicMock()
         mock_crypto.dump_privatekey().decode.return_value = 'return-value'
         thing = Certificate(self.thing_id)
@@ -65,7 +64,7 @@ class TestCertificate(unittest.TestCase):
         """
         Test generate private csr
         """
-        mock_api.sign_cert.return_value = ('fingerprint', 'pem')
+        mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_crypto.dump_certificate_request.return_value = MagicMock()
         mock_crypto.dump_certificate_request().decode.return_value = 'return-value'
 
@@ -74,31 +73,31 @@ class TestCertificate(unittest.TestCase):
 
         self.assertEqual(value, 'return-value')
 
-    def test_sign_cert(self, _mock_crypto, _mock_utils, mock_redis, mock_api):
+    def test_generate_certificate(self, _mock_crypto, _mock_utils, mock_redis, mock_api):
         """
-        Test sign_cert()
+        Test generate_certificate()
         """
-        mock_api.sign_cert.return_value = ('fingerprint', 'pem')
+        mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_redis.return_value.get_jwt = MagicMock(return_value=self.jwt)
 
         thing = Certificate(self.thing_id)
-        mock_api.sign_cert.reset_mock()
-        cert = thing.sign_cert()
+        mock_api.generate_certificate.reset_mock()
+        cert = thing.generate_certificate()
 
         self.assertIsNotNone(cert)
-        mock_api.sign_cert.assert_called_once_with(self.jwt, ANY)
+        mock_api.generate_certificate.assert_called_once_with(self.jwt, ANY)
 
     def test_renew_cert(self, _mock_crypto, _mock_utils, mock_redis, mock_api):
         """
         Test generate private csr
         """
-        mock_api.sign_cert.return_value = ('fingerprint', 'pem')
+        mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_redis.return_value.get_jwt = MagicMock(return_value=self.jwt)
 
         thing = Certificate(self.thing_id)
         thing.renew_cert()
 
-        mock_api.reset_entity_status.assert_called_once_with(self.jwt, self.crt['fingerprint'])
+        mock_api.revoke_certificate.assert_called_once_with(self.jwt, self.crt['fingerprint'])
         self.assertIsNotNone(thing.crt['pem'])
 
 

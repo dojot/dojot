@@ -224,9 +224,9 @@ class DojotAPI():
         return devices_ids
 
     @staticmethod
-    def sign_cert(jwt: str, csr: str) -> str:
+    def generate_certificate(jwt: str, csr: str) -> str:
         """
-        Sign the certificates.
+        Generate the certificates.
 
         Parameters:
             jwt: Dojot JWT token
@@ -253,9 +253,9 @@ class DojotAPI():
         return (res['certificateFingerprint'], res['certificatePem'])
 
     @staticmethod
-    def reset_entity_status(jwt: str, fingerprint: str) -> None:
+    def revoke_certificate(jwt: str, fingerprint: str) -> None:
         """
-        Changes the entity's status.
+        Revoke a certificate.
 
         Params:
             jwt: Dojot JWT token

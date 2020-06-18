@@ -331,9 +331,9 @@ class TestDojotAPIGetDevices(unittest.TestCase):
 
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
-class TestDojotAPISignCert(unittest.TestCase):
+class TestDojotAPIGenerateCertificate(unittest.TestCase):
     """
-    DojotAPI sign_cert() tests.
+    DojotAPI generate_certificate() tests.
     """
     def setUp(self):
         self.call_api = DojotAPI.call_api
@@ -358,22 +358,22 @@ class TestDojotAPISignCert(unittest.TestCase):
     def tearDown(self):
         DojotAPI.call_api = self.call_api
 
-    def test_sign_cert(self, mock_requests):
+    def test_generate_certificate(self, mock_requests):
         """
-        Test generate private csr
+        Test generate certificate
         """
-        DojotAPI.sign_cert(self.jwt, self.csr)
+        DojotAPI.generate_certificate(self.jwt, self.csr)
 
         DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args)
 
-    def test_sign_cert_exception(self, mock_requests):
+    def test_generate_certificate_exception(self, mock_requests):
         """
-        Should not sign the cert, because rose an exception.
+        Should not generate the cert, because rose an exception.
         """
         DojotAPI.call_api.side_effect = APICallError()
 
         with self.assertRaises(Exception) as context:
-            DojotAPI.sign_cert(self.jwt, self.csr)
+            DojotAPI.generate_certificate(self.jwt, self.csr)
 
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
@@ -383,9 +383,9 @@ class TestDojotAPISignCert(unittest.TestCase):
 
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
-class TestDojotAPIResetEntityStatus(unittest.TestCase):
+class TestDojotAPIRevokeCertificate(unittest.TestCase):
     """
-    DojotAPI reset_entity_status() tests.
+    DojotAPI revoke_certificate() tests.
     """
     def setUp(self):
         self.call_api = DojotAPI.call_api
@@ -406,23 +406,23 @@ class TestDojotAPIResetEntityStatus(unittest.TestCase):
     def tearDown(self):
         DojotAPI.call_api = self.call_api
 
-    def test_reset_entity_status(self, mock_requests):
+    def test_revoke_certificate(self, mock_requests):
         """
-        Should reset the entity status correctly.
+        Should revoke the certificate correctly.
         """
 
-        DojotAPI.reset_entity_status(self.jwt, self.crt['fingerprint'])
+        DojotAPI.revoke_certificate(self.jwt, self.crt['fingerprint'])
 
         DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
 
-    def test_reset_entity_status_exception(self, mock_requests):
+    def test_revoke_certificate_exception(self, mock_requests):
         """
-        Should not sign the cert, because rose an exception.
+        Should not generate cert, because rose an exception.
         """
         DojotAPI.call_api.side_effect = APICallError()
 
         with self.assertRaises(Exception) as context:
-            DojotAPI.reset_entity_status(self.jwt, self.crt['fingerprint'])
+            DojotAPI.revoke_certificate(self.jwt, self.crt['fingerprint'])
 
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
