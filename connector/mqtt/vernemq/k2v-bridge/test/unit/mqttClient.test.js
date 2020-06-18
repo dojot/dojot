@@ -174,6 +174,7 @@ describe('Testing MQTTClient', () => {
       fakeTopic,
       JSON.stringify(attrs),
       { qos: mockDefaultConfig.mqtt['client.publish.qos'] },
+      expect.any(Function),
     );
   });
 
