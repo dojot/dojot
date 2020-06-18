@@ -69,6 +69,8 @@ services:
       POSTGRES_DB: ejbca
       POSTGRES_USER: ejbca
       POSTGRES_PASSWORD: ejbca
+    ports:
+      - "5432:5432"
     volumes:
       - "ejbca-db-volume:/var/lib/postgresql/data"
     networks:
@@ -80,6 +82,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: pass
+    ports:
+      - "27017:27017"
     volumes:
       - "mongo-db-volume:/data/db"
       - "mongo-db-cfg-volume:/data/configdb"

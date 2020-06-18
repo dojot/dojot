@@ -389,7 +389,7 @@ const handler = {
       }
       const proxy = new Proxy(value, {
         async apply(targetFunc, thisArgument, argumentsList) {
-          if (!ejbcaClient) {
+          if (!ejbcaClient && targetFunc.name !== 'healthCheck') {
             await createEjbcaClient();
           }
           try {
