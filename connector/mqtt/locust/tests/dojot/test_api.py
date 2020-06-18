@@ -344,15 +344,14 @@ class TestDojotAPISignCert(unittest.TestCase):
         self.passwd = "testPasswd"
         self.csr = "testCsr"
         self.args = {
-            "url": MOCK_CONFIG['dojot']['url'] + "/sign/" + self.username + "/pkcs10",
+            "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates",
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(self.jwt),
             },
             "data": json.dumps({
-                "passwd": self.passwd,
-                "certificate": self.csr
+                "csr": self.csr
             }),
         }
 
@@ -363,7 +362,7 @@ class TestDojotAPISignCert(unittest.TestCase):
         """
         Test generate private csr
         """
-        DojotAPI.sign_cert(self.jwt, self.username, self.passwd, self.csr)
+        DojotAPI.sign_cert(self.jwt, self.csr)
 
         DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args)
 
@@ -374,7 +373,7 @@ class TestDojotAPISignCert(unittest.TestCase):
         DojotAPI.call_api.side_effect = APICallError()
 
         with self.assertRaises(Exception) as context:
-            DojotAPI.sign_cert(self.jwt, self.username, self.passwd, self.csr)
+            DojotAPI.sign_cert(self.jwt, self.csr)
 
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
@@ -393,20 +392,15 @@ class TestDojotAPIResetEntityStatus(unittest.TestCase):
         DojotAPI.call_api = MagicMock()
 
         self.jwt = "testJWT"
-        self.username = "testUser"
+        self.crt = {}
+        self.crt['fingerprint'] = "testFingerprint"
         self.args = {
-            "url": MOCK_CONFIG['dojot']['url'] + "/user",
+            "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates/" + self.crt['fingerprint'],
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(self.jwt),
-            },
-            "data": json.dumps({
-                "username": self.username,
-                "password": "dojot",
-                "subjectDN": "CN=" + self.username,
-                "status": 10
-            }),
+            }
         }
 
     def tearDown(self):
@@ -417,9 +411,9 @@ class TestDojotAPIResetEntityStatus(unittest.TestCase):
         Should reset the entity status correctly.
         """
 
-        DojotAPI.reset_entity_status(self.jwt, self.username)
+        DojotAPI.reset_entity_status(self.jwt, self.crt['fingerprint'])
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
 
     def test_reset_entity_status_exception(self, mock_requests):
         """
@@ -428,12 +422,12 @@ class TestDojotAPIResetEntityStatus(unittest.TestCase):
         DojotAPI.call_api.side_effect = APICallError()
 
         with self.assertRaises(Exception) as context:
-            DojotAPI.reset_entity_status(self.jwt, self.username)
+            DojotAPI.reset_entity_status(self.jwt, self.crt['fingerprint'])
 
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
 
 class TestDojotAPIDivideLoads(unittest.TestCase):
     """

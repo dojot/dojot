@@ -19,8 +19,7 @@ class Certificate:
 
         self.jwt = RedisClient().get_jwt()
 
-        # we need to remove the : from the thing_id the actual ejbca have a regex for the CN
-        self.c_name = "".join(thing_id.split(":"))
+        self.c_name = thing_id
         self.key = {"pem": self.generate_private_key()}
         self.csr = {"pem": self.generate_csr()}
         self.crt = {}
