@@ -15,7 +15,7 @@ It is important that you see the [README](./ejbca/README.md) of the EJBCA Server
 ## Component architecture
 
 The component is written in javascript and runs on the Node.js interpreter. It makes use of the [EJBCA server](https://www.ejbca.org/) for issuing certificates, which in turn needs to be connected to a [Postgres](https://www.postgresql.org/) database to store its settings centrally. Both applications run within the same [Docker](https://www.docker.com/) container and together form the **x509-identity-mgmt** component.
-The component stores the certificates and their association with the devices into [MongoDB](https://www.mongodb.com/);
+The component stores the certificates and their association with the devices into [MongoDB](https://www.mongodb.com/).<br>
 It is located behind the [API Gateway](https://github.com/dojot/kong) of the dojot platform.
 
 ![Component architecture](./examples/component-architecture.png?raw=true)
