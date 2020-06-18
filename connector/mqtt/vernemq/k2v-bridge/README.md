@@ -50,7 +50,7 @@ K2V_MQTT_TLS_KEY_FILE                | MQTT client key file location            
 
 ### **Microservice SDK configurations**
 
-You can configure the Kafka Producer with variables from the Microservice SDK and librdkafka. For
+You can configure the Kafka Consumer with variables from the Microservice SDK and librdkafka. For
 more details on these configurations, please read the
 [librdkafka official configuration guide](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 and [Microservice SDK documentation](https://www.npmjs.com/package/@dojot/microservice-sdk).
@@ -77,15 +77,7 @@ K2V_SDK_SUBSCRIPTION_BACKOFF_MIN_MS   | 1000          |
 
 Key                                             | Default Value      |
 ----------------------------------------------- | ------------------ |
-V2K_KAFKA_ACKS                                  | -1                 |
-V2K_KAFKA_BATCH_NUM_MESSAGES                    | 10000              |
-V2K_KAFKA_CLIENT_ID                             | ${V2K_APP_BASEDIR} |
-V2K_KAFKA_COMPRESSION_CODEC                     | none               |
-V2K_KAFKA_ENABLE_IDEMPOTENCE                    | false              |
-V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION | 1000000            |
-V2K_KAFKA_METADATA_BROKER_LIST                  | kafka-server:9092  |
-V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES            | 1048576            |
-V2K_KAFKA_QUEUE_BUFFERING_MAX_MS                | 0.5                |
-V2K_KAFKA_RETRIES                               | 2                  |
-V2K_KAFKA_RETRY_BACKOFF_MS                      | 100                |
-V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE               | false              |
+K2V_KAFKA_CLIENT_ID                             | ${K2V_APP_BASEDIR} |
+K2V_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION | 1000000            |
+K2V_KAFKA_METADATA_BROKER_LIST                  | kafka-server:9092  |
+K2V_KAFKA_SOCKET_KEEPALIVE_ENABLE               | false              |

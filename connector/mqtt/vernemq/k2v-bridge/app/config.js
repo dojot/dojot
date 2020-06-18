@@ -37,20 +37,11 @@ const mqtt = {
 };
 
 const kafka = {
-  acks: parseInt(process.env.K2V_KAFKA_ACKS, 10),
-  'batch.num.messages': parseInt(process.env.K2V_KAFKA_BATCH_NUM_MESSAGES, 10),
   'client.id': process.env.K2V_KAFKA_CLIENT_ID,
-  'compression.codec': process.env.K2V_KAFKA_COMPRESSION_CODEC,
-  // dr_cb: (toBoolean(process.env.K2V_KAFKA_DR_CB)),
-  'enable.idempotence': (toBoolean(process.env.K2V_KAFKA_ENABLE_IDEMPOTENCE)),
   'group.id': process.env.K2V_KAFKA_GROUP_ID,
   'max.in.flight.requests.per.connection':
     parseInt(process.env.K2V_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 10),
   'metadata.broker.list': process.env.K2V_KAFKA_METADATA_BROKER_LIST,
-  retries: parseInt(process.env.K2V_KAFKA_RETRIES, 10),
-  'queue.buffering.max.kbytes': parseInt(process.env.K2V_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 10),
-  'queue.buffering.max.ms': parseFloat(process.env.K2V_KAFKA_QUEUE_BUFFERING_MAX_MS),
-  'retry.backoff.ms': parseInt(process.env.K2V_KAFKA_RETRY_BACKOFF_MS, 10),
   'socket.keepalive.enable': (toBoolean(process.env.K2V_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
 };
 
