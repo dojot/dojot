@@ -17,13 +17,13 @@ Before running the K2V-bridge service within your environment, make sure you con
 
 ### **App**
 
-Key                              | Purpose                                            | Default Value   | Valid Values     |
--------------------------------- | -------------------------------------------------- | --------------- | ---------------- |
-K2V_APP_BASEDIR                  | Base directory where the project is located        | /opt/k2v_bridge | string           |
-K2V_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3               | number           |
-K2V_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3               | number           |
-K2V_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | localhost:5583  | hostname/IP:port |
-K2V_APP_HOSTNAME                 | Hostname to be used in the certificate common name | k2v-bridge      | hostname/IP      |
+Key                              | Purpose                                            | Default Value      | Valid Values     |
+-------------------------------- | -------------------------------------------------- | ------------------ | ---------------- |
+K2V_APP_BASEDIR                  | Base directory where the project is located        | /opt/k2v_bridge    | string           |
+K2V_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3                  | number           |
+K2V_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3                  | number           |
+K2V_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | ejbca-wrapper:5583 | hostname/IP:port |
+K2V_APP_HOSTNAME                 | Hostname to be used in the certificate common name | k2v-bridge         | hostname/IP      |
 
 
 ### **Kafka Messenger**
