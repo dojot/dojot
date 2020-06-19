@@ -73,16 +73,6 @@ _createCSR()
     sh "${V2K_APP_BASEDIR}"/bin/scripts_tls/createCSR.sh
 }
 
-##create entity in ejbca
-_createEntity()
-{
-    echo "Create Entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/user"
-    $(curl --silent -X POST "${certEjbcaApiUrl}"/user \
-    -H "Content-Type:application/json" \
-    -H "Accept:application/json" \
-    -d  "{\"username\": \"${certCname}\"}")
-}
-
 ##sign csr in ejbca
 _signCert()
 {
@@ -122,7 +112,6 @@ _generateCertificates()
     _createCRTDir
     _generateKeyPair
     _createCSR
-    _createEntity
     _signCert
 }
 
