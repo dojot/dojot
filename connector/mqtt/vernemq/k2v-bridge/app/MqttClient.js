@@ -122,8 +122,12 @@ class MQTTClient {
           JSON.stringify(value.data.attrs),
           { qos: this.publishQos },
           (error, packet) => {
-            this.logger.error(error.stack || error);
-            this.logger.error(`Packet that caused the error: ${util.inspect(packet)}`);
+            if (error) {
+              this.logger.error(error.stack || error);
+              if (packet) {
+                this.logger.error(`Packet that caused the error: ${util.inspect(packet)}`);
+              }
+            }
           },
         );
       } else {
