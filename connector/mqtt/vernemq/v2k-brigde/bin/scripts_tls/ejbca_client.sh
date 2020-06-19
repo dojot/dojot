@@ -43,12 +43,12 @@ _connectEJBCA()
   START_TIME=$(date +'%s')
   echo "Waiting for dojot EJBCA Broker fully start. Adress '${EJBCA_ADDRESS}'..."
   echo "Try to connect to dojot EJBCA Broker ... "
-  RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/healthcheck || echo "" | jq '.status')
+  RESPONSE=$( (curl --fail -s "${certEjbcaApiUrl}/healthcheck" || echo "") | jq '.status')
   echo "$RESPONSE"
-  while [ -z "${RESPONSE}" ] || [ "${RESPONSE}" = '"ok"' ]; do
+  while [ -z "${RESPONSE}" ] || [ "${RESPONSE}" != '"ok"' ]; do
       sleep 30
       echo "Retry to connect to dojot EJBCA broker ... "
-      RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/healthcheck || echo "" | jq '.status')
+      RESPONSE=$( (curl --fail -s "${certEjbcaApiUrl}/healthcheck" || echo "") | jq '.status')
 
       ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
       if [ ${ELAPSED_TIME} -gt 180 ]
