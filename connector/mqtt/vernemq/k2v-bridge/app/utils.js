@@ -21,4 +21,13 @@ const generateDojotActuationTopic = (tenant, deviceId, suffix) => `${tenant}:${d
  */
 const toBoolean = (value) => (value && (value.toString().toLowerCase().trim() === 'true'));
 
-module.exports = { generateDojotActuationTopic, toBoolean };
+/**
+ * Exit the application with a given code
+ * Default code 1
+ * @function Kill the application
+ *
+ * @param {number} code
+ */
+const killApplication = (code = 1) => process.exit(code);
+
+module.exports = { generateDojotActuationTopic, toBoolean, killApplication };

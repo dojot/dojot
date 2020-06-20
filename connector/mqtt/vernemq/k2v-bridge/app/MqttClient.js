@@ -95,8 +95,10 @@ class MQTTClient {
   onDisconnect() {
     this.isConnected = false;
     this.logger.info('MQTT connection ended, trying to reconnect...');
-    this.mqttc.reconnect();
-    // TODO: agentMessenger (.pause or .stop)
+    // TODO: agentMessenger (.pause or .stop kafka consumer)
+    // temporary exit the application with code 1, this behavior
+    // will be updated in the next versions
+    utils.killApplication();
   }
 
   /**

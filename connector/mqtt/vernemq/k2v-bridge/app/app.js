@@ -5,6 +5,7 @@ const { unflatten } = require('flat');
 
 const config = require('./config');
 const MQTTClient = require('./MqttClient');
+const utils = require('./utils');
 
 // Logger configuration
 const logConfig = unflatten(config.logger);
@@ -38,7 +39,7 @@ process.on('uncaughtException', async (ex) => {
   // exception bubbles all the way back to the event loop.
   logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
   // TODO: stop server (connection redis, kafka consumer, etc.)
-  process.exit(1);
+  utils.killApplication();
 });
 
 const mqttClient = new MQTTClient();
@@ -48,5 +49,5 @@ try {
 } catch (error) {
   logger.error('An error occurred while initializing the MQTT Client. Bailing out!');
   logger.error(error.stack || error);
-  process.exit(1);
+  utils.killApplication();
 }

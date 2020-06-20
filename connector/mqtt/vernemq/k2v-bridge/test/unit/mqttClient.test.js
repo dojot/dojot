@@ -1,5 +1,6 @@
 const mqtt = require('mqtt');
 const MQTTClient = require('../../app/MqttClient');
+const utils = require('../../app/utils');
 
 /* dependencies mock */
 const mockMqtt = {
@@ -65,6 +66,7 @@ jest.mock('../../app/config', () => ({
 jest.mock('fs');
 jest.mock('../../app/utils', () => ({
   generateDojotActuationTopic: jest.fn(() => 'fakeId:fake/config'),
+  killApplication: jest.fn(),
 }));
 jest.mock('@dojot/microservice-sdk');
 
@@ -144,7 +146,7 @@ describe('Testing MQTTClient', () => {
     mqttClient.onDisconnect();
 
     expect(mqttClient.isConnected).toEqual(false);
-    expect(mockMqtt.reconnect).toHaveBeenCalledTimes(1);
+    expect(utils.killApplication).toHaveBeenCalledTimes(1);
   });
 
   it('should publish a message', () => {
