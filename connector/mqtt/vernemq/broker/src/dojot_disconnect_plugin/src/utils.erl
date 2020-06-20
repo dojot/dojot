@@ -1,4 +1,4 @@
--module(clean_sess).
+-module(utils).
 -import(lists,[member/2]). 
 
 % time defined in miliseconds (default 30 min)
@@ -8,7 +8,7 @@
     set_connection_timeout/1,
     disconnect_client/1,
     is_dojot_user/1,
-    cancel_timeout/1
+    cancel_connection_timeout/1
 ]).
 
 is_dojot_user(Username) ->
@@ -40,7 +40,7 @@ set_connection_timeout(SubId) ->
     ets:insert(TableId, { ClientId, Tref }),
     ok.
 
-cancel_timeout(SubId) ->
+cancel_connection_timeout(SubId) ->
     error_logger:info_msg("Cancel timeout due to disconnect: ~p ~n", [SubId]),
     TableId = ets:whereis(?MODULE),
     { _, ClientId } = SubId,
