@@ -53,7 +53,8 @@ class Certificate:
         req.set_pubkey(key)
         req.sign(key, "sha256")
 
-        return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")
+        # Remove \n from CSR and return the csr
+        return crypto.dump_certificate_request(crypto.FILETYPE_PEM, req).decode("ascii")[:-1]
 
     def generate_certificate(self) -> str:
         """
@@ -61,17 +62,21 @@ class Certificate:
 
         Returns the pem certificate.
         """
-        # Remove \n from CSR
-        csr = self.csr["pem"][:-1]
-        return DojotAPI.generate_certificate(self.jwt, csr)
+        return DojotAPI.generate_certificate(self.jwt, self.csr["pem"])
 
     def renew_cert(self) -> None:
         """
         Renew a certificate.
         """
-        DojotAPI.revoke_certificate(self.jwt, self.crt["fingerprint"])
+        self.revoke_cert()
 
         self.key = {"pem": self.generate_private_key()}
         self.csr = {"pem": self.generate_csr()}
         self.crt = {}
         self.crt["fingerprint"], self.crt["pem"] = self.generate_certificate()
+
+    def revoke_cert(self) -> None:
+        """
+        Revoke a certificate
+        """
+        DojotAPI.revoke_certificate(self.jwt, self.crt["fingerprint"])

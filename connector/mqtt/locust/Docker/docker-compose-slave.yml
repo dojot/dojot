@@ -17,7 +17,6 @@ services:
       REDIS_PASSWD: ""
       TASK_MIN_TIME: "29500"
       TASK_MAX_TIME: "30000"
-      EJBCA_URL: "http://localhost:5583"
       LOG_LEVEL: "info"
 
       RENEW_DEVICES: "False"

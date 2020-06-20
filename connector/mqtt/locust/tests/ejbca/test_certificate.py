@@ -7,19 +7,10 @@ from unittest import mock
 from unittest.mock import patch, MagicMock, ANY
 from src.ejbca.certificate import Certificate
 
-MOCK_CONFIG = {
-    'security': {
-        'dns_cert': ['1', '2'],
-        'ejbca_url': 'ejbca-url'
-    }
-}
-
-
 @patch('src.ejbca.certificate.DojotAPI')
 @patch('src.ejbca.certificate.RedisClient')
 @patch('src.ejbca.certificate.Utils')
 @patch('src.ejbca.certificate.crypto')
-@patch.dict('src.ejbca.certificate.CONFIG', MOCK_CONFIG)
 class TestCertificate(unittest.TestCase):
     """
     Certificate class tests.
@@ -66,7 +57,7 @@ class TestCertificate(unittest.TestCase):
         """
         mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_crypto.dump_certificate_request.return_value = MagicMock()
-        mock_crypto.dump_certificate_request().decode.return_value = 'return-value'
+        mock_crypto.dump_certificate_request().decode.return_value = 'return-value\n'
 
         thing = Certificate(self.thing_id)
         value = thing.generate_csr()
@@ -89,13 +80,26 @@ class TestCertificate(unittest.TestCase):
 
     def test_renew_cert(self, _mock_crypto, _mock_utils, mock_redis, mock_api):
         """
-        Test generate private csr
+        Test generate renew certificate
         """
         mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
         mock_redis.return_value.get_jwt = MagicMock(return_value=self.jwt)
 
         thing = Certificate(self.thing_id)
         thing.renew_cert()
+
+        mock_api.revoke_certificate.assert_called_once_with(self.jwt, self.crt['fingerprint'])
+        self.assertIsNotNone(thing.crt['pem'])
+
+    def test_revoke(self, _mock_crypto, _mock_utils, mock_redis, mock_api):
+        """
+        Test revoke_certificate
+        """
+        mock_api.generate_certificate.return_value = ('fingerprint', 'pem')
+        mock_redis.return_value.get_jwt = MagicMock(return_value=self.jwt)
+
+        thing = Certificate(self.thing_id)
+        thing.revoke_cert()
 
         mock_api.revoke_certificate.assert_called_once_with(self.jwt, self.crt['fingerprint'])
         self.assertIsNotNone(thing.crt['pem'])
