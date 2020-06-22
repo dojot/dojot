@@ -1,28 +1,169 @@
 # **Kafka WS**
 
-The **Kafka WS** service provides support for pure WebSocket connections to retrieve data directly
-from Kafka.
+The **Kafka WS** service provides support for retrieving data from Apache Kafka through pure WebSocket connections.
 
-Work in progress...
+It was designed to be used in the context of dojot IoT Platform for allowing users to retrieve realtime raw and/or processed data.
 
-# **Overview**
+## **Overview**
 
-**Kafka WebSocket service** allows the user to retrieve conditional and/or partial data from a topic
-in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
-language you want, as long as the client supports **RFC 6455** websockets.
+**Kafka WebSocket service** allows the users to retrieve conditional and/or partial data from a given dojot topic in a Kafka cluster. It works with pure websocket connections, so you can create websocket clients in any language you want as long as they support **RFC 6455**.
 
----
+### **Connecting to the service**
 
-## **Connecting to the service**
+The connection is done via pure websockets using the URI `/v1/websocket/:topic`. It is also possible to pass conditional and filter options as part of the URI. In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.
 
-The connection is done via pure websockets in the `/v1/websocket/:topic` endpoint. See the
-[examples](./examples) directory for a client example.
+If you want to jump for a full client example, see the [examples](./examples) directory.
 
-### **HTTP error codes**
+### **Understanding the URI parts**
+
+Before dive into the explanation of how each filter works and its rules, it is necessary to understand the parts of the URI. It's general format is:
+
+```js
+/v1/websocket/:topic?fields=<selector>&where=<conditions>
+```
+
+#### **Topic**
+
+The `topic` parameter is the Kafka topic that you want to receive data from.
+
+##### **Fields**
+
+The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
+
+See [this section](#selecting-parameters) for an explanation.
+
+##### **Where**
+
+The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
+conditions.
+
+Grammar:
+
+- `where → expression:*`
+- `expression → condition:+`
+- `condition → selector=(operator:):?values;`
+- `selector → parameter | parameter.selector`
+- `operator →` [see here](#applying-conditions)
+- `values → value | value,values`
+
+Where:
+
+- `:*` - zero or more
+- `:+` - one or more
+- `:?` - zero or one
+
+##### **URI Examples**
+
+To ilustrate the parameters' usage, here are some examples of valid URIs:
+
+Retrieving full messages from `topic.example` topic:
+
+```js
+/v1/websocket/topic.example
+```
+
+Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
+
+```js
+/v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+```
+
+Retrieving the temperature and location:
+
+```js
+/v1/websocket/topic.example?fields=temperature,location
+```
+
+Retrieving full messages where 5.0 ≤ temperature < 10.0:
+
+```js
+/v1/websocket/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
+```
+
+Retrieving the temperature and rain when rain ≤ 15:
+
+```js
+/v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
+```
+
+### **Filtering flow**
+
+The filtering happens right after a message is received from a Kafka topic that the client has
+requested to subscribe. The message is then filtered by `where` (if present) and then by `fields`
+(if present). This flow is better explained in the next image:
+
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-kafka-ws/subscription-engine/kafka-ws/docs/plant_uml/message_flow)
+
+**Fig. 1** - Kafka messages' flow within the system.
+
+### **Selecting parameters (`fields`)**
+
+The rules to select parameters from a message are:
+
+- `a,b,c`: select multiple parameters
+- `a/b/c`: select a parameter from its parent
+- `a(b,c)`: select multiple parameters from a specific parameter
+- `a/*/c`: wildcard selection
+
+Examples:
+
+```js
+{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
+{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
+{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
+{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
+```
+
+### **Applying conditions (`where`)**
+
+The conditions can be applied to any parameter in the message. The permitted operators are:
+
+#### **Set operators**
+
+Applied to a parameter via a set of values. These operators are applied to N possible values.
+
+- `in`: returns the parameter if the value is in the list
+- `nin`: returns the parameter if the value is not in the list
+
+Examples:
+
+```js
+{ a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
+{ a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
+```
+
+#### **Arythmetic operators**
+
+Applied to a parameter via one value. These operators are applied to 1 possible value.
+
+- `neq`: not equal
+- `gt`: greater than
+- `gte`: greater or equal to
+- `lt`: less than
+- `lte`: less or equal to
+
+**Obs.:** if you do not pass an operator, it is considered the equal operator.
+
+Examples:
+
+```js
+{ rain: 10, temperature: 30.0 } → f(rain=11) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=neq:11) → continue to process
+{ rain: 10, temperature: 30.0 } → f(rain=gt:10) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=gte:10) → continue to process
+{ rain: 10, temperature: 30.0 } → f(rain=lt:10) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=lte:10) → continue to process
+```
+
+### Connection Error Codes
+
+The errors generated by the service are listed below.
+
+#### **HTTP error codes**
 
 - `426`: occurs when the received connection is not a Websocket one.
 
-### **Websocket error codes**
+#### **Websocket error codes**
 
 - `4000` - INVALID_SYNTAX: there is a syntatic problem with `where`
 - `4001` - INVALID_OPERATOR: an invalid operator has been passed to a condition, see the [list of
@@ -36,145 +177,7 @@ operators](#applying-conditions) for more info
 - `4408` - EXPIRED_CONNECTION: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
 
----
-
-## **Understanding the URI parts**
-
-Before jumping in the explanation on how each filter works and its rules, we need to understand the
-parts of the URI that applies these filters. The general format of it is:
-```
-/v1/websocket/:topic?fields=<selector>&where=<conditions>
-```
-
-### **Topic**
-
-The `topic` parameter is the Kafka topic that you want to receive data from.
-
-### **Fields**
-
-The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
-
-See [this section](#selecting-parameters) for an explanation.
-
-### **Where**
-
-The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
-conditions.
-
-Grammar:
-- `where → expression:*`
-- `expression → condition:+`
-- `condition → selector=(operator:):?values;`
-- `selector → parameter | parameter.selector`
-- `operator → `[see here](#applying-conditions)
-- `values → value | value,values`
-
-Where:
-- `:*` - zero or more
-- `:+` - one or more
-- `:?` - zero or one
-
-### **Examples**
-
-To ilustrate the parameters' usage, here are some examples of valid URIs:
-
-Retrieving full messages from `topic.example` topic:
-```
-/v1/websocket/topic.example
-```
-
-Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
-```
-/v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
-```
-
-Retrieving the temperature and location:
-```
-/v1/websocket/topic.example?fields=temperature,location
-```
-
-Retrieving full messages where 5.0 ≤ temperature < 10.0:
-```
-/v1/websocket/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
-```
-
-Retrieving the temperature and rain when rain ≤ 15:
-```
-/v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
-```
-
----
-
-## **Filtering flow**
-
-The filtering happens right after a message is received in a Kafka topic that the client has
-requested to subscribe. The message is then filtered by `where` (if present) and then by `fields`
-(if present). This flow is better explained in the next image:
-
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-kafka-ws/subscription-engine/kafka-ws/docs/plant_uml/message_flow)
-
-**Fig. 1** - Kafka messages' flow within the system.
-
----
-
-## **Selecting parameters**
-
-The rules to select parameters from a message are:
-- `a,b,c`: select multiple parameters
-- `a/b/c`: select a parameter from its parent
-- `a(b,c)`: select multiple parameters from a specific parameter
-- `a/*/c`: wildcard selection
-
-Examples:
-```
-{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
-{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
-{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
-{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
-```
-
----
-
-## **Applying conditions**
-
-The conditions can be applied to any parameter in the message. The permitted operators are:
-
-### **Set operators**
-
-Applied to a parameter via a set of values. These operators are applied to N possible values.
-- `in`: returns the parameter if the value is in the list
-- `nin`: returns the parameter if the value is not in the list
-
-Examples:
-```
-{ a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
-{ a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
-```
-
-### **Arythmetic operators**
-
-Applied to a parameter via one value. These operators are applied to 1 possible value.
-- `neq`: not equal
-- `gt`: greater than
-- `gte`: greater or equal to
-- `lt`: less than
-- `lte`: less or equal to
-
-**Obs.:** if you do not pass an operator, it is equal.
-
-Examples:
-```
-{ rain: 10, temperature: 30.0 } → f(rain=11) → discard
-{ rain: 10, temperature: 30.0 } → f(rain=neq:11) → continue to process
-{ rain: 10, temperature: 30.0 } → f(rain=gt:10) → discard
-{ rain: 10, temperature: 30.0 } → f(rain=gte:10) → continue to process
-{ rain: 10, temperature: 30.0 } → f(rain=lt:10) → discard
-{ rain: 10, temperature: 30.0 } → f(rain=lte:10) → continue to process
-```
-
-# **Running the service**
-
-## **Preparing the environment**
+## **Running the service**
 
 ### **Configuration**
 
@@ -204,12 +207,11 @@ Note1: A websocket connection is closed by the server when certain conditions ar
 
 Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) can access the kafka topic, generally topics start with `tenant.*`
 
-### ** JSON Web Token (JWT) **
+### **JSON Web Token (JWT)**
 
-When KAFKA_WS_JWT_HEADER_AUTH is true, it is necessary to provide a JSON Web Token (JWT)  in the Header on the Autorization field, as in this example in js below  (see more https://tools.ietf.org/html/rfc7519#section-4):
+When KAFKA_WS_JWT_HEADER_AUTH is true, it is necessary to provide a JSON Web Token (JWT)  in the Header on the Autorization field, as in this example below  (see more at <https://tools.ietf.org/html/rfc7519#section-4>):
 
 ```js
-
 const makeJwtToken = (tenant, expirationTime) => {
   const payload = {
     service: tenant,
@@ -229,31 +231,29 @@ new WebSocket('ws://localhost:8080/tenant.ws.example.test', {
 });
 ```
 
+Note1: In the context of a dojot deployment the JWT Token is provided by the Authorization service, and is validated by the API Gateway before redirecting the connection to the Kafka WS. So, no validations are done by the Kafka WS, except the expiration time.
+
 ### **Parser compilation**
 
-Before running the program, you need to compile the Nearley parser:
+Before running the service, it is necessary to compile the Nearley parser:
+
 ```shell
 npm run parser:compile
 ```
 
----
+### **Standalone Mode**
 
-## **Standalone**
+To run the Kafka WS in the standalone mode, just type:
 
 ```shell
 npm run kafka-ws
 ```
 
 If you are developing, you can use `nodemon` too:
+
 ```shell
 npm run dev
 ```
-
----
-
-## NOTE
-
-To use WebSocket with Nginx, Kong, Api gateway or similar, look for timeout settings. In Nginx, for example: proxy_connect_timeout, proxy_send_timeout and proxy_connect_timeout; And in Kong on a Service, for example: connect_timeout, write_timeout and read_timeout.
 
 ## **Examples**
 
