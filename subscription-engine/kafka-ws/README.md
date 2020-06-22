@@ -186,18 +186,18 @@ Before proceeding, **make sure you configure your environment**.
 Key           | Purpose                                         | Default Value     | Valid Values             |
 ------------- | ----------------------------------------------- | ----------------- | ------------------------ |
 LOG_LEVEL     | log level                                       | info              | info, warn, debug, error |
-LOG_VERBOSE   | Enables verbose mode for logging                    | false              | string: "true" or "false" |
-LOG_FILE   | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false              | string: "true" or "false" |
+LOG_VERBOSE   | Enables verbose mode for logging                    | false              | string: "true" or "false" / *number*: 1 or 0 |
+LOG_FILE   | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false              | string: "true" or "false" / *number*: 1 or 0 |
 LOG_FILE_LEVEL     | Log level to log on files                                     | debug              | info, warn, debug, error |
 KAFKA_HOSTS   | comma-separated list of Kafka hosts (with port) | kafka-server:9092 | list of hostname:port    |
 KAFKA_WS_HOST | Kafka-ws address                                | 0.0.0.0         | hostname                 |
 KAFKA_WS_PORT | Kafka-ws port                                   | 8080              | valid port               |
-KAFKA_WS_TLS | Kafka-ws secure - enables TLS ( Needs: KAFKA_WS_TLS_CA_FILE, KAFKA_WS_TLS_KEY_FILE and KAFKA_WS_TLS_CERT_FILE )                                   | false              | string: "true" or "false"              |
+KAFKA_WS_TLS | Kafka-ws secure - enables TLS ( Needs: KAFKA_WS_TLS_CA_FILE, KAFKA_WS_TLS_KEY_FILE and KAFKA_WS_TLS_CERT_FILE )                                   | false              | *string*: "true" or "false" / *number*: 1 or 0             |
 KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-cert.pem              | valid path               |
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
-KAFKA_WS_JWT_HEADER_AUTH   | Enables use token jwt in authorization header | false              | string: "true" or "false" |
-KAFKA_WS_JWT_EXP_TIME   | Enables use exp, expiration time,  from jwt (Needs KAFKA_WS_JWT_HEADER_AUTH)                     | false               | string: "true" or "false" |
+KAFKA_WS_JWT_HEADER_AUTH   | Enables use token jwt in authorization header | false              | string: "true" or "false" / *number*: 1 or 0 |
+KAFKA_WS_JWT_EXP_TIME   | Enables use exp, expiration time,  from jwt (Needs KAFKA_WS_JWT_HEADER_AUTH)                     | false               | string: "true" or "false" / *number*: 1 or 0 |
 KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 720              | seconds |
 REDIS_HOST       | Redis host                   | redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |

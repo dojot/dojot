@@ -63,6 +63,7 @@ class RedisExpireMgmt {
 
   /**
    * Initializes Subscribe
+   * @returns Returns a Promise that, when resolved, will have been subscribed to the Redis event channel.
    */
   initSubscribe() {
     // TODO: improve handle errors
@@ -120,7 +121,7 @@ class RedisExpireMgmt {
    *
    * @param {string} idConnection unique id for a connection
    * @param {number} timestampSec unix timestamp in seconds
-   * @param {funcion} callback  callback to be called when the lifetime is over
+   * @param {function} callback  callback to be called when the lifetime is over
    */
   addConnection(idConnection, timestampSec, callback) {
     if (this.clients.sub.connected && this.clients.pub.connected) {
@@ -158,8 +159,9 @@ class RedisExpireMgmt {
   }
 
   /**
-   * Get remaining time to live of a connection
+   * Get remaining Time To Live of a connection
    * @param {string} idConnection unique id for a connection
+   * @returns Returns a Promise that, when resolved, will have the TTL value.
    */
   checkRemainTime(idConnection) {
     return new Promise((resolve, reject) => {

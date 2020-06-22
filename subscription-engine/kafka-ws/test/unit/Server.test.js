@@ -36,7 +36,7 @@ describe('Testing utils', () => {
     expect(server.ws.handleUpgrade).toHaveBeenCalledWith(request, null, null);
   });
 
-  it('onUpgrade not is websocket', () => {
+  it('onUpgrade is not websocket', () => {
     const socket = jest.fn();
     socket.write = jest.fn();
     socket.destroy = jest.fn();
