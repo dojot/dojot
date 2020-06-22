@@ -32,7 +32,7 @@ describe('Testing utils', () => {
     expect(isObjectEmpty(null)).toBe(false);
   });
 
-  it('parseTenantAndExpTimeFromToken There is no authorization toke', () => {
+  it('parseTenantAndExpTimeFromToken There is no authorization token', () => {
     let someError = false;
     try {
       parseTenantAndExpTimeFromToken(null);
@@ -57,12 +57,12 @@ describe('Testing utils', () => {
     expect(someError).toBe(true);
   });
 
-  it('parseTenantAndExpTimeFromToken Tentant is not inside the token', () => {
+  it('parseTenantAndExpTimeFromToken Tenant is not inside the token', () => {
     let someError = false;
     try {
       parseTenantAndExpTimeFromToken(makeJwtToken(null, 123));
     } catch (e) {
-      if (e.message.includes('Tentant is not inside the')) {
+      if (e.message.includes('Tenant is not inside the')) {
         someError = true;
       }
     }

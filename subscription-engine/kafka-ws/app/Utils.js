@@ -120,7 +120,7 @@ const parseTenantAndExpTimeFromToken = (rawToken) => {
   const { service: tenant, exp: expirationTimeSec } = tokenData;
 
   if (!tenant) {
-    throw new Error('Tentant is not inside the token.');
+    throw new Error('Tenant is not inside the token.');
   }
   if (!expirationTimeSec) {
     throw new Error('Expiration Time is not inside the token.');
