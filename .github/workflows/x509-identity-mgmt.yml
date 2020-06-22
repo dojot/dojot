@@ -1,0 +1,102 @@
+name: x509-identity-mgmt
+
+# Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in 'x509-identity-mgmt/**' is submitted
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - "x509-identity-mgmt/**"
+jobs:
+  unit-tests:
+    name: (x509-identity-mgmt) Unit Tests #  Path to help identify each job in the status checks
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'ci skip') == false # If the commit message contains 'ci skip', it won't be necessary to run this job
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: npm install, build, and test
+        run: |
+          cd x509-identity-mgmt/js
+          npm ci
+          npm run build --if-present
+          npm run lint
+          npm test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available in forks of repositories, that's the reason we use an open token
+          file: x509-identity-mgmt/js/coverage/lcov.info # Created when 'npm test' is executed
+          flags: x509IdentityMgmt # Flags allow you to isolate coverage reports for different tests
+          name: x509-identity-mgmt # Custom name for the upload
+
+  docker-hub:
+    needs: unit-tests
+    name: (x509-identity-mgmt) Build and Publish image to DockerHUb # Path to help identify each job in the status checks
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # If this is a PR, it won't run
+    steps:
+      - name: Owner Repository
+        id: get_owner
+        run: |
+          export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+          echo Current Owner is $OWNER
+          echo ::set-output name=owner::$OWNER
+
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Build and Push
+        uses: elgohr/Publish-Docker-Github-Action@2.16
+        with:
+          name: ${{ steps.get_owner.outputs.owner }}/x509-identity-mgmt
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          workdir: x509-identity-mgmt
+          buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # Label with the built image's commit
+          tag_names: true # Whether tag will be based in the branch name or in the tag name
+
+  gh-pages:
+    needs: docker-hub
+    name: (x509-identity-mgmt) Generate documentation and Publish in gh-pages
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Version Doc
+        id: version_doc
+        env:
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
+          echo Documentation Version $TAG_VERSION
+          echo ::set-output name=version::$TAG_VERSION
+
+      - name: Generate docs
+        env:
+          FOLDER_TO_GH_PAGES: x509-identity-mgmt
+          PATH_APIB: ./x509-identity-mgmt/js/apidocs/api-description.apib
+          VERSION_NAME: ${{ steps.version_doc.outputs.version }}
+        run: |
+          sh .github/workflows/scripts/doc_aglio_api.sh
+
+      - name: Publish Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./build-docs #fix when use .github/workflows/scripts/doc_aglio_api.sh
+          keep_files: true
+          allow_empty_commit: false
