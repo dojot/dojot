@@ -2,11 +2,9 @@
 
 #########################################################
 #########################################################
-BASE_DIR=${BASE_DIR:-"/k2v_bridge"}
 
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
-
-. "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
+. "${K2V_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
+. "${K2V_APP_BASEDIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
 echo "Retrieve cert for  ${certCAName} CA : ${certEjbcaApiUrl}/ca/${certCAName}"
 certCa=$(curl --silent -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}" \

@@ -7,21 +7,19 @@
 # export EJBCA_ADDRESS='localhost'
 # export STATIC_CERT='n'
 # export USE_VMQ_OPERATOR='n'
-# export HOSTNAME='broker'
+# export K2V_APP_HOSTNAME='broker'
 # export CRL_UPDATE_TIME='*/30 * * * *'
-# export BASE_DIR='/vernemq'
+# export K2V_APP_BASEDIR='/vernemq'
 # export CHECKEND_EXPIRATION_SEC='43200'
 # export CHECK_EXPIRATION_TIME='*/30 * * * *'
 # export CHECK_BROKER_CERT_REVOKED_TIME='*/30 * * * *'
-# 
+#
 #########################################################
 
 
 ########################################################
 
-BASE_DIR=${BASE_DIR:-"/k2v_bridge"}
-
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${K2V_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 _removeCRTDir()
 {
@@ -66,13 +64,13 @@ _connectEJBCA()
 ##Generate key par (private and public key)
 _generateKeyPair()
 {
-    sh "${BASE_DIR}"/bin/scripts_tls/generateKeyPair.sh
+    sh "${K2V_APP_BASEDIR}"/bin/scripts_tls/generateKeyPair.sh
 }
 
 ##Create CSR (cert wih some infos and sign with private key )
 _createCSR()
 {
-    sh "${BASE_DIR}"/bin/scripts_tls/createCSR.sh
+    sh "${K2V_APP_BASEDIR}"/bin/scripts_tls/createCSR.sh
 }
 
 ##create entity in ejbca
@@ -88,34 +86,34 @@ _createEntity()
 ##sign csr in ejbca
 _signCert()
 {
-    sh "${BASE_DIR}"/bin/scripts_tls/signCert.sh
+    sh "${K2V_APP_BASEDIR}"/bin/scripts_tls/signCert.sh
 }
 
 ##Get from PKI the CA certificate and return in PEM format
 _retrieveCACertificate()
 {
-    sh "${BASE_DIR}"/bin/scripts_tls/retrieveCACertificate.sh
+    sh "${K2V_APP_BASEDIR}"/bin/scripts_tls/retrieveCACertificate.sh
 }
 
 ##Get from PKI the CRL certificate
 _retrieveCRLCertificate()
 {
-    sh "${BASE_DIR}"/bin/scripts_tls/retrieveCRL.sh
+    sh "${K2V_APP_BASEDIR}"/bin/scripts_tls/retrieveCRL.sh
 }
 
 _cronTabCRL()
 {
-    echo "$CRL_UPDATE_TIME   ${BASE_DIR}/bin/scripts_tls/retrieveCRL.sh" >> "${BASE_DIR}"/crontab.tab
+    echo "$CRL_UPDATE_TIME   ${K2V_APP_BASEDIR}/bin/scripts_tls/retrieveCRL.sh" >> "${K2V_APP_BASEDIR}"/crontab.tab
 }
 
 _cronTabExpiration()
 {
-    echo "$CHECK_EXPIRATION_TIME  ${BASE_DIR}/bin/scripts_tls/checkExpirationCertificate.sh" >> "${BASE_DIR}"/crontab.tab
+    echo "$CHECK_EXPIRATION_TIME  ${K2V_APP_BASEDIR}/bin/scripts_tls/checkExpirationCertificate.sh" >> "${K2V_APP_BASEDIR}"/crontab.tab
 }
 
 _cronTabCheckBrokerCertRevoke()
 {
-    echo "$CHECK_BROKER_CERT_REVOKED_TIME  ${BASE_DIR}/bin/scripts_tls/checkBrokerCertHasRevoke.sh" >> "${BASE_DIR}"/crontab.tab
+    echo "$CHECK_BROKER_CERT_REVOKED_TIME  ${K2V_APP_BASEDIR}/bin/scripts_tls/checkBrokerCertHasRevoke.sh" >> "${K2V_APP_BASEDIR}"/crontab.tab
 }
 
 ##Generate private key and sign certificate crt
@@ -130,7 +128,7 @@ _generateCertificates()
 
 _startCronService()
 {
-   supercronic  "${BASE_DIR}"/crontab.tab &
+   supercronic  "${K2V_APP_BASEDIR}"/crontab.tab &
 }
 
 main()
@@ -153,7 +151,7 @@ main()
 
 
     #verifies certificate chains.
-    . "${BASE_DIR}"/bin/scripts_tls/checkCertificateChain.sh
+    . "${K2V_APP_BASEDIR}"/bin/scripts_tls/checkCertificateChain.sh
 }
 
 
