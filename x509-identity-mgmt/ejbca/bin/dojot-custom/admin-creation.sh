@@ -49,7 +49,7 @@ function createSuperAdmin() {
         cat <<< "***************************************************
 * Super Admin client certificate enrollment URL:  *
 ***************************************************
-URL: https://${CONTAINER_IP}:8443/ejbca/enrol/keystore.jsp
+URL: https://${HOST_NAME}:8443/ejbca/enrol/keystore.jsp
 Username: ${ADMIN_USERNAME}
 Password: ${superAdminEnrollmentCode}
 ***************************************************
