@@ -31,7 +31,7 @@ operators](#applying-conditions) for more info
 - `4003` - INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
 - `4004` - INVALID_VALUE: a value with an invalid type was passed to a condition
 - `4400` - INVALID_PATHNAME: a Malformed URI was passed
-- `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the JSON Web Token (JWT) 
+- `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the JSON Web Token (JWT)
 - `4403` - FORBIDDEN_TOPIC: the tenant sent in JSON Web Token (JWT) cannot access the kafka topic passed
 - `4408` - EXPIRED_CONNECTION: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
@@ -200,7 +200,7 @@ REDIS_HOST       | Redis host                   | redis                         
 REDIS_PORT       | Redis port                   | 6379                               | number |
 REDIS_DATABASE   | Redis database               | 1                                  | number |
 
-Note1: Maximum lifetime of a connection will be the highest value between the time calculate from expiration timestamp provided by the JSON Web Token (JWT)  (if KAFKA_WS_JWT_EXP_TIME is true) and KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_MAX_LIFE_TIME is -1, it will be the value provided in the time calculate from expiration timestamp provided by the JSON Web Token (JWT)  (if KAFKA_WS_JWT_EXP_TIME is true), otherwise there would be no maximum connection lifetime.
+Note1: A websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
 
 Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) can access the kafka topic, generally topics start with `tenant.*`
 
