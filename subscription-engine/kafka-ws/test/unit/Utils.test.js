@@ -18,20 +18,14 @@ const makeJwtToken = (tenant, expSeconds, user = 'test') => {
     Buffer.from('dummy signature').toString('base64')}`;
 };
 
-describe('Testing utils', () => {
-  beforeAll(() => {
-  });
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+beforeAll(() => {
+});
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
-  it('isObjectEmpty ', async () => {
-    expect(isObjectEmpty({})).toBe(true);
-    expect(isObjectEmpty({ test: 123 })).toBe(false);
-    expect(isObjectEmpty(null)).toBe(false);
-  });
-
-  it('parseTenantAndExpTimeFromToken There is no authorization token', () => {
+describe('Testing "parseTenantAndExpTimeFromToken()"', () => {
+  it('should throw an error because there is no authentication token', () => {
     let someError = false;
     try {
       parseTenantAndExpTimeFromToken(null);
@@ -43,7 +37,7 @@ describe('Testing utils', () => {
     expect(someError).toBe(true);
   });
 
-  it('parseTenantAndExpTimeFromToken Invalid token', () => {
+  it('should throw an error because of the invalid token', () => {
     let someError = false;
     try {
       parseTenantAndExpTimeFromToken('111');
@@ -55,7 +49,7 @@ describe('Testing utils', () => {
     expect(someError).toBe(true);
   });
 
-  it('parseTenantAndExpTimeFromToken Tenant is not inside the token', () => {
+  it('should throw an error because the token does not contain the tenant', () => {
     let someError = false;
     try {
       parseTenantAndExpTimeFromToken(makeJwtToken(null, 123));
@@ -67,7 +61,7 @@ describe('Testing utils', () => {
     expect(someError).toBe(true);
   });
 
-  it('parseTenantAndExpTimeFromToken Expiration Time is not inside the token', () => {
+  it('should throw an error because the token does not contain the Expiration Time', () => {
     let someError = false;
     try {
       parseTenantAndExpTimeFromToken(makeJwtToken('tenant', null));
@@ -79,22 +73,45 @@ describe('Testing utils', () => {
     expect(someError).toBe(true);
   });
 
-  it('parseTenantAndExpTimeFromToken Expiration Time is not inside the token', () => {
+  it('should have the Tenant and the Expiration Time in the token', () => {
     const { tenant, expirationTimestamp } = parseTenantAndExpTimeFromToken(makeJwtToken('tenant', 123));
     expect(tenant).toBe('tenant');
     expect(expirationTimestamp).toBe(123);
   });
+});
 
-  it('checkTopicBelongsTenant', () => {
-    expect(checkTopicBelongsTenant('test.topic', 'test')).toBe(true);
-    expect(checkTopicBelongsTenant('tes2t.topic', 'test')).toBe(false);
-    expect(checkTopicBelongsTenant('tes2t.topic', null)).toBe(false);
+describe('Testing "isObjectEmpty()"', () => {
+  it('should be an empty object', async () => {
+    expect(isObjectEmpty({})).toBe(true);
   });
 
-  it('checkAndParseURLPathname', () => {
+  it('should not be an empty object', async () => {
+    expect(isObjectEmpty({ test: 123 })).toBe(false);
+  });
+
+  it('should not be an empty object if null', async () => {
+    expect(isObjectEmpty(null)).toBe(false);
+  });
+});
+
+describe('Testing "checkTopicBelongsTenant()"', () => {
+  it('should belong to the tenant', () => {
+    expect(checkTopicBelongsTenant('test.topic', 'test')).toBe(true);
+  });
+  it('should not belong to the tenant', () => {
+    expect(checkTopicBelongsTenant('tes2t.topic', 'test')).toBe(false);
+  });
+  it('should not belong to the tenant if null', () => {
+    expect(checkTopicBelongsTenant('tes2t.topic', null)).toBe(false);
+  });
+});
+
+describe('Testing "checkAndParseURLPathname()"', () => {
+  it('should be a valid topic', () => {
     const parsed = checkAndParseURLPathname('http://localhost:5000/v1/websocket/kafka_topic?fields=temperature', '/v1/websocket/:topic');
     expect(parsed[1]).toBe('kafka_topic');
-
+  });
+  it('should throw a malformed path error', () => {
     let someError = false;
     try {
       checkAndParseURLPathname('http://localhost:5000/v1/websocket/d/kafka_topic?fields=temperature', '/v1/websocket/:topic');

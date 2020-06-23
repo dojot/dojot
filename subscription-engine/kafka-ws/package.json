@@ -7,8 +7,9 @@
   "scripts": {
     "kafka-ws": "node app/Index.js",
     "dev": "nodemon app/Index.js",
-    "test": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest test/**/**.test.js --coverage --passWithNoTests",
-    "test:watch": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --watch test/**/**.test.js --coverage --passWithNoTests",
+    "test": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --coverage --passWithNoTests",
+    "test:watch": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --watch --coverage --passWithNoTests",
+    "debugtest": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && node --inspect-brk node_modules/.bin/jest --runInBand --coverage=false",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js .",
     "parser:compile": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js"
@@ -62,6 +63,9 @@
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
       "/node_modules/"
+    ],
+    "testMatch": [
+      "**/test/**/**.test.js"
     ]
   },
   "author": "@eduardogmisiuk",

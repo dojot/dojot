@@ -15,7 +15,7 @@ describe('Testing Conditions', () => {
     const object = { sensor: { status: 'failed' }, temperature: 35 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ sensor: { status: 'failed' }, temperature: 35 });
+    expect(filterData).toEqual({ sensor: { status: 'failed' }, temperature: 35 });
   });
 
   it('in with no data', () => {
@@ -23,7 +23,7 @@ describe('Testing Conditions', () => {
     const object = { sensor: { status: 'started' }, temperature: 35 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
   it('nin with data', () => {
@@ -31,7 +31,7 @@ describe('Testing Conditions', () => {
     const object = { sensor: { status: 'failed' }, temperature: 35 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
   it('nin with no data', () => {
@@ -39,7 +39,7 @@ describe('Testing Conditions', () => {
     const object = { sensor: { status: 'started' }, temperature: 35 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ sensor: { status: 'started' }, temperature: 35 });
+    expect(filterData).toEqual({ sensor: { status: 'started' }, temperature: 35 });
   });
 
   it('gte with data ', () => {
@@ -47,7 +47,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 20 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toEqual({ location: 'x', temperature: 20 });
   });
 
   it('gte with no data ', () => {
@@ -55,7 +55,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 20 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
   it('gt with data', () => {
@@ -63,7 +63,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 21 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toEqual({ location: 'x', temperature: 21 });
   });
 
   it('gt with no data', () => {
@@ -71,7 +71,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 21 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
 
@@ -80,7 +80,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 19 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toEqual({ location: 'x', temperature: 19 });
   });
 
   it('lt with no data', () => {
@@ -88,7 +88,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 21 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
   it('lte with data', () => {
@@ -96,7 +96,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 19 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toEqual({ location: 'x', temperature: 19 });
   });
 
   it('lte with no data', () => {
@@ -104,7 +104,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 21 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
   it('eq with data', () => {
@@ -112,7 +112,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 19 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toEqual({ location: 'x', temperature: 19 });
   });
 
   it('eq with no data', () => {
@@ -120,7 +120,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 21 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 
   it('neq with data', () => {
@@ -128,7 +128,7 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 19 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({ location: 'x' });
+    expect(filterData).toEqual({ location: 'x', temperature: 19 });
   });
 
   it('neq with no data', () => {
@@ -136,6 +136,6 @@ describe('Testing Conditions', () => {
     const object = { location: 'x', temperature: 20 };
     const filterData = filter(object);
 
-    expect(filterData).toMatchObject({});
+    expect(filterData).toEqual({});
   });
 });
