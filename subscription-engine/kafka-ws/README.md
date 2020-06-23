@@ -6,7 +6,7 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 
 ## **Overview**
 
-**Kafka WebSocket service** allows the users to retrieve conditional and/or partial data from a given dojot topic in a Kafka cluster. It works with pure websocket connections, so you can create websocket clients in any language you want as long as they support **RFC 6455**.
+**Kafka WebSocket service** allows the users to retrieve conditional and/or partial data from a given dojot topic in a Kafka cluster. It works with pure websocket connections, so you can create websocket clients in any language you want as long as they support [RFC 6455](https://tools.ietf.org/html/rfc6455).
 
 ### **Connecting to the service**
 
@@ -58,31 +58,31 @@ To ilustrate the parameters' usage, here are some examples of valid URIs:
 
 Retrieving full messages from `topic.example` topic:
 
-```js
+```
 /v1/websocket/topic.example
 ```
 
-Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
+Retrieving a sensor *status* and *temperature* when the *status* is `failed` or `stopped`:
 
-```js
+```
 /v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
-Retrieving the temperature and location:
+Retrieving the *temperature* and *location*:
 
-```js
+```
 /v1/websocket/topic.example?fields=temperature,location
 ```
 
-Retrieving full messages where 5.0 ≤ temperature < 10.0:
+Retrieving full messages where *temperature* is <ins>greater than or equal to</ins> 5.0 and <ins>less than</ins> 10.0:
 
-```js
-/v1/websocket/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
+```
+/v1/websocket/topic.example?where=temperature=gte:5.0;temperature=lt:10.0;
 ```
 
-Retrieving the temperature and rain when rain ≤ 15:
+Retrieving the *temperature* and *rain* where *rain* is <ins>less than or equal to</ins> 15:
 
-```js
+```
 /v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
@@ -197,7 +197,7 @@ KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-c
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
 KAFKA_WS_JWT_HEADER_AUTH   | Enables use token jwt in authorization header | false              | string: "true" or "false" / *number*: 1 or 0 |
-KAFKA_WS_JWT_EXP_TIME   | Enables use exp, expiration time,  from jwt (Needs KAFKA_WS_JWT_HEADER_AUTH)                     | false               | string: "true" or "false" / *number*: 1 or 0 |
+KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time),  from jwt (Needs KAFKA_WS_JWT_HEADER_AUTH)                     | false               | string: "true" or "false" / *number*: 1 or 0 |
 KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 720              | seconds |
 REDIS_HOST       | Redis host                   | redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |
