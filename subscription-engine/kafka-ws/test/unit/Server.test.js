@@ -1,7 +1,6 @@
 const { createServer: createHttpServer } = require('http');
 const Server = require('../../app/Server');
 
-
 jest.mock('fs');
 jest.mock('http');
 jest.mock('https');

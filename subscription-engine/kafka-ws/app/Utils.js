@@ -89,7 +89,6 @@ function isNumber(value) {
   return false;
 }
 
-
 /**
  * Checks if the given object is empty, like {}
  *

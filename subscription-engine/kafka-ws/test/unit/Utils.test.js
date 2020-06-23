@@ -1,4 +1,3 @@
-
 const {
   isObjectEmpty,
   parseTenantAndExpTimeFromToken,
@@ -43,7 +42,6 @@ describe('Testing utils', () => {
     }
     expect(someError).toBe(true);
   });
-
 
   it('parseTenantAndExpTimeFromToken Invalid token', () => {
     let someError = false;

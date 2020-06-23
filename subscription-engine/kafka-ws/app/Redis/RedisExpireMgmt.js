@@ -63,7 +63,8 @@ class RedisExpireMgmt {
 
   /**
    * Initializes Subscribe
-   * @returns Returns a Promise that, when resolved, will have been subscribed to the Redis event channel.
+   * @returns Returns a Promise that, when resolved, will have been subscribed
+   *          to the Redis event channel.
    */
   initSubscribe() {
     // TODO: improve handle errors
@@ -175,7 +176,6 @@ class RedisExpireMgmt {
       });
     });
   }
-
 
   /**
    * End connection with redis
