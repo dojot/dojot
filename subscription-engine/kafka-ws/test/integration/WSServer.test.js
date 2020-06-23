@@ -50,7 +50,7 @@ describe('Testing WSServer - works fine', () => {
         remoteAddress: '1.1.1.1',
         remotePort: 80,
       },
-      url: 'http://localhost:5000/v1/websocket/tenant2.ws.example.test?fields=location&where=temperature=gte:20;',
+      url: 'http://localhost:5000/v1/topics/tenant2.ws.example.test?fields=location&where=temperature=gte:20;',
       headers: {
         authorization: `Bearer ${makeJwtToken('tenant', 123)}`,
       },

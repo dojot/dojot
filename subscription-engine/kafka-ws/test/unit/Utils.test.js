@@ -108,13 +108,13 @@ describe('Testing "checkTopicBelongsTenant()"', () => {
 
 describe('Testing "checkAndParseURLPathname()"', () => {
   it('should be a valid topic', () => {
-    const parsed = checkAndParseURLPathname('http://localhost:5000/v1/websocket/kafka_topic?fields=temperature', '/v1/websocket/:topic');
+    const parsed = checkAndParseURLPathname('http://localhost:5000/v1/topics/kafka_topic?fields=temperature', '/v1/topics/:topic');
     expect(parsed[1]).toBe('kafka_topic');
   });
   it('should throw a malformed path error', () => {
     let someError = false;
     try {
-      checkAndParseURLPathname('http://localhost:5000/v1/websocket/d/kafka_topic?fields=temperature', '/v1/websocket/:topic');
+      checkAndParseURLPathname('http://localhost:5000/v1/topics/d/kafka_topic?fields=temperature', '/v1/topics/:topic');
     } catch (e) {
       if (e.message.includes('Malformed Pathname')) {
         someError = true;

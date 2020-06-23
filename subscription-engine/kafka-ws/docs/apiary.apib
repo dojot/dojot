@@ -12,7 +12,7 @@ from Kafka.
 in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
 language you want, as long as the client supports **RFC 6455** websockets.
 
-## Retrieving conditional and/or partial messages from topic: [/v1/websocket/{topic}?fields={selector}&where={conditions}]
+## Retrieving conditional and/or partial messages from topic: [/kafka-ws/v1/topics/{topic}?fields={selector}&where={conditions}]
 
 ### **Where**
 
@@ -38,27 +38,27 @@ To ilustrate the parameters' usage, here are some examples of valid URIs:
 
 Retrieving full messages from `topic.example` topic:
 ```
-/v1/websocket/topic.example
+/kafka-ws/v1/topics/topic.example
 ```
 
 Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
 ```
-/v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+/kafka-ws/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the temperature and location:
 ```
-/v1/websocket/topic.example?fields=temperature,location
+/kafka-ws/v1/topics/topic.example?fields=temperature,location
 ```
 
 Retrieving full messages where 5.0 ≤ temperature < 10.0:
 ```
-/v1/websocket/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
+/kafka-ws/v1/topics/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
 ```
 
 Retrieving the temperature and rain when rain ≤ 15:
 ```
-/v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
+/kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
 ---

@@ -22,7 +22,7 @@ const createURL = (arg, host, port, tls) => {
   } else {
     urlCreate = 'ws://';
   }
-  urlCreate = `${urlCreate}${host}:${port}/v1/websocket/`;
+  urlCreate = `${urlCreate}${host}:${port}/v1/topics/`;
   switch (arg) {
     case '0':
       urlCreate = `${urlCreate}tenant1.ws.example.test/?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;`;
@@ -95,10 +95,10 @@ if (tls) {
 }
 
 // Other test websockets with different conditions:
-// const ws = new WebSocket('http://localhost:5000/v1/websocket/kafka_topic?fields=temperature,a/*/e,foo&where=foo=nin:"a,bc",d,"\\\\,\\n\\"a","\\"";');
-// const ws = new WebSocket('http://localhost:5000/v1/websocket/kafka_topic?fields=temperature,a/*/e&where=foo=in:"a,bc\\n",ab\\n,"\\\\,\\",a";');
-// const ws = new WebSocket('http://localhost:5000/v1/websocket/kafka_topic?fields=temperature,a/*/e&where=data.temperature=lt:30.0;rain=10;bar=neq:20;');
-// const ws = new WebSocket('http://localhost:5000/v1/websocket/kafka_topic?fields=temperature,a/*/e&where=temperature=31.0;a.c.e=nin:a,1,h,2,3;');
+// const ws = new WebSocket('http://localhost:5000/v1/topics/kafka_topic?fields=temperature,a/*/e,foo&where=foo=nin:"a,bc",d,"\\\\,\\n\\"a","\\"";');
+// const ws = new WebSocket('http://localhost:5000/v1/topics/kafka_topic?fields=temperature,a/*/e&where=foo=in:"a,bc\\n",ab\\n,"\\\\,\\",a";');
+// const ws = new WebSocket('http://localhost:5000/v1/topics/kafka_topic?fields=temperature,a/*/e&where=data.temperature=lt:30.0;rain=10;bar=neq:20;');
+// const ws = new WebSocket('http://localhost:5000/v1/topics/kafka_topic?fields=temperature,a/*/e&where=temperature=31.0;a.c.e=nin:a,1,h,2,3;');
 
 ws.on('open', () => {
   console.info('Connected to the server.');

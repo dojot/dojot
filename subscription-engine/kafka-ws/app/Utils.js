@@ -153,7 +153,7 @@ const checkTopicBelongsTenant = (topic, tenant) => {
  *  Parses pathname from a given URL into substring matches
  *
  * @param {string} fullUrl ex: http://google.com
- * @param {string} pathToRegex ex: /v1/websocket/:topic
+ * @param {string} pathToRegex ex: /v1/topics/:topic
  *
  * @returns {array} substring matches
  */

@@ -10,7 +10,7 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 
 ### **Connecting to the service**
 
-The connection is done via pure websockets using the URI `/v1/websocket/:topic`. It is also possible to pass conditional and filter options as part of the URI. In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.
+The connection is done via pure websockets using the URI `/kafka-ws/v1/topics/:topic`. It is also possible to pass conditional and filter options as part of the URI. In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.
 
 If you want to jump for a full client example, see the [examples](./examples) directory.
 
@@ -18,8 +18,8 @@ If you want to jump for a full client example, see the [examples](./examples) di
 
 Before dive into the explanation of how each filter works and its rules, it is necessary to understand the parts of the URI. It's general format is:
 
-```js
-/v1/websocket/:topic?fields=<selector>&where=<conditions>
+```
+/kafka-ws/v1/topics/:topic?fields=<selector>&where=<conditions>
 ```
 
 #### **Topic**
@@ -59,31 +59,31 @@ To ilustrate the parameters' usage, here are some examples of valid URIs:
 Retrieving full messages from `topic.example` topic:
 
 ```
-/v1/websocket/topic.example
+/kafka-ws/v1/topics/topic.example
 ```
 
 Retrieving a sensor *status* and *temperature* when the *status* is `failed` or `stopped`:
 
 ```
-/v1/websocket/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+/kafka-ws/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the *temperature* and *location*:
 
 ```
-/v1/websocket/topic.example?fields=temperature,location
+/kafka-ws/v1/topics/topic.example?fields=temperature,location
 ```
 
 Retrieving full messages where *temperature* is <ins>greater than or equal to</ins> 5.0 and <ins>less than</ins> 10.0:
 
 ```
-/v1/websocket/topic.example?where=temperature=gte:5.0;temperature=lt:10.0;
+/kafka-ws/v1/topics/topic.example?where=temperature=gte:5.0;temperature=lt:10.0;
 ```
 
 Retrieving the *temperature* and *rain* where *rain* is <ins>less than or equal to</ins> 15:
 
 ```
-/v1/websocket/topic.example?where=rain=lte:15;&fields=temperature,rain
+/kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
 ### **Filtering flow**
