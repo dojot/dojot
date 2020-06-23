@@ -92,7 +92,7 @@ The filtering happens right after a message is received from a Kafka topic that 
 requested to subscribe. The message is then filtered by `where` (if present) and then by `fields`
 (if present). This flow is better explained in the next image:
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-kafka-ws/subscription-engine/kafka-ws/docs/plant_uml/message_flow)
+![message_flow](./docs/plant_uml/message_flow.svg)
 
 **Fig. 1** - Kafka messages' flow within the system.
 
