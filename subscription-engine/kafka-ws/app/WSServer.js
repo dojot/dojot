@@ -22,7 +22,6 @@ const { server: serverConfig } = require('./Config');
 
 const logger = new Logger();
 
-
 /**
  * Gets the kafka topic from the given url
  * TODO: put this function in a more appropriate place, as a class to handle connections
@@ -102,7 +101,6 @@ const getTenantAndExpirationFromJWT = (rawToken, cbError) => {
   }
   return parsedToken;
 };
-
 
 /**
   * WebSocket Server.
@@ -199,7 +197,6 @@ class WSServer {
     this.setExpiration(ws, expirationTimestampFromJWT, idWsConnection);
 
     const { fields, where } = url.parse(req.url, true).query;
-
 
     let conditions;
     try {

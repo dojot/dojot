@@ -59,7 +59,6 @@ const caFile = process.env.WS_TLS_CA_FILE || '../certs/client/ca-cert.pem';
 const keyFile = process.env.WS_TLS_KEY_FILE || '../certs/client/client-key.pem';
 const certFile = process.env.WS_TLS_CERT_FILE || '../certs/client/client-cert.pem';
 
-
 const url = createURL(args[0], host, port, tls);
 
 console.info(`Trying to connect ${url}`);

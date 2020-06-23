@@ -24,7 +24,6 @@ const makeJwtToken = (tenant, expSeconds, user = 'test') => {
     Buffer.from('dummy signature').toString('base64')}`;
 };
 
-
 let wSServer = null;
 describe('Testing WSServer - works fine', () => {
   beforeAll(() => {
