@@ -9,7 +9,6 @@ describe('Testing Conditions', () => {
     jest.clearAllMocks();
   });
 
-
   it('in with data', () => {
     const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
     const object = { sensor: { status: 'failed' }, temperature: 35 };
@@ -73,7 +72,6 @@ describe('Testing Conditions', () => {
 
     expect(filterData).toEqual({});
   });
-
 
   it('lt with data', () => {
     const filter = ConditionApplier('temperature', 'lt', [20]);
