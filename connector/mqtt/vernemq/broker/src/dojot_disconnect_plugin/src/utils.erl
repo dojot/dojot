@@ -1,8 +1,11 @@
 -module(utils).
--import(lists,[member/2]). 
+-import(lists,[member/2]).
+
+-on_load(utils_on_load/0).
 
 % time defined in miliseconds (default 30 min)
 -define(MAX_TIMEOUT, element(1, string:to_integer(os:getenv("PLUGIN_DISC_LIFETIME_SESSION", "1800000")))).
+-define(DISCONNECT_ETS_TABLE, "PLUGIN_DISC_ETS").
 
 -export([
     set_connection_timeout/1,
@@ -10,6 +13,15 @@
     is_dojot_user/1,
     cancel_connection_timeout/1
 ]).
+
+utils_on_load() -> 
+    try
+        error_logger:info_msg("Loading disconnect plugin utils module"),
+        ets:new(?DISCONNECT_ETS_TABLE, [public, named_table])
+    catch
+    error:badarg->
+        ok
+    end.
 
 is_dojot_user(Username) ->
 
@@ -24,26 +36,22 @@ is_dojot_user(Username) ->
     end.
 
 disconnect_client(SubId) ->
-    error_logger:info_msg("disconnect_client: ~p ~n", [SubId]),
     vernemq_dev_api:disconnect_by_subscriber_id(SubId, []).
 
 set_connection_timeout(SubId) ->
-
-    case member(?MODULE, ets:all()) of
-        false ->
-            ets:new(?MODULE, [ set, public, named_table])
-    end,
-    
-    TableId = ets:whereis(?MODULE),
-    { _, Tref } = timer:apply_after(?MAX_TIMEOUT, ?MODULE, disconnect_client, [SubId]),       
+    { _, Tref } = timer:apply_after(?MAX_TIMEOUT, ?MODULE, disconnect_client, [SubId]),
     { _, ClientId } = SubId,
-    ets:insert(TableId, { ClientId, Tref }),
+    ets:insert(?DISCONNECT_ETS_TABLE, { ClientId, [Tref] }),
     ok.
 
 cancel_connection_timeout(SubId) ->
-    error_logger:info_msg("Cancel timeout due to disconnect: ~p ~n", [SubId]),
-    TableId = ets:whereis(?MODULE),
     { _, ClientId } = SubId,
-    timerId = ets:match(TableId, ClientId),
-    timer:cancel(timerId),
-    ok.
+
+    try
+        [timerId] = ets:lookup(?DISCONNECT_ETS_TABLE, ClientId),
+        timer:cancel(timerId),
+        ets:delete(?DISCONNECT_ETS_TABLE, ClientId)
+    catch
+    error:badarg->
+        ok
+    end.
