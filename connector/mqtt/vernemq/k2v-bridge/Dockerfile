@@ -41,9 +41,8 @@ RUN apk --no-cache add \
       openssl \
       tini
 
-ENV BASE_DIR=/opt/k2v_bridge
 COPY --from=base /opt/k2v_bridge /opt/k2v_bridge
 
-ENTRYPOINT ["/sbin/tini", "--", "./bin/entryPoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD [ "npm", "run", "app" ]
+CMD ["./bin/entryPoint.sh", "npm", "run", "app"]
