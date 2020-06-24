@@ -1,0 +1,60 @@
+{
+    "name": "@dojot/x509-identity-mgmt",
+    "version": "1.0.0",
+    "description": "API for issuing and managing x.509 certificates. Once these certificates are associated with IoT devices or third party applications, they become the identity of these elements to the dojot platform.",
+    "main": "index.js",
+    "scripts": {
+        "lint": "./node_modules/.bin/eslint src/*.js",
+        "start": "cross-env NODE_ENV=production node index",
+        "dev": "cross-env NODE_ENV=development node --trace-sync-io index",
+        "debugdev": "cross-env NODE_APP_PORT=3737 NODE_ENV=development NODE_DEBUG=tls,https,http,request EJBCA_TLS_CLIENT_DIR=./tls EJBCA_CLIENT_USERNAME=ejbcaclient MONGO_USER=root MONGO_PASS=pass MONGO_AUTH_DB=admin  node --inspect-brk --trace-sync-io index",
+        "test": "cross-env NODE_ENV=test jest --verbose",
+        "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand"
+    },
+    "author": {
+        "name": "Thiago de Paula Ferreira",
+        "email": "thiagodepaulaferreira@gmail.com",
+        "url": "https://github.com/thiagodpf"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dojot/dojot.git"
+    },
+    "keywords": [
+        "x.509",
+        "EJBCA",
+        "dojot"
+    ],
+    "license": "GPL-3.0",
+    "dependencies": {
+        "@dojot/microservice-sdk": "^0.1.3",
+        "@godaddy/terminus": "^4.3.1",
+        "ajv": "^6.12.0",
+        "asn1js": "^2.0.26",
+        "compression": "^1.7.4",
+        "express": "^4.17.1",
+        "express-async-errors": "^3.1.1",
+        "express-paginate": "^1.0.0",
+        "express-request-id": "^1.4.1",
+        "http-errors": "^1.7.3",
+        "http-status-codes": "^1.4.0",
+        "jwt-decode": "^2.2.0",
+        "mongo-querystring": "^4.1.1",
+        "mongoose": "^5.9.12",
+        "morgan": "^1.10.0",
+        "pkijs": "^2.1.88",
+        "rotating-file-stream": "^2.0.2",
+        "serve-index": "^1.9.1",
+        "soap": "^0.31.0"
+    },
+    "devDependencies": {
+        "cross-env": "^7.0.2",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.1.0",
+        "eslint-plugin-import": "^2.20.2",
+        "eslint-plugin-jest": "^23.8.2",
+        "faker": "^4.1.0",
+        "jest": "^25.2.7",
+        "supertest": "^4.0.2"
+    }
+}
