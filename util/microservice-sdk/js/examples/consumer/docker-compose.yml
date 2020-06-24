@@ -1,0 +1,59 @@
+version: '3.7'
+services:
+
+  zookeeper:
+    image: dojot/zookeeper:3.4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka:
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    depends_on:
+      - zookeeper
+    restart: always
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_TOPICS: 'consumer.example.test'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafkacat-producer:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    restart: always
+    command: >
+      bash -c "
+        for ((i=0; ; i++)) do
+          echo \"Test Message - $${i}\" |\
+          kafkacat -b kafka:9092 -P -t consumer.example.test
+          sleep 5
+        done
+      "
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  consumer:
+    build:
+      context: ./../../
+      dockerfile: ./examples/consumer/Dockerfile
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      KAFKA_GROUP_ID: sdk-consumer-example
+      KAFKA_TOPIC: consumer.example.test
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
