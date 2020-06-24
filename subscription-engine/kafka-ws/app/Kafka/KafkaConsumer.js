@@ -33,7 +33,6 @@ class KafkaConsumer {
     }
   }
 
-
   /**
    * Register Callback for a topic
    *

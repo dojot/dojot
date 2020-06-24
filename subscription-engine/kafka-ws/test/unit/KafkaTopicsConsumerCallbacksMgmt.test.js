@@ -4,7 +4,6 @@ jest.mock('@dojot/microservice-sdk');
 
 jest.mock('../../app/Kafka/KafkaConsumer');
 
-
 let kafkaTopicsCallbacksMgmt = null;
 describe('Testing KafkaTopicsConsumerCallbacksMgmt - works fine', () => {
   beforeAll(() => {
@@ -39,7 +38,6 @@ describe('Testing KafkaTopicsConsumerCallbacksMgmt - works fine', () => {
     kafkaTopicsCallbacksMgmt.addCallback('topic1', '2', callbackB);
 
     expect(kafkaTopicsCallbacksMgmt.kafka.registerCallback).toHaveBeenCalledTimes(1);
-
 
     const callback = kafkaTopicsCallbacksMgmt.createCallbackKafkaConsumer('topic1');
 

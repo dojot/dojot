@@ -30,7 +30,6 @@ const applyGte = (parameter, value, data) => {
   return {};
 };
 
-
 /**
  * Applies the less than operator.
  *
@@ -62,7 +61,6 @@ const applyLte = (parameter, value, data) => {
   }
   return {};
 };
-
 
 /**
  * Applies the equal operator.

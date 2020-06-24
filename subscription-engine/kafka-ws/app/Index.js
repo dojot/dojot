@@ -1,8 +1,6 @@
-
 const { Logger } = require('@dojot/microservice-sdk');
 const { app: { log: logConfig } } = require('./Config');
 const Server = require('./Server');
-
 
 Logger.setTransport('console', {
   level: logConfig.log_console_level,
