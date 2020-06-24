@@ -257,7 +257,6 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         });
       }));
 
-
   // ---------------------
   // test all field limits
   // ---------------------
@@ -486,7 +485,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         });
       }));
 
-
   // --------------------
   // test all field types
   // --------------------
@@ -525,7 +523,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
           ],
         });
       }));
-
 
   it("should 'belongsTo.device' should be string",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
@@ -589,7 +586,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
           ],
         });
       }));
-
 
   // --------------------
   // test all field regex

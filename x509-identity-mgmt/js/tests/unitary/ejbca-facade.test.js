@@ -34,7 +34,6 @@ const readline = require('readline');
 const { ejbca: ejbcaCfg } = require('../../src/config');
 const ejbcaFacade = require('../../src/core/ejbca-facade');
 
-
 describe('testing internal functions of the EJBCA Facade', () => {
   beforeEach(() => {
     // clear the array
