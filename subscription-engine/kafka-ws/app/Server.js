@@ -6,7 +6,6 @@ const { Logger } = require('@dojot/microservice-sdk');
 const { server: serverConfig } = require('./Config');
 const { WSServer } = require('./WSServer');
 
-
 const logger = new Logger();
 
 /**
@@ -66,6 +65,5 @@ class Server {
     }
   }
 }
-
 
 module.exports = Server;

@@ -29,7 +29,6 @@ describe('Testing Conditions', () => {
     expect(condi).toMatchObject([{ parameter: 'temperature', operator: 'gte', values: [20] }]);
   });
 
-
   it('throw new InvalidOperatorArity', () => {
     let someError = false;
     try {
@@ -55,7 +54,6 @@ describe('Testing Conditions', () => {
     }
     expect(someError).toBe(true);
   });
-
 
   it('throw a any error', () => {
     let someError = false;
@@ -83,14 +81,12 @@ describe('Testing Conditions', () => {
     expect(someError).toBe(true);
   });
 
-
   it('extractUnquotedValues', () => {
     const queryString = 'sensor.status=in:"failed",stopped;';
     const condi = WhereParser()(queryString);
 
     expect(condi).toMatchObject([{ parameter: 'sensor.status', operator: 'in', values: ['failed', 'stopped'] }]);
   });
-
 
   it('throw InvalidEscapeValue', () => {
     let someError = false;

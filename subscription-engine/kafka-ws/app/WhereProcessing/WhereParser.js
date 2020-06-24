@@ -11,7 +11,6 @@ const {
   InvalidValue,
 } = require('../Errors').Errors;
 
-
 const logger = new Logger();
 
 /**
