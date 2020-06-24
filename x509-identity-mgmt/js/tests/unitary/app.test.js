@@ -11,7 +11,6 @@ const { token } = require('../util.test');
 
 const req = request(app);
 
-
 describe('unit testing of the App object', () => {
   it('should complain about a missing JWT',
     () => req.get('/api/v1/certificates')

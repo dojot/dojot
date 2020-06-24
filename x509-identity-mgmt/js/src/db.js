@@ -111,7 +111,6 @@ on('close', () => {
   healthCheck = false;
 });
 
-
 /** ************************************************************************
  * Customizations used to select certificate fields from the QueryString URL
  ************************************************************************* */

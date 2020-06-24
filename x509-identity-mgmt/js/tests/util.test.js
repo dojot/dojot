@@ -131,7 +131,6 @@ lYzdxnExRY/ltyk01/XNz2n66JotjGr0Xk8vKe8wwodknK587xA/gMw19eOR2YEi
 0Loq45swNAbyfTo5a3Cm/fncY6WzmFclVrfmg9MTWA6D0OZ7KVcRPg==
 -----END X509 CRL-----`;
 
-
 /* defines the JWT token to be used for test requests */
 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
   + '.eyJzZXJ2aWNlIjoiYWRtaW4ifQ'
