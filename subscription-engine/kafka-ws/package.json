@@ -1,0 +1,76 @@
+{
+  "name": "kafka-ws",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Websocket service with conditional/partial data requests",
+  "main": "app/Index.js",
+  "scripts": {
+    "kafka-ws": "node app/Index.js",
+    "dev": "nodemon app/Index.js",
+    "test": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --coverage",
+    "test:watch": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --watch --coverage",
+    "debugtest": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && node --inspect-brk node_modules/.bin/jest --runInBand --coverage=false",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
+    "parser:compile": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot"
+  },
+  "keywords": [
+    "dojot",
+    "kafka",
+    "websocket"
+  ],
+  "files": [
+    "package-lock.json",
+    "app/**/*.js",
+    "test/",
+    "!test/unit/coverage/"
+  ],
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-plugin-import": "^2.21.1",
+    "jest": "^25.5.4",
+    "nodemon": "^2.0.4",
+    "redis-mock": "^0.49.0"
+  },
+  "dependencies": {
+    "@dojot/microservice-sdk": "^0.1.3",
+    "crypto-js": "^4.0.0",
+    "express": "^4.17.1",
+    "flat": "^5.0.0",
+    "json-mask": "^1.0.1",
+    "lodash": "^4.17.15",
+    "moo": "^0.5.1",
+    "nearley": "^2.19.3",
+    "path-to-regexp": "^6.1.0",
+    "redis": "^3.0.2",
+    "uuid": "^8.1.0",
+    "ws": "^7.3.0"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!app/Index.js",
+      "!app/Errors/*",
+      "!app/Config.js",
+      "!app/WhereProcessing/Parser.js"
+    ],
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testMatch": [
+      "**/test/**/**.test.js"
+    ]
+  },
+  "author": "@eduardogmisiuk",
+  "contributors": [
+    "@mprevide"
+  ],
+  "license": "GPL-3.0"
+}
