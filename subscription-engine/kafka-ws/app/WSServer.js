@@ -33,7 +33,7 @@ const getKafkaTopicFromPathname = (fullUrl, cbError) => {
   let parsedRoute = null;
   // check if the url pathname has the expected pattern with the topic
   try {
-    parsedRoute = checkAndParseURLPathname(fullUrl, '/v1/topics/:topic');
+    parsedRoute = checkAndParseURLPathname(fullUrl, '/api/v1/topics/:topic');
   } catch (e) {
     logger.error(e);
     cbError(e);
