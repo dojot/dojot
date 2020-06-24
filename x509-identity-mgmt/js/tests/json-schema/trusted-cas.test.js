@@ -39,7 +39,6 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         });
       }));
 
-
   // --------------------
   // test all field types
   // --------------------
@@ -158,7 +157,6 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
           ],
         });
       }));
-
 
   // --------------------
   // test all field types
