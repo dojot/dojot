@@ -1,11 +1,9 @@
 -module(utils).
 -import(lists,[member/2]).
 
--on_load(utils_on_load/0).
-
 % time defined in miliseconds (default 30 min)
 -define(MAX_TIMEOUT, element(1, string:to_integer(os:getenv("PLUGIN_DISC_LIFETIME_SESSION", "1800000")))).
--define(DISCONNECT_ETS_TABLE, "PLUGIN_DISC_ETS").
+-define(DISCONNECT_ETS_TABLE, disconnect_ets_table).
 
 -export([
     set_connection_timeout/1,
@@ -13,15 +11,6 @@
     is_dojot_user/1,
     cancel_connection_timeout/1
 ]).
-
-utils_on_load() -> 
-    try
-        error_logger:info_msg("Loading disconnect plugin utils module"),
-        ets:new(?DISCONNECT_ETS_TABLE, [public, named_table])
-    catch
-    error:badarg->
-        ok
-    end.
 
 is_dojot_user(Username) ->
 
@@ -46,12 +35,8 @@ set_connection_timeout(SubId) ->
 
 cancel_connection_timeout(SubId) ->
     { _, ClientId } = SubId,
-
-    try
-        [timerId] = ets:lookup(?DISCONNECT_ETS_TABLE, ClientId),
-        timer:cancel(timerId),
-        ets:delete(?DISCONNECT_ETS_TABLE, ClientId)
-    catch
-    error:badarg->
-        ok
-    end.
+    [{ _Key, Value }] = ets:lookup(?DISCONNECT_ETS_TABLE, ClientId),
+    [ { TrefK, Trefv } ] = Value,
+    Tref = {TrefK, Trefv},
+    timer:cancel(Tref),
+    ets:delete(?DISCONNECT_ETS_TABLE, ClientId).
