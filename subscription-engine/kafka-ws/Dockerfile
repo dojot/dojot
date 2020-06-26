@@ -18,9 +18,10 @@ RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-he
 COPY package.json .
 COPY package-lock.json .
 
+RUN npm install
+
 COPY app ./app
 
-RUN npm install
 RUN npm run parser:compile
 
 FROM node:10.16.3-alpine
@@ -34,3 +35,7 @@ RUN apk --no-cache add \
 COPY --from=base /opt/kafka-ws /opt/kafka-ws
 
 CMD ["npm", "run", "kafka-ws"]
+
+HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=2 \
+    CMD HC=$(wget -q -O - "http://localhost:${KAFKA_WS_PORT:-8080}/healthcheck") \
+        && echo $HC && echo $HC | grep -q '"status":"ok"'

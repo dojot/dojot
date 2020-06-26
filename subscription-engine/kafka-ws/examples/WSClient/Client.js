@@ -25,7 +25,7 @@ const createURL = (arg, host, port, tls) => {
   urlCreate = `${urlCreate}${host}:${port}/api/v1/topics/`;
   switch (arg) {
     case '0':
-      urlCreate = `${urlCreate}tenant1.ws.example.test/?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;`;
+      urlCreate = `${urlCreate}tenant1.ws.example.test?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;`;
       break;
     case '1':
       urlCreate = `${urlCreate}tenant2.ws.example.test?fields=location&where=temperature=gte:20;`;

@@ -1,4 +1,4 @@
-const { WSServer } = require('../../app/WSServer');
+const websocketTarball = require('../../app/WebsocketTarball');
 
 jest.mock('@dojot/microservice-sdk');
 jest.mock('ws');
@@ -24,11 +24,7 @@ const makeJwtToken = (tenant, expSeconds, user = 'test') => {
     Buffer.from('dummy signature').toString('base64')}`;
 };
 
-let wSServer = null;
 describe('Testing WSServer - works fine', () => {
-  beforeAll(() => {
-    wSServer = new WSServer();
-  });
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -36,7 +32,7 @@ describe('Testing WSServer - works fine', () => {
   it('Should init correctly ', async () => {
     let someError = false;
     try {
-      await wSServer.init();
+      await websocketTarball.init();
     } catch (e) {
       someError = true;
     }
@@ -49,7 +45,6 @@ describe('Testing WSServer - works fine', () => {
         remoteAddress: '1.1.1.1',
         remotePort: 80,
       },
-      url: 'http://localhost:5000/api/v1/topics/tenant2.ws.example.test?fields=location&where=temperature=gte:20;',
       headers: {
         authorization: `Bearer ${makeJwtToken('tenant', 123)}`,
       },
@@ -61,7 +56,10 @@ describe('Testing WSServer - works fine', () => {
       on: jest.fn(),
     };
 
-    wSServer.onConnection(ws, req);
+    const topic = 'tenant2.ws.example.test';
+    const fields = 'location';
+    const where = 'temperature=gte:20;';
+    websocketTarball.onConnection(ws, req, topic, fields, where);
 
     expect(ws.close).toHaveBeenCalled();
     expect(ws.on).toHaveBeenCalled();

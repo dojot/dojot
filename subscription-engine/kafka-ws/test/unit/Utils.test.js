@@ -2,7 +2,6 @@ const {
   isObjectEmpty,
   parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
-  checkAndParseURLPathname,
 } = require('../../app/Utils');
 
 jest.mock('crypto-js');
@@ -103,23 +102,5 @@ describe('Testing "checkTopicBelongsTenant()"', () => {
   });
   it('should not belong to the tenant if null', () => {
     expect(checkTopicBelongsTenant('tes2t.topic', null)).toBe(false);
-  });
-});
-
-describe('Testing "checkAndParseURLPathname()"', () => {
-  it('should be a valid topic', () => {
-    const parsed = checkAndParseURLPathname('http://localhost:5000/api/v1/topics/kafka_topic?fields=temperature', '/api/v1/topics/:topic');
-    expect(parsed[1]).toBe('kafka_topic');
-  });
-  it('should throw a malformed path error', () => {
-    let someError = false;
-    try {
-      checkAndParseURLPathname('http://localhost:5000/api/v1/topics/d/kafka_topic?fields=temperature', '/api/v1/topics/:topic');
-    } catch (e) {
-      if (e.message.includes('Malformed Pathname')) {
-        someError = true;
-      }
-    }
-    expect(someError).toBe(true);
   });
 });

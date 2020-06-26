@@ -27,6 +27,8 @@ services:
     depends_on:
       - zookeeper
     restart: always
+    ports:
+      - 9092:9092 #For tests running externally
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_HOST_NAME: kafka
@@ -57,6 +59,7 @@ services:
       - kafka
       - redis
     environment:
+      NODE_ENV: development # To detail error messages
       KAFKA_HOSTS: kafka:9092
       KAFKA_GROUP_ID: kafka-ws-example
       LOG_LEVEL: debug

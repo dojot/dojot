@@ -1,6 +1,4 @@
 const Crypto = require('crypto-js');
-const url = require('url');
-const { pathToRegexp } = require('path-to-regexp');
 
 /* Constants */
 
@@ -150,24 +148,6 @@ const checkTopicBelongsTenant = (topic, tenant) => {
 };
 
 /**
- *  Parses pathname from a given URL into substring matches
- *
- * @param {string} fullUrl ex: http://google.com
- * @param {string} pathToRegex ex: /api/v1/topics/:topic
- *
- * @returns {array} substring matches
- */
-const checkAndParseURLPathname = (fullUrl, pathToRegex) => {
-  const { pathname } = url.parse(fullUrl);
-  const regexpRoute = pathToRegexp(pathToRegex);
-  const parsedRoute = regexpRoute.exec(pathname);
-  if (!parsedRoute) {
-    throw new Error('Malformed Pathname');
-  }
-  return parsedRoute;
-};
-
-/**
  * Adds a given amount of seconds to the current time, and returns it in seconds.
  *
  * @param {number} addSec
@@ -185,6 +165,5 @@ module.exports = {
   isObjectEmpty,
   parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
-  checkAndParseURLPathname,
   addTimeFromNow,
 };
