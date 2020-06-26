@@ -109,25 +109,25 @@ describe('Testing MQTTClient', () => {
     expectMqttInitialization(mqttClient);
   });
 
-  it('Should initializing correctly the client with protocol mqtt', () => {
+  it('Should initializing correctly the client with MQTT protocol', () => {
     mockDefaultConfig.mqtt['client.secure'] = false;
     const mqttClient = new MQTTClient(mockDefaultConfig.mqtt);
     mqttClient.init();
 
     expect(mqtt.connect).toHaveBeenCalledTimes(1);
-    expect(mockMqtt.on).toHaveBeenCalledTimes(2);
+    expect(mockMqtt.on).toHaveBeenCalledTimes(3);
   });
 
-  it('Should initializing correctly the client with protocol mqtts', () => {
+  it('Should initializing correctly the client with MQTTS protocol', () => {
     mockDefaultConfig.mqtt['client.secure'] = true;
     const mqttClient = new MQTTClient(mockDefaultConfig.mqtt);
     mqttClient.init();
 
     expect(mqtt.connect).toHaveBeenCalledTimes(1);
-    expect(mockMqtt.on).toHaveBeenCalledTimes(2);
+    expect(mockMqtt.on).toHaveBeenCalledTimes(3);
   });
 
-  it('should connect successfully the client (callback)', () => {
+  it('should successfully set client as connected and connect Kafka Consumer', () => {
     const mqttClient = new MQTTClient(mockDefaultConfig.mqtt);
     mqttClient.init();
     const spyAgentMessengerInit = jest.spyOn(mqttClient.agentMessenger, 'init');
@@ -138,14 +138,21 @@ describe('Testing MQTTClient', () => {
     expect(spyAgentMessengerInit).toHaveBeenCalledTimes(1);
   });
 
-
-  it('should disconnect and reconnect successfully the client (callback)', () => {
+  it('should successfully set client as disconnected', () => {
     const mqttClient = new MQTTClient(mockDefaultConfig.mqtt);
     mqttClient.init();
 
     mqttClient.onDisconnect();
 
     expect(mqttClient.isConnected).toEqual(false);
+  });
+
+  it('should successfully exit the program when an error occurs', () => {
+    const mqttClient = new MQTTClient(mockDefaultConfig.mqtt);
+    mqttClient.init();
+
+    mqttClient.onError(new Error('fake'));
+
     expect(utils.killApplication).toHaveBeenCalledTimes(1);
   });
 
