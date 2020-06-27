@@ -9,7 +9,7 @@ module.exports = () => {
     const params = {
       ws,
       connection: req.connection,
-      ticket: req.ticket,
+      token: req.token,
       topic: req.params.topic,
       fields: req.query.fields,
       where: req.query.where,

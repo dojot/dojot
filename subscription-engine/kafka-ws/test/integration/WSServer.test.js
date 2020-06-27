@@ -49,7 +49,7 @@ describe('Testing WSServer - works fine', () => {
         remoteAddress: '1.1.1.1',
         remotePort: 80,
       },
-      ticket: {
+      token: {
         tenant: 'tenant',
         remainingTime: 130,
       },
@@ -71,7 +71,7 @@ describe('Testing WSServer - works fine', () => {
     const params = {
       ws,
       connection: req.connection,
-      ticket: req.ticket,
+      token: req.token,
       topic: req.params.topic,
       fields: req.query.fields,
       where: req.query.where,

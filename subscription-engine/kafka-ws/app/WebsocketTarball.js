@@ -106,7 +106,7 @@ class Tarball {
    * @param {Object} params Parameters encapsulated in an object.
    */
   onConnection({
-    ws, connection, ticket, topic, fields, where,
+    ws, connection, token, topic, fields, where,
   }) {
     logger.debug(
       `Received connection from ${connection.remoteAddress}:${connection.remotePort}`,
@@ -126,7 +126,7 @@ class Tarball {
 
     let expirationTimestamp = null;
     if (serverConfig.jwt_header_auth) {
-      const { tenant, remainingTime } = ticket;
+      const { tenant, remainingTime } = token;
       expirationTimestamp = remainingTime;
       checkTenantCanAccessTopic(kafkaTopic, tenant, () => {
         ws.close(ErrorCodes.FORBIDDEN_TOPIC, 'Tenant can\'t access this topic');
