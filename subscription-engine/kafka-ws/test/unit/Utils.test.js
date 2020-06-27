@@ -1,6 +1,5 @@
 const {
   isObjectEmpty,
-  parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
 } = require('../../app/Utils');
 
@@ -21,62 +20,6 @@ beforeAll(() => {
 });
 beforeEach(() => {
   jest.clearAllMocks();
-});
-
-describe('Testing "parseTenantAndExpTimeFromToken()"', () => {
-  it('should throw an error because there is no authentication token', () => {
-    let someError = false;
-    try {
-      parseTenantAndExpTimeFromToken(null);
-    } catch (e) {
-      if (e.message.includes('There is no authorization token in')) {
-        someError = true;
-      }
-    }
-    expect(someError).toBe(true);
-  });
-
-  it('should throw an error because of the invalid token', () => {
-    let someError = false;
-    try {
-      parseTenantAndExpTimeFromToken('111');
-    } catch (e) {
-      if (e.message.includes('Invalid token')) {
-        someError = true;
-      }
-    }
-    expect(someError).toBe(true);
-  });
-
-  it('should throw an error because the token does not contain the tenant', () => {
-    let someError = false;
-    try {
-      parseTenantAndExpTimeFromToken(makeJwtToken(null, 123));
-    } catch (e) {
-      if (e.message.includes('Tenant is not inside the')) {
-        someError = true;
-      }
-    }
-    expect(someError).toBe(true);
-  });
-
-  it('should throw an error because the token does not contain the Expiration Time', () => {
-    let someError = false;
-    try {
-      parseTenantAndExpTimeFromToken(makeJwtToken('tenant', null));
-    } catch (e) {
-      if (e.message.includes('Expiration Time is not inside the token')) {
-        someError = true;
-      }
-    }
-    expect(someError).toBe(true);
-  });
-
-  it('should have the Tenant and the Expiration Time in the token', () => {
-    const { tenant, expirationTimestamp } = parseTenantAndExpTimeFromToken(makeJwtToken('tenant', 123));
-    expect(tenant).toBe('tenant');
-    expect(expirationTimestamp).toBe(123);
-  });
 });
 
 describe('Testing "isObjectEmpty()"', () => {

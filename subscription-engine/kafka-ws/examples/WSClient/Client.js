@@ -36,10 +36,11 @@ const createURL = (arg, host, port, tls) => {
   return urlCreate;
 };
 
-const makeJwtToken = (tenant, expSeconds, user = 'test') => {
+const makeJwtToken = (tenant, iatSeconds, expSeconds, user = 'test') => {
   const payload = {
     service: tenant,
     username: user,
+    iat: iatSeconds,
     exp: expSeconds,
   };
   return `${Buffer.from('jwt schema').toString('base64')}.${
@@ -71,7 +72,7 @@ const timestampExpirationSec = timestampInSec + tokenLiveSec;
 
 console.info('The jwt token will expirate at', timestampExpirationSec, 'sec');
 
-const token = makeJwtToken(tenant, timestampExpirationSec, 'user');
+const token = makeJwtToken(tenant, timestampInSec, timestampExpirationSec, 'user');
 
 let ws = null;
 if (tls) {

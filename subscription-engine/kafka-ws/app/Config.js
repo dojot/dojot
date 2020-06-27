@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 /* parse unsigned integer */
 const parseUint = (val) => val && Math.abs(parseInt(val, 10));
 
@@ -38,6 +40,10 @@ module.exports = {
       '":referrer"',
       '":user-agent"',
     ]).join(' '),
+    ticket: {
+      secret: process.env.TICKET_SECRET || crypto.randomFillSync(Buffer.alloc(10)).toString('hex'),
+      expiresIn: parseUint(process.env.TICKET_EXPIRESIN_SEC) || 60,
+    },
   },
   redis: {
     host: process.env.REDIS_HOST || 'redis',

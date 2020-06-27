@@ -96,40 +96,6 @@ function isNumber(value) {
 const isObjectEmpty = (object) => (typeof object !== 'object') || (object !== null && Object.keys(object).length === 0);
 
 /**
- * Parses JWT and gets expiration (sec) and tenant values.
- *
- * @param {string} rawToken
- *
- * @returns {object} obj like {expirationTimestamp: 1591638638 , tenant: 'example'}
- */
-const parseTenantAndExpTimeFromToken = (rawToken) => {
-  if (!rawToken) {
-    throw new Error('There is no authorization token in the header');
-  }
-
-  const tokenSplit = rawToken.split('.');
-
-  if (tokenSplit.length !== 3) {
-    throw new Error('Invalid token');
-  }
-
-  const tokenData = JSON.parse((Buffer.from(tokenSplit[1], 'base64')).toString());
-  const { service: tenant, exp: expirationTimeSec } = tokenData;
-
-  if (!tenant) {
-    throw new Error('Tenant is not inside the token.');
-  }
-  if (!expirationTimeSec) {
-    throw new Error('Expiration Time is not inside the token.');
-  }
-
-  return {
-    tenant,
-    expirationTimestamp: expirationTimeSec,
-  };
-};
-
-/**
  * Checks if the topic belongs to tenant,
  *  for that the topic must be started with {tenant}.
  *
@@ -163,7 +129,6 @@ module.exports = {
   createFingerprint,
   isNumber,
   isObjectEmpty,
-  parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
   addTimeFromNow,
 };

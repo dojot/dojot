@@ -6,9 +6,15 @@ module.exports = () => {
   const router = express.Router();
 
   router.ws('/topics/:topic', async (ws, req) => {
-    const { topic } = req.params;
-    const { fields, where } = req.query;
-    await websocketTarball.onConnection(ws, req, topic, fields, where);
+    const params = {
+      ws,
+      connection: req.connection,
+      ticket: req.ticket,
+      topic: req.params.topic,
+      fields: req.query.fields,
+      where: req.query.where,
+    };
+    await websocketTarball.onConnection(params);
   });
 
   return router;

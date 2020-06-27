@@ -13,10 +13,11 @@ jest.mock('../../app/Config.js', () => ({
   kafka: { consumer: {} },
 }));
 
-const makeJwtToken = (tenant, expSeconds, user = 'test') => {
+const makeJwtToken = (tenant, iatSeconds, expSeconds, user = 'test') => {
   const payload = {
     service: tenant,
     username: user,
+    iat: iatSeconds,
     exp: expSeconds,
   };
   return `${Buffer.from('jwt schema').toString('base64')}.${
@@ -41,12 +42,23 @@ describe('Testing WSServer - works fine', () => {
 
   it('Should onConnection ', async () => {
     const req = {
+      headers: {
+        authorization: `Bearer ${makeJwtToken('tenant', 123, 130)}`,
+      },
       connection: {
         remoteAddress: '1.1.1.1',
         remotePort: 80,
       },
-      headers: {
-        authorization: `Bearer ${makeJwtToken('tenant', 123)}`,
+      ticket: {
+        tenant: 'tenant',
+        remainingTime: 130,
+      },
+      params: {
+        topic: 'tenant2.ws.example.test',
+      },
+      query: {
+        fields: 'location',
+        where: 'temperature=gte:20;',
       },
     };
 
@@ -56,10 +68,16 @@ describe('Testing WSServer - works fine', () => {
       on: jest.fn(),
     };
 
-    const topic = 'tenant2.ws.example.test';
-    const fields = 'location';
-    const where = 'temperature=gte:20;';
-    websocketTarball.onConnection(ws, req, topic, fields, where);
+    const params = {
+      ws,
+      connection: req.connection,
+      ticket: req.ticket,
+      topic: req.params.topic,
+      fields: req.query.fields,
+      where: req.query.where,
+    };
+
+    websocketTarball.onConnection(params);
 
     expect(ws.close).toHaveBeenCalled();
     expect(ws.on).toHaveBeenCalled();

@@ -10,7 +10,6 @@ const RedisExpirationMgmt = require('./Redis/RedisExpireMgmt');
 
 const KafkaTopicsCallbacksMgmt = require('./Kafka/KafkaTopicsConsumerCallbacksMgmt');
 const {
-  parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
   isObjectEmpty,
   addTimeFromNow,
@@ -65,24 +64,6 @@ const checkTenantCanAccessTopic = (kafkaTopic, tenant, cbError) => {
 };
 
 /**
- * Extracts tenant and expiration timestamp from jwt
- * TODO: put this function in a more appropriate place, as a class to handle connections
- *
- * @param {string} rawToken
- * @param  {funcion} cbError callback if error occurs
- */
-const getTenantAndExpirationFromJWT = (rawToken, cbError) => {
-  let parsedToken = null;
-  try {
-    parsedToken = parseTenantAndExpTimeFromToken(rawToken);
-  } catch (e) {
-    logger.error('Can\'t parse JWT to get exp and tenant');
-    cbError();
-  }
-  return parsedToken;
-};
-
-/**
   * A websocket "Tarball" (joke with a lump of solidified crude oil).
   *
   * This object has many coupled behaviors, but the main idea is to
@@ -122,12 +103,13 @@ class Tarball {
   /**
    * `connection` event callback.
    *
-   * @param {WebSocket} ws
-   * @param {IncomingMessage} req
+   * @param {Object} params Parameters encapsulated in an object.
    */
-  onConnection(ws, req, topic, fields, where) {
+  onConnection({
+    ws, connection, ticket, topic, fields, where,
+  }) {
     logger.debug(
-      `Received connection from ${req.connection.remoteAddress}:${req.connection.remotePort}`,
+      `Received connection from ${connection.remoteAddress}:${connection.remotePort}`,
     );
     // create a unique ID for this instance of connection
     const idWsConnection = uuidv4();
@@ -142,19 +124,16 @@ class Tarball {
     // get the topic of pathname
     const kafkaTopic = topic;
 
-    let expirationTimestampFromJWT = null;
+    let expirationTimestamp = null;
     if (serverConfig.jwt_header_auth) {
-      const { headers: { authorization: rawToken } } = req;
-      const { tenant, expirationTimestamp } = getTenantAndExpirationFromJWT(rawToken, (e) => {
-        ws.close(ErrorCodes.INVALID_TOKEN_JWT, e);
-      });
-      expirationTimestampFromJWT = expirationTimestamp;
+      const { tenant, remainingTime } = ticket;
+      expirationTimestamp = remainingTime;
       checkTenantCanAccessTopic(kafkaTopic, tenant, () => {
         ws.close(ErrorCodes.FORBIDDEN_TOPIC, 'Tenant can\'t access this topic');
       });
     }
 
-    this.setExpiration(ws, expirationTimestampFromJWT, idWsConnection);
+    this.setExpiration(ws, expirationTimestamp, idWsConnection);
 
     let conditions;
     try {
@@ -162,7 +141,7 @@ class Tarball {
     } catch (error) {
       if (error instanceof WSError) {
         logger.debug(
-          `Closing connection ${req.connection.remoteAddress}:${req.connection.remotePort}`,
+          `Closing connection ${connection.remoteAddress}:${connection.remotePort}`,
         );
         logger.error(
           `Error while parsing, code: ${error.ws_code}, reason: ${error.ws_reason}`,
