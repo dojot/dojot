@@ -29,7 +29,7 @@ const logger = new Logger();
 const getMaxLifetime = (expirationTimestampJWT) => {
   let expirationJWT = 0;
 
-  if (serverConfig.jwt_header_auth) {
+  if (serverConfig.requireTicket) {
     // takes the jwt expiration timestamp if configured to use it.
     expirationJWT = serverConfig.jwt_exp_time && expirationTimestampJWT != null
       ? expirationTimestampJWT : 0;
@@ -125,7 +125,7 @@ class Tarball {
     const kafkaTopic = topic;
 
     let expirationTimestamp = null;
-    if (serverConfig.jwt_header_auth) {
+    if (serverConfig.requireTicket) {
       const { tenant, remainingTime } = token;
       expirationTimestamp = remainingTime;
       checkTenantCanAccessTopic(kafkaTopic, tenant, () => {

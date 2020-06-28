@@ -68,7 +68,7 @@ services:
       LOG_FILE_LEVEL: debug
       KAFKA_WS_PORT: 5000
       KAFKA_WS_HOST: 0.0.0.0
-      KAFKA_WS_JWT_HEADER_AUTH: "true"
+      KAFKA_WS_REQUIRE_TICKET: "true"
       KAFKA_WS_JWT_EXP_TIME: "true"
       KAFKA_WS_MAX_LIFE_TIME: 120
       # tls example

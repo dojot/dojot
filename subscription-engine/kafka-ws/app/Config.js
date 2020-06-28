@@ -66,7 +66,7 @@ module.exports = {
     tls_ca_file: process.env.KAFKA_WS_TLS_CA_FILE || '/opt/kafka-ws/certs/ca-cert.pem',
     tls_key_file: process.env.KAFKA_WS_TLS_KEY_FILE || '/opt/kafka-ws/certs/server-key.pem',
     tls_cert_file: process.env.KAFKA_WS_TLS_CERT_FILE || '/opt/kafka-ws/certs/server-cert.pem',
-    jwt_header_auth: parseBoolean(process.env.KAFKA_WS_JWT_HEADER_AUTH),
+    requireTicket: parseBoolean(process.env.KAFKA_WS_REQUIRE_TICKET),
     jwt_exp_time: parseBoolean(process.env.KAFKA_WS_JWT_EXP_TIME),
     connection_max_life_time: parseInt(process.env.KAFKA_WS_MAX_LIFE_TIME, 10) || 7200,
   },

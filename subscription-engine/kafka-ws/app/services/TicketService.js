@@ -29,26 +29,32 @@ function getRedisKey(ticket) {
  * @param {String} token A JWT Token with the information for the websocket.
  * @returns A ticket calculated via HMAC
  */
-function getTicket(token) {
+function generateTicket(token) {
   const hmac = crypto.createHmac('sha256', appCfg.ticket.secret);
   hmac.update(token);
   return hmac.digest('hex');
 }
 
 /**
- * Obtains the Token needed to establish a connection to the server via websocket
+ * Obtains the encoded Token JWT needed to establish a connection to the server via websocket
  *
  * @param {String} ticket Ticket that gives access to the required Token for the websocket.
  */
-async function getToken(ticket) {
+async function retrieveEncodedToken(ticket) {
   const redis = RedisManager.getClient();
-  let token = null;
   try {
-    token = await redis.getAsync(getRedisKey(ticket));
+    const key = getRedisKey(ticket);
+    const multi = redis.multi();
+    multi.get(key);
+    multi.del(key);
+    const exec = promisify(multi.exec).bind(multi);
+    const replies = await exec();
+    const [token] = replies;
+    return token;
   } catch (error) {
-    logger.error('The token was not found. It may have expired.');
+    logger.error(`The token was not found. Ticket ${ticket} has expired or is invalid.`);
   }
-  return token;
+  return null;
 }
 
 /**
@@ -58,20 +64,21 @@ async function getToken(ticket) {
  * @param {Object} auth Object with data extracted from the user's access token.
  */
 async function issueTicket({ tenant, expiration }) {
-  const tokenJWT = await jwtSignAsync({ tenant, remainingTime: expiration },
+  const token = await jwtSignAsync({ tenant, remainingTime: expiration },
     appCfg.ticket.secret,
     { expiresIn: appCfg.ticket.expiresIn });
 
   const redis = RedisManager.getClient();
-  const ticket = getTicket(tokenJWT);
+  const ticket = generateTicket(token);
 
   /* Defines an entry in Redis with a certain expiration time. */
-  await redis.client.setexAsync(getRedisKey(ticket), appCfg.ticket.expiresIn, tenant);
+  const setexAsync = promisify(redis.setex).bind(redis);
+  await setexAsync(getRedisKey(ticket), appCfg.ticket.expiresIn, tenant);
 
   return ticket;
 }
 
 module.exports = {
   issueTicket,
-  getToken,
+  retrieveEncodedToken,
 };

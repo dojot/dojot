@@ -8,8 +8,6 @@ const compression = require('compression');
 
 const createError = require('http-errors');
 
-const HttpStatus = require('http-status-codes');
-
 const morgan = require('morgan');
 
 /* This library is about what happens when you hit an async error. */
@@ -77,9 +75,7 @@ function configure(server) {
       return next(err);
     }
     const status = err.status || 500;
-    if (err.name === 'UnauthorizedError') {
-      res.sendStatus(HttpStatus.UNAUTHORIZED);
-    } else if (status === 500 && nodeEnv !== 'development') {
+    if (status === 500 && nodeEnv !== 'development') {
       logger.error(err.message);
       res.status(status).json({ message: 'An unexpected error has occurred.' });
     } else if (err.responseBody) {

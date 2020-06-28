@@ -8,7 +8,7 @@ jest.mock('../../app/Redis/RedisExpireMgmt');
 jest.mock('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 jest.mock('../../app/Config.js', () => ({
   server: {
-    jwt_header_auth: true,
+    requireTicket: true,
   },
   kafka: { consumer: {} },
 }));
