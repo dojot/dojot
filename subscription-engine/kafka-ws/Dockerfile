@@ -20,6 +20,7 @@ COPY package-lock.json .
 
 RUN npm install
 
+COPY index.js .
 COPY app ./app
 
 RUN npm run parser:compile

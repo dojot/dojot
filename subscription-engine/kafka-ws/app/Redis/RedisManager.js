@@ -32,7 +32,7 @@ class RedisManager {
    * Get the Redis connection client
    */
   getClient() {
-    return this.redis;
+    return this.redisClient;
   }
 }
 

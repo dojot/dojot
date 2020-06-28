@@ -73,7 +73,7 @@ async function issueTicket({ tenant, expiration }) {
 
   /* Defines an entry in Redis with a certain expiration time. */
   const setexAsync = promisify(redis.setex).bind(redis);
-  await setexAsync(getRedisKey(ticket), appCfg.ticket.expiresIn, tenant);
+  await setexAsync(getRedisKey(ticket), appCfg.ticket.expiresIn, token);
 
   return ticket;
 }

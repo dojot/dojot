@@ -116,11 +116,7 @@ class Tarball {
 
     // TODO: create a class to handle info about the connection and
     // set things like expirate, kafkatopic, etc
-    if (!topic) {
-      const err = new Error('Malformed Pathname');
-      logger.error(err.message);
-      ws.close(ErrorCodes.INVALID_PATHNAME, err);
-    }
+
     // get the topic of pathname
     const kafkaTopic = topic;
 

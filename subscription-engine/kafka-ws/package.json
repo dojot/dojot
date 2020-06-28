@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "description": "Websocket service with conditional/partial data requests",
-  "main": "app/index.js",
+  "main": "index.js",
   "scripts": {
-    "kafka-ws": "node app/index.js",
-    "dev": "nodemon app/index.js",
+    "kafka-ws": "node index.js",
+    "dev": "nodemon index.js",
     "test": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --coverage",
     "test:watch": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --watch --coverage",
     "debugtest": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && node --inspect-brk node_modules/.bin/jest --runInBand --coverage=false",
@@ -67,7 +67,7 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "app/**/*.js",
-      "!app/index.js",
+      "!index.js",
       "!app/Errors/*",
       "!app/Config.js",
       "!app/WhereProcessing/Parser.js"

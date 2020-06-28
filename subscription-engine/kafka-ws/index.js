@@ -6,13 +6,13 @@ const https = require('https');
 
 const { Logger } = require('@dojot/microservice-sdk');
 
-const { server: serverCfg } = require('./Config');
+const { server: serverCfg } = require('./app/Config');
 
-const application = require('./App');
+const application = require('./app/App');
 
-const websocketTarball = require('./WebsocketTarball');
+const websocketTarball = require('./app/WebsocketTarball');
 
-const terminus = require('./Terminus');
+const terminus = require('./app/Terminus');
 
 const logger = new Logger();
 
