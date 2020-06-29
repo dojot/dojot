@@ -10,6 +10,8 @@
  * @param {string} tenant
  * @param {string} deviceId
  * @param {string} suffix
+ *
+ * @returns {string}
  */
 const generateDojotActuationTopic = (tenant, deviceId, suffix) => `${tenant}:${deviceId}${suffix}`;
 
@@ -18,16 +20,15 @@ const generateDojotActuationTopic = (tenant, deviceId, suffix) => `${tenant}:${d
  * @function toBoolean
  *
  * @param {string} value
+ *
+ * @returns {boolean}
  */
 const toBoolean = (value) => (value && (value.toString().toLowerCase().trim() === 'true'));
 
 /**
- * Exit the application with a given code
- * Default code 1
- * @function Kill the application
- *
- * @param {number} code
+ * Kills the program process.
+ * @function killApplication
  */
-const killApplication = (code = 1) => process.exit(code);
+const killApplication = () => process.kill(process.pid);
 
 module.exports = { generateDojotActuationTopic, toBoolean, killApplication };

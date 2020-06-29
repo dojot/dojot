@@ -1,6 +1,7 @@
 const { Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
 
 const config = require('./config');
+const utils = require('./utils');
 
 /**
  * An agent to consume messages from pre-defined topics in Apache Kafka,
@@ -25,8 +26,6 @@ class AgentMessenger {
    * Initializes the agent messenger and registers callbacks for incoming messages.
    * @access public
    * @function init
-   *
-   * @returns {Promise<void | Error>}
    */
   init() {
     this.logger.info('Initializing Kafka Consumer...');
@@ -38,10 +37,13 @@ class AgentMessenger {
       });
 
       this.logger.info('... Kafka Consumer was initialized');
-      return Promise.resolve();
     }).catch((error) => {
       this.logger.error('Error while initializing the Kafka Consumer');
-      return Promise.reject(error);
+      if (error) {
+        this.logger.error(error.stack || error);
+      }
+      this.logger.error('Bailing out!');
+      utils.killApplication();
     });
   }
 }
