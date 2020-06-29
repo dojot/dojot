@@ -1,0 +1,16 @@
+@startuml
+start
+
+:Receive Kafka message;
+
+if (match where?) then (yes)
+else (no)
+  :Discard;
+  stop
+endif
+
+:Filter fields;
+:Send to client;
+
+stop
+@enduml
