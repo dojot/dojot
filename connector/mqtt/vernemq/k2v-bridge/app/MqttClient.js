@@ -42,8 +42,8 @@ class MQTTClient {
   }
 
   /**
-   * Initializes the mqttClient loading it's attributes, registering
-   * it's callbacks and connecting to a broker.
+   * Initializes the mqttClient loading it's attributes, registering it's callbacks and connecting
+   * to a broker.
    * @access public
    * @function init
    */
@@ -68,12 +68,11 @@ class MQTTClient {
 
     this.mqttc = mqtt.connect(this.mqttOptions);
 
-    const mqttOnConnectBind = this.onConnect.bind(this);
-    const mqttOnDisconnectBind = this.onDisconnect.bind(this);
-
-    this.logger.info('Binding event callbacks');
-    this.mqttc.on('connect', mqttOnConnectBind);
-    this.mqttc.on('disconnect', mqttOnDisconnectBind);
+    this.logger.info('Binding event callbacks...');
+    this.mqttc.on('connect', this.onConnect.bind(this));
+    this.mqttc.on('disconnect', this.onDisconnect.bind(this));
+    this.mqttc.on('error', this.onError.bind(this));
+    this.logger.info('... Binded event callbacks');
   }
 
   /**
@@ -95,9 +94,23 @@ class MQTTClient {
   onDisconnect() {
     this.isConnected = false;
     this.logger.info('MQTT connection ended, trying to reconnect...');
-    // TODO: agentMessenger (.pause or .stop kafka consumer)
-    // temporary exit the application with code 1, this behavior
-    // will be updated in the next versions
+    // TODO: stop Kafka message consumption
+    // TODO: better disconnection handling
+  }
+
+  /**
+   * Called when an error is thrown.
+   * @access private
+   * @callback MQTTClient~onError
+   *
+   * @param {*} error
+   */
+  onError(error) {
+    this.logger.error('An error has occurred in the MQTT connection.');
+    if (error) {
+      this.logger.error(error.stack || error);
+    }
+    this.logger.error('Bailing out!');
     utils.killApplication();
   }
 
