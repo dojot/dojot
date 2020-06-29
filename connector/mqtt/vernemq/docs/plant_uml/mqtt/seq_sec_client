@@ -1,0 +1,25 @@
+@startuml
+
+collections Client
+group  Register with CA
+        Client -> EJBCA: Request to create entity for client
+end
+group  Public Certificates
+    group Retrieve Public Certificate
+        note over Client, EJBCA #dcded5
+          The client must have a key pair (private/public key) 
+          and create a Certificate Signing Request (CSR) to 
+          send to CA
+        end note
+        
+        Client -> EJBCA: Send CSR 
+        EJBCA -->  Client: Reponse with Public Certificate
+    end
+    
+    group Retrieve Root Certificate
+        Client -> EJBCA: Request Root Certificate 
+        EJBCA -->  Client: Reponse with Root Certificate 
+    end
+end
+
+@enduml
