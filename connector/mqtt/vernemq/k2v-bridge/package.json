@@ -26,14 +26,13 @@
   "dependencies": {
     "@dojot/microservice-sdk": "^0.1.3",
     "flat": "^5.0.0",
-    "mqtt": "^3.0.0"
+    "mqtt": "^4.1.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.19.1",
-    "jest": "^24.9.0",
-    "jest-mock-process": "^1.3.2"
+    "jest": "^24.9.0"
   },
   "jest": {
     "coverageDirectory": "./coverage/",

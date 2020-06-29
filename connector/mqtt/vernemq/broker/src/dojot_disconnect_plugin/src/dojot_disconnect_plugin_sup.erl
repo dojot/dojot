@@ -11,11 +11,13 @@
 %% Helper macro for declaring children of supervisor
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 
+
 %% ===================================================================
 %% API functions
 %% ===================================================================
 
 start_link() ->
+    ets:new(disconnect_ets_table, [public, named_table]),
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================

@@ -14,7 +14,13 @@ RUN apk --no-cache add \
       musl-dev \
       python
 
-RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
+RUN apk add --no-cache --virtual \
+      .build-deps \
+      gcc \
+      zlib-dev \
+      libc-dev \
+      bsd-compat-headers \
+      py-setuptools bash
 
 COPY package.json .
 COPY package-lock.json .
