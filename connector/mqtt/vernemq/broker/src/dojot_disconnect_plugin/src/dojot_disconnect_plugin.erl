@@ -1,27 +1,26 @@
 -module(dojot_disconnect_plugin).
 
--behaviour(auth_on_register_hook).
--behaviour(auth_on_subscribe_hook).
--behaviour(auth_on_publish_hook).
+-behaviour(on_register_hook).
+-behaviour(on_client_offline_hook).
+-behaviour(on_client_gone_hook).
 
--export([auth_on_register/5,
-         auth_on_publish/6,
-         auth_on_subscribe/3]).
+-export([on_register/3,
+        on_client_offline/1,
+        on_client_gone/1
+]).
 
-auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName, Password, CleanSession) ->
+on_register(_, SubscriberId, UserName) ->
 
-    case clean_sess:is_dojot_user(UserName) of
+    case utils:is_dojot_user(UserName) of
         is_user ->
-            ok = clean_sess:set_connection_timeout(SubscriberId),
+            ok = utils:set_connection_timeout(SubscriberId),
             ok;
         not_user ->
             ok
     end.
 
+on_client_offline(SubscriberId) ->
+    utils:cancel_connection_timeout(SubscriberId).
 
-
-auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, Payload, IsRetain) ->
-    next.
-
-auth_on_subscribe(UserName, ClientId, [{_Topic, _QoS}|_] = Topics) ->
-    next.
+on_client_gone(SubscriberId) ->
+    utils:cancel_connection_timeout(SubscriberId).
