@@ -17,17 +17,6 @@ const { Logger } = require('@dojot/microservice-sdk');
 
 const { app: appCfg, nodeEnv } = require('./Config');
 
-Logger.setTransport('console', {
-  level: appCfg.log.log_console_level,
-});
-if (appCfg.log.log_file) {
-  Logger.setTransport('file', {
-    level: appCfg.log.log_file_level,
-    filename: appCfg.log.log_file_filename,
-  });
-}
-Logger.setVerbose(appCfg.log.log_verbose);
-
 const app = express();
 const accessControlRouter = require('./routes/AccessControlRouter');
 const ticketRouter = require('./routes/TicketRouter');

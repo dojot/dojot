@@ -1,29 +1,14 @@
-const websocketTarball = require('../../app/WebsocketTarball');
-
 jest.mock('@dojot/microservice-sdk');
 jest.mock('ws');
 jest.mock('uuid');
 jest.mock('../../app/Errors');
 jest.mock('../../app/Redis/RedisExpireMgmt');
 jest.mock('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
-jest.mock('../../app/Config.js', () => ({
-  server: {
-    requireTicket: true,
-  },
-  kafka: { consumer: {} },
-}));
 
-const makeJwtToken = (tenant, iatSeconds, expSeconds, user = 'test') => {
-  const payload = {
-    service: tenant,
-    username: user,
-    iat: iatSeconds,
-    exp: expSeconds,
-  };
-  return `${Buffer.from('jwt schema').toString('base64')}.${
-    Buffer.from(JSON.stringify(payload)).toString('base64')}.${
-    Buffer.from('dummy signature').toString('base64')}`;
-};
+const websocketTarball = require('../../app/WebsocketTarball');
+const cfg = require('../../app/Config');
+
+cfg.kafka.consumer = {};
 
 describe('Testing WSServer - works fine', () => {
   beforeEach(() => {
@@ -42,9 +27,6 @@ describe('Testing WSServer - works fine', () => {
 
   it('Should onConnection ', async () => {
     const req = {
-      headers: {
-        authorization: `Bearer ${makeJwtToken('tenant', 123, 130)}`,
-      },
       connection: {
         remoteAddress: '1.1.1.1',
         remotePort: 80,

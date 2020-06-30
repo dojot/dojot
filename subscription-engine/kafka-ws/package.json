@@ -35,7 +35,8 @@
     "eslint-plugin-import": "^2.21.1",
     "jest": "^25.5.4",
     "nodemon": "^2.0.4",
-    "redis-mock": "^0.49.0"
+    "redis-mock": "^0.49.0",
+    "supertest": "^4.0.2"
   },
   "dependencies": {
     "@dojot/microservice-sdk": "^0.1.3",
@@ -68,6 +69,8 @@
     "collectCoverageFrom": [
       "app/**/*.js",
       "!index.js",
+      "!app/App.js",
+      "!app/Terminus.js",
       "!app/Errors/*",
       "!app/Config.js",
       "!app/WhereProcessing/Parser.js"
@@ -78,7 +81,8 @@
     ],
     "testMatch": [
       "**/test/**/**.test.js"
-    ]
+    ],
+    "setupFilesAfterEnv": ["./jest.setup.js"]
   },
   "author": "@eduardogmisiuk",
   "contributors": [

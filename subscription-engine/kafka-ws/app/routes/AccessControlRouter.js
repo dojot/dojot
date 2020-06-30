@@ -8,29 +8,24 @@ const createError = require('http-errors');
 
 const service = require('../services/TicketService');
 
-const { app: appCfg, server: servCfg } = require('../Config');
+const { app: appCfg } = require('../Config');
 
-/* The "ticketing route" should not require a ticket to be accessed,
- * so skip a middleware when this condition is met. */
-const skipWhen = { path: /^.+\/ticket$/ig };
+/* The "/ticket" route (as well as "/public" route)
+ * should not require a ticket to be accessed, so skip
+ * the middleware when this condition is met. */
+const skipWhen = { path: /^.+\/(ticket|public)$/ig };
 
 module.exports = () => {
   const router = express.Router();
 
   /* Rips the "one-time" ticket, so it won't be used again */
   const ticketRipperMiddleware = async (req, res, next) => {
-    /* If the component is configured to not require tickets,
-     * it does not require this middleware. */
-    if (!servCfg.requireTicket) {
-      next();
-    }
-
     /* If the component is configured to require tickets,
      * it must be informed via QueryString */
     if (!req.query.ticket) {
       const err = new createError.Unauthorized();
       err.message = 'Missing ticket';
-      next(err);
+      return next(err);
     }
 
     /* The ticket is opaque, but it allows us to have access
@@ -49,13 +44,13 @@ module.exports = () => {
     if (!token) {
       const err = new createError.Unauthorized();
       err.message = 'Invalid ticket';
-      next(err);
+      return next(err);
     }
 
     /* adds the token in the request header and moves on to
      * the next middleware... */
     req.headers.authorization = `Bearer ${token}`;
-    next();
+    return next();
   };
   ticketRipperMiddleware.unless = unless;
 
@@ -63,7 +58,6 @@ module.exports = () => {
    * and makes it available to the next middlewares */
   const tokenIntrospectionMiddleware = jwt({
     secret: appCfg.ticket.secret,
-    credentialsRequired: servCfg.requireTicket,
     requestProperty: 'token',
   });
 

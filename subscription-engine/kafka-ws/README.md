@@ -197,8 +197,7 @@ KAFKA_WS_TLS | Kafka-ws secure - enables TLS ( Needs: KAFKA_WS_TLS_CA_FILE, KAFK
 KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-cert.pem              | valid path               |
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
-KAFKA_WS_REQUIRE_TICKET   | Enables use token jwt in authorization header | false              | string: "true" or "false" / *number*: 1 or 0 |
-KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time),  from jwt (Needs KAFKA_WS_REQUIRE_TICKET)                     | false               | string: "true" or "false" / *number*: 1 or 0 |
+KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time) from JWT                      | false               | string: "true" or "false" / *number*: 1 or 0 |
 KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 720              | seconds |
 REDIS_HOST       | Redis host                   | redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |
@@ -206,11 +205,11 @@ REDIS_DATABASE   | Redis database               | 1                             
 
 Note1: A websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
 
-Note2: When KAFKA_WS_REQUIRE_TICKET is true, it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) can access the kafka topic, generally topics start with `tenant.*`
+Note2: It is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) can access the kafka topic, generally topics start with `tenant.*`
 
 ### **JSON Web Token (JWT)**
 
-When KAFKA_WS_REQUIRE_TICKET is true, it is necessary to provide a JSON Web Token (JWT)  in the Header on the Autorization field, as in this example below ([see more here](https://tools.ietf.org/html/rfc7519#section-4)):
+It is necessary to provide a JSON Web Token (JWT)  in the Header on the Autorization field, as in this example below ([see more here](https://tools.ietf.org/html/rfc7519#section-4)):
 
 ```js
 const makeJwtToken = (tenant, expirationTime) => {
