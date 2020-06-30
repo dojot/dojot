@@ -28,8 +28,7 @@
     "flat": "^5.0.0",
     "md5": "^2.2.1",
     "moment": "^2.24.0",
-    "mqtt": "^3.0.0",
-    "mqtt-packet": "^6.3.1"
+    "mqtt": "^4.1.0"
   },
   "jest": {
     "coverageDirectory": "./coverage/",
