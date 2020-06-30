@@ -1,11 +1,7 @@
 const fs = require('fs');
-
 const http = require('http');
-
 const https = require('https');
-
 const { Logger } = require('@dojot/microservice-sdk');
-
 const { app: appCfg, server: serverCfg } = require('./app/Config');
 
 Logger.setTransport('console', {
@@ -20,9 +16,7 @@ if (appCfg.log.log_file) {
 Logger.setVerbose(appCfg.log.log_verbose);
 
 const application = require('./app/App');
-
 const websocketTarball = require('./app/WebsocketTarball');
-
 const terminus = require('./app/Terminus');
 
 const logger = new Logger();

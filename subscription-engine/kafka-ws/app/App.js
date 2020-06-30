@@ -1,26 +1,18 @@
 const express = require('express');
-
 const expressWS = require('express-ws');
-
 const addRequestId = require('express-request-id');
-
 const compression = require('compression');
-
 const createError = require('http-errors');
-
 const morgan = require('morgan');
-
 /* This library is about what happens when you hit an async error. */
 require('express-async-errors');
-
 const { Logger } = require('@dojot/microservice-sdk');
-
 const { app: appCfg, nodeEnv } = require('./Config');
-
-const app = express();
 const accessControlRouter = require('./routes/AccessControlRouter');
 const ticketRouter = require('./routes/TicketRouter');
 const topicsRouter = require('./routes/TopicsRouter');
+
+const app = express();
 
 function configure(server) {
   const logger = new Logger();

@@ -1,5 +1,4 @@
 const express = require('express');
-
 const websocketTarball = require('../WebsocketTarball');
 
 module.exports = () => {

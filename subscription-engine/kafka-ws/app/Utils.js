@@ -121,6 +121,24 @@ const checkTopicBelongsTenant = (topic, tenant) => {
 const addTimeFromNow = (addSec) => Math.round(new Date().getTime() / 1000)
   + addSec;
 
+/* parse unsigned integer */
+const parseUint = (val) => val && Math.abs(parseInt(val, 10));
+
+/* parse boolean */
+const parseBoolean = (val, def = false) => {
+  if (val) {
+    if (val.toString().toLowerCase().trim() === 'true' || val === '1') return true;
+    if (val.toString().toLowerCase().trim() === 'false' || val === '0') return false;
+  }
+  return def;
+};
+
+/* parse array */
+const parseArray = (val) => {
+  if (typeof val !== 'string') return undefined;
+  return val.split(',').map((el) => el.trim());
+};
+
 module.exports = {
   escapeChars,
   numericOperators,
@@ -131,4 +149,7 @@ module.exports = {
   isObjectEmpty,
   checkTopicBelongsTenant,
   addTimeFromNow,
+  parseUint,
+  parseBoolean,
+  parseArray,
 };

@@ -1,11 +1,7 @@
 const express = require('express');
-
 const jwtDecode = require('jwt-decode');
-
 const createError = require('http-errors');
-
 const HttpStatus = require('http-status-codes');
-
 const service = require('../services/TicketService');
 
 /* This route is responsible for issuing new tickets */

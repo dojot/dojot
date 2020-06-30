@@ -1,22 +1,5 @@
 const crypto = require('crypto');
-
-/* parse unsigned integer */
-const parseUint = (val) => val && Math.abs(parseInt(val, 10));
-
-/* parse boolean */
-const parseBoolean = (val, def = false) => {
-  if (val) {
-    if (val.toString().toLowerCase().trim() === 'true' || val === '1') return true;
-    if (val.toString().toLowerCase().trim() === 'false' || val === '0') return false;
-  }
-  return def;
-};
-
-/* parse array */
-const parseArray = (val) => {
-  if (typeof val !== 'string') return undefined;
-  return val.split(',').map((el) => el.trim());
-};
+const { parseUint, parseBoolean, parseArray } = require('./Utils');
 
 module.exports = {
   nodeEnv: process.env.NODE_ENV || 'production',

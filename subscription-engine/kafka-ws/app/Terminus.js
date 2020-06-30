@@ -3,9 +3,7 @@
 // need to write boilerplate code.
 // https://github.com/godaddy/terminus
 const { createTerminus } = require('@godaddy/terminus');
-
 const { Logger } = require('@dojot/microservice-sdk');
-
 const { terminus: terminusCfg } = require('./Config');
 
 const logger = new Logger();

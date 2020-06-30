@@ -1,13 +1,8 @@
 const crypto = require('crypto');
-
 const jwt = require('jsonwebtoken');
-
 const { promisify } = require('util');
-
 const { Logger } = require('@dojot/microservice-sdk');
-
 const { app: appCfg } = require('../Config');
-
 const RedisManager = require('../Redis/RedisManager');
 
 const jwtSignAsync = promisify(jwt.sign).bind(jwt);
@@ -18,6 +13,7 @@ const logger = new Logger();
  * Key in Redis where it is possible to obtain the JWT Token
  * (with the information for the websocket) through the ticket.
  * @param {String} ticket A 'Single Use' ticket.
+ * @returns {String} The Redis key that gives access to the JWT token
  */
 function getRedisKey(ticket) {
   return `ticket:${ticket}`;
@@ -27,7 +23,7 @@ function getRedisKey(ticket) {
  * Obtains the ticket through the Token cryptographic HMAC digests.
  *
  * @param {String} token A JWT Token with the information for the websocket.
- * @returns A ticket calculated via HMAC
+ * @returns {String} A ticket calculated via HMAC
  */
 function generateTicket(token) {
   const hmac = crypto.createHmac('sha256', appCfg.ticket.secret);
@@ -36,9 +32,10 @@ function generateTicket(token) {
 }
 
 /**
- * Obtains the encoded Token JWT needed to establish a connection to the server via websocket
+ * Obtains the encoded JWT Token needed to establish a connection to the server via websocket
  *
  * @param {String} ticket Ticket that gives access to the required Token for the websocket.
+ * @returns {String} A encoded JWT Token referring to the ticket
  */
 async function retrieveEncodedToken(ticket) {
   const redis = RedisManager.getClient();
@@ -62,6 +59,7 @@ async function retrieveEncodedToken(ticket) {
  * communication with the server via websocket.
  *
  * @param {Object} auth Object with data extracted from the user's access token.
+ * @returns {String} A single-use ticket that makes it possible to establish a websocket connection
  */
 async function issueTicket({ tenant, expiration }) {
   const token = await jwtSignAsync({ tenant, remainingTime: expiration },

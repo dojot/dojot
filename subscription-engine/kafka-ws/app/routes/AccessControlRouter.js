@@ -1,11 +1,7 @@
 const express = require('express');
-
 const jwt = require('express-jwt');
-
 const unless = require('express-unless');
-
 const createError = require('http-errors');
-
 const service = require('../services/TicketService');
 
 const { app: appCfg } = require('../Config');
