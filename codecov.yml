@@ -2,7 +2,11 @@ coverage:
   status:
     project:
       default:
+<<<<<<< HEAD
         target: 80%
+=======
+        target: 90%
+>>>>>>> origin/release/v0.5.0-alpha
         threshold: 0.5%
         base: auto
         if_no_uploads: error
@@ -11,7 +15,11 @@ coverage:
         only_pulls: false
     patch:
       default:
+<<<<<<< HEAD
         target: 80%
+=======
+        target: 90%
+>>>>>>> origin/release/v0.5.0-alpha
         threshold: 0.5%
         base: auto
         if_no_uploads: error
