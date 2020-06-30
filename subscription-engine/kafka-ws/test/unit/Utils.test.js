@@ -5,17 +5,6 @@ const {
 
 jest.mock('crypto-js');
 
-const makeJwtToken = (tenant, expSeconds, user = 'test') => {
-  const payload = {
-    service: tenant,
-    username: user,
-    exp: expSeconds,
-  };
-  return `${Buffer.from('jwt schema').toString('base64')}.${
-    Buffer.from(JSON.stringify(payload)).toString('base64')}.${
-    Buffer.from('dummy signature').toString('base64')}`;
-};
-
 beforeAll(() => {
 });
 beforeEach(() => {
