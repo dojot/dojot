@@ -12,8 +12,7 @@ CONFIG = {
     'security': {
         'devices_to_renew':           int(os.environ.get("DEVICES_TO_RENEW", 1000)),
         'devices_to_revoke':          int(os.environ.get("DEVICES_TO_REVOKE", 1000)),
-        'dns_cert':                   [],
-        'ejbca_ca_name':              "IOTmidCA",
+        'dns_cert':                   [],    
         'renew_devices':              Utils.str_to_bool(os.environ.get("RENEW_DEVICES", "False")),
         'revoke_devices':             Utils.str_to_bool(os.environ.get("REVOKE_DEVICES", "False")),
         'cert_dir':                   os.environ.get("CERT_DIR", "cert/"),
