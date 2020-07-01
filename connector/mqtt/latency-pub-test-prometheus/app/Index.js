@@ -6,7 +6,6 @@ const {
   killApplication,
 } = require('./Utils');
 
-
 const TAG = { filename: 'Index' };
 
 logger.setLevel(config.app.log_level);

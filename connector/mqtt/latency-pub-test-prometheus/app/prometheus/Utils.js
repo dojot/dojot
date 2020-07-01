@@ -28,7 +28,6 @@ const resetAllRegistersMetricsPrometheus = () => {
   Prometheus.register.resetMetrics();
 };
 
-
 /**
  * ContentType for Prometheus text/plain; version=0.0.4; charset=utf-8
  * @return {string} ContentType

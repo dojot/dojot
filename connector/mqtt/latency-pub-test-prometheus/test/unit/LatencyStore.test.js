@@ -3,13 +3,11 @@ const metrics = require('../../app/LatencyStore');
 jest.mock('@dojot/dojot-module-logger');
 jest.mock('simple-statistics');
 
-
 jest.mock('simple-statistics', () => ({
   mean: jest.fn(() => 3),
   median: jest.fn(() => 4),
   standardDeviation: jest.fn(() => 5),
 }));
-
 
 metrics.cleanLatencies();
 

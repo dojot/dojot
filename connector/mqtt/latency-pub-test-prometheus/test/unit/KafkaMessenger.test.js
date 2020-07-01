@@ -85,7 +85,6 @@ describe('Testing Dojot Kafka messenger', () => {
   it('kafkaOnMessage not correctly', () => {
     kafkaMessenger.init();
 
-
     metrics.addLatency.mockResolvedValue();
 
     try {
