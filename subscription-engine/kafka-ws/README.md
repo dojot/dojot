@@ -6,12 +6,36 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 
 ## **Overview**
 
-**Kafka WebSocket service** allows the users to retrieve conditional and/or partial data from a given dojot topic in a Kafka cluster. It works with pure websocket connections, so you can create websocket clients in any language you want as long as they support [RFC 6455](https://tools.ietf.org/html/rfc6455).
+**Kafka WebSocket service** allows the users to retrieve data from a given dojot topic in a Kafka cluster, this retrieval can be conditional and/or partial. It works with pure websocket connections, so you can create websocket clients in any language you want as long as they support [RFC 6455](https://tools.ietf.org/html/rfc6455).
 
 ### **Connecting to the service**
 
-The connection is done via pure websockets using the URI `/api/v1/topics/:topic`. It is also possible to pass conditional and filter options as part of the URI. In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.<br>
-*Note*: When the component is behind the API Gateway of the dojot platform, it must be accessed through the URI: `/kafka-ws/v1/topics/:topic`.
+The connection is done in two steps, you must first obtain a *single-use ticket* through a REST request, then, be authorized to connect to the service through a websocket.
+
+#### First step: Get the single-use ticket
+
+A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
+Ticket request must be made by REST at the endpoint `/api/v1/ticket` using the HTTP GET verb. The request must contain the header `Authorization` and the JWT token as value, according to the syntax:
+
+    POST <base-url>/v1/ticket
+    Authorization: Bearer [Encoded JWT]
+
+The component responds with the following syntax:
+
+    HTTP/1.1 200 OK
+    Content-type: application/json
+    {
+      "ticket": "[an opaque ticket of 64 hexadecimal characters]"
+    }
+
+Note: In the context of a dojot deployment the JWT Token is provided by the *Auth service*, and is validated by the *API Gateway* before redirecting the connection to the Kafka-WS. So, no validations are done by the Kafka WS.
+
+#### Second step: Establish a websocket connection
+
+The connection is done via pure websockets using the URI `/api/v1/topics/:topic`. You **must** pass the previously generated ticket as a parameter of this URI. It is also possible to pass conditional and filter options as parameters of the URI.
+
+In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.<br>
+*Note*: When the component is behind the API Gateway of the dojot platform, it must be accessed through the URI: `<base-url>/kafka-ws/v1/topics/:topic`.
 
 If you want to jump for a full client example, see the [examples](./examples) directory.
 
@@ -20,20 +44,24 @@ If you want to jump for a full client example, see the [examples](./examples) di
 Before diving into the explanation of how each filter works and its rules, it is necessary to understand the parts of the URI. It's general format is:
 
 ```
-/api/v1/topics/:topic?fields=<selector>&where=<conditions>
+/api/v1/topics/:topic?ticket=<hexValue>&fields=<selector>&where=<conditions>
 ```
 
-#### **Topic**
+#### Topic
 
-The `topic` parameter is the Kafka topic that you want to receive data from.
+The `:topic` parameter is the Kafka topic that you want to receive data from.
 
-##### **Fields**
+#### ticket
+
+The `ticket` parameter is the previously generated *single-use* ticket
+
+##### Fields
 
 The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
 
 See [this section](###selecting-parameters-fields) for an explanation.
 
-##### **Where**
+##### Where
 
 The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
 conditions.
@@ -54,6 +82,8 @@ Where:
 - `:?` - zero or one
 
 ##### **URI Examples**
+
+Note: For simplicity, we will not include the `ticket` parameter in the examples, but it must always be sent, otherwise the server will refuse the connection.
 
 To ilustrate the parameters' usage, here are some examples of valid URIs:
 
@@ -172,8 +202,6 @@ operators](###applying-conditions-where) for more info
 - `4002` - INVALID_ESCAPE_VALUE: an unsupported escape character has been passed to a condition
 - `4003` - INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
 - `4004` - INVALID_VALUE: a value with an invalid type was passed to a condition
-- `4400` - INVALID_PATHNAME: a Malformed URI was passed
-- `4401` - INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the JSON Web Token (JWT)
 - `4403` - FORBIDDEN_TOPIC: the tenant sent in JSON Web Token (JWT) cannot access the kafka topic passed
 - `4408` - EXPIRED_CONNECTION: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
@@ -186,6 +214,7 @@ Before proceeding, **make sure you configure your environment**.
 
 Key           | Purpose                                         | Default Value     | Valid Values             |
 ------------- | ----------------------------------------------- | ----------------- | ------------------------ |
+NODE_ENV      | Is used (by convention) to state whether a particular environment is a **production** or a **development** environment. | production | *production* or *development* |
 LOG_LEVEL     | log level                                       | info              | info, warn, debug, error |
 LOG_VERBOSE   | Enables verbose mode for logging                    | false              | string: "true" or "false" / *number*: 1 or 0 |
 LOG_FILE   | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false              | string: "true" or "false" / *number*: 1 or 0 |
@@ -197,42 +226,18 @@ KAFKA_WS_TLS | Kafka-ws secure - enables TLS ( Needs: KAFKA_WS_TLS_CA_FILE, KAFK
 KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-cert.pem              | valid path               |
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
-KAFKA_WS_JWT_HEADER_AUTH   | Enables use token jwt in authorization header | false              | string: "true" or "false" / *number*: 1 or 0 |
-KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time),  from jwt (Needs KAFKA_WS_JWT_HEADER_AUTH)                     | false               | string: "true" or "false" / *number*: 1 or 0 |
-KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 720              | seconds |
+KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time) from JWT informed when requesting a *single-use ticket*. | false               | string: "true" or "false" / *number*: 1 or 0 |
+TICKET_EXPIRATION_SEC | Duration time (in seconds) of the *single-use ticket*. | 60 | seconds |
+TICKET_SECRET | Secret used to sign *single-use tickets* and prevent forgery. Give preference to large random values. | Random value generated at application startup. In a cluster environment, all instances need to share the same secret. | string |
+KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 7200             | seconds |
 REDIS_HOST       | Redis host                   | redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |
 REDIS_DATABASE   | Redis database               | 1                                  | number |
 
 Note1: A websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
 
-Note2: When KAFKA_WS_JWT_HEADER_AUTH is true, it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) can access the kafka topic, generally topics start with `tenant.*`
+Note2: It is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) when requesting a *single-use ticket* can access the kafka topic, generally topics start with `tenant.*`
 
-### **JSON Web Token (JWT)**
-
-When KAFKA_WS_JWT_HEADER_AUTH is true, it is necessary to provide a JSON Web Token (JWT)  in the Header on the Autorization field, as in this example below ([see more here](https://tools.ietf.org/html/rfc7519#section-4)):
-
-```js
-const makeJwtToken = (tenant, expirationTime) => {
-  const payload = {
-    service: tenant,
-    exp: expirationTime,
-  };
-  return `${Buffer.from('jwt schema').toString('base64')}.${
-    Buffer.from(JSON.stringify(payload)).toString('base64')}.${
-    Buffer.from('dummy signature').toString('base64')}`;
-};
-
-// Unix time, time in seconds since the epoch.
-const expirationTime = 1591369727;
-new WebSocket('ws://localhost:8080/tenant.ws.example.test', {
-  headers: {
-    Authorization: `Bearer ${makeJwtToken('tenant', expirationTime)}`,
-  },
-});
-```
-
-Note1: In the context of a dojot deployment the JWT Token is provided by the Authorization service, and is validated by the API Gateway before redirecting the connection to the Kafka WS. So, no validations are done by the Kafka WS, except the expiration time.
 
 ### **Parser compilation**
 
