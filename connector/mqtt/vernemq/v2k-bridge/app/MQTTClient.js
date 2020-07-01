@@ -65,14 +65,11 @@ class MQTTClient {
       rejectUnauthorized: true,
     };
 
-    const onConnectBind = this.onConnect.bind(this);
-    const onDisconnectBind = this.onDisconnect.bind(this);
-    const onMessageBind = this.onMessage.bind(this);
-
     this.connect();
-    this.mqttc.on('connect', onConnectBind);
-    this.mqttc.on('disconnect', onDisconnectBind);
-    this.mqttc.on('message', onMessageBind);
+    this.mqttc.on('connect', this.onConnect.bind(this));
+    this.mqttc.on('disconnect', this.onDisconnect.bind(this));
+    this.mqttc.on('error', this.onError.bind(this));
+    this.mqttc.on('message', this.onMessage.bind(this));
 
     // Creates an async queue
     this.messageQueue = async.queue((data, done) => {
@@ -111,6 +108,20 @@ class MQTTClient {
   }
 
   /**
+   * Handles MQTT errors.
+   *
+   * @param {*} error
+   */
+  onError(error) {
+    this.logger.error('An error has occurred in the MQTT connection.');
+    if (error) {
+      this.logger.error(error.stack || error);
+    }
+    this.logger.error('Bailing out!');
+    process.exit(1);
+  }
+
+  /**
    * Reached when a message arrives on the topic.
    *
    * @callback MQTTClient~onMessage
@@ -122,8 +133,8 @@ class MQTTClient {
   onMessage(topic, message, packet) {
     // pause
     if (this.isConnected) {
-      // check if message is duplicated
       const size = message.toString().length;
+      // check if message is duplicated
       if (packet.dup === false) {
         this.currentMessageQueueLength += size;
         const data = { topic, message };
