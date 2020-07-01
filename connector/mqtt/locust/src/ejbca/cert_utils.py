@@ -78,37 +78,14 @@ class CertUtils:
         """
         Revokes a certificate for a specific device.
         """
-        # Loads the certificate as a X509 object
-        cert: crypto.X509 = crypto.load_certificate(
-            crypto.FILETYPE_PEM, thing.thing_certificate)
-        # Retrieves the Serial Number in Hexadecimal
-        serial_number = hex(cert.get_serial_number())[2:]
-        # URL to revoke a certificate
-        url = CONFIG["dojot"]["url"] + \
-            "/ca/CN={0},O=EJBCA/certificate/{1}".format(
-                CONFIG["security"]["ejbca_ca_name"], serial_number)
-
-        requests.delete(
-            url=url,
-            headers={
-                "Authorization": "Bearer {0}".format(RedisClient().get_jwt())
-            },
-        )
+        thing.cert.revoke_cert()
 
     @staticmethod
     def has_been_revoked(thing: Thing) -> bool:
         """
         Verifies whether the certificate has been revoked or not.
         """
-        # Loads the certificate as a X509 object
-        cert: crypto.X509 = crypto.load_certificate(crypto.FILETYPE_PEM, thing.thing_certificate)
-        # Retrieves the Serial Number in Hexadecimal
-        serial_number = hex(cert.get_serial_number())[2:]
-        # URL to verify the certificate status
-        url = CONFIG["dojot"]["url"] + \
-            "/ca/CN={0},O=EJBCA/certificate/{1}/status".format(
-                CONFIG["security"]["ejbca_ca_name"], serial_number
-            )
+        url = CONFIG["dojot"]["url"]+ "x509/v1/certificates/" + thing.cert.crt['fingerprint']
 
         res = requests.get(
             url=url,
@@ -116,10 +93,5 @@ class CertUtils:
                 "Authorization": "Bearer {0}".format(RedisClient().get_jwt())
             }
         )
-        res = res.json()
 
-        if res.get("status") and res["status"].get("return"):
-            return res["status"]["return"]["reason"] == 0
-
-        LOGGER.error("Error: invalid response from EJBCA")
-        return False
+        return res.status_code == 404

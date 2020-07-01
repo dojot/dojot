@@ -465,23 +465,20 @@ class GenerateCerts():
         Retrieves the CA certificate and exports to a file.
         """
         res = requests.get(
-            url=f"{CONFIG['dojot']['url']}/ca/{CONFIG['security']['ejbca_ca_name']}",
+            url=f"{CONFIG['dojot']['url']}/x509/v1/ca",
             headers={
                 "Authorization": "Bearer {0}".format(self.jwt)
             },
         )
         res = res.json()
 
-        if res["certificate"] is None:
+        if res["caPem"] is None:
             LOGGER.error("Error while retrieving the CA certificate.")
             sys.exit(1)
-
-        certificate = "-----BEGIN CERTIFICATE-----\n" +\
-                    res["certificate"] +\
-                    "\n-----END CERTIFICATE-----\n"
+        
+        certificate = res["caPem"]
 
         filename = f"{CONFIG['security']['cert_dir']}{CONFIG['security']['ca_cert_file']}"
-
         with open(filename, "w") as ca_file:
             ca_file.write(certificate)
 

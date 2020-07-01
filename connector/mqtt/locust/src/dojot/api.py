@@ -224,32 +224,9 @@ class DojotAPI():
         return devices_ids
 
     @staticmethod
-    def create_ejbca_user(jwt: str, username: str) -> None:
+    def generate_certificate(jwt: str, csr: str) -> str:
         """
-        Makes a requisition to EJBCA to create a user.
-
-        Parameters:
-            jwt: Dojot JWT token
-            username: dojot username
-        """
-        args = {
-            "url": CONFIG['dojot']['url'] + "/user",
-            "headers": {
-                'content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer {0}'.format(jwt),
-            },
-            "data": json.dumps({
-                "username": username
-            }),
-        }
-
-        DojotAPI.call_api(requests.post, args, False)
-
-    @staticmethod
-    def sign_cert(jwt: str, username: str, passwd: str, csr: str) -> str:
-        """
-        Sign the certificates.
+        Generate the certificates.
 
         Parameters:
             jwt: Dojot JWT token
@@ -260,26 +237,25 @@ class DojotAPI():
         Returns the raw certificate.
         """
         args = {
-            "url": CONFIG['dojot']['url'] + "/sign/" + username + "/pkcs10",
+            "url": CONFIG['dojot']['url'] + "/x509/v1/certificates",
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
             },
             "data": json.dumps({
-                "passwd": passwd,
-                "certificate": csr
+                "csr": csr
             }),
         }
 
         res = DojotAPI.call_api(requests.post, args)
 
-        return res['status']['data']
+        return (res['certificateFingerprint'], res['certificatePem'])
 
     @staticmethod
-    def reset_entity_status(jwt: str, username: str, status: int = 10) -> None:
+    def revoke_certificate(jwt: str, fingerprint: str) -> None:
         """
-        Changes the entity's status.
+        Revoke a certificate.
 
         Params:
             jwt: Dojot JWT token
@@ -287,21 +263,15 @@ class DojotAPI():
             status: status to be set, defaults to 10
         """
         args = {
-            "url": CONFIG['dojot']['url'] + "/user",
+            "url": CONFIG['dojot']['url'] + "/x509/v1/certificates/"+ fingerprint,
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
-            },
-            "data": json.dumps({
-                "username": username,
-                "password": "dojot",
-                "subjectDN": "CN=" + username,
-                "status": status
-            }),
+            }
         }
 
-        DojotAPI.call_api(requests.post, args, False)
+        DojotAPI.call_api(requests.delete, args, False)
 
 
     @staticmethod
