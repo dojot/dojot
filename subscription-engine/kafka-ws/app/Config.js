@@ -25,7 +25,7 @@ module.exports = {
     ]).join(' '),
     ticket: {
       secret: process.env.TICKET_SECRET || crypto.randomFillSync(Buffer.alloc(10)).toString('hex'),
-      expiresIn: parseUint(process.env.TICKET_EXPIRESIN_SEC) || 60,
+      expiresIn: parseUint(process.env.TICKET_EXPIRATION_SEC) || 60,
     },
   },
   redis: {

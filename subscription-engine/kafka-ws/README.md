@@ -14,7 +14,7 @@ The connection is done in two steps, you must first obtain a *single-use ticket*
 
 #### First step: Get the single-use ticket
 
-A ticket allows the user to subscribe to a dojot topic. To obtain it, it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
+A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
 Ticket request must be made by REST at the endpoint `/api/v1/ticket` using the HTTP GET verb. The request must contain the header `Authorization` and the JWT token as value, according to the syntax:
 
     POST <base-url>/v1/ticket
@@ -214,6 +214,7 @@ Before proceeding, **make sure you configure your environment**.
 
 Key           | Purpose                                         | Default Value     | Valid Values             |
 ------------- | ----------------------------------------------- | ----------------- | ------------------------ |
+NODE_ENV      | Is used (by convention) to state whether a particular environment is a **production** or a **development** environment. | production | *production* or *development* |
 LOG_LEVEL     | log level                                       | info              | info, warn, debug, error |
 LOG_VERBOSE   | Enables verbose mode for logging                    | false              | string: "true" or "false" / *number*: 1 or 0 |
 LOG_FILE   | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false              | string: "true" or "false" / *number*: 1 or 0 |
@@ -226,6 +227,8 @@ KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-c
 KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
 KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
 KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time) from JWT informed when requesting a *single-use ticket*. | false               | string: "true" or "false" / *number*: 1 or 0 |
+TICKET_EXPIRATION_SEC | Duration time (in seconds) of the *single-use ticket*. | 60 | seconds |
+TICKET_SECRET | Secret used to sign *single-use tickets* and prevent forgery. Give preference to large random values. | Random value generated at application startup. In a cluster environment, all instances need to share the same secret. | string |
 KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 7200             | seconds |
 REDIS_HOST       | Redis host                   | redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |
