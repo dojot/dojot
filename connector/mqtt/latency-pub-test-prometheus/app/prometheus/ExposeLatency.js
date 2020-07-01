@@ -31,7 +31,6 @@ class ExposeLatency {
     }
   }
 
-
   /**
    * Set current minimum latency
    *

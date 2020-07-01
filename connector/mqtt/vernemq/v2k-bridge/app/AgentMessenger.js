@@ -4,7 +4,6 @@ const appConfig = require('./config');
 const Utils = require('./utils');
 const MQTTClient = require('./MQTTClient');
 
-
 /**
  * Class representing an AgentMessenger
  *

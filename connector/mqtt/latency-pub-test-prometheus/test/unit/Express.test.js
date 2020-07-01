@@ -40,7 +40,6 @@ describe('loading express', () => {
     express = new ExpressApp();
     express.initListen();
 
-
     const response = await request(express.app).get('/metrics');
 
     expect(response.text).toEqual(

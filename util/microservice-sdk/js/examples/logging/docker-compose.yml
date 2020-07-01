@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+
+  logging-sample-app:
+    build:
+      context: ./../../
+      dockerfile: ./examples/logging/Dockerfile
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m

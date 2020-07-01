@@ -3,12 +3,10 @@
 #########################################################
 #########################################################
 
-BASE_DIR=${BASE_DIR:-"/k2v_bridge"}
-
-. "${BASE_DIR}"/bin/scripts_tls/_initVariables.sh
+. "${K2V_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
 
-. "${BASE_DIR}"/bin/scripts_tls/saveFormattedCRT.sh
+. "${K2V_APP_BASEDIR}"/bin/scripts_tls/saveFormattedCRT.sh
 
 echo
 echo "Signing cert : ${certEjbcaApiUrl}/internal/api/v1/throw-away "

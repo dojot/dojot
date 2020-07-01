@@ -44,4 +44,7 @@ RUN mkdir -p /vernemq/cert/ && \
 # Copy entrypoint script
 COPY bin/command.sh /
 
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini" "--"]
+
 USER vernemq

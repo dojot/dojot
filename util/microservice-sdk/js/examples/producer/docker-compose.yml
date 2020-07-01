@@ -1,0 +1,56 @@
+version: '3.7'
+services:
+
+  zookeeper:
+    image: dojot/zookeeper:3.4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka:
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    depends_on:
+      - zookeeper
+    restart: always
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_TOPICS: 'producer.example.test'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafkacat-consumer:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    restart: always
+    command:
+      - bash
+      - -c
+      - |
+        kafkacat -u -G sample -b kafka:9092 -C -t producer.example.test -f '\nKey (%K bytes): %k\t\nValue (%S bytes): %s\nTimestamp: %T\tPartition: %p\tOffset: %o\n--\n'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  producer:
+    build:
+      context: ./../../
+      dockerfile: ./examples/producer/Dockerfile
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      KAFKA_TOPIC: producer.example.test
+      KAFKA_CLIENT_ID: producer.example
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
