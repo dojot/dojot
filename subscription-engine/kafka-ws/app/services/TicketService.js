@@ -34,9 +34,9 @@ function generateTicket(token) {
 /**
  * Verify the integrity and authenticity of the token.
  *
- * @param {*} token Token to verify
- * @param {*} ticket ticket received
- * @returns {Boolean} if the token is authentic, the ticket received
+ * @param {String} token Token to verify
+ * @param {String} ticket Ticket received
+ * @returns {Boolean} If the token is authentic, the ticket received
  *                    and the computed ticket will match.
  */
 function verifyToken(token, ticket) {
