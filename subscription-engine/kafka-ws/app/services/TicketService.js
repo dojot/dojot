@@ -32,7 +32,7 @@ function generateTicket(token) {
 }
 
 /**
- * Verify the integrity and authenticity of the token.
+ * Verifies the integrity and authenticity of the token.
  *
  * @param {String} token Token to verify
  * @param {String} ticket Ticket received
