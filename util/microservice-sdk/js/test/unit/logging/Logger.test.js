@@ -52,17 +52,17 @@ jest.mock('winston-daily-rotate-file');
 const winston = require('winston');
 
 const { Logger } = require('../../../lib/logging/Logger');
-const { textFormat, jsonFormat } = require('../../../lib/logging/Formats');
+const { jsonFormat } = require('../../../lib/logging/Formats');
+const { createWinstonTransport } = require('../../../lib/logging/Transports');
 
-// setup
-// teardown
-afterEach(() => {
+// setup - console is set by default
+beforeEach(() => {
   Logger.sharedLogger.transports = {
-    console: null,
+    console: createWinstonTransport('console', {level: 'info'}),
     file: null,
   };
   Logger.sharedLogger.wlogger.transports = {
-    console: { level: null },
+    console: { level: 'info' },
     file: { level: null },
   };
   jest.clearAllMocks();
@@ -70,26 +70,6 @@ afterEach(() => {
 
 // logger configuration tests
 // static methods
-describe('Logger configuration', () => {
-  test('Set a valid transport - console', () => {
-    // console transport is unset
-    expect(Logger.isTransportSet('console')).toBeFalsy();
-
-    // set console transport
-    Logger.setTransport('console', { level: 'error' });
-
-    // expected ...
-    expect(winston.transports.Console.mock.calls.length).toBe(1);
-    expect(winston.transports.Console).toBeCalledWith(
-      expect.objectContaining({
-        level: 'error',
-        format: textFormat,
-      }),
-    );
-    expect(Logger.sharedLogger.wlogger.add.mock.calls.length).toBe(1);
-    expect(Logger.isTransportSet('console')).toBeTruthy();
-  });
-
   test('Set a valid transport - file', () => {
     // file transport is unset
     expect(Logger.isTransportSet('file')).toBeFalsy();
@@ -111,7 +91,7 @@ describe('Logger configuration', () => {
 
   test('Unset valid transports', () => {
     // set transports
-    Logger.setTransport('console', { level: 'error' });
+    // console set by default
     Logger.setTransport('file', { level: 'error' });
 
     // intermediate checks
@@ -162,24 +142,28 @@ describe('Logger configuration', () => {
     }).toThrow('The config must be an object value.');
   });
 
-  test('Trying to set a transport that has been set', () => {
+  test('Replacing a transport that has been set', () => {
     // set transports
-    Logger.setTransport('console', { level: 'error' });
+    // console set by default
     Logger.setTransport('file', { level: 'error' });
 
     // intermediate check
     expect(Logger.isTransportSet('console')).toBeTruthy();
     expect(Logger.isTransportSet('file')).toBeTruthy();
 
-    // console has been set
-    expect(() => {
-      Logger.setTransport('console');
-    }).toThrow('Transport has been set. It is necessary to unset it.');
-
-    // console has been set
-    expect(() => {
-      Logger.setTransport('file');
-    }).toThrow('Transport has been set. It is necessary to unset it.');
+    // replacing
+    Logger.setTransport('console', { level: 'debug' });
+    expect(winston.transports.Console).toBeCalledWith(
+      expect.objectContaining({
+        level: 'debug'
+      }),
+    );
+    Logger.setTransport('file', { level: 'debug' });
+    expect(winston.transports.DailyRotateFile).toBeCalledWith(
+      expect.objectContaining({
+        level: 'debug'
+      }),
+    );
   });
 
   test('Unset transport with invalid parameter - transport name', () => {
@@ -205,8 +189,7 @@ describe('Logger configuration', () => {
   });
 
   test('Set a valid logging level - console', () => {
-    // set console transport
-    Logger.setTransport('console', { level: 'error' });
+    // console set by default
 
     // change console level to debug
     Logger.setLevel('console', 'debug');
@@ -302,6 +285,9 @@ describe('Logger configuration', () => {
   });
 
   test('Trying to set logging level for an unset transport', () => {
+    // uset console
+    Logger.unsetTransport('console');
+
     // console
     expect(() => {
       Logger.setLevel('console', 'error');
@@ -351,7 +337,6 @@ describe('Logger configuration', () => {
       Logger.setVerbose('true');
     }).toThrow('The parameter enable must be a boolean.');
   });
-});
 
 describe('Logger wrapper instantiation', () => {
   test('Instantiate a logger wrapper - sucess', () => {
