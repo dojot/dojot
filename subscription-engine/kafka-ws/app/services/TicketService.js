@@ -32,6 +32,21 @@ function generateTicket(token) {
 }
 
 /**
+ * Verify the integrity and authenticity of the token.
+ *
+ * @param {*} token Token to verify
+ * @param {*} ticket ticket received
+ * @returns {Boolean} if the token is authentic, the ticket received
+ *                    and the computed ticket will match.
+ */
+function verifyToken(token, ticket) {
+  const correspondent = generateTicket(token);
+  const a = Buffer.from(ticket);
+  const b = Buffer.from(correspondent);
+  return crypto.timingSafeEqual(a, b);
+}
+
+/**
  * Obtains the encoded JWT Token needed to establish a connection to the server via websocket
  *
  * @param {String} ticket Ticket that gives access to the required Token for the websocket.
@@ -47,7 +62,16 @@ async function retrieveEncodedToken(ticket) {
     const exec = promisify(multi.exec).bind(multi);
     const replies = await exec();
     const [token] = replies;
-    return token;
+
+    if (token) {
+      if (verifyToken(token, ticket)) {
+        return token;
+      }
+      logger.error(`Failure to verify the integrity and authenticity of the token returned by Redis.
+        Obtained Token: ${token}
+        Informed Ticket: ${ticket}
+      `);
+    }
   } catch (error) {
     logger.error(`The token was not found. Ticket ${ticket} has expired or is invalid.`);
   }
