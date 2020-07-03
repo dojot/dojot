@@ -82,7 +82,9 @@
     "testMatch": [
       "**/test/**/**.test.js"
     ],
-    "setupFilesAfterEnv": ["./jest.setup.js"]
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ]
   },
   "author": "@eduardogmisiuk",
   "contributors": [
