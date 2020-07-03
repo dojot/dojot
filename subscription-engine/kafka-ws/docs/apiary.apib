@@ -10,7 +10,7 @@ from Kafka.
 
 A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
 
-## Getting a ticket [/api/v1/ticket]
+## Getting a ticket [/kafka-ws/v1/ticket]
 
 ### A single-use Ticket [GET]
 
@@ -37,7 +37,7 @@ Gets a single-use Ticket. It can only be used once and has a very short validity
 in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
 language you want, as long as the client supports **RFC 6455** websockets.
 
-## Retrieving conditional and/or partial messages from topic: [/api/v1/topics/{topic}?ticket={ticket}&fields={selector}&where={conditions}]
+## Retrieving conditional and/or partial messages from topic: [/kafka-ws/v1/topics/{topic}?ticket={ticket}&fields={selector}&where={conditions}]
 
 ### **Where**
 
@@ -65,27 +65,27 @@ To ilustrate the parameters' usage, here are some examples of valid URIs:
 
 Retrieving full messages from `topic.example` topic:
 ```
-/api/v1/topics/topic.example
+/kafka-ws/v1/topics/topic.example
 ```
 
 Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
 ```
-/api/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+/kafka-ws/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the temperature and location:
 ```
-/api/v1/topics/topic.example?fields=temperature,location
+/kafka-ws/v1/topics/topic.example?fields=temperature,location
 ```
 
 Retrieving full messages where 5.0 ≤ temperature < 10.0:
 ```
-/api/v1/topics/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
+/kafka-ws/v1/topics/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
 ```
 
 Retrieving the temperature and rain when rain ≤ 15:
 ```
-/api/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
+/kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
 ---

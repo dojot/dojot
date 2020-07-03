@@ -42,7 +42,7 @@ function configure(server) {
   /* Open API - Routes available through the API Gateway
    * First the request goes through the ticket router,
    * then it goes through the topic router. */
-  app.use('/api/v1',
+  app.use('/kafka-ws/v1',
     accessControlRouter(),
     ticketRouter(),
     topicsRouter());
