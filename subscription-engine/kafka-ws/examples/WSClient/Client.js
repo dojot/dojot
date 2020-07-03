@@ -45,7 +45,7 @@ async function generateAccessToken(tenant) {
 async function requestTicket(accessToken) {
   console.info('Requesting a ticket needed to open a websocket communication...');
   const protocol = (tls) ? 'https' : 'http';
-  const uri = `${protocol}://${host}:${port}/api/v1/ticket`;
+  const uri = `${protocol}://${host}:${port}/kafka-ws/v1/ticket`;
   const agent = (tls)
     ? superagent.get(uri).ca(ca).key(key).cert(cert)
     : superagent.get(uri);
@@ -60,7 +60,7 @@ async function requestTicket(accessToken) {
 function generateWebsocketURI(option, ticket) {
   console.info('Generating the websocket connection URI...');
   const protocol = (tls) ? 'wss' : 'ws';
-  const endpoint = `${protocol}://${host}:${port}/api/v1/topics`;
+  const endpoint = `${protocol}://${host}:${port}/kafka-ws/v1/topics`;
   let resource;
   const queryParams = [];
   if (option === '0') {

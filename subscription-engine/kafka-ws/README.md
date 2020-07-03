@@ -15,7 +15,7 @@ The connection is done in two steps, you must first obtain a *single-use ticket*
 #### First step: Get the single-use ticket
 
 A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
-Ticket request must be made by REST at the endpoint `/api/v1/ticket` using the HTTP GET verb. The request must contain the header `Authorization` and the JWT token as value, according to the syntax:
+Ticket request must be made by REST at the endpoint `<base-url>/kafka-ws/v1/ticket` using the HTTP GET verb. The request must contain the header `Authorization` and the JWT token as value, according to the syntax:
 
     POST <base-url>/v1/ticket
     Authorization: Bearer [Encoded JWT]
@@ -32,10 +32,9 @@ Note: In the context of a dojot deployment the JWT Token is provided by the *Aut
 
 #### Second step: Establish a websocket connection
 
-The connection is done via pure websockets using the URI `/api/v1/topics/:topic`. You **must** pass the previously generated ticket as a parameter of this URI. It is also possible to pass conditional and filter options as parameters of the URI.
+The connection is done via pure websockets using the URI `<base-url>/kafka-ws/v1/topics/:topic`. You **must** pass the previously generated ticket as a parameter of this URI. It is also possible to pass conditional and filter options as parameters of the URI.
 
 In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.<br>
-*Note*: When the component is behind the API Gateway of the dojot platform, it must be accessed through the URI: `<base-url>/kafka-ws/v1/topics/:topic`.
 
 If you want to jump for a full client example, see the [examples](./examples) directory.
 
@@ -44,7 +43,7 @@ If you want to jump for a full client example, see the [examples](./examples) di
 Before diving into the explanation of how each filter works and its rules, it is necessary to understand the parts of the URI. It's general format is:
 
 ```
-/api/v1/topics/:topic?ticket=<hexValue>&fields=<selector>&where=<conditions>
+/kafka-ws/v1/topics/:topic?ticket=<hexValue>&fields=<selector>&where=<conditions>
 ```
 
 #### Topic
@@ -90,31 +89,31 @@ To ilustrate the parameters' usage, here are some examples of valid URIs:
 Retrieving full messages from `topic.example` topic:
 
 ```
-/api/v1/topics/topic.example
+/kafka-ws/v1/topics/topic.example
 ```
 
 Retrieving a sensor *status* and *temperature* when the *status* is `failed` or `stopped`:
 
 ```
-/api/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+/kafka-ws/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the *temperature* and *location*:
 
 ```
-/api/v1/topics/topic.example?fields=temperature,location
+/kafka-ws/v1/topics/topic.example?fields=temperature,location
 ```
 
 Retrieving full messages where *temperature* is <ins>greater than or equal to</ins> 5.0 and <ins>less than</ins> 10.0:
 
 ```
-/api/v1/topics/topic.example?where=temperature=gte:5.0;temperature=lt:10.0;
+/kafka-ws/v1/topics/topic.example?where=temperature=gte:5.0;temperature=lt:10.0;
 ```
 
 Retrieving the *temperature* and *rain* where *rain* is <ins>less than or equal to</ins> 15:
 
 ```
-/api/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
+/kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
 ### **Filtering flow**
