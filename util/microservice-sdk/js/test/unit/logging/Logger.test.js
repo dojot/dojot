@@ -58,7 +58,7 @@ const { createWinstonTransport } = require('../../../lib/logging/Transports');
 // setup - console is set by default
 beforeEach(() => {
   Logger.sharedLogger.transports = {
-    console: createWinstonTransport('console', {level: 'info'}),
+    console: createWinstonTransport('console', { level: 'info' }),
     file: null,
   };
   Logger.sharedLogger.wlogger.transports = {
@@ -70,6 +70,7 @@ beforeEach(() => {
 
 // logger configuration tests
 // static methods
+describe('Logger configuration', () => {
   test('Set a valid transport - file', () => {
     // file transport is unset
     expect(Logger.isTransportSet('file')).toBeFalsy();
@@ -155,13 +156,13 @@ beforeEach(() => {
     Logger.setTransport('console', { level: 'debug' });
     expect(winston.transports.Console).toBeCalledWith(
       expect.objectContaining({
-        level: 'debug'
+        level: 'debug',
       }),
     );
     Logger.setTransport('file', { level: 'debug' });
     expect(winston.transports.DailyRotateFile).toBeCalledWith(
       expect.objectContaining({
-        level: 'debug'
+        level: 'debug',
       }),
     );
   });
@@ -337,6 +338,7 @@ beforeEach(() => {
       Logger.setVerbose('true');
     }).toThrow('The parameter enable must be a boolean.');
   });
+});
 
 describe('Logger wrapper instantiation', () => {
   test('Instantiate a logger wrapper - sucess', () => {
