@@ -8,18 +8,16 @@ subjectAltName="DNS.1:${certInternalDns}"
 
 if [ ! -z "$certDns" ]
 then
-      subjectAltName="${subjectAltName},DNS.2:${certDns}"
+  subjectAltName="${subjectAltName},DNS.2:${certDns}"
 fi
 
 if [ ! -z "$certIp" ]
 then
-      subjectAltName="${subjectAltName},IP.1:${certIp}"
+  subjectAltName="${subjectAltName},IP.1:${certIp}"
 fi
 
 
 echo "Create CSR for ${certCname}"
 openssl req -new  -sha256 -out "${certDir}/${certCsrFile}" -key "${certDir}/${certKeyFile}" \
-      -addext "subjectAltName = ${subjectAltName}" \
-      -addext "keyUsage = Digital Signature, Non Repudiation, Key Encipherment" \
-      -addext "basicConstraints  =  CA:FALSE" \
-      --subj "/CN=${certCname}"
+  -addext "subjectAltName = ${subjectAltName}" \
+  --subj "/CN=${certCname}"

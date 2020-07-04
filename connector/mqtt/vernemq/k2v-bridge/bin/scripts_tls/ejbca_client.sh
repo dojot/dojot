@@ -4,7 +4,7 @@
 ### Required Packages: openssl, curl, jq
 ### Expected environment variables, example:
 #
-# export EJBCA_ADDRESS='localhost'
+# export K2V_APP_EJBCA_ADDRESS='localhost'
 # export STATIC_CERT='n'
 # export USE_VMQ_OPERATOR='n'
 # export K2V_APP_HOSTNAME='broker'
@@ -39,14 +39,14 @@ _connectEJBCA()
 {
   # Waiting for dojot MQTT broker for at most 3 minutes
   START_TIME=$(date +'%s')
-  echo "Waiting for dojot EJBCA Broker fully start. Adress '${EJBCA_ADDRESS}'..."
+  echo "Waiting for dojot EJBCA Broker fully start. Adress '${K2V_APP_EJBCA_ADDRESS}'..."
   echo "Try to connect to dojot EJBCA Broker ... "
-  RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/ejbca/version || echo "")
+  RESPONSE=$( (curl --fail -s "${certEjbcaApiUrl}/healthcheck" || echo "") | jq '.status')
   echo "$RESPONSE"
-  while [ -z "${RESPONSE}" ]; do
+  while [ -z "${RESPONSE}" ] || [ "${RESPONSE}" != '"ok"' ]; do
       sleep 30
       echo "Retry to connect to dojot EJBCA broker ... "
-      RESPONSE=$(curl --fail -s "${certEjbcaApiUrl}"/ejbca/version || echo "")
+      RESPONSE=$( (curl --fail -s "${certEjbcaApiUrl}/healthcheck" || echo "") | jq '.status')
 
       ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
       if [ ${ELAPSED_TIME} -gt 180 ]
@@ -55,7 +55,7 @@ _connectEJBCA()
           exit 3
       fi
   done
-  echo "dojot EJBCA broker at host '${EJBCA_ADDRESS}' fully started."
+  echo "dojot EJBCA broker at host '${K2V_APP_EJBCA_ADDRESS}' fully started."
 
   # give time for EJBCA fully started
   sleep 5
@@ -71,16 +71,6 @@ _generateKeyPair()
 _createCSR()
 {
     sh "${K2V_APP_BASEDIR}"/bin/scripts_tls/createCSR.sh
-}
-
-##create entity in ejbca
-_createEntity()
-{
-    echo "Create Entity ${certCname} in ${certCAName} : ${certEjbcaApiUrl}/user"
-    $(curl --silent -X POST "${certEjbcaApiUrl}"/user \
-    -H "Content-Type:application/json" \
-    -H "Accept:application/json" \
-    -d  "{\"username\": \"${certCname}\"}")
 }
 
 ##sign csr in ejbca
@@ -122,7 +112,6 @@ _generateCertificates()
     _createCRTDir
     _generateKeyPair
     _createCSR
-    _createEntity
     _signCert
 }
 
