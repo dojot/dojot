@@ -93,6 +93,7 @@ class Logger {
 
   /**
    * Sets the transport.
+   * If the transport has already been set, it replaces the old one.
    * Note that this method is static, so it sets the 'global' logger.
    *
    * @param { string } transport  name of the transport. It can be:
@@ -109,9 +110,9 @@ class Logger {
       throw new Error('The config must be an object value.');
     }
 
-    // validate current state
+    // remove the corresponding transport if has set
     if (this.isTransportSet(transport)) {
-      throw new Error('Transport has been set. It is necessary to unset it.');
+      Logger.unsetTransport(transport);
     }
 
     // create the new  transport
@@ -236,5 +237,8 @@ Logger.sharedLogger = {
   handleMetadata: (metadata) => (Logger.sharedLogger.verbose
     ? addFileAndLineToMetadata(metadata) : metadata),
 };
+
+// Enable console transport by default
+Logger.setTransport('console');
 
 module.exports = { Logger };
