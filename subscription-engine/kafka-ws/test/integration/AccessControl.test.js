@@ -50,7 +50,7 @@ const req = request(server);
 
 describe('Integration tests related to websocket access control', () => {
   it('should be unauthorized because of a missing ticket',
-    () => req.get('/api/v1/topics/dummy.topic')
+    () => req.get('/kafka-ws/v1/topics/dummy.topic')
       .send()
       .expect(401)
       .then((res) => {
@@ -58,7 +58,7 @@ describe('Integration tests related to websocket access control', () => {
       }));
 
   it('should be unauthorized because of a invalid ticket',
-    () => req.get('/api/v1/topics/dummy.topic?ticket=fake')
+    () => req.get('/kafka-ws/v1/topics/dummy.topic?ticket=fake')
       .send()
       .expect(401)
       .then((res) => {
@@ -75,7 +75,7 @@ describe('Integration tests related to websocket access control', () => {
         cfg.app.ticket.secret,
         { expiresIn: 60 },
       ).then((token) => new Promise(((resolve, reject) => {
-        req.get('/api/v1/ticket')
+        req.get('/kafka-ws/v1/ticket')
           .set('Authorization', `Bearer ${token}`)
           .send()
           .expect(200)
@@ -93,7 +93,7 @@ describe('Integration tests related to websocket access control', () => {
       (done) => {
         server.listen(0);
         const { port } = server.address();
-        const ws = new WebSocket(`ws://127.0.0.1:${port}/api/v1/topics/${tenant}.topic?ticket=${ticket}`);
+        const ws = new WebSocket(`ws://127.0.0.1:${port}/kafka-ws/v1/topics/${tenant}.topic?ticket=${ticket}`);
 
         ws.on('close', () => {
           expect(WebsocketTarball.onConnection).toHaveBeenCalled();
