@@ -1,12 +1,12 @@
 version: '3'
 services:
   locust-slave:
-    image: dojot/locust:development
+    image: dojot/locust:v0.5.0-alpha.2
     command: bash slave_entrypoint.sh
     volumes:
       - ..:/usr/src/app
     environment:
-      # Don't forget to set the environment variables
+      DOJOT_URL: "http://127.0.0.1:8000"
       DOJOT_MQTT_HOST: "127.0.0.1"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "1883"
