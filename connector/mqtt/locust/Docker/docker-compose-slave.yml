@@ -6,7 +6,7 @@ services:
     volumes:
       - ..:/usr/src/app
     environment:
-      # Don't forget to set the environment variables
+      DOJOT_URL: "http://127.0.0.1:8000"
       DOJOT_MQTT_HOST: "127.0.0.1"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "1883"
