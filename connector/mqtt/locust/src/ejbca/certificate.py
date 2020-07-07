@@ -15,7 +15,6 @@ class Certificate:
 
     def __init__(self, device_id):
         self.logger = Utils.create_logger("certificate")
-        # Utils.validate_thing_id(thing_id)
 
         self.jwt = RedisClient().get_jwt()
 
@@ -68,8 +67,6 @@ class Certificate:
         """
         Renew a certificate.
         """
-        self.revoke_cert()
-
         self.key = {"pem": self.generate_private_key()}
         self.csr = {"pem": self.generate_csr()}
         self.crt = {}
