@@ -88,8 +88,10 @@ class TestCertificate(unittest.TestCase):
         thing = Certificate(self.thing_id)
         thing.renew_cert()
 
-        mock_api.revoke_certificate.assert_called_once_with(self.jwt, self.crt['fingerprint'])
         self.assertIsNotNone(thing.crt['pem'])
+        self.assertIsNotNone(thing.crt['fingerprint'])
+        self.assertIsNotNone(thing.csr['pem'])
+        self.assertIsNotNone(thing.key['pem'])
 
     def test_revoke(self, _mock_crypto, _mock_utils, mock_redis, mock_api):
         """

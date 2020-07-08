@@ -85,7 +85,7 @@ class CertUtils:
         """
         Verifies whether the certificate has been revoked or not.
         """
-        url = CONFIG["dojot"]["url"]+ "x509/v1/certificates/" + thing.cert.crt['fingerprint']
+        url = CONFIG["dojot"]["url"]+ "/x509/v1/certificates/" + thing.cert.crt['fingerprint']
 
         res = requests.get(
             url=url,

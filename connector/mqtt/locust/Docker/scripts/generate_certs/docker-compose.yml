@@ -6,11 +6,11 @@ services:
       - ../../..:/usr/src/app
     environment:
       DOJOT_URL: "http://127.0.0.1:8000"
-      DOJOT_USER: "admin"
-      DOJOT_PASSWD: "admin"
       DOJOT_MQTT_HOST: "127.0.0.1"
       DOJOT_MQTT_PORT: "1883"
       DOJOT_ENV: "n"
+
+      EJBCA_URL: "http://localhost:5583"
 
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
