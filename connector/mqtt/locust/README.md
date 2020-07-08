@@ -224,7 +224,7 @@ CERT_DIR                     | certificates and private keys directory          
 DEBUG_MODE                   | activate debug mode in shell scripts                           | 0             | 0, 1                                          |
 DEVICES_TO_RENEW             | number of devices to renew randomly                            | 1000          | integer                                       |
 DEVICES_TO_REVOKE            | number of devices to revoke randomly                           | 1000          | integer                                       |
-LOCUST_MASTER_HOST           | Locust master IP/hostname                                      | locust-master | hostname/IP                                   |
+LOCUST_MASTER_NODE_HOST      | Locust master IP/hostname                                      | locust-master | hostname/IP                                   |
 LOG_LEVEL                    | log level (case insensitive)                                   | info          | notset, debug, info, warning, error, critical |
 MAX_TIME_RECONN              | max time (in seconds) to try to reconnect to the MQTT broker   | 600           | integer                                       |
 MIN_TIME_RECONN              | min time (in seconds) to try to reconnect to the MQTT broker   | 1             | integer                                       |
@@ -242,8 +242,8 @@ RENEW_CERT_DIR               | directory where the certs to be renewed will be s
 RENEW_DEVICES                | enable random renovation of devices (case insensitive)         | False         | True, False                                   |
 REVOKE_CERT_DIR              | directory where the certs to be revoked will be stored         | revoke/       | directory name                                |
 REVOKE_DEVICES               | enable random revocation of devices (case insensitive)         | False         | True, False                                   |
-TASK_MAX_TIME                | max time of each Locust's tasks (ms)                           | 30000         | integer                                       |
-TASK_MIN_TIME                | min time of each Locust's tasks (ms)                           | 29500         | integer                                       |
+TASK_MAX_TIME                | max time of each Locust's tasks (sec)                          | 30            | integer                                       |
+TASK_MIN_TIME                | min time of each Locust's tasks (sec)                          | 29            | integer                                       |
 TENANT                       | tenant that is publishing                                      | admin         | string                                        |
 TIME_TO_RENEW                | time to renew the cert after the client initialization         | 1000          | integer                                       |
 TIME_TO_REVOKE               | time to revoke the cert after the client initialization        | 1000          | integer                                       |

@@ -1,10 +1,9 @@
 """
 Locust Load Test.
 """
-import logging
 import uuid
 
-from locust import Locust, task, TaskSet
+from locust import between, User, task, TaskSet
 
 from src.utils import Utils
 from src.config import CONFIG
@@ -12,11 +11,13 @@ from src.mqtt_locust.mqtt_client import MQTTClient
 from src.mqtt_locust.redis_client import RedisClient
 
 
-class MqttLocust(Locust):
+class MqttLocust(User):
     """Locust client using MQTT."""
 
+    abstract = True
+
     def __init__(self, *args, **kwargs):
-        super(Locust, self).__init__(*args, **kwargs)
+        super(MqttLocust, self).__init__(*args, **kwargs)
 
         # Connects to Redis database that stores the device_id for each client
         cache = RedisClient()
@@ -44,12 +45,12 @@ class MqttLocust(Locust):
         # UUID to identify the client run
         run_id = str(uuid.uuid4())
 
-        self.client = MQTTClient(device_id, run_id, should_revoke, should_renew)
+        self.client = MQTTClient(
+            device_id, run_id, should_revoke, should_renew)
         self.client.connect()
 
-
 class ThingBehavior(TaskSet):
-    """MQTT pub/sub load test class. It specifies the transmission and reception behaviours
+    """MQTT pub/sub load test class. It specifies the transmission and reception behaviors
     of messages from the MQTT broker."""
 
     @task
@@ -70,10 +71,9 @@ class ThingBehavior(TaskSet):
         """
         self.client.disconnect()
 
-
 class Client(MqttLocust):
     """The client that will run the tasks when hatched."""
 
-    task_set = ThingBehavior
-    min_wait = CONFIG['locust']['task_min_time']
-    max_wait = CONFIG['locust']['task_max_time']
+    wait_time = between(CONFIG['locust']['task_min_time'],
+                        CONFIG['locust']['task_max_time'])
+    tasks = [ThingBehavior]

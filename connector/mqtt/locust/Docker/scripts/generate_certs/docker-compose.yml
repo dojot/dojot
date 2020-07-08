@@ -5,7 +5,7 @@ services:
     volumes:
       - ../../..:/usr/src/app
     environment:
-      DOJOT_URL: "http://127.0.0.1:8000"
+      DOJOT_URL: "http://10.50.11.53:80"
       DOJOT_USER: "admin"
       DOJOT_PASSWD: "admin"
       DOJOT_MQTT_HOST: "127.0.0.1"
