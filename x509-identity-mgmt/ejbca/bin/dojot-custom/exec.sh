@@ -16,6 +16,11 @@
 # Redirect stderr to stdout to make output easier to consume by other tools
 exec 2>&1
 
+# DEBUG
+if [ -n "${DEBUG+x}" ] ; then
+    set -x
+fi
+
 # Variables used by configuration scripts
 readonly BASE_DIR="$1"
 readonly TEMP_DIR="$2"
