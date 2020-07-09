@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+
+  keycloak:
+    build: 
+      context: ./../
+      dockerfile: ./Dockerfile
+    depends_on:
+      - postgres
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+
+  postgres:
+    image: dojot/postgres:9.5.21-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    volumes:
+      - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka:
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    depends_on:
+      - zookeeper
+    restart: always
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_NUM_PARTITIONS: 10
+      JMX_PORT: 1099
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  zookeeper:
+    image: dojot/zookeeper:3.4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m

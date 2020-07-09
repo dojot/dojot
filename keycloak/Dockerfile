@@ -26,5 +26,5 @@ FROM jboss/keycloak:10.0.1
 COPY --from=keycloak-services-builder keycloak/services/target/keycloak-services-10.0.1.jar $JBOSS_HOME/modules/system/layers/keycloak/org/keycloak/keycloak-services/main
 
 COPY --from=keycloak-kafka-builder keycloak-kafka/target/keycloak-kafka-1.0.0-jar-with-dependencies.jar $JBOSS_HOME/standalone/deployments
-COPY ./custom/keycloak-kafka/kafka-module.cli $JBOSS_HOME/bin
+COPY ./plugins/keycloak-kafka/kafka-module.cli $JBOSS_HOME/bin
 RUN $JBOSS_HOME/bin/jboss-cli.sh --file=$JBOSS_HOME/bin/kafka-module.cli
