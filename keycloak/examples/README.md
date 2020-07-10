@@ -8,6 +8,7 @@ docker-compose up
 ```
 
 To explore Keycloak GUI (graphical user interface) access http://localhost:8080 and login in with user ```admin``` and password ```admin```
+
 Keycloak also makes available a set of APIs to manage users, groups, clients, permissions ..., visit [Keycloak Admin REST API
 ](https://www.keycloak.org/docs-api/5.0/rest-api/index.html) for more details.
 
