@@ -8,5 +8,5 @@ The Keycloak was adopt by dojot in order to centralize the access control and of
 ## Keycloak and Kafka
 The dojot needs publish messages in Kafka after tenant creation and removal events, as this feature is not offered natively by Keycloak, the dojot team reach this target:
 
-- Adopting and customizing [keycloak-kafka](https://github.com/SnuK87/keycloak-kafka) SPI
+- Adopting and customizing [keycloak-kafka](https://github.com/SnuK87/keycloak-kafka) SPI (Service Provider Interface)
 - Customizing Keycloak services module to trigger admin events for tenants's CRUD operations (It can be removed when newer versions of Keycloak implement it natively, to go further in this thread visit [KEYCLOAK-14313](https://issues.redhat.com/browse/KEYCLOAK-14313)) 
