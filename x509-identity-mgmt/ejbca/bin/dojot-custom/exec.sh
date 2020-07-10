@@ -136,7 +136,7 @@ function getLock() {
     # obtained by the container, if not, it means that there is already a lock file that has not yet reached
     # the timeout, so it will not be possible to rewrite the lock file while the container that created the
     # lock finishes executing the settings or until the lock timeout is reached.
-    ( set -o noclobber; echo "${HOST_NAME} (${CONTAINER_IP})" > "$LOCK_FILE") 2> /dev/null
+    ( set -o noclobber; echo "${HOST_NAME} (${CONTAINER_IP})" > "$LOCK_FILE")
 }
 
 # --------------------------------------------------------------------

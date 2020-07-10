@@ -66,7 +66,6 @@ The access to EJBCA's functionalities is done through the certificate that it is
 
 | Variable | Description |
 |----------|-------------|
-| EJBCA_PROFILES_DIR | The directory where are located the XML files that define EJBCA's Certificate and End Entities Profiles. <br>**Default**: /mnt/persistent/profiles <br><br> Note 1: Profile xml files are generated and edited through the web administration panel offered by the EJBCA server. <br><br>Note 2: The name of the profiles must not contain spaces. |
 | **Certificate Profiles** | |
 | EJBCA_DEVICES_CA_CERT_PROFILE | Name of the certificate profile of the root CA used to sign certificates for IoT devices. <br>**Default**: X509IdentitiesCA |
 | EJBCA_SERVICES_CA_CERT_PROFILE | Name of the certificate profile of the root CA used to sign certificates for dojot services. <br>**Default**: ServicesCA |

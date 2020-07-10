@@ -37,7 +37,7 @@ readonly SHARED_VOLUME="/mnt/persistent"
 # (cert|entity)profile_<name>-<id>.xml
 #
 # The directory where the XML files are located
-readonly PROFILES_DIR=${EJBCA_PROFILES_DIR:-"${SHARED_VOLUME}/profiles"}
+readonly PROFILES_DIR="/opt/primekey/profiles"
 #
 # The name of the profiles must not contain spaces!!!
 #
