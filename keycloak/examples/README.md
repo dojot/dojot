@@ -3,7 +3,7 @@
 This example makes available an enviroment with Keycloak integrated with Kafka.
 
 To run this example, type:
-```bash
+```
 docker-compose up
 ```
 
@@ -16,7 +16,7 @@ Keycloak also makes available a set of APIs to manage users, groups, clients, pe
 To test Kafka integration follow these instructions:
 
 - Get an admin token:
-```bash
+```
 ADMIN_JWT=$(curl --location --request POST localhost:8080/auth/realms/master/protocol/openid-connect/token \
 --data-urlencode 'username=admin' \
 --data-urlencode 'password=admin' \
@@ -25,7 +25,7 @@ ADMIN_JWT=$(curl --location --request POST localhost:8080/auth/realms/master/pro
 ``` 
 
 - Create a new tenant:
-```bash
+```
 curl --location --request POST 'http://localhost:8080/auth/admin/realms' -H "Authorization: Bearer ${ADMIN_JWT}" -H 'Content-Type:application/json' \
 --data-raw ' {
    "realm": "myTenant",
@@ -35,17 +35,17 @@ curl --location --request POST 'http://localhost:8080/auth/admin/realms' -H "Aut
 ``` 
 
 - Delete tenant:
-```bash
+```
 curl --location --request DELETE 'http://localhost:8080/auth/admin/realms/myTenant' -H "Authorization: Bearer ${ADMIN_JWT}" -H 'Content-Type:application/json'
  ```
  
 Now check ```dojot-management.dojot.tenancy``` topic to verify if the messages was sent:
-```bash
+```
 docker container exec -it dojot_keycloak_kafka_1 bash -c 'unset JMX_PORT && kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic dojot-management.dojot.tenancy --from-beginning'
 ```
 
 The following result is expected:
-```json
+```
 {"type":"CREATE","tenant":"myTenant"}
 {"type":"DELETE","tenant":"myTenant"}
 ```
