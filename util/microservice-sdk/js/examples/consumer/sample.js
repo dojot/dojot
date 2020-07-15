@@ -17,7 +17,7 @@ const consumer = new Consumer({
   },
   'kafka.topic': {
     'auto.offset.reset': 'beginning',
-  }
+  },
 });
 
 consumer.init().then(() => {

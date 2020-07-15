@@ -91,7 +91,7 @@ test('Constructor: default', () => {
     'kafka.consumer': {
       'enable.auto.commit': false,
     },
-    'kafka.topic': {}
+    'kafka.topic': {},
   };
 
   // check
@@ -113,7 +113,7 @@ test('Constructor: divergent value for enable.auto.commit', () => {
     'kafka.consumer': {
       'enable.auto.commit': false, // it must be disabled!
     },
-    'kafka.topic': {}
+    'kafka.topic': {},
   };
 
   // check
@@ -127,11 +127,11 @@ test('Constructor: divergent value for enable.auto.commit', () => {
 test('Constructor: consumer and topic properties', () => {
   const consumer = new Consumer({
     'kafka.consumer': {
-      'bootstrap.servers': ['kafka.server1', 'kafka.server2']
+      'bootstrap.servers': ['kafka.server1', 'kafka.server2'],
     },
    'kafka.topic': {
-    'auto.offset.reset': 'beginning'
-   }
+    'auto.offset.reset': 'beginning',
+   },
   });
   const expectedConfig = {
     'in.processing.max.messages': 1,
@@ -141,11 +141,11 @@ test('Constructor: consumer and topic properties', () => {
     'subscription.backoff.delta.ms': 1000,
     'commit.interval.ms': 5000,
     'kafka.consumer': {
-      'bootstrap.servers': ['kafka.server1', 'kafka.server2']
+      'bootstrap.servers': ['kafka.server1', 'kafka.server2'],
     },
     'kafka.topic': {
-      'auto.offset.reset': 'beginning'
-    }
+      'auto.offset.reset': 'beginning',
+    },
   };
 
   // check
@@ -153,7 +153,7 @@ test('Constructor: consumer and topic properties', () => {
   expect(consumer.consumer).not.toBeNull();
   expect(consumer.commitManager).not.toBeNull();
   expect(consumer.msgQueue).not.toBeNull();
-})
+});
 
 test('Basic initialization', async () => {
   const consumer = new Consumer();

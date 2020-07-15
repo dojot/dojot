@@ -91,7 +91,8 @@ class Producer {
     this.isReady = false;
     this.producer = new Kafka.Producer(
       this.config['kafka.producer'],
-      this.config['kafka.topic']);
+      this.config['kafka.topic'],
+);
 
     if (this.isDeliveryReportEnabled()) {
       // This will set a callback to be executed everytime a message is published.
@@ -115,8 +116,8 @@ class Producer {
   */
   isDeliveryReportEnabled() {
     return (
-      this.config['kafka.producer'].dr_cb ||
-      this.config['kafka.producer'].dr_msg_cb
+      this.config['kafka.producer'].dr_cb
+      || this.config['kafka.producer'].dr_msg_cb
       );
   }
 

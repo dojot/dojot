@@ -23,8 +23,8 @@ describe('Kafka producer', () => {
       dr_cb: true,
     },
     'kafka.topic': {
-      'request.required.acks': -1
-    }
+      'request.required.acks': -1,
+    },
   };
   const mockKafka = {
     producer: {
