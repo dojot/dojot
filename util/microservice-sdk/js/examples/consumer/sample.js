@@ -11,11 +11,13 @@ Logger.setVerbose(true);
 const logger = new Logger('sample-consumer');
 
 const consumer = new Consumer({
-  kafka: {
+  'kafka.consumer': {
     'group.id': process.env.KAFKA_GROUP_ID || 'sdk-consumer-example',
     'metadata.broker.list': process.env.KAFKA_HOSTS || 'localhost:9092',
-    'auto.offset.reset': 'beginning',
   },
+  'kafka.topic': {
+    'auto.offset.reset': 'beginning',
+  }
 });
 
 consumer.init().then(() => {

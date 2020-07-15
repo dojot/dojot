@@ -80,10 +80,14 @@ module.exports = class Consumer {
    * delta time (in miliseconds) in the exponential delay between retries.
    * - "commit.interval.ms": time interval (in miliseconds) for commiting the processed messages
    * into kafka. A message is commited if and only if all previous messages has been processed.
-   * - kafka: an object with specific properties for the node-rdkafka consumer. For more details,
-   * see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+   * - kafka.consumer: an object with global properties for the node-rdkafka consumer. For a full
+   * list of the properties, see:
+   * https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md#global-configuration-properties.
+   * - kafka.topic: an object with specific topic configuration properties that applies to all
+   * topics the node-rdkafka consumer subscribes to. For a full list of properties, see:
+   *  https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md#topic-configuration-properties.
    *
-   * ATTENTION: The property 'kafka["enable.auto.commit"]' is set to 'false' even if
+   * ATTENTION: The property 'kafka.consumer["enable.auto.commit"]' is set to 'false' even if
    * it is 'true' in the 'config' because the commits are managed by
    * this consumer.
    *
@@ -94,9 +98,12 @@ module.exports = class Consumer {
     this.config = config || {};
 
     // kafka consumer configuration
-    this.config.kafka = this.config.kafka || {};
-    this.config.kafka['enable.auto.commit'] = false;
-    this.config.kafka.rebalance_cb = this.onRebalance.bind(this);
+    this.config['kafka.consumer'] = this.config['kafka.consumer'] || {};
+    this.config['kafka.consumer']['enable.auto.commit'] = false;
+    this.config['kafka.consumer'].rebalance_cb = this.onRebalance.bind(this);
+
+    // kafka topic configuration
+    this.config['kafka.topic'] = this.config['kafka.topic'] || {};
 
     // wrapper-specific configuration
     this.config['in.processing.max.messages'] = (
@@ -124,7 +131,8 @@ module.exports = class Consumer {
     this.topicMap = {};
     this.topicRegExpArray = [];
     // consumer
-    this.consumer = new Kafka.KafkaConsumer(this.config.kafka);
+    this.consumer = new Kafka.KafkaConsumer(this.config['kafka.consumer'],
+    this.config['kafka.topic']);
     // commit manager
     this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
       this.config['commit.interval.ms']);

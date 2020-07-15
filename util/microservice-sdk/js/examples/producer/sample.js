@@ -14,7 +14,7 @@ const logger = new Logger('sample-producer');
 
 (async () => {
   const producer = new Producer({
-    kafka: {
+    'kafka.producer': {
       'client.id': process.env.KAFKA_CLIENT_ID || 'sample-producer',
       'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
       dr_cb: true,

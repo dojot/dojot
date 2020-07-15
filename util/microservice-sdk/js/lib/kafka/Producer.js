@@ -51,15 +51,23 @@ class Producer {
   *    handling disconnections and reconnection. Set it to 0 to turn it off.
   * - "producer.connect.timeout.ms":  Timeout  in ms  to connect
   * - "producer.disconnect.timeout.ms":  Timeout  in ms  to disconnect
-  * - kafka: an object with specific properties for the node-rdkafka consumer. For more details,
-  * see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+  * - "kafka.producer": an object with global properties for the node-rdkafka producer. For a full
+  *    list of the properties, see:
+  *    https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md#global-configuration-properties.
+  * - "kafka.topic": an object with specific topic configuration properties that applies to all
+  *   topics the node-rdkafka producer produces to. For a full list of properties, see:
+  *   https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md#topic-configuration-properties.
+  *
   */
   constructor(config) {
     // configuration
     this.config = config || {};
 
-    // kafka consumer configuration
-    this.config.kafka = this.config.kafka || {};
+    // kafka producer configuration
+    this.config['kafka.producer'] = this.config['kafka.producer'] || {};
+
+    // kafka topic configuration
+    this.config['kafka.topic'] = this.config['kafka.topic'] || {};
 
     this.config['producer.flush.timeout.ms'] = (
       this.config['producer.flush.timeout.ms'] || PRODUCER_FLUSH_TIMEOUT_MS
@@ -81,7 +89,9 @@ class Producer {
 
 
     this.isReady = false;
-    this.producer = new Kafka.Producer(this.config.kafka);
+    this.producer = new Kafka.Producer(
+      this.config['kafka.producer'],
+      this.config['kafka.topic']);
 
     if (this.isDeliveryReportEnabled()) {
       // This will set a callback to be executed everytime a message is published.
@@ -104,7 +114,10 @@ class Producer {
   * @private
   */
   isDeliveryReportEnabled() {
-    return this.config.kafka.dr_cb || this.config.kafka.dr_msg_cb;
+    return (
+      this.config['kafka.producer'].dr_cb ||
+      this.config['kafka.producer'].dr_msg_cb
+      );
   }
 
   /**

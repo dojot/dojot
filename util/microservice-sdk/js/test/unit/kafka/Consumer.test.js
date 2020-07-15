@@ -88,9 +88,10 @@ test('Constructor: default', () => {
     'subscription.backoff.max.ms': 60000,
     'subscription.backoff.delta.ms': 1000,
     'commit.interval.ms': 5000,
-    kafka: {
+    'kafka.consumer': {
       'enable.auto.commit': false,
     },
+    'kafka.topic': {}
   };
 
   // check
@@ -101,7 +102,7 @@ test('Constructor: default', () => {
 });
 
 test('Constructor: divergent value for enable.auto.commit', () => {
-  const consumer = new Consumer({ kafka: { 'enable.auto.commit': true } });
+  const consumer = new Consumer({ 'kafka.consumer': { 'enable.auto.commit': true } });
   const expectedConfig = {
     'in.processing.max.messages': 1,
     'queued.max.messages.bytes': 10485760,
@@ -109,9 +110,10 @@ test('Constructor: divergent value for enable.auto.commit', () => {
     'subscription.backoff.max.ms': 60000,
     'subscription.backoff.delta.ms': 1000,
     'commit.interval.ms': 5000,
-    kafka: {
+    'kafka.consumer': {
       'enable.auto.commit': false, // it must be disabled!
     },
+    'kafka.topic': {}
   };
 
   // check
@@ -120,6 +122,38 @@ test('Constructor: divergent value for enable.auto.commit', () => {
   expect(consumer.commitManager).not.toBeNull();
   expect(consumer.msgQueue).not.toBeNull();
 });
+
+
+test('Constructor: consumer and topic properties', () => {
+  const consumer = new Consumer({
+    'kafka.consumer': {
+      'bootstrap.servers': ['kafka.server1', 'kafka.server2']
+    },
+   'kafka.topic': {
+    'auto.offset.reset': 'beginning'
+   }
+  });
+  const expectedConfig = {
+    'in.processing.max.messages': 1,
+    'queued.max.messages.bytes': 10485760,
+    'subscription.backoff.min.ms': 1000,
+    'subscription.backoff.max.ms': 60000,
+    'subscription.backoff.delta.ms': 1000,
+    'commit.interval.ms': 5000,
+    'kafka.consumer': {
+      'bootstrap.servers': ['kafka.server1', 'kafka.server2']
+    },
+    'kafka.topic': {
+      'auto.offset.reset': 'beginning'
+    }
+  };
+
+  // check
+  expect(consumer.config).toMatchObject(expectedConfig);
+  expect(consumer.consumer).not.toBeNull();
+  expect(consumer.commitManager).not.toBeNull();
+  expect(consumer.msgQueue).not.toBeNull();
+})
 
 test('Basic initialization', async () => {
   const consumer = new Consumer();

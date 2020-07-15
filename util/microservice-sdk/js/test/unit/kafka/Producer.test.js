@@ -18,10 +18,13 @@ jest.useFakeTimers();
 
 describe('Kafka producer', () => {
   const mockConfig = {
-    kafka: {
+    'kafka.producer': {
       'metadata.broker.list': 'kafka:9092',
       dr_cb: true,
     },
+    'kafka.topic': {
+      'request.required.acks': -1
+    }
   };
   const mockKafka = {
     producer: {
