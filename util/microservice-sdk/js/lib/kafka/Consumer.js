@@ -132,7 +132,7 @@ module.exports = class Consumer {
     this.topicRegExpArray = [];
     // consumer
     this.consumer = new Kafka.KafkaConsumer(this.config['kafka.consumer'],
-    this.config['kafka.topic']);
+      this.config['kafka.topic']);
     // commit manager
     this.commitManager = new CommitManager(this.consumer.commit.bind(this.consumer),
       this.config['commit.interval.ms']);

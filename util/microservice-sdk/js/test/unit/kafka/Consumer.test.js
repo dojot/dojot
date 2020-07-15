@@ -129,9 +129,9 @@ test('Constructor: consumer and topic properties', () => {
     'kafka.consumer': {
       'bootstrap.servers': ['kafka.server1', 'kafka.server2'],
     },
-   'kafka.topic': {
-    'auto.offset.reset': 'beginning',
-   },
+    'kafka.topic': {
+      'auto.offset.reset': 'beginning',
+    },
   });
   const expectedConfig = {
     'in.processing.max.messages': 1,
