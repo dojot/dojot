@@ -6,13 +6,38 @@ FORMAT: 1A
 The Kafka WS service provides support for pure WebSocket connections to retrieve data directly
 from Kafka.
 
+# Group Ticket
+
+A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
+
+## Getting a ticket [/kafka-ws/v1/ticket]
+
+### A single-use Ticket [GET]
+
+Gets a single-use Ticket. It can only be used once and has a very short validity period, it must be used to establish a websocket connection.
+
++ Request
+
+    + Headers
+
+            Authorization: Bearer [Encoded JWT]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "ticket": "ab1ee9ea52dec599bdc93259fae4539b7239a668ccf478cf52deba8c1cbef62f"
+            }
+
+
 # Group WebSocket
 
 **Kafka WebSocket service** allows the user to retrieve conditional and/or partial data from a topic
 in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
 language you want, as long as the client supports **RFC 6455** websockets.
 
-## Retrieving conditional and/or partial messages from topic: [/api/v1/topics/{topic}?fields={selector}&where={conditions}]
+## Retrieving conditional and/or partial messages from topic: [/kafka-ws/v1/topics/{topic}?ticket={ticket}&fields={selector}&where={conditions}]
 
 ### **Where**
 
@@ -34,31 +59,33 @@ Where:
 
 #### **Examples**
 
+Note: For simplicity, we will not include the `ticket` parameter in the examples, but it must always be sent, otherwise the server will refuse the connection.
+
 To ilustrate the parameters' usage, here are some examples of valid URIs:
 
 Retrieving full messages from `topic.example` topic:
 ```
-/api/v1/topics/topic.example
+/kafka-ws/v1/topics/topic.example
 ```
 
 Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
 ```
-/api/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
+/kafka-ws/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
 ```
 
 Retrieving the temperature and location:
 ```
-/api/v1/topics/topic.example?fields=temperature,location
+/kafka-ws/v1/topics/topic.example?fields=temperature,location
 ```
 
 Retrieving full messages where 5.0 ≤ temperature < 10.0:
 ```
-/api/v1/topics/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
+/kafka-ws/v1/topics/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
 ```
 
 Retrieving the temperature and rain when rain ≤ 15:
 ```
-/api/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
+/kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
 ---
@@ -122,6 +149,7 @@ Examples:
 
 + Parameters
     + topic:topic.example (required, string) - The `topic` parameter is the Kafka topic that you want to receive data from.
+    + ticket (required, string) - Previously generated single-use ticket
     + selector:sensor/status,temperature (optional, string) - The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
     + conditions: sensor.status=in:failed,stopped; (optional, string) - The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
 conditions.
@@ -131,9 +159,14 @@ conditions.
 + Request
   + Headers
 
-            Authorization: Bearer JWT
+            Upgrade: WebSocket
+            Connection: Upgrade
 
 + Response 200
+  + Headers
+
+            Upgrade: WebSocket
+            Connection: Upgrade
 
   + body
 
@@ -177,20 +210,6 @@ conditions.
   + body
 
             INVALID_VALUE: a value with an invalid type was passed to a condition
-
-+ Response 4400
-  **Websocket error**
-
-  + body
-
-            INVALID_PATHNAME: a Malformed URI was passed
-
-+ Response 4401
-  **Websocket error**
-
-  + body
-
-            INVALID_TOKEN_JWT: it isn't possible to extract information (exp and service) from the jwt
 
 + Response 4403
   **Websocket error**
