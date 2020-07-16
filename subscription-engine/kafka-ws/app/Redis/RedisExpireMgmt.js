@@ -15,6 +15,7 @@ class RedisExpireMgmt {
     this.expirationMap = new Map();
 
     // TODO:  ADD TLS and  PASSWORD options for Redis
+    // TODO: Implement "retry_strategy"
     // const fs = require('fs');
     // const tls_options = {
     //   ca: [ fs.readFileSync(resolve(__dirname, "./server.crt")) ]

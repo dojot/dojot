@@ -1,6 +1,4 @@
 const Crypto = require('crypto-js');
-const url = require('url');
-const { pathToRegexp } = require('path-to-regexp');
 
 /* Constants */
 
@@ -98,40 +96,6 @@ function isNumber(value) {
 const isObjectEmpty = (object) => (typeof object !== 'object') || (object !== null && Object.keys(object).length === 0);
 
 /**
- * Parses JWT and gets expiration (sec) and tenant values.
- *
- * @param {string} rawToken
- *
- * @returns {object} obj like {expirationTimestamp: 1591638638 , tenant: 'example'}
- */
-const parseTenantAndExpTimeFromToken = (rawToken) => {
-  if (!rawToken) {
-    throw new Error('There is no authorization token in the header');
-  }
-
-  const tokenSplit = rawToken.split('.');
-
-  if (tokenSplit.length !== 3) {
-    throw new Error('Invalid token');
-  }
-
-  const tokenData = JSON.parse((Buffer.from(tokenSplit[1], 'base64')).toString());
-  const { service: tenant, exp: expirationTimeSec } = tokenData;
-
-  if (!tenant) {
-    throw new Error('Tenant is not inside the token.');
-  }
-  if (!expirationTimeSec) {
-    throw new Error('Expiration Time is not inside the token.');
-  }
-
-  return {
-    tenant,
-    expirationTimestamp: expirationTimeSec,
-  };
-};
-
-/**
  * Checks if the topic belongs to tenant,
  *  for that the topic must be started with {tenant}.
  *
@@ -150,30 +114,30 @@ const checkTopicBelongsTenant = (topic, tenant) => {
 };
 
 /**
- *  Parses pathname from a given URL into substring matches
- *
- * @param {string} fullUrl ex: http://google.com
- * @param {string} pathToRegex ex: /api/v1/topics/:topic
- *
- * @returns {array} substring matches
- */
-const checkAndParseURLPathname = (fullUrl, pathToRegex) => {
-  const { pathname } = url.parse(fullUrl);
-  const regexpRoute = pathToRegexp(pathToRegex);
-  const parsedRoute = regexpRoute.exec(pathname);
-  if (!parsedRoute) {
-    throw new Error('Malformed Pathname');
-  }
-  return parsedRoute;
-};
-
-/**
  * Adds a given amount of seconds to the current time, and returns it in seconds.
  *
  * @param {number} addSec
  */
 const addTimeFromNow = (addSec) => Math.round(new Date().getTime() / 1000)
   + addSec;
+
+/* parse unsigned integer */
+const parseUint = (val) => val && Math.abs(parseInt(val, 10));
+
+/* parse boolean */
+const parseBoolean = (val, def = false) => {
+  if (val) {
+    if (val.toString().toLowerCase().trim() === 'true' || val === '1') return true;
+    if (val.toString().toLowerCase().trim() === 'false' || val === '0') return false;
+  }
+  return def;
+};
+
+/* parse array */
+const parseArray = (val) => {
+  if (typeof val !== 'string') return undefined;
+  return val.split(',').map((el) => el.trim());
+};
 
 module.exports = {
   escapeChars,
@@ -183,8 +147,9 @@ module.exports = {
   createFingerprint,
   isNumber,
   isObjectEmpty,
-  parseTenantAndExpTimeFromToken,
   checkTopicBelongsTenant,
-  checkAndParseURLPathname,
   addTimeFromNow,
+  parseUint,
+  parseBoolean,
+  parseArray,
 };
