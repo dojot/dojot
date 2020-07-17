@@ -1,13 +1,13 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const { logSampleMessages } = require('./SampleModule');
 
-// By default, no transport is enabled; so you need to
-// set at least one before to log the messages.
+// By default, console transport is enabled; but you can
+// change it or add a file transport if required.
 // It's worth to say that the transports are shared by all
 // modules of the microservice; consequently, any change
 // in the configuration will be valid for all!
 
-// Setting console transport
+// Setting console transport (this will replace the console set by default)
 // For more information about it, see:
 // https://github.com/winstonjs/winston/blob/HEAD/docs/transports.md#console-transport
 //

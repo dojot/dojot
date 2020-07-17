@@ -3,8 +3,8 @@ const util = require('util');
 const { Logger, Kafka: { Producer } } = require('../index.js');
 
 // Set the global logger properties
-// Add a console transport
-Logger.setTransport('console', { level: 'debug' });
+// Console transport is set by default, but with info level
+Logger.setLevel('console', 'debug');
 
 // Enable verbose mode
 Logger.setVerbose(true);

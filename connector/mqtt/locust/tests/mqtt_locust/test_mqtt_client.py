@@ -639,7 +639,7 @@ class MQTTClientRevokeCertAndEmitEvent(unittest.TestCase):
         """
         client = MQTTClient("123", "987", True, False)
 
-        mock_cert_utils.has_been_revoked.return_value = True
+        mock_cert_utils.has_been_revoked.return_value = False
 
         has_revoked = client.revoke_cert_and_emit_event()
 
@@ -650,31 +650,18 @@ class MQTTClientRevokeCertAndEmitEvent(unittest.TestCase):
 
     def test_not_revoke_cert_and_emit_event(self, mock_utils, _mock_paho, mock_cert_utils):
         """
-        Should not revoke cert
+        Should not revoke cert - Exception thrown by the revoking function
         """
         client = MQTTClient("123", "987", True, False)
 
         mock_cert_utils.has_been_revoked.return_value = False
+        mock_cert_utils.revoke_cert.side_effect = Exception
 
         has_revoked = client.revoke_cert_and_emit_event()
 
         self.assertFalse(has_revoked)
         mock_cert_utils.revoke_cert.assert_called_once()
         mock_utils.fire_locust_failure.assert_called()
-
-
-    def test_revoke_cert_and_emit_event_exception(self, mock_utils, _mock_paho, mock_cert_utils):
-        """
-        Revoking should throw an exception.
-        """
-        mock_cert_utils.revoke_cert.side_effect = Exception
-        client = MQTTClient("123", "987", True, False)
-
-        res = client.revoke_cert_and_emit_event()
-
-        self.assertRaises(Exception, mock_cert_utils.revoke_cert)
-        mock_utils.fire_locust_failure.assert_called()
-        self.assertFalse(res)
 
 
 @patch('src.mqtt_locust.mqtt_client.json')
