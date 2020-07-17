@@ -58,7 +58,7 @@ Where:
 The transports ('console' and 'file') are shared by all instances of the wrapper. So,
 any change in the transports will affect all instances.
 
-By default, no transport is set, so it is necessary to do this as part of the configuration
+By default, console transport is set, but this can be changed as part of the configuration
 or initialization of the microservice.
 
 It's usage is very simple and is shown by the following example:
@@ -66,13 +66,13 @@ It's usage is very simple and is shown by the following example:
 ```js
 const { Logger } = require('@dojot/microservice-sdk');
 
-// By default, no transport is enabled; so you need to
-// set at least one before to log the messages.
+// By default, console transport is enabled; but you can
+// change it or add a file transport if required.
 // It's worth to say that the transports are shared by all
 // modules of the microservice; consequently, any change
 // in the configuration will be valid for all!
 
-// Setting console transport
+// Setting console transport (this will replace the console set by default)
 // For more information about it, see:
 // https://github.com/winstonjs/winston/blob/HEAD/docs/transports.md#console-transport
 //
