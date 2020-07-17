@@ -1,3 +1,5 @@
+const mockProcess = require('jest-mock-process');
+
 jest.mock('fs');
 jest.mock('@dojot/microservice-sdk');
 jest.mock('../../app/AgentMessenger');
@@ -52,8 +54,15 @@ const MQTTClient = require('../../app/MQTTClient');
 const AgentMessenger = require('../../app/AgentMessenger');
 
 describe('Testing v2k bridge client', () => {
+  let mockExit;
+
   beforeEach(() => {
+    mockExit = mockProcess.mockProcessExit();
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    mockExit.mockRestore();
   });
 
   const expectClientInitialization = (client, agent, config = mqttConfig) => {
@@ -136,6 +145,16 @@ describe('Testing v2k bridge client', () => {
     client.onDisconnect();
 
     expect(mockConfig.fakeMqtt.reconnect).toHaveBeenCalled();
+  });
+
+  it('Should exit after an error', () => {
+    const agent = new AgentMessenger(fakeMqttConfig);
+    const client = new MQTTClient(agent, fakeMqttConfig);
+
+    client.init();
+    client.onError('fake');
+
+    expect(mockExit).toHaveBeenCalled();
   });
 
   it('should push a message to the queue (callback) once', () => {

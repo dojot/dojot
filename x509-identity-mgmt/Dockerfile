@@ -36,7 +36,7 @@ RUN npm install --unsafe-perm --production
 COPY --chown=10001:0 js /opt/x509-identity-mgmt
 
 # Copy EJBCA profiles
-COPY --chown=10001:0 ejbca/resources/profiles/ /mnt/persistent/profiles/
+COPY --chown=10001:0 ejbca/resources/profiles/ /opt/primekey/profiles/
 
 # Copy EJBCA setup scripts
 COPY --chown=10001:0 ejbca/bin/ /opt/primekey/bin/internal/
