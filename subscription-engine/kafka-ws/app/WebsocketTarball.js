@@ -157,7 +157,7 @@ class Tarball {
     this.createCallbackSendMessage(ws, kafkaTopic, idWsConnection, filter);
 
     ws.on('close', (code, reason) => {
-      this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection)
+      this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection);
     });
   }
 
