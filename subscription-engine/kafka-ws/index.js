@@ -83,5 +83,5 @@ process.on('uncaughtException', async (ex) => {
   logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
 
   // TODO: stop server (connection redis, kafka consumer, etc.)
-  process.exit(1);
+  process.kill(process.pid);
 });

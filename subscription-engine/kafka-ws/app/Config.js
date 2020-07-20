@@ -29,7 +29,7 @@ module.exports = {
     },
   },
   redis: {
-    host: process.env.REDIS_HOST || 'redis',
+    host: process.env.REDIS_HOST || 'kafka-ws-redis',
     port: parseInt(process.env.REDIS_PORT, 10) || 6379,
     database: parseInt(process.env.REDIS_DATABASE, 10) || 1,
   },

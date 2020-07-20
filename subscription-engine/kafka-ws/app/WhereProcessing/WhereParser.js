@@ -11,7 +11,7 @@ const {
   InvalidValue,
 } = require('../Errors').Errors;
 
-const logger = new Logger();
+const logger = new Logger('kafka-ws:where-parser');
 
 /**
  * Parses the `where` query parameter.

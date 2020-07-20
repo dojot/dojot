@@ -3,7 +3,7 @@ const { Logger } = require('@dojot/microservice-sdk');
 const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const { kafka: { consumer: consumerConfig } } = require('../Config');
 
-const logger = new Logger();
+const logger = new Logger('kafka-ws:kafka-consumer');
 
 /**
  * Consume kafka messages from kafka topics
