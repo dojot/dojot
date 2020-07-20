@@ -15,7 +15,7 @@ const topicsRouter = require('./routes/TopicsRouter');
 const app = express();
 
 function configure(server) {
-  const logger = new Logger();
+  const logger = new Logger('kafka-ws:app');
   logger.info('Configuring the Express Application...');
 
   /* Lets it define WebSocket endpoints like any other type of route

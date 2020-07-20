@@ -7,7 +7,7 @@ const RedisManager = require('../Redis/RedisManager');
 
 const jwtSignAsync = promisify(jwt.sign).bind(jwt);
 
-const logger = new Logger();
+const logger = new Logger('kafka-ws:ticket-service');
 
 /**
  * Key in Redis where it is possible to obtain the JWT Token

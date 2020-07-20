@@ -229,7 +229,7 @@ KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time) from JWT informed 
 TICKET_EXPIRATION_SEC | Duration time (in seconds) of the *single-use ticket*. | 60 | seconds |
 TICKET_SECRET | Secret used to sign *single-use tickets* and prevent forgery. Give preference to large random values. | Random value generated at application startup. In a cluster environment, all instances need to share the same secret. | string |
 KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 7200             | seconds |
-REDIS_HOST       | Redis host                   | redis                              | string |
+REDIS_HOST       | Redis host                   | kafka-ws-redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |
 REDIS_DATABASE   | Redis database               | 1                                  | number |
 
