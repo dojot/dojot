@@ -1,13 +1,5 @@
 const { toBoolean } = require('./utils');
 
-const app = {
-  basedir: process.env.V2K_APP_BASEDIR,
-  'connection.retry.count': parseInt(process.env.V2K_APP_CONNECTION_RETRY_COUNT, 10),
-  'connection.retry.timeout': parseInt(process.env.V2K_APP_CONNECTION_RETRY_TIMEOUT, 10),
-  'ejbca.address': process.env.V2K_APP_EJBCA_ADDRESS,
-  hostname: process.env.V2K_APP_HOSTNAME,
-};
-
 const logger = {
   'transports.console.level': process.env.V2K_LOGGER_TRANSPORTS_CONSOLE_LEVEL,
   verbose: toBoolean(process.env.V2K_LOGGER_VERBOSE),
@@ -65,5 +57,5 @@ const kafka = {
 };
 
 module.exports = {
-  app, kafka, logger, messenger, mqtt, sdk,
+  kafka, logger, messenger, mqtt, sdk,
 };

@@ -4,12 +4,12 @@
 ### Required Packages: openssl, curl, jq
 ### Expected environment variables, example:
 #
-# export V2K_APP_EJBCA_ADDRESS='localhost:5583'
+# export V2K_APP_EJBCA_ADDRESS='x509-identity-mgmt:3000'
 # export STATIC_CERT='n'
 # export USE_VMQ_OPERATOR='n'
 # export V2K_APP_BASEDIR='broker'
 # export CRL_UPDATE_TIME='*/30 * * * *'
-# export V2K_APP_BASEDIR='/vernemq'
+# export V2K_APP_BASEDIR='/opt/v2k-bridge'
 # export CHECKEND_EXPIRATION_SEC='43200'
 # export CHECK_EXPIRATION_TIME='*/30 * * * *'
 # export CHECK_BROKER_CERT_REVOKED_TIME='*/30 * * * *'
