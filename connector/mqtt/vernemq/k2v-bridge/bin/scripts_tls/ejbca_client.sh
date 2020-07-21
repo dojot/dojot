@@ -4,7 +4,7 @@
 ### Required Packages: openssl, curl, jq
 ### Expected environment variables, example:
 #
-# export K2V_APP_EJBCA_ADDRESS='x509-identity-mgmt:3000q'
+# export K2V_APP_EJBCA_ADDRESS='x509-identity-mgmt:3000'
 # export STATIC_CERT='n'
 # export USE_VMQ_OPERATOR='n'
 # export K2V_APP_HOSTNAME='broker'
