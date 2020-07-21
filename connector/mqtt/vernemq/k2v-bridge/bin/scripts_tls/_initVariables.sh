@@ -1,9 +1,7 @@
 #!/bin/sh
 
-EJBCA_ADDRESS=${EJBCA_ADDRESS:-"ejbca-wrapper:5583"}
-
 export CHECKEND_EXPIRATION_SEC="${CHECKEND_EXPIRATION_SEC:-43200}" #12h
-export CERT_EJBCA_URL="http://${EJBCA_ADDRESS}"
+export CERT_EJBCA_URL="http://${K2V_APP_EJBCA_ADDRESS}"
 export CERT_CA_FILE='ca.crt'
 export CERT_CRL_FILE='ca.crl'
 export CERT_CERT_FILE="$K2V_APP_HOSTNAME.crt"
@@ -31,4 +29,3 @@ export certCrlFile=$CERT_CRL_FILE
 export certDir="$K2V_APP_BASEDIR/app/cert"
 export keyLength=2048
 export password="dojot"
-
