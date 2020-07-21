@@ -2,15 +2,14 @@
     Handles Paho MQTT-Client operations like publish/subscription, connection,
     loop function.
 """
+import json
 import logging
 import time
-import json
-import paho.mqtt.client as mqtt
 
-from src.utils import Utils
+import paho.mqtt.client as mqtt
 from src.config import CONFIG
 from src.ejbca.cert_utils import CertUtils
-
+from src.utils import Utils
 
 REQUEST_TYPE = 'mqtt'
 MESSAGE_TYPE_CONNECT = 'connect'
@@ -440,29 +439,23 @@ class MQTTClient:
         Return: True if succeeded, False otherwise.
         """
         try:
-            CertUtils.revoke_cert(self.new_cert)
+            if CertUtils.has_been_revoked(self.new_cert):
+                self.logger.debug("Already revoked, skipping step...")
+            else:
+                CertUtils.revoke_cert(self.new_cert)
+                Utils.fire_locust_success(
+                    request_type=REQUEST_TYPE,
+                    name=MESSAGE_TYPE_REVOKE,
+                    response_time=0,
+                    response_length=0
+                )
+                self.is_revoked = True
+
+            return True
 
         except Exception as exception:
-            Utils.fire_locust_failure(
-                request_type=REQUEST_TYPE,
-                name=MESSAGE_TYPE_REVOKE,
-                response_time=0,
-                response_length=0,
-                exception=exception
-            )
             self.logger.error("An error occurred while trying to revoke the certificate")
             self.logger.error(str(exception))
-            return False
-
-        if CertUtils.has_been_revoked(self.new_cert):
-            Utils.fire_locust_success(
-                request_type=REQUEST_TYPE,
-                name=MESSAGE_TYPE_REVOKE,
-                response_time=0,
-                response_length=0
-            )
-            self.is_revoked = True
-            return True
 
         Utils.fire_locust_failure(
             request_type=REQUEST_TYPE,
