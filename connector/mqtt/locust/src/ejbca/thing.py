@@ -13,7 +13,7 @@ class Thing():
 
         self.tenant = tenant
         self.device_id = device_id
-        self.cert = Certificate(thing_id)
+        self.cert = Certificate(self.device_id)
         self.thing_id = thing_id
         self.private_key = self.cert.key["pem"]
         self.thing_certificate = self.cert.crt["pem"]
