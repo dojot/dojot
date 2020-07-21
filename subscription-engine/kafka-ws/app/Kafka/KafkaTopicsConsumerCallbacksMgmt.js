@@ -3,7 +3,7 @@ const util = require('util');
 
 const KafkaWSConsumers = require('./KafkaConsumer');
 
-const logger = new Logger();
+const logger = new Logger('kafka-ws:kafka-topics-consumer-callbacks-mgmt');
 
 /**
 * Manages n callbacks for a single kafka topic,

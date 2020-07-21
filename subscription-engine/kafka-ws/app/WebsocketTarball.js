@@ -16,7 +16,7 @@ const {
 } = require('./Utils');
 const { server: serverConfig } = require('./Config');
 
-const logger = new Logger();
+const logger = new Logger('kafka-ws:websocket-tarball');
 
 /**
  * Checks the settings set in the deployment for maximum connection life,
@@ -156,7 +156,9 @@ class Tarball {
     // create callback to call the filter and send the message via ws
     this.createCallbackSendMessage(ws, kafkaTopic, idWsConnection, filter);
 
-    ws.on('close', (code, reason) => this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection));
+    ws.on('close', (code, reason) => {
+      this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection);
+    });
   }
 
   /**
