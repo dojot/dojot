@@ -7,7 +7,7 @@
 # export V2K_APP_EJBCA_ADDRESS='x509-identity-mgmt:3000'
 # export STATIC_CERT='n'
 # export USE_VMQ_OPERATOR='n'
-# export V2K_APP_BASEDIR='broker'
+# export V2K_APP_HOSTNAME='v2k-bridge'
 # export CRL_UPDATE_TIME='*/30 * * * *'
 # export V2K_APP_BASEDIR='/opt/v2k-bridge'
 # export CHECKEND_EXPIRATION_SEC='43200'
