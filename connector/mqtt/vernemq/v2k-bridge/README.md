@@ -19,13 +19,13 @@ environment variables to match your needs.
 
 ### **App**
 
-Key                              | Purpose                                            | Default Value   | Valid Values     |
--------------------------------- | -------------------------------------------------- | --------------- | ---------------- |
-V2K_APP_BASEDIR                  | Base directory where the project is located        | /opt/v2k_bridge | string           |
-V2K_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3               | number           |
-V2K_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3               | number           |
-V2K_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | localhost:5583  | hostname/IP:port |
-V2K_APP_HOSTNAME                 | Hostname to be used in the certificate common name | v2k-bridge      | hostname/IP      |
+Key                              | Purpose                                            | Default Value           | Valid Values     |
+-------------------------------- | -------------------------------------------------- | ----------------------- | ---------------- |
+V2K_APP_BASEDIR                  | Base directory where the project is located        | /opt/v2k_bridge         | string           |
+V2K_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3                       | number           |
+V2K_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3                       | number           |
+V2K_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | x509-identity-mgmt:3000 | hostname/IP:port |
+V2K_APP_HOSTNAME                 | Hostname to be used in the certificate common name | v2k-bridge              | hostname/IP      |
 
 ### **Kafka Messenger**
 
