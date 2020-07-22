@@ -252,6 +252,153 @@ Any property accepted by the producer of node-rdkafka can be set in object **kaf
 
 For more details, see: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md.
 
+### Configuration Manager
+
+This module is responsible for the creation of a configuration file for the services. It creates a
+file based on:
+- Environment variables
+- User configuration file
+- Default configuration file
+
+This is, also, the precedence for the configuration, from higher to lower priority. The following
+image summarizes the module flow:
+
+![Configuration Manager flow](./docs/images/Configuration Manager Flow.png)
+
+#### Environment variables
+
+All environment variables must follow this format:
+```
+SERVICE_SCOPE_KEY
+```
+
+Examples:
+```
+V2K_APP_HOSTNAME
+V2K_APP_CONNECTION_RETRY_COUNT
+```
+
+#### User configuration files
+
+The user configuration file can be used to replace the default values with the ones that should be
+used in a determined environment. This way, you can have multiple configuration files for a myriad
+of environments, e.g. production, development, 100K load test, etc.
+The filename can have any name you want. The recommended approach is to use a name that reflects the
+environment it is directed to and use the `.conf` extension. Examples:
+```
+production.conf
+development.conf
+100k.conf
+```
+
+As for the parameters, their format is:
+```
+scope1.param.key=value
+scope1.param.another.key=value
+scope2.param.key=value
+```
+
+Examples:
+```
+app.hostname=v2k-bridge
+app.connection.retry.count=3
+```
+
+#### Default configuration file
+
+This file is very similar to the previous one. The differences are:
+- It should exists
+- It should not be empty
+- It should be named `default.conf`
+- It should be in a directory named `config` in the project root
+- It accepts types for variables
+
+##### Types
+
+To remove the burden of treating variables' types in the service code, this module provides an easy
+way of handling them. Examples of variables and types:
+```
+scope1.param.boolean.key:boolean=trUe
+scope1.param.float.key:float=3.1415
+scope1.param.integer.key:integer=10
+scope1.param.string.array.key:string[]=["stringA", "stringB"]
+scope2.param.explicit.string.key:string=this is explicitly typed as string
+scope2.param.implicit.string.key=this has the string type
+```
+
+The accepted types are:
+- boolean: true or false, case insensitive
+- float
+- integer
+- string[]: a list of strings, must be delimited by [ ]
+- string: if no type is passed, this is the default
+
+__NOTE THAT__ only the default configuration file can be typed
+
+#### Created configuration file
+
+The module will create a JSON file. It will be located in `./config` with the name being the acronym
+in lower case. Example:
+```
+v2k.json
+```
+
+__NOTE THAT__ this file should not be modified/loaded/created by the user.
+
+#### Environment variables and file parameters
+
+The environment variables are translated to file parameters when they are parsed in this module. As
+you can already tell, the translation removes the service acronym. The translation is as follows:
+
+| Environment variable     | File parameter   |
+| ------------------------ | ---------------- |
+| V2K_APP_HOSTNAME         | app.hostname     |
+| EXAMPLE_SCOPE1_PARAM_KEY | scope1.param.key |
+
+#### Scopes
+
+Let's say you have two classes and need two different configuration objects to pass to them. You can
+use the scopes to solve this issue.
+
+Example:
+
+example.conf
+```
+class1.param1:integer=10
+class1.param2=value2
+class2.param3=value3
+class2.param4.key1=value41
+class2.param4.key2=value42
+```
+
+This file will create the following object when `ConfigManager.getConfig` is called:
+```js
+{
+  class1: {
+    param1: 10,
+    param2: 'value2',
+  },
+  class2: {
+    param3: 'value3',
+    'param4.key1': 'value41',
+    'param4.key2': 'value42',
+  },
+}
+```
+
+__NOTE THAT__ the scopes have a depth of 1.
+
+#### Usage
+
+Create the default configuration file `./config/default.conf` in your project's root directory.
+
+Now you can start using the module:
+```js
+const { ConfigManager } = require('@dojot/microservice-sdk');
+ConfigManager.createConfig('V2K');
+const config = ConfigManager.getConfig();
+```
+
 ## Code Examples
 
  Refer to the [examples directory](examples/) for some code samples.
