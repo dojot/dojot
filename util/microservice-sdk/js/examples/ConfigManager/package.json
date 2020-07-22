@@ -1,0 +1,18 @@
+{
+  "name": "configmanager",
+  "version": "1.0.0",
+  "description": "An example usage of ConfigManager",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "example",
+    "configuration"
+  ],
+  "author": "Eduardo Garcia Misiuk",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@dojot/microservice-sdk": "file:./microservice-sdk-pkg"
+  }
+}
