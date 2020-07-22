@@ -29,4 +29,3 @@ export certCrlFile=$CERT_CRL_FILE
 export certDir="$K2V_APP_BASEDIR/app/cert"
 export keyLength=2048
 export password="dojot"
-
