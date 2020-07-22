@@ -10,3 +10,6 @@ The dojot needs publish messages in Kafka after tenant creation and removal even
 
 - Adopting and customizing [keycloak-kafka](https://github.com/SnuK87/keycloak-kafka) SPI (Service Provider Interface)
 - Customizing Keycloak services module to trigger admin events for tenants's CRUD operations (It can be removed when newer versions of Keycloak implement it natively, to go further in this thread visit [KEYCLOAK-14313](https://issues.redhat.com/browse/KEYCLOAK-14313)) 
+
+### HTTPS
+It's highly recommended to communicate with Keycloak over HTTPS when it is not on the same network as API gateway, visit the session **Setting up TLS(SSL)** in [Keycloak Docker image page](https://hub.docker.com/r/jboss/keycloak/) for more details.
