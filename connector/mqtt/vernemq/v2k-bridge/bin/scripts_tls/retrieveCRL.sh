@@ -5,14 +5,14 @@
 
 . "${V2K_APP_BASEDIR}"/bin/scripts_tls/_initVariables.sh
 
-echo "Retrieve crl from  ${certCAName} CA : ${certEjbcaApiUrl}/ca/${certCAName}/crl?update=true"
-certCrl=$(curl --silent -X GET "${certEjbcaApiUrl}"/ca/"${certCAName}"/crl?update=true \
--H "Content-Type:application/json" \
--H "Accept:application/json" | jq '.CRL' -r)
+echo
+echo "Retrieve CRL of trusted CA : ${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl "
 
-(echo  "-----BEGIN X509 CRL-----"
-echo "${certCrl}"
-echo "-----END X509 CRL-----"  ) > "${certDir}"/tempcrl.crl
+certCrl=$(curl  -X GET "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl" \
+  -H "Content-Type:application/json" \
+  -H "Accept:application/json" | jq '.crl' -r)
+
+echo "${certCrl}" > "${certDir}"/tempcrl.crl
 
 openssl crl -inform pem -in "${certDir}"/tempcrl.crl -out "${certDir}"/"${certCrlFile}"
 

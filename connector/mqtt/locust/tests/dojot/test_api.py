@@ -329,64 +329,11 @@ class TestDojotAPIGetDevices(unittest.TestCase):
         DojotAPI.call_api.assert_called_with(mock_requests.get, ANY)
         self.assertEqual(devices, [])
 
-
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
-class TestDojotAPICreateEjbcaUser(unittest.TestCase):
+class TestDojotAPIGenerateCertificate(unittest.TestCase):
     """
-    DojotAPI create_ejbca_user() tests.
-    """
-    def setUp(self):
-        self.call_api = DojotAPI.call_api
-        DojotAPI.call_api = MagicMock()
-
-        self.jwt = "testJWT"
-        self.username = "testUser"
-        self.args = {
-            "url": MOCK_CONFIG['dojot']['url'] + "/user",
-            "headers": {
-                'content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer {0}'.format(self.jwt),
-            },
-            "data": json.dumps({
-                "username": self.username
-            }),
-        }
-
-    def tearDown(self):
-        DojotAPI.call_api = self.call_api
-
-    def test_create_ejbca_user(self, mock_requests):
-        """
-        Should successfully call a POPST to create a EJBCA user.
-        """
-        mock_requests.post = MagicMock()
-
-        DojotAPI.create_ejbca_user(self.jwt, self.username)
-
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
-
-    def test_create_ejbca_user_exception(self, mock_requests):
-        """
-        Should not create a user, because rose an exception.
-        """
-        DojotAPI.call_api.side_effect = APICallError()
-
-        with self.assertRaises(Exception) as context:
-            DojotAPI.create_ejbca_user(self.jwt, self.username)
-
-        self.assertIsNotNone(context.exception)
-        self.assertIsInstance(context.exception, APICallError)
-
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
-
-
-@patch('src.dojot.api.requests', autospec=True)
-@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
-class TestDojotAPISignCert(unittest.TestCase):
-    """
-    DojotAPI sign_cert() tests.
+    DojotAPI generate_certificate() tests.
     """
     def setUp(self):
         self.call_api = DojotAPI.call_api
@@ -397,37 +344,36 @@ class TestDojotAPISignCert(unittest.TestCase):
         self.passwd = "testPasswd"
         self.csr = "testCsr"
         self.args = {
-            "url": MOCK_CONFIG['dojot']['url'] + "/sign/" + self.username + "/pkcs10",
+            "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates",
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(self.jwt),
             },
             "data": json.dumps({
-                "passwd": self.passwd,
-                "certificate": self.csr
+                "csr": self.csr
             }),
         }
 
     def tearDown(self):
         DojotAPI.call_api = self.call_api
 
-    def test_sign_cert(self, mock_requests):
+    def test_generate_certificate(self, mock_requests):
         """
-        Test generate private csr
+        Test generate certificate
         """
-        DojotAPI.sign_cert(self.jwt, self.username, self.passwd, self.csr)
+        DojotAPI.generate_certificate(self.jwt, self.csr)
 
         DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args)
 
-    def test_sign_cert_exception(self, mock_requests):
+    def test_generate_certificate_exception(self, mock_requests):
         """
-        Should not sign the cert, because rose an exception.
+        Should not generate the cert, because rose an exception.
         """
         DojotAPI.call_api.side_effect = APICallError()
 
         with self.assertRaises(Exception) as context:
-            DojotAPI.sign_cert(self.jwt, self.username, self.passwd, self.csr)
+            DojotAPI.generate_certificate(self.jwt, self.csr)
 
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
@@ -437,56 +383,51 @@ class TestDojotAPISignCert(unittest.TestCase):
 
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
-class TestDojotAPIResetEntityStatus(unittest.TestCase):
+class TestDojotAPIRevokeCertificate(unittest.TestCase):
     """
-    DojotAPI reset_entity_status() tests.
+    DojotAPI revoke_certificate() tests.
     """
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
 
         self.jwt = "testJWT"
-        self.username = "testUser"
+        self.crt = {}
+        self.crt['fingerprint'] = "testFingerprint"
         self.args = {
-            "url": MOCK_CONFIG['dojot']['url'] + "/user",
+            "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates/" + self.crt['fingerprint'],
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(self.jwt),
-            },
-            "data": json.dumps({
-                "username": self.username,
-                "password": "dojot",
-                "subjectDN": "CN=" + self.username,
-                "status": 10
-            }),
+            }
         }
 
     def tearDown(self):
         DojotAPI.call_api = self.call_api
 
-    def test_reset_entity_status(self, mock_requests):
+    def test_revoke_certificate(self, mock_requests):
         """
-        Should reset the entity status correctly.
+        Should revoke the certificate correctly.
         """
 
-        DojotAPI.reset_entity_status(self.jwt, self.username)
+        DojotAPI.revoke_certificate(self.jwt, self.crt['fingerprint'])
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
 
-    def test_reset_entity_status_exception(self, mock_requests):
+    def test_revoke_certificate_exception(self, mock_requests):
         """
-        Should not sign the cert, because rose an exception.
+        Should not generate cert, because rose an exception.
         """
         DojotAPI.call_api.side_effect = APICallError()
 
         with self.assertRaises(Exception) as context:
-            DojotAPI.reset_entity_status(self.jwt, self.username)
+            DojotAPI.revoke_certificate(self.jwt, self.crt['fingerprint'])
 
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
 
 class TestDojotAPIDivideLoads(unittest.TestCase):
     """
