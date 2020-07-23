@@ -13,6 +13,7 @@
   "author": "Eduardo Garcia Misiuk",
   "license": "GPL-3.0",
   "dependencies": {
-    "@dojot/microservice-sdk": "file:./microservice-sdk-pkg"
+    "@dojot/microservice-sdk": "file:./microservice-sdk-pkg",
+    "lodash": "^4.17.19"
   }
 }
