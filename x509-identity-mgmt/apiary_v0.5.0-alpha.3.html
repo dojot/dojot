@@ -1,0 +1,357 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>X.509 Identity Management</title><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"><style>@import url('https://fonts.googleapis.com/css?family=Roboto:400,700|Inconsolata|Raleway:200');.hljs-comment,.hljs-title{color:#8e908c}.hljs-variable,.hljs-attribute,.hljs-tag,.hljs-regexp,.ruby .hljs-constant,.xml .hljs-tag .hljs-title,.xml .hljs-pi,.xml .hljs-doctype,.html .hljs-doctype,.css .hljs-id,.css .hljs-class,.css .hljs-pseudo{color:#c82829}.hljs-number,.hljs-preprocessor,.hljs-pragma,.hljs-built_in,.hljs-literal,.hljs-params,.hljs-constant{color:#f5871f}.ruby .hljs-class .hljs-title,.css .hljs-rules .hljs-attribute{color:#eab700}.hljs-string,.hljs-value,.hljs-inheritance,.hljs-header,.ruby .hljs-symbol,.xml .hljs-cdata{color:#718c00}.css .hljs-hexcolor{color:#3e999f}.hljs-function,.python .hljs-decorator,.python .hljs-title,.ruby .hljs-function .hljs-title,.ruby .hljs-title .hljs-keyword,.perl .hljs-sub,.javascript .hljs-title,.coffeescript .hljs-title{color:#4271ae}.hljs-keyword,.javascript .hljs-function{color:#8959a8}.hljs{display:block;background:white;color:#4d4d4c;padding:.5em}.coffeescript .javascript,.javascript .xml,.tex .hljs-formula,.xml .javascript,.xml .vbscript,.xml .css,.xml .hljs-cdata{opacity:.5}.right .hljs-comment{color:#969896}.right .css .hljs-class,.right .css .hljs-id,.right .css .hljs-pseudo,.right .hljs-attribute,.right .hljs-regexp,.right .hljs-tag,.right .hljs-variable,.right .html .hljs-doctype,.right .ruby .hljs-constant,.right .xml .hljs-doctype,.right .xml .hljs-pi,.right .xml .hljs-tag .hljs-title{color:#c66}.right .hljs-built_in,.right .hljs-constant,.right .hljs-literal,.right .hljs-number,.right .hljs-params,.right .hljs-pragma,.right .hljs-preprocessor{color:#de935f}.right .css .hljs-rule .hljs-attribute,.right .ruby .hljs-class .hljs-title{color:#f0c674}.right .hljs-header,.right .hljs-inheritance,.right .hljs-name,.right .hljs-string,.right .hljs-value,.right .ruby .hljs-symbol,.right .xml .hljs-cdata{color:#b5bd68}.right .css .hljs-hexcolor,.right .hljs-title{color:#8abeb7}.right .coffeescript .hljs-title,.right .hljs-function,.right .javascript .hljs-title,.right .perl .hljs-sub,.right .python .hljs-decorator,.right .python .hljs-title,.right .ruby .hljs-function .hljs-title,.right .ruby .hljs-title .hljs-keyword{color:#81a2be}.right .hljs-keyword,.right .javascript .hljs-function{color:#b294bb}.right .hljs{display:block;overflow-x:auto;background:#1d1f21;color:#c5c8c6;padding:.5em;-webkit-text-size-adjust:none}.right .coffeescript .javascript,.right .javascript .xml,.right .tex .hljs-formula,.right .xml .css,.right .xml .hljs-cdata,.right .xml .javascript,.right .xml .vbscript{opacity:.5}body{color:black;background:white;font:400 14px / 1.42 'Roboto',Helvetica,sans-serif}header{border-bottom:1px solid #f2f2f2;margin-bottom:12px}h1,h2,h3,h4,h5{color:black;margin:12px 0}h1 .permalink,h2 .permalink,h3 .permalink,h4 .permalink,h5 .permalink{margin-left:0;opacity:0;transition:opacity .25s ease}h1:hover .permalink,h2:hover .permalink,h3:hover .permalink,h4:hover .permalink,h5:hover .permalink{opacity:1}.triple h1 .permalink,.triple h2 .permalink,.triple h3 .permalink,.triple h4 .permalink,.triple h5 .permalink{opacity:.15}.triple h1:hover .permalink,.triple h2:hover .permalink,.triple h3:hover .permalink,.triple h4:hover .permalink,.triple h5:hover .permalink{opacity:.15}h1{font:200 36px 'Raleway',Helvetica,sans-serif;font-size:36px}h2{font:200 36px 'Raleway',Helvetica,sans-serif;font-size:30px}h3{font-size:100%;text-transform:uppercase}h5{font-size:100%;font-weight:normal}p{margin:0 0 10px}p.choices{line-height:1.6}a{color:#428bca;text-decoration:none}li p{margin:0}hr.split{border:0;height:1px;width:100%;padding-left:6px;margin:12px auto;background-image:linear-gradient(to right, rgba(0,0,0,0) 20%, rgba(0,0,0,0.2) 51.4%, rgba(255,255,255,0.2) 51.4%, rgba(255,255,255,0) 80%)}dl dt{float:left;width:130px;clear:left;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}dl dd{margin-left:150px}blockquote{color:rgba(0,0,0,0.5);font-size:15.5px;padding:10px 20px;margin:12px 0;border-left:5px solid #e8e8e8}blockquote p:last-child{margin-bottom:0}pre{background-color:#f5f5f5;padding:12px;border:1px solid #cfcfcf;border-radius:6px;overflow:auto}pre code{color:black;background-color:transparent;padding:0;border:none}code{color:#444;background-color:#f5f5f5;font:'Inconsolata',monospace;padding:1px 4px;border:1px solid #cfcfcf;border-radius:3px}ul,ol{padding-left:2em}table{border-collapse:collapse;border-spacing:0;margin-bottom:12px}table tr:nth-child(2n){background-color:#fafafa}table th,table td{padding:6px 12px;border:1px solid #e6e6e6}.text-muted{opacity:.5}.note,.warning{padding:.3em 1em;margin:1em 0;border-radius:2px;font-size:90%}.note h1,.warning h1,.note h2,.warning h2,.note h3,.warning h3,.note h4,.warning h4,.note h5,.warning h5,.note h6,.warning h6{font-family:200 36px 'Raleway',Helvetica,sans-serif;font-size:135%;font-weight:500}.note p,.warning p{margin:.5em 0}.note{color:black;background-color:#f0f6fb;border-left:4px solid #428bca}.note h1,.note h2,.note h3,.note h4,.note h5,.note h6{color:#428bca}.warning{color:black;background-color:#fbf1f0;border-left:4px solid #c9302c}.warning h1,.warning h2,.warning h3,.warning h4,.warning h5,.warning h6{color:#c9302c}header{margin-top:24px}nav{position:fixed;top:24px;bottom:0;overflow-y:auto}nav .resource-group{padding:0}nav .resource-group .heading{position:relative}nav .resource-group .heading .chevron{position:absolute;top:12px;right:12px;opacity:.5}nav .resource-group .heading a{display:block;color:black;opacity:.7;border-left:2px solid transparent;margin:0}nav .resource-group .heading a:hover{text-decoration:none;background-color:bad-color;border-left:2px solid black}nav ul{list-style-type:none;padding-left:0}nav ul a{display:block;font-size:13px;color:rgba(0,0,0,0.7);padding:8px 12px;border-top:1px solid #d9d9d9;border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}nav ul a:hover{text-decoration:none;background-color:bad-color;border-left:2px solid black}nav ul>li{margin:0}nav ul>li:first-child{margin-top:-12px}nav ul>li:last-child{margin-bottom:-12px}nav ul ul a{padding-left:24px}nav ul ul li{margin:0}nav ul ul li:first-child{margin-top:0}nav ul ul li:last-child{margin-bottom:0}nav>div>div>ul>li:first-child>a{border-top:none}.preload *{transition:none !important}.pull-left{float:left}.pull-right{float:right}.badge{display:inline-block;float:right;min-width:10px;min-height:14px;padding:3px 7px;font-size:12px;color:#000;background-color:#f2f2f2;border-radius:10px;margin:-2px 0}.badge.get{color:#70bbe1;background-color:#d9edf7}.badge.head{color:#70bbe1;background-color:#d9edf7}.badge.options{color:#70bbe1;background-color:#d9edf7}.badge.put{color:#f0db70;background-color:#fcf8e3}.badge.patch{color:#f0db70;background-color:#fcf8e3}.badge.post{color:#93cd7c;background-color:#dff0d8}.badge.delete{color:#ce8383;background-color:#f2dede}.collapse-button{float:right}.collapse-button .close{display:none;color:#428bca;cursor:pointer}.collapse-button .open{color:#428bca;cursor:pointer}.collapse-button.show .close{display:inline}.collapse-button.show .open{display:none}.collapse-content{max-height:0;overflow:hidden;transition:max-height .3s ease-in-out}nav{width:220px}.container{max-width:940px;margin-left:auto;margin-right:auto}.container .row .content{margin-left:244px;width:696px}.container .row:after{content:'';display:block;clear:both}.container-fluid nav{width:22%}.container-fluid .row .content{margin-left:24%}.container-fluid.triple nav{width:16.5%;padding-right:1px}.container-fluid.triple .row .content{position:relative;margin-left:16.5%;padding-left:24px}.middle:before,.middle:after{content:'';display:table}.middle:after{clear:both}.middle{box-sizing:border-box;width:51.5%;padding-right:12px}.right{box-sizing:border-box;float:right;width:48.5%;padding-left:12px}.right a{color:#428bca}.right h1,.right h2,.right h3,.right h4,.right h5,.right p,.right div{color:white}.right pre{background-color:#1d1f21;border:1px solid #1d1f21}.right pre code{color:#c5c8c6}.right .description{margin-top:12px}.triple .resource-heading{font-size:125%}.definition{margin-top:12px;margin-bottom:12px}.definition .method{font-weight:bold}.definition .method.get{color:#2e8ab8}.definition .method.head{color:#2e8ab8}.definition .method.options{color:#2e8ab8}.definition .method.post{color:#56b82e}.definition .method.put{color:#b8a22e}.definition .method.patch{color:#b8a22e}.definition .method.delete{color:#b82e2e}.definition .uri{word-break:break-all;word-wrap:break-word}.definition .hostname{opacity:.5}.example-names{background-color:#eee;padding:12px;border-radius:6px}.example-names .tab-button{cursor:pointer;color:black;border:1px solid #ddd;padding:6px;margin-left:12px}.example-names .tab-button.active{background-color:#d5d5d5}.right .example-names{background-color:#444}.right .example-names .tab-button{color:white;border:1px solid #666;border-radius:6px}.right .example-names .tab-button.active{background-color:#5e5e5e}#nav-background{position:fixed;left:0;top:0;bottom:0;width:16.5%;padding-right:14.4px;background-color:#fbfbfb;border-right:1px solid #f0f0f0;z-index:-1}#right-panel-background{position:absolute;right:-12px;top:-12px;bottom:-12px;width:48.6%;background-color:#333;z-index:-1}@media (max-width:1200px){nav{width:198px}.container{max-width:840px}.container .row .content{margin-left:224px;width:606px}}@media (max-width:992px){nav{width:169.4px}.container{max-width:720px}.container .row .content{margin-left:194px;width:526px}}@media (max-width:768px){nav{display:none}.container{width:95%;max-width:none}.container .row .content,.container-fluid .row .content,.container-fluid.triple .row .content{margin-left:auto;margin-right:auto;width:95%}#nav-background{display:none}#right-panel-background{width:48.6%}}.back-to-top{position:fixed;z-index:1;bottom:0;right:24px;padding:4px 8px;color:rgba(0,0,0,0.5);background-color:#f2f2f2;text-decoration:none !important;border-top:1px solid #d9d9d9;border-left:1px solid #d9d9d9;border-right:1px solid #d9d9d9;border-top-left-radius:3px;border-top-right-radius:3px}.resource-group{padding:12px;margin-bottom:12px;background-color:white;border:1px solid #d9d9d9;border-radius:6px}.resource-group h2.group-heading,.resource-group .heading a{padding:12px;margin:-12px -12px 12px -12px;background-color:#f2f2f2;border-bottom:1px solid #d9d9d9;border-top-left-radius:6px;border-top-right-radius:6px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.triple .content .resource-group{padding:0;border:none}.triple .content .resource-group h2.group-heading,.triple .content .resource-group .heading a{margin:0 0 12px 0;border:1px solid #d9d9d9}nav .resource-group .heading a{padding:12px;margin-bottom:0}nav .resource-group .collapse-content{padding:0}.action{margin-bottom:12px;padding:12px 12px 0 12px;overflow:hidden;border:1px solid transparent;border-radius:6px}.action h4.action-heading{padding:6px 12px;margin:-12px -12px 12px -12px;border-bottom:1px solid transparent;border-top-left-radius:6px;border-top-right-radius:6px;overflow:hidden}.action h4.action-heading .name{float:right;font-weight:normal;padding:6px 0}.action h4.action-heading .method{padding:6px 12px;margin-right:12px;border-radius:3px;display:inline-block}.action h4.action-heading .method.get{color:#fff;background-color:#337ab7}.action h4.action-heading .method.head{color:#fff;background-color:#337ab7}.action h4.action-heading .method.options{color:#fff;background-color:#337ab7}.action h4.action-heading .method.put{color:#fff;background-color:#ed9c28}.action h4.action-heading .method.patch{color:#fff;background-color:#ed9c28}.action h4.action-heading .method.post{color:#fff;background-color:#5cb85c}.action h4.action-heading .method.delete{color:#fff;background-color:#d9534f}.action h4.action-heading code{color:#444;background-color:#f5f5f5;border-color:#cfcfcf;font-weight:normal;word-break:break-all;display:inline-block;margin-top:2px}.action dl.inner{padding-bottom:2px}.action .title{border-bottom:1px solid white;margin:0 -12px -1px -12px;padding:12px}.action.get{border-color:#bce8f1}.action.get h4.action-heading{color:#337ab7;background:#d9edf7;border-bottom-color:#bce8f1}.action.head{border-color:#bce8f1}.action.head h4.action-heading{color:#337ab7;background:#d9edf7;border-bottom-color:#bce8f1}.action.options{border-color:#bce8f1}.action.options h4.action-heading{color:#337ab7;background:#d9edf7;border-bottom-color:#bce8f1}.action.post{border-color:#d6e9c6}.action.post h4.action-heading{color:#5cb85c;background:#dff0d8;border-bottom-color:#d6e9c6}.action.put{border-color:#faebcc}.action.put h4.action-heading{color:#ed9c28;background:#fcf8e3;border-bottom-color:#faebcc}.action.patch{border-color:#faebcc}.action.patch h4.action-heading{color:#ed9c28;background:#fcf8e3;border-bottom-color:#faebcc}.action.delete{border-color:#ebccd1}.action.delete h4.action-heading{color:#d9534f;background:#f2dede;border-bottom-color:#ebccd1}</style></head><body class="preload"><a href="#top" class="text-muted back-to-top"><i class="fa fa-toggle-up"></i>&nbsp;Back to top</a><div class="container"><div class="row"><nav><div class="resource-group"><div class="heading"><div class="chevron"><i class="open fa fa-angle-down"></i></div><a href="#x.509">X.509</a></div><div class="collapse-content"><ul><li><a href="#x.509-endpoint-for-certificates-in-general">Endpoint for certificates in general</a><ul><li><a href="#x.509-endpoint-for-certificates-in-general-post"><span class="badge post"><i class="fa fa-plus"></i></span>Create x.509 Certificate from CSR</a></li><li><a href="#x.509-endpoint-for-certificates-in-general-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>List X.509 Certificates</a></li></ul></li><li><a href="#x.509-endpoint-for-a-specific-certificate">Endpoint for a specific certificate</a><ul><li><a href="#x.509-endpoint-for-a-specific-certificate-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>Get X.509 Certificate</a></li><li><a href="#x.509-endpoint-for-a-specific-certificate-delete"><span class="badge delete"><i class="fa fa-times"></i></span>Delete X.509 Certificate</a></li></ul></li><li><a href="#x.509-endpoint-for-the-root-ca-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>Get Root CA</a></li><li><a href="#x.509-endpoint-for-the-crl-of-root-ca-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>Gets the latest CRL</a></li></ul></div></div><p style="text-align: center; word-wrap: break-word;"><a href="https://localhost:8000/x509/v1">https://localhost:8000/x509/v1</a></p></nav><div class="content"><header><h1 id="top">X.509 Identity Management</h1></header><p>API documentation for X.509 Identity Management</p>
+<section id="x.509" class="resource-group"><h2 class="group-heading">X.509 <a href="#x.509" class="permalink">&para;</a></h2><p>API to provide x.509 identification for final dojot entities, that is, IoT devices that communicate with the dojot IoT platform.</p>
+<div id="x.509-endpoint-for-certificates-in-general" class="resource"><h3 class="resource-heading">Endpoint for certificates in general <a href="#x.509-endpoint-for-certificates-in-general" class="permalink">&nbsp;&para;</a></h3><div id="x.509-endpoint-for-certificates-in-general-post" class="action post"><h4 class="action-heading"><div class="name">Create x.509 Certificate from CSR</div><a href="#x.509-endpoint-for-certificates-in-general-post" class="method post">POST</a><code class="uri">/certificates</code></h4><p>Creates a X.509 certificate using the specified Certificate Signing Request (CSR).</p>
+<p>The SubjectDN only needs to contain the CN field, limited to 255 characters, being A-Z, a-z, 0-9 and space.</p>
+<p>The CSR must include a public key that is either an RSA key with a length of at least 2048 bits or an ECC key from NIST recommended curves: P-256, P-384 or P-521.</p>
+<ul>
+<li>csr (string) - The CSR in PEM Format</li>
+</ul>
+<h4>Example URI</h4><div class="definition"><span class="method post">POST</span>&nbsp;<span class="uri"><span class="hostname">https://localhost:8000/x509/v1</span>/certificates</span></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">Authorization</span>: <span class="hljs-string">Bearer [JWT]</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">csr</span>": <span class="hljs-value"><span class="hljs-string">"[[CSR in PEM Format]]"</span>
+</span>}</code></pre><div style="height: 1px;"></div><h5>Schema</h5><pre><code>{
+  "<span class="hljs-attribute">$schema</span>": <span class="hljs-value"><span class="hljs-string">"http://json-schema.org/draft-07/schema"</span></span>,
+  "<span class="hljs-attribute">type</span>": <span class="hljs-value"><span class="hljs-string">"object"</span></span>,
+  "<span class="hljs-attribute">default</span>": <span class="hljs-value">{}</span>,
+  "<span class="hljs-attribute">additionalProperties</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+  "<span class="hljs-attribute">properties</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">csr</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">type</span>": <span class="hljs-value"><span class="hljs-string">"string"</span></span>,
+      "<span class="hljs-attribute">title</span>": <span class="hljs-value"><span class="hljs-string">"Certificate Signing Request (CSR) Schema"</span></span>,
+      "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"Schema for validating an PKCS#10 CSR."</span></span>,
+      "<span class="hljs-attribute">contentEncoding</span>": <span class="hljs-value"><span class="hljs-string">"base64"</span></span>,
+      "<span class="hljs-attribute">contentMediaType</span>": <span class="hljs-value"><span class="hljs-string">"application/pkcs10"</span></span>,
+      "<span class="hljs-attribute">maxLength</span>": <span class="hljs-value"><span class="hljs-number">65536</span></span>,
+      "<span class="hljs-attribute">pattern</span>": <span class="hljs-value"><span class="hljs-string">"^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}$"</span>
+    </span>}
+  </span>}
+</span>}</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>201</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">certificateFingerprint</span>": <span class="hljs-value"><span class="hljs-string">"D3:20:80:C7:89:B6:5D:B9:83:BF:D1:7E:93:6A:F2:CB:0B:57:CF:33:30:ED:9E:4A:7C:05:4D:D4:D0:8E:3D:2F"</span></span>,
+  "<span class="hljs-attribute">certificatePem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----[[Certificate Base64 Encoded em PEM Format]]-----END CERTIFICATE-----"</span>
+</span>}</code></pre><div style="height: 1px;"></div><h5>Schema</h5><pre><code>{
+  "<span class="hljs-attribute">$schema</span>": <span class="hljs-value"><span class="hljs-string">"http://json-schema.org/draft-04/schema#"</span></span>,
+  "<span class="hljs-attribute">type</span>": <span class="hljs-value"><span class="hljs-string">"object"</span></span>,
+  "<span class="hljs-attribute">properties</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">certificateFingerprint</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">type</span>": <span class="hljs-value"><span class="hljs-string">"string"</span></span>,
+      "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"Fingerprint (as SHA256) of the certificate, where each pair of bytes (represented by hexadecimal characters) are separated by a colon."</span>
+    </span>}</span>,
+    "<span class="hljs-attribute">certificatePem</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">type</span>": <span class="hljs-value"><span class="hljs-string">"string"</span></span>,
+      "<span class="hljs-attribute">description</span>": <span class="hljs-value"><span class="hljs-string">"The PEM format consists of a header and a footer, the Certificate is encoded in *Base64* in the middle.\nNote that each line has a maximum of 64 bytes. As the file is in JSON payload, it is necessary to represent the line breaks with the `\\r\\n` markers."</span>
+    </span>}
+  </span>}
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div><div id="x.509-endpoint-for-certificates-in-general-get" class="action get"><h4 class="action-heading"><div class="name">List X.509 Certificates</div><a href="#x.509-endpoint-for-certificates-in-general-get" class="method get">GET</a><code class="uri">/certificates{?page,limit,fields,keyVal}</code></h4><p>Lists the x.509 certificates registered for your tenant.
+The results might be filtered and are paginated with a default page size of 25.</p>
+<h4>Example URI</h4><div class="definition"><span class="method get">GET</span>&nbsp;<span class="uri"><span class="hostname">https://localhost:8000/x509/v1</span>/certificates?<span class="hljs-attribute">page=</span><span class="hljs-literal"></span>&<span class="hljs-attribute">limit=</span><span class="hljs-literal"></span>&<span class="hljs-attribute">fields=</span><span class="hljs-literal"></span>&<span class="hljs-attribute">keyVal=</span><span class="hljs-literal"></span></span></div><div class="title"><strong>URI Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>page</dt><dd><code>number</code>&nbsp;<span>(optional)</span>&nbsp;<span class="text-info default"><strong>Default:&nbsp;</strong><span>1</span></span>&nbsp;<p>It is a metadata for paginated results.</p>
+</dd><dt>limit</dt><dd><code>number</code>&nbsp;<span>(optional)</span>&nbsp;<span class="text-info default"><strong>Default:&nbsp;</strong><span>25</span></span>&nbsp;<p>The maximum number of results to return per page.</p>
+</dd><dt>fields</dt><dd><code>string</code>&nbsp;<span>(optional)</span>&nbsp;<p>List of keys (comma-separated) that should be included in the result. If the fields parameter is not set, all keys will be kept in the result.</p>
+</dd><dt>keyVal</dt><dd><code>string</code>&nbsp;<span>(optional)</span>&nbsp;<p>Filters the returned documents by the given key=val. If more than one key=val pair is set; the returned documents must contain all of them.</p>
+</dd></dl></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">Authorization</span>: <span class="hljs-string">Bearer [JWT]</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">paging</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">previous</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">number</span>": <span class="hljs-value"><span class="hljs-number">1</span></span>,
+      "<span class="hljs-attribute">url</span>": <span class="hljs-value"><span class="hljs-string">"/x509/v1/certificates?page=1&amp;limit=5"</span>
+    </span>}</span>,
+    "<span class="hljs-attribute">current</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">number</span>": <span class="hljs-value"><span class="hljs-number">2</span></span>,
+      "<span class="hljs-attribute">url</span>": <span class="hljs-value"><span class="hljs-string">"/x509/v1/certificates?page=2&amp;limit=5"</span>
+    </span>}</span>,
+    "<span class="hljs-attribute">next</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">number</span>": <span class="hljs-value"><span class="hljs-number">3</span></span>,
+      "<span class="hljs-attribute">url</span>": <span class="hljs-value"><span class="hljs-string">"/x509/v1/certificates?page=3&amp;limit=5"</span>
+    </span>}</span>,
+    "<span class="hljs-attribute">totalItems</span>": <span class="hljs-value"><span class="hljs-number">55</span></span>,
+    "<span class="hljs-attribute">totalPages</span>": <span class="hljs-value"><span class="hljs-number">11</span></span>,
+    "<span class="hljs-attribute">limitPerPage</span>": <span class="hljs-value"><span class="hljs-number">5</span>
+  </span>}</span>,
+  "<span class="hljs-attribute">certificates</span>": <span class="hljs-value">[
+    {
+      "<span class="hljs-attribute">issuedByDojotPki</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+      "<span class="hljs-attribute">autoRegistered</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value"><span class="hljs-string">"01:89:B9:85:55:38:34:B6:43:12:57:EC:09:08:0B:22:31:BC:FC:3D:AF:C8:00:94:C0:89:60:89:54:63:17:F0"</span></span>,
+      "<span class="hljs-attribute">pem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIGZDCCBEygAwIBAgIUG/kCnjE/+o1Gd7fJ5uROnUA8PAYwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSsw\nKQYDVQQDDCJhZG1pbjpUZXN0ZSBkZSBjaGF2ZSBFQ0Mgc2VjcDM4NHIxMHYwEAYH\nKoZIzj0CAQYFK4EEACIDYgAEHWk7X3/gQAUZ9jV1adKr6V9W08C2/+R47WX2f5J8\nOzggEJISeAR0XDCo5ezglsOkd8v7rJ1h/lGfoCjKzc61V4htK2ILHAcGuf6YdvyQ\n9sJhq//JHScVygwWI+ARzk0So4ICvjCCArowDAYDVR0TAQH/BAIwADAfBgNVHSME\nGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYDVR0uBIHUMIHRMIHOoIHLoIHI\nhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1Ymxp\nY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0YWNybCZpc3N1ZXI9VUlEJTNE\nYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUwOSUyMElkZW50aXR5JTIwQ0El\nMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJDTyUzRGRvam90JTIwSW9UJTIw\nUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMIIBWgYDVR0f\nBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1jcmwm\naXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1MTklMkNDTiUzRFg1MDklMjBJ\nZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0ZSUyMElzc3VlciUyQ08lM0Rk\nb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMwIQYKCZImiZPyLGQBAQwTYy0w\nZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkG\nA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxh\ndGZvcm0wHQYDVR0OBBYEFDZLtrE9HG9wXzzAWu6QQBchA5gOMA4GA1UdDwEB/wQE\nAwID6DANBgkqhkiG9w0BAQsFAAOCAgEAh8Hd+81mvVpBkCFifUAyu8JKuACbDsRA\nLlOpA1i0oj+gMGyhkHPjo3+tuPWAsiHq7/4GucnCd29/jXO97M2YM0u1tAs8rQmu\nTnJR75H9O0mYbB+CNAJV9ZgcjZspFb8JVcMumA0nlcJHg7yHEZ7Awy5g+FsDiE9b\nckkSo90o0UPt1toXgGqVNQwT7wXVOTFJgEee9C2/oO/AgR5mWxZMAVI7afgGddbM\n/FsSUAmfjq6Cay5d56aJrfKEV480Mp0YevEdBmRHF4nHx+9xtnouc0FaPBvU7DXB\nw+h3VLUuIi5l2Ro9MvnUWMNNqdvXD+5HeaQbIbP2tQ+rE/Pg2w1txuxm+XbnMbCr\nh3NV8gZk3nwyKXa9L64DJaTNu1ZScxm0GqhVSbLLTDqraK3IGVQ5uDcCaU0jH9o5\na0ZjanmcICBKuttyKcWm20E/KmmS7frBFxvmrOE0tb3XVy4Nt8cF8oScxJKC0hAx\nAgjomVslurKCT33TBlv4GJwamalHoaH8RGrkfMGpFe6r9N+Sv8aEAajFidd0vF0a\nle9jNrO88BrEADYXc+KSTJR5YNV2L/zMYBGMv8dB8ZadmJjUNlZEsFddeqGiwuIG\nB1HJ23q/kF3dwI/lnl1kYXtsweEdgAmiaSqgEOG4eRbV9UBS2cqDvHuhYJhoY47J\n61vg0s7WFh0=\n-----END CERTIFICATE-----"</span></span>,
+      "<span class="hljs-attribute">belongsTo</span>": <span class="hljs-value">{}</span>,
+      "<span class="hljs-attribute">tenant</span>": <span class="hljs-value"><span class="hljs-string">"admin"</span></span>,
+      "<span class="hljs-attribute">createdAt</span>": <span class="hljs-value"><span class="hljs-string">"2020-06-06T21:13:36.448Z"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">issuedByDojotPki</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+      "<span class="hljs-attribute">autoRegistered</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value"><span class="hljs-string">"05:5B:91:45:81:93:55:92:AD:7A:0A:40:F4:05:05:0C:6F:31:14:97:D9:01:87:86:90:50:5C:F8:7B:97:F9:78"</span></span>,
+      "<span class="hljs-attribute">pem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIGRjCCBC6gAwIBAgIUWaMM+XRlf4mugbY6bjC7fEOjfEwwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMDcwMFoX\nDTIxMDYwNjIxMDcwMFowSTEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSow\nKAYDVQQDDCFhZG1pbjpFQ0MgcHJpbWUyNTZ2MSBUaGlhZ28gVGVzdGUwWTATBgcq\nhkjOPQIBBggqhkjOPQMBBwNCAAScpvJvi3wQGER+b2CQ3/E+Nw+ddTCu2fv5sF/E\nBqVe0tWQu1rWPDmrwmjkIOM33e1fo0SzeNaDrDurPEx7OTAOo4ICvjCCArowDAYD\nVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYD\nVR0uBIHUMIHRMIHOoIHLoIHIhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0\nYWNybCZpc3N1ZXI9VUlEJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUw\nOSUyMElkZW50aXR5JTIwQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJD\nTyUzRGRvam90JTIwSW9UJTIwUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIG\nCCsGAQUFBwMEMIIBWgYDVR0fBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3\nMi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0\nL2NlcnRkaXN0P2NtZD1jcmwmaXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1\nMTklMkNDTiUzRFg1MDklMjBJZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0\nZSUyMElzc3VlciUyQ08lM0Rkb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMw\nIQYKCZImiZPyLGQBAQwTYy0wZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUw\nOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYD\nVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0wHQYDVR0OBBYEFD1vcBmX/6Of+o7t8eis\nKz8AyLtgMA4GA1UdDwEB/wQEAwID6DANBgkqhkiG9w0BAQsFAAOCAgEALwyxbhhT\nPbZelxPYPZc7uTwtYOi4Ha4npk2iPWa48c5p37o0qID5wk0evoGJgjwngDfGEBfs\nG4dYipFjxSi+bkjhV6Bll8VXasMM/U4YaftQu3uEsTnjbGVXEY3jQmetXQ+hPcn6\nqlj9jqQPBwI6ieoXuLXBdBB8eLtCxIwjBeXWT75m6ILRUw9csDEkt+tjZx913jWe\nh8skZ280EbfJnketd0oayzU3exsoaHXuHXEdEJBjUptl5eLBoVGGsgV6rMATeZ/a\n64BeyFV4uaQWYVphz12xplysxOc/SemkZPZEci3lkct163FQuRdazWJnikjWg3ht\n9dJh9jiXwCuGL/hwFNjHrFil0dKhI53TOpqO+lgtxZwnImVwvXrf+UtmJ+YdGeJu\ntAuJdehJ6O/lHD4GUhFWAWD1LCyOPxi+wgUGrH43qLcybvQferNxqZPnnpmn2EjP\nhl+4OWoryhjXUR8UpV2MLr0P6QRvl6y159oISFNxa4JjBGXBmWF770ccp6FTukUg\nvC8MSMLtgnBJqJ/UyYF8QKKTdnfwoQQQOeyOeJ59zIQxjeic8bRywZxLHrHMNYYc\n/+jQiqMc7K/+3Cmn8GiUcPJtUv+qlcD3bJMv6RxDaj/OLUVA6vSOwKEepFueb71b\nDpsr30AtcONH8L8ujiO/ZMil/6KJG00glr8=\n-----END CERTIFICATE-----"</span></span>,
+      "<span class="hljs-attribute">belongsTo</span>": <span class="hljs-value">{}</span>,
+      "<span class="hljs-attribute">tenant</span>": <span class="hljs-value"><span class="hljs-string">"admin"</span></span>,
+      "<span class="hljs-attribute">createdAt</span>": <span class="hljs-value"><span class="hljs-string">"2020-06-06T21:07:56.765Z"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">issuedByDojotPki</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+      "<span class="hljs-attribute">autoRegistered</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value"><span class="hljs-string">"06:F6:68:C7:97:D0:8D:2D:BD:81:00:64:70:28:50:CE:FA:3B:54:C1:D2:6E:56:F7:1A:F0:6C:D5:19:AA:A1:94"</span></span>,
+      "<span class="hljs-attribute">pem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIGZDCCBEygAwIBAgIUZmlG21/XH0EoRo3IpaDpB1JnPK4wDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSsw\nKQYDVQQDDCJhZG1pbjpUZXN0ZSBkZSBjaGF2ZSBFQ0Mgc2VjcDM4NHIxMHYwEAYH\nKoZIzj0CAQYFK4EEACIDYgAEHWk7X3/gQAUZ9jV1adKr6V9W08C2/+R47WX2f5J8\nOzggEJISeAR0XDCo5ezglsOkd8v7rJ1h/lGfoCjKzc61V4htK2ILHAcGuf6YdvyQ\n9sJhq//JHScVygwWI+ARzk0So4ICvjCCArowDAYDVR0TAQH/BAIwADAfBgNVHSME\nGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYDVR0uBIHUMIHRMIHOoIHLoIHI\nhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1Ymxp\nY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0YWNybCZpc3N1ZXI9VUlEJTNE\nYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUwOSUyMElkZW50aXR5JTIwQ0El\nMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJDTyUzRGRvam90JTIwSW9UJTIw\nUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMIIBWgYDVR0f\nBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1jcmwm\naXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1MTklMkNDTiUzRFg1MDklMjBJ\nZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0ZSUyMElzc3VlciUyQ08lM0Rk\nb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMwIQYKCZImiZPyLGQBAQwTYy0w\nZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkG\nA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxh\ndGZvcm0wHQYDVR0OBBYEFDZLtrE9HG9wXzzAWu6QQBchA5gOMA4GA1UdDwEB/wQE\nAwID6DANBgkqhkiG9w0BAQsFAAOCAgEAG3QPbes/2ufPlehHmr7exfZ7ZwhuWlDp\nFGTbL/VKsciBDZBZ5ZPUPTrmcDKVdXs/lN/AzxifQUZ2AWlLv6h8P6uoJ2MCgxNp\n/7TW3IMKMiPcuBowPPmxaXP/DCnGhuZ9sxxh5zUYyqzOK2qJTaGqK1rI+MjE2Efh\nw5ULlqw5MddwXuGBmsKfmfW65Ix8n+5cUMW0X6APkG5iX2P+57BDHSt6v8UbzMAS\nzwRQZ9oec5KwS7icZTREfqJ50edNpqLuoZ+UCnjkgoCpyG9TvH3SiihQo6W9CQ9J\nA6Z1K2TMW56dIdc0PDQ9uiV/xuVtkxyDQxgEGsWw0ecN7JeM2vGMR00c//NdVXq9\nnyuJWLbhBAiZDit2kn0sXtCZS0uXp46f+iIwNfVt6HhSVxDtI0WPPjq4+RqaUbIA\nkmR/gv2QAjp6XqTHPX+wXv2iQz9WF96EAPL2n1Wj4WEhlmP3t7uSGQj5ITiPqbX9\nJgxNFI6xZkIjeJZuvsZWekhbZ4ULRngF8a1KdkKvomTZhEYtm7SjCop565InLo0+\n3/MDhNKIIHQC58kV0wqw2Q6S3twKzOnxdYMWaXN/UZYIiJxkIQ+6breaKO8geZ74\ncDIwplNG5Dze2NfOwY7R8YMpYYNCLbygx7+TqkCAYlls7bNgjDZ8ch/1a4aYFtHl\n9K1e9s4zjdw=\n-----END CERTIFICATE-----"</span></span>,
+      "<span class="hljs-attribute">belongsTo</span>": <span class="hljs-value">{}</span>,
+      "<span class="hljs-attribute">tenant</span>": <span class="hljs-value"><span class="hljs-string">"admin"</span></span>,
+      "<span class="hljs-attribute">createdAt</span>": <span class="hljs-value"><span class="hljs-string">"2020-06-06T21:13:37.619Z"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">issuedByDojotPki</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+      "<span class="hljs-attribute">autoRegistered</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value"><span class="hljs-string">"14:61:7A:C9:41:47:47:35:E1:37:E4:35:C4:3E:CE:BE:62:28:CB:B2:CF:A5:6F:1A:E5:30:64:F8:CC:74:39:78"</span></span>,
+      "<span class="hljs-attribute">pem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIGijCCBHKgAwIBAgIUA5KTnZU3BV/W1Y8azQ5+4qW2e5swDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSsw\nKQYDVQQDDCJhZG1pbjpUZXN0ZSBkZSBjaGF2ZSBFQ0Mgc2VjcDUyMXIxMIGbMBAG\nByqGSM49AgEGBSuBBAAjA4GGAAQAnBJFrKXkqraaEEpxxvJRx9NUU/NzyPKQkX2f\nnaUQxn6e9Q88BtskqrvkpNeEd6BJP43EuGsrG54wmCmG/HeTAD0BHcvIpcbPgEd7\nUcS4LHtt3DPKuqazet7tD8zlLShs6dCSM3djr+kArxcSjNCJG0iPgEME53Er3jbK\nWbhznLHMUZ2jggK+MIICujAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFFjCckdw\nxGbsWEEv3h/+sy1Cz5RgMIHcBgNVHS4EgdQwgdEwgc6ggcuggciGgcVodHRwOi8v\nMTcyLjE4LjAuMwoxNzIuMTkuMC40OjgwODAvZWpiY2EvcHVibGljd2ViL3dlYmRp\nc3QvY2VydGRpc3Q/Y21kPWRlbHRhY3JsJmlzc3Vlcj1VSUQlM0RjLTBmYTM5YjMz\nZTU2ZTA2NTE5JTJDQ04lM0RYNTA5JTIwSWRlbnRpdHklMjBDQSUyQ09VJTNEQ2Vy\ndGlmaWNhdGUlMjBJc3N1ZXIlMkNPJTNEZG9qb3QlMjBJb1QlMjBQbGF0Zm9ybTAd\nBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwQwggFaBgNVHR8EggFRMIIBTTCC\nAUmggcaggcOGgcBodHRwOi8vMTcyLjE4LjAuMwoxNzIuMTkuMC40OjgwODAvZWpi\nY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/Y21kPWNybCZpc3N1ZXI9VUlE\nJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUwOSUyMElkZW50aXR5JTIw\nQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJDTyUzRGRvam90JTIwSW9U\nJTIwUGxhdGZvcm2ifqR8MHoxIzAhBgoJkiaJk/IsZAEBDBNjLTBmYTM5YjMzZTU2\nZTA2NTE5MRkwFwYDVQQDDBBYNTA5IElkZW50aXR5IENBMRswGQYDVQQLDBJDZXJ0\naWZpY2F0ZSBJc3N1ZXIxGzAZBgNVBAoMEmRvam90IElvVCBQbGF0Zm9ybTAdBgNV\nHQ4EFgQUKf1jtwgfqvEOnc4mHsYdeVSjSJMwDgYDVR0PAQH/BAQDAgPoMA0GCSqG\nSIb3DQEBCwUAA4ICAQAc6QkunA0A7hyQhGlilvtzdeCvbvyX6e2LpPR+IZ8fd8Be\nGPYyMiwE/u5IK+N8yuBSadT/q0MgM1xJ5o8995SxV66a3DB5vB6kaPvC5af6+mjS\nPkvnkCvUEUQ306f8fStDfBxHj9Cwyc810RG5fg4iHPDTpe/Wpf+qYDWTWA45oein\niLMG+FuFuERwYteydHlS8jZNr5kWNYjihDZ7K5kKbHEwdMW0exnUWXBDwkvL45hH\nV+iw1AMzO1SA9YpQCJtbRaMkDA8QIa1MPNOp6xIpSPrAWaq8nJjZQ8VZi+I3tD6Z\nylfJ9Dw0hj9iuiTBkIWUU2FHTZnFLA35Tm+TyfJ2JKJB9asKJiumHAep6g3+o2Ws\nOMCgXY6O4LQAdcxyqWArbKy0A/jng8Rpk1LemidvCxm3b+qUjKjIFBVG1ne5Rl6J\niqBLxOPo1En2PGas/ZV4nwgAS+3Z2VyckGeL3OsiqZ+UKXyNhu3P3fFk9GgBiPHi\nDUsgojmupyhYiSHTvT220abJtrdubusjw+KuxOG6/R6XXyF8xXFa86vYRJz2lWgc\nmJ9rqwF0sDf9DReaaewnBEjgX2lgZyfE3digQzsmNvmCnNGDpoHJX9BMr/K9sY6E\n8N8CUnY2toEjV3WFx08yerg3LaubVBZSMYnxKkn7r5jGzlqvKWmnIl6aZzD9mA==\n-----END CERTIFICATE-----"</span></span>,
+      "<span class="hljs-attribute">belongsTo</span>": <span class="hljs-value">{}</span>,
+      "<span class="hljs-attribute">tenant</span>": <span class="hljs-value"><span class="hljs-string">"admin"</span></span>,
+      "<span class="hljs-attribute">createdAt</span>": <span class="hljs-value"><span class="hljs-string">"2020-06-06T21:13:32.490Z"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">issuedByDojotPki</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+      "<span class="hljs-attribute">autoRegistered</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value"><span class="hljs-string">"1A:76:96:74:59:BB:A2:FD:04:3C:7E:8C:D6:72:6D:9A:B2:36:D6:3B:38:C2:CF:3F:F8:FA:EE:97:E6:CD:B6:B3"</span></span>,
+      "<span class="hljs-attribute">pem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIGRjCCBC6gAwIBAgIUBT0AjgZAzJO2U+vs4MZXXpEF6SUwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNjIxMTMwMFoX\nDTIxMDYwNjIxMTMwMFowSTEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMSow\nKAYDVQQDDCFhZG1pbjpFQ0MgcHJpbWUyNTZ2MSBUaGlhZ28gVGVzdGUwWTATBgcq\nhkjOPQIBBggqhkjOPQMBBwNCAAScpvJvi3wQGER+b2CQ3/E+Nw+ddTCu2fv5sF/E\nBqVe0tWQu1rWPDmrwmjkIOM33e1fo0SzeNaDrDurPEx7OTAOo4ICvjCCArowDAYD\nVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRYwnJHcMRm7FhBL94f/rMtQs+UYDCB3AYD\nVR0uBIHUMIHRMIHOoIHLoIHIhoHFaHR0cDovLzE3Mi4xOC4wLjMKMTcyLjE5LjAu\nNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0L2NlcnRkaXN0P2NtZD1kZWx0\nYWNybCZpc3N1ZXI9VUlEJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNEWDUw\nOSUyMElkZW50aXR5JTIwQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVyJTJD\nTyUzRGRvam90JTIwSW9UJTIwUGxhdGZvcm0wHQYDVR0lBBYwFAYIKwYBBQUHAwIG\nCCsGAQUFBwMEMIIBWgYDVR0fBIIBUTCCAU0wggFJoIHGoIHDhoHAaHR0cDovLzE3\nMi4xOC4wLjMKMTcyLjE5LjAuNDo4MDgwL2VqYmNhL3B1YmxpY3dlYi93ZWJkaXN0\nL2NlcnRkaXN0P2NtZD1jcmwmaXNzdWVyPVVJRCUzRGMtMGZhMzliMzNlNTZlMDY1\nMTklMkNDTiUzRFg1MDklMjBJZGVudGl0eSUyMENBJTJDT1UlM0RDZXJ0aWZpY2F0\nZSUyMElzc3VlciUyQ08lM0Rkb2pvdCUyMElvVCUyMFBsYXRmb3Jton6kfDB6MSMw\nIQYKCZImiZPyLGQBAQwTYy0wZmEzOWIzM2U1NmUwNjUxOTEZMBcGA1UEAwwQWDUw\nOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYD\nVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0wHQYDVR0OBBYEFD1vcBmX/6Of+o7t8eis\nKz8AyLtgMA4GA1UdDwEB/wQEAwID6DANBgkqhkiG9w0BAQsFAAOCAgEALw1cbCNE\nG9f47gbzD/XVbA1En+tGp+GSCcqboNZuCWZlMMwP9EdGIttnZg4cH/L7k0eiobNP\nVYc+2A6kP4mbDvz4usyxMvczca6+XN8sPxc7mZirUCxEZisoecwq23mNmgLVuR4b\nrS935ZcgCaK+1rbggBgC4SH6RJhrHcwDuSOq22CZIR80834Xjo6TQdMMNJf6CAzH\negeV6qFf6wA91SYpfSv8rVh+vaXfHEKtVfxm0J7fpLTUa2rDoOKuyi3OPkryETAy\nBmGJdvZCZU/CSjYc3Z0RsOPt7qwPbY31gzfJQbc3Qqiq0X+Ws/hilagQxCsEvkXC\nS33rRRxiWS6PGGJf3TliVQNKWnxW0jhtzuYMc0VEoTdjbmqSaQ7Lo8YloPvBvHYS\n5Vdl9Y1uuZQnHvBuy9LhKNS69WDZTEMu5DXrJypSRqnuw6Nywb43cIffbvtvRWCs\njZ8rNEkcGSoUE9Yb7fM6pwirl+QSjvsKa/k++rSp9VeSB8fKgmaneNScipXBcIl/\n5eYLIjobnXb/7SGwxLKtTm96cX2TG+GhXi4xTxd4xbLsq0FNxMhsBwHkMoygYWTY\nhCvnb3mDv4zbC0Vy/LN0gFXkDIvURh0gb8mosP5mB+0Rv1uW0WzIgDuQU22k2vqH\npvuMCXOKhOBlsDD2Qfk7e4M3ps/T498bNCo=\n-----END CERTIFICATE-----"</span></span>,
+      "<span class="hljs-attribute">belongsTo</span>": <span class="hljs-value">{}</span>,
+      "<span class="hljs-attribute">tenant</span>": <span class="hljs-value"><span class="hljs-string">"admin"</span></span>,
+      "<span class="hljs-attribute">createdAt</span>": <span class="hljs-value"><span class="hljs-string">"2020-06-06T21:13:30.316Z"</span>
+    </span>}
+  ]
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div></div><div id="x.509-endpoint-for-a-specific-certificate" class="resource"><h3 class="resource-heading">Endpoint for a specific certificate <a href="#x.509-endpoint-for-a-specific-certificate" class="permalink">&nbsp;&para;</a></h3><div id="x.509-endpoint-for-a-specific-certificate-get" class="action get"><h4 class="action-heading"><div class="name">Get X.509 Certificate</div><a href="#x.509-endpoint-for-a-specific-certificate-get" class="method get">GET</a><code class="uri">/certificates/{fingerprint}{?fields}</code></h4><p>Gets a certificate.</p>
+<h4>Example URI</h4><div class="definition"><span class="method get">GET</span>&nbsp;<span class="uri"><span class="hostname">https://localhost:8000/x509/v1</span>/certificates/<span class="hljs-attribute" title="fingerprint">fingerprint</span>?<span class="hljs-attribute">fields=</span><span class="hljs-literal"></span></span></div><div class="title"><strong>URI Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>fingerprint</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>Fingerprint (as SHA256) of the certificate, where each pair of bytes (represented by hexadecimal characters) are separated by a colon.</p>
+</dd><dt>fields</dt><dd><code>string</code>&nbsp;<span>(optional)</span>&nbsp;<p>List of keys (comma-separated) that should be included in the result. If the fields parameter is not set, all keys will be kept in the result.</p>
+</dd></dl></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">Authorization</span>: <span class="hljs-string">Bearer [JWT]</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">issuedByDojotPki</span>": <span class="hljs-value"><span class="hljs-literal">true</span></span>,
+  "<span class="hljs-attribute">autoRegistered</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+  "<span class="hljs-attribute">fingerprint</span>": <span class="hljs-value"><span class="hljs-string">"27:98:B3:A2:69:28:2C:C3:00:E2:2C:7D:48:50:94:C4:4A:F7:A2:1C:63:B8:06:7F:69:15:01:F6:EA:09:34:2D"</span></span>,
+  "<span class="hljs-attribute">pem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIG/DCCBOSgAwIBAgIUGeK2VFaRPpGRlBrJjwipf6Eds1YwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMB4XDTIwMDYwNTIwMDEwMFoX\nDTIxMDYwNTIwMDEwMFowNDEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMRUw\nEwYDVQQDDAxhZG1pbjoxMjM0NTYwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQDFu7NweJ79eNKwTkU30Zxd19lsABkNYAXJDqfyrsuT68eeR3nGz0uyQpEE\nSQs0Ob8o62JXvL0DnnAa5MK8yt+p9TiltJEOQXTMbrovFJnDR85BrZFQEbyCKyrz\n9WQTDwCEqv362dnkcwLBd2DObD8OvRg/UzuVoSA7tlsQzaASzpItUJFCuGKzHa0t\nb3Ttrhgz4Q9WPXgOOdKsLg6pouyGSEaXKyIhAcrLUjvnOcSjJbo46+y5iTemW5km\n3gNdbINVluCG3HVQ7zZpLoaYv447WUvFPMMSeRAYNRz2QoBOt8seofcwVvurcctm\ntL5WFlYNCH+eDkdFHUy3xdVrsibTAgMBAAGjggK+MIICujAMBgNVHRMBAf8EAjAA\nMB8GA1UdIwQYMBaAFFjCckdwxGbsWEEv3h/+sy1Cz5RgMIHcBgNVHS4EgdQwgdEw\ngc6ggcuggciGgcVodHRwOi8vMTcyLjE4LjAuMwoxNzIuMTkuMC40OjgwODAvZWpi\nY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/Y21kPWRlbHRhY3JsJmlzc3Vl\ncj1VSUQlM0RjLTBmYTM5YjMzZTU2ZTA2NTE5JTJDQ04lM0RYNTA5JTIwSWRlbnRp\ndHklMjBDQSUyQ09VJTNEQ2VydGlmaWNhdGUlMjBJc3N1ZXIlMkNPJTNEZG9qb3Ql\nMjBJb1QlMjBQbGF0Zm9ybTAdBgNVHSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwQw\nggFaBgNVHR8EggFRMIIBTTCCAUmggcaggcOGgcBodHRwOi8vMTcyLjE4LjAuMwox\nNzIuMTkuMC40OjgwODAvZWpiY2EvcHVibGljd2ViL3dlYmRpc3QvY2VydGRpc3Q/\nY21kPWNybCZpc3N1ZXI9VUlEJTNEYy0wZmEzOWIzM2U1NmUwNjUxOSUyQ0NOJTNE\nWDUwOSUyMElkZW50aXR5JTIwQ0ElMkNPVSUzRENlcnRpZmljYXRlJTIwSXNzdWVy\nJTJDTyUzRGRvam90JTIwSW9UJTIwUGxhdGZvcm2ifqR8MHoxIzAhBgoJkiaJk/Is\nZAEBDBNjLTBmYTM5YjMzZTU2ZTA2NTE5MRkwFwYDVQQDDBBYNTA5IElkZW50aXR5\nIENBMRswGQYDVQQLDBJDZXJ0aWZpY2F0ZSBJc3N1ZXIxGzAZBgNVBAoMEmRvam90\nIElvVCBQbGF0Zm9ybTAdBgNVHQ4EFgQUuNRRFLrgvwwHe8ShOhMWRISTXZYwDgYD\nVR0PAQH/BAQDAgPoMA0GCSqGSIb3DQEBCwUAA4ICAQCLOCwNFlG6lM3P3+ToiwLA\n33q+ZRnMTXIOzzOKpiaOWfBv55y3nZnHIKuTlNMsP0qiOfDdrdvtQTs5NVmwSfa+\nK0uNH+wFTO8XLgs+Ii7OvAB+UX7+Vo8uxFxPKAgJHOUBFjIZq0y2Le4p+PNtuEQR\ntB3cisT++sUVc6NCgmoRUsEjGxNXnyPVU40GJ9DlNYtlBu4h+FaxaAeeEz3xduU7\neXLjlXpSWSIcRzfGo+6wobENZordAvqz6Hp5o3sHSXhiXkNeO1B2A421bkkUhA7W\nWjE8IknN5QjlquFp5rQZABLTx2Qw7YqiRkLqAXLXM20+XnqKBQ3HjNgklC9CpBZi\nM/KJlEm8muiODENwUBZ6YSo1nsgWAO/YBJ8NAbzT6sUQybsSnCBp9DAOf0amdqYn\na45C0gOWSBXMcxjXXOcVxFdNCfVpFAi9c7Y/bCeYbWVXY8jQ6e3nKwvbvILXORl9\n+Pyqqw6qhToHbcOqdCWqoZoEBRRg06Vkm6r0d6yh/UcE/UHyKlgnRGFZdpFYlSvZ\nTB+4Paeq3wOKxAkjUs2SlFHZYT43+NKmsiSTf1yyKruwh1yMR0hAfRM9GCooOjvr\n5PokzscdSyNwWh/LrkUAvKnB/XgpgqeN+ngK8jVotieV4vLc7ji/i6ME1Czi0g9I\nLPSCByr/Jf5/sLD6GXNh4w==\n-----END CERTIFICATE-----"</span></span>,
+  "<span class="hljs-attribute">belongsTo</span>": <span class="hljs-value">{}</span>,
+  "<span class="hljs-attribute">tenant</span>": <span class="hljs-value"><span class="hljs-string">"admin"</span></span>,
+  "<span class="hljs-attribute">createdAt</span>": <span class="hljs-value"><span class="hljs-string">"2020-06-05T20:01:11.286Z"</span>
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div><div id="x.509-endpoint-for-a-specific-certificate-delete" class="action delete"><h4 class="action-heading"><div class="name">Delete X.509 Certificate</div><a href="#x.509-endpoint-for-a-specific-certificate-delete" class="method delete">DELETE</a><code class="uri">/certificates/{fingerprint}</code></h4><p>Deletes a x.509 certificate.</p>
+<h4>Example URI</h4><div class="definition"><span class="method delete">DELETE</span>&nbsp;<span class="uri"><span class="hostname">https://localhost:8000/x509/v1</span>/certificates/<span class="hljs-attribute" title="fingerprint">fingerprint</span></span></div><div class="title"><strong>URI Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>fingerprint</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>Fingerprint (as SHA256) of the certificate, where each pair of bytes (represented by hexadecimal characters) are separated by a colon.</p>
+</dd></dl></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">Authorization</span>: <span class="hljs-string">Bearer [JWT]</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>204</code></strong></div></div></div><div id="x.509-endpoint-for-the-root-ca" class="resource"><h3 class="resource-heading">Endpoint for the root CA <a href="#x.509-endpoint-for-the-root-ca" class="permalink">&nbsp;&para;</a></h3><div id="x.509-endpoint-for-the-root-ca-get" class="action get"><h4 class="action-heading"><div class="name">Get Root CA</div><a href="#x.509-endpoint-for-the-root-ca-get" class="method get">GET</a><code class="uri">/ca</code></h4><p>Obtains the CA of the dojot platform used to sign the device certificates.</p>
+<h4>Example URI</h4><div class="definition"><span class="method get">GET</span>&nbsp;<span class="uri"><span class="hostname">https://localhost:8000/x509/v1</span>/ca</span></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">Authorization</span>: <span class="hljs-string">Bearer [JWT]</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">certificateFingerprint</span>": <span class="hljs-value"><span class="hljs-string">"B9:7C:88:EE:A4:13:3E:64:99:44:C5:35:61:9D:4E:15:B7:70:A4:FD:78:61:70:22:D2:27:BC:74:15:AA:C5:CC"</span></span>,
+  "<span class="hljs-attribute">caPem</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN CERTIFICATE-----\nMIIF6jCCA9KgAwIBAgIUIJGGnpOs/DHPUarctEZt5r7S4IAwDQYJKoZIhvcNAQEL\nBQAwejEjMCEGCgmSJomT8ixkAQEME2MtMGZhMzliMzNlNTZlMDY1MTkxGTAXBgNV\nBAMMEFg1MDkgSWRlbnRpdHkgQ0ExGzAZBgNVBAsMEkNlcnRpZmljYXRlIElzc3Vl\ncjEbMBkGA1UECgwSZG9qb3QgSW9UIFBsYXRmb3JtMCAXDTIwMDYwNTE5MzExMFoY\nDzIwNTAwNTI5MTkzMTEwWjB6MSMwIQYKCZImiZPyLGQBAQwTYy0wZmEzOWIzM2U1\nNmUwNjUxOTEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2Vy\ndGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0wggIi\nMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDJnP/Oh1gi0Az9vDKOQjzt0CLb\n9O0RJP5TCFdMdGbdVcJ273W8egyTWsu5PnYwyXAYbm613Z2CLHv5rr9mx+9bY27K\nzC8DNcDU05KZN8NuOJYqaBwcfI1x0vMytQE4J64iJzeOeehxEsrxY5wa168MNTDN\n43achUJoxUTVxzdRrUk0Nx2XadfBEHbLOXxffkAE37BahHS/KXywby3EnvJth2kL\nWBifxtD8oDzfCrA9RiwI5Rt5b0ceI9Euprsr4kslxK9uZn7p+/Qx2XX2rHFZqFlz\nKOig61XuusxtbLwbSvWRjPe29hivk18AabWPXqbDuFqPxpW3WkEBUD3Rd/YqEIj1\n2VV0ACcaPkudEx8RmGsTglR3munWIgb1OGckYtd5Lu9+OjkhMSufLCMoBn9sqjPv\nHYmt6paJrlhITw9uF+p8ZBGJ0mb1j+AuRVJEHvsJS8A2bAmtAdTnBsUL+ZflIYB6\nfefAgTtTcdpXppTxgf6Kz156udWgQ7Pvk8Io4Fr4K63ngw2NLdLGsBkR9voGoLJL\nEIllHJodN6jq7z63110LZPdw5Au/55qMibS7389ocbLxvsqxxC7BF+GfnqQ7ooPZ\naE6jsLpHaWRbsT1uDl3rZUu5ijv3HF778N5n5HewBx0DMZE8mtX7oeHmzsDh6HU9\n+94b6Y9NlC8UaKCCkQIDAQABo2YwZDASBgNVHRMBAf8ECDAGAQH/AgEAMB8GA1Ud\nIwQYMBaAFFjCckdwxGbsWEEv3h/+sy1Cz5RgMB0GA1UdDgQWBBRYwnJHcMRm7FhB\nL94f/rMtQs+UYDAOBgNVHQ8BAf8EBAMCAYYwDQYJKoZIhvcNAQELBQADggIBALPy\nHv+6Wm8OxyIwU8kpa/r5HrPcZJIIJn+GA8AFjW/JffUxQN08sITJLUAx2/qnUg5r\nJRPUwWJ64gerJGuY/qavuuArMq+sEXz2Fe5N3p6PtTyyUK2KxRK6SlFFdHmPocRT\nClIRCl+Ae4vpxHjVizzN9tP9RTuxYydf5wejxw2HK9NjMPCCVWiH6qclPeLD9vhw\niHeVISj0fc2tnMbZNDHy/UWFPxIoqV+0nrF/6mCsQE93U0FJENG3oJrwNb3KbR7h\ntWEfUFKWpRjZAKtgdDcWKCIhRZRJ6ToFhq/NsoRjQpXiCRejsVMa+sg8XmaJcG7/\ngLQQlY6x/njOalliJvJmmsV9d27XhgNefWBCM2RWmO/h1Np/vuTOSQ9fEQGa0v8R\nn/fuqfuElastPPbV/UaMHQHvG/PnFYhX8Rbex7koD3Ng+aFtSzJp8xF+8o3qYxeY\nmDrnqFd8JM7GUf2coZt9jHH7n1Ibd2KeMS9FreIETB10jYlcd0+R9oLf7/0yhI5I\nJcGzESkJZD7YATR/ro5X+t22OXjEhiSaoQsXceJURsEYoXHnJx9myy5Tg0Z3Xl7w\nynW39uy69yXippIdCqfD0UyXZiSQ2tXwNVT6cFbGkEbxOjH2zzzmeleFl4EOAkC5\n193nerH/R/ebrNktOaDsmQFKcwnpszpaDT19+lAG\n-----END CERTIFICATE-----"</span>
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div></div><div id="x.509-endpoint-for-the-crl-of-root-ca" class="resource"><h3 class="resource-heading">Endpoint for the CRL of root CA <a href="#x.509-endpoint-for-the-crl-of-root-ca" class="permalink">&nbsp;&para;</a></h3><div id="x.509-endpoint-for-the-crl-of-root-ca-get" class="action get"><h4 class="action-heading"><div class="name">Gets the latest CRL</div><a href="#x.509-endpoint-for-the-crl-of-root-ca-get" class="method get">GET</a><code class="uri">/ca/crl</code></h4><p>Gets the latest CRL released by the root CA.</p>
+<h4>Example URI</h4><div class="definition"><span class="method get">GET</span>&nbsp;<span class="uri"><span class="hostname">https://localhost:8000/x509/v1</span>/ca/crl</span></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span><br><span class="hljs-attribute">Authorization</span>: <span class="hljs-string">Bearer [JWT]</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">crl</span>": <span class="hljs-value"><span class="hljs-string">"-----BEGIN X509 CRL-----\nMIIC9DCB3QIBATANBgkqhkiG9w0BAQsFADB6MSMwIQYKCZImiZPyLGQBAQwTYy0w\nMzY2MmU3ZTllMzhmMTUwMjEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkG\nA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxh\ndGZvcm0XDTIwMDYwNDE3MDYwOVoXDTIwMDYwNTE3MDYwOVqgLzAtMB8GA1UdIwQY\nMBaAFHZvzXewT/4MbYWcyDTFR0rqc3faMAoGA1UdFAQDAgEBMA0GCSqGSIb3DQEB\nCwUAA4ICAQARdQORwfEyQqAg+xsV/QwDtLdSMqZSokK5NDbtgATKcxQ4I83PCgCT\noYGxBWKmEatrMtGW94T7DewniluP+4ZWOTF8sNS1RMacUyA3Avjecb11Fh1T4bcE\nVXt5pJkW10CFtYZWwc7IGtH+TK3vNspN2Fkq+4CcZ707W3S4AdL6dy9P0kreXGof\nM7/glM4ep95UKuzVboFfIWOy29iQf4kLvxpWBevEWSzH6rDZKcBxlhpdEl/RNBtC\n3hsoJ7q5V+IR0Gn6mv7I5KPmKddnIvCom5zoWchcamob0VvN70bRnruu6ZhKQVXv\nn54u3YfhPSlp1TUuc3vnG+otBFVGIRLlein502J+JiWYkSYyGom6Nv68RKvUr7Fp\nDMN+Gbt+YYmug2Ax91WvYrGvbfiUREwzhr/oiT2NWc3Xil/5upfxw/rox3zmoWeJ\ny6+ypdQfAqxi2sxSt74+Qk2E4A8tyvt/FM1170dCIGbPsG2mq7qGwbXJ8q3bQHsZ\nh2ioqzHnE1IUWzIveQ4llCHhfuO/pZyuTP5NoKNx71PX8ZauYFNgGoyyfoygN1dc\nhh93exQN/BZ2WBOV2JrjTJsE1kFySMA73Ncr1he2ISLc6aVJyNc5lo+6qo4AmTSU\n3VaIKRNnYWNbpNxV4Pad57/hg1iPMY9jHk8EX5tjtFEiXp0mAN6Y5w==\n-----END X509 CRL-----"</span>
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div></div></section></div></div></div><p style="text-align: center;" class="text-muted">Generated by&nbsp;<a href="https://github.com/danielgtaylor/aglio" class="aglio">aglio</a>&nbsp;on 23 Jul 2020</p><script>/* eslint-env browser */
+/* eslint quotes: [2, "single"] */
+'use strict';
+
+/*
+  Determine if a string ends with another string.
+*/
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+/*
+  Get a list of direct child elements by class name.
+*/
+function childrenByClass(element, name) {
+  var filtered = [];
+
+  for (var i = 0; i < element.children.length; i++) {
+    var child = element.children[i];
+    var classNames = child.className.split(' ');
+    if (classNames.indexOf(name) !== -1) {
+      filtered.push(child);
+    }
+  }
+
+  return filtered;
+}
+
+/*
+  Get an array [width, height] of the window.
+*/
+function getWindowDimensions() {
+  var w = window,
+      d = document,
+      e = d.documentElement,
+      g = d.body,
+      x = w.innerWidth || e.clientWidth || g.clientWidth,
+      y = w.innerHeight || e.clientHeight || g.clientHeight;
+
+  return [x, y];
+}
+
+/*
+  Collapse or show a request/response example.
+*/
+function toggleCollapseButton(event) {
+    var button = event.target.parentNode;
+    var content = button.parentNode.nextSibling;
+    var inner = content.children[0];
+
+    if (button.className.indexOf('collapse-button') === -1) {
+      // Clicked without hitting the right element?
+      return;
+    }
+
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+        // Currently showing, so let's hide it
+        button.className = 'collapse-button';
+        content.style.maxHeight = '0px';
+    } else {
+        // Currently hidden, so let's show it
+        button.className = 'collapse-button show';
+        content.style.maxHeight = inner.offsetHeight + 12 + 'px';
+    }
+}
+
+function toggleTabButton(event) {
+    var i, index;
+    var button = event.target;
+
+    // Get index of the current button.
+    var buttons = childrenByClass(button.parentNode, 'tab-button');
+    for (i = 0; i < buttons.length; i++) {
+        if (buttons[i] === button) {
+            index = i;
+            button.className = 'tab-button active';
+        } else {
+            buttons[i].className = 'tab-button';
+        }
+    }
+
+    // Hide other tabs and show this one.
+    var tabs = childrenByClass(button.parentNode.parentNode, 'tab');
+    for (i = 0; i < tabs.length; i++) {
+        if (i === index) {
+            tabs[i].style.display = 'block';
+        } else {
+            tabs[i].style.display = 'none';
+        }
+    }
+}
+
+/*
+  Collapse or show a navigation menu. It will not be hidden unless it
+  is currently selected or `force` has been passed.
+*/
+function toggleCollapseNav(event, force) {
+    var heading = event.target.parentNode;
+    var content = heading.nextSibling;
+    var inner = content.children[0];
+
+    if (heading.className.indexOf('heading') === -1) {
+      // Clicked without hitting the right element?
+      return;
+    }
+
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+      // Currently showing, so let's hide it, but only if this nav item
+      // is already selected. This prevents newly selected items from
+      // collapsing in an annoying fashion.
+      if (force || window.location.hash && endsWith(event.target.href, window.location.hash)) {
+        content.style.maxHeight = '0px';
+      }
+    } else {
+      // Currently hidden, so let's show it
+      content.style.maxHeight = inner.offsetHeight + 12 + 'px';
+    }
+}
+
+/*
+  Refresh the page after a live update from the server. This only
+  works in live preview mode (using the `--server` parameter).
+*/
+function refresh(body) {
+    document.querySelector('body').className = 'preload';
+    document.body.innerHTML = body;
+
+    // Re-initialize the page
+    init();
+    autoCollapse();
+
+    document.querySelector('body').className = '';
+}
+
+/*
+  Determine which navigation items should be auto-collapsed to show as many
+  as possible on the screen, based on the current window height. This also
+  collapses them.
+*/
+function autoCollapse() {
+  var windowHeight = getWindowDimensions()[1];
+  var itemsHeight = 64; /* Account for some padding */
+  var itemsArray = Array.prototype.slice.call(
+    document.querySelectorAll('nav .resource-group .heading'));
+
+  // Get the total height of the navigation items
+  itemsArray.forEach(function (item) {
+    itemsHeight += item.parentNode.offsetHeight;
+  });
+
+  // Should we auto-collapse any nav items? Try to find the smallest item
+  // that can be collapsed to show all items on the screen. If not possible,
+  // then collapse the largest item and do it again. First, sort the items
+  // by height from smallest to largest.
+  var sortedItems = itemsArray.sort(function (a, b) {
+    return a.parentNode.offsetHeight - b.parentNode.offsetHeight;
+  });
+
+  while (sortedItems.length && itemsHeight > windowHeight) {
+    for (var i = 0; i < sortedItems.length; i++) {
+      // Will collapsing this item help?
+      var itemHeight = sortedItems[i].nextSibling.offsetHeight;
+      if ((itemsHeight - itemHeight <= windowHeight) || i === sortedItems.length - 1) {
+        // It will, so let's collapse it, remove its content height from
+        // our total and then remove it from our list of candidates
+        // that can be collapsed.
+        itemsHeight -= itemHeight;
+        toggleCollapseNav({target: sortedItems[i].children[0]}, true);
+        sortedItems.splice(i, 1);
+        break;
+      }
+    }
+  }
+}
+
+/*
+  Initialize the interactive functionality of the page.
+*/
+function init() {
+    var i, j;
+
+    // Make collapse buttons clickable
+    var buttons = document.querySelectorAll('.collapse-button');
+    for (i = 0; i < buttons.length; i++) {
+        buttons[i].onclick = toggleCollapseButton;
+
+        // Show by default? Then toggle now.
+        if (buttons[i].className.indexOf('show') !== -1) {
+            toggleCollapseButton({target: buttons[i].children[0]});
+        }
+    }
+
+    var responseCodes = document.querySelectorAll('.example-names');
+    for (i = 0; i < responseCodes.length; i++) {
+        var tabButtons = childrenByClass(responseCodes[i], 'tab-button');
+        for (j = 0; j < tabButtons.length; j++) {
+            tabButtons[j].onclick = toggleTabButton;
+
+            // Show by default?
+            if (j === 0) {
+                toggleTabButton({target: tabButtons[j]});
+            }
+        }
+    }
+
+    // Make nav items clickable to collapse/expand their content.
+    var navItems = document.querySelectorAll('nav .resource-group .heading');
+    for (i = 0; i < navItems.length; i++) {
+        navItems[i].onclick = toggleCollapseNav;
+
+        // Show all by default
+        toggleCollapseNav({target: navItems[i].children[0]});
+    }
+}
+
+// Initial call to set up buttons
+init();
+
+window.onload = function () {
+    autoCollapse();
+    // Remove the `preload` class to enable animations
+    document.querySelector('body').className = '';
+};
+</script></body></html>
