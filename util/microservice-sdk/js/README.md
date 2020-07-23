@@ -399,6 +399,20 @@ ConfigManager.createConfig('V2K');
 const config = ConfigManager.getConfig();
 ```
 
+If you need to convert any object's keys to a new pattern, like camelCase or PascalCase, instead of
+the dotted version we provide, you can use the transformObjectKeys function. You can pass any
+function that receives a string and return a string to this function. Example:
+```js
+const { ConfigManager } = require('@dojot/microservice-sdk');
+const camelCase = require('lodash/camelCase');
+
+const obj = { 'param1.key1': 'value11', 'param1.key2': 'value12' };
+const newObj = ConfigManager.transformObjectKeys(obj, camelCase);
+console.log(newObj);
+// Should print:
+// { param1Key1: 'value11', param1Key2: 'value12' }
+```
+
 ## Code Examples
 
  Refer to the [examples directory](examples/) for some code samples.
