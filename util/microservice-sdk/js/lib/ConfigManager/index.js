@@ -1,3 +1,4 @@
-const ConfigManager = require('./Manager');
+const { createConfig, getConfig } = require('./Manager');
+const { transformObjectKeys } = require('./KeyTransformer');
 
-module.exports = ConfigManager;
+module.exports = { createConfig, getConfig, transformObjectKeys };
