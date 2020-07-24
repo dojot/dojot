@@ -11,24 +11,18 @@ const Parsers = require('./Parsers');
  */
 const mergeConfigs = (envVarsData, userData, defaultData) => {
   // Transforming the lines in parsed objects
-  const parsedEnvVars = envVarsData
-    .map(Parsers.Type.parseLine);
-  const parsedUser = userData
-    .map(Parsers.Type.parseLine);
-  const parsedDefault = defaultData
-    .map(Parsers.Type.parseLine);
+  const parsedEnvVars = envVarsData.map(Parsers.Type.parseLine);
+  const parsedUser = userData.map(Parsers.Type.parseLine);
+  const parsedDefault = defaultData.map(Parsers.Type.parseLine);
 
   // Applying the types to parameters, taking into account the types in the default configuration
   // file
-  const typedEnvVars = parsedEnvVars.map(
-    (parsedLine) => Parsers.Type.mapToTyped(parsedLine, parsedDefault),
-  );
-  const typedUser = parsedUser.map(
-    (parsedLine) => Parsers.Type.mapToTyped(parsedLine, parsedDefault),
-  );
-  const typedDefault = parsedDefault.map(
-    (parsedLine) => Parsers.Type.applyType(parsedLine),
-  );
+  const typedEnvVars = parsedEnvVars
+    .map((parsedLine) => Parsers.Type.mapToTyped(parsedLine, parsedDefault));
+  const typedUser = parsedUser
+    .map((parsedLine) => Parsers.Type.mapToTyped(parsedLine, parsedDefault));
+  const typedDefault = parsedDefault
+    .map((parsedLine) => Parsers.Type.applyType(parsedLine));
 
   // Building the object that can be written to a .json file
   const objectEnvVars = Parsers.File.parseConfig(typedEnvVars);
