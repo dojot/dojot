@@ -2,6 +2,9 @@
  * @module Writer writes the JSON config file.
  */
 const { writeFileSync } = require('fs');
+
+const jsonStringify = require('fast-safe-stringify');
+
 const { createFilename } = require('../Utils');
 const { Logger } = require('../../logging/Logger');
 
@@ -17,7 +20,7 @@ const logger = new Logger('microservice-sdk:config-manager-writer');
 const writeJson = (service, path, data) => {
   try {
     const jsonFilename = createFilename(`${service}.json`, path);
-    writeFileSync(jsonFilename, JSON.stringify(data));
+    writeFileSync(jsonFilename, jsonStringify(data));
   } catch (error) {
     logger.error(`${error.stack || error}`);
   }
