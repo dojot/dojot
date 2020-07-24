@@ -20,8 +20,7 @@ const { unflatten } = require('flat');
  * }
  * ```
  *
- * @param {{parameter: string, value: any}[]} data string with the config values in the form
- * <parameter>=<value>
+ * @param {{parameter: string, value: any}[]} data array of parsed lines
  *
  * @returns {{}}
  */
