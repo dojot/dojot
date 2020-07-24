@@ -1,13 +1,5 @@
 const TypeConverter = require('./TypeConverter');
-
-const Types = ['boolean', 'float', 'integer', 'string', 'string[]'];
-
-/**
- * Checks if the passed type is a valid one (case insensitive).
- *
- * @param {string} type
- */
-const isTypeValid = (type) => Types.some((acceptedType) => acceptedType === type.toLowerCase());
+const { isTypeValid } = require('../Utils');
 
 /**
  * Returns the parsed line
@@ -57,7 +49,9 @@ const applyType = (line, comparator = undefined) => {
  * latter.
  *
  * @param {{parameter: string, type: string, value: string}} line
- * @param {string[]} defaultConfig
+ * @param {{parameter: string, type: string, value: string}[]} defaultConfig
+ *
+ * @returns {{parameter: string, value: any}}
  */
 const mapToTyped = (line, defaultConfig) => {
   // Finding a object with the same parameter
