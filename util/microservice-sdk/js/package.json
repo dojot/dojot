@@ -62,6 +62,7 @@
       "lib"
     ],
     "collectCoverage": true,
+    "clearMocks": true,
     "testPathIgnorePatterns": [
       "test/unit/coverage"
     ],
