@@ -42,18 +42,13 @@ const readDefaultConfig = () => {
  * @returns {string[]}
  */
 const readUserConfig = (path, filename) => {
-  try {
-    const fileLocation = Utils.createFilename(filename, path);
-    if (existsSync(fileLocation)) {
-      const data = readFileSync(fileLocation).toString();
-      const config = Sanitizer.sanitize(data);
-      return config;
-    }
-    logger.debug('User configuration not present');
-  } catch (error) {
-    logger.error(`${error.stack || error}`);
+  const fileLocation = Utils.createFilename(filename, path);
+  if (existsSync(fileLocation)) {
+    const data = readFileSync(fileLocation).toString();
+    const config = Sanitizer.sanitize(data);
+    return config;
   }
-
+  logger.debug('User configuration not present');
   return [];
 };
 
@@ -66,17 +61,13 @@ const readUserConfig = (path, filename) => {
  * @returns {{}}
  */
 const readJson = (service, path) => {
-  try {
-    const filename = Utils.createFilename(`${service}.json`, path);
-    if (existsSync(filename)) {
-      const data = readFileSync(filename);
-      const config = JSON.parse(data);
-      return config;
-    }
-  } catch (error) {
-    logger.error(`${error.stack || error}`);
+  const filename = Utils.createFilename(`${service}.json`, path);
+  if (existsSync(filename)) {
+    const data = readFileSync(filename);
+    const config = JSON.parse(data);
+    return config;
   }
-
+  logger.debug('JSON configuration file not present');
   return {};
 };
 
