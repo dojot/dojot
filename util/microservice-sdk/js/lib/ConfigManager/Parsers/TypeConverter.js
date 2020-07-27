@@ -42,16 +42,16 @@ const toString = (value) => value.toString().trim();
  * @returns {string[]}
  */
 const toStringArray = (value) => {
-  const valueToString = value.toString();
+  const valueToString = value.toString().trim();
   // Verifying whether the array is correctly delimited by []
-  if (!valueToString.match(/\[.+\]/)) {
+  if (!valueToString.match(/^\[.+\]$/)) {
     throw new Error('invalid array of strings');
   }
   // Removing [ from the beginning and ] from the end
   const stringArray = valueToString.slice(1, -1).split(',');
 
   // Verifying whether all strings are correctly delimited by ' or "
-  if (!stringArray.every((str) => str.toString().match(/['"].+['"]/))) {
+  if (!stringArray.every((str) => str.toString().trim().match(/^['"].+['"]$/))) {
     throw new Error('found an invalid value in the passed array of strings');
   }
   // Removing " from the beginning and the end
