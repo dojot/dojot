@@ -42,14 +42,22 @@ const toString = (value) => value.toString().trim();
  * @returns {string[]}
  */
 const toStringArray = (value) => {
-  const stringArray = value.toString()
-    // Removing [ from the beginning and ] from the end
-    .slice(1, -1)
-    .split(',')
-    // Removing " from the beginning and the end
-    .map((str) => str.trim().slice(1, -1));
+  const valueToString = value.toString();
+  // Verifying whether the array is correctly delimited by []
+  if (!valueToString.match(/\[.+\]/)) {
+    throw new Error('invalid array of strings');
+  }
+  // Removing [ from the beginning and ] from the end
+  const stringArray = valueToString.slice(1, -1).split(',');
 
-  return stringArray;
+  // Verifying whether all strings are correctly delimited by ' or "
+  if (!stringArray.every((str) => str.toString().match(/['"].+['"]/))) {
+    throw new Error('found an invalid value in the passed array of strings');
+  }
+  // Removing " from the beginning and the end
+  const resultingArray = stringArray.map((str) => str.trim().slice(1, -1));
+
+  return resultingArray;
 };
 
 module.exports = {

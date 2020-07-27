@@ -58,7 +58,12 @@ describe('string', () => {
 });
 
 describe('string[]', () => {
-  it('should convert to string[]', () => {
-    expect(TypeConverter['string[]']('["1", "2", "3"]')).toEqual(['1', '2', '3']);
+  it('should convert', () => {
+    expect(TypeConverter['string[]']('["1", "2", \'3\']')).toEqual(['1', '2', '3']);
+  });
+
+  it('should not convert - invalid delimiters', () => {
+    expect(() => TypeConverter['string[]']('("1", "2", "3")')).toThrow();
+    expect(() => TypeConverter['string[]']('["1", [2], "3"]')).toThrow();
   });
 });
