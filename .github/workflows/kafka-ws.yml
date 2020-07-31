@@ -76,8 +76,7 @@ jobs:
         workdir: subscription-engine/kafka-ws
         # Label with the built image's commit
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
-        # Whether tag will be based in the branch name or in the tag name
-
+        tag_names: true # tag will be based in branch name or tag name
 
   gh-pages:
     needs: docker-hub
