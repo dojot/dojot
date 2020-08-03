@@ -76,7 +76,7 @@ The process of obtaining certificates for VerneMQ instances follows the same ste
 
 - CRL updated the CRL certificate every time by setting in CRL_UPDATE_TIME
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/development/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
 
 Fig. 3 - VerneMQ (Broker) retrieves certificates from PKI (EJBCA)
 
