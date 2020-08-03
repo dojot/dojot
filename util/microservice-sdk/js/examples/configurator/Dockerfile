@@ -23,14 +23,14 @@ COPY lib microservice-sdk-pkg/lib
 COPY index.js microservice-sdk-pkg/
 
 # example application
-COPY examples/ConfigManager/package*.json ./
+COPY examples/configurator/package*.json ./
 
 RUN npm install
 
-COPY examples/ConfigManager/*.js ./
+COPY examples/configurator/*.js ./
 
 RUN mkdir config
-COPY examples/ConfigManager/config ./config
+COPY examples/configurator/config ./config
 
 FROM node:10.16.3-alpine
 

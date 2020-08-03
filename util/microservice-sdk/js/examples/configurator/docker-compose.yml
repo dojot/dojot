@@ -1,0 +1,31 @@
+version: '3.3'
+services:
+
+  vernemq:
+    image: vernemq/vernemq
+    restart: always
+    environment:
+      DOCKER_VERNEMQ_ACCEPT_EULA: 'yes'
+      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: 'on'
+    ports:
+      - 1883:1883 # MQTT
+      - 8888:8888 # Healthcheck
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  config-manager-sample-app:
+    restart: always
+    # You can add some environment variables here to overwrite the defaults. Example:
+    # environment:
+    #   CONFEXAMPLE_CLIENT_MESSAGE_PUB_INTERVAL: 3000
+    build:
+      context: ./../../
+      dockerfile: ./examples/configurator/Dockerfile
+    depends_on:
+      - vernemq
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
