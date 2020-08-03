@@ -413,6 +413,9 @@ console.log(newObj);
 // { param1Key1: 'value11', param1Key2: 'value12' }
 ```
 
+__NOTE THAT__ you don't need to call `createConfig` every time you need the configuration, you just
+need to call it in your initialization file. In other places where you need it, call `getConfig`.
+
 ## Code Examples
 
  Refer to the [examples directory](examples/) for some code samples.
