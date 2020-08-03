@@ -1,0 +1,39 @@
+version: '3'
+services:
+  ws-client-sample:
+    build:
+      context: ./WSClient/
+      dockerfile: ./Dockerfile
+    environment:
+      ## Change to your Dojot environment
+      # KAFKAWS_DOJOT_ADDRESS: "localhost:3000"
+      # KAFKAWS_DOJOT_USER: "admin"
+      # KAFKAWS_DOJOT_PASSWORD: "admin"
+
+      ## You can change here these variables to test with other topics and filters
+      # Don't forget that the Dojot user must have access to the topic
+      # KAFKAWS_APP_KAFKA_TOPIC: "admin.device-data"
+
+      ## The filters are, by default, empty. If you want to change this, here are some examples:
+      # Ex. 1
+      # KAFKAWS_APP_FILTER_FIELDS: "fields=sensor/status,temperature"
+      # KAFKAWS_APP_FILTER_WHERE: "where=sensor.status=in:failed,stopped;"
+      # Ex. 2
+      # KAFKAWS_APP_FILTER_FIELDS: "fields=location"
+      # KAFKAWS_APP_FILTER_WHERE: "where=temperature=gte:20;"
+
+      ## If the Kafka WS server has HTTPS, add this:
+      # KAFKAWS_TLS_ENABLE: "true"
+      # If enabled, you need the CA file too:
+      # KAFKAWS_TLS_CA_FILE: "./certs/ca-cert.pem"
+    depends_on:
+      - kafka-ws-example
+    restart: always
+    command: ["node", "Client.js"]
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    # If you have activated the TLS, you need to pass the CA certificate in a volume. Example:
+    # volumes:
+    #   - ./certs/client/:/certs/:Z
