@@ -1,14 +1,14 @@
-const Manager = require('../../../lib/ConfigManager/Manager');
-const Parsers = require('../../../lib/ConfigManager/Parsers');
-const FileManager = require('../../../lib/ConfigManager/FileManager');
-const Merger = require('../../../lib/ConfigManager/Merger');
+const Manager = require('../../../lib/configManager/Manager');
+const Parsers = require('../../../lib/configManager/parsers');
+const FileManager = require('../../../lib/configManager/fileManager');
+const Merger = require('../../../lib/configManager/Merger');
 
-jest.mock('../../../lib/ConfigManager/Parsers', () => ({
+jest.mock('../../../lib/configManager/parsers', () => ({
   EnvVars: {
     parseEnvironmentVariables: jest.fn(),
   },
 }));
-jest.mock('../../../lib/ConfigManager/FileManager', () => ({
+jest.mock('../../../lib/configManager/fileManager', () => ({
   Reader: {
     readDefaultConfig: jest.fn(),
     readJson: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock('../../../lib/ConfigManager/FileManager', () => ({
     writeJson: jest.fn(),
   },
 }));
-jest.mock('../../../lib/ConfigManager/Merger', () => ({
+jest.mock('../../../lib/configManager/Merger', () => ({
   mergeConfigs: jest.fn(),
 }));
 

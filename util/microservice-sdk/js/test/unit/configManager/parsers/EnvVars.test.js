@@ -1,4 +1,4 @@
-const EnvVars = require('../../../../lib/ConfigManager/Parsers/EnvVars');
+const EnvVars = require('../../../../lib/configManager/parsers/EnvVars');
 
 describe('parseEnvironmentVariables', () => {
   // process.env mocking taken from https://stackoverflow.com/a/48042799

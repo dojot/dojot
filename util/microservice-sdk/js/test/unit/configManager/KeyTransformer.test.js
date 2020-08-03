@@ -1,4 +1,4 @@
-const { transformObjectKeys } = require('../../../lib/ConfigManager/KeyTransformer');
+const { transformObjectKeys } = require('../../../lib/configManager/KeyTransformer');
 
 describe('transformObjectKeys', () => {
   const obj = { 'param.key1': 'testValue1', 'param.key2': 'testValue2' };

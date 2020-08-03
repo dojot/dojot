@@ -2,12 +2,12 @@ const fs = require('fs');
 
 const jsonStringify = require('fast-safe-stringify');
 
-const Writer = require('../../../../lib/ConfigManager/FileManager/Writer');
-const Utils = require('../../../../lib/ConfigManager/Utils');
+const Writer = require('../../../../lib/configManager/fileManager/Writer');
+const Utils = require('../../../../lib/configManager/Utils');
 
 jest.mock('fs');
 
-jest.mock('../../../../lib/ConfigManager/Utils', () => ({
+jest.mock('../../../../lib/configManager/Utils', () => ({
   createFilename: jest.fn(() => './config/testfile.json'),
 }));
 

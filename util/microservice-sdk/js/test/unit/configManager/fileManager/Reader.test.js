@@ -1,12 +1,12 @@
 const fs = require('fs');
 
-const Reader = require('../../../../lib/ConfigManager/FileManager/Reader');
-const Sanitizer = require('../../../../lib/ConfigManager/FileManager/Sanitizer');
-const Utils = require('../../../../lib/ConfigManager/Utils');
+const Reader = require('../../../../lib/configManager/fileManager/Reader');
+const Sanitizer = require('../../../../lib/configManager/fileManager/Sanitizer');
+const Utils = require('../../../../lib/configManager/Utils');
 
 jest.mock('fs');
 
-jest.mock('../../../../lib/ConfigManager/Utils', () => ({
+jest.mock('../../../../lib/configManager/Utils', () => ({
   createFilename: jest.fn(() => './config/testfile'),
 }));
 jest.mock('../../../../lib/logging/Logger', () => ({
@@ -14,7 +14,7 @@ jest.mock('../../../../lib/logging/Logger', () => ({
     debug: jest.fn(),
   })),
 }));
-jest.mock('../../../../lib/ConfigManager/FileManager/Sanitizer', () => ({
+jest.mock('../../../../lib/configManager/fileManager/Sanitizer', () => ({
   sanitize: jest.fn((data) => data),
 }));
 

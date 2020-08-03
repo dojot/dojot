@@ -1,4 +1,4 @@
-const File = require('../../../../lib/ConfigManager/Parsers/File');
+const File = require('../../../../lib/configManager/parsers/File');
 
 describe('parseConfig', () => {
   it('should correctly parse the array', () => {

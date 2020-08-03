@@ -1,4 +1,4 @@
-const Sanitizer = require('../../../../lib/ConfigManager/FileManager/Sanitizer');
+const Sanitizer = require('../../../../lib/configManager/fileManager/Sanitizer');
 
 describe('sanitize', () => {
   it('should remove comments', () => {

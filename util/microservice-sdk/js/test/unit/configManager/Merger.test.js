@@ -1,4 +1,4 @@
-const Merger = require('../../../lib/ConfigManager/Merger');
+const Merger = require('../../../lib/configManager/Merger');
 
 describe('Functionality', () => {
   const envVarsData = ['scope1.testParam1=10'];

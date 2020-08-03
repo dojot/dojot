@@ -1,4 +1,4 @@
-const Utils = require('../../../lib/ConfigManager/Utils');
+const Utils = require('../../../lib/configManager/Utils');
 
 describe('toCanonicalFormat', () => {
   it('should correctly convert to canonical format', () => {

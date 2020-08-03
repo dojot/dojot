@@ -1,4 +1,4 @@
-const TypeConverter = require('../../../../lib/ConfigManager/Parsers/TypeConverter');
+const TypeConverter = require('../../../../lib/configManager/parsers/TypeConverter');
 
 describe('boolean', () => {
   it('should convert to boolean', () => {

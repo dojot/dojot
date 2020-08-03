@@ -1,4 +1,4 @@
-const Type = require('../../../../lib/ConfigManager/Parsers/Type');
+const Type = require('../../../../lib/configManager/parsers/Type');
 
 describe('applyType', () => {
   it('should apply the type from "line"', () => {
