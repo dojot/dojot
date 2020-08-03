@@ -302,5 +302,5 @@ Note: In this case, the message is a publish  on an attribute with the label att
 ##### Example on how to subscribe
 
 ```console
- mosquitto_sub -h myhost -p 1883 -t admin:a1998e/attrs -u admin:a1998e
+ mosquitto_sub -h myhost -p 1883 -t admin:a1998e/config -u admin:a1998e
 ```
