@@ -22,7 +22,7 @@ services:
     #   CONFEXAMPLE_CLIENT_MESSAGE_PUB_INTERVAL: 3000
     build:
       context: ./../../
-      dockerfile: ./examples/configurator/Dockerfile
+      dockerfile: ./examples/configManager/Dockerfile
     depends_on:
       - vernemq
     logging:
