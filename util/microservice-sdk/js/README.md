@@ -269,10 +269,17 @@ image summarizes the module flow:
 
 All environment variables must follow this format:
 ```
-SERVICE_SCOPE_KEY
+{SERVICE}_{SCOPE}_{KEY}
 ```
 
-Examples:
+Where:
+- SERVICE: an acronym for the module, should be alphanumeric. Example: K2V, KAFKAWS.
+- SCOPE: the name of a configuration object, should be alphanumeric. Example: MQTT, LWM2M, KAFKA.
+- KEY: a value that will be put in the {SCOPE} object. Can contain subparts that are separated by
+underscores. These underscores are converted in dots in the final configuration. Examples:
+CLIENT_ID, BROKER_LIST.
+
+Examples of full environment variables names:
 ```
 V2K_APP_HOSTNAME
 V2K_APP_CONNECTION_RETRY_COUNT
@@ -288,7 +295,7 @@ environment it is directed to and use the `.conf` extension. Examples:
 ```
 production.conf
 development.conf
-100k.conf
+load-testing.conf
 ```
 
 As for the parameters, their format is:
@@ -324,16 +331,19 @@ scope1.param.integer.key:integer=10
 scope1.param.string.array.key:string[]=["stringA", 'stringB']
 scope2.param.explicit.string.key:string=this is explicitly typed as string
 scope2.param.implicit.string.key=this has the string type
+scope2.param.string.quotation.mark="strings are not delimited, these quotation marks will be in the string"
 ```
 
 The accepted types are:
-- boolean: true or false, case insensitive
-- float
-- integer
-- string[]: a list of strings, must be delimited by [ ] and each string must be delimited by ' or "
-- string: if no type is passed, this is the default
+- boolean: true or false, case insensitive.
+- float: any value with or without decimal places.
+- integer: any value without decimal places.
+- string[]: a list of strings, must be delimited by [ ] and each string must be delimited by ' or ".
+- string: if no type is passed, this is the default. There is no delimitation character.
 
-__NOTE THAT__ only the default configuration file can be typed
+__NOTE THAT__ only the default configuration file can be typed. The user file and environment
+variables will inherit the same types. If a user file parameter or environment variable does not
+exist in the default file, it will have the string type.
 
 #### Created configuration file
 
@@ -348,7 +358,7 @@ __NOTE THAT__ this file should not be modified/loaded/created by the user.
 #### Environment variables and file parameters
 
 The environment variables are translated to file parameters when they are parsed in this module. As
-you can already tell, the translation removes the service acronym. The translation is as follows:
+you can already see, the translation removes the {SERVICE} acronym. The translation is as follows:
 
 | Environment variable     | File parameter   |
 | ------------------------ | ---------------- |
@@ -386,7 +396,12 @@ This file will create the following object when `ConfigManager.getConfig` is cal
 }
 ```
 
-__NOTE THAT__ the scopes have a depth of 1.
+__NOTE THAT__ the {SCOPE} part is always the name of a configuration object.
+__NOTE THAT__ the object have always a depth of one, thus you should access the dotted ones like
+this:
+```js
+obj.class2['param4.key1']
+```
 
 #### Usage
 
