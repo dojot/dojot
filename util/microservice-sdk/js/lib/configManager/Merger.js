@@ -1,5 +1,5 @@
 const { merge } = require('lodash');
-const Parsers = require('./Parsers');
+const Parsers = require('./parsers');
 
 /**
  * Merges the configurations from environment variables, user config file and default config file

@@ -1,5 +1,5 @@
-const Parsers = require('./Parsers');
-const { Reader, Writer } = require('./FileManager');
+const Parsers = require('./parsers');
+const { Reader, Writer } = require('./fileManager');
 const Merger = require('./Merger');
 
 /**
