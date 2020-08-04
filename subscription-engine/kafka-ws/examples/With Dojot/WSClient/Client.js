@@ -8,12 +8,11 @@ const { promisify } = require('util');
 const parseBoolean = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 // Parsing environment variables
-const dojotAddress = process.env.KAFKAWS_DOJOT_ADDRESS || 'dojot.iotplat';
-// const dojotAddress = process.env.KAFKAWS_DOJOT_ADDRESS || 'localhost:3000';
+const dojotAddress = process.env.KAFKAWS_DOJOT_ADDRESS || 'localhost:3000';
 const dojotUser = process.env.KAFKAWS_DOJOT_USER || 'admin';
 const dojotPassword = process.env.KAFKAWS_DOJOT_PASSWORD || 'admin';
 
-const tls = parseBoolean(process.env.KAFKAWS_TLS_ENABLE || true);
+const tls = parseBoolean(process.env.KAFKAWS_TLS_ENABLE || false);
 const caFile = process.env.KAFKAWS_TLS_CA_FILE || './certs/ca.crt';
 
 const kafkaTopic = process.env.KAFKAWS_APP_KAFKA_TOPIC || 'admin.device-data';
@@ -112,6 +111,8 @@ function startWebsocket(uri) {
 
   ws.on('close', (code, reason) => {
     console.info(`Websocket on "close": Connection closed.\nCode: ${code}\nReason: ${reason}`);
+    console.info('Terminating the app, goodbye!');
+    process.kill(process.pid);
   });
 
   ws.on('error', (err) => {
