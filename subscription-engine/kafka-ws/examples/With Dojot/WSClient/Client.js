@@ -41,7 +41,7 @@ async function generateAccessToken() {
         console.error(error.stack || error);
         reject(error);
       });
-  })
+  });
 }
 
 async function requestTicket(accessToken) {
@@ -63,7 +63,7 @@ async function requestTicket(accessToken) {
     return ticket;
   } catch (error) {
     console.error(error.stack || error);
-    process.exit(1);
+    throw error;
   }
 }
 
