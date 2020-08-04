@@ -4,8 +4,8 @@ services:
     build:
       context: ./WSClient/
       dockerfile: ./Dockerfile
-    environment:
-      ## Change to your Dojot environment
+    ## Change to your Dojot environment
+    # environment:
       # KAFKAWS_DOJOT_ADDRESS: "localhost:3000"
       # KAFKAWS_DOJOT_USER: "admin"
       # KAFKAWS_DOJOT_PASSWORD: "admin"
