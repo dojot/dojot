@@ -2,6 +2,7 @@
  * @module Reader reads the config files.
  */
 const { readFileSync, existsSync } = require('fs');
+const path = require('path');
 
 const Sanitizer = require('./Sanitizer');
 const Utils = require('../Utils');
@@ -9,8 +10,10 @@ const { Logger } = require('../../logging/Logger');
 
 const logger = new Logger('microservice-sdk:config-manager-reader');
 
+// Obtains the absolute path of the initial script
+const rootPath = path.dirname(require.main.filename);
 // Default configuration file location
-const DefaultConfigLocation = './config/default.conf';
+const DefaultConfigLocation = path.join(rootPath, 'config/default.conf');
 
 /**
  * Reads the default configuration file and returns an array of unparsed parameters.
