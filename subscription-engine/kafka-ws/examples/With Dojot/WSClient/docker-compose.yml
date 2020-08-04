@@ -26,8 +26,6 @@ services:
       # KAFKAWS_TLS_ENABLE: "true"
       # If enabled, you need the CA file too:
       # KAFKAWS_TLS_CA_FILE: "./certs/ca-cert.pem"
-    depends_on:
-      - kafka-ws-example
     restart: always
     command: ["node", "Client.js"]
     logging:
