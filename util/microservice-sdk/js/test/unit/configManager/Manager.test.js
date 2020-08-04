@@ -22,7 +22,7 @@ jest.mock('../../../lib/configManager/Merger', () => ({
   mergeConfigs: jest.fn(),
 }));
 
-describe('createConfig', () => {
+describe('loadSettings', () => {
   it('should successfully create the configuration', () => {
     Parsers.EnvVars.parseEnvironmentVariables.mockReturnValueOnce(['testParam1=10']);
     FileManager.Reader.readUserConfig.mockReturnValueOnce(['testParam2=20']);
@@ -33,7 +33,7 @@ describe('createConfig', () => {
       testParam3: '30',
     });
 
-    Manager.createConfig('TESTSVC');
+    Manager.loadSettings('TESTSVC');
 
     expect(Parsers.EnvVars.parseEnvironmentVariables).toHaveBeenCalledTimes(1);
     expect(FileManager.Reader.readUserConfig).toHaveBeenCalledTimes(1);

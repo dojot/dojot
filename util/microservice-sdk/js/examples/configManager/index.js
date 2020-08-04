@@ -10,7 +10,7 @@ Logger.setTransport('console');
 const logger = new Logger('config-example');
 
 // Setting up the configuration
-ConfigManager.createConfig('CONFEXAMPLE');
+ConfigManager.loadSettings('CONFEXAMPLE');
 const config = ConfigManager.getConfig('CONFEXAMPLE');
 // The MQTT library configuration is all in camelCase format, so we need to convert it before using
 const mqttConfig = ConfigManager.transformObjectKeys(config.mqtt, camelCase);

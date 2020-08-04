@@ -410,7 +410,7 @@ Create the default configuration file `./config/default.conf` in your project's 
 Now you can start using the module:
 ```js
 const { ConfigManager } = require('@dojot/microservice-sdk');
-ConfigManager.createConfig('V2K');
+ConfigManager.loadSettings('V2K');
 const config = ConfigManager.getConfig();
 ```
 
@@ -428,7 +428,7 @@ console.log(newObj);
 // { param1Key1: 'value11', param1Key2: 'value12' }
 ```
 
-__NOTE THAT__ you don't need to call `createConfig` every time you need the configuration, you just
+__NOTE THAT__ you don't need to call `loadSettings` every time you need the configuration, you just
 need to call it in your initialization file. In other places where you need it, call `getConfig`.
 
 ## Code Examples

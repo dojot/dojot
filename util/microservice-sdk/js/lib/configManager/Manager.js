@@ -11,7 +11,7 @@ const Merger = require('./Merger');
  * @param {string} service acronym for the service, should only contain letters/numbers
  * @param {string} path path to the user configuration file, defaults to './config'
  */
-const createConfig = (service, path = './config', userConfigFile = 'production.conf') => {
+const loadSettings = (service, path = './config', userConfigFile = 'production.conf') => {
   const envVarsData = Parsers.EnvVars.parseEnvironmentVariables(service);
   const userData = Reader.readUserConfig(path, userConfigFile);
   const defaultData = Reader.readDefaultConfig();
@@ -34,4 +34,4 @@ const getConfig = (service, path = './config') => {
   return config;
 };
 
-module.exports = { createConfig, getConfig };
+module.exports = { loadSettings, getConfig };
