@@ -6,7 +6,7 @@ To establish encrypted communication between the client and the server, it is ne
 
 With this tool, just inform the host names, IPs and CN of the certificate as parameters and it takes care to generate a ready-to-use certificate.
 
-It uses the OpenSSL program to generate certificates and cryptographic keys.
+It uses the [OpenSSL](https://www.openssl.org/) to generate certificates and cryptographic keys.
 
 ## Usage
 
