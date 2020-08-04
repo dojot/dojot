@@ -39,13 +39,13 @@ const readDefaultConfig = () => {
 /**
  * Reads the user configuration file and returns an array of unparsed parameters.
  *
- * @param {string} path
+ * @param {string} filePath
  * @param {string} filename
  *
  * @returns {string[]}
  */
-const readUserConfig = (path, filename) => {
-  const fileLocation = Utils.createFilename(filename, path);
+const readUserConfig = (filePath, filename) => {
+  const fileLocation = Utils.createFilename(filename, filePath);
   if (existsSync(fileLocation)) {
     const data = readFileSync(fileLocation).toString();
     const config = Sanitizer.sanitize(data);
@@ -59,12 +59,12 @@ const readUserConfig = (path, filename) => {
  * Reads the configuration from the JSON file.
  *
  * @param {string} service
- * @param {string} path
+ * @param {string} filePath
  *
  * @returns {{}}
  */
-const readJson = (service, path) => {
-  const filename = Utils.createFilename(`${service}.json`, path);
+const readJson = (service, filePath) => {
+  const filename = Utils.createFilename(`${service}.json`, filePath);
   if (existsSync(filename)) {
     const data = readFileSync(filename);
     const config = JSON.parse(data);
