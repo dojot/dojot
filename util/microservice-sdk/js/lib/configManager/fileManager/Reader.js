@@ -19,7 +19,7 @@ const DefaultConfigLocation = path.join(rootPath, 'config/default.conf');
  * Reads the default configuration file and returns an array of unparsed parameters.
  *
  * @returns {string[]}
- * @throws
+ * @throws if the default configuration file is empty or not found
  */
 const readDefaultConfig = () => {
   if (existsSync(DefaultConfigLocation)) {
