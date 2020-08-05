@@ -5,7 +5,7 @@ WORKDIR /usr/src/app
 COPY ./requirements ./requirements
 COPY ./src ./src
 
-RUN apk add \
+RUN apk add --no-cache \
     curl \
     bash \
     gcc \
