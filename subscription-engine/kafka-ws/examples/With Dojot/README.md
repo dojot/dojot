@@ -29,7 +29,7 @@ You need to change the environment variables in the Docker Compose file to refle
 | KAFKAWS_DOJOT_ADDRESS     | Address where Dojot is located                                                         | localhost:3000    | IP/hostname:port    |
 | KAFKAWS_DOJOT_PASSWORD    | Dojot user password                                                                    | admin             | password            |
 | KAFKAWS_DOJOT_USER        | Dojot user                                                                             | admin             | username            |
-| KAFKAWS_TLS_CA_FILE       | CA certificate file location                                                           | ./certs/ca.crt    | Path to a file      |
+| KAFKAWS_TLS_CA_FILE       | CA certificate file location. **Required if TLS is enabled**.                          | ./certs/ca.crt    | Path to a file      |
 | KAFKAWS_TLS_ENABLE        | Enable TLS, the server must be configured accordingly                                  | false             | boolean             |
 
 In the next sections we will show some configurations that are needed when using TLS.
