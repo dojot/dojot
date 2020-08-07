@@ -232,6 +232,7 @@ KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)   
 REDIS_HOST       | Redis host                   | kafka-ws-redis                              | string |
 REDIS_PORT       | Redis port                   | 6379                               | number |
 REDIS_DATABASE   | Redis database               | 1                                  | number |
+KAFKA_WS_REQUEST_CERT | Whether the service should request for a client certificate or not | false | boolean
 
 Note1: A websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
 
