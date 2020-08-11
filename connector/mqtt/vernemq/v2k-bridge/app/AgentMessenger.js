@@ -67,7 +67,7 @@ class AgentMessenger {
       return;
     }
 
-    this.logger.debug(`Trying to sending message to kafka topic ${kafkaTopic}....);
+    this.logger.debug(`Trying to send message to kafka topic ${kafkaTopic}....);
     this.producer.produce(kafkaTopic, deviceDataMessage, messageKey).then(() => {
       this.logger.debug(`Successfully sent message to Kafka in ${kafkaTopic}`);
     }).catch((error) => {
