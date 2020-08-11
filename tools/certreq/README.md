@@ -6,13 +6,12 @@ To establish encrypted communication between the client and the server, it is ne
 
 Basically the functionality of this tool is to connect to the API platform (using a __username__ and __password__) and request certificates according to the tanant to which the user belongs. Each certificate will have an __identifier__ associated with a device on the dojot platform, so for the certificate to be useful, it is necessary to inform valid identifiers (device IDs) according to the user's tenant. The tenant is automatically associated in generating the certificate.
 
-With this tool, simply inform the list of device identifiers separated by commas and the tool will retrieve the respective certificates. If the identifier does not belong to any tentant device, the certificate will be of no use, because despite the TLS connection being established, the platform will not let anything be published.
+With this tool, simply inform the list of device identifiers separated by commas and the tool will retrieve the respective certificates. If the identifier does not belong to any device (according to the user's tenant), the certificate will be of no use, because despite the TLS connection being established, the platform will not let anything be published.
 
 It uses:
 - [OpenSSL](https://www.openssl.org/) to generate CSR and cryptographic keys;
 - [curl](https://curl.haxx.se/) to access the dojot platform APIs;
-- [jq](https://stedolan.github.io/jq/) to process the return JSON from the dojot platform APIs;
-- [GNU awk](https://www.gnu.org/software/gawk/) to extract data from certain parts of the output of some commands in the shell.
+- [jq](https://stedolan.github.io/jq/) to process the return JSON from the dojot platform APIs.
 
 ## Usage
 
@@ -63,7 +62,7 @@ key | value
 With the CA certificate and the device's certificate and key pair, it is possible to publish data on the dojot platform (over mutual TLS). For example, through the MqTT protocol, using the command `mosquitto_pub`:
 
 ~~~bash
-mosquitto_pub -m '{"timestamp":654321}' -t 'admin:123456/attrs' -h 'dojot.host.com' -p 8883 --cafile './ca/ca.pem' --cert './cert_123456/cert.pem' --key './cert_123456/private.key' -d
+mosquitto_pub -m '{"timestamp":654321}' -t 'admin:123456/attrs' -u 'admin:123456' -h 'dojot.host.com' -p 8883 --cafile './ca/ca.pem' --cert './cert_123456/cert.pem' --key './cert_123456/private.key' -q 1 -d
 ~~~
 > The details of the `mosquitto_pub` can be found in its [manual](https://mosquitto.org/man/mosquitto_pub-1.html).
 >

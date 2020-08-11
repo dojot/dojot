@@ -19,6 +19,7 @@ HOST="127.0.0.1"
 PORT="8000"
 USERNAME="admin"
 PASSWD="admin"
+DIVICE_IDS=''
 
 readonly KEY_PAIR_FILE='private.key'
 readonly CSR_FILE='request.csr'
@@ -61,7 +62,7 @@ function getToken() {
   JWT=$(curl -sS -X POST "${HOST}:${PORT}/auth" \
     -H 'Content-Type:application/json' \
     -d "{ \"username\": \"${USERNAME}\", \"passwd\": \"${PASSWD}\" }" 2>/dev/null \
-    | gawk -v FS='"' '{print $4}')
+    | jq -j '.jwt')
 
   if [ -z "${JWT}" ]; then
     printf '\r\xE2\x9D\x8C Failed to get access token!\n'
@@ -179,7 +180,6 @@ function precondition() {
     checker "cURL" "curl" "curl"
     checker "OpenSSL" "openssl" "openssl"
     checker "jq" "jq" "jq"
-    checker "GNU awk" "gawk" "gawk"
 }
 
 function checker() {
