@@ -182,7 +182,7 @@ function checker() {
   local commandName=$2
   local aptPkgName=$3
 
-  echo -e "Checking if ${YELLOW}${programName}${NRML}${NC} are installed..."
+  echo -e "Checking if ${YELLOW}${programName}${NRML}${NC} is installed..."
   command -v "${commandName}" >/dev/null 2>&1 || {
     echo -e >&2 "${RED}Error - ${BOLD}${programName}${NRML} isn't installed."
     echo -e >&2 "${NC}To install ${BOLD}${programName}${NRML} run: ${CYAN}sudo apt install ${aptPkgName}"

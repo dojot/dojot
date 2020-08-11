@@ -35,7 +35,7 @@ The following example explores the use of multiple DNS and IP entries in the _Su
 ~~~bash
 ./certgen.sh \
     --dns 'domain1.com,domain2.com,domain3.com' \
-    --ip '192.168.0.010,192.168.0.020,192.168.0.030' \
+    --ip '192.168.0.10,192.168.0.20,192.168.0.30' \
     --cname 'CertificateCommonName'
 ~~~
 
