@@ -30,7 +30,7 @@ if (serverCfg.tls) {
     key: fs.readFileSync(serverCfg.tls_key_file),
     ca: [fs.readFileSync(serverCfg.tls_ca_file)],
     rejectUnauthorized: true,
-    requestCert: true,
+    requestCert: serverCfg.request_cert,
   };
   server = https.createServer(options, application.expressApp);
 } else {
