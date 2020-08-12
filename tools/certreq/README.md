@@ -59,10 +59,17 @@ key | value
 
 ## Lastly
 
-With the CA certificate and the device's certificate and key pair, it is possible to publish data on the dojot platform (over mutual TLS). For example, through the MqTT protocol, using the command `mosquitto_pub`:
+With the CA certificate and the device's certificate and key pair, it is possible to _publish_ data or _subscribe_ to consume data from the dojot platform (over mutual TLS). For example, through the MqTT protocol, using the commands `mosquitto_pub` and `mosquitto_sub` (from package `mosquitto-clients` on Debian-based Linux distributions):
 
 ~~~bash
+# Publish
 mosquitto_pub -m '{"timestamp":654321}' -t 'admin:123456/attrs' -u 'admin:123456' -h 'dojot.host.com' -p 8883 --cafile './ca/ca.pem' --cert './cert_123456/cert.pem' --key './cert_123456/private.key' -q 1 -d
 ~~~
 > The details of the `mosquitto_pub` can be found in its [manual](https://mosquitto.org/man/mosquitto_pub-1.html).
->
+
+
+~~~bash
+# Subscribe
+mosquitto_sub -t 'admin:123456/attrs' -u 'admin:123456' -h 'dojot.host.com' -p 8883 --cafile './ca/ca.pem' --cert './cert_123456/cert.pem' --key './cert_123456/private.key' -q 1 -d
+~~~
+> The details of the `mosquitto_sub` can be found in its [manual](https://mosquitto.org/man/mosquitto_sub-1.html).
