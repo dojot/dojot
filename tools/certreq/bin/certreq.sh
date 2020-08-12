@@ -19,13 +19,14 @@ HOST="127.0.0.1"
 PORT="8000"
 USERNAME="admin"
 PASSWD="admin"
-DIVICE_IDS=''
+DEVICE_IDS=''
+JWT=''
+TOKEN_FILE=''
 
 readonly KEY_PAIR_FILE='private.key'
 readonly CSR_FILE='request.csr'
 readonly CA_FILE='ca.pem'
 readonly CERT_FILE='cert.pem'
-readonly TOKEN_FILE='token.jwt'
 
 readonly RED='\e[91m'
 readonly CYAN='\e[96m'
@@ -47,7 +48,7 @@ function main() {
     getToken
   fi
 
-  if [ -z "${DIVICE_IDS}" ]; then
+  if [ -z "${DEVICE_IDS}" ]; then
     getDeviceIDs
   fi
 
@@ -76,12 +77,12 @@ function getToken() {
 function getDeviceIDs() {
   printf '\xE2\x8F\xB3 Obtaining device IDs...'
 
-  DIVICE_IDS=$(curl -sS -X GET "${HOST}:${PORT}/device?idsOnly=true" \
+  DEVICE_IDS=$(curl -sS -X GET "${HOST}:${PORT}/device?idsOnly=true" \
     -H "Authorization: Bearer ${JWT}" \
     -H 'Content-Type: application/json' \
     | jq -r '.[]?')
 
-  if [ -z "${DIVICE_IDS}" ]; then
+  if [ -z "${DEVICE_IDS}" ]; then
     printf '\r\xE2\x9D\x8C Failed to get device IDs!\n'
     exit 1
   else
@@ -113,7 +114,7 @@ function getCertificates() {
   local csrContent
   local cert
 
-  for id in ${DIVICE_IDS}; do
+  for id in ${DEVICE_IDS}; do
 
     printf '\xE2\x8F\xB3 Obtaining the certificate for device "%s"...' "${id}"
 
@@ -154,9 +155,10 @@ function parseArgs() {
     case "$1" in
       -h ) HOST="${2}"; shift;;
       -p ) PORT="${2}"; shift;;
-      -i ) DIVICE_IDS="$2"; shift;;
+      -i ) DEVICE_IDS="$2"; shift;;
       -u ) USERNAME="${2}"; shift;;
       -s ) PASSWD="${2}"; shift;;
+      -t ) TOKEN_FILE="${2}"; shift;;
       * )  args+=("$1")  # if no match, add it to the positional args
     esac
     shift # move to next key-value pair
@@ -166,14 +168,28 @@ function parseArgs() {
   set -- "${args[@]}"
 
   # split a comma separated deviceIDs string
-  if [ -n "${DIVICE_IDS+x}" ] ; then
-    DIVICE_IDS=$(echo -e "${DIVICE_IDS//,/'\n'}")
+  if [ -n "${DEVICE_IDS+x}" ] ; then
+    DEVICE_IDS=$(echo -e "${DEVICE_IDS//,/'\n'}")
+  fi
+
+  # If the name of the file containing the access token is not entered
+  # by parameter, then a default name is defined...
+  if [ -z "${TOKEN_FILE}" ] ; then
+    TOKEN_FILE='token.jwt'
+  fi
+
+  # If the file containing the access token exists, then the token is loaded
+  # into the variable. This way, it is not necessary to use the username and
+  # password to generate a new token.
+  if [ -f "${TOKEN_FILE}" ]; then
+    JWT=$(cat "${TOKEN_FILE}")
   fi
 
   readonly HOST
   readonly PORT
   readonly USERNAME
   readonly PASSWD
+  readonly TOKEN_FILE
 }
 
 function precondition() {
