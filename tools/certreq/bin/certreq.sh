@@ -23,7 +23,7 @@ DIVICE_IDS=''
 
 readonly KEY_PAIR_FILE='private.key'
 readonly CSR_FILE='request.csr'
-readonly CA_FILE='ca.crt'
+readonly CA_FILE='ca.pem'
 readonly CERT_FILE='cert.pem'
 readonly TOKEN_FILE='token.jwt'
 
