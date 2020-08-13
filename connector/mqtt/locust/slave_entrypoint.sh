@@ -8,11 +8,11 @@ readonly DOJOT_MQTT_PORT=${DOJOT_MQTT_PORT:-"1883"}
 readonly DOJOT_MQTT_TIMEOUT=${DOJOT_MQTT_TIMEOUT:-"60"}
 
 # Locust parameters
-readonly LOCUST_MASTER_HOST=${LOCUST_MASTER_HOST:-"127.0.0.1"}
+readonly LOCUST_MASTER_HOST=${LOCUST_MASTER_HOST:-"locust-master"}
 
 # Redis parameters
 readonly REDIS_CONN_TIMEOUT=${REDIS_CONN_TIMEOUT:-"180"}
-readonly REDIS_HOST=${REDIS_HOST:-"127.0.0.1"}
+readonly REDIS_HOST=${REDIS_HOST:-"redis"}
 readonly REDIS_PORT=${REDIS_PORT:-"6379"}
 readonly REDIS_PASSWD=${REDIS_PASSWD:-""}
 
