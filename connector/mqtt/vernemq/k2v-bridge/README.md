@@ -30,7 +30,7 @@ K2V_APP_HOSTNAME                 | Hostname to be used in the certificate common
 
 Key                                | Purpose                        | Default Value       | Valid Values |
 ---------------------------------- | ------------------------------ | ------------------- | ------------ |
-K2V_MESSENGER_CONSUME_TOPIC_SUFFIX | Kafka consumption topic suffix | ${K2V_APP_HOSTNAME} | string       |
+K2V_MESSENGER_CONSUME_TOPIC_SUFFIX | Kafka consumption topic suffix | dojot.device-manager.device | string       |
 
 ### **MQTT**
 
