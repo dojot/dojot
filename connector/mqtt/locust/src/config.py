@@ -12,7 +12,7 @@ CONFIG = {
     'security': {
         'devices_to_renew':           int(os.environ.get("DEVICES_TO_RENEW", 1000)),
         'devices_to_revoke':          int(os.environ.get("DEVICES_TO_REVOKE", 1000)),
-        'dns_cert':                   [],    
+        'dns_cert':                   [],
         'renew_devices':              Utils.str_to_bool(os.environ.get("RENEW_DEVICES", "False")),
         'revoke_devices':             Utils.str_to_bool(os.environ.get("REVOKE_DEVICES", "False")),
         'cert_dir':                   os.environ.get("CERT_DIR", "cert/"),
@@ -33,7 +33,7 @@ CONFIG = {
         'redis': {
             'certificates_db':      int(os.environ.get("REDIS_CERTIFICATES_DB", 0)),
             'mapped_db':            int(os.environ.get("REDIS_MAPPED_DB", 1)),
-            'host':                 os.environ.get("REDIS_HOST", "127.0.0.1"),
+            'host':                 os.environ.get("REDIS_HOST", "redis"),
             'port':                 int(os.environ.get("REDIS_PORT", 6379)),
             'jwt_expire_time':      int(os.environ.get("REDIS_STORED_JWT_EXPIRE_TIME", 1800)),
         }
