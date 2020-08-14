@@ -16,7 +16,7 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 echo
 echo "Retrieve CRL of trusted CA : ${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl "
 
-requestCode=$(curl -s -o "${certDir}"/requestResult.json -w "%{http_code}" "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl?update=true" \
+requestCode=$(curl -s -o "${certDir}"/requestResult.json -w "%{http_code}" "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl" \
   -H "Content-Type:application/json" \
   -H "Accept:application/json")
 
