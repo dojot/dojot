@@ -49,3 +49,17 @@ services:
       - 6380:6379
     volumes:
       - ../db/:/data
+
+  locust-exporter:
+    image: containersol/locust_exporter:v0.3.0
+    networks:
+      - default
+    restart: always
+    logging:
+      driver: json-file
+    depends_on:
+      - locust-master
+    ports:
+      - 9646:9646
+    environment:
+      LOCUST_EXPORTER_URI: http://locust-master:8089
