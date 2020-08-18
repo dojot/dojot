@@ -4,16 +4,22 @@ services:
     image: dojot/locust:development
     command: bash master_entrypoint.sh
     volumes:
-      - ..:/usr/src/app
+      # If you need to change code while running the container, activate this volume:
+      # - ..:/usr/src/app
+      # If you only need to generate certificates, activate this volume instead:
+      - ../cert:/usr/src/app/cert
     environment:
       DOJOT_URL: "http://127.0.0.1:8000"
       DOJOT_MQTT_HOST: "127.0.0.1"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "1883"
       DOJOT_MQTT_TIMEOUT: "120"
+      DOJOT_ENV: "n"
+
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
       REDIS_PASSWD: ""
       REDIS_BACKUP: "y"
-      DOJOT_ENV: "n"
     networks:
       - default
     depends_on:

@@ -180,6 +180,12 @@ After extracting the response payload certificate and saving it to disk in a tex
     LPSCByr/Jf5/sLD6GXNh4w==
     -----END CERTIFICATE-----
 
+**Note:** If you have not saved the certificate _fingerprint_ returned by the API and also do not know how to calculate it again, you can use the [OpenSSL](https://www.openssl.org/) tool for this! It is necessary that the certificate (in PEM format as returned by the API) is saved on disk (for example, with the name `cert.pem`), then execute the command:
+~~~bash
+openssl x509 -fingerprint -sha256 -in cert.pem
+~~~
+
+<br>
 With the certificate in hand, the device already has an identity and is almost ready to communicate (over TLS) with the dojot platform, but first, it is still necessary to recover the internal CA certificate of the dojot platform, which was responsible for sign the device certificate and who the device must trust for mutual TLS to be established.
 
 This procedure is described below ...
