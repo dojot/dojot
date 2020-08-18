@@ -8,7 +8,7 @@ The IoT-Agent MQTT extends [VerneMQ](https://github.com/vernemq/vernemq) with so
 
 The currently accepted **MQTT protocol versions** are MQTT v3.1 and v3.1.1 respectively.
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt_1)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/development/connector/mqtt/vernemq/docs/plant_uml/mqtt/diag_mqtt_1)
 
 Fig. 1 - Data communication flows among the services that implement the IoT-Agent MQTT.
 
@@ -60,7 +60,7 @@ The process of obtaining certificates for a client (Fig. 2):
 
 - Obtaining the root certificate (public certificate of **CA**).
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_client)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/development/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_client)
 
 Fig. 2 - Client retrieves certificates from PKI (EJBCA)
 
@@ -76,7 +76,7 @@ The process of obtaining certificates for VerneMQ instances follows the same ste
 
 - CRL updated the CRL certificate every time by setting in CRL_UPDATE_TIME
 
-![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/epic-100kMqttDevices/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
+![image](http://www.plantuml.com/plantuml/proxy?src=https://raw.githubusercontent.com/dojot/dojot/development/connector/mqtt/vernemq/docs/plant_uml/mqtt/seq_sec_service1)
 
 Fig. 3 - VerneMQ (Broker) retrieves certificates from PKI (EJBCA)
 
@@ -302,5 +302,5 @@ Note: In this case, the message is a publish  on an attribute with the label att
 ##### Example on how to subscribe
 
 ```console
- mosquitto_sub -h myhost -p 1883 -t admin:a1998e/attrs -u admin:a1998e
+ mosquitto_sub -h myhost -p 1883 -t admin:a1998e/config -u admin:a1998e
 ```
