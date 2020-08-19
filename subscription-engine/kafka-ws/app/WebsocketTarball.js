@@ -1,5 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const { v4: uuidv4 } = require('uuid');
+const isEmpty = require('lodash/isEmpty');
 
 const { WSError } = require('./Errors').Errors;
 const { ErrorCodes } = require('./Errors');
@@ -11,7 +12,6 @@ const RedisExpirationMgmt = require('./Redis/RedisExpireMgmt');
 const KafkaTopicsCallbacksMgmt = require('./Kafka/KafkaTopicsConsumerCallbacksMgmt');
 const {
   checkTopicBelongsTenant,
-  isObjectEmpty,
   addTimeFromNow,
 } = require('./Utils');
 const { server: serverConfig } = require('./Config');
@@ -199,12 +199,12 @@ class Tarball {
     const boundSend = ws.send.bind(ws);
     this.kafkaTopicsCallbacksMgmt.addCallback(kafkaTopic, idWsConnection, (data) => {
       try {
-        const objectFiltered = filter(data);
-        // If the filtered object is empty,
-        // it does not send a message to ws
-        if (!isObjectEmpty(objectFiltered)) {
-          boundSend(JSON.stringify(objectFiltered));
-          logger.debug(`Sending ${JSON.stringify(objectFiltered)}`);
+        const filteredObject = filter(data);
+        // If the filtered object is empty, it should not be sent
+        if (!isEmpty(filteredObject)) {
+          const stringifiedObject = JSON.stringify(filteredObject);
+          boundSend(stringifiedObject);
+          logger.debug(`Sending ${stringifiedObject}`);
         }
       } catch (error) {
         logger.error(`Caught ${error.stack}`);

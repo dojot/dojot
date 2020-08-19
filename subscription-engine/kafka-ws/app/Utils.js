@@ -88,14 +88,6 @@ function isNumber(value) {
 }
 
 /**
- * Checks if the given object is empty, like {}
- *
- * @param {object} object
- * @returns {boolean} true if it is empty
- */
-const isObjectEmpty = (object) => (typeof object !== 'object') || (object !== null && Object.keys(object).length === 0);
-
-/**
  * Checks if the topic belongs to tenant,
  *  for that the topic must be started with {tenant}.
  *
@@ -146,7 +138,6 @@ module.exports = {
   setOperators,
   createFingerprint,
   isNumber,
-  isObjectEmpty,
   checkTopicBelongsTenant,
   addTimeFromNow,
   parseUint,
