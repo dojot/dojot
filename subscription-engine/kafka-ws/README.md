@@ -135,13 +135,23 @@ The rules to select parameters from a message are:
 - `a(b,c)`: select multiple parameters from a specific parameter
 - `a/*/c`: wildcard selection
 
+__NOTE THAT__ if you select a parameter that does not exist in its parent's object, it will return
+nothing. Check the examples for a better understanding.
+
 Examples:
 
+Let's filter the following object:
 ```js
-{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
-{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
-{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
-{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
+{ attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
+```
+
+Filters and its results:
+```js
+f('attrs,metadata') => { attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
+f('metadata/tenant') => { metadata: { tenant: 'admin' } }
+f('attrs(temperature,rain)') => { attrs: { temperature: 20, rain: 10.5 } }
+f('attrs/*') => { attrs: { temperature: 20, rain: 10.5 } }
+f('attrs/humidity') => { attrs: { } }
 ```
 
 ### **Applying conditions (`where`)**
