@@ -33,7 +33,15 @@ The user is responsible for generating a CSR, and for that, he needs tools for t
 
 With OpenSSL installed on the user's computer (Linux in this case), just type the command below in the terminal:
 
-    openssl req -newkey rsa:2048 -nodes -sha256 -keyout private.key -out request.csr -subj "/CN=[!!!device identifier here!!!]"
+~~~bash
+openssl req \
+  -newkey 'rsa:2048' \
+  -nodes \
+  -sha256 \
+  -keyout 'private.key' \
+  -out 'request.csr' \
+  -subj '/CN=[device-id-here!]'
+~~~
 
 Explaining this command in detail:
 
@@ -45,11 +53,13 @@ Explaining this command in detail:
 | -sha256                                    | This specifies the message digest to sign the request. |
 | -keyout private.key                        | This gives the filename to write the newly created private key to. |
 | -out request.csr                           | This specifies the output filename to write the CSR to |
-| -subj "/CN=[!!!device identifier here!!!]" | Sets subject name for new request. <br> **Important note**: Only the CN (CommonName) is required. The value of this field must match the *device identifier*. The dojot platform is responsible for adding the correct *tenant*. In this way, the *Certificate-Device* relationship is made. |
+| -subj "/CN=[`device-id-here!`]" | Sets subject name for new request. <br> **Important note**: Only the CN (CommonName) is required. The value of this field must match the *device identifier*. The dojot platform is responsible for adding the correct *tenant*. In this way, the *Certificate-Device* relationship is made. |
 
 For more details, just consult the tool manual:
 
-    man openssl-req
+~~~bash
+man openssl-req
+~~~
 
 Upon completion of the command, two files will be generated, one of which is the `private.key` and *must be stored with the device in a very secure way*. The other is the CSR `request.csr` and it must be sent to the dojot platform in order to obtain an x.509 certificate.
 
@@ -58,17 +68,24 @@ For IoT devices the ideal is to use pairs of keys derived from elliptical curves
 Below are the commands needed to generate each of these curves:
 
 ##### P-256
-    openssl ecparam -genkey -name prime256v1 -noout -out ec256-key-pair.pem
-    openssl req -new -key ec256-key-pair.pem -out ec256-key-pair.csr -sha256 -subj "/CN=[[device ID]]"
+~~~bash
+openssl ecparam -genkey -name 'prime256v1' -noout -out 'ec256-key-pair.pem'
 
+openssl req -new -key 'ec256-key-pair.pem' -out 'ec256-key-pair.csr' -sha256 -subj '/CN=[[device ID]]'
+~~~
 ##### P-384
-    openssl ecparam -genkey -name secp384r1 -noout -out ec384-key-pair.pem
-    openssl req -new -key ec384-key-pair.pem -out ec384-key-pair.csr -sha256 -subj "/CN=[[device ID]]"
+~~~bash
+openssl ecparam -genkey -name 'secp384r1' -noout -out 'ec384-key-pair.pem'
+
+openssl req -new -key 'ec384-key-pair.pem' -out 'ec384-key-pair.csr' -sha256 -subj '/CN=[[device ID]]'
+~~~
 
 ##### P-521
-    openssl ecparam -genkey -name secp521r1 -noout -out ec512-key-pair.pem
-    openssl req -new -key ec512-key-pair.pem -out ec512-key-pair.csr -sha256 -subj "/CN=[[device ID]]"
+~~~bash
+openssl ecparam -genkey -name 'secp521r1' -noout -out 'ec512-key-pair.pem'
 
+openssl req -new -key 'ec512-key-pair.pem' -out 'ec512-key-pair.csr' -sha256 -subj '/CN=[[device ID]]'
+~~~
 
 #### Submit the CSR to the dojot platform
 
@@ -181,8 +198,9 @@ After extracting the response payload certificate and saving it to disk in a tex
     -----END CERTIFICATE-----
 
 **Note:** If you have not saved the certificate _fingerprint_ returned by the API and also do not know how to calculate it again, you can use the [OpenSSL](https://www.openssl.org/) tool for this! It is necessary that the certificate (in PEM format as returned by the API) is saved on disk (for example, with the name `cert.pem`), then execute the command:
+
 ~~~bash
-openssl x509 -fingerprint -sha256 -in cert.pem
+openssl x509 -fingerprint -sha256 -in 'cert.pem'
 ~~~
 
 <br>
@@ -274,12 +292,12 @@ The syntax for the listing is given below:
 Since the parameters informed in the URL are optional and in case they are not informed, the list presents the first 25 elements (configurable value).
 Below are detailed the parameters that can be informed in the URL:
 
-| Parameter | Description |
-|-----------|-------------|
-| page      | It is a metadata for paginated results. It identifies the position of the first document to be returned; if not set, the value 1 is assumed. Type: Number (>0). |
-| limit     | It is a metadata for paginated results. It defines the maximum number of documents (items) to be returned; if not set, the value 25 is assumed. Type: Number(>0, <=250) |
-| fields    | List of keys that should be included in the result. If the fields parameter is not set, all keys will be kept in the result. Type: list of keys separated by a comma |
-| key=val   | Filters the returned documents by the given key=val. If more than one key=val pair is set; the returned documents must contain all of them. Type: [MongoDB query parameters](https://www.npmjs.com/package/mongo-querystring) |
+| Parameter | Description | Type |
+|-----------|-------------|------|
+| page      | It is a metadata for paginated results. It identifies the position of the first record to be returned; if not set, the value 1 is assumed. | Number (>0) |
+| limit     | It is a metadata for paginated results. It defines the maximum number of records (items) to be returned; if not set, the value 25 is assumed. | Number(>0, <=250) |
+| fields    | list of record _attributes_ that should be included in the result. If the `fields` parameter is not set, all _attributes_ will be kept in the result. | list of attributes separated by a comma |
+| key=val   | Filters the returned records by the given key=val. If more than one key=val pair is set; the returned records must contain all of them.<br>In other words, `key` is the name of an _attribute_ of a record returned by the API. Likewise, `val` contains the filter that should be applied to that _attribute_. For example, if we wanted to filter certificates whose `fingerprint` _started with_ `AF:9B:33`, the parameter would look like this: `fingerprint=^AF:9B:33`. | See [mongo-querystring](https://www.npmjs.com/package/mongo-querystring) for more details |
 
 The response syntax would be as follows:
 
@@ -311,10 +329,10 @@ The response syntax would be as follows:
 
 Response Elements
 
-| Key | Description |
-|--|--|
-| certificates | List of x509 certificates according to the query parameters. Each element of the array is the same as specified by Get x509 Certificate. Type: Array |
-| paging | Metadata for controlling paginated results. It contains the URIs for the *previous*, *current* and *next* page. The *previous* and *next* will assume *null* value when there is no page. Type: Document with keys previous and next. |
+| Key | Description | Type |
+|-----|-------------|------|
+| certificates | List of x509 certificates according to the query parameters. Each element of the array is the same as specified by Get x509 Certificate. | Array |
+| paging | Metadata for controlling paginated results. It contains the URIs for the *previous*, *current* and *next* page. The *previous* and *next* will assume *null* value when there is no page. | Object with keys to navigate the paging. |
 
 A practical example query would be:
 
