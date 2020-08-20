@@ -9,8 +9,8 @@ services:
       # If you only need to generate certificates, activate this volume instead:
       - ../cert:/usr/src/app/cert
     environment:
-      DOJOT_URL: "http://127.0.0.1:8000"
-      DOJOT_MQTT_HOST: "127.0.0.1"
+      DOJOT_URL: "http://10.50.11.53"
+      DOJOT_MQTT_HOST: "10.50.11.53"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "1883"
       DOJOT_MQTT_TIMEOUT: "120"
