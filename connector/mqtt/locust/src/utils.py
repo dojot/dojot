@@ -232,6 +232,7 @@ class Utils():
     
         return 10
 
+    @staticmethod
     def get_metric_disconnected_index_by_time(time: float) -> int:
         """
         Return the index, of disconnect message
