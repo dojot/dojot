@@ -6,6 +6,8 @@ const { Logger } = require('@dojot/microservice-sdk');
 
 const { mongo: { conn: connCfg } } = require('./config');
 
+const { BadRequest } = require('./core/errors');
+
 const { Schema } = mongoose;
 
 const logger = new Logger();
@@ -114,35 +116,68 @@ on('close', () => {
 /** ************************************************************************
  * Customizations used to select certificate fields from the QueryString URL
  ************************************************************************* */
-const certificateProjectableFields = [
+const certProjectableFields = [
   'fingerprint',
   'pem',
   'createdAt',
   'issuedByDojotPki',
   'autoRegistered',
+  'belongsTo',
   'belongsTo.device',
   'belongsTo.application',
   'tenant',
 ];
 
-function getProjectionFields(commaSeparatedFields) {
+function parseProjectionFields(commaSeparatedFields) {
   const queryFields = (commaSeparatedFields)
     ? commaSeparatedFields.split(',')
     : null;
 
   /* Defines the fields that will be returned by the query */
-  const fields = (queryFields)
-    ? certificateProjectableFields.filter(
-      (path) => queryFields.some(
-        (field) => path.startsWith(field),
-      ),
-    )
-    : [...certificateProjectableFields];
-
-  /* _id must be specifically excluded ('-' prefix) */
-  fields.push('-_id');
-
+  let fields = [...certProjectableFields];
+  if (queryFields) {
+    const invalidFields = queryFields.filter((el) => !certProjectableFields.includes(el));
+    if (invalidFields.length) {
+      const errorMsg = `The fields provided are not valid: [${invalidFields.join(',')}]`;
+      throw BadRequest(errorMsg);
+    }
+    fields = [...queryFields];
+  }
   return fields;
+}
+
+function getComplexFieldMap(dottedAllowedFields) {
+  return dottedAllowedFields.reduce((map, el) => {
+    const field = el.substring(0, el.indexOf('.'));
+    if (field) {
+      const remaining = el.substring(el.indexOf('.') + 1);
+      let arr = map.get(field);
+      if (!arr) {
+        arr = [];
+        map.set(field, arr);
+      }
+      arr.push(remaining);
+    }
+    return map;
+  }, new Map());
+}
+
+function sanitizeFields(obj, dottedAllowedFields) {
+  const objFields = Object.keys(obj);
+  const allowedFields = new Set(dottedAllowedFields.map((el) => el.split('.')[0]));
+  const notAllowedFields = objFields.filter((f) => !allowedFields.has(f));
+
+  /* Removes non-allowed fields from the object */
+  notAllowedFields.forEach((f) => Reflect.deleteProperty(obj, f));
+
+  /* Sanitizes complex fields kept in the object */
+  getComplexFieldMap(dottedAllowedFields).forEach((nestedAllowedFields, allowedField) => {
+    if (Reflect.has(obj, allowedField)) {
+      sanitizeFields(Reflect.get(obj, allowedField), nestedAllowedFields);
+    }
+  });
+
+  return obj;
 }
 
 /** *******************************************************************
@@ -163,7 +198,7 @@ const certificateQueryString = new MongoQS({
   },
 });
 
-function getConditionFields(urlQueryStringObj, tenant) {
+function parseConditionFields(urlQueryStringObj, tenant) {
   const mongodbFilterObj = certificateQueryString.parse(urlQueryStringObj);
   return Object.assign(mongodbFilterObj, { tenant });
 }
@@ -176,7 +211,8 @@ module.exports = {
   close: mongoose.connection.close.bind(mongoose.connection),
   certificate: {
     model: mongoose.model('Certificate', certificateSchema),
-    getProjectionFields,
-    getConditionFields,
+    parseProjectionFields,
+    parseConditionFields,
+    sanitizeFields: (cert) => sanitizeFields(cert, certProjectableFields),
   },
 };
