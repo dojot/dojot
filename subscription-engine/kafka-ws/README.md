@@ -143,14 +143,27 @@ The rules to select parameters from a message are:
 - `a(b,c)`: select multiple parameters from a specific parameter
 - `a/*/c`: wildcard selection
 
+__NOTE THAT__ if you select parameters that do not exist in their parent's object, it will return
+an empty object. Check the examples for a better understanding.
+
 Examples:
 
+Let's filter the following object:
 ```js
-{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
-{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
-{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
-{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
+{ attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
 ```
+
+Filters and its results:
+```js
+f('attrs,metadata') => { attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
+f('metadata/tenant') => { metadata: { tenant: 'admin' } }
+f('attrs(temperature,rain)') => { attrs: { temperature: 20, rain: 10.5 } }
+f('attrs/*') => { attrs: { temperature: 20, rain: 10.5 } }
+f('attrs/humidity') => { attrs: { } }
+```
+
+__NOTE THAT__ in the last example the `attrs` object is empty. This happens if no attribute matches
+the sent filter. It will not throw an error.
 
 ### **Applying conditions (`where`)**
 
