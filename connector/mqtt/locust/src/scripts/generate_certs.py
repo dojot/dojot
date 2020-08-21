@@ -3,6 +3,7 @@ Certificate creation for Locust.
 """
 
 import argparse
+import glob
 from multiprocessing import Process
 import time
 import uuid
@@ -143,7 +144,7 @@ class GenerateCerts():
         )
         parser.add_argument(
             "--remove",
-            help="activates the remotion of the certificates directory before the generation",
+            help="activates the remotion of the existing certificates before the generation",
             action="store_true",
             default=False
         )
@@ -211,26 +212,27 @@ class GenerateCerts():
         Certificate creation commands.
         """
         if self.parser_args.remove and os.path.exists(CONFIG['security']['cert_dir']):
-            LOGGER.info("Removing certificates directory...")
-            shutil.rmtree(CONFIG['security']['cert_dir'])
-            LOGGER.info("... Removed certificates directory")
+            LOGGER.info("Removing certificates...")
+            # We don't remove the cert directory because it can be mounted as a volume and it will
+            # throw the 'Resource busy' error, we remove everything inside it instead
+            for path in glob.glob(os.path.join(CONFIG['security']['cert_dir'], '*')):
+                if os.path.isfile(path):
+                    os.remove(path)
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+
+            LOGGER.info("... Removed certificates")
 
             LOGGER.info("Creating certificates directories...")
-            os.makedirs(CONFIG['security']['cert_dir'], exist_ok=True)
-            os.makedirs(
-                "{0}{1}".format(
-                    CONFIG['security']['cert_dir'], CONFIG['security']['renew_cert_dir']
-                ),
-                exist_ok=True
+            revoke_dir = os.path.join(
+                CONFIG['security']['cert_dir'], CONFIG['security']['revoke_cert_dir']
             )
-            os.makedirs(
-                "{0}{1}".format(
-                    CONFIG['security']['cert_dir'], CONFIG['security']['revoke_cert_dir']
-                ),
-                exist_ok=True
+            renew_dir = os.path.join(
+                CONFIG['security']['cert_dir'], CONFIG['security']['renew_cert_dir']
             )
+            os.makedirs(renew_dir, exist_ok=True)
+            os.makedirs(revoke_dir, exist_ok=True)
             LOGGER.info("... Created certificates directories")
-
 
         if self.parser_args.devices is not None:
             if self.parser_args.processes > self.parser_args.devices:
@@ -475,7 +477,7 @@ class GenerateCerts():
         if res["caPem"] is None:
             LOGGER.error("Error while retrieving the CA certificate.")
             sys.exit(1)
-        
+
         certificate = res["caPem"]
 
         filename = f"{CONFIG['security']['cert_dir']}{CONFIG['security']['ca_cert_file']}"
