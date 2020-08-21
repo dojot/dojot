@@ -3,8 +3,6 @@
  * @module utils
  */
 
-const moment = require('moment');
-
 /**
  * @function generateDojotDeviceDataMessage
  *
@@ -26,7 +24,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
     metadata: {
       deviceid: deviceIdValue,
       tenant: tenantValue,
-      timestamp: moment().unix(),
+      timestamp: Date.now(),
     },
     attrs: payload,
   };
