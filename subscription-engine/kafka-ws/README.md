@@ -82,7 +82,15 @@ Where:
 
 ##### **URI Examples**
 
-Note: For simplicity, we will not include the `ticket` parameter in the examples, but it must always be sent, otherwise the server will refuse the connection.
+__NOTE THAT__ for simplicity, we will not include the `ticket` parameter in the examples, but it
+must always be sent, otherwise the server will refuse the connection.
+
+__NOTE THAT__ you can use spaces in the filtering parameters, but, depending on your URI building
+method, you must ensure all the spaces are represented as `+` signs. Example:
+
+```
+/kafka-ws/v1/topics/topic.example?where=attrs.+brake+signal+1+=gte:0.0;&fields=attrs/+brake+signal+1+
+```
 
 To ilustrate the parameters' usage, here are some examples of valid URIs:
 
