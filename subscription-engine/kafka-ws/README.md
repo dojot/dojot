@@ -171,7 +171,7 @@ The conditions can be applied to any parameter in the message. The permitted ope
 
 #### **Set operators**
 
-Applied to a parameter via a set of values. These operators are applied to N possible values.
+Applied to N values.
 
 __NOTE THAT__ all values are treated as **string**.
 
@@ -189,28 +189,41 @@ Examples:
 
 #### **Arythmetic operators**
 
-Applied to a parameter via one value. These operators are applied to 1 possible value.
+Applied to only one value.
 
 __NOTE THAT__ all values are treated as **float**.
 
-- `eq`: equal
+- `eq`: equal (the default operator)
 - `neq`: not equal
 - `gt`: greater than
 - `gte`: greater than or equal to
 - `lt`: less than
 - `lte`: less than or equal to
 
-**Obs.:** if you do not pass an operator, it is considered the `eq` operator.
-
 Examples:
 
 ```js
-{ rain: 10, temperature: 30.0 } → f(rain=11) → discard
+{ rain: 10, temperature: 30.0 } → f(rain=10) → continue to process
+{ rain: 10, temperature: 30.0 } → f(rain=eq:11) → discard
 { rain: 10, temperature: 30.0 } → f(rain=neq:11) → continue to process
 { rain: 10, temperature: 30.0 } → f(rain=gt:10) → discard
 { rain: 10, temperature: 30.0 } → f(rain=gte:10) → continue to process
 { rain: 10, temperature: 30.0 } → f(rain=lt:10) → discard
 { rain: 10, temperature: 30.0 } → f(rain=lte:10) → continue to process
+```
+
+#### **Boolean operators**
+
+Applied to only one value.
+
+- `bool`: verifies if the value is true or false
+
+Examples:
+
+```js
+{ sensors: { rain: { enabled: true } } } → f(sensors.rain.enabled=bool:true) → continue to process
+{ sensors: { rain: { enabled: true } } } → f(sensors.rain.enabled=bool:false) → discard
+{ sensors: { rain: { enabled: false } } } → f(sensors.rain.enabled=bool:false) → continue to process
 ```
 
 ### Connection Error Codes
@@ -239,32 +252,34 @@ operators](###applying-conditions-where) for more info
 
 Before proceeding, **make sure you configure your environment**.
 
-Key           | Purpose                                         | Default Value     | Valid Values             |
-------------- | ----------------------------------------------- | ----------------- | ------------------------ |
-NODE_ENV      | Is used (by convention) to state whether a particular environment is a **production** or a **development** environment. | production | *production* or *development* |
-LOG_LEVEL     | log level                                       | info              | info, warn, debug, error |
-LOG_VERBOSE   | Enables verbose mode for logging                    | false              | string: "true" or "false" / *number*: 1 or 0 |
-LOG_FILE   | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false              | string: "true" or "false" / *number*: 1 or 0 |
-LOG_FILE_LEVEL     | Log level to log on files                                     | debug              | info, warn, debug, error |
-KAFKA_HOSTS   | comma-separated list of Kafka hosts (with port) | kafka-server:9092 | list of hostname:port    |
-KAFKA_WS_HOST | Kafka-ws address                                | 0.0.0.0         | hostname                 |
-KAFKA_WS_PORT | Kafka-ws port                                   | 8080              | valid port               |
-KAFKA_WS_TLS | Kafka-ws secure - enables TLS ( Needs: KAFKA_WS_TLS_CA_FILE, KAFKA_WS_TLS_KEY_FILE and KAFKA_WS_TLS_CERT_FILE )                                   | false              | *string*: "true" or "false" / *number*: 1 or 0             |
-KAFKA_WS_TLS_CA_FILE | Kafka-ws ca file location      | /opt/kafka-ws/certs/ca-cert.pem              | valid path               |
-KAFKA_WS_TLS_KEY_FILE | Kafka-ws key file location      | /opt/kafka-ws/certs/server-key.pem              | valid path               |
-KAFKA_WS_TLS_CERT_FILE | Kafka-ws certificate file location      | /opt/kafka-ws/certs/server-cert.pem              | valid path               |
-KAFKA_WS_JWT_EXP_TIME   | Enables use *exp* (expiration time) from JWT informed when requesting a *single-use ticket*. | false               | string: "true" or "false" / *number*: 1 or 0 |
-TICKET_EXPIRATION_SEC | Duration time (in seconds) of the *single-use ticket*. | 60 | seconds |
-TICKET_SECRET | Secret used to sign *single-use tickets* and prevent forgery. Give preference to large random values. | Random value generated at application startup. In a cluster environment, all instances need to share the same secret. | string |
-KAFKA_WS_MAX_LIFE_TIME   | Maximum lifetime of a connection   (-1 to disable)                 | 7200             | seconds |
-REDIS_HOST       | Redis host                   | kafka-ws-redis                              | string |
-REDIS_PORT       | Redis port                   | 6379                               | number |
-REDIS_DATABASE   | Redis database               | 1                                  | number |
-KAFKA_WS_REQUEST_CERT | Whether the service should request for a client certificate or not | false | boolean
+Key                    | Purpose                                                                                     | Default Value                       | Valid Values                  |
+---------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------- |
+NODE_ENV               | Is used (by convention) to state in which environment it is running                         | production                          | *production* or *development* |
+LOG_LEVEL              | Log level                                                                                   | info                                | info, warn, debug, error      |
+LOG_VERBOSE            | Enables verbose mode for logging                                                            | false                               | true or false / 1 or 0        |
+LOG_FILE               | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false                               | true or false / 1 or 0        |
+LOG_FILE_LEVEL         | Log level to log on files                                                                   | debug                               | info, warn, debug, error      |
+KAFKA_HOSTS            | comma-separated list of Kafka hosts (with port)                                             | kafka-server:9092                   | list of hostname:port         |
+KAFKA_WS_HOST          | Kafka WS address                                                                            | 0.0.0.0                             | hostname                      |
+KAFKA_WS_PORT          | Kafka WS port                                                                               | 8080                                | valid port                    |
+KAFKA_WS_TLS           | Enables TLS (Needs: KAFKA_WS_TLS_CA_FILE, KAFKA_WS_TLS_KEY_FILE and KAFKA_WS_TLS_CERT_FILE) | false                               | true or false / 1 or 0        |
+KAFKA_WS_TLS_CA_FILE   | Kafka WS ca file location                                                                   | /opt/kafka-ws/certs/ca-cert.pem     | valid path                    |
+KAFKA_WS_TLS_KEY_FILE  | Kafka WS key file location                                                                  | /opt/kafka-ws/certs/server-key.pem  | valid path                    |
+KAFKA_WS_TLS_CERT_FILE | Kafka WS certificate file location                                                          | /opt/kafka-ws/certs/server-cert.pem | valid path                    |
+KAFKA_WS_JWT_EXP_TIME  | Enables use of expiration time from the informed JWT when requesting a *single-use ticket*. | false                               | true or false / 1 or 0        |
+TICKET_EXPIRATION_SEC  | Duration time (in seconds) of the *single-use ticket*.                                      | 60                                  | seconds                       |
+TICKET_SECRET          | Secret used to sign *single-use tickets* and prevent forgery                                | Random value                        | string                        |
+KAFKA_WS_MAX_LIFE_TIME | Maximum lifetime of a connection   (-1 to disable)                                          | 7200                                | seconds                       |
+REDIS_HOST             | Redis host                                                                                  | kafka-ws-redis                      | string                        |
+REDIS_PORT             | Redis port                                                                                  | 6379                                | number                        |
+REDIS_DATABASE         | Redis database                                                                              | 1                                   | number                        |
+KAFKA_WS_REQUEST_CERT  | Whether the service should request for a client certificate or not                          | false                               | boolean                       |
 
-Note1: A websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
+__NOTE THAT__ a websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
 
-Note2: It is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) when requesting a *single-use ticket* can access the kafka topic, generally topics start with `tenant.*`
+__NOTE THAT__ it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) when requesting a *single-use ticket* can access the kafka topic, generally topics start with `tenant.*`
+
+__NOTE THAT__ if you pass a TICKET_SECRET, give preference to large random values. Also note that in a cluster environment all instances must share the same secret.
 
 
 ### **Parser compilation**
