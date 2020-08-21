@@ -8,7 +8,7 @@
  * @returns {object} filtered data.
  */
 const applyGt = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) > value) {
+  if (data[parameter] && Number(data[parameter]) > Number(value)) {
     return data;
   }
   return {};
@@ -24,7 +24,7 @@ const applyGt = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyGte = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) >= value) {
+  if (data[parameter] && Number(data[parameter]) >= Number(value)) {
     return data;
   }
   return {};
@@ -40,7 +40,7 @@ const applyGte = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyLt = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) < value) {
+  if (data[parameter] && Number(data[parameter]) < Number(value)) {
     return data;
   }
   return {};
@@ -56,7 +56,7 @@ const applyLt = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyLte = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) <= value) {
+  if (data[parameter] && Number(data[parameter]) <= Number(value)) {
     return data;
   }
   return {};
@@ -72,7 +72,7 @@ const applyLte = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyEq = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) === value) {
+  if (data[parameter] && Number(data[parameter]) === Number(value)) {
     return data;
   }
 
@@ -89,7 +89,7 @@ const applyEq = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyNeq = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) !== value) {
+  if (data[parameter] && Number(data[parameter]) !== Number(value)) {
     return data;
   }
 
