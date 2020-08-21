@@ -14,9 +14,12 @@ services:
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
       DOJOT_MQTT_PORT: "1883"
       DOJOT_MQTT_TIMEOUT: "120"
+      DOJOT_ENV: "n"
+
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
       REDIS_PASSWD: ""
       REDIS_BACKUP: "y"
-      DOJOT_ENV: "n"
     networks:
       - default
     depends_on:

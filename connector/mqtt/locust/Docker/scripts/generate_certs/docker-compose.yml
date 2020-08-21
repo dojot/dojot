@@ -1,7 +1,9 @@
 version: "3"
 services:
   generate-certs:
-    image: dojot/generate_certs:development
+    build:
+      context: ../../../
+      dockerfile: ./Docker/scripts/generate_certs/Dockerfile
     volumes:
       # If you need to change code while running the container, activate this volume:
       # - ../../../src:/usr/src/app/src
@@ -12,8 +14,6 @@ services:
       DOJOT_MQTT_HOST: "127.0.0.1"
       DOJOT_MQTT_PORT: "1883"
       DOJOT_ENV: "n"
-
-      EJBCA_URL: "http://localhost:5583"
 
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"

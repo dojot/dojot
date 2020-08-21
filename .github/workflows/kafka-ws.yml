@@ -77,7 +77,7 @@ jobs:
         # Label with the built image's commit
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
         # Whether tag will be based in the branch name or in the tag name
-
+        tag_names: true
 
   gh-pages:
     needs: docker-hub
