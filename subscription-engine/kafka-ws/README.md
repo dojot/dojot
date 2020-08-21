@@ -95,7 +95,15 @@ Where:
 
 ##### **URI Examples**
 
-Note: For simplicity, we will not include the `ticket` parameter in the examples, but it must always be sent, otherwise the server will refuse the connection.
+__NOTE THAT__ for simplicity, we will not include the `ticket` parameter in the examples, but it
+must always be sent, otherwise the server will refuse the connection.
+
+__NOTE THAT__ you can use spaces in the filtering parameters, but, depending on your URI building
+method, you must ensure all the spaces are represented as `+` signs. Example:
+
+```
+/kafka-ws/v1/topics/topic.example?where=attrs.+brake+signal+1+=gte:0.0;&fields=attrs/+brake+signal+1+
+```
 
 To ilustrate the parameters' usage, here are some examples of valid URIs:
 
@@ -148,14 +156,27 @@ The rules to select parameters from a message are:
 - `a(b,c)`: select multiple parameters from a specific parameter
 - `a/*/c`: wildcard selection
 
+__NOTE THAT__ if you select parameters that do not exist in their parent's object, it will return
+an empty object. Check the examples for a better understanding.
+
 Examples:
 
+Let's filter the following object:
 ```js
-{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
-{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
-{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
-{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
+{ attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
 ```
+
+Filters and its results:
+```js
+f('attrs,metadata') => { attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
+f('metadata/tenant') => { metadata: { tenant: 'admin' } }
+f('attrs(temperature,rain)') => { attrs: { temperature: 20, rain: 10.5 } }
+f('attrs/*') => { attrs: { temperature: 20, rain: 10.5 } }
+f('attrs/humidity') => { attrs: { } }
+```
+
+__NOTE THAT__ in the last example the `attrs` object is empty. This happens if no attribute matches
+the sent filter. It will not throw an error.
 
 ### **Applying conditions (`where`)**
 
@@ -165,27 +186,34 @@ The conditions can be applied to any parameter in the message. The permitted ope
 
 Applied to a parameter via a set of values. These operators are applied to N possible values.
 
-- `in`: returns the parameter if the value is in the list
-- `nin`: returns the parameter if the value is not in the list
+__NOTE THAT__ all values are treated as **string**.
+
+- `in`: returns the parameter if any string in the list is contained in it
+- `nin`: returns the parameter if any string in the list is not contained in it
 
 Examples:
 
-```js
+```
 { a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
+{ a: 'foo', b: 'bar' } → f(b=in:ar) → continue to process
 { a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
+{ a: 'foo', b: 'bar' } → f(b=nin:ar) → discard
 ```
 
 #### **Arythmetic operators**
 
 Applied to a parameter via one value. These operators are applied to 1 possible value.
 
+__NOTE THAT__ all values are treated as **float**.
+
+- `eq`: equal
 - `neq`: not equal
 - `gt`: greater than
-- `gte`: greater or equal to
+- `gte`: greater than or equal to
 - `lt`: less than
-- `lte`: less or equal to
+- `lte`: less than or equal to
 
-**Obs.:** if you do not pass an operator, it is considered the equal operator.
+**Obs.:** if you do not pass an operator, it is considered the `eq` operator.
 
 Examples:
 
