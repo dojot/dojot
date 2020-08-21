@@ -160,27 +160,34 @@ The conditions can be applied to any parameter in the message. The permitted ope
 
 Applied to a parameter via a set of values. These operators are applied to N possible values.
 
-- `in`: returns the parameter if the value is in the list
-- `nin`: returns the parameter if the value is not in the list
+__NOTE THAT__ all values are treated as **string**.
+
+- `in`: returns the parameter if any string in the list is contained in it
+- `nin`: returns the parameter if any string in the list is not contained in it
 
 Examples:
 
-```js
+```
 { a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
+{ a: 'foo', b: 'bar' } → f(b=in:ar) → continue to process
 { a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
+{ a: 'foo', b: 'bar' } → f(b=nin:ar) → discard
 ```
 
 #### **Arythmetic operators**
 
 Applied to a parameter via one value. These operators are applied to 1 possible value.
 
+__NOTE THAT__ all values are treated as **float**.
+
+- `eq`: equal
 - `neq`: not equal
 - `gt`: greater than
-- `gte`: greater or equal to
+- `gte`: greater than or equal to
 - `lt`: less than
-- `lte`: less or equal to
+- `lte`: less than or equal to
 
-**Obs.:** if you do not pass an operator, it is considered the equal operator.
+**Obs.:** if you do not pass an operator, it is considered the `eq` operator.
 
 Examples:
 
