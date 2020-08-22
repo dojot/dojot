@@ -76,16 +76,10 @@ function createFingerprint(topic, fields, conditions) {
  *
  * @returns {boolean} true if it is a number, false otherwise
  */
-function isNumber(value) {
-  // Integer
-  if (value.match(/^-?[1-9][0-9]*$/)) return true;
-  // Float with values before and after the dot
-  if (value.match(/^-?[1-9][0-9]*\.[0-9]*$/)) return true;
-  // Float with values only after the dot
-  if (value.match(/^-?0?\.[0-9]+$/)) return true;
-
-  return false;
-}
+const isNumber = (value) => {
+  const number = Number(value);
+  return !Number.isNaN(number) && Number.isFinite(number);
+};
 
 /**
  * Checks if the given object is empty, like {}
