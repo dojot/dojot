@@ -4,12 +4,8 @@ const nearley = require('nearley');
 
 const Utils = require('../Utils');
 const whereParser = require('./Parser');
-const {
-  InvalidSyntax,
-  InvalidEscapeValue,
-  InvalidOperatorArity,
-  InvalidValue,
-} = require('../Errors').Errors;
+const { InvalidSyntax, InvalidEscapeValue } = require('../Errors').Errors;
+const OperatorValidator = require('./OperatorValidator');
 
 const logger = new Logger('kafka-ws:where-parser');
 
@@ -33,18 +29,14 @@ const WhereParser = () => {
   this.formatValues = (values, operator) => {
     let processedValues = [];
 
-    if (Utils.numericOperators.includes(operator)) {
-      // No more than one value is permitted for a numeric operator
-      if (values.length > 1) {
-        throw new InvalidOperatorArity(operator, values.length);
+    if (Utils.operators.includes(operator)) {
+      const value = OperatorValidator[operator](values);
+
+      if (Utils.setOperators.includes(operator)) {
+        processedValues = value;
+      } else {
+        processedValues.push(value);
       }
-      if (!Utils.isNumber(values[0])) {
-        throw new InvalidValue(operator, values[0]);
-      }
-      processedValues.push(Number(values[0]));
-    } else if (Utils.setOperators.includes(operator)) {
-      // Multiple values are permitted for set operators
-      processedValues = values.map((value) => value.toString());
     }
 
     return processedValues;
