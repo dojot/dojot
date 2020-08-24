@@ -8,7 +8,7 @@ const Utils = require('../Utils');
  */
 const Lexer = moo.compile({
   parameter: {
-    match: /[a-zA-Z0-9]+[.[a-zA-Z0-9]+]*=/,
+    match: /[a-zA-Z0-9 _-]+[.[a-zA-Z0-9 _-]+]*=/,
     // Removing =
     value: (matched) => matched.slice(0, -1),
   },
