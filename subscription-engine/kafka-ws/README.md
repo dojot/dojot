@@ -12,7 +12,7 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 
 The connection is done in two steps, you must first obtain a *single-use ticket* through a REST request, then, be authorized to connect to the service through a websocket.
 
-#### First step: Get the single-use ticket
+#### **First step**: Get the single-use ticket
 
 A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
 Ticket request must be made by REST at the endpoint `<base-url>/kafka-ws/v1/ticket` using the HTTP GET verb. The request must contain the header `Authorization` and the JWT token as value, according to the syntax:
@@ -30,9 +30,22 @@ The component responds with the following syntax:
 
 Note: In the context of a dojot deployment the JWT Token is provided by the *Auth service*, and is validated by the *API Gateway* before redirecting the connection to the Kafka-WS. So, no validations are done by the Kafka WS.
 
-#### Second step: Establish a websocket connection
+#### **Second step**: Establish a websocket connection
 
 The connection is done via pure websockets using the URI `<base-url>/kafka-ws/v1/topics/:topic`. You **must** pass the previously generated ticket as a parameter of this URI. It is also possible to pass conditional and filter options as parameters of the URI.
+
+#### Behavior when requesting a ticket and a websocket connection
+
+Below we can understand the behavior of the Kafka-ws service when a user (through a [user agent](https://en.wikipedia.org/wiki/User_agent)) requests a ticket in order to establish a communication via websocket with Kafka-ws.
+
+Note that when the user requests a new ticket, Kafka-ws extracts some information from the _user's access token_ and generates a _signed payload_, to be used later in the decision to authorize (or not) the connection via websocket. From the payload a _ticket_ is generated and the two are stored in Redis, where the ticket is the key to obtain the payload. A [TTL](https://en.wikipedia.org/wiki/Time_to_live) is defined by Kafka-ws, so the user has to use the ticket within the established time, otherwise, Redis automatically deletes the ticket and payload.
+
+After obtaining the ticket, the user makes an HTTP request to Kafka-ws requesting an upgrade to communicate via _websocket_. As the specification of this HTTP request limits the use of additional headers, it is necessary to send the ticket through the URL, so that it can be validated by Kafka-ws before authorizing the upgrade.<br>
+Since the ticket is valid, that is, it corresponds to an entry on Redis, Kafka-ws retrieves the payload related to the ticket, verifies the integrity of the payload and deletes that entry on Redis so that the ticket cannot be used again.<br>
+With the payload it is possible to make the decision to authorize the upgrade to websocket or not. If authorization is granted, Kafka-ws opens a subscription channel based on a specific topic in Kafka.
+From there, the upgrade to websocket is established and the user starts to receive data as they are being published in Kafka.
+
+![Sequence diagram for subscribing to Kafka-ws](./docs/kafka-ws_subscription-flow.svg)
 
 In the following sections, it is explained in details how to compose the URI to retrieve filtered and/or partial data from a given topic.<br>
 
@@ -82,7 +95,15 @@ Where:
 
 ##### **URI Examples**
 
-Note: For simplicity, we will not include the `ticket` parameter in the examples, but it must always be sent, otherwise the server will refuse the connection.
+__NOTE THAT__ for simplicity, we will not include the `ticket` parameter in the examples, but it
+must always be sent, otherwise the server will refuse the connection.
+
+__NOTE THAT__ you can use spaces in the filtering parameters, but, depending on your URI building
+method, you must ensure all the spaces are represented as `+` signs. Example:
+
+```
+/kafka-ws/v1/topics/topic.example?where=attrs.+brake+signal+1+=gte:0.0;&fields=attrs/+brake+signal+1+
+```
 
 To ilustrate the parameters' usage, here are some examples of valid URIs:
 
@@ -165,27 +186,34 @@ The conditions can be applied to any parameter in the message. The permitted ope
 
 Applied to a parameter via a set of values. These operators are applied to N possible values.
 
-- `in`: returns the parameter if the value is in the list
-- `nin`: returns the parameter if the value is not in the list
+__NOTE THAT__ all values are treated as **string**.
+
+- `in`: returns the parameter if any string in the list is contained in it
+- `nin`: returns the parameter if any string in the list is not contained in it
 
 Examples:
 
-```js
+```
 { a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
+{ a: 'foo', b: 'bar' } → f(b=in:ar) → continue to process
 { a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
+{ a: 'foo', b: 'bar' } → f(b=nin:ar) → discard
 ```
 
 #### **Arythmetic operators**
 
 Applied to a parameter via one value. These operators are applied to 1 possible value.
 
+__NOTE THAT__ all values are treated as **float**.
+
+- `eq`: equal
 - `neq`: not equal
 - `gt`: greater than
-- `gte`: greater or equal to
+- `gte`: greater than or equal to
 - `lt`: less than
-- `lte`: less or equal to
+- `lte`: less than or equal to
 
-**Obs.:** if you do not pass an operator, it is considered the equal operator.
+**Obs.:** if you do not pass an operator, it is considered the `eq` operator.
 
 Examples:
 
