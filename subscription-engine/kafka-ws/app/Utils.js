@@ -13,12 +13,13 @@ const escapeChars = {
 
 // Numeric operators
 const numericOperators = ['gt', 'gte', 'lt', 'lte', 'eq', 'neq'];
-
 // Set operators, can be seem as string operators too
 const setOperators = ['in', 'nin'];
+// Boolean operators
+const booleanOperators = ['bool'];
 
 // All supported operators
-const operators = numericOperators.concat(setOperators);
+const operators = numericOperators.concat(setOperators, booleanOperators);
 
 /* Functions */
 
@@ -70,26 +71,6 @@ function createFingerprint(topic, fields, conditions) {
 }
 
 /**
- * Checks if a value is a number (integer or float).
- *
- * @param {string} value
- *
- * @returns {boolean} true if it is a number, false otherwise
- */
-const isNumber = (value) => {
-  const number = Number(value);
-  return !Number.isNaN(number) && Number.isFinite(number);
-};
-
-/**
- * Checks if the given object is empty, like {}
- *
- * @param {object} object
- * @returns {boolean} true if it is empty
- */
-const isObjectEmpty = (object) => (typeof object !== 'object') || (object !== null && Object.keys(object).length === 0);
-
-/**
  * Checks if the topic belongs to tenant,
  *  for that the topic must be started with {tenant}.
  *
@@ -118,13 +99,27 @@ const addTimeFromNow = (addSec) => Math.round(new Date().getTime() / 1000)
 /* parse unsigned integer */
 const parseUint = (val) => val && Math.abs(parseInt(val, 10));
 
-/* parse boolean */
-const parseBoolean = (val, def = false) => {
-  if (val) {
-    if (val.toString().toLowerCase().trim() === 'true' || val === '1') return true;
-    if (val.toString().toLowerCase().trim() === 'false' || val === '0') return false;
+/**
+ * Converts the value to boolean. Accepted values for a boolean:
+ * - `true/false` (case insensitive)
+ * - `0/1`
+ *
+ * Any value or type that differs from these will throw an error.
+ *
+ * @param {string | number} val
+ *
+ * @throws {Error} when an invalid value is detected
+ */
+const parseBoolean = (value) => {
+  if (value === null || value === undefined || Number.isNaN(value) || value === '') {
+    throw new Error('invalid value for a boolean');
   }
-  return def;
+
+  const stringifiedValue = value.toString().toLowerCase().trim();
+  if (/^(true|1)$/.test(stringifiedValue)) return true;
+  if (/^(false|0)$/.test(stringifiedValue)) return false;
+
+  throw new Error('invalid value for a boolean');
 };
 
 /* parse array */
@@ -133,17 +128,55 @@ const parseArray = (val) => {
   return val.split(',').map((el) => el.trim());
 };
 
+/**
+ * Checks if a value is a boolean.
+ *
+ * @param {string | number} value
+ *
+ * @returns {boolean} true if it is a boolean, false otherwise
+ */
+function isBoolean(value) {
+  try {
+    parseBoolean(value);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Checks if a value is a number (integer or float).
+ *
+ * @param {string} value
+ *
+ * @returns {boolean} true if it is a number, false otherwise
+ */
+const isNumber = (value) => {
+  const number = Number(value);
+  return !Number.isNaN(number) && Number.isFinite(number);
+};
+
+/**
+ * Checks if the given object is empty, like {}
+ *
+ * @param {object} object
+ * @returns {boolean} true if it is empty
+ */
+const isObjectEmpty = (object) => (typeof object !== 'object') || (object !== null && Object.keys(object).length === 0);
+
 module.exports = {
   escapeChars,
   numericOperators,
-  operators,
   setOperators,
+  booleanOperators,
+  operators,
   createFingerprint,
-  isNumber,
-  isObjectEmpty,
   checkTopicBelongsTenant,
   addTimeFromNow,
   parseUint,
   parseBoolean,
   parseArray,
+  isBoolean,
+  isNumber,
+  isObjectEmpty,
 };
