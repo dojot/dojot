@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# -e       Exit immediately if a command exits with a non-zero status.
+# -x       Print commands and their arguments as they are executed
+set -e
+
+# Debug mode
+if [ ! -z "${DEBUG+x}" ]; then
+    set -x
+fi
+
 BASE_DIR=${BASE_DIR:-"/vernemq"}
 
 . "${BASE_DIR}"/scripts_tls/_initVariables.sh
@@ -7,16 +16,24 @@ BASE_DIR=${BASE_DIR:-"/vernemq"}
 echo
 echo "Retrieve CRL of trusted CA : ${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl "
 
-certCrl=$(curl  -X GET "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl?update=true" \
+requestCode=$(curl -s -o "${certDir}"/requestResult.json -w "%{http_code}" "${certEjbcaApiUrl}/internal/api/v1/throw-away/ca/crl" \
   -H "Content-Type:application/json" \
-  -H "Accept:application/json" | jq '.crl' -r)
+  -H "Accept:application/json")
 
-echo "${certCrl}" > "${certDir}"/tempcrl.crl
+if [[ "$requestCode" == 200 ]]; then
+  echo "Building CRL"
+  jq '.crl' -r < "${certDir}"/requestResult.json > "${certDir}"/tempcrl.crl 
 
-openssl crl -inform pem -in "${certDir}"/tempcrl.crl -out "${certDir}"/"${certCrlFile}"
+  openssl crl -inform pem -in "${certDir}"/tempcrl.crl -out "${certDir}"/"${certCrlFile}"
 
-chmod +x "${certDir}"/"${certCrlFile}"
+  chmod +x "${certDir}"/"${certCrlFile}"
+  rm "${certDir}"/tempcrl.crl
+else
+  echo "Error retrieving CRL"
+fi
 
-rm  "${certDir}"/tempcrl.crl
+rm "${certDir}"/requestResult.json
+
+
 
 
