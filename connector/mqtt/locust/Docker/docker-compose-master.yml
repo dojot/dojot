@@ -1,11 +1,11 @@
 version: '3'
 services:
   locust-master:
-    image: dojot/locust:v0.5.0-alpha.2
+    image: dojot/locust:v0.5.0-alpha.4
     command: bash master_entrypoint.sh
     volumes:
       # If you need to change code while running the container, activate this volume:
-      # - ..:/usr/src/app
+      # - ../src:/usr/src/app/src
       # If you only need to generate certificates, activate this volume instead:
       - ../cert:/usr/src/app/cert
     environment:
@@ -49,3 +49,17 @@ services:
       - 6380:6379
     volumes:
       - ../db/:/data
+
+  locust-exporter:
+    image: containersol/locust_exporter:v0.3.0
+    networks:
+      - default
+    restart: always
+    logging:
+      driver: json-file
+    depends_on:
+      - locust-master
+    ports:
+      - 9646:9646
+    environment:
+      LOCUST_EXPORTER_URI: http://locust-master:8089
