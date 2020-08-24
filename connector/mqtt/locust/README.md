@@ -151,6 +151,17 @@ After the initialization of the master, you can access the graphical interface b
 typing the address to the server you are running the master followed by the Locust
 port, e.g: `localhost:8089`.
 
+## **Using the Grafana dashboard**
+
+If you are using Ansible to install dojot, you can configure it to scrape for Locust metrics. To
+accomplish this, you must provide the IP/hostname of the Locust master machine and the port 9646,
+which is the default exporter port (you can change it in the
+[Docker Compose file](./Docker/docker-compose-master.yml)). Check Ansible variables documentation
+for the server-side configuration of Prometheus.
+
+After the configuration is done, you can access the Grafana dashboard built for Locust integration.
+It already comes embedded in the Ansible installation.
+
 # **How it works**
 
 Locust works with a master/slave architecture, as you can see in the diagram.
