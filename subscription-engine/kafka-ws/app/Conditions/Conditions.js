@@ -1,3 +1,5 @@
+const Utils = require('../Utils');
+
 /**
  * Applies the greater than operator.
  *
@@ -8,7 +10,7 @@
  * @returns {object} filtered data.
  */
 const applyGt = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) > value) {
+  if (data[parameter] && Number(data[parameter]) > Number(value)) {
     return data;
   }
   return {};
@@ -24,7 +26,7 @@ const applyGt = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyGte = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) >= value) {
+  if (data[parameter] && Number(data[parameter]) >= Number(value)) {
     return data;
   }
   return {};
@@ -40,7 +42,7 @@ const applyGte = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyLt = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) < value) {
+  if (data[parameter] && Number(data[parameter]) < Number(value)) {
     return data;
   }
   return {};
@@ -56,7 +58,7 @@ const applyLt = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyLte = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) <= value) {
+  if (data[parameter] && Number(data[parameter]) <= Number(value)) {
     return data;
   }
   return {};
@@ -72,7 +74,7 @@ const applyLte = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyEq = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) === value) {
+  if (data[parameter] && Number(data[parameter]) === Number(value)) {
     return data;
   }
 
@@ -89,7 +91,7 @@ const applyEq = (parameter, value, data) => {
  * @returns {object} filtered data.
  */
 const applyNeq = (parameter, value, data) => {
-  if (data[parameter] && Number(data[parameter]) !== value) {
+  if (data[parameter] && Number(data[parameter]) !== Number(value)) {
     return data;
   }
 
@@ -139,6 +141,23 @@ const applyNin = (parameter, values, data) => {
   return {};
 };
 
+/**
+ * Applies the not equal operator.
+ *
+ * @param {string} parameter parameter that will be analysed
+ * @param {string} value value to be compared
+ * @param {object} data the data to be filtered
+ *
+ * @returns {object} filtered data.
+ */
+const applyBool = (parameter, value, data) => {
+  if (Utils.parseBoolean(data[parameter]) === Utils.parseBoolean(value)) {
+    return data;
+  }
+
+  return {};
+};
+
 module.exports = {
   gt: applyGt,
   gte: applyGte,
@@ -148,4 +167,5 @@ module.exports = {
   neq: applyNeq,
   in: applyIn,
   nin: applyNin,
+  bool: applyBool,
 };

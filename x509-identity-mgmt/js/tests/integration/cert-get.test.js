@@ -24,10 +24,13 @@ describe('X509 Certificates - GET integrations', () => {
       const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
       const queryResult = {
         fingerprint,
+        belongsTo: {
+          device: null,
+        },
       };
-      db.certificate.model.exec.mockResolvedValue(queryResult);
+      db.certificate.model.exec.mockResolvedValue({ ...queryResult, _id: '123456' });
 
-      return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerprint`)
+      return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerprint,belongsTo`)
         .set('Authorization', `Bearer ${token}`)
         .send()
         .expect(200)
@@ -52,16 +55,32 @@ describe('X509 Certificates - GET integrations', () => {
         });
     });
 
+  it('should throw an invalid field error',
+    () => {
+      const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
+      db.certificate.model.exec.mockResolvedValue(null);
+
+      return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerPrint,_id`)
+        .set('Authorization', `Bearer ${token}`)
+        .send()
+        .expect(400)
+        .then((res) => {
+          expect(res.body).toEqual({
+            message: 'The fields provided are not valid: [fingerPrint,_id]',
+          });
+        });
+    });
+
   it('should get a list of certificates',
     () => {
       const fingerprint1 = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
       const fingerprint2 = '26:E9:8C:28:1F:9D:E9:D3:FF:5E:6B:11:9B:E2:DA:FC:5C:A6:36:F1:15:B2:19:35:E9:71:2B:E1:01:AD:93:32';
       const fingerprint3 = '99:5C:B8:C0:2D:FA:A0:DE:60:2C:0E:C0:97:76:0A:A8:1F:9B:BD:08:1F:7B:A5:10:58:5F:07:D6:25:4E:83:49';
-      const results = {
-        fingerprint1,
-        fingerprint2,
-        fingerprint3,
-      };
+      const results = [
+        { fingerprint: fingerprint1 },
+        { fingerprint: fingerprint2 },
+        { fingerprint: fingerprint3 },
+      ];
       db.certificate.model.exec.mockResolvedValue(results);
       db.certificate.model.count.mockResolvedValue(3);
 
@@ -92,11 +111,11 @@ describe('X509 Certificates - GET integrations', () => {
       const fingerprint1 = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
       const fingerprint2 = '26:E9:8C:28:1F:9D:E9:D3:FF:5E:6B:11:9B:E2:DA:FC:5C:A6:36:F1:15:B2:19:35:E9:71:2B:E1:01:AD:93:32';
       const fingerprint3 = '99:5C:B8:C0:2D:FA:A0:DE:60:2C:0E:C0:97:76:0A:A8:1F:9B:BD:08:1F:7B:A5:10:58:5F:07:D6:25:4E:83:49';
-      const results = {
-        fingerprint1,
-        fingerprint2,
-        fingerprint3,
-      };
+      const results = [
+        { fingerprint: fingerprint1 },
+        { fingerprint: fingerprint2 },
+        { fingerprint: fingerprint3 },
+      ];
       db.certificate.model.exec.mockResolvedValue(results);
       db.certificate.model.count.mockResolvedValue(3);
 
