@@ -23,25 +23,26 @@ MESSAGE_TYPE_REVOKE = 'revoke'
 REQUEST_METRICS_TYPE = 'metric'
 CONNECTED_METRICS = {
     1: 'connect [ 0, 200 [ ms',
-    2: '[ 200, 400 [ ms connect',
-    3: '< 600 ms connect',
-    4: '< 800 ms connect',
-    5: '< 1 seg connect',
-    6: '< 1.2 seg connect',
-    7: '< 1.4 seg ms connect',
-    8: '< 1.6 seg ms connect',
-    9: '< 1.8 seg ms connect',
-    10: '>= 2 seg ms connect'
+    2: 'connect [ 200, 400 [ ms',
+    3: 'connect [ 400, 600 [ ms',
+    4: 'connect [ 600, 800 [ ms',
+    5: 'connect [ 0.8, 1 [ seg',
+    6: 'connect [ 1, 1.2 [ seg',
+    7: 'connect [ 1.2, 1.4 [ seg',
+    8: 'connect [ 1.4, 1.6 [ seg',
+    9: 'connect [ 1.6, 1.8 [ seg',
+    10: 'connect [ 1.8, 2 [ seg',
+    11: 'connect [ 2, +inf [ seg'
 }
 
 DISCONNECTED_METRICS = {
-    1: '< 5 min disconnect',
-    2: '< 10 min disconnect',
-    3: '< 15 min disconnect',
-    4: '< 20 min disconnect',
-    5: '< 25 min disconnect',
-    6: '< 30 min disconnect',
-    7: '>= 30 min disconnect'
+    1: 'disconnect [ 0, 5  [ min',
+    2: 'disconnect [ 5, 10 [ min',
+    3: 'disconnect [ 10, 15 [ min',
+    4: 'disconnect [ 15, 20 [ min',
+    5: 'disconnect [ 20, 35 [ min',
+    6: 'disconnect [ 25, 30 [ min',
+    7: 'disconnect [ 30, +inf [ min',
 }
 
 class LocustError(Exception):

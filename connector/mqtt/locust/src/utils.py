@@ -221,16 +221,18 @@ class Utils():
             return 4
         elif 800 <= time < 1000:
             return 5
-        elif 1200 <= time < 1200:
+        elif 1000 <= time < 1200:
             return 6
-        elif 1400 <= time < 1600:
+        elif 1200 <= time < 1400:
             return 7
-        elif 1600 <= time < 1800:
+        elif 1400 <= time < 1600:
             return 8
-        elif 1800 <= time < 2000:
+        elif 1600 <= time < 1800:
             return 9
+        elif 1800 <= time < 2000:
+            return 10
     
-        return 10
+        return 11
 
     @staticmethod
     def get_metric_disconnected_index_by_time(time: float) -> int:
