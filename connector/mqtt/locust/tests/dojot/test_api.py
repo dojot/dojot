@@ -50,6 +50,7 @@ class TestDojotAPIGetJwt(unittest.TestCase):
                 "passwd": MOCK_CONFIG['dojot']['passwd'],
             }),
             "headers": {
+                "Accept": "application/json",
                 "Content-Type": "application/json"
             },
         }
@@ -346,7 +347,7 @@ class TestDojotAPIGenerateCertificate(unittest.TestCase):
         self.args = {
             "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates",
             "headers": {
-                "content-type": "application/json",
+                "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(self.jwt),
             },
@@ -397,7 +398,7 @@ class TestDojotAPIRevokeCertificate(unittest.TestCase):
         self.args = {
             "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates/" + self.crt['fingerprint'],
             "headers": {
-                "content-type": "application/json",
+                "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(self.jwt),
             }
@@ -428,6 +429,42 @@ class TestDojotAPIRevokeCertificate(unittest.TestCase):
         self.assertIsInstance(context.exception, APICallError)
 
         DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
+
+
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
+class TestDojotAPIRetrieveCaCert(unittest.TestCase):
+    """
+    DojotAPI revoke_certificate() tests.
+    """
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+        self.jwt = "testJWT"
+        self.args = {
+            "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/ca",
+            "headers": {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Bearer {0}".format(self.jwt),
+            }
+        }
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
+    def test_retrieve_ca_cert(self, mock_requests):
+        """
+        Should retrieve the CA certificate correctly.
+        """
+        DojotAPI.call_api.return_value = {"caPem": "testPem"}
+
+        res = DojotAPI.retrieve_ca_cert(self.jwt)
+
+        self.assertEqual(res, "testPem")
+        DojotAPI.call_api.assert_called_once_with(mock_requests.get, self.args)
+
 
 class TestDojotAPIDivideLoads(unittest.TestCase):
     """
