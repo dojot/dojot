@@ -435,7 +435,7 @@ class TestDojotAPIRevokeCertificate(unittest.TestCase):
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIRetrieveCaCert(unittest.TestCase):
     """
-    DojotAPI revoke_certificate() tests.
+    DojotAPI retrieve_ca_cert() tests.
     """
     def setUp(self):
         self.call_api = DojotAPI.call_api
