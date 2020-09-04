@@ -49,7 +49,7 @@ K2V_MQTT_CLIENT_SECURE               | MQTT client secure                       
 K2V_MQTT_CLIENT_USERNAME             | MQTT client username                     | ${K2V_APP_HOSTNAME}                                 | string                 |
 K2V_MQTT_SERVER_ADDRESS              | MQTT broker host                         | vernemq-k8s                                         | hostname/IP            |
 K2V_MQTT_SERVER_PORT                 | MQTT broker port                         | 8883                                                | integer                |
-K2V_MQTT_TLS_CA_FILE                 | CA certificate file location             | ${K2V_APP_BASEDIR}/app/cert/${K2V_APP_HOSTNAME}.ca  | string                 |
+K2V_MQTT_TLS_CA_FILE                 | CA certificate file location             | ${K2V_APP_BASEDIR}/app/cert/ca.crt                  | string                 |
 K2V_MQTT_TLS_CERTIFICATE_FILE        | MQTT client certificate file location    | ${K2V_APP_BASEDIR}/app/cert/${K2V_APP_HOSTNAME}.crt | string                 |
 K2V_MQTT_TLS_KEY_FILE                | MQTT client key file location            | ${K2V_APP_BASEDIR}/app/cert/${K2V_APP_HOSTNAME}.key | string                 |
 
