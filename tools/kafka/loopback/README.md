@@ -26,22 +26,29 @@ After configuring the Loopback service to work in your environment, we can send 
 __NOTE THAT__ in this example we are using MQTT, but the protocol is not relevant; you are good to
 go as long as you can succesfully send messages to Dojot with your preferred protocol.
 
-Before proceeding, we need to subscribe to the actuation topic to be able to receive the messages:
+Before proceeding, we need to subscribe to the actuation topic to be able to receive the messages.
+In the terminal, run:
 
 ```shell
 mosquitto_sub -h <dojot_host> -p 1883 -t admin:123abc/config -u admin:123abc
 ```
 
-Send the message:
+Now open a new terminal and send the message:
 
 ```shell
 mosquitto_pub -h <dojot_host> -p 1883 -t admin:123abc/attrs -m '{"timestamp": 1583939224072}' -u admin:123abc
 ```
 
-## Internal Messages
+In the first terminal you should see the same message you sent arriving:
 
-When you sent the message with `mosquitto_pub`, the Loopback serice received the following message
-from `admin.device-data`:
+```json
+{ "timestamp": 1583939224072 }
+```
+
+## Internal Behaviour
+
+When you sent the message with `mosquitto_pub`, the Loopback service received the following message
+from `admin.device-data` topic:
 
 ```json
 {
@@ -57,7 +64,7 @@ from `admin.device-data`:
 ```
 
 After receiving the above message, the Loopback service transforms it to create the following
-actuation message, that is sent to `admin.device-manager.device`:
+actuation message, that is sent to the `admin.device-manager.device` topic:
 
 ```json
 {
@@ -75,5 +82,5 @@ actuation message, that is sent to `admin.device-manager.device`:
 }
 ```
 
-More information on message formating and its contents can be found
+More information on the message's format can be found
 [here](https://dojotdocs.readthedocs.io/projects/DeviceManager/en/latest/kafka-messages.html).
