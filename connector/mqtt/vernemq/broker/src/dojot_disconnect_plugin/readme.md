@@ -31,7 +31,7 @@ cd -
 __NOTE THAT__ if you are not running a local VerneMQ instance, you should send the image to the
 machine that is running or use some kind of Docker Registry (e.g. DockerHub).
 
-Enter in the VerneMQ instance you are running and then enable the plugin:
+After initializing this newly-made VerneMQ image, enter in its and enable the plugin:
 
 ```shell
 vmq-admin plugin enable --name dojot_disconnect_plugin --path <PathToYourPlugin>/dojot_disconnect_plugin/_build/default
