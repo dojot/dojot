@@ -1,40 +1,65 @@
-# Loopback service for kafka
+# Loopback service for Kafka
 
-This service is a helper for kafka. It's goal is to transform messages sent from devices to dojot into messages sent from dojot to devices. It transfers incoming messages from **device-data** topic to **device-manager** topic adapting them according to dojot's message schema.
+This service's goal is to simulate actuations in Dojot by forwarding messages in the `device-data`
+topic (publishing topic) to the `device-manager.device` topic (actuation topic), adapting its format
+to be Dojot-compliant.
 
 # Configurations
+
 ## Environment Variables
 
-Key                      | Purpose                                                             | Default Value   			| Valid Values      |
------------------------- | ------------------------------------------------------------------- | -------------------------- | ----------------- |
-DOJOT_USERNAME           | username to access dojot                 						   | admin           			| string   		    |
-DOJOT_PASSWORD           | password to access dojot                 						   | admin           			| string   		    |
-AUTH_ADDRESS             | Address of the auth service                                         | http://auth:5000           | hostname/IP:port  |
-DATA_BROKER_ADDRESS      | Address of the data broker service                                  | http://data-broker:80    	| hostname/IP:port  |
-KAFKA_BROKER_LIST        | Addresses of the kafka brokers separated by a comma                 | kafka-server:9092			| hostname/IP:port  |
-LOOPBACK_CONSUMER_GROUP  | Kafka consumer group                                                | loopback-group             | string            |
-DEVICE_DATA_TOPIC    	 | Topic to consume from                                               | device-data        		| string            |
-DEVICE_MANAGER_TOPIC     | Topic to produce to                                                 | dojot.device-manager.device| string            |
+Key                     | Purpose                               | Default Value               | Valid Values     |
+----------------------- | ------------------------------------- | --------------------------- | ---------------- |
+AUTH_ADDRESS            | Address of the Auth service           | http://auth:5000            | hostname/IP:port |
+DATA_BROKER_ADDRESS     | Address of the Data Broker service    | http://data-broker:80       | hostname/IP:port |
+DEVICE_DATA_TOPIC       | Topic to be consumed                  | device-data                 | string           |
+DEVICE_MANAGER_TOPIC    | Topic to produce to                   | dojot.device-manager.device | string           |
+DOJOT_PASSWORD          | Dojot's user password                 | admin                       | string           |
+DOJOT_USERNAME          | Dojot's user name                     | admin                       | string           |
+KAFKA_BROKER_LIST       | Comma-separated list of Kafka brokers | kafka-server:9092           | hostname/IP:port |
+LOOPBACK_CONSUMER_GROUP | Kafka consumer group to be used       | loopback-group              | string           |
 
 # Example
-Bellow there is an example of the message received from the **device-data** topic and the modified message sent to **device-manager** topic.
 
-Received message from device-data:
+After configuring the Loopback service to work in your environment, we can send messages to Dojot.
+
+__NOTE THAT__ in this example we are using MQTT, but the protocol is not relevant; you are good to
+go as long as you can succesfully send messages to Dojot with your preferred protocol.
+
+Before proceeding, we need to subscribe to the actuation topic to be able to receive the messages:
+
+```shell
+mosquitto_sub -h <dojot_host> -p 1883 -t admin:123abc/config -u admin:123abc
 ```
+
+Send the message:
+
+```shell
+mosquitto_pub -h <dojot_host> -p 1883 -t admin:123abc/attrs -m '{"timestamp": 1583939224072}' -u admin:123abc
+```
+
+## Internal Messages
+
+When you sent the message with `mosquitto_pub`, the Loopback serice received the following message
+from `admin.device-data`:
+
+```json
 {
-    "metadata": { 
-        "deviceid":"e33dada7ce5a4905819d8fb0606c613f",
-        "tenant":"admin",
-        "timestamp":1583939224
-    },
-    "attrs": {
-        "timestamp": 1583939224072
-    }
+  "metadata": {
+    "deviceid": "123abc",
+    "tenant": "admin",
+    "timestamp": 1583939224
+  },
+  "attrs": {
+    "timestamp": 1583939224072
+  }
 }
 ```
 
-Sent message to device-manager:
-```
+After receiving the above message, the Loopback service transforms it to create the following
+actuation message, that is sent to `admin.device-manager.device`:
+
+```json
 {
   "event": "configure",
   "meta": {
@@ -42,12 +67,13 @@ Sent message to device-manager:
     "timestamp": 1583939224
   },
   "data": {
-    "id": "e33dada7ce5a4905819d8fb0606c613f",
+    "id": "123abc",
     "attrs": {
-        "timestamp": 1583939224072
+      "timestamp": 1583939224072
     }
   }
 }
 ```
 
-More information can be find [here](https://dojotdocs.readthedocs.io/projects/DeviceManager/en/latest/kafka-messages.html).
+More information on message formating and its contents can be found
+[here](https://dojotdocs.readthedocs.io/projects/DeviceManager/en/latest/kafka-messages.html).
