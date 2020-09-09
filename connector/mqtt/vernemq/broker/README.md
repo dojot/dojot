@@ -1,55 +1,58 @@
 # **Dojot VerneMQ**
 
-The Dojot VerneMQ service is a extension of [VerneMQ](https://github.com/vernemq/vernemq) with some features for dojot case.
+The Dojot VerneMQ service is an extension of [VerneMQ](https://github.com/vernemq/vernemq) with some
+modifications for Dojot's integration.
 
+# **Configuration**
 
-## **Environment variables**
+There are two configurations for VerneMQ: the one provided by the VerneMQ itself and the Dojot's
+one.
 
-Key                      | Purpose                                                             | Default Value  | Accepted values
------------------------  | --------------------------------------------------------------      | -------------- |------------
-EJBCA_ADDRESS            | Address of the EJBCA broker                                         | "ejbca-wrapper:5583"| IP or DNS
-USE_VMQ_OPERATOR         | Enables the broker for use with the vmq-operator                    | "n"            | y or n
-EXTERNAL_SERVER_HOSTNAME | Server hostname (the host to connect external)                      | "localhost"    | hostname
-EXTERNAL_SERVER_IP       | Server IP (the IP to connect external)                              | ""             | IP
-INTERNAL_DNS             | Internal hostname (used to connect for vk2-bridge and k2v-bridge)   | "vernemq-k8s"  | hostname
-CA_NAME                  | CA Name from EJBCA                                                  | "IOTmidCA"     | string
-CHECK_EXPIRATION_TIME    | Check if the certificate has expired every time defined by this cron expression and renews them if necessary | "0 1 * * *"    | cron schedule expressions
-CHECK_BROKER_CERT_REVOKED_TIME  | Checks if the public certificate of broker has revoked every time defined by this cron expression and renews them if necessary  | "0 */3 * * *" | cron schedule expressions
-CRL_UPDATE_TIME          | Retrieve the new CRL every time defined by this cron expression | "0 */2 * * *" | cron schedule expressions
-CHECKEND_EXPIRATION_SEC  | Check the certificates states and renews them if they expire within the next arg seconds | 43200  | seconds
+## **Dojot**
 
+Key                             | Purpose                                                                                     | Default Value           | Accepted values
+------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------- |-----------------
+CA_NAME                         | CA Name from EJBCA                                                                          | IOTmidCA                | string
+CHECK_EXPIRATION_TIME           | Cron interval for certificate validation, renewing if necessary                             | 0 1 * * *               | cron expressions
+CHECK_BROKER_CERT_REVOKED_TIME  | Cron interval for public certificate validation, renewing if necessary                      | 0 */3 * * *             | cron expressions
+CHECKEND_EXPIRATION_SEC         | Check the certificates states and renew them if they expire within the next `value` seconds | 43200                   | seconds
+CRL_UPDATE_TIME                 | Cron interval for CRL retrieval                                                             | 0 */2 * * *             | cron expressions
+EJBCA_ADDRESS                   | EJBCA address                                                                               | x509-identity-mgmt:3000 | hostname/IP
+EXTERNAL_SERVER_HOSTNAME        | Server hostname                                                                             | localhost               | hostname
+EXTERNAL_SERVER_IP              | Server IP                                                                                   | empty string            | IP
+INTERNAL_DNS                    | Internal hostname, used for V2K and K2V bridges connections                                 | vernemq-k8s             | hostname
+USE_VMQ_OPERATOR                | Enables the VerneMQ operator (for Kubernetes use)                                           | n                       | y or n
 
-### **VerneMQ Configuration**
+## **VerneMQ**
 
-In dojot case we use this configuration [see here](./examples/vernemq.conf).
+To configure VerneMQ, you simply pass a configuration file encoded in base64 for the `VERNEMQ_CONF`
+environment variable. The configuration we use is the one in [this file](./examples/vernemq.conf).
 
-You can pass a environment variable VERNEMQ_CONF in base64 when you are using [vmq-operator](https://github.com/vernemq/vmq-operator) with the contents of the [configuration.](./examples/vernemq.conf)
+Example usage in Docker Compose:
 
-Example of part of a yaml
+```yaml
+  environment:
+    VERNEMQ_CONF: "YWNjZXB0X2V1bGEgPSB5ZXMKbWV0YW..." # just the beginning of base64
+```
+
+Example usage in Kubernetes:
 
 ```yaml
  env:
-      ## BASE-64 config
-    - name: VERNEMQ_CONF
-      value: "YWNjZXB0X2V1bGEgPSB5ZXMKbWV0YW..." # just the beginning of base64
+  - name: VERNEMQ_CONF
+    value: "YWNjZXB0X2V1bGEgPSB5ZXMKbWV0YW..." # just the beginning of base64
 ```
 
-NOTE: All configuration parameters available in [vernemq.conf](./examples/vernemq.conf) can be defined using environment variables with the prefix DOCKER_VERNEMQ followed by the name of the configuration parameter. For example: allow_anonymous=on is "DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on" or allow_register_during_netsplit=on is "DOCKER_VERNEMQ_ALLOW_REGISTER_DURING_NETSPLIT=on".
+__NOTE THAT__ all configuration parameters available in the configuration file can be defined using
+environment variables with the prefix `DOCKER_VERNEMQ_` followed by the name of the configuration
+parameter. For example: `allow_anonymous` is `DOCKER_VERNEMQ_ALLOW_ANONYMOUS` or
+`allow_register_during_netsplit` is `DOCKER_VERNEMQ_ALLOW_REGISTER_DURING_NETSPLIT`.
 
-See more about VerneMQ configuration in [documentation](https://docs.vernemq.com/).
+Check out the [official documentation](https://docs.vernemq.com/) for more details on configuration.
 
-### **Plugins Dojot for verneMQ**
+# **Plugins**
 
-Plugin verneMQ ACL for Dojot  [see here](./src/dojot_acl_plugin).
+There are some plugins that were developed to VerneMQ:
 
-Plugin verneMQ Disconnect for Dojot [see here](./src/dojot_disconnect_plugin).
-
-### **Building Docker image with plugins**
-
-Example:
-
-```shell
-
-docker build -t <img_name> .
-
-```
+- [ACL](./src/dojot_acl_plugin)
+- [Disconnect](./src/dojot_disconnect_plugin)
