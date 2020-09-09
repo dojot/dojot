@@ -1,37 +1,41 @@
 # Dojot Disconnect Plugin
 
-This plugin checks and closes staled connections for dojot. The important files are:
+This plugin disconnects clients from VerneMQ after some time. This increases the security because
+the client's certificate might've been revoked/expired and we wouldn't know it, since these checks
+are made in the beginning of the TLS handshake.
 
-- src/utils.erl
-- src/dojot_disconnect_plugin.app.src
+The most important files are:
 
-This plugin uses Erlang OTP.
+- [src/utils.erl](./src/utils.erl)
+- [src/dojot_disconnect_plugin.app.src](./src/dojot_disconnect_plugin.app.src)
 
+__IMPORTANT__: make sure you use the same Erlang version that the
+[Dojot's VerneMQ Dockerfile](../../Dockerfile) uses to avoid problems.
 
-You must have a recent version of Erlang installed (it's recommended to use the
-same one VerneMQ is compiled for, typically > 17). To compile do:
+# Configuration
 
-    ./rebar3 compile
+Key                          | Purpose          | Default Value    | Accepted values
+---------------------------- | ---------------- | ---------------- | ---------------------
+PLUGIN_DISC_LIFETIME_SESSION | Session lifetime | 1800000 (30 min) | integer (miliseconds)
 
-Before generating the VerneMQ docker image, you MUST generate the _build with rebar3 and move the _build dir to dojot_disconnect_plugin.
+# Running the plugin in VerneMQ
 
-To enable the plugin, use (inside the container docker running verneMQ with the copy of the plugin):
+Build VerneMQ image:
 
-    vmq-admin plugin enable --name dojot_disconnect_plugin --path <PathToYourPlugin>/dojot_disconnect_plugin/_build/default
+```shell
+cd ../..
+docker build <image_name>:<tag>
+cd -
+```
+
+__NOTE THAT__ if you are not running a local VerneMQ instance, you should send the image to the
+machine that is running or use some kind of Docker Registry (e.g. DockerHub).
+
+Enter in the VerneMQ instance you are running and then enable the plugin:
+
+```shell
+vmq-admin plugin enable --name dojot_disconnect_plugin --path <PathToYourPlugin>/dojot_disconnect_plugin/_build/default
+```
 
 Depending on how VerneMQ is started you might need ``sudo`` rights to access ``vmq-admin``.
 Moreover the ``<PathToYourPlugin>`` should be accessible by VerneMQ (file permissions).
-
-Since this plugin implements hooks which are already covered by
-``vmq_passwd`` and ``vmq_acl`` you might want to disable these in order to see
-the effect of this plugin.
-
-    vmq-admin plugin disable --name vmq_passwd
-    vmq-admin plugin disable --name vmq_acl
-
-
-## **Environment variables**
-
-Key                      | Purpose                                                       | Default Value  | Accepted values
------------------------  | --------------------------------------------------------------| -------------- |-------------------------
-PLUGIN_DISC_LIFETIME_SESSION    | Session lifetime                                                | 1800000    | integer (miliseconds)
