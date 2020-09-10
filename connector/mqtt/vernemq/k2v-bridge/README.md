@@ -1,8 +1,8 @@
 # **K2V Bridge**
 
-The K2V Bridge is responsible for consuming Dojot's messages from Apache Kafka, translating them to
+The K2V Bridge is responsible for consuming dojot's messages from Apache Kafka, translating them to
 the appropriate data format and then publishing them to the appropriate topic in VerneMQ. This topic
-has the format `<tenant>:<device-id>/config`, which is the default for actuation messages in Dojot.
+has the format `<tenant>:<device-id>/config`, which is the default for actuation messages in dojot.
 
 This service was designed to scale up with each instance working as a consumer of a consumer group
 in Apache Kafka.
