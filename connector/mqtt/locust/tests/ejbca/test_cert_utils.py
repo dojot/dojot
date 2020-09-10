@@ -136,10 +136,9 @@ class TestCertUtils(unittest.TestCase):
 
     @staticmethod
     @patch('src.ejbca.cert_utils.requests')
-    @patch('src.ejbca.cert_utils.crypto')
     @patch('src.ejbca.cert_utils.Thing')
-    @patch.dict('src.ejbca.certificate.CONFIG', MOCK_CONFIG)
-    def test_revoke_cert(mock_thing, mock_crypto, mock_request):
+    @patch.dict('src.ejbca.cert_utils.CONFIG', MOCK_CONFIG)
+    def test_revoke_cert(mock_thing, mock_request):
         """
         Test certificate revoke cert
         """
@@ -149,14 +148,12 @@ class TestCertUtils(unittest.TestCase):
         mock_thing.cert.revoke_cert.assert_called_once()
 
         mock_thing.reset_mock()
-        mock_crypto.reset_mock()
         mock_request.reset_mock()
 
     @patch('src.ejbca.cert_utils.requests')
-    @patch('src.ejbca.cert_utils.crypto')
     @patch('src.ejbca.cert_utils.Thing')
-    @patch.dict('src.ejbca.certificate.CONFIG', MOCK_CONFIG)
-    def test_has_been_revoked_false(self, mock_thing, _mock_crypto, mock_request):
+    @patch.dict('src.ejbca.cert_utils.CONFIG', MOCK_CONFIG)
+    def test_has_been_revoked_false(self, mock_thing, mock_request):
         """
         has_been_revoked() should return False - Certificate not revoked yet
         """
@@ -179,10 +176,9 @@ class TestCertUtils(unittest.TestCase):
 
 
     @patch('src.ejbca.cert_utils.requests')
-    @patch('src.ejbca.cert_utils.crypto')
     @patch('src.ejbca.cert_utils.Thing')
-    @patch.dict('src.ejbca.certificate.CONFIG', MOCK_CONFIG)
-    def test_has_been_revoked_true(self, mock_thing, _mock_crypto, mock_request):
+    @patch.dict('src.ejbca.cert_utils.CONFIG', MOCK_CONFIG)
+    def test_has_been_revoked_true(self, mock_thing, mock_request):
         """
         has_been_revoked() should return True
         """

@@ -3,7 +3,6 @@ Certificate generation.
 """
 from OpenSSL import crypto
 
-from src.config import CONFIG
 from src.utils import Utils
 from src.mqtt_locust.redis_client import RedisClient
 from src.dojot.api import DojotAPI
