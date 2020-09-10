@@ -1,8 +1,8 @@
 # Loopback service for Kafka
 
-This service's goal is to simulate actuations in Dojot by forwarding messages in the `device-data`
+This service's goal is to simulate actuations in dojot by forwarding messages in the `device-data`
 topic (publishing topic) to the `device-manager.device` topic (actuation topic), adapting its format
-to be Dojot-compliant.
+to be dojot-compliant.
 
 # Configurations
 
@@ -14,17 +14,17 @@ AUTH_ADDRESS            | Address of the Auth service           | http://auth:50
 DATA_BROKER_ADDRESS     | Address of the Data Broker service    | http://data-broker:80       | hostname/IP:port |
 DEVICE_DATA_TOPIC       | Topic to be consumed                  | device-data                 | string           |
 DEVICE_MANAGER_TOPIC    | Topic to produce to                   | dojot.device-manager.device | string           |
-DOJOT_PASSWORD          | Dojot's user password                 | admin                       | string           |
-DOJOT_USERNAME          | Dojot's user name                     | admin                       | string           |
+DOJOT_PASSWORD          | dojot's user password                 | admin                       | string           |
+DOJOT_USERNAME          | dojot's user name                     | admin                       | string           |
 KAFKA_BROKER_LIST       | Comma-separated list of Kafka brokers | kafka-server:9092           | hostname/IP:port |
 LOOPBACK_CONSUMER_GROUP | Kafka consumer group to be used       | loopback-group              | string           |
 
 # Example
 
-After configuring the Loopback service to work in your environment, we can send messages to Dojot.
+After configuring the Loopback service to work in your environment, we can send messages to dojot.
 
 __NOTE THAT__ in this example we are using MQTT, but the protocol is not relevant; you are good to
-go as long as you can succesfully send messages to Dojot with your preferred protocol.
+go as long as you can succesfully send messages to dojot with your preferred protocol.
 
 Before proceeding, we need to subscribe to the actuation topic to be able to receive the messages.
 In the terminal, run:
