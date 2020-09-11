@@ -1,7 +1,6 @@
 """
 Redis-related module.
 """
-import logging
 from uuid import uuid4
 import redis
 

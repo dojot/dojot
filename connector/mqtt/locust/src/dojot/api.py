@@ -29,22 +29,24 @@ class DojotAPI():
         """
         Request a JWT token.
         """
-        LOGGER.debug("Retrieving JWT...")
+        url = "{0}/auth".format(CONFIG['dojot']['url'])
+        LOGGER.info("Retrieving JWT from %s...", url)
 
         args = {
-            "url": "{0}/auth".format(CONFIG['dojot']['url']),
+            "url": url,
             "data": json.dumps({
                 "username": CONFIG['dojot']['user'],
                 "passwd": CONFIG['dojot']['passwd'],
             }),
             "headers": {
+                "Accept": "application/json",
                 "Content-Type": "application/json"
             },
         }
 
         res = DojotAPI.call_api(requests.post, args)
 
-        LOGGER.debug(".. retrieved JWT")
+        LOGGER.info("... Retrieved the JWT token")
         return res["jwt"]
 
     @staticmethod
@@ -58,7 +60,7 @@ class DojotAPI():
             n: total number of devices to be created
             batch: number of devices to be created in each iteration
         """
-        LOGGER.debug("Creating devices...")
+        LOGGER.info("Creating devices...")
 
         args = {
             "headers": {
@@ -79,7 +81,7 @@ class DojotAPI():
 
             DojotAPI.call_api(requests.post, args, False)
 
-        LOGGER.debug("... created the devices")
+        LOGGER.info("... created the devices")
 
     @staticmethod
     def create_template(jwt: str) -> str:
@@ -88,7 +90,7 @@ class DojotAPI():
 
         Returns the created template ID.
         """
-        LOGGER.debug("Creating template...")
+        LOGGER.info("Creating template...")
 
         args = {
             "url": "{0}/template".format(CONFIG['dojot']['url']),
@@ -110,7 +112,7 @@ class DojotAPI():
 
         res = DojotAPI.call_api(requests.post, args)
 
-        LOGGER.debug("... created the template")
+        LOGGER.info("... created the template")
         return res["template"]["id"]
 
     @staticmethod
@@ -125,7 +127,7 @@ class DojotAPI():
 
         Returns the created device ID.
         """
-        LOGGER.debug("Creating template...")
+        LOGGER.info("Creating the device...")
 
         args = {
             "url": "{0}/device".format(CONFIG['dojot']['url']),
@@ -142,7 +144,7 @@ class DojotAPI():
 
         res = DojotAPI.call_api(requests.post, args)
 
-        LOGGER.debug("... created the template")
+        LOGGER.info("... created the template")
         return res["devices"][0]["id"]
 
     @staticmethod
@@ -150,7 +152,7 @@ class DojotAPI():
         """
         Delete all devices.
         """
-        LOGGER.debug("Deleting devices...")
+        LOGGER.info("Deleting devices...")
 
         args = {
             "url": "{0}/device".format(CONFIG['dojot']['url']),
@@ -161,14 +163,14 @@ class DojotAPI():
 
         DojotAPI.call_api(requests.delete, args, False)
 
-        LOGGER.debug("... deleted devices")
+        LOGGER.info("... deleted devices")
 
     @staticmethod
     def delete_templates(jwt: str) -> None:
         """
         Delete all templates.
         """
-        LOGGER.debug("Deleting templates...")
+        LOGGER.info("Deleting templates...")
 
         args = {
             "url": "{0}/template".format(CONFIG['dojot']['url']),
@@ -179,7 +181,7 @@ class DojotAPI():
 
         DojotAPI.call_api(requests.delete, args, False)
 
-        LOGGER.debug("... deleted templates")
+        LOGGER.info("... deleted templates")
 
     @staticmethod
     def get_devices(jwt: str) -> List:
@@ -191,7 +193,7 @@ class DojotAPI():
 
         Returns a list of IDs.
         """
-        LOGGER.debug("Retrieving devices...")
+        LOGGER.info("Retrieving devices...")
 
         args = {
             "url": "{0}/device?page_size={1}".format(
@@ -219,7 +221,7 @@ class DojotAPI():
 
             devices_ids.extend(res)
 
-        LOGGER.debug("... retrieved the devices")
+        LOGGER.info("... retrieved the devices")
 
         return devices_ids
 
@@ -239,7 +241,7 @@ class DojotAPI():
         args = {
             "url": CONFIG['dojot']['url'] + "/x509/v1/certificates",
             "headers": {
-                "content-type": "application/json",
+                "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
             },
@@ -265,7 +267,7 @@ class DojotAPI():
         args = {
             "url": CONFIG['dojot']['url'] + "/x509/v1/certificates/"+ fingerprint,
             "headers": {
-                "content-type": "application/json",
+                "Content-Type": "application/json",
                 "Accept": "application/json",
                 "Authorization": "Bearer {0}".format(jwt),
             }
@@ -273,6 +275,37 @@ class DojotAPI():
 
         DojotAPI.call_api(requests.delete, args, False)
 
+    @staticmethod
+    def retrieve_ca_cert(jwt: str) -> str:
+        """
+        Retrieves the CA certificate.
+
+        Params:
+            jwt: Dojot JWT token
+
+        Returns the CA certificate.
+        """
+        LOGGER.info("Retrieving the CA certificate...")
+
+        args = {
+            "url": f"{CONFIG['dojot']['url']}/x509/v1/ca",
+            "headers": {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            }
+        }
+
+        res = DojotAPI.call_api(requests.get, args)
+
+        if res["caPem"] is None:
+            LOGGER.error("Error while retrieving the CA certificate.")
+            sys.exit(1)
+
+        certificate = res["caPem"]
+        LOGGER.info("... CA certificate retrieved")
+
+        return certificate
 
     @staticmethod
     def divide_loads(total: int, batch: int) -> List:
@@ -299,10 +332,11 @@ class DojotAPI():
     def call_api(func: Callable[..., requests.Response], args: dict, return_json: bool = True) ->\
         Dict:
         """
-        Calls the Dojot API using `func` and `args`.
+        Encapsulates HTTP calls to dojot adding error handling and retrying. Made to use the
+        `requests` lib.
 
         Parameters:
-            func: function to call Dojot API.
+            func: function to call Dojot API (e.g. requests.get).
             args: dictionary of arguments to `func`
 
         Returns the response in a dictionary
@@ -314,7 +348,6 @@ class DojotAPI():
                 res.raise_for_status()
 
             except Exception as exception:
-                LOGGER.debug(str(exception))
                 if res is not None and res.status_code == 429:
                     LOGGER.error("reached maximum number of requisitions to Dojot")
                     sys.exit(1)

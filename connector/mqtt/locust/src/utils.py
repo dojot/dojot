@@ -195,7 +195,7 @@ class Utils():
         logger = logging.getLogger(name)
         handler = logging.StreamHandler()
         formatter = logging.Formatter(
-            fmt="%(name)s line %(lineno)s | %(asctime)s [%(levelname)s]: %(message)s",
+            fmt="%(name)s:%(lineno)s | %(asctime)s [%(levelname)s]: %(message)s",
             datefmt="%d-%m-%Y %H:%M:%S"
         )
         handler.setFormatter(formatter)
