@@ -4,6 +4,9 @@ This plugin disconnects clients from VerneMQ after some time. This increases the
 the client's certificate might've been revoked/expired and we wouldn't know it, since these checks
 are made in the beginning of the TLS handshake.
 
+The disconnection time can be changed by passing the time in milisseconds to the
+`PLUGIN_DISC_LIFETIME_SESSION` environment variable.
+
 The most important files are:
 
 - [src/utils.erl](./src/utils.erl)
@@ -11,6 +14,9 @@ The most important files are:
 
 __IMPORTANT__: make sure you use the same Erlang version that the
 [Dojot's VerneMQ Dockerfile](../../Dockerfile) uses to avoid problems.
+
+For more info on plugin development for VerneMQ, please refer to the
+[official documentation](https://docs.vernemq.com/plugindevelopment/introduction).
 
 # Configuration
 
