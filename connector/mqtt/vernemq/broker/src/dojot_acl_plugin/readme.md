@@ -10,6 +10,9 @@ The most important files are:
 __IMPORTANT__: make sure you use the same Erlang version that the
 [Dojot's VerneMQ Dockerfile](../../Dockerfile) uses to avoid problems.
 
+For more info on plugin development for VerneMQ, please refer to the
+[official documentation](https://docs.vernemq.com/plugindevelopment/introduction).
+
 # Configuration
 
 Key                        | Purpose                                                                                                        | Default Value | Accepted values
