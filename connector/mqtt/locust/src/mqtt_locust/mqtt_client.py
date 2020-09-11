@@ -393,7 +393,7 @@ class MQTTClient:
             )
         # metrics
         disconnected_time = Utils.seconds_to_milliseconds(time.time()) - self.start_time
-        Utils.fire_locust_failure(
+        Utils.fire_locust_success(
                 request_type=REQUEST_METRICS_TYPE,
                 name=DISCONNECTED_METRICS[Utils.get_metric_disconnected_index_by_time((disconnected_time / 60000))],
                 response_time=disconnected_time,
