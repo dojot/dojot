@@ -5,7 +5,7 @@ modifications for Dojot's integration.
 
 # **Configuration**
 
-There are two configurations for VerneMQ: the one provided by the VerneMQ itself and the Dojot's
+There are two configurations for the dojot VerneMQ service: the one provided by the VerneMQ itself and the Dojot's
 one.
 
 ## **Dojot**
@@ -52,7 +52,7 @@ Check out the [official documentation](https://docs.vernemq.com/) for more detai
 
 # **Plugins**
 
-There are some plugins that were developed to VerneMQ:
+There are some plugins that were developed to the dojot VerneMQ service:
 
 - [ACL](./src/dojot_acl_plugin)
 - [Disconnect](./src/dojot_disconnect_plugin)
