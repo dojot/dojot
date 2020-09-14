@@ -87,7 +87,7 @@ Key                                             | Default Value       |
 V2K_KAFKA_ACKS                                  | -1                  |
 V2K_KAFKA_BATCH_NUM_MESSAGES                    | 10000               |
 V2K_KAFKA_CLIENT_ID                             | ${V2K_APP_HOSTNAME} |
-V2K_KAFKA_COMPRESSION_CODEC                     | none                |
+V2K_KAFKA_COMPRESSION_CODEC                     | gzip                |
 V2K_KAFKA_DR_CB                                 | true                |
 V2K_KAFKA_ENABLE_IDEMPOTENCE                    | false               |
 V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION | 1000000             |
