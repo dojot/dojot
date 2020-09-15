@@ -3,7 +3,6 @@ Certificate utilities.
 """
 import os
 import requests
-from OpenSSL import crypto
 
 from src.config import CONFIG
 from src.utils import Utils
