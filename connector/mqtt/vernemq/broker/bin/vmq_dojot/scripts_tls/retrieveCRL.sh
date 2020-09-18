@@ -22,12 +22,13 @@ requestCode=$(curl -s -o "${certDir}"/requestResult.json -w "%{http_code}" "${ce
 
 if [[ "$requestCode" == 200 ]]; then
   echo "Building CRL"
-  jq '.crl' -r < "${certDir}"/requestResult.json > "${certDir}"/tempcrl.crl 
+  jq '.crl' -r < "${certDir}"/requestResult.json > "${certDir}"/tempcrl.crl
 
   openssl crl -inform pem -in "${certDir}"/tempcrl.crl -out "${certDir}"/"${certCrlFile}"
 
   chmod +x "${certDir}"/"${certCrlFile}"
   rm "${certDir}"/tempcrl.crl
+  echo 'CRL saved to disk'
 else
   echo "Error retrieving CRL"
 fi

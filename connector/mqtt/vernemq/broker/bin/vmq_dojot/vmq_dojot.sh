@@ -35,7 +35,8 @@ _removeCRTDir()
 
 _createCRTDir()
 {
-  mkdir "${certDir}"
+  # Create the directory if it doesn't already exist
+  [ -d "${certDir}" ] || mkdir -p "${certDir}"
   cd "${certDir}" || exit
 }
 
@@ -142,24 +143,25 @@ main()
     ## retrieve crl
     _retrieveCRLCertificate
 
-
     #verifies certificate chains.
     . "${BASE_DIR}"/scripts_tls/checkCertificateChain.sh
 
+    # Runs supercronic if it IS NOT already running!
+    if ! pgrep -x 'supercronic' >/dev/null 2>&1; then
+      ## create cron file
+      touch "${BASE_DIR}"/crontab.tab
 
-    ## create cron file
-    touch "${BASE_DIR}"/crontab.tab
+      ## create cron tab to update CRL
+      _cronTabCRL
 
-    ## create cron tab to update CRL
-    _cronTabCRL
+      ## create cron tab to check Expiration
+      _cronTabExpiration
 
-    ## create cron tab to check Expiration
-    _cronTabExpiration
+      ## create cron tab to check Revoke
+      _cronTabCheckBrokerCertRevoke
 
-    ## create cron tab to check Revoke
-    _cronTabCheckBrokerCertRevoke
-
-    _startCronService
+      _startCronService
+    fi
 
   if [ "${isK8sEnv}" = "n" ]
   then
