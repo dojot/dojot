@@ -46,136 +46,474 @@ describe('Testing Conditions', () => {
   });
 
   describe('gte', () => {
-    it('with data ', () => {
-      const filter = ConditionApplier('temperature', 'gte', [20]);
-      const object = { location: 'x', temperature: 20 };
-      const filterData = filter(object);
+    describe('limits - 0.001 precision', () => {
+      it('in the limit border', () => {
+        const filter = ConditionApplier('temperature', 'gte', [0]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', temperature: 20 });
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
+
+      it('inferior limit', () => {
+        const filter = ConditionApplier('temperature', 'gte', [0]);
+        const object = { location: 'x', temperature: -0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('superior limit', () => {
+        const filter = ConditionApplier('temperature', 'gte', [0]);
+        const object = { location: 'x', temperature: 0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: 0.001 });
+      });
     });
 
-    it('without data ', () => {
-      const filter = ConditionApplier('temperature', 'gte', [21]);
-      const object = { location: 'x', temperature: 20 };
-      const filterData = filter(object);
+    describe('special values', () => {
+      it('value: NaN', () => {
+        const filter = ConditionApplier('temperature', 'gte', [NaN]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({});
+        expect(filterData).toEqual({});
+      });
+
+      it('value: undefined', () => {
+        const filter = ConditionApplier('temperature', 'gte', [undefined]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('value: null', () => {
+        const filter = ConditionApplier('temperature', 'gte', [null]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        // The default behaviour for JS is that null is converted to 0
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
     });
   });
 
   describe('gt', () => {
-    it('with data', () => {
-      const filter = ConditionApplier('temperature', 'gt', [20]);
-      const object = { location: 'x', temperature: 21 };
-      const filterData = filter(object);
+    describe('limits - 0.001 precision', () => {
+      it('in the limit border', () => {
+        const filter = ConditionApplier('temperature', 'gt', [0]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', temperature: 21 });
+        expect(filterData).toEqual({});
+      });
+
+      it('inferior limit', () => {
+        const filter = ConditionApplier('temperature', 'gt', [0]);
+        const object = { location: 'x', temperature: -0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('superior limit', () => {
+        const filter = ConditionApplier('temperature', 'gt', [0]);
+        const object = { location: 'x', temperature: 0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: 0.001 });
+      });
     });
 
-    it('without data', () => {
-      const filter = ConditionApplier('temperature', 'gt', [21]);
-      const object = { location: 'x', temperature: 21 };
-      const filterData = filter(object);
+    describe('special values', () => {
+      it('value: NaN', () => {
+        const filter = ConditionApplier('temperature', 'gt', [NaN]);
+        const object = { location: 'x', temperature: 1 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({});
-    });
-  });
+        expect(filterData).toEqual({});
+      });
 
-  describe('lt', () => {
-    it('with data', () => {
-      const filter = ConditionApplier('temperature', 'lt', [20]);
-      const object = { location: 'x', temperature: 19 };
-      const filterData = filter(object);
+      it('value: undefined', () => {
+        const filter = ConditionApplier('temperature', 'gt', [undefined]);
+        const object = { location: 'x', temperature: 1 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', temperature: 19 });
-    });
+        expect(filterData).toEqual({});
+      });
 
-    it('without data', () => {
-      const filter = ConditionApplier('temperature', 'lt', [20]);
-      const object = { location: 'x', temperature: 21 };
-      const filterData = filter(object);
+      it('value: null', () => {
+        const filter = ConditionApplier('temperature', 'gt', [null]);
+        const object = { location: 'x', temperature: 1 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({});
+        // The default behaviour for JS is that null is converted to 0
+        expect(filterData).toEqual({ location: 'x', temperature: 1 });
+      });
     });
   });
 
   describe('lte', () => {
-    it('with data', () => {
-      const filter = ConditionApplier('temperature', 'lte', [19]);
-      const object = { location: 'x', temperature: 19 };
-      const filterData = filter(object);
+    describe('limits - 0.001 precision', () => {
+      it('in the limit border', () => {
+        const filter = ConditionApplier('temperature', 'lte', [0]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', temperature: 19 });
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
+
+      it('inferior limit', () => {
+        const filter = ConditionApplier('temperature', 'lte', [0]);
+        const object = { location: 'x', temperature: -0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: -0.001 });
+      });
+
+      it('superior limit', () => {
+        const filter = ConditionApplier('temperature', 'lte', [0]);
+        const object = { location: 'x', temperature: 0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
     });
 
-    it('without data', () => {
-      const filter = ConditionApplier('temperature', 'lte', [20]);
-      const object = { location: 'x', temperature: 21 };
-      const filterData = filter(object);
+    describe('special values', () => {
+      it('value: NaN', () => {
+        const filter = ConditionApplier('temperature', 'lte', [NaN]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({});
+        expect(filterData).toEqual({});
+      });
+
+      it('value: undefined', () => {
+        const filter = ConditionApplier('temperature', 'lte', [undefined]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('value: null', () => {
+        const filter = ConditionApplier('temperature', 'lte', [null]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        // The default behaviour for JS is that null is converted to 0
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
+    });
+  });
+
+  describe('lt', () => {
+    describe('limits - 0.001 precision', () => {
+      it('in the limit border', () => {
+        const filter = ConditionApplier('temperature', 'lt', [0]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('inferior limit', () => {
+        const filter = ConditionApplier('temperature', 'lt', [0]);
+        const object = { location: 'x', temperature: -0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: -0.001 });
+      });
+
+      it('superior limit', () => {
+        const filter = ConditionApplier('temperature', 'lt', [0]);
+        const object = { location: 'x', temperature: 0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+    });
+
+    describe('special values', () => {
+      it('value: NaN', () => {
+        const filter = ConditionApplier('temperature', 'lt', [NaN]);
+        const object = { location: 'x', temperature: -1 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('value: undefined', () => {
+        const filter = ConditionApplier('temperature', 'lt', [undefined]);
+        const object = { location: 'x', temperature: -1 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('value: null', () => {
+        const filter = ConditionApplier('temperature', 'lt', [null]);
+        const object = { location: 'x', temperature: -1 };
+        const filterData = filter(object);
+
+        // The default behaviour for JS is that null is converted to 0
+        expect(filterData).toEqual({ location: 'x', temperature: -1 });
+      });
     });
   });
 
   describe('eq', () => {
-    it('with data', () => {
-      const filter = ConditionApplier('temperature', 'eq', [19]);
-      const object = { location: 'x', temperature: 19 };
-      const filterData = filter(object);
+    describe('limits - 0.001 precision', () => {
+      it('in the limit border', () => {
+        const filter = ConditionApplier('temperature', 'eq', [0]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', temperature: 19 });
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
+
+      it('inferior limit', () => {
+        const filter = ConditionApplier('temperature', 'eq', [0]);
+        const object = { location: 'x', temperature: -0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('superior limit', () => {
+        const filter = ConditionApplier('temperature', 'eq', [0]);
+        const object = { location: 'x', temperature: 0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
     });
 
-    it('without data', () => {
-      const filter = ConditionApplier('temperature', 'eq', [20]);
-      const object = { location: 'x', temperature: 21 };
-      const filterData = filter(object);
+    describe('special values', () => {
+      it('value: NaN', () => {
+        const filter = ConditionApplier('temperature', 'eq', [NaN]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({});
+        expect(filterData).toEqual({});
+      });
+
+      it('value: undefined', () => {
+        const filter = ConditionApplier('temperature', 'eq', [undefined]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({});
+      });
+
+      it('value: null', () => {
+        const filter = ConditionApplier('temperature', 'eq', [null]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        // The default behaviour for JS is that null is converted to 0
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
     });
   });
 
   describe('neq', () => {
-    it('with data', () => {
-      const filter = ConditionApplier('temperature', 'neq', [20]);
-      const object = { location: 'x', temperature: 19 };
-      const filterData = filter(object);
+    describe('limits - 0.001 precision', () => {
+      it('in the limit border', () => {
+        const filter = ConditionApplier('temperature', 'neq', [0]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', temperature: 19 });
+        expect(filterData).toEqual({});
+      });
+
+      it('inferior limit', () => {
+        const filter = ConditionApplier('temperature', 'neq', [0]);
+        const object = { location: 'x', temperature: -0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: -0.001 });
+      });
+
+      it('superior limit', () => {
+        const filter = ConditionApplier('temperature', 'neq', [0]);
+        const object = { location: 'x', temperature: 0.001 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: 0.001 });
+      });
     });
 
-    it('without data', () => {
-      const filter = ConditionApplier('temperature', 'neq', [20]);
-      const object = { location: 'x', temperature: 20 };
-      const filterData = filter(object);
+    describe('special values', () => {
+      it('value: NaN', () => {
+        const filter = ConditionApplier('temperature', 'neq', [NaN]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
 
-      expect(filterData).toEqual({});
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
+
+      it('value: undefined', () => {
+        const filter = ConditionApplier('temperature', 'neq', [undefined]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        expect(filterData).toEqual({ location: 'x', temperature: 0 });
+      });
+
+      it('value: null', () => {
+        const filter = ConditionApplier('temperature', 'neq', [null]);
+        const object = { location: 'x', temperature: 0 };
+        const filterData = filter(object);
+
+        // The default behaviour for JS is that null is converted to 0
+        expect(filterData).toEqual({});
+      });
     });
   });
 
   describe('bool', () => {
-    it('with data - value "true"', () => {
-      const filter = ConditionApplier('enabled', 'bool', ['true']);
-      const object = { location: 'x', enabled: true };
-      const filterData = filter(object);
+    describe('true', () => {
+      describe('should match', () => {
+        it('true === true', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const object = { location: 'x', enabled: true };
+          const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', enabled: true });
+          expect(filterData).toEqual({ location: 'x', enabled: true });
+        });
+
+        it('true === 1', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const object = { location: 'x', enabled: 1 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({ location: 'x', enabled: 1 });
+        });
+
+        it('1 === true', () => {
+          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const object = { location: 'x', enabled: true };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({ location: 'x', enabled: true });
+        });
+
+        it('1 === 1', () => {
+          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const object = { location: 'x', enabled: 1 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({ location: 'x', enabled: 1 });
+        });
+      });
+
+      describe('should not match', () => {
+        it('true !== false', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const object = { location: 'x', enabled: false };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+
+        it('true !== 0', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const object = { location: 'x', enabled: 0 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+
+        it('1 !== false', () => {
+          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const object = { location: 'x', enabled: false };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+
+        it('1 !== 0', () => {
+          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const object = { location: 'x', enabled: 0 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+      });
     });
 
-    it('with data - value "false"', () => {
-      const filter = ConditionApplier('enabled', 'bool', ['false']);
-      const object = { location: 'x', enabled: false };
-      const filterData = filter(object);
+    describe('false', () => {
+      describe('should match', () => {
+        it('false === false', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const object = { location: 'x', enabled: false };
+          const filterData = filter(object);
 
-      expect(filterData).toEqual({ location: 'x', enabled: false });
-    });
+          expect(filterData).toEqual({ location: 'x', enabled: false });
+        });
 
-    it('without data', () => {
-      const filter = ConditionApplier('enabled', 'bool', ['true']);
-      const object = { location: 'x', enabled: false };
-      const filterData = filter(object);
+        it('false === 0', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const object = { location: 'x', enabled: 0 };
+          const filterData = filter(object);
 
-      expect(filterData).toEqual({});
+          expect(filterData).toEqual({ location: 'x', enabled: 0 });
+        });
+
+        it('0 === false', () => {
+          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const object = { location: 'x', enabled: false };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({ location: 'x', enabled: false });
+        });
+
+        it('0 === 0', () => {
+          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const object = { location: 'x', enabled: 0 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({ location: 'x', enabled: 0 });
+        });
+      });
+
+      describe('should not match', () => {
+        it('false !== true', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const object = { location: 'x', enabled: true };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+
+        it('false !== 1', () => {
+          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const object = { location: 'x', enabled: 1 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+
+        it('0 !== true', () => {
+          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const object = { location: 'x', enabled: true };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+
+        it('0 !== 1', () => {
+          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const object = { location: 'x', enabled: 1 };
+          const filterData = filter(object);
+
+          expect(filterData).toEqual({});
+        });
+      });
     });
   });
 });
