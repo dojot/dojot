@@ -1,4 +1,3 @@
-const { isNull } = require('lodash');
 const Utils = require('../Utils');
 
 /**
