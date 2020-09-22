@@ -1,3 +1,7 @@
+/**
+ * @module OperatorValidator provides functions to verify whether the operator's values have the
+ * correct type and arity.
+ */
 const Utils = require('../Utils');
 const { InvalidOperatorArity, InvalidValue } = require('../Errors').Errors;
 
