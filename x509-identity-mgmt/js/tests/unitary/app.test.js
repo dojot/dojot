@@ -1,4 +1,3 @@
-jest.mock('rotating-file-stream');
 jest.mock('../../src/services/certificates-service');
 
 process.env.TRUST_PROXY = 'true';

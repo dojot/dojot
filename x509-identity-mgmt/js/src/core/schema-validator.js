@@ -1,11 +1,11 @@
-const createError = require('http-errors');
-
 const Ajv = require('ajv');
 const defsSchema = require('../../schemas/defs.json');
 const regTrustCaSchema = require('../../schemas/register-trusted-ca-certificate.json');
 const updTrustCaSchema = require('../../schemas/update-trusted-ca-certificate.json');
 const regOrGenCertSchema = require('../../schemas/register-or-generate-certificate.json');
 const chOwnCertSchema = require('../../schemas/change-owner-certificate.json');
+
+const { BadRequest } = require('../sdk/web/backing/error-template');
 
 const ajv = new Ajv({
   allErrors: true,
@@ -27,9 +27,8 @@ const ajv = new Ajv({
  * @return {String} formatted api response
  */
 function errorResponse(schema$id, schemaErrors) {
-  const httpError = new createError.BadRequest();
-  httpError.responseBody = { schema$id, schemaErrors };
-  return httpError;
+  const errorMsg = 'Input data schema validation failure!';
+  return BadRequest(errorMsg, { schema$id, schemaErrors });
 }
 
 /**

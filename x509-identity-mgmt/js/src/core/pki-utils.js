@@ -4,9 +4,7 @@ const pkijs = require('pkijs');
 
 const crypto = require('crypto');
 
-const { BadRequest } = require('./errors');
-
-const { certificate: certCfg } = require('../config');
+const { BadRequest } = require('../sdk/web/backing/error-template');
 
 /* Identification of key algorithms. For details:
  * http://oid-info.com/get/<OID-dot-notation> */
@@ -112,9 +110,6 @@ function parseCert(pem) {
  * @param {pkijs.PublicKeyInfo} Destructuring only attributes "algorithm" and "parsedKey"
  */
 function checkPublicKey({ algorithm, parsedKey }) {
-  if (!certCfg.checkPublicKey) {
-    return;
-  }
   const algoID = (algorithm) ? algorithm.algorithmId : '';
   if (algoID === RSA) {
     const keyLength = (parsedKey) ? parsedKey.modulus.valueBlock.valueHex.byteLength : 0;
