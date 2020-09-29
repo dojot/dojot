@@ -21,5 +21,6 @@ module.exports = ({ config, logger }) => {
     logger.debug('Creating the Web Server');
     server = http.createServer(config);
   }
+  logger.debug('Web Server created!');
   return server;
 };

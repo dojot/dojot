@@ -125,7 +125,7 @@ class CertificatesService {
         .maxTimeMS(this.queryMaxTimeMS)
         .lean()
         .exec(),
-      this.CertificateModel.count(filterFields),
+      this.CertificateModel.countDocuments(filterFields),
     ]);
     return { itemCount, results };
   }

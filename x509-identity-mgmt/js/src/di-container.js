@@ -16,6 +16,14 @@ const ejbcaFacade = require('./ejbca-facade');
 
 const scopedDIController = require('./controllers/scoped-di-controller');
 
+const responseCompressController = require('./controllers/response-compress-controller');
+
+const requestIdController = require('./controllers/request-id-controller');
+
+const requestLogController = require('./controllers/request-log-controller');
+
+const paginateController = require('./controllers/paginate-controller');
+
 const jsonBodyParsingController = require('./controllers/json-body-parsing-controller');
 
 const tokenParsingController = require('./controllers/token-parsing-controller');
@@ -33,7 +41,7 @@ const CertificatesService = require('./services/certificates-service');
 const TrustedCAsService = require('./services/trusted-cas-service');
 
 const {
-  asFunction, asValue, asClass, Lifetime,
+  asFunction, asValue, asClass, Lifetime, InjectionMode,
 } = awilix;
 
 module.exports = (config) => {
@@ -46,7 +54,8 @@ module.exports = (config) => {
       injector: () => ({
         config: {
           allowedAttrs: config.certificate.subject.allowedattrs,
-          allowedAttrsConstraints: config.certificate.subject.allowedattrsconstraints,
+          // allowedAttrsConstraints: config.certificate.subject.allowedattrsconstraints,
+          allowedAttrsConstraints: ['CN=^[0-9A-Za-z ]{1,255}$'],
           mandatoryAttrs: config.certificate.subject.mandatoryattrs,
           constantAttrs: {
             O: config.certificate.subject.constantattrs.o,
@@ -57,6 +66,8 @@ module.exports = (config) => {
     }),
 
     logger: asClass(Logger, {
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({ sid: 'X509-Identity-Mgmt - Main' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -70,6 +81,10 @@ module.exports = (config) => {
         config: config.framework,
         controllers: [
           // The order of the controllers matters
+          DIContainer.resolve('responseCompressController'),
+          DIContainer.resolve('requestIdController'),
+          DIContainer.resolve('requestLogController'),
+          DIContainer.resolve('paginateController'),
           DIContainer.resolve('jsonBodyParsingController'),
           DIContainer.resolve('tokenParsingController'),
           DIContainer.resolve('staticFileController'),
@@ -105,8 +120,25 @@ module.exports = (config) => {
 
     // --------------------------------------------------------
 
-    scopedDIController: asFunction(scopedDIController, {
-      injector: () => ({ DIContainer }),
+    responseCompressController: asFunction(responseCompressController, {
+      injector: () => ({ config: undefined }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    requestIdController: asFunction(requestIdController, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    requestLogController: asFunction(requestLogController, {
+      injector: () => ({ logFormat: config.framework.logformat }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    paginateController: asFunction(paginateController, {
+      injector: () => ({
+        limit: config.framework.paginate.limit,
+        maxLimit: config.framework.paginate.maxlimit,
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -120,6 +152,11 @@ module.exports = (config) => {
     }),
 
     staticFileController: asFunction(staticFileController, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    scopedDIController: asFunction(scopedDIController, {
+      injector: () => ({ DIContainer }),
       lifetime: Lifetime.SINGLETON,
     }),
 

@@ -1,4 +1,6 @@
-const { asClass, asValue } = require('awilix');
+const {
+  asClass, asValue, InjectionMode, Lifetime,
+} = require('awilix');
 
 const { Logger } = require('@dojot/microservice-sdk');
 
@@ -14,7 +16,11 @@ module.exports = ({ DIContainer }) => ({
       tenant: asValue(req.tenant),
     });
     req.scope.register({
-      logger: asClass(Logger),
+      logger: asClass(Logger, {
+        injectionMode: InjectionMode.CLASSIC,
+        injector: () => ({ sid: `X509-Identity-Mgmt - ${req.id}` }),
+        lifetime: Lifetime.SCOPED,
+      }),
     });
 
     next();

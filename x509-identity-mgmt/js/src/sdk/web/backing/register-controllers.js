@@ -4,7 +4,7 @@ const sanitize = (obj, logger) => {
     path: [],
     middleware: [],
   };
-  logger.debug(`Sanitizing the object so that only the pattern remains: ${controllerPattern}`);
+  logger.debug('\tSanitizing the controller so that only the pattern remains: ', controllerPattern);
 
   const subset = Object.fromEntries(
     Object.entries(obj).filter(([key]) => Object.keys(controllerPattern).includes(key)),
@@ -26,52 +26,52 @@ const sanitize = (obj, logger) => {
 };
 
 const checkPath = ({ path }, logger) => {
-  logger.debug('Checking if the object has valid path values...');
+  logger.debug('\tChecking if the controller has valid path values...');
   if (!path.length) {
-    logger.debug("The object has no path value. Using '/' (root path)!");
+    logger.debug("\tThe controller has no path value. Using '/' (root path)!");
     return true;
   }
 
   const checked = path.every((value) => {
     if (typeof value !== 'string' && !(value instanceof RegExp)) {
-      logger.debug('The path value must be a string or instance of RegExp!');
+      logger.debug('\tThe path value must be a string or instance of RegExp!');
       return false;
     }
     return true;
   });
 
   if (checked) {
-    logger.debug('The path values are checked!');
+    logger.debug('\tThe path values are checked!');
     return true;
   }
-  logger.debug('The path values are not implemented correctly. This is a problem!');
+  logger.debug('\tThe path values are not implemented correctly. This is a problem!');
   return false;
 };
 
 const checkMiddleware = ({ middleware }, logger) => {
-  logger.debug('Checking if the object has middlewares to handle requests...');
+  logger.debug('\tChecking if the controller has middlewares to handle requests...');
   if (!middleware.length) {
-    logger.debug('The object has no middleware to handle requests. This is a problem!');
+    logger.debug('\tThe controller has no middleware to handle requests. This is a problem!');
     return false;
   }
 
   const checked = middleware.every((fn) => {
     if (!fn) {
-      logger.debug('Middleware has not been defined, but it should be!');
+      logger.debug('\tMiddleware has not been defined, but it should be!');
       return false;
     }
-    if (typeof middleware !== 'function') {
-      logger.debug('The middleware must be a function. This is a problem!');
+    if (typeof fn !== 'function') {
+      logger.debug('\tThe middleware must be a function. This is a problem!');
       return false;
     }
     return true;
   });
 
   if (checked) {
-    logger.debug('Middlewares to handle requests are checked!');
+    logger.debug('\tMiddlewares to handle requests are checked!');
     return true;
   }
-  logger.debug('Middlewares to handle requests are not implemented correctly. This is a problem!');
+  logger.debug('\tMiddlewares to handle requests are not implemented correctly. This is a problem!');
   return false;
 };
 
@@ -82,18 +82,21 @@ module.exports = (controllersToBeRegistered, framework, logger) => {
   }
 
   controllers.forEach((controllerToBeRegistered) => {
+    logger.debug(`\tController to be registered: ${controllerToBeRegistered.name}`);
+
     const controller = sanitize(controllerToBeRegistered, logger);
+
     if (checkPath(controller, logger) && checkMiddleware(controller, logger)) {
       if (controller.path.length) {
         framework.use(controller.path, controller.middleware);
-        logger.debug(`Controller registered: ${controller.name}`);
-        logger.debug(`---> Path pattern: ${controller.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
+        logger.debug(`\tController registered! -> ${controller.name}`);
+        logger.debug(`\t---> Path pattern: ${controller.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
       } else {
         framework.use(controller.middleware);
-        logger.debug(`Controller registered: ${controller.name}`);
+        logger.debug(`\tController registered! -> ${controller.name}`);
       }
     } else {
-      logger.debug(`Controller not registered: ${controller.name}`);
+      logger.debug(`\tController not registered! -> ${controller.name}`);
     }
   });
 };

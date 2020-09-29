@@ -59,6 +59,14 @@ function parseProjectionFields(commaSeparatedFields) {
     }
     fields = [...queryFields];
   }
+
+  // you cannot specify an embedded document and a field
+  // within that document embedded in the same projection
+  if (fields.includes('belongsTo.device')
+      || fields.includes('belongsTo.application')) {
+    fields = fields.filter((el) => el !== 'belongsTo');
+  }
+
   return fields;
 }
 

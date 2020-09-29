@@ -15,7 +15,7 @@ const sanitize = (obj, logger) => {
     params: [],
     handlers: [],
   };
-  logger.debug(`Sanitizing the object so that only the pattern remains: ${routePattern}`);
+  logger.debug('\tSanitizing the route object so that only the pattern remains: ', routePattern);
 
   const subset = Object.fromEntries(
     Object.entries(obj).filter(([key]) => Object.keys(routePattern).includes(key)),
@@ -45,101 +45,101 @@ const sanitize = (obj, logger) => {
 };
 
 const checkPath = ({ path }, logger) => {
-  logger.debug('Checking if the object has valid route path values...');
+  logger.debug('\tChecking if the route object has valid path values...');
   if (!path.length) {
-    logger.debug('The object has no route path value. This is a problem!');
+    logger.debug('\tThe route object has no path value. This is a problem!');
     return false;
   }
 
   const checked = path.every((value) => {
     if (!value) {
-      logger.debug('Route path value has not been defined, but it should be!');
+      logger.debug('\tRoute path value has not been defined, but it should be!');
       return false;
     }
     if (typeof value !== 'string' && !(value instanceof RegExp)) {
-      logger.debug('Route path value must be a string or instance of RegExp!');
+      logger.debug('\tRoute path value must be a string or instance of RegExp!');
       return false;
     }
     return true;
   });
 
   if (checked) {
-    logger.debug('Route path values are checked!');
+    logger.debug('\tRoute path values are checked!');
     return true;
   }
-  logger.debug('Route path values are not implemented correctly. This is a problem!');
+  logger.debug('\tRoute path values are not implemented correctly. This is a problem!');
   return false;
 };
 
 const checkParams = ({ params }, logger) => {
-  logger.debug('Checking if the object has triggers for parameters declared in the route path...');
+  logger.debug('\tChecking if the route object has triggers for parameters declared in the route path...');
   if (!params || !params.length) {
-    logger.debug('The object has no triggers for parameters declared in the route path. OK no problem!');
+    logger.debug('\tThe route object has no triggers for parameters declared in the route path. OK no problem!');
     return true;
   }
 
   const checked = params.every(({ name, trigger }) => {
-    logger.debug(`Checking the trigger for the parameter: '${name}'`);
+    logger.debug(`\tChecking the trigger for the parameter: '${name}'`);
     if (!name) {
-      logger.debug('Parameter Name has not been defined, but it should be!');
+      logger.debug('\tParameter Name has not been defined, but it should be!');
       return false;
     }
     if (!trigger) {
-      logger.debug('Parameter Trigger has not been defined, but it should be!');
+      logger.debug('\tParameter Trigger has not been defined, but it should be!');
       return false;
     }
     if (typeof name !== 'string') {
-      logger.debug('Parameter Name must be a string!');
+      logger.debug('\tParameter Name must be a string!');
       return false;
     }
     if (typeof trigger !== 'function') {
-      logger.debug('Parameter Trigger must be a function!');
+      logger.debug('\tParameter Trigger must be a function!');
       return false;
     }
     return true;
   });
 
   if (checked) {
-    logger.debug('Triggers for the parameters on the route path are checked!');
+    logger.debug('\tTriggers for the parameters on the route path are checked!');
     return true;
   }
-  logger.debug('Triggers for the parameters in the route path are not implemented correctly. This is a problem!');
+  logger.debug('\tTriggers for the parameters in the route path are not implemented correctly. This is a problem!');
   return false;
 };
 
 const checkHandlers = ({ handlers }, logger) => {
-  logger.debug('Checking if the object has handlers to handle requests in the route path...');
+  logger.debug('\tChecking if the route object has handlers to handle requests in the route path...');
   if (!handlers.length) {
-    logger.debug('The object has no handlers to handle requests in the route path. This is a problem!');
+    logger.debug('\tThe route object has no handlers to handle requests in the route path. This is a problem!');
     return false;
   }
 
   const checked = handlers.every(({ method, middleware }) => {
     if (!method) {
-      logger.debug("Handler's Routing Method has not been defined, but it should be!");
+      logger.debug("\tHandler's Routing Method has not been defined, but it should be!");
       return false;
     }
     if (!middleware) {
-      logger.debug('Handler Middleware has not been defined, but it should be!');
+      logger.debug('\tHandler Middleware has not been defined, but it should be!');
       return false;
     }
-    if (!allowedRoutingMethods.includes(method)) {
-      logger.debug('The handler does not have a valid Routing Method!');
+    if (!allowedRoutingMethods(method)) {
+      logger.debug('\tThe handler does not have a valid Routing Method!');
       return false;
     }
     if ((typeof middleware !== 'function' && !Array.isArray(middleware))
         || (Array.isArray(middleware) && middleware.some((mid) => typeof mid !== 'function'))) {
-      logger.debug('The middleware of the handler must be a function or an array of functions!');
+      logger.debug('\tThe middleware of the handler must be a function or an array of functions!');
       return false;
     }
     return true;
   });
 
   if (checked) {
-    logger.debug('Request handlers on the route path are checked!');
+    logger.debug('\tRequest handlers on the route path are checked!');
     return true;
   }
-  logger.debug('Request handlers on the route path are not implemented correctly. This is a problem!');
+  logger.debug('\tRequest handlers on the route path are not implemented correctly. This is a problem!');
   return false;
 };
 
@@ -152,7 +152,10 @@ module.exports = (routesToBeRegistered, framework, logger) => {
   const mountingMap = new Map();
 
   routes.forEach((routeToBeRegistered) => {
+    logger.debug(`\tRoute to be registered: ${routeToBeRegistered.name}`);
+
     const route = sanitize(routeToBeRegistered, logger);
+
     if (checkPath(route, logger) && checkParams(route, logger) && checkHandlers(route, logger)) {
       let { mountPoint } = route;
       if (!mountPoint.startsWith('/')) {
@@ -169,11 +172,11 @@ module.exports = (routesToBeRegistered, framework, logger) => {
       route.params.forEach(({ name, trigger }) => mountRouter.param(name, trigger));
       route.handlers.forEach(({ method, middleware }) => expressRoute[method](middleware));
 
-      logger.debug(`Route registered: ${route.name}`);
-      logger.debug(`---> Mount point: ${mountPoint}`);
-      logger.debug(`---> Path pattern: ${route.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
+      logger.debug(`\tRoute registered! -> ${route.name}`);
+      logger.debug(`\t---> Mount point: ${mountPoint}`);
+      logger.debug(`\t---> Path pattern: ${route.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
     } else {
-      logger.debug(`Route not registered: ${route.name}`);
+      logger.debug(`\tRoute NOT registered! -> ${route.name}`);
     }
   });
 

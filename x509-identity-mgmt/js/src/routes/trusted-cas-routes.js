@@ -1,5 +1,7 @@
 const HttpStatus = require('http-status-codes');
 
+const sanitize = require('./sanitize-params');
+
 const { validateNewTrustedCA, validateUpdTrustedCA } = require('../core/schema-validator');
 
 module.exports = ({ mountPoint }) => {
@@ -72,6 +74,10 @@ module.exports = ({ mountPoint }) => {
     mountPoint,
     name: 'trusted-cas-fingerprint-route',
     path: ['/trusted-cas/:caCertificateFingerprint'],
+    params: [{
+      name: 'caCertificateFingerprint',
+      trigger: sanitize.fingerprint,
+    }],
     handlers: [
       {
         /* Delete Trusted CA Certificate */

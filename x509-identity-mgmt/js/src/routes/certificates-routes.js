@@ -1,5 +1,7 @@
 const HttpStatus = require('http-status-codes');
 
+const sanitize = require('./sanitize-params');
+
 const { validateRegOrGenCert, validateChangeOwnerCert } = require('../core/schema-validator');
 
 module.exports = ({ mountPoint, db }) => {
@@ -59,13 +61,17 @@ module.exports = ({ mountPoint, db }) => {
     mountPoint,
     name: 'certificate-fingerprint-route',
     path: ['/certificates/:certificateFingerprint'],
+    params: [{
+      name: 'certificateFingerprint',
+      trigger: sanitize.fingerprint,
+    }],
     handlers: [
       {
         /* Delete x.509 certificate */
         method: 'delete',
         middleware: [
           async (req, res) => {
-            const fingerprint = req.params.certificateFingerprint.toUpperCase();
+            const fingerprint = req.params.certificateFingerprint;
             const queryFields = dbCert.parseProjectionFields(null);
             const filterFields = dbCert.parseConditionFields({ fingerprint }, req.tenant);
 
@@ -81,7 +87,7 @@ module.exports = ({ mountPoint, db }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const fingerprint = req.params.certificateFingerprint.toUpperCase();
+            const fingerprint = req.params.certificateFingerprint;
             const queryFields = dbCert.parseProjectionFields(req.query.fields);
             const filterFields = dbCert.parseConditionFields({ fingerprint }, req.tenant);
 
@@ -98,7 +104,7 @@ module.exports = ({ mountPoint, db }) => {
         middleware: [
           validateChangeOwnerCert(),
           async (req, res) => {
-            const fingerprint = req.params.certificateFingerprint.toUpperCase();
+            const fingerprint = req.params.certificateFingerprint;
             const filterFields = dbCert.parseConditionFields({ fingerprint }, req.tenant);
 
             const service = req.scope.resolve('certificatesService');
