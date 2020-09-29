@@ -31,8 +31,13 @@ jest.mock('@dojot/microservice-sdk', () => {
 const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
-const { ejbca: ejbcaCfg } = require('../../src/config');
-const ejbcaFacade = require('../../src/core/ejbca-facade');
+const { Logger } = require('@dojot/microservice-sdk');
+const ejbcaFacade = require('../../src/ejbca-facade')({
+  config: global.config.ejbca,
+  logger: new Logger(),
+});
+
+const { ejbca: ejbcaCfg } = global.config;
 
 describe('testing internal functions of the EJBCA Facade', () => {
   beforeEach(() => {

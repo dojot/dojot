@@ -102,7 +102,6 @@ module.exports = ({ mountPoint }) => {
         /* Get Trusted CA Certificate */
         method: 'get',
         middleware: [
-          validateUpdTrustedCA(),
           (req, res) => {
             res.sendStatus(200);
           },

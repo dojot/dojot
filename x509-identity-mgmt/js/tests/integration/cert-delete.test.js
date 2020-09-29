@@ -6,7 +6,8 @@ const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
 const request = require('supertest');
-const db = require('../../src/db');
+const DIContainer = require('../../src/di-container');
+const { token } = require('../util.test');
 
 fs.promises = {
   access: jest.fn().mockReturnValue(Promise.resolve(true)),
@@ -31,6 +32,9 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
+const container = DIContainer(global.config);
+
+const db = container.resolve('db');
 db.certificate.model = {
   findOne: jest.fn().mockReturnThis(),
   findByIdAndDelete: jest.fn().mockReturnThis(),
@@ -40,10 +44,9 @@ db.certificate.model = {
   exec: jest.fn().mockResolvedValue(),
 };
 
-const app = require('../../src/app');
-const { token } = require('../util.test');
+const framework = container.resolve('framework');
 
-const req = request(app);
+const req = request(framework);
 
 const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
 

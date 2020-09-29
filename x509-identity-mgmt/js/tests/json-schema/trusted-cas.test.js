@@ -4,9 +4,13 @@ const faker = require('faker');
 
 const { generateCert } = require('../util.test');
 
-const app = require('../../src/app');
+const DIContainer = require('../../src/di-container');
 
-const req = request(app);
+const container = DIContainer(global.config);
+
+const framework = container.resolve('framework');
+
+const req = request(framework);
 
 /* defines the JWT token to be used for test requests */
 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
@@ -24,6 +28,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
+          message: 'Input data schema validation failure!',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -52,6 +57,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
+          message: 'Input data schema validation failure!',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -88,6 +94,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
+          message: 'Input data schema validation failure!',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -116,6 +123,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
+          message: 'Input data schema validation failure!',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -143,6 +151,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
+          message: 'Input data schema validation failure!',
           schema$id: 'http://www.dojot.com.br/schemas/upd-trust-ca',
           schemaErrors: [
             {
@@ -170,6 +179,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
+          message: 'Input data schema validation failure!',
           schema$id: 'http://www.dojot.com.br/schemas/upd-trust-ca',
           schemaErrors: [
             {

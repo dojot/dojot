@@ -1,16 +1,19 @@
 const request = require('supertest');
-const db = require('../../src/db');
+const DIContainer = require('../../src/di-container');
+const { token } = require('../util.test');
 
+const container = DIContainer(global.config);
+
+const db = container.resolve('db');
 db.certificate.model = {
   findOneAndUpdate: jest.fn().mockReturnThis(),
   maxTimeMS: jest.fn().mockReturnThis(),
   exec: jest.fn().mockResolvedValue(),
 };
 
-const app = require('../../src/app');
-const { token } = require('../util.test');
+const framework = container.resolve('framework');
 
-const req = request(app);
+const req = request(framework);
 
 describe('X509 Certificates - PATCH integrations', () => {
   it('should change ownership',

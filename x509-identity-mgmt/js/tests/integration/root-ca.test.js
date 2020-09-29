@@ -1,15 +1,14 @@
-process.env.EJBCA_CRL_FORCE_CREATION = 'true';
+global.config.ejbca.forcecrlrenew = true;
 
 jest.mock('fs');
 jest.mock('soap');
 jest.mock('readline');
-jest.mock('../../src/db');
 
 const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
 const request = require('supertest');
-const app = require('../../src/app');
+const DIContainer = require('../../src/di-container');
 const {
   token, caCert, caFingerprint, caCRL,
 } = require('../util.test');
@@ -55,7 +54,11 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
-const req = request(app);
+const container = DIContainer(global.config);
+
+const framework = container.resolve('framework');
+
+const req = request(framework);
 
 describe('Root CA - integrations', () => {
   it('should get a Root CA Certificate',

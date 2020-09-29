@@ -28,11 +28,12 @@ jest.mock('@dojot/microservice-sdk', () => {
 
 const EventEmitter = require('events');
 const mongoose = require('mongoose');
+const { Logger } = require('@dojot/microservice-sdk');
 
 mongoose.connection = new EventEmitter();
 mongoose.connection.close = jest.fn();
 
-const db = require('../../src/db');
+const db = require('../../src/db')({ config: global.config.mongo, logger: new Logger() });
 
 describe('testing internal functions of the DB module', () => {
   it('should establish a connection with MongoDB', async () => {

@@ -1,14 +1,25 @@
-jest.mock('../../src/services/certificates-service');
+jest.mock('../../src/services/certificates-service', () => jest.fn().mockImplementation(() => ({
+  // eslint-disable-next-line no-labels, no-unused-labels, no-restricted-syntax
+  listCertificates: jest.fn().mockRejectedValue('Internal error simulation'),
+})));
 
-process.env.TRUST_PROXY = 'true';
-process.env.USE_LOG_FILE = 'true';
+global.config.framework.trustproxy = true;
 
+const { asValue } = require('awilix');
 const request = require('supertest');
-const app = require('../../src/app');
-const certServ = require('../../src/services/certificates-service');
+const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
-const req = request(app);
+const container = DIContainer(global.config);
+
+// register some request-specific data..
+container.register({
+  tenant: asValue('admin'),
+});
+
+const framework = container.resolve('framework');
+
+const req = request(framework);
 
 describe('unit testing of the App object', () => {
   it('should complain about a missing JWT',
@@ -44,16 +55,13 @@ describe('unit testing of the App object', () => {
       }));
 
   it('should issue an internal error',
-    () => {
-      certServ.listCertificates.mockRejectedValue('Internal error simulation');
-      return req.get('/api/v1/certificates')
-        .set('Authorization', `Bearer ${token}`)
-        .send()
-        .expect(500)
-        .then((res) => {
-          expect(res.body).toEqual({
-            message: 'An unexpected error has occurred.',
-          });
+    () => req.get('/api/v1/certificates')
+      .set('Authorization', `Bearer ${token}`)
+      .send()
+      .expect(500)
+      .then((res) => {
+        expect(res.body).toEqual({
+          message: 'An unexpected error has occurred.',
         });
-    });
+      }));
 });

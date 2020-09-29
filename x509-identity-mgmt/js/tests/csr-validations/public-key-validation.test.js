@@ -1,10 +1,12 @@
 const request = require('supertest');
-
+const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
-const app = require('../../src/app');
+const container = DIContainer(global.config);
 
-const req = request(app);
+const framework = container.resolve('framework');
+
+const req = request(framework);
 
 describe('X509 Certificates - CSR Public Key Validation', () => {
   it('should check for RSA key length less than 2048 bits',

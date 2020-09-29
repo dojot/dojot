@@ -1,7 +1,14 @@
 const request = require('supertest');
 
-const app = require('../../src/app');
 const { token } = require('../util.test');
+
+const DIContainer = require('../../src/di-container');
+
+const container = DIContainer(global.config);
+
+const framework = container.resolve('framework');
+
+const req = request(framework);
 
 const caPem = `-----BEGIN CERTIFICATE-----
 MIIDujCCAqKgAwIBAgILBAAAAAABD4Ym5g0wDQYJKoZIhvcNAQEFBQAwTDEgMB4G
@@ -25,8 +32,6 @@ ot+3i9DAgBkcRcAtjOj4LaR0VknFBbVPFd5uRHg5h6h+u/N5GJG79G+dwfCMNYxd
 AfvDbbnvRG15RjF+Cv6pgsH/76tuIMRQyV+dTZsXjAzlAcmgQWpzU/qlULRuJQ/7
 TBj0/VLZjmmx6BEP3ojY+x1J96relc8geMJgEtslQIxq/H5COEBkEveegeGTLg==
 -----END CERTIFICATE-----`;
-
-const req = request(app);
 
 describe('Trusted CAs - GET/POST/PATCH/DELETE integrations', () => {
   it('should get a HTTP status code = 201',

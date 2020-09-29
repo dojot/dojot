@@ -1,17 +1,14 @@
 jest.mock('fs');
 jest.mock('soap');
 jest.mock('readline');
-jest.mock('../../src/db');
 
 const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
 const http = require('http');
 const request = require('supertest');
-const db = require('../../src/db');
-const ejbca = require('../../src/core/ejbca-facade');
-const app = require('../../src/app');
 const terminus = require('../../src/terminus');
+const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
 fs.promises = {
@@ -36,9 +33,17 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
-const server = http.createServer(app);
+const container = DIContainer(global.config);
+
+const logger = container.resolve('logger');
+const framework = container.resolve('framework');
+const server = http.createServer(framework);
+
+const db = container.resolve('db');
+const ejbcaFacade = container.resolve('ejbcaFacade');
+
 const req = request(server);
-terminus.setup(server, db, ejbca);
+terminus(global.config.terminus, logger).setup(server, db, ejbcaFacade);
 
 const originalGet = http.get;
 
@@ -46,7 +51,7 @@ describe('Service Health Check - GET integrations', () => {
   beforeEach(() => { http.get = originalGet; });
 
   it('should be healthy', () => {
-    db.healthCheck.mockResolvedValue(true);
+    db.healthCheck = jest.fn().mockResolvedValue(true);
 
     http.get = jest.fn((url, cb1) => {
       cb1({
@@ -74,7 +79,7 @@ describe('Service Health Check - GET integrations', () => {
   });
 
   it('should indicate that the MongoDB is not OK', () => {
-    db.healthCheck.mockResolvedValue(false);
+    db.healthCheck = jest.fn().mockResolvedValue(false);
 
     http.get = jest.fn((url, cb1) => {
       cb1({
@@ -106,7 +111,7 @@ describe('Service Health Check - GET integrations', () => {
   });
 
   it('should indicate that the EJBCA is not OK', () => {
-    db.healthCheck.mockResolvedValue(true);
+    db.healthCheck = jest.fn().mockResolvedValue(true);
 
     http.get = jest.fn((url, cb1) => {
       cb1({

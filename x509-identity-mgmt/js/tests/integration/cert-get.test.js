@@ -1,6 +1,10 @@
 const request = require('supertest');
-const db = require('../../src/db');
+const DIContainer = require('../../src/di-container');
+const { token } = require('../util.test');
 
+const container = DIContainer(global.config);
+
+const db = container.resolve('db');
 db.certificate.model = {
   find: jest.fn().mockReturnThis(),
   findOne: jest.fn().mockReturnThis(),
@@ -10,13 +14,12 @@ db.certificate.model = {
   maxTimeMS: jest.fn().mockReturnThis(),
   lean: jest.fn().mockReturnThis(),
   exec: jest.fn().mockResolvedValue(),
-  count: jest.fn().mockResolvedValue(),
+  countDocuments: jest.fn().mockResolvedValue(),
 };
 
-const app = require('../../src/app');
-const { token } = require('../util.test');
+const framework = container.resolve('framework');
 
-const req = request(app);
+const req = request(framework);
 
 describe('X509 Certificates - GET integrations', () => {
   it('should get a certificate',
@@ -82,7 +85,7 @@ describe('X509 Certificates - GET integrations', () => {
         { fingerprint: fingerprint3 },
       ];
       db.certificate.model.exec.mockResolvedValue(results);
-      db.certificate.model.count.mockResolvedValue(3);
+      db.certificate.model.countDocuments.mockResolvedValue(3);
 
       return req.get('/api/v1/certificates?fields=fingerprint')
         .set('Authorization', `Bearer ${token}`)
@@ -117,7 +120,7 @@ describe('X509 Certificates - GET integrations', () => {
         { fingerprint: fingerprint3 },
       ];
       db.certificate.model.exec.mockResolvedValue(results);
-      db.certificate.model.count.mockResolvedValue(3);
+      db.certificate.model.countDocuments.mockResolvedValue(3);
 
       return req.get('/api/v1/certificates?page=2&limit=0')
         .set('Authorization', `Bearer ${token}`)

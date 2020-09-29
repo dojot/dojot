@@ -1,14 +1,12 @@
 jest.mock('fs');
 jest.mock('soap');
 jest.mock('readline');
-jest.mock('../../src/db');
 
 const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
 const request = require('supertest');
-const db = require('../../src/db');
-const app = require('../../src/app');
+const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
 const csr = `-----BEGIN CERTIFICATE REQUEST-----
@@ -85,13 +83,18 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
+const container = DIContainer(global.config);
+
+const db = container.resolve('db');
 db.certificate = {
   model: jest.fn().mockImplementation(() => ({
     save: jest.fn().mockResolvedValue(true),
   })),
 };
 
-const req = request(app);
+const framework = container.resolve('framework');
+
+const req = request(framework);
 
 describe('X509 Certificates - POST integrations', () => {
   it('should issue a certificate',
