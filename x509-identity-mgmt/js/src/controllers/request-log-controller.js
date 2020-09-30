@@ -5,9 +5,10 @@ const morgan = require('morgan');
 module.exports = ({ logFormat, logger }) => {
   /* setup the logger */
   const defaultFormat = [
-    ':remote-addr', '-', ':remote-user', ':id',
-    '":method :url HTTP/:http-version"', ':status',
-    ':res[content-length]', '":referrer"', '":user-agent"',
+    ':id',
+    '"HTTP/:http-version :method :url"',
+    '":status :res[content-length]bytes :total-time[0]ms"',
+    '":remote-addr :referrer :user-agent"',
   ].join(' ');
 
   morgan.token('id', (req) => req.id);
@@ -17,7 +18,7 @@ module.exports = ({ logFormat, logger }) => {
     middleware: morgan(logFormat || defaultFormat, {
       stream: {
         write: (message) => {
-          logger.info(message);
+          logger.info(message.slice(0, -1));
         },
       },
     }),

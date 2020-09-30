@@ -170,7 +170,14 @@ module.exports = (routesToBeRegistered, framework, logger) => {
 
       const expressRoute = mountRouter.route(route.path);
       route.params.forEach(({ name, trigger }) => mountRouter.param(name, trigger));
-      route.handlers.forEach(({ method, middleware }) => expressRoute[method](middleware));
+      route.handlers.forEach(({ method, middleware }) => (
+        (method === 'ws')
+          ? mountRouter[method](
+            route.path[0],
+            (Array.isArray(middleware) ? middleware[0] : middleware),
+          )
+          : expressRoute[method](middleware)
+      ));
 
       logger.debug(`\tRoute registered! -> ${route.name}`);
       logger.debug(`\t---> Mount point: ${mountPoint}`);
