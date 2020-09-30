@@ -53,8 +53,14 @@ module.exports = ({ mountPoint }) => {
         method: 'post',
         middleware: [
           validateNewTrustedCA(),
-          (req, res) => {
-            res.sendStatus(201);
+          async (req, res) => {
+            let result = null;
+            if (!req.body.allowAutoRegistration) {
+              req.body.allowAutoRegistration = false;
+            }
+            const caService = req.scope.resolve('trustedCAsService');
+            result = await caService.registerCertificate(req.body);
+            res.status(HttpStatus.CREATED).json(result);
           },
         ],
       },

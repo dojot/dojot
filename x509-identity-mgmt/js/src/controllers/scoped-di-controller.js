@@ -23,6 +23,8 @@ module.exports = ({ DIContainer }) => ({
       }),
     });
 
+    req.logger = req.scope.resolve('logger');
+
     next();
   },
 });

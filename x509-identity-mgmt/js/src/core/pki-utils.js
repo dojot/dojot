@@ -6,6 +6,8 @@ const crypto = require('crypto');
 
 const { BadRequest } = require('../sdk/web/backing/error-template');
 
+const TOTAL_MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
+
 /* Identification of key algorithms. For details:
  * http://oid-info.com/get/<OID-dot-notation> */
 const RSA = '1.2.840.113549.1.1.1';
@@ -21,7 +23,7 @@ const namedCurves = [
 /**
  * Retrieves the DER structure represented in base64.
  *
- * @param {*} pem A PEM-encoded DER (ASN.1 data structure)
+ * @param {string} pem A PEM-encoded DER (ASN.1 data structure)
  * @return {String} DER in base64.
  */
 function getDER(pem) {
@@ -41,7 +43,7 @@ function getArraybuffer(buf) {
 
 /**
  * Converts a javascript ArrayBuffer to a hex string array
- * @param {*} arrayBuffer (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ * @param {ArrayBuffer} arrayBuffer (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
  * @return {Array} a hex string array.
  */
 function arrayBufferToHex(arrayBuffer) {
@@ -56,7 +58,7 @@ function arrayBufferToHex(arrayBuffer) {
 /**
  * Obtains an ASN1 structure from a PEM encoded file.
  *
- * @param {*} pem pem A PEM-encoded x.509 Certificate or CSR.
+ * @param {string} pem pem A PEM-encoded x.509 Certificate or CSR.
  * @return {pkijs.CertificationRequest} an ASN1 data structure.
  */
 function getASN1(pem) {
@@ -151,9 +153,77 @@ function getFingerprint(pem) {
   return fingerprint;
 }
 
+/**
+ * Obtain the serial number of the informed certificate.
+ *
+ * @param {pkijs.Certificate} certificate in which the serial number will be retrieved.
+ *
+ * @return {string} returns the serial number of the certificate.
+ */
 function getSerialNumber(certificate) {
   const arrHex = arrayBufferToHex(certificate.serialNumber.valueBlock.valueHex);
   return arrHex.join('').toUpperCase();
+}
+
+/**
+ * Checks the remaining days of validity of the informed certificate.
+ *
+ * @param {pkijs.Certificate} certificate to be verified
+ * @param {number} minimumValidityDays that the certificate still needs to have
+ */
+function checkRemainingDays(certificate, minimumValidityDays = 0) {
+  const difference = certificate.notAfter.value - new Date();
+  const remainingDays = Math.floor(difference / TOTAL_MILLISECONDS_IN_A_DAY);
+  if (remainingDays < 0) {
+    throw BadRequest(`The certificate expired ${Math.abs(remainingDays)} days ago.`);
+  }
+  if (remainingDays < minimumValidityDays) {
+    throw BadRequest(`The certificate must be valid for more than ${minimumValidityDays} days.`);
+  }
+}
+
+/**
+ * checks whether the certificate belongs to a root CA.
+ *
+ * @param {pkijs.Certificate} certificate to be verified
+ */
+async function assertRootCA(certificate) {
+  // +-----------+-------------------+
+  // |    OID    |    Description    |
+  // +-----------+-------------------+
+  // | 2.5.29.19 | Basic Constraints |
+  // +-----------+-------------------+
+  const extension = certificate.extensions.find((ext) => ext.extnID === '2.5.29.19');
+  if (!extension || !extension.parsedValue) {
+    throw BadRequest("The certificate is not a CA certificate. It does not contain the extension 'Basic Constraints' (OID: 2.5.29.19).");
+  }
+  const { cA } = extension.parsedValue;
+  if (!cA) {
+    throw BadRequest("The certificate is not a CA certificate. It does not contain the flag 'CA:TRUE' in the extension 'Basic Constraints'.");
+  }
+
+  const certChainVerificationEngine = new pkijs.CertificateChainValidationEngine({
+    trustedCerts: [certificate],
+    certs: [certificate],
+  });
+  const { result: selfSigned } = await certChainVerificationEngine.verify();
+  if (!selfSigned) {
+    throw BadRequest('The certificate is not a Root CA certificate (self signed).');
+  }
+}
+
+/**
+ * Checks that the external certificate does not have the same
+ * CommonName as the platform's internal root CA.
+ * @param {pkijs.Certificate} certificate to be verified
+ * @param {*} rootCN CommonName of the internal root CA of the platform.
+ */
+function checkRootExternalCN(certificate, rootCN) {
+  const cnameAttr = certificate.subject.typesAndValues.find((attr) => attr.type === '2.5.4.3');
+  if (cnameAttr && cnameAttr.value && cnameAttr.value.valueBlock
+      && cnameAttr.value.valueBlock.value === rootCN) {
+    throw BadRequest("It is not allowed to register a CA certificate with the same 'CNAME' of the platform.");
+  }
 }
 
 module.exports = {
@@ -162,4 +232,7 @@ module.exports = {
   checkPublicKey,
   getFingerprint,
   getSerialNumber,
+  checkRemainingDays,
+  assertRootCA,
+  checkRootExternalCN,
 };

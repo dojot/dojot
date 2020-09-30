@@ -122,9 +122,8 @@ const certificateQueryString = new MongoQS({
   },
 });
 
-function parseConditionFields(urlQueryStringObj, tenant) {
-  const mongodbFilterObj = certificateQueryString.parse(urlQueryStringObj);
-  return Object.assign(mongodbFilterObj, { tenant });
+function parseConditionFields(urlQueryStringObj) {
+  return certificateQueryString.parse(urlQueryStringObj);
 }
 /** ***************************************************************** */
 

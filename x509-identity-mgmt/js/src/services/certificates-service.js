@@ -76,6 +76,8 @@ class CertificatesService {
    * @throws an exception if no record is found with the entered filters.
    */
   async changeOwnership(filterFields, belongsTo) {
+    Object.assign(filterFields, { tenant: this.tenant });
+
     const result = await this.CertificateModel.findOneAndUpdate(filterFields, { belongsTo })
       .maxTimeMS(this.queryMaxTimeMS)
       .exec();
@@ -95,6 +97,8 @@ class CertificatesService {
    * @throws an exception if no record is found with the entered filters.
    */
   async getCertificate(queryFields, filterFields) {
+    Object.assign(filterFields, { tenant: this.tenant });
+
     /* Executes the query and converts the result to JSON */
     const result = await this.CertificateModel.findOne(filterFields)
       .select(queryFields.join(' '))
@@ -118,6 +122,8 @@ class CertificatesService {
    * @returns a set of certificates that meet the search criteria
    */
   async listCertificates(queryFields, filterFields, limit, offset) {
+    Object.assign(filterFields, { tenant: this.tenant });
+
     /* Executes the query and converts the results to JSON */
     const [results, itemCount] = await Promise.all([
       this.CertificateModel.find(filterFields)

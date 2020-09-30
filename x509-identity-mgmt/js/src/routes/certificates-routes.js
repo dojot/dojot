@@ -26,9 +26,9 @@ module.exports = ({ mountPoint, db }) => {
             }
             const service = req.scope.resolve('certificatesService');
             if (req.body.csr) {
-              result = await service.generateCertificate(req.body, req.tenant);
+              result = await service.generateCertificate(req.body);
             } else if (req.body.certificatePem) {
-              result = await service.registerCertificate(req.body, req.tenant);
+              result = await service.registerCertificate(req.body);
             }
             res.status(HttpStatus.CREATED).json(result);
           },
@@ -40,7 +40,7 @@ module.exports = ({ mountPoint, db }) => {
         middleware: [
           async (req, res) => {
             const queryFields = dbCert.parseProjectionFields(req.query.fields);
-            const filterFields = dbCert.parseConditionFields(req.query, req.tenant);
+            const filterFields = dbCert.parseConditionFields(req.query);
 
             const service = req.scope.resolve('certificatesService');
 
@@ -73,7 +73,7 @@ module.exports = ({ mountPoint, db }) => {
           async (req, res) => {
             const fingerprint = req.params.certificateFingerprint;
             const queryFields = dbCert.parseProjectionFields(null);
-            const filterFields = dbCert.parseConditionFields({ fingerprint }, req.tenant);
+            const filterFields = dbCert.parseConditionFields({ fingerprint });
 
             const service = req.scope.resolve('certificatesService');
             const certToRemove = await service.getCertificate(queryFields, filterFields);
@@ -89,7 +89,7 @@ module.exports = ({ mountPoint, db }) => {
           async (req, res) => {
             const fingerprint = req.params.certificateFingerprint;
             const queryFields = dbCert.parseProjectionFields(req.query.fields);
-            const filterFields = dbCert.parseConditionFields({ fingerprint }, req.tenant);
+            const filterFields = dbCert.parseConditionFields({ fingerprint });
 
             const service = req.scope.resolve('certificatesService');
             const result = await service.getCertificate(queryFields, filterFields);
@@ -105,7 +105,7 @@ module.exports = ({ mountPoint, db }) => {
           validateChangeOwnerCert(),
           async (req, res) => {
             const fingerprint = req.params.certificateFingerprint;
-            const filterFields = dbCert.parseConditionFields({ fingerprint }, req.tenant);
+            const filterFields = dbCert.parseConditionFields({ fingerprint });
 
             const service = req.scope.resolve('certificatesService');
             await service.changeOwnership(filterFields, req.body.belongsTo);
