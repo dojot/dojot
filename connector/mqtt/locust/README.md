@@ -221,7 +221,7 @@ pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc
 
 ## Unit Tests
 
-You can get the complete tests' report by running:
+You can get the complete tests report by running:
 ```shell
 run_cov
 ```
