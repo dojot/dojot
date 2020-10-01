@@ -9,14 +9,13 @@ class CertificatesService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    db, ejbcaFacade, tenant, dnUtils, logger, certValidity,
+    db, ejbcaFacade, tenant, dnUtils, certValidity,
     checkPublicKey, queryMaxTimeMS,
   }) {
     this.db = db;
     this.ejbcaFacade = ejbcaFacade;
     this.tenant = tenant;
     this.dnUtils = dnUtils;
-    this.logger = logger;
     this.certValidity = certValidity;
     this.checkPublicKey = checkPublicKey;
     this.queryMaxTimeMS = queryMaxTimeMS;
@@ -94,7 +93,7 @@ class CertificatesService {
    *
    * @returns Returns the record that represents the certificate in the database
    *
-   * @throws an exception if no record is found with the entered filters.
+   * @throws an exception if no record is found with the informed filters.
    */
   async getCertificate(queryFields, filterFields) {
     Object.assign(filterFields, { tenant: this.tenant });

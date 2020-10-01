@@ -79,9 +79,9 @@ module.exports = ({ mountPoint }) => {
   const trustedCAsCAFingerprintRoute = {
     mountPoint,
     name: 'trusted-cas-fingerprint-route',
-    path: ['/trusted-cas/:caCertificateFingerprint'],
+    path: ['/trusted-cas/:caFingerprint'],
     params: [{
-      name: 'caCertificateFingerprint',
+      name: 'caFingerprint',
       trigger: sanitize.fingerprint,
     }],
     handlers: [

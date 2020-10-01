@@ -18,7 +18,9 @@ mongoose.set('useUnifiedTopology', true);
 const certificateSchema = new Schema({
   fingerprint: String,
   pem: String,
+  caFingerprint: String,
   createdAt: { type: Date, default: Date.now },
+  modifiedAt: { type: Date, default: Date.now },
   issuedByDojotPki: { type: Boolean, default: true },
   autoRegistered: { type: Boolean, default: false },
   belongsTo: new Schema({
@@ -29,13 +31,26 @@ const certificateSchema = new Schema({
 });
 certificateSchema.index({ tenant: 1, fingerprint: 1 });
 
+const trustedCASchema = new Schema({
+  caFingerprint: String,
+  caPem: String,
+  createdAt: { type: Date, default: Date.now },
+  modifiedAt: { type: Date, default: Date.now },
+  allowAutoRegistration: { type: Boolean, default: false },
+  tenant: String,
+});
+trustedCASchema.index({ tenant: 1, caFingerprint: 1 });
+
+
 /** ************************************************************************
  * Customizations used to select certificate fields from the QueryString URL
  ************************************************************************* */
 const certProjectableFields = [
   'fingerprint',
+  'caFingerprint',
   'pem',
   'createdAt',
+  'modifiedAt',
   'issuedByDojotPki',
   'autoRegistered',
   'belongsTo',
@@ -112,8 +127,10 @@ const certificateQueryString = new MongoQS({
   arrRegex: /^[a-zA-Z0-9-_.]+(\[])?$/i,
   whitelist: {
     fingerprint: true,
+    caFingerprint: true,
     pem: true,
     createdAt: true,
+    modifiedAt: true,
     issuedByDojotPki: true,
     autoRegistered: true,
     'belongsTo.device': true,
@@ -227,6 +244,9 @@ function initMongoClient(connCfg, logger) {
       parseProjectionFields,
       parseConditionFields,
       sanitizeFields: (cert) => sanitizeFields(cert, certProjectableFields),
+    },
+    trustedCA: {
+      model: mongoose.model('TrustedCA', trustedCASchema),
     },
   };
 }

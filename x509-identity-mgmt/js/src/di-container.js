@@ -190,7 +190,9 @@ module.exports = (config) => {
     trustedCAsService: asClass(TrustedCAsService, {
       injector: () => ({
         rootCA: config.ejbca.rootca,
+        queryMaxTimeMS: config.mongo.query.maxtimems,
         externalCaCertMinimumValidityDays: config.certificate.external.ca.minimumvaliditydays,
+        caCertLimit: config.certificate.external.ca.limit,
       }),
       lifetime: Lifetime.SCOPED,
     }),
