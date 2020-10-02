@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
-const MongoQS = require('mongo-querystring');
-
-const { BadRequest } = require('./sdk/web/backing/error-template');
-
-const { Schema } = mongoose;
+const { BadRequest } = require('../sdk/web/backing/error-template');
 
 /**
  * To fix all deprecation warnings:
@@ -15,59 +11,16 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
-const certificateSchema = new Schema({
-  fingerprint: String,
-  pem: String,
-  caFingerprint: String,
-  createdAt: { type: Date, default: Date.now },
-  modifiedAt: { type: Date, default: Date.now },
-  issuedByDojotPki: { type: Boolean, default: true },
-  autoRegistered: { type: Boolean, default: false },
-  belongsTo: new Schema({
-    device: String,
-    application: String,
-  }),
-  tenant: String,
-});
-certificateSchema.index({ tenant: 1, fingerprint: 1 });
 
-const trustedCASchema = new Schema({
-  caFingerprint: String,
-  caPem: String,
-  createdAt: { type: Date, default: Date.now },
-  modifiedAt: { type: Date, default: Date.now },
-  allowAutoRegistration: { type: Boolean, default: false },
-  tenant: String,
-});
-trustedCASchema.index({ tenant: 1, caFingerprint: 1 });
-
-
-/** ************************************************************************
- * Customizations used to select certificate fields from the QueryString URL
- ************************************************************************* */
-const certProjectableFields = [
-  'fingerprint',
-  'caFingerprint',
-  'pem',
-  'createdAt',
-  'modifiedAt',
-  'issuedByDojotPki',
-  'autoRegistered',
-  'belongsTo',
-  'belongsTo.device',
-  'belongsTo.application',
-  'tenant',
-];
-
-function parseProjectionFields(commaSeparatedFields) {
+function parseProjectionFields(commaSeparatedFields, projectableFields) {
   const queryFields = (commaSeparatedFields)
     ? commaSeparatedFields.split(',')
     : null;
 
   /* Defines the fields that will be returned by the query */
-  let fields = [...certProjectableFields];
+  let fields = [...projectableFields];
   if (queryFields) {
-    const invalidFields = queryFields.filter((el) => !certProjectableFields.includes(el));
+    const invalidFields = queryFields.filter((el) => !projectableFields.includes(el));
     if (invalidFields.length) {
       const errorMsg = `The fields provided are not valid: [${invalidFields.join(',')}]`;
       throw BadRequest(errorMsg);
@@ -77,10 +30,9 @@ function parseProjectionFields(commaSeparatedFields) {
 
   // you cannot specify an embedded document and a field
   // within that document embedded in the same projection
-  if (fields.includes('belongsTo.device')
-      || fields.includes('belongsTo.application')) {
-    fields = fields.filter((el) => el !== 'belongsTo');
-  }
+  fields = fields.filter(
+    (fname) => !fields.some((other) => other.startsWith(`${fname}.`)),
+  );
 
   return fields;
 }
@@ -119,30 +71,6 @@ function sanitizeFields(obj, dottedAllowedFields) {
   return obj;
 }
 
-/** *******************************************************************
- * Customizations used to filter certificates from the QueryString URL
- ******************************************************************** */
-const certificateQueryString = new MongoQS({
-  keyRegex: /^[a-zA-Z0-9-_.]+$/i,
-  arrRegex: /^[a-zA-Z0-9-_.]+(\[])?$/i,
-  whitelist: {
-    fingerprint: true,
-    caFingerprint: true,
-    pem: true,
-    createdAt: true,
-    modifiedAt: true,
-    issuedByDojotPki: true,
-    autoRegistered: true,
-    'belongsTo.device': true,
-    'belongsTo.application': true,
-    tenant: true,
-  },
-});
-
-function parseConditionFields(urlQueryStringObj) {
-  return certificateQueryString.parse(urlQueryStringObj);
-}
-/** ***************************************************************** */
 
 function initMongoClient(connCfg, logger) {
   /* Flag indicating whether the MongoDB Driver had the first successful connection */
@@ -239,15 +167,8 @@ function initMongoClient(connCfg, logger) {
     connect,
     healthCheck: () => healthCheck,
     close: mongoose.connection.close.bind(mongoose.connection),
-    certificate: {
-      model: mongoose.model('Certificate', certificateSchema),
-      parseProjectionFields,
-      parseConditionFields,
-      sanitizeFields: (cert) => sanitizeFields(cert, certProjectableFields),
-    },
-    trustedCA: {
-      model: mongoose.model('TrustedCA', trustedCASchema),
-    },
+    parseProjectionFields,
+    sanitizeFields,
   };
 }
 

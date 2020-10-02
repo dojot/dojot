@@ -4,8 +4,8 @@ const { token } = require('../util.test');
 
 const container = DIContainer(global.config);
 
-const db = container.resolve('db');
-db.certificate.model = {
+const certificateModel = container.resolve('certificateModel');
+certificateModel.model = {
   find: jest.fn().mockReturnThis(),
   findOne: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
@@ -31,7 +31,7 @@ describe('X509 Certificates - GET integrations', () => {
           device: null,
         },
       };
-      db.certificate.model.exec.mockResolvedValue({ ...queryResult, _id: '123456' });
+      certificateModel.model.exec.mockResolvedValue({ ...queryResult, _id: '123456' });
 
       return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerprint,belongsTo`)
         .set('Authorization', `Bearer ${token}`)
@@ -45,7 +45,7 @@ describe('X509 Certificates - GET integrations', () => {
   it('should not find any certificate',
     () => {
       const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
-      db.certificate.model.exec.mockResolvedValue(null);
+      certificateModel.model.exec.mockResolvedValue(null);
 
       return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerprint`)
         .set('Authorization', `Bearer ${token}`)
@@ -61,7 +61,7 @@ describe('X509 Certificates - GET integrations', () => {
   it('should throw an invalid field error',
     () => {
       const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
-      db.certificate.model.exec.mockResolvedValue(null);
+      certificateModel.model.exec.mockResolvedValue(null);
 
       return req.get(`/api/v1/certificates/${fingerprint}?fields=fingerPrint,_id`)
         .set('Authorization', `Bearer ${token}`)
@@ -84,8 +84,8 @@ describe('X509 Certificates - GET integrations', () => {
         { fingerprint: fingerprint2 },
         { fingerprint: fingerprint3 },
       ];
-      db.certificate.model.exec.mockResolvedValue(results);
-      db.certificate.model.countDocuments.mockResolvedValue(3);
+      certificateModel.model.exec.mockResolvedValue(results);
+      certificateModel.model.countDocuments.mockResolvedValue(3);
 
       return req.get('/api/v1/certificates?fields=fingerprint')
         .set('Authorization', `Bearer ${token}`)
@@ -119,8 +119,8 @@ describe('X509 Certificates - GET integrations', () => {
         { fingerprint: fingerprint2 },
         { fingerprint: fingerprint3 },
       ];
-      db.certificate.model.exec.mockResolvedValue(results);
-      db.certificate.model.countDocuments.mockResolvedValue(3);
+      certificateModel.model.exec.mockResolvedValue(results);
+      certificateModel.model.countDocuments.mockResolvedValue(3);
 
       return req.get('/api/v1/certificates?page=2&limit=0')
         .set('Authorization', `Bearer ${token}`)

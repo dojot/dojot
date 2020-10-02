@@ -4,8 +4,8 @@ const { token } = require('../util.test');
 
 const container = DIContainer(global.config);
 
-const db = container.resolve('db');
-db.certificate.model = {
+const certificateModel = container.resolve('certificateModel');
+certificateModel.model = {
   findOneAndUpdate: jest.fn().mockReturnThis(),
   maxTimeMS: jest.fn().mockReturnThis(),
   exec: jest.fn().mockResolvedValue(),
@@ -22,7 +22,7 @@ describe('X509 Certificates - PATCH integrations', () => {
       const queryResult = {
         fingerprint,
       };
-      db.certificate.model.exec.mockResolvedValue(queryResult);
+      certificateModel.model.exec.mockResolvedValue(queryResult);
 
       return req.patch(`/api/v1/certificates/${fingerprint}`)
         .set('Authorization', `Bearer ${token}`)
@@ -40,7 +40,7 @@ describe('X509 Certificates - PATCH integrations', () => {
   it('should not find any certificate to patch',
     () => {
       const fingerprint = '2A:38:A7:01:28:42:C0:18:56:1E:99:5E:F0:9A:BE:AD:D8:4D:E0:C8:3E:4F:08:4D:01:B8:47:DD:58:DC:70:AD';
-      db.certificate.model.exec.mockResolvedValue(null);
+      certificateModel.model.exec.mockResolvedValue(null);
 
       return req.patch(`/api/v1/certificates/${fingerprint}`)
         .set('Authorization', `Bearer ${token}`)

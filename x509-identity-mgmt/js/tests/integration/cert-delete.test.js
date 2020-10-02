@@ -34,8 +34,8 @@ soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
 const container = DIContainer(global.config);
 
-const db = container.resolve('db');
-db.certificate.model = {
+const certificateModel = container.resolve('certificateModel');
+certificateModel.model = {
   findOne: jest.fn().mockReturnThis(),
   findByIdAndDelete: jest.fn().mockReturnThis(),
   select: jest.fn().mockReturnThis(),
@@ -97,8 +97,8 @@ const queryResult = {
 describe('X509 Certificates - DELETE integrations', () => {
   it('should delete certificate',
     () => {
-      db.certificate.model.exec.mockResolvedValueOnce(queryResult);
-      db.certificate.model.exec.mockResolvedValueOnce({});
+      certificateModel.model.exec.mockResolvedValueOnce(queryResult);
+      certificateModel.model.exec.mockResolvedValueOnce({});
 
       return req.delete(`/api/v1/certificates/${fingerprint}`)
         .set('Authorization', `Bearer ${token}`)

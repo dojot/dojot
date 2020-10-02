@@ -2,7 +2,9 @@ const awilix = require('awilix');
 
 const { Logger } = require('@dojot/microservice-sdk');
 
-const dnUtils = require('./core/distinguished-name');
+const pkiUtils = require('./core/pki-utils');
+
+const dnUtils = require('./core/dn-utils');
 
 const server = require('./sdk/web/server');
 
@@ -10,7 +12,11 @@ const framework = require('./sdk/web/framework');
 
 const defaultErrorHandler = require('./sdk/web/backing/default-error-handler');
 
-const db = require('./db');
+const db = require('./db/mongo-client');
+
+const certificateModel = require('./db/certificate-model');
+
+const trustedCAModel = require('./db/trusted-ca-model');
 
 const ejbcaFacade = require('./ejbca-facade');
 
@@ -32,13 +38,17 @@ const staticFileController = require('./controllers/static-file-controller');
 
 const throwAwayRoutes = require('./routes/throw-away-routes');
 
+const rootCARoutes = require('./routes/root-ca-routes');
+
 const trustedCAsRoutes = require('./routes/trusted-cas-routes');
 
 const certificatesRoutes = require('./routes/certificates-routes');
 
 const CertificatesService = require('./services/certificates-service');
 
-const TrustedCAsService = require('./services/trusted-cas-service');
+const RootCAService = require('./services/root-ca-service');
+
+const TrustedCAService = require('./services/trusted-ca-service');
 
 const {
   asFunction, asValue, asClass, Lifetime, InjectionMode,
@@ -49,6 +59,8 @@ module.exports = (config) => {
 
   const modules = {
     config: asValue(config, { lifetime: Lifetime.SINGLETON }),
+
+    pkiUtils: asValue(pkiUtils, { lifetime: Lifetime.SINGLETON }),
 
     dnUtils: asFunction(dnUtils, {
       injector: () => ({
@@ -93,6 +105,7 @@ module.exports = (config) => {
         routes: ([
           // The order of the routes matters
           DIContainer.resolve('throwAwayRoutes'),
+          DIContainer.resolve('rootCARoutes'),
           DIContainer.resolve('trustedCAsRoutes'),
           DIContainer.resolve('certificatesRoutes'),
         ]).flat(),
@@ -108,13 +121,21 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
+    ejbcaFacade: asFunction(ejbcaFacade, {
+      injector: () => ({ config: config.ejbca }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
     db: asFunction(db, {
       injector: () => ({ config: config.mongo }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    ejbcaFacade: asFunction(ejbcaFacade, {
-      injector: () => ({ config: config.ejbca }),
+    certificateModel: asFunction(certificateModel, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    trustedCAModel: asFunction(trustedCAModel, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -167,6 +188,11 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
+    rootCARoutes: asFunction(rootCARoutes, {
+      injector: () => ({ mountPoint: '/api/v1' }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
     trustedCAsRoutes: asFunction(trustedCAsRoutes, {
       injector: () => ({ mountPoint: '/api/v1' }),
       lifetime: Lifetime.SINGLETON,
@@ -187,7 +213,14 @@ module.exports = (config) => {
       lifetime: Lifetime.SCOPED,
     }),
 
-    trustedCAsService: asClass(TrustedCAsService, {
+    rootCAService: asClass(RootCAService, {
+      injector: () => ({
+        rootCA: config.ejbca.rootca,
+      }),
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    trustedCAService: asClass(TrustedCAService, {
       injector: () => ({
         rootCA: config.ejbca.rootca,
         queryMaxTimeMS: config.mongo.query.maxtimems,
@@ -196,8 +229,6 @@ module.exports = (config) => {
       }),
       lifetime: Lifetime.SCOPED,
     }),
-
-
   };
 
   DIContainer.register(modules);

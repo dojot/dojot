@@ -8,7 +8,7 @@ const { BadRequest } = require('../sdk/web/backing/error-template');
  *
  * These are the Subject RDNs supported by the EJBCA.
  * For custom RDNs, you must also configure them in the EJBCA. */
-const RDNs = [
+const RelativeDistinguishedNamesCatalog = [
   {
     OID: '2.5.4.3',
     name: 'commonName',
@@ -191,7 +191,7 @@ function factoryFunction(config) {
    * @throws exceptions if this does not pass the validations.
    */
   function verify() {
-    const attributes = Reflect.ownKeys(this).filter(
+    const attributes = Object.keys(this).filter(
       ((attr) => typeof Reflect.get(this, attr) !== 'function'),
     );
     checkAllowedAttributes(attributes);
@@ -206,7 +206,7 @@ function factoryFunction(config) {
    * Converts SubjectDN fields to a string
    */
   function stringify() {
-    return Reflect.ownKeys(this).filter(
+    return Object.keys(this).filter(
       ((attr) => typeof Reflect.get(this, attr) !== 'function'),
     ).map(
       ((attr) => [attr, Reflect.get(this, attr)].join('=')),
@@ -229,27 +229,57 @@ function factoryFunction(config) {
    * Generates a DN object from a sequence of Relative Distinguished Names.
    * @param {pkijs.RelativeDistinguishedNames} relativeDNs - https://tools.ietf.org/html/rfc5280#section-4.1.2.4
    *                                                      or https://tools.ietf.org/html/rfc5280#section-4.1.2.6
+   * @param {boolean} includeConstantAttrs include attributes to be overwritten in SubjectDN
    * @return {string} The Distinguished Name (DN object).
    */
-  return (relativeDNs) => (
-    /* Returns the complete Distinguished Name (subjectDN|issuerDN) */
-    relativeDNs.typesAndValues.reduce(
+  return (relativeDNs, includeConstantAttrs = false) => {
+    let $ = {};
+
+    // defines the object's methods using the default values for the Property Descriptor
+    // therefore, the methods will NOT be enumerable, configurable, or writable
+    Reflect.defineProperty($, 'verify', { value: verify });
+    Reflect.defineProperty($, 'stringify', { value: stringify });
+    Reflect.defineProperty($, 'cnamePrefix', { value: cnamePrefix });
+
+    // reduce the RelativeDNs to a complete DistinguishedName (subjectDN|issuerDN)
+    // and yet maintaining the order of the RDNs (through enumerable properties)
+    $ = relativeDNs.typesAndValues.reduce(
       (obj, attr) => {
-        const rdn = RDNs.find((el) => el.OID === attr.type);
-        const key = (rdn) ? rdn.shortName || rdn.name : attr.type;
+        const rdn = RelativeDistinguishedNamesCatalog.find((el) => el.OID === attr.type);
+
+        const key = (rdn) ? (rdn.shortName || rdn.name) : attr.type;
+
         if (!Reflect.has(obj, key)) {
-          Reflect.set(obj, key, attr.value.valueBlock.value);
+          // defines the object's properties as enumerable and writable
+          Reflect.defineProperty(obj, key, {
+            writable: true,
+            enumerable: true,
+            value: attr.value.valueBlock.value,
+          });
         }
+
         return obj;
-      },
-      {
-        ...constantAttrs,
-        verify,
-        stringify,
-        cnamePrefix,
-      },
-    )
-  );
+      }, $,
+    );
+
+    if (includeConstantAttrs) {
+      // it is important to keep the same Property Descriptor
+      // configuration used for previous RelativeDNs...
+      Object.entries(constantAttrs).forEach(
+        ([key, value]) => (
+          (Reflect.has($, key))
+            ? Reflect.set($, key, value)
+            : Reflect.defineProperty($, key, {
+              writable: true,
+              enumerable: true,
+              value,
+            })
+        ),
+      );
+    }
+
+    return $;
+  };
 }
 
 /**

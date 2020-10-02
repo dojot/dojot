@@ -42,7 +42,7 @@ module.exports = ({ mountPoint }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const caService = req.scope.resolve('trustedCAsService');
+            const caService = req.scope.resolve('rootCAService');
             const result = await caService.getRootCertificate();
             res.status(HttpStatus.OK).json(result);
           },
@@ -62,7 +62,7 @@ module.exports = ({ mountPoint }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const caService = req.scope.resolve('trustedCAsService');
+            const caService = req.scope.resolve('rootCAService');
             const result = await caService.getRootCRL(req.query.update === 'true');
             res.status(HttpStatus.OK).json(result);
           },

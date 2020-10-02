@@ -1,6 +1,5 @@
 const { NotFound } = require('../sdk/web/backing/error-template');
 
-const pkiUtils = require('../core/pki-utils');
 /**
  * Service to handle certificates
  */
@@ -9,17 +8,17 @@ class CertificatesService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    db, ejbcaFacade, tenant, dnUtils, certValidity,
-    checkPublicKey, queryMaxTimeMS,
+    certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils,
+    certValidity, checkPublicKey, queryMaxTimeMS,
   }) {
-    this.db = db;
     this.ejbcaFacade = ejbcaFacade;
     this.tenant = tenant;
+    this.pkiUtils = pkiUtils;
     this.dnUtils = dnUtils;
     this.certValidity = certValidity;
     this.checkPublicKey = checkPublicKey;
     this.queryMaxTimeMS = queryMaxTimeMS;
-    this.CertificateModel = db.certificate.model;
+    this.CertificateModel = certificateModel.model;
     this.notImplemented = 'This operation is not available yet';
   }
 
@@ -31,13 +30,13 @@ class CertificatesService {
    * @returns an object containing the certificate in PEM format and its fingerprint.
    */
   async generateCertificate({ csr: csrPem, belongsTo }) {
-    const csr = pkiUtils.parseCSR(csrPem);
+    const csr = this.pkiUtils.parseCSR(csrPem);
 
     if (this.checkPublicKey) {
-      pkiUtils.checkPublicKey(csr.subjectPublicKeyInfo);
+      this.pkiUtils.checkPublicKey(csr.subjectPublicKeyInfo);
     }
 
-    const subjectDN = this.dnUtils.from(csr.subject)
+    const subjectDN = this.dnUtils.from(csr.subject, true)
       .verify()
       .cnamePrefix(this.tenant)
       .stringify();
@@ -46,12 +45,18 @@ class CertificatesService {
       subjectDN, this.certValidity, csrPem,
     );
 
-    const certificateFingerprint = pkiUtils.getFingerprint(certificatePem);
+    const cert = this.pkiUtils.parseCert(certificatePem);
+    const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
 
     const model = new this.CertificateModel({
       fingerprint: certificateFingerprint,
       pem: certificatePem,
       belongsTo,
+      subjectDN,
+      validity: {
+        notBefore: cert.notBefore.value,
+        notAfter: cert.notAfter.value,
+      },
       tenant: this.tenant,
     });
     await model.save();
@@ -77,9 +82,10 @@ class CertificatesService {
   async changeOwnership(filterFields, belongsTo) {
     Object.assign(filterFields, { tenant: this.tenant });
 
-    const result = await this.CertificateModel.findOneAndUpdate(filterFields, { belongsTo })
-      .maxTimeMS(this.queryMaxTimeMS)
-      .exec();
+    const result = await this.CertificateModel.findOneAndUpdate(
+      filterFields, { belongsTo, modifiedAt: new Date() },
+    ).maxTimeMS(this.queryMaxTimeMS).exec();
+
     if (!result) {
       throw NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
@@ -104,9 +110,11 @@ class CertificatesService {
       .maxTimeMS(this.queryMaxTimeMS)
       .lean()
       .exec();
+
     if (!result) {
       throw NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
+
     return result;
   }
 
@@ -133,6 +141,7 @@ class CertificatesService {
         .exec(),
       this.CertificateModel.countDocuments(filterFields),
     ]);
+
     return { itemCount, results };
   }
 
@@ -153,9 +162,12 @@ class CertificatesService {
     /* If the certificate was issued by the internal CA,
      * it must be revoked in a Certificate Revocation List */
     if (certRecord.issuedByDojotPki) {
-      const cert = pkiUtils.parseCert(certRecord.pem);
+      const cert = this.pkiUtils.parseCert(certRecord.pem);
+
       const issuerDN = this.dnUtils.from(cert.issuer).stringify();
-      const certificateSN = pkiUtils.getSerialNumber(cert);
+
+      const certificateSN = this.pkiUtils.getSerialNumber(cert);
+
       await this.ejbcaFacade.revokeCertificate(issuerDN, certificateSN);
     }
   }
@@ -170,7 +182,7 @@ class CertificatesService {
    * @returns an object containing the certificate in PEM format and its fingerprint.
    */
   async throwAwayCertificate({ csr: csrPem }) {
-    const csr = pkiUtils.parseCSR(csrPem);
+    const csr = this.pkiUtils.parseCSR(csrPem);
 
     const subjectDN = this.dnUtils.from(csr.subject).stringify();
 
@@ -178,7 +190,7 @@ class CertificatesService {
       subjectDN, this.certValidity, csrPem,
     );
 
-    const certificateFingerprint = pkiUtils.getFingerprint(certificatePem);
+    const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
 
     return { certificateFingerprint, certificatePem };
   }

@@ -35,7 +35,7 @@ tQhSy0m/R1mP
         .expect(400)
         .then((res) => {
           expect(res.body).toEqual({
-            message: 'Error checking SubjectDN allowed attributes in CSR. Allowed: [CN] Found: [O,C,ST,CN]',
+            message: 'Error checking SubjectDN allowed attributes in CSR. Allowed: [CN] Found: [C,ST,O,CN]',
           });
         });
     });

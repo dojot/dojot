@@ -85,12 +85,11 @@ soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
 const container = DIContainer(global.config);
 
-const db = container.resolve('db');
-db.certificate = {
-  model: jest.fn().mockImplementation(() => ({
-    save: jest.fn().mockResolvedValue(true),
-  })),
-};
+const certificateModel = container.resolve('certificateModel');
+
+certificateModel.model = jest.fn().mockImplementation(() => ({
+  save: jest.fn().mockResolvedValue(true),
+}));
 
 const framework = container.resolve('framework');
 

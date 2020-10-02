@@ -33,7 +33,7 @@ const { Logger } = require('@dojot/microservice-sdk');
 mongoose.connection = new EventEmitter();
 mongoose.connection.close = jest.fn();
 
-const db = require('../../src/db')({ config: global.config.mongo, logger: new Logger() });
+const db = require('../../src/db/mongo-client')({ config: global.config.mongo, logger: new Logger() });
 
 describe('testing internal functions of the DB module', () => {
   it('should establish a connection with MongoDB', async () => {

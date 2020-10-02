@@ -4,14 +4,32 @@ const sanitize = require('./sanitize-params');
 
 const { validateRegOrGenCert, validateChangeOwnerCert } = require('../core/schema-validator');
 
-module.exports = ({ mountPoint, db }) => {
-  const { certificate: dbCert } = db;
-
+module.exports = ({ mountPoint, certificateModel }) => {
   const certsRoute = {
     mountPoint,
     name: 'certificates-route',
     path: ['/certificates'],
     handlers: [
+      {
+        /* List x.509 Certificates */
+        method: 'get',
+        middleware: [
+          async (req, res) => {
+            const queryFields = certificateModel.parseProjectionFields(req.query.fields);
+            const filterFields = certificateModel.parseConditionFields(req.query);
+
+            const service = req.scope.resolve('certificatesService');
+
+            const { itemCount, results } = await service.listCertificates(
+              queryFields, filterFields, req.query.limit, req.offset,
+            );
+            results.forEach((cert) => certificateModel.sanitizeFields(cert));
+
+            const paging = req.getPaging(itemCount);
+            res.status(HttpStatus.OK).json({ paging, certificates: results });
+          },
+        ],
+      },
       {
         /* Generate x.509 Certificate from CSR
          * (or also)
@@ -34,66 +52,32 @@ module.exports = ({ mountPoint, db }) => {
           },
         ],
       },
-      {
-        /* List x.509 Certificates */
-        method: 'get',
-        middleware: [
-          async (req, res) => {
-            const queryFields = dbCert.parseProjectionFields(req.query.fields);
-            const filterFields = dbCert.parseConditionFields(req.query);
-
-            const service = req.scope.resolve('certificatesService');
-
-            const { itemCount, results } = await service.listCertificates(
-              queryFields, filterFields, req.query.limit, req.offset,
-            );
-            results.forEach((cert) => dbCert.sanitizeFields(cert));
-
-            const paging = req.getPaging(itemCount);
-            res.status(HttpStatus.OK).json({ paging, certificates: results });
-          },
-        ],
-      },
     ],
   };
 
   const certsFingerprintRoute = {
     mountPoint,
     name: 'certificate-fingerprint-route',
-    path: ['/certificates/:certificateFingerprint'],
+    path: ['/certificates/:fingerprint'],
     params: [{
-      name: 'certificateFingerprint',
+      name: 'fingerprint',
       trigger: sanitize.fingerprint,
     }],
     handlers: [
-      {
-        /* Delete x.509 certificate */
-        method: 'delete',
-        middleware: [
-          async (req, res) => {
-            const fingerprint = req.params.certificateFingerprint;
-            const queryFields = dbCert.parseProjectionFields(null);
-            const filterFields = dbCert.parseConditionFields({ fingerprint });
-
-            const service = req.scope.resolve('certificatesService');
-            const certToRemove = await service.getCertificate(queryFields, filterFields);
-            await service.deleteCertificate(certToRemove);
-            res.sendStatus(HttpStatus.NO_CONTENT);
-          },
-        ],
-      },
       {
         /* Get x.509 Certificate */
         method: 'get',
         middleware: [
           async (req, res) => {
-            const fingerprint = req.params.certificateFingerprint;
-            const queryFields = dbCert.parseProjectionFields(req.query.fields);
-            const filterFields = dbCert.parseConditionFields({ fingerprint });
+            const { fingerprint } = req.params;
+            const queryFields = certificateModel.parseProjectionFields(req.query.fields);
+            const filterFields = certificateModel.parseConditionFields({ fingerprint });
 
             const service = req.scope.resolve('certificatesService');
+
             const result = await service.getCertificate(queryFields, filterFields);
-            dbCert.sanitizeFields(result);
+            certificateModel.sanitizeFields(result);
+
             res.status(HttpStatus.OK).json(result);
           },
         ],
@@ -104,11 +88,31 @@ module.exports = ({ mountPoint, db }) => {
         middleware: [
           validateChangeOwnerCert(),
           async (req, res) => {
-            const fingerprint = req.params.certificateFingerprint;
-            const filterFields = dbCert.parseConditionFields({ fingerprint });
+            const { fingerprint } = req.params;
+            const filterFields = certificateModel.parseConditionFields({ fingerprint });
 
             const service = req.scope.resolve('certificatesService');
+
             await service.changeOwnership(filterFields, req.body.belongsTo);
+
+            res.sendStatus(HttpStatus.NO_CONTENT);
+          },
+        ],
+      },
+      {
+        /* Delete x.509 certificate */
+        method: 'delete',
+        middleware: [
+          async (req, res) => {
+            const { fingerprint } = req.params;
+            const queryFields = certificateModel.parseProjectionFields(null);
+            const filterFields = certificateModel.parseConditionFields({ fingerprint });
+
+            const service = req.scope.resolve('certificatesService');
+
+            const certToRemove = await service.getCertificate(queryFields, filterFields);
+            await service.deleteCertificate(certToRemove);
+
             res.sendStatus(HttpStatus.NO_CONTENT);
           },
         ],
