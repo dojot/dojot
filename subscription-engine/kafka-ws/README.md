@@ -84,7 +84,7 @@ Grammar:
 - `expression → condition:+`
 - `condition → selector=(operator:):?values;`
 - `selector → parameter | parameter.selector`
-- `operator →` [see here](###applying-conditions-where)
+- `operator → `[see here](###applying-conditions-where)
 - `values → value | value,values`
 
 Where:
