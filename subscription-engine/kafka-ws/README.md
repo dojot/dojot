@@ -360,7 +360,6 @@ Check the documentation for more information:
 - [Latest Kafka WS API documentation](https://dojot.github.io/kafka-ws/apiary_latest.html#kafka-ws)
 - [Development Kafka WS API documentation](https://dojot.github.io/kafka-ws/apiary_development.html#kafka-ws)
 - [Latest dojot platform documentation](https://dojotdocs.readthedocs.io/en/latest)
-- [Development dojot platform documentation](https://dojotdocs.readthedocs.io/en/development)
 
 # **Issues and help**
 
