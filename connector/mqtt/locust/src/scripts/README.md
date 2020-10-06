@@ -1,6 +1,6 @@
 # **Scripts**
 
-To facilitate some jobs, we provide scripts that automates tasks. As for now, there is only one
+To facilitate some jobs, we provide scripts that automates tasks. Currently, there is only one
 script: the `generate_certs`.
 
 # `generate_certs`

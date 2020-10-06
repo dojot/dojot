@@ -231,7 +231,7 @@ If you are not running inside the generate_certs Docker Compose, run:
 coverage run -m pytest tests && coverage html
 ```
 
-It will generate a HTML coverage report in the `htmlcov` directory.
+It will generate an HTML coverage report in the `htmlcov` directory.
 
 # **Issues and help**
 
