@@ -26,7 +26,7 @@ const namedCurves = [
  * @param {string} pem A PEM-encoded DER (ASN.1 data structure)
  * @return {String} DER in base64.
  */
-function getDER(pem) {
+function getBase64DER(pem) {
   /* remove PEM header/footer and all non-base64 characters */
   return pem.replace(/(^-.+?-.+$|[^A-Za-z0-9+/=])/gm, '');
 }
@@ -62,7 +62,7 @@ function arrayBufferToHex(arrayBuffer) {
  * @return {pkijs.CertificationRequest} an ASN1 data structure.
  */
 function getASN1(pem) {
-  const derBase64 = getDER(pem);
+  const derBase64 = getBase64DER(pem);
 
   /* decodes a base64-encoded DER to a ArrayBuffer */
   const der = getArraybuffer(Buffer.from(derBase64, 'base64'));
@@ -142,7 +142,7 @@ function checkPublicKey({ algorithm, parsedKey }) {
  */
 function getFingerprint(pem) {
   const hash = crypto.createHash('sha256');
-  hash.update(getDER(pem), 'base64');
+  hash.update(getBase64DER(pem), 'base64');
 
   /* perform a SHA256 hash on it */
   const fingerprint = hash.digest('hex')

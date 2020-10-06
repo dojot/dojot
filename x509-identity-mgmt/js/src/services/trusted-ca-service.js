@@ -8,9 +8,11 @@ class TrustedCAService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    trustedCAModel, ejbcaFacade, tenant, pkiUtils, dnUtils, rootCA,
+    certificatesService, trustedCAModel, certificateModel,
+    ejbcaFacade, tenant, pkiUtils, dnUtils, rootCA,
     externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
   }) {
+    this.certificatesService = certificatesService;
     this.ejbcaFacade = ejbcaFacade;
     this.tenant = tenant;
     this.pkiUtils = pkiUtils;
@@ -19,6 +21,9 @@ class TrustedCAService {
     this.queryMaxTimeMS = queryMaxTimeMS;
     this.externalCaCertMinimumValidityDays = externalCaCertMinimumValidityDays;
     this.TrustedCAModel = trustedCAModel.model;
+    this.CertificateModel = certificateModel.model;
+    this.parseCertProjFlds = certificateModel.parseProjectionFields.bind(certificateModel);
+    this.parseCertCndtFlds = certificateModel.parseConditionFields.bind(certificateModel);
     this.caCertLimit = caCertLimit;
   }
 
@@ -32,11 +37,12 @@ class TrustedCAService {
    *
    * @throws an exception if no record is found with the informed filters.
    */
-  async getTrustedCACertificate(queryFields, filterFields) {
+  async getCertificate(queryFields, filterFields) {
     Object.assign(filterFields, { tenant: this.tenant });
 
     /* Executes the query and converts the result to JSON */
     const result = await this.TrustedCAModel.findOne(filterFields)
+      .select(queryFields.join(' '))
       .maxTimeMS(this.queryMaxTimeMS)
       .lean()
       .exec();
@@ -56,7 +62,7 @@ class TrustedCAService {
    *
    * @returns a set of certificates that meet the search criteria.
    */
-  async listTrustedCACertificates(queryFields, filterFields, limit, offset) {
+  async listCertificates(queryFields, filterFields, limit, offset) {
     Object.assign(filterFields, { tenant: this.tenant });
 
     /* Executes the query and converts the results to JSON */
@@ -79,7 +85,7 @@ class TrustedCAService {
    *
    * @returns the fingerprint of the registered certificate.
    */
-  async registerTrustedCACertificate({ caPem, allowAutoRegistration }) {
+  async registerCertificate({ caPem, allowAutoRegistration }) {
     const caCert = this.pkiUtils.parseCert(caPem);
 
     this.pkiUtils.checkRemainingDays(caCert, this.externalCaCertMinimumValidityDays);
@@ -135,12 +141,29 @@ class TrustedCAService {
   /**
    * Removes a external trusted root CA certificate from the database.
    *
-   * @param {object} certRecord Record that represents the certificate in
+   * @param {object} caCertRecord Record that represents the certificate in
    *                       the database and that must be removed.
    */
-  async deleteTrustedCACertificate(certRecord) {
+  async deleteCertificate(caCertRecord) {
+    const { caFingerprint } = caCertRecord;
+    const { tenant } = this;
+
+    const qf = this.parseCertProjFlds(null);
+    const ff = this.parseCertCndtFlds({ tenant, caFingerprint, autoRegistered: false });
+    const { itemCount } = await this.certificatesService.listCertificates(qf, ff, 1, 0);
+    if (itemCount > 0) {
+      throw BadRequest('There are certificates dependent on the CA to be removed, '
+      + "however these certificates are not marked as 'autoRegistered'. Therefore, "
+      + 'they must be removed manually before removing their CA certificate!');
+    }
+
+    // TODO: When we start using MongoDB >= 4.4 we can use transactions here...
+    await this.CertificateModel.deleteMany({ tenant, caFingerprint, autoRegistered: true })
+      .maxTimeMS(this.queryMaxTimeMS)
+      .exec();
+
     /* eslint no-underscore-dangle: ["error", { "allow": ["_id"] }] */
-    await this.TrustedCAModel.findByIdAndDelete(certRecord._id)
+    await this.TrustedCAModel.findByIdAndDelete(caCertRecord._id)
       .maxTimeMS(this.queryMaxTimeMS)
       .exec();
   }

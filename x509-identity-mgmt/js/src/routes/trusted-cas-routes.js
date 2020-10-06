@@ -38,7 +38,7 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
 
             const caService = req.scope.resolve('trustedCAService');
 
-            const { itemCount, results } = await caService.listTrustedCACertificates(
+            const { itemCount, results } = await caService.listCertificates(
               queryFields, filterFields, req.query.limit, req.offset,
             );
             results.forEach((cert) => trustedCAModel.sanitizeFields(cert));
@@ -71,7 +71,7 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
 
             const caService = req.scope.resolve('trustedCAService');
 
-            const result = await caService.getTrustedCACertificate(queryFields, filterFields);
+            const result = await caService.getCertificate(queryFields, filterFields);
             trustedCAModel.sanitizeFields(result);
 
             res.status(HttpStatus.OK).json(result);
@@ -106,8 +106,8 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
 
             const caService = req.scope.resolve('trustedCAService');
 
-            const certToRemove = await caService.getTrustedCACertificate(queryFields, filterFields);
-            await caService.deleteTrustedCACertificate(certToRemove);
+            const certToRemove = await caService.getCertificate(queryFields, filterFields);
+            await caService.deleteCertificate(certToRemove);
 
             res.sendStatus(HttpStatus.NO_CONTENT);
           },
