@@ -4,15 +4,43 @@ The **Kafka WS** service provides support for retrieving data from Apache Kafka 
 
 It was designed to be used in the context of dojot IoT Platform for allowing users to retrieve realtime raw and/or processed data.
 
-## **Overview**
+# **Table of Contents**
+
+1. [Overview](#overview)
+   1. [Connecting to the service](##connecting-to-the-service)
+      1. [**First step**: Get the single-use ticket](###first-step-get-the-single-use-ticket)
+      2. [**Second step**: Establish a websocket connection](###second-step-establish-a-websocket-connection)
+      3. [Behavior when requesting a ticket and a websocket connection](###behavior-when-requesting-a-ticket-and-a-websocket-connection)
+   2. [Understanding the URI parts](##understanding-the-uri-parts)
+      1. [Fields](###fields)
+      2. [Where](###where)
+      3. [URI Examples](###uri-examples)
+   3. [Filtering flow](##filtering-flow)
+   4. [Selecting parameters (`fields`)](##selecting-parameters-fields)
+   5. [Applying conditions (`where`)](##applying-conditions-where)
+      1. [Set operators](###set-operators)
+      2. [Arithmetic operators](###arithmetic-operators)
+      3. [Boolean operators](###boolean-operators)
+   6. [Connection Error Codes](##connection-error-codes)
+      1. [HTTP error codes](###http-error-codes)
+      2. [Websocket error codes](###websocket-error-codes)
+2. [Running the service](#running-the-service)
+   1. [Configuration](##configuration)
+   2. [Parser compilation](##parser-compilation)
+   3. [Standalone Mode](##standalone-mode)
+3. [Examples](#examples)
+4. [Documentation](#documentation)
+5. [Issues and help](#issues-and-help)
+
+# **Overview**
 
 **Kafka WebSocket service** allows the users to retrieve data from a given dojot topic in a Kafka cluster, this retrieval can be conditional and/or partial. It works with pure websocket connections, so you can create websocket clients in any language you want as long as they support [RFC 6455](https://tools.ietf.org/html/rfc6455).
 
-### **Connecting to the service**
+## **Connecting to the service**
 
 The connection is done in two steps, you must first obtain a *single-use ticket* through a REST request, then, be authorized to connect to the service through a websocket.
 
-#### **First step**: Get the single-use ticket
+### **First step**: Get the single-use ticket
 
 A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
 Ticket request must be made by REST at the endpoint `<base-url>/kafka-ws/v1/ticket` using the HTTP GET verb. The request must contain the header `Authorization` and the JWT token as value, according to the syntax:
@@ -30,11 +58,11 @@ The component responds with the following syntax:
 
 Note: In the context of a dojot deployment the JWT Token is provided by the *Auth service*, and is validated by the *API Gateway* before redirecting the connection to the Kafka-WS. So, no validations are done by the Kafka WS.
 
-#### **Second step**: Establish a websocket connection
+### **Second step**: Establish a websocket connection
 
 The connection is done via pure websockets using the URI `<base-url>/kafka-ws/v1/topics/:topic`. You **must** pass the previously generated ticket as a parameter of this URI. It is also possible to pass conditional and filter options as parameters of the URI.
 
-#### Behavior when requesting a ticket and a websocket connection
+### **Behavior when requesting a ticket and a websocket connection**
 
 Below we can understand the behavior of the Kafka-ws service when a user (through a [user agent](https://en.wikipedia.org/wiki/User_agent)) requests a ticket in order to establish a communication via websocket with Kafka-ws.
 
@@ -51,7 +79,7 @@ In the following sections, it is explained in details how to compose the URI to 
 
 If you want to jump for a full client example, see the [examples](./examples) directory.
 
-### **Understanding the URI parts**
+## **Understanding the URI parts**
 
 Before diving into the explanation of how each filter works and its rules, it is necessary to understand the parts of the URI. It's general format is:
 
@@ -59,21 +87,20 @@ Before diving into the explanation of how each filter works and its rules, it is
 /kafka-ws/v1/topics/:topic?ticket=<hexValue>&fields=<selector>&where=<conditions>
 ```
 
-#### Topic
+The essential parameters are:
 
-The `:topic` parameter is the Kafka topic that you want to receive data from.
+- `topic`: Kafka topic that you want to receive data from.
+- `ticket`: previously generated *single-use* ticket, used to connect to Kafka WS.
 
-#### ticket
+In the next topics we will cover the data manipulation parameters - which are optional.
 
-The `ticket` parameter is the previously generated *single-use* ticket
-
-##### Fields
+### **Fields**
 
 The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
 
-See [this section](###selecting-parameters-fields) for an explanation.
+See [this section](##selecting-parameters-fields) for an explanation.
 
-##### Where
+### **Where**
 
 The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
 conditions.
@@ -84,7 +111,7 @@ Grammar:
 - `expression → condition:+`
 - `condition → selector=(operator:):?values;`
 - `selector → parameter | parameter.selector`
-- `operator →` [see here](###applying-conditions-where)
+- `operator → `[see here](##applying-conditions-where)
 - `values → value | value,values`
 
 Where:
@@ -93,7 +120,7 @@ Where:
 - `:+` - one or more
 - `:?` - zero or one
 
-##### **URI Examples**
+### **URI Examples**
 
 __NOTE THAT__ for simplicity, we will not include the `ticket` parameter in the examples, but it
 must always be sent, otherwise the server will refuse the connection.
@@ -137,7 +164,7 @@ Retrieving the *temperature* and *rain* where *rain* is <ins>less than or equal 
 /kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
 ```
 
-### **Filtering flow**
+## **Filtering flow**
 
 The filtering happens right after a message is received from a Kafka topic that the client has
 requested to subscribe. The message is then filtered by `where` (if present) and then by `fields`
@@ -147,7 +174,7 @@ requested to subscribe. The message is then filtered by `where` (if present) and
 
 **Fig. 1** - Kafka messages' flow within the system.
 
-### **Selecting parameters (`fields`)**
+## **Selecting parameters (`fields`)**
 
 The rules to select parameters from a message are:
 
@@ -178,11 +205,11 @@ f('attrs/humidity') => { attrs: { } }
 __NOTE THAT__ in the last example the `attrs` object is empty. This happens if no attribute matches
 the sent filter. It will not throw an error.
 
-### **Applying conditions (`where`)**
+## **Applying conditions (`where`)**
 
 The conditions can be applied to any parameter in the message. The permitted operators are:
 
-#### **Set operators**
+### **Set operators**
 
 Applied to N values.
 
@@ -200,7 +227,7 @@ Examples:
 { a: 'foo', b: 'bar' } → f(b=nin:ar) → discard
 ```
 
-#### **Arythmetic operators**
+### **Arithmetic operators**
 
 Applied to only one value.
 
@@ -225,7 +252,7 @@ Examples:
 { rain: 10, temperature: 30.0 } → f(rain=lte:10) → continue to process
 ```
 
-#### **Boolean operators**
+### **Boolean operators**
 
 Applied to only one value.
 
@@ -239,15 +266,15 @@ Examples:
 { sensors: { rain: { enabled: false } } } → f(sensors.rain.enabled=bool:false) → continue to process
 ```
 
-### Connection Error Codes
+## **Connection Error Codes**
 
 The errors generated by the service are listed below.
 
-#### **HTTP error codes**
+### **HTTP error codes**
 
 - `426`: occurs when the received connection is not a Websocket one.
 
-#### **Websocket error codes**
+### **Websocket error codes**
 
 - `4000` - INVALID_SYNTAX: there is a syntatic problem with `where`
 - `4001` - INVALID_OPERATOR: an invalid operator has been passed to a condition, see the [list of
@@ -259,9 +286,9 @@ operators](###applying-conditions-where) for more info
 - `4408` - EXPIRED_CONNECTION: connection lifetime is over
 - `4999` - INTERNAL: there is an error in the server
 
-## **Running the service**
+# **Running the service**
 
-### **Configuration**
+## **Configuration**
 
 Before proceeding, **make sure you configure your environment**.
 
@@ -295,7 +322,7 @@ __NOTE THAT__ it is checked whether the service (tenant) that is passed in the J
 __NOTE THAT__ if you pass a TICKET_SECRET, give preference to large random values. Also note that in a cluster environment all instances must share the same secret.
 
 
-### **Parser compilation**
+## **Parser compilation**
 
 Before running the service, it is necessary to compile the Nearley parser:
 
@@ -303,7 +330,7 @@ Before running the service, it is necessary to compile the Nearley parser:
 npm run parser:compile
 ```
 
-### **Standalone Mode**
+## **Standalone Mode**
 
 To run the Kafka WS in the standalone mode, just type:
 
@@ -316,7 +343,25 @@ If you are developing, you can use `nodemon` too:
 ```shell
 npm run dev
 ```
+__NOTE THAT__ in order to use WebSocket with Nginx, Kong, API gateway or similar, look for timeout
+settings. Examples:
+- Nginx: `proxy_connect_timeout`, `proxy_send_timeout` and
+`proxy_connect_timeout`
+- Kong: connect_timeout, write_timeout and read_timeout.
 
-## **Examples**
+# **Examples**
 
 Check the [examples](./examples) directory for more info.
+
+# **Documentation**
+
+Check the documentation for more information:
+
+- [Latest Kafka WS API documentation](https://dojot.github.io/kafka-ws/apiary_latest.html#kafka-ws)
+- [Development Kafka WS API documentation](https://dojot.github.io/kafka-ws/apiary_development.html#kafka-ws)
+- [Latest dojot platform documentation](https://dojotdocs.readthedocs.io/en/latest)
+
+# **Issues and help**
+
+If you found a problem or need help, leave an issue in the main
+[dojot repository](https://github.com/dojot/dojot) and we will help you!
