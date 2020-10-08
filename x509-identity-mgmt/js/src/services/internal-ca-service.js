@@ -1,7 +1,7 @@
 /**
  * Service to handle Root CA
  */
-class RootCAService {
+class InternalCAService {
   /**
    * The dependencies are injected through the constructor
    */
@@ -40,4 +40,4 @@ class RootCAService {
   }
 }
 
-module.exports = RootCAService;
+module.exports = InternalCAService;

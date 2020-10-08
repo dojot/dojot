@@ -23,7 +23,7 @@ const namedCurves = [
 /**
  * Retrieves the DER structure represented in base64.
  *
- * @param {string} pem A PEM-encoded DER (ASN.1 data structure)
+ * @param {string} pem A PEM-encoded DER (ASN.1 data structure).
  * @return {String} DER in base64.
  */
 function getBase64DER(pem) {
@@ -32,9 +32,10 @@ function getBase64DER(pem) {
 }
 
 /**
- * Converts a Buffer (Node.js) to an ArrayBuffer (javascript standard built-in object)
- * @param {Buffer} buf (https://nodejs.org/api/buffer.html#buffer_class_buffer)
- * @return {ArrayBuffer} (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ * Converts a Buffer (Node.js) to an ArrayBuffer (javascript standard built-in object).
+ *
+ * @param {Buffer} buf (https://nodejs.org/api/buffer.html#buffer_class_buffer).
+ * @return {ArrayBuffer} (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer).
  */
 function getArraybuffer(buf) {
   /* You may use the `byteLength` property instead of the `length` one. */
@@ -43,7 +44,8 @@ function getArraybuffer(buf) {
 
 /**
  * Converts a javascript ArrayBuffer to a hex string array
- * @param {ArrayBuffer} arrayBuffer (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+ *
+ * @param {ArrayBuffer} arrayBuffer (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer).
  * @return {Array} a hex string array.
  */
 function arrayBufferToHex(arrayBuffer) {
@@ -60,6 +62,8 @@ function arrayBufferToHex(arrayBuffer) {
  *
  * @param {string} pem pem A PEM-encoded x.509 Certificate or CSR.
  * @return {pkijs.CertificationRequest} an ASN1 data structure.
+ *
+ * @throws an exception if an ASN1 data structure cannot be obtained.
  */
 function getASN1(pem) {
   const derBase64 = getBase64DER(pem);
@@ -94,7 +98,7 @@ function parseCSR(pem) {
 /**
  * parses a string argument and returns a x.509 v3 Certificate.
  *
- * @param {String} pem A PEM-encoded certificate
+ * @param {String} pem A PEM-encoded certificate.
  * @return {pkijs.Certificate} a x.509 v3 Certificate.
  */
 function parseCert(pem) {
@@ -109,7 +113,9 @@ function parseCert(pem) {
 /**
  * Checks whether the public key is supported by the application.
  *
- * @param {pkijs.PublicKeyInfo} Destructuring only attributes "algorithm" and "parsedKey"
+ * @param {pkijs.PublicKeyInfo} Destructuring only attributes "algorithm" and "parsedKey".
+ *
+ * @throws an exception if the public key is not supported by the platform.
  */
 function checkPublicKey({ algorithm, parsedKey }) {
   const algoID = (algorithm) ? algorithm.algorithmId : '';
@@ -137,7 +143,7 @@ function checkPublicKey({ algorithm, parsedKey }) {
  * Calculates the fingerprint of the certificate using the SHA256
  * hashing algorithm. The certificate must be in PEM format.
  *
- * @param {String} pem A PEM-encoded certificate
+ * @param {String} pem A PEM-encoded certificate.
  * @return {string} The Certificate fingerprint (256 bits) represented in hexadecimal.
  */
 function getFingerprint(pem) {
@@ -168,8 +174,11 @@ function getSerialNumber(certificate) {
 /**
  * Checks the remaining days of validity of the informed certificate.
  *
- * @param {pkijs.Certificate} certificate to be verified
- * @param {number} minimumValidityDays that the certificate still needs to have
+ * @param {pkijs.Certificate} certificate to be verified.
+ * @param {number} minimumValidityDays that the certificate still needs to have.
+ *
+ * @throws an exception if the certificate has expired.
+ * @throws an exception if the certificate does not have a minimum validity days.
  */
 function checkRemainingDays(certificate, minimumValidityDays = 0) {
   const difference = certificate.notAfter.value - new Date();
@@ -183,16 +192,40 @@ function checkRemainingDays(certificate, minimumValidityDays = 0) {
 }
 
 /**
- * checks whether the certificate belongs to a root CA.
+ * assert that the certificate is the low end of the chain.
  *
- * @param {pkijs.Certificate} certificate to be verified
+ * @param {pkijs.Certificate} certificate to be verified.
+ *
+ * @throws an exception if the certificate is not the low end of the chain (or self signed).
+ */
+async function assertLeaf(certificate) {
+  // OID = 2.5.29.19
+  // Description = Basic Constraints
+  const extension = certificate.extensions.find((ext) => ext.extnID === '2.5.29.19');
+  if (extension && extension.parsedValue && extension.parsedValue.cA) {
+    throw BadRequest("The certificate is a CA certificate. It contains the flag 'CA:TRUE' in the extension 'Basic Constraints'.");
+  }
+
+  const certChainVerificationEngine = new pkijs.CertificateChainValidationEngine({
+    trustedCerts: [certificate],
+    certs: [certificate],
+  });
+  const { result: selfSigned } = await certChainVerificationEngine.verify();
+  if (selfSigned) {
+    throw BadRequest('The certificate is self-signed.');
+  }
+}
+
+/**
+ * assert that the certificate belongs to a root CA.
+ *
+ * @param {pkijs.Certificate} certificate to be verified.
+ *
+ * @throws an exception if the certificate does not belong to a root CA.
  */
 async function assertRootCA(certificate) {
-  // +-----------+-------------------+
-  // |    OID    |    Description    |
-  // +-----------+-------------------+
-  // | 2.5.29.19 | Basic Constraints |
-  // +-----------+-------------------+
+  // OID = 2.5.29.19
+  // Description = Basic Constraints
   const extension = certificate.extensions.find((ext) => ext.extnID === '2.5.29.19');
   if (!extension || !extension.parsedValue) {
     throw BadRequest("The certificate is not a CA certificate. It does not contain the extension 'Basic Constraints' (OID: 2.5.29.19).");
@@ -213,10 +246,49 @@ async function assertRootCA(certificate) {
 }
 
 /**
+ * checks whether the certificate belongs to a root CA.
+ *
+ * @param {pkijs.Certificate} certificate to be verified.
+ *
+ * @returns true if the certificate belongs to a root CA, otherwise, false.
+ */
+async function isRootCA(certificate) {
+  try {
+    await assertRootCA(certificate);
+  } catch (ex) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Checks the certificate chain of trust up to their root CA.
+ *
+ * @param {List} chain of certificates to be checked.
+ * @param {pkijs.Certificate} trusted CA certificate.
+ *
+ * @throws an exception if the chain of trust is not validated.
+ */
+async function checkChainOfTrust(chain, trusted) {
+  const certChainVerificationEngine = new pkijs.CertificateChainValidationEngine({
+    trustedCerts: [trusted],
+    certs: [...chain],
+  });
+  const { result } = await certChainVerificationEngine.verify();
+  if (!result) {
+    throw BadRequest('The certificate chain of trust is not valid.');
+  }
+}
+
+/**
  * Checks that the external certificate does not have the same
  * CommonName as the platform's internal root CA.
+ *
  * @param {pkijs.Certificate} certificate to be verified
  * @param {*} rootCN CommonName of the internal root CA of the platform.
+ *
+ * @throws an exception if the external certificate CN is the same as the
+ *         internal root CA certificate CN of the platform.
  */
 function checkRootExternalCN(certificate, rootCN) {
   const cnameAttr = certificate.subject.typesAndValues.find((attr) => attr.type === '2.5.4.3');
@@ -233,6 +305,9 @@ module.exports = {
   getFingerprint,
   getSerialNumber,
   checkRemainingDays,
+  assertLeaf,
   assertRootCA,
+  isRootCA,
+  checkChainOfTrust,
   checkRootExternalCN,
 };

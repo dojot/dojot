@@ -4,6 +4,8 @@ const sanitize = require('./sanitize-params');
 
 const { validateRegOrGenCert, validateChangeOwnerCert } = require('../core/schema-validator');
 
+const CERT_SERVICE = 'certificateService';
+
 module.exports = ({ mountPoint, certificateModel }) => {
   const certsRoute = {
     mountPoint,
@@ -18,7 +20,7 @@ module.exports = ({ mountPoint, certificateModel }) => {
             const queryFields = certificateModel.parseProjectionFields(req.query.fields);
             const filterFields = certificateModel.parseConditionFields(req.query);
 
-            const service = req.scope.resolve('certificatesService');
+            const service = req.scope.resolve(CERT_SERVICE);
 
             const { itemCount, results } = await service.listCertificates(
               queryFields, filterFields, req.query.limit, req.offset,
@@ -39,14 +41,17 @@ module.exports = ({ mountPoint, certificateModel }) => {
           validateRegOrGenCert(),
           async (req, res) => {
             let result = null;
-            if (!req.body.belongsTo) {
-              req.body.belongsTo = {};
-            }
-            const service = req.scope.resolve('certificatesService');
+            const belongsTo = req.body.belongsTo || {};
+
+            const service = req.scope.resolve(CERT_SERVICE);
             if (req.body.csr) {
-              result = await service.generateCertificate(req.body);
-            } else if (req.body.certificatePem) {
-              result = await service.registerCertificate(req.body);
+              result = await service.generateCertificate({ csr: req.body.csr, belongsTo });
+            } else if (req.body.certificateChain) {
+              const certificateChain = req.body.certificateChain.match(sanitize.certRegExp);
+              const caFingerprint = req.body.caFingerprint || '';
+              result = await service.registerCertificate({
+                caFingerprint, certificateChain, belongsTo,
+              });
             }
             res.status(HttpStatus.CREATED).json(result);
           },
@@ -73,7 +78,7 @@ module.exports = ({ mountPoint, certificateModel }) => {
             const queryFields = certificateModel.parseProjectionFields(req.query.fields);
             const filterFields = certificateModel.parseConditionFields({ fingerprint });
 
-            const service = req.scope.resolve('certificatesService');
+            const service = req.scope.resolve(CERT_SERVICE);
 
             const result = await service.getCertificate(queryFields, filterFields);
             certificateModel.sanitizeFields(result);
@@ -91,7 +96,7 @@ module.exports = ({ mountPoint, certificateModel }) => {
             const { fingerprint } = req.params;
             const filterFields = certificateModel.parseConditionFields({ fingerprint });
 
-            const service = req.scope.resolve('certificatesService');
+            const service = req.scope.resolve(CERT_SERVICE);
 
             await service.changeOwnership(filterFields, req.body.belongsTo);
 
@@ -108,7 +113,7 @@ module.exports = ({ mountPoint, certificateModel }) => {
             const queryFields = certificateModel.parseProjectionFields(null);
             const filterFields = certificateModel.parseConditionFields({ fingerprint });
 
-            const service = req.scope.resolve('certificatesService');
+            const service = req.scope.resolve(CERT_SERVICE);
 
             const certToRemove = await service.getCertificate(queryFields, filterFields);
             await service.deleteCertificate(certToRemove);

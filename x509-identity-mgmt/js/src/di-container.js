@@ -38,15 +38,15 @@ const staticFileController = require('./controllers/static-file-controller');
 
 const throwAwayRoutes = require('./routes/throw-away-routes');
 
-const rootCARoutes = require('./routes/root-ca-routes');
+const internalCARoutes = require('./routes/internal-ca-routes');
 
-const trustedCAsRoutes = require('./routes/trusted-cas-routes');
+const trustedCARoutes = require('./routes/trusted-ca-routes');
 
-const certificatesRoutes = require('./routes/certificates-routes');
+const certificateRoutes = require('./routes/certificate-routes');
 
-const CertificatesService = require('./services/certificates-service');
+const CertificateService = require('./services/certificate-service');
 
-const RootCAService = require('./services/root-ca-service');
+const InternalCAService = require('./services/internal-ca-service');
 
 const TrustedCAService = require('./services/trusted-ca-service');
 
@@ -105,9 +105,9 @@ module.exports = (config) => {
         routes: ([
           // The order of the routes matters
           DIContainer.resolve('throwAwayRoutes'),
-          DIContainer.resolve('rootCARoutes'),
-          DIContainer.resolve('trustedCAsRoutes'),
-          DIContainer.resolve('certificatesRoutes'),
+          DIContainer.resolve('internalCARoutes'),
+          DIContainer.resolve('trustedCARoutes'),
+          DIContainer.resolve('certificateRoutes'),
         ]).flat(),
         errorhandlers: [
           // The order of the error handlers matters
@@ -188,32 +188,34 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    rootCARoutes: asFunction(rootCARoutes, {
+    internalCARoutes: asFunction(internalCARoutes, {
       injector: () => ({ mountPoint: '/api/v1' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    trustedCAsRoutes: asFunction(trustedCAsRoutes, {
+    trustedCARoutes: asFunction(trustedCARoutes, {
       injector: () => ({ mountPoint: '/api/v1' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    certificatesRoutes: asFunction(certificatesRoutes, {
+    certificateRoutes: asFunction(certificateRoutes, {
       injector: () => ({ mountPoint: '/api/v1' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
     // --------------------------------------------------------
-    certificatesService: asClass(CertificatesService, {
+    certificateService: asClass(CertificateService, {
       injector: () => ({
         certValidity: config.certificate.validity,
         checkPublicKey: config.certificate.checkpublickey,
         queryMaxTimeMS: config.mongo.query.maxtimems,
+        certMinimumValidityDays: config.certificate.external.minimumvaliditydays,
+        caCertAutoRegistration: config.certificate.external.ca.autoregistration,
       }),
       lifetime: Lifetime.SCOPED,
     }),
 
-    rootCAService: asClass(RootCAService, {
+    internalCAService: asClass(InternalCAService, {
       injector: () => ({
         rootCA: config.ejbca.rootca,
       }),

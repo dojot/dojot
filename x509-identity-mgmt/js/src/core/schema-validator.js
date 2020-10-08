@@ -27,7 +27,7 @@ const ajv = new Ajv({
  * @return {String} formatted api response
  */
 function errorResponse(schema$id, schemaErrors) {
-  const errorMsg = 'Input data schema validation failure!';
+  const errorMsg = 'Input data schema validation failure.';
   return BadRequest(errorMsg, { schema$id, schemaErrors });
 }
 

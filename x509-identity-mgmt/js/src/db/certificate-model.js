@@ -5,8 +5,8 @@ const MongoQS = require('mongo-querystring');
 const { Schema } = mongoose;
 
 const certificateSchema = new Schema({
-  fingerprint: String,
   caFingerprint: String,
+  fingerprint: String,
   pem: String,
   subjectDN: String,
   validity: new Schema({

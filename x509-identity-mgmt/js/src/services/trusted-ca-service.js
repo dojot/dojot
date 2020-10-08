@@ -8,11 +8,9 @@ class TrustedCAService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    certificatesService, trustedCAModel, certificateModel,
-    ejbcaFacade, tenant, pkiUtils, dnUtils, rootCA,
-    externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
+    trustedCAModel, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils,
+    rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
   }) {
-    this.certificatesService = certificatesService;
     this.ejbcaFacade = ejbcaFacade;
     this.tenant = tenant;
     this.pkiUtils = pkiUtils;
@@ -20,9 +18,11 @@ class TrustedCAService {
     this.rootCA = rootCA;
     this.queryMaxTimeMS = queryMaxTimeMS;
     this.externalCaCertMinimumValidityDays = externalCaCertMinimumValidityDays;
+
     this.TrustedCAModel = trustedCAModel.model;
+    this.parseTrustedCACndtFlds = trustedCAModel.parseConditionFields.bind(trustedCAModel);
+
     this.CertificateModel = certificateModel.model;
-    this.parseCertProjFlds = certificateModel.parseProjectionFields.bind(certificateModel);
     this.parseCertCndtFlds = certificateModel.parseConditionFields.bind(certificateModel);
     this.caCertLimit = caCertLimit;
   }
@@ -87,6 +87,7 @@ class TrustedCAService {
    */
   async registerCertificate({ caPem, allowAutoRegistration }) {
     const caCert = this.pkiUtils.parseCert(caPem);
+    const caFingerprint = this.pkiUtils.getFingerprint(caPem);
 
     this.pkiUtils.checkRemainingDays(caCert, this.externalCaCertMinimumValidityDays);
 
@@ -94,14 +95,12 @@ class TrustedCAService {
 
     this.pkiUtils.checkRootExternalCN(caCert, this.rootCA);
 
-    await this.checkCertLimit();
-
-    const caFingerprint = this.pkiUtils.getFingerprint(caPem);
+    await this.checkCACertLimitByTenant();
 
     await this.checkExistingCertificate(caFingerprint);
 
+    // Register the certificate in the database
     const subjectDN = this.dnUtils.from(caCert.subject).stringify();
-
     const model = new this.TrustedCAModel({
       caFingerprint,
       caPem,
@@ -148,13 +147,12 @@ class TrustedCAService {
     const { caFingerprint } = caCertRecord;
     const { tenant } = this;
 
-    const qf = this.parseCertProjFlds(null);
     const ff = this.parseCertCndtFlds({ tenant, caFingerprint, autoRegistered: false });
-    const { itemCount } = await this.certificatesService.listCertificates(qf, ff, 1, 0);
-    if (itemCount > 0) {
+    const certCount = this.CertificateModel.countDocuments(ff);
+    if (certCount > 0) {
       throw BadRequest('There are certificates dependent on the CA to be removed, '
       + "however these certificates are not marked as 'autoRegistered'. Therefore, "
-      + 'they must be removed manually before removing their CA certificate!');
+      + 'they must be removed manually before removing their CA certificate.');
     }
 
     // TODO: When we start using MongoDB >= 4.4 we can use transactions here...
@@ -174,14 +172,14 @@ class TrustedCAService {
    * @throws an exception if the maximum number has already been reached and
    * a new certificate is trying to be inserted.
    */
-  async checkCertLimit() {
+  async checkCACertLimitByTenant() {
     if (this.caCertLimit > -1) {
       const filterFields = { tenant: this.tenant };
 
       const count = await this.TrustedCAModel.countDocuments(filterFields);
 
       if (count >= this.caCertLimit) {
-        throw BadRequest('The number of registered CAs has been exceeded!');
+        throw BadRequest('The number of registered CAs has been exceeded.');
       }
     }
   }
@@ -200,12 +198,25 @@ class TrustedCAService {
       caFingerprint: fingerprint,
       tenant: this.tenant,
     };
-
     const count = await this.TrustedCAModel.countDocuments(filterFields);
-
     if (count) {
-      throw Conflict(`The certificate with fingerprint '${fingerprint}' already exists!`);
+      throw Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
     }
+  }
+
+  /**
+   * Obtains the PEM from the trusted CA certificate registered on the platform.
+   *
+   * @param {string} caFingerprint to be used as a query filter.
+   *
+   * @returns the CA certificate in PEM format.
+   */
+  async getPEM(caFingerprint) {
+    const ff = this.parseTrustedCACndtFlds({ tenant: this.tenant, caFingerprint });
+    const { caPem } = await this.TrustedCAModel.findOne(ff)
+      .select('caPem').maxTimeMS(this.queryMaxTimeMS).lean()
+      .exec();
+    return caPem;
   }
 }
 

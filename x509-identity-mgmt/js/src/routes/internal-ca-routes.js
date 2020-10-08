@@ -1,5 +1,7 @@
 const HttpStatus = require('http-status-codes');
 
+const CA_SERVICE = 'internalCAService';
+
 module.exports = ({ mountPoint }) => {
   const caRoute = {
     mountPoint,
@@ -11,9 +13,9 @@ module.exports = ({ mountPoint }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const rootCAService = req.scope.resolve('rootCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
 
-            const result = await rootCAService.getRootCertificate();
+            const result = await caService.getRootCertificate();
 
             res.status(HttpStatus.OK).json(result);
           },
@@ -32,9 +34,9 @@ module.exports = ({ mountPoint }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const rootCAService = req.scope.resolve('rootCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
 
-            const result = await rootCAService.getRootCRL();
+            const result = await caService.getRootCRL();
 
             res.status(HttpStatus.OK).json(result);
           },

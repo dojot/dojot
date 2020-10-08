@@ -4,6 +4,10 @@ const sanitize = require('./sanitize-params');
 
 const { validateNewTrustedCA, validateUpdTrustedCA } = require('../core/schema-validator');
 
+const { BadRequest } = require('../sdk/web/backing/error-template');
+
+const CA_SERVICE = 'trustedCAService';
+
 module.exports = ({ mountPoint, trustedCAModel }) => {
   const trustedCAsRoute = {
     mountPoint,
@@ -16,13 +20,17 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
         middleware: [
           validateNewTrustedCA(),
           async (req, res) => {
-            if (!req.body.allowAutoRegistration) {
-              req.body.allowAutoRegistration = false;
+            const pemArr = req.body.caPem.match(sanitize.certRegExp);
+            if (!pemArr || pemArr.length > 1) {
+              throw BadRequest('Only one CA certificate is expected per request.');
             }
 
-            const caService = req.scope.resolve('trustedCAService');
+            const [caPem] = pemArr;
+            const allowAutoRegistration = req.body.allowAutoRegistration || false;
 
-            const result = await caService.registerCertificate(req.body);
+            const caService = req.scope.resolve(CA_SERVICE);
+
+            const result = await caService.registerCertificate({ caPem, allowAutoRegistration });
 
             res.status(HttpStatus.CREATED).json(result);
           },
@@ -36,7 +44,7 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
             const queryFields = trustedCAModel.parseProjectionFields(req.query.fields);
             const filterFields = trustedCAModel.parseConditionFields(req.query);
 
-            const caService = req.scope.resolve('trustedCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
 
             const { itemCount, results } = await caService.listCertificates(
               queryFields, filterFields, req.query.limit, req.offset,
@@ -69,7 +77,7 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
             const queryFields = trustedCAModel.parseProjectionFields(req.query.fields);
             const filterFields = trustedCAModel.parseConditionFields({ caFingerprint });
 
-            const caService = req.scope.resolve('trustedCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
 
             const result = await caService.getCertificate(queryFields, filterFields);
             trustedCAModel.sanitizeFields(result);
@@ -87,7 +95,7 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
             const { caFingerprint } = req.params;
             const filterFields = trustedCAModel.parseConditionFields({ caFingerprint });
 
-            const caService = req.scope.resolve('trustedCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
 
             await caService.changeAutoRegistration(filterFields, req.body.allowAutoRegistration);
 
@@ -104,7 +112,7 @@ module.exports = ({ mountPoint, trustedCAModel }) => {
             const queryFields = trustedCAModel.parseProjectionFields(null);
             const filterFields = trustedCAModel.parseConditionFields({ caFingerprint });
 
-            const caService = req.scope.resolve('trustedCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
 
             const certToRemove = await caService.getCertificate(queryFields, filterFields);
             await caService.deleteCertificate(certToRemove);

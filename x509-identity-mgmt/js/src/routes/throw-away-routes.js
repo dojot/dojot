@@ -4,6 +4,10 @@ const { validateRegOrGenCert } = require('../core/schema-validator');
 
 const { BadRequest } = require('../sdk/web/backing/error-template');
 
+const CERT_SERVICE = 'certificateService';
+
+const CA_SERVICE = 'internalCAService';
+
 module.exports = ({ mountPoint }) => {
   const throwAwayRoute = {
     mountPoint,
@@ -19,10 +23,10 @@ module.exports = ({ mountPoint }) => {
           async (req, res) => {
             let result = null;
             if (req.body.csr) {
-              const certService = req.scope.resolve('certificatesService');
+              const certService = req.scope.resolve(CERT_SERVICE);
               result = await certService.throwAwayCertificate(req.body);
             } else {
-              throw BadRequest('It is necessary to inform the CSR for the certificate to be issued');
+              throw BadRequest('It is necessary to inform the CSR for the certificate to be issued.');
             }
             res.status(HttpStatus.CREATED).json(result);
           },
@@ -42,7 +46,7 @@ module.exports = ({ mountPoint }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const caService = req.scope.resolve('rootCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
             const result = await caService.getRootCertificate();
             res.status(HttpStatus.OK).json(result);
           },
@@ -62,7 +66,7 @@ module.exports = ({ mountPoint }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const caService = req.scope.resolve('rootCAService');
+            const caService = req.scope.resolve(CA_SERVICE);
             const result = await caService.getRootCRL(req.query.update === 'true');
             res.status(HttpStatus.OK).json(result);
           },
