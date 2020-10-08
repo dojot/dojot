@@ -343,9 +343,9 @@ If you are developing, you can use `nodemon` too:
 ```shell
 npm run dev
 ```
-__NOTE THAT_ in order to use WebSocket with nginx, Kong, API gateway or similar, look for timeout
+__NOTE THAT__ in order to use WebSocket with Nginx, Kong, API gateway or similar, look for timeout
 settings. Examples:
-- nginx: `proxy_connect_timeout`, `proxy_send_timeout` and
+- Nginx: `proxy_connect_timeout`, `proxy_send_timeout` and
 `proxy_connect_timeout`
 - Kong: connect_timeout, write_timeout and read_timeout.
 
