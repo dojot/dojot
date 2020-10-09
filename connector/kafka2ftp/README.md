@@ -81,16 +81,16 @@ Before proceeding, **make sure you configure your environment**.
 
 Key                        | Purpose                                                  | Default Value      | Valid Values |
 -------------------------- | -------------------------------------------------------- | ---------------    | -----------  |
+FTP_FTPS                   | Explicit FTPS over TLS                                   | false              | String (true or false)                |
+FTP_HOST                   | Server FTP host                                          | localhost          | String                       |
+FTP_PASSWORD               | Server FTP Password                                      | guest              | String                       |
+FTP_PORT                   | Server FTP port                                          | 21                 | Natural number                      |
+FTP_REMOTE_DIR             | Path where files will be sent (This path must exist previously)   | /                  | Path                         |
+FTP_TENANT                 | Tenant is a context identifier into dojot. This defines the topic on which the service will subscribe *tenant*.dojot.ftp                  | admin               | String  |
+FTP_USER                   | Server FTP Username                                      | anonymous          | String                       |
 KAFKA_GROUP_ID             | The Kafka consumer group ID to be used                   | kafka2ftp          | String       |
 KAFKA_HOSTS                | Addresses of the kafka brokers separated by a comma      | kafka:9092         | hostname/IP  |
 LOG_LEVEL                  | logger level                                             | info               | debug, error, warning, info  |
-FTP_TENANT                 | Tenant is a context identifier into dojot. This defines the topic on which the service will subscribe *tenant*.dojot.ftp                  | admin               | String  |
-FTP_HOST                   | Server FTP host                                          | localhost          | String                       |
-FTP_PORT                   | Server FTP port                                          | 21                 | Natural number                      |
-FTP_FTPS                   | Explicit FTPS over TLS                                   | false              | String (true or false)                |
-FTP_USER                   | Server FTP Username                                      | anonymous          | String                       |
-FTP_PASSWORD               | Server FTP Password                                      | guest              | String                       |
-FTP_REMOTE_DIR             | Path where files will be sent (This path must exist previously)   | /                  | Path                         |
 MAX_CONCURRENT_CONNECTIONS | The maximum number of FTP connections at the same time.                                            | 10                 | Natural number               |
 RETRIES      | The maximum number of times to attempt the upload       | 13                 | Natural number               |
 
