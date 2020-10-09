@@ -54,7 +54,7 @@ content         | File contents.
 
 ### Using with Flowbroker
 
-You can use this service together with the [flowbroker](https://github.com/dojot/flowbroker) using the **Publish in FTP topic** node, see more in the [dojot platform documentation](https://dojotdocs.readthedocs.io))  on the topic *Using flow builder*.
+You can use this service together with the [flowbroker](https://github.com/dojot/flowbroker) using the **Publish in FTP topic** node, see more in the [dojot platform documentation](https://dojotdocs.readthedocs.io)  on the topic *Using flow builder*.
 
 ## Dependencies
 
