@@ -4,18 +4,18 @@ The **kafka2ftp** service provides a connector solution for forwarding messages 
 
 ## **Table of Contents**
 
-1. [Overview](##overview)
-   1. [Message forwarding service to FTP servers](###message-forwarding-service-to-ftp-servers)
-   2. [Using with Flowbroker](###using-with-flowbroker)
-2. [Dependencies](##dependencies)
-   1. [Dojot Services](###dojot-services)
-   2. [Others Services](###others-services)
-3. [Running the service](##running-the-service)
-   1. [Configuration](###configuration)
-      1. [Environment variables](####environment-variables)
-   2. [How to run](###how-to-run)
-4. [Documentation](##documentation)
-5. [Issues and help](##issues-and-help)
+1. [Overview](#overview)
+   1. [Message forwarding service to FTP servers](#message-forwarding-service-to-ftp-servers)
+   2. [Using with Flowbroker](#using-with-flowbroker)
+2. [Dependencies](#dependencies)
+   1. [Dojot Services](#dojot-services)
+   2. [Others Services](#others-services)
+3. [Running the service](#running-the-service)
+   1. [Configuration](#configuration)
+      1. [Environment variables](#environment-variables)
+   2. [How to run](#how-to-run)
+4. [Documentation](#documentation)
+5. [Issues and help](#issues-and-help)
 
 ## Overview
 
