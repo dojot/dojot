@@ -65,7 +65,7 @@ The services dependencies are listed in the next topics.
 
 ### Dojot Services
 
-- Flowbroker >= v0.5.0 (Justing if you are using the **Publish in FTP topic** node)
+- Flowbroker >= v0.5.0 (Only if you are using the **Publish in FTP topic** node)
 
 ### Others Services
 
