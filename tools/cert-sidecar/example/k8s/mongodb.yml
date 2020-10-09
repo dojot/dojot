@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  labels:
+    name: mongodb
+spec:
+  type: ClusterIP
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    name: mongodb
+    app: example
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  labels:
+    name: mongodb
+    app: example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example
+      name: mongodb
+  template:
+    metadata:
+      labels:
+        name: mongodb
+        app: example
+    spec:
+      restartPolicy: Always
+      containers:
+        - image: dojot/mongo:3.2
+          name: mongodb

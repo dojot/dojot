@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: x509-identity-mgmt
+  labels:
+    name: x509-identity-mgmt
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    name: x509-identity-mgmt
+    app: example
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: x509-identity-mgmt
+  labels:
+    name: x509-identity-mgmt
+    app: example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example
+      name: x509-identity-mgmt
+  template:
+    metadata:
+      labels:
+        name: x509-identity-mgmt
+        app: example
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: x509-identity-mgmt
+          image: dojot/x509-identity-mgmt:v0.5.0-rc.1
+          env:
+          - name: DATABASE_JDBC_URL
+            value: "jdbc:postgresql://postgres:5432/postgres?characterEncoding=UTF-8"
+          - name: DATABASE_USER
+            value: "postgres"
+          - name: DATABASE_PASSWORD
+            value: "postgres"
+          - name: EJBCA_PERFORM_DOJOT_SETUP
+            value: "true"
+          - name: MONGO_URI
+            value: "mongodb://mongodb:27017/x509-identity-mgmt"
