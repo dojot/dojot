@@ -2,21 +2,24 @@
 
 The **kafka2ftp** service provides a connector solution for forwarding messages from Apache Kafka to FTP servers.
 
-# **Table of Contents**
+## **Table of Contents**
 
-1. [Overview](#overview)
-   1. [Message forwarding service to FTP servers](##message-forwarding-service-to-ftp-servers)
-   2. [Using with Flowbroker](##using-with-flowbroker)
-2. [Running the service](#running-the-service)
-   1. [Configuration](##configuration)
-      1. [Environment variables](###environment-variables)
-   2. [How to run](##how-to-run)
-3. [Documentation](#documentation)
-4. [Issues and help](#issues-and-help)
+1. [Overview](##overview)
+   1. [Message forwarding service to FTP servers](###message-forwarding-service-to-ftp-servers)
+   2. [Using with Flowbroker](###using-with-flowbroker)
+2. [Dependencies](##dependencies)
+   1. [Dojot Services](###dojot-services)
+   2. [Others Services](###others-services)
+3. [Running the service](##running-the-service)
+   1. [Configuration](###configuration)
+      1. [Environment variables](####environment-variables)
+   2. [How to run](###how-to-run)
+4. [Documentation](##documentation)
+5. [Issues and help](##issues-and-help)
 
-# Overview
+## Overview
 
-## Message forwarding service to FTP servers
+### Message forwarding service to FTP servers
 
 The **kafka2ftp**  subscribes to the topic *tenant* .dojot.ftp (*tenant* is defined in the environment variable), in which messages are produced with information about the filename, encoding format and file content. These messages are processed by the service and sent to the corresponding FTP server. Example of message received by this service below:
 
@@ -49,17 +52,32 @@ filename        | Name of the file to be sent to the FTP server.
 encoding        | Encoding the contents of the file. Valid values are: ascii, base64, hex, utf16le, utf8 and binary.
 content         | File contents.
 
-## Using with Flowbroker
+### Using with Flowbroker
 
 You can use this service together with the [flowbroker](https://github.com/dojot/flowbroker) using the **Publish in FTP topic** node, see more in the [dojot platform documentation](https://dojotdocs.readthedocs.io))  on the topic *Using flow builder*.
 
-# Running the service
+## Dependencies
 
-## Configuration
+The services dependencies are listed in the next topics.
+
+- Dojot Services: They are dojot services
+- Others Services: They are external services
+
+### Dojot Services
+
+- Flowbroker >= v0.5.0 (Justing if you are using the **Publish in FTP topic** node)
+
+### Others Services
+
+- Kafka (tested using Kafka version 2.12)
+
+## Running the service
+
+### Configuration
 
 Before proceeding, **make sure you configure your environment**.
 
-### Environment variables
+#### Environment variables
 
 Key                        | Purpose                                                  | Default Value      | Valid Values |
 -------------------------- | -------------------------------------------------------- | ---------------    | -----------  |
@@ -78,7 +96,7 @@ RETRIES      | The maximum number of times to attempt the upload       | 13     
 
 Note: Number of RETRIES sent uses the "exponential backoff" strategy. When RETRIES=13 using an exponential backoff strategy, this means the last attempt is made after 2h 16m 31 sec. The total time in ms can be calculated with _Sum[1000*2^k, {k, 0, n-1}]_ where *n=retries*.
 
-# How to run
+## How to run
 
 Beforehand, you need an already running dojot instance in your machine. Check out the
 [dojot documentation](https://dojotdocs.readthedocs.io)
@@ -99,13 +117,13 @@ docker push <username>/kafka2ftp:<tag>
 
 __NOTE THAT__  you can use the official image provided by dojot in its  [DockerHub page](https://hub.docker.com/r/dojot/kafka2ftp).
 
-# Documentation
+## Documentation
 
 Check the documentation for more information:
 
 - [Latest dojot platform documentation](https://dojotdocs.readthedocs.io/en/latest)
 
-# Issues and help
+## Issues and help
 
 If you found a problem or need help, leave an issue in the main
 [dojot repository](https://github.com/dojot/dojot) and we will help you!
