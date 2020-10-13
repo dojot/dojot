@@ -148,7 +148,7 @@ class TrustedCAService {
     const { tenant } = this;
 
     const ff = this.parseCertCndtFlds({ tenant, caFingerprint, autoRegistered: false });
-    const certCount = this.CertificateModel.countDocuments(ff);
+    const certCount = await this.CertificateModel.countDocuments(ff);
     if (certCount > 0) {
       throw BadRequest('There are certificates dependent on the CA to be removed, '
       + "however these certificates are not marked as 'autoRegistered'. Therefore, "
@@ -213,10 +213,14 @@ class TrustedCAService {
    */
   async getPEM(caFingerprint) {
     const ff = this.parseTrustedCACndtFlds({ tenant: this.tenant, caFingerprint });
-    const { caPem } = await this.TrustedCAModel.findOne(ff)
+    const result = await this.TrustedCAModel.findOne(ff)
       .select('caPem').maxTimeMS(this.queryMaxTimeMS).lean()
       .exec();
-    return caPem;
+    if (result) {
+      const { caPem } = result;
+      return caPem;
+    }
+    throw new Error('No certificate found matching the provided fingerprint.');
   }
 }
 

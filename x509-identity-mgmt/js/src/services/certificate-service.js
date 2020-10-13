@@ -10,7 +10,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils,
     dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration,
+    caCertAutoRegistration, logger,
   }) {
     this.trustedCAService = trustedCAService;
     this.ejbcaFacade = ejbcaFacade;
@@ -22,6 +22,7 @@ class CertificateService {
     this.queryMaxTimeMS = queryMaxTimeMS;
     this.certMinimumValidityDays = certMinimumValidityDays;
     this.caCertAutoRegistration = caCertAutoRegistration;
+    this.logger = logger;
 
     this.CertificateModel = certificateModel.model;
   }
@@ -76,21 +77,23 @@ class CertificateService {
     * @returns the fingerprint of the registered certificate.
     */
   async registerCertificate({ caFingerprint, certificateChain, belongsTo }) {
-    let rootCAFingerprint = caFingerprint;
     let rootCAPem = null;
+    let rootCAFingerprint = caFingerprint;
+
+    // the first certificate in the chain must be the one to be registered
     const [pemToBeRegistered] = certificateChain;
-    const cert = this.pkiUtils.parseCert(pemToBeRegistered);
-    const certificateFingerprint = this.pkiUtils.getFingerprint(pemToBeRegistered);
+    const certToBeRegistered = this.pkiUtils.parseCert(pemToBeRegistered);
+    const certFingerprint = this.pkiUtils.getFingerprint(pemToBeRegistered);
 
     // ensures that the certificate's validity is within the limit
-    this.pkiUtils.checkRemainingDays(cert, this.certMinimumValidityDays);
+    this.pkiUtils.checkRemainingDays(certToBeRegistered, this.certMinimumValidityDays);
 
     // ensures that the certificate is not a CA certificate
     // and that it is also not self-signed
-    await this.pkiUtils.assertLeaf(cert);
+    await this.pkiUtils.assertLeaf(certToBeRegistered);
 
     // ensures that the certificate has not yet been registered for the tentant
-    await this.checkExistingCertificate(certificateFingerprint);
+    await this.checkExistingCertificate(certFingerprint);
 
     // Attempts to extract the root CA from the certificate chain
     if (certificateChain.length > 1) {
@@ -98,6 +101,14 @@ class CertificateService {
       if (await this.pkiUtils.isRootCA(lastCert)) {
         rootCAPem = certificateChain.pop();
         rootCAFingerprint = this.pkiUtils.getFingerprint(rootCAPem);
+
+        // If "caFingerprint" is informed and also a root CA certificate in the payload,
+        // we must ensure that the two are the same, otherwise, we must return an error.
+        if (caFingerprint && caFingerprint !== rootCAFingerprint) {
+          throw BadRequest('The fingerprint of the CA defined in the payload of the request '
+            + 'does not match the fingerprint of the certificate of the root CA that was '
+            + 'also informed in the certificate chain.');
+        }
       }
     }
 
@@ -107,8 +118,15 @@ class CertificateService {
         + 'certificate as the last one in the chain of certificates.');
     }
 
-    let registeredRootCAPem = await this.trustedCAService.getPEM(rootCAFingerprint);
-    if (!registeredRootCAPem) {
+    // Attempts to obtain the previously registered root CA certificate...
+    let registeredRootCAPem = null;
+    try {
+      registeredRootCAPem = await this.trustedCAService.getPEM(rootCAFingerprint);
+    } catch (ex) {
+      this.logger.debug(ex);
+      // If the root CA certificate has not been registered, but it was informed in
+      // the request and the service is able to automatically register it, then it does.
+      // Otherwise, it throws an error and does not continue with the operation.
       if (this.caCertAutoRegistration && rootCAPem) {
         await this.trustedCAService.registerCertificate({
           caPem: rootCAPem, allowAutoRegistration: false,
@@ -119,21 +137,26 @@ class CertificateService {
       }
     }
 
-    // ensures that the certificate chain of trust is valid
+    // The last certificate of the chain must be that of the root CA previously registered
+    certificateChain.push(registeredRootCAPem);
+
+    // Converts the PEM format certificate chain to javascript objects
     const certChain = certificateChain.map((pem) => this.pkiUtils.parseCert(pem));
-    const trusted = this.pkiUtils.parseCert(registeredRootCAPem);
+
+    // ensures that the certificate chain of trust is valid
+    const trusted = certChain[certChain.length - 1];
     await this.pkiUtils.checkChainOfTrust(certChain, trusted);
 
     // Register the certificate in the database
-    const subjectDN = this.dnUtils.from(cert.subject).stringify();
+    const subjectDN = this.dnUtils.from(certToBeRegistered.subject).stringify();
     const model = new this.CertificateModel({
       caFingerprint: rootCAFingerprint,
-      fingerprint: certificateFingerprint,
+      fingerprint: certFingerprint,
       pem: pemToBeRegistered,
       subjectDN,
       validity: {
-        notBefore: cert.notBefore.value,
-        notAfter: cert.notAfter.value,
+        notBefore: certToBeRegistered.notBefore.value,
+        notAfter: certToBeRegistered.notAfter.value,
       },
       issuedByDojotPki: false,
       belongsTo,
@@ -141,7 +164,7 @@ class CertificateService {
     });
     await model.save();
 
-    return { certificateFingerprint };
+    return { certificateFingerprint: certFingerprint };
   }
 
   /**

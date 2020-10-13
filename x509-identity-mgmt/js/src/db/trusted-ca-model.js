@@ -51,7 +51,20 @@ const mongoQS = new MongoQS({
 
 module.exports = ({ db }) => ({
   model: mongoose.model('TrustedCA', trustedCASchema),
-  parseConditionFields: (urlQueryStringObj) => mongoQS.parse(urlQueryStringObj),
+  parseConditionFields: (conditionFields) => {
+    Object.entries(conditionFields).forEach(
+      ([key, value]) => {
+        // value must be a string
+        if (typeof value !== 'string') {
+          if (typeof value.toString !== 'function') {
+            throw new Error('The value of the Condition Field must be a string or convertible to a string.');
+          }
+          Reflect.set(conditionFields, key, value.toString());
+        }
+      },
+    );
+    return mongoQS.parse(conditionFields);
+  },
   parseProjectionFields: (commaSeparatedFields) => (
     db.parseProjectionFields(commaSeparatedFields, projectableFields)
   ),
