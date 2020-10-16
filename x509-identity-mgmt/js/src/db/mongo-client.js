@@ -72,104 +72,96 @@ function sanitizeFields(obj, dottedAllowedFields) {
 }
 
 
-function initMongoClient(connCfg, logger) {
+module.exports = ({ config, healthCheck, logger }) => {
   /* Flag indicating whether the MongoDB Driver had the first successful connection */
   let initialized = false;
 
-  /* flag with the health check result of the database connection */
-  let healthCheck = false;
-
   const connOpts = {
-    user: connCfg.options.user,
-    pass: connCfg.options.pass,
-    authSource: connCfg.options.authsource,
-    autoIndex: connCfg.options.autoindex,
-    poolSize: connCfg.options.poolsize,
-    serverSelectionTimeoutMS: connCfg.options.serverselectiontimeoutms,
-    heartbeatFrequencyMS: connCfg.options.heartbeatfrequencyms,
-    socketTimeoutMS: connCfg.options.sockettimeoutms,
-    family: connCfg.options.family,
+    user: config.options.user,
+    pass: config.options.pass,
+    authSource: config.options.authsource,
+    autoIndex: config.options.autoindex,
+    poolSize: config.options.poolsize,
+    serverSelectionTimeoutMS: config.options.serverselectiontimeoutms,
+    heartbeatFrequencyMS: config.options.heartbeatfrequencyms,
+    socketTimeoutMS: config.options.sockettimeoutms,
+    family: config.options.family,
   };
 
   const connect = () => {
     logger.info('Establishing connection with MongoDB');
-    return mongoose.connect(connCfg.uri, connOpts)
+    return mongoose.connect(config.uri, connOpts)
       .catch((err) => {
         logger.error(`Mongoose connect() failed with error: ${err.message}`);
       });
   };
 
-  const on = mongoose.connection.on.bind(mongoose.connection);
-
   /* Emitted when an error occurs on this connection. */
-  on('error', (err) => {
+  mongoose.connection.on('error', (err) => {
     logger.error(err);
   });
 
   /* Emitted when this connection successfully connects to the db.
    * May be emitted multiple times in reconnected scenarios. */
-  on('connected', () => {
+  mongoose.connection.on('connected', () => {
     logger.info('Connection established to MongoDB');
     initialized = true;
-    healthCheck = true;
+    healthCheck.ready();
   });
 
   /* Emitted when Mongoose lost connection to the MongoDB server. This event may be
    * due to your code explicitly closing the connection, the database server crashing,
    * or network connectivity issues. */
-  on('disconnected', () => {
+  mongoose.connection.on('disconnected', () => {
     logger.error('Lost MongoDB connection');
-    healthCheck = false;
+    healthCheck.notReady();
     if (!initialized) {
-      setTimeout(() => connect(), connCfg.options.heartbeatFrequencyMS);
+      setTimeout(() => connect(), config.options.heartbeatFrequencyMS);
     }
   });
 
   /* Emitted if Mongoose lost connectivity to MongoDB and successfully reconnected.
    * Mongoose attempts to automatically reconnect when it loses connection to the database. */
-  on('reconnected', () => {
+  mongoose.connection.on('reconnected', () => {
     logger.info('Reconnected to MongoDB');
-    healthCheck = true;
+    healthCheck.ready();
   });
 
   /* Emitted when you're connected to a standalone server and Mongoose has run out
    * of reconnectTries. The MongoDB driver will no longer attempt to reconnect after
    * this event is emitted. This event will never be emitted if you're connected
    * to a replica set. */
-  on('reconnectFailed', () => {
+  mongoose.connection.on('reconnectFailed', () => {
     logger.error('Reconnected to MongoDB failed');
     initialized = false;
-    healthCheck = false;
-    setTimeout(() => connect(), connCfg.options.heartbeatFrequencyMS);
+    healthCheck.notReady();
+    setTimeout(() => connect(), config.options.heartbeatFrequencyMS);
   });
 
   /* Emitted when you're connecting to a replica set and Mongoose has successfully
    * connected to the primary and at least one secondary. */
-  on('fullsetup', () => {
+  mongoose.connection.on('fullsetup', () => {
     logger.info('Connected to the primary and at least one secondary server on the MongoDB Replica Set');
-    healthCheck = true;
+    healthCheck.ready();
   });
 
   /* Emitted when you're connecting to a replica set and Mongoose has successfully
    * connected to all servers specified in your connection string. */
-  on('all', () => {
+  mongoose.connection.on('all', () => {
     logger.info('Connected to all servers on the MongoDB Replica Set');
-    healthCheck = true;
+    healthCheck.ready();
   });
 
-  on('close', () => {
+  mongoose.connection.on('close', () => {
     logger.info('MongoDB connection has been closed');
     initialized = false;
-    healthCheck = false;
+    healthCheck.notReady();
   });
 
   return {
     connect,
-    healthCheck: () => healthCheck,
     close: mongoose.connection.close.bind(mongoose.connection),
     parseProjectionFields,
     sanitizeFields,
   };
-}
-
-module.exports = ({ config, logger }) => initMongoClient(config.conn, logger);
+};

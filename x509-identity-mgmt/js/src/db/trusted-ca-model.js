@@ -51,7 +51,8 @@ const mongoQS = new MongoQS({
 
 module.exports = ({ db }) => ({
   model: mongoose.model('TrustedCA', trustedCASchema),
-  parseConditionFields: (conditionFields) => {
+  parseConditionFields: (candidates) => {
+    const conditionFields = { ...candidates };
     Object.entries(conditionFields).forEach(
       ([key, value]) => {
         // value must be a string

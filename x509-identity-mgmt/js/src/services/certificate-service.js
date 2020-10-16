@@ -12,19 +12,18 @@ class CertificateService {
     dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
     caCertAutoRegistration, logger,
   }) {
-    this.trustedCAService = trustedCAService;
-    this.ejbcaFacade = ejbcaFacade;
-    this.tenant = tenant;
-    this.pkiUtils = pkiUtils;
-    this.dnUtils = dnUtils;
-    this.certValidity = certValidity;
-    this.checkPublicKey = checkPublicKey;
-    this.queryMaxTimeMS = queryMaxTimeMS;
-    this.certMinimumValidityDays = certMinimumValidityDays;
-    this.caCertAutoRegistration = caCertAutoRegistration;
-    this.logger = logger;
-
-    this.CertificateModel = certificateModel.model;
+    Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
+    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
+    Object.defineProperty(this, 'tenant', { value: tenant });
+    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
+    Object.defineProperty(this, 'dnUtils', { value: dnUtils });
+    Object.defineProperty(this, 'certValidity', { value: certValidity });
+    Object.defineProperty(this, 'checkPublicKey', { value: checkPublicKey });
+    Object.defineProperty(this, 'queryMaxTimeMS', { value: queryMaxTimeMS });
+    Object.defineProperty(this, 'certMinimumValidityDays', { value: certMinimumValidityDays });
+    Object.defineProperty(this, 'caCertAutoRegistration', { value: caCertAutoRegistration });
+    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
   }
 
   /**

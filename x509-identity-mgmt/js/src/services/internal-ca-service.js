@@ -8,9 +8,9 @@ class InternalCAService {
   constructor({
     ejbcaFacade, rootCA, pkiUtils,
   }) {
-    this.ejbcaFacade = ejbcaFacade;
-    this.rootCA = rootCA;
-    this.pkiUtils = pkiUtils;
+    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
+    Object.defineProperty(this, 'rootCA', { value: rootCA });
+    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
   }
 
   /**

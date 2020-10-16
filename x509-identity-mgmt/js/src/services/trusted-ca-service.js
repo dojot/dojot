@@ -11,20 +11,20 @@ class TrustedCAService {
     trustedCAModel, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils,
     rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
   }) {
-    this.ejbcaFacade = ejbcaFacade;
-    this.tenant = tenant;
-    this.pkiUtils = pkiUtils;
-    this.dnUtils = dnUtils;
-    this.rootCA = rootCA;
-    this.queryMaxTimeMS = queryMaxTimeMS;
-    this.externalCaCertMinimumValidityDays = externalCaCertMinimumValidityDays;
+    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
+    Object.defineProperty(this, 'tenant', { value: tenant });
+    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
+    Object.defineProperty(this, 'dnUtils', { value: dnUtils });
+    Object.defineProperty(this, 'rootCA', { value: rootCA });
+    Object.defineProperty(this, 'queryMaxTimeMS', { value: queryMaxTimeMS });
+    Object.defineProperty(this, 'externalCaCertMinimumValidityDays', { value: externalCaCertMinimumValidityDays });
 
-    this.TrustedCAModel = trustedCAModel.model;
-    this.parseTrustedCACndtFlds = trustedCAModel.parseConditionFields.bind(trustedCAModel);
+    Object.defineProperty(this, 'TrustedCAModel', { value: trustedCAModel.model });
+    Object.defineProperty(this, 'parseTrustedCACndtFlds', { value: trustedCAModel.parseConditionFields.bind(trustedCAModel) });
 
-    this.CertificateModel = certificateModel.model;
-    this.parseCertCndtFlds = certificateModel.parseConditionFields.bind(certificateModel);
-    this.caCertLimit = caCertLimit;
+    Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
+    Object.defineProperty(this, 'parseCertCndtFlds', { value: certificateModel.parseConditionFields.bind(certificateModel) });
+    Object.defineProperty(this, 'caCertLimit', { value: caCertLimit });
   }
 
   /**

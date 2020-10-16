@@ -10,7 +10,8 @@ module.exports = () => ({
     const err = new createError.Unauthorized();
     if (req.path.includes('throw-away')) {
       return next();
-    } if (req.headers.authorization) {
+    }
+    if (req.headers.authorization) {
       const authHeader = req.headers.authorization.split(' ');
       if (authHeader.length === 2 && authHeader[0] === 'Bearer') {
         const token = authHeader[1];

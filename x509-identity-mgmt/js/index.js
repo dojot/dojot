@@ -2,8 +2,6 @@ const { unflatten } = require('flat');
 
 const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
 
-const terminus = require('./src/terminus');
-
 const DIContainer = require('./src/di-container');
 
 ConfigManager.loadSettings('X509IDMGMT');
@@ -24,24 +22,48 @@ const container = DIContainer(config);
 
 const logger = container.resolve('logger');
 
+const stateManager = container.resolve('stateManager');
+
+const ejbcaHealthCheck = container.resolve('ejbcaHealthCheck');
+
 const db = container.resolve('db');
 
 const server = container.resolve('server');
 
 const framework = container.resolve('framework');
 
-const ejbcaFacade = container.resolve('ejbcaFacade');
-
+// Emitted each time there is a request. Note that there may be multiple
+// requests per connection (in the case of keep-alive connections).
 server.on('request', framework);
 logger.debug('Express Framework registered as listener for requests to the web server!');
 
-server.listen(config.server.port, () => {
+// Emitted when the server has been bound after calling server.listen().
+server.on('listening', () => {
   logger.info('Server ready to accept connections!');
   logger.info(server.address());
+  stateManager.signalReady('server');
 });
+
+// Emitted when an error occurs. Unlike net.Socket, the 'close' event will not
+// be emitted directly following this event unless server.close() is manually called.
+server.on('error', (e) => {
+  logger.error('Server experienced an error:', e);
+});
+
+// Emitted when the server closes. If connections exist,
+// this event is not emitted until all connections are ended.
+server.on('close', () => {
+  stateManager.signalNotReady('server');
+  ejbcaHealthCheck.stop();
+});
+
+// Begin accepting connections on the specified port and hostname.
+// If the hostname is omitted, the server will accept connections
+// directed to any IPv4 address (i.e. "0.0.0.0").
+server.listen(config.server.port);
 
 // Starts the process of connecting to the database
 db.connect();
 
-// adds health checks and graceful shutdown to the application
-terminus(config.terminus, logger).setup(server, db, ejbcaFacade);
+// The EJBCA healthchack is done at intervals directly in the Event Loop
+ejbcaHealthCheck.start();

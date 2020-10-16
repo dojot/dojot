@@ -1,6 +1,6 @@
 const awilix = require('awilix');
 
-const { Logger } = require('@dojot/microservice-sdk');
+const { Logger, ServiceStateManager } = require('@dojot/microservice-sdk');
 
 const pkiUtils = require('./core/pki-utils');
 
@@ -18,7 +18,11 @@ const certificateModel = require('./db/certificate-model');
 
 const trustedCAModel = require('./db/trusted-ca-model');
 
-const ejbcaFacade = require('./ejbca-facade');
+const EjbcaSoap = require('./ejbca/ejbca-soap-client');
+
+const EjbcaFacade = require('./ejbca/ejbca-facade');
+
+const EjbcaHealthCheck = require('./ejbca/ejbca-health-check');
 
 const scopedDIController = require('./controllers/scoped-di-controller');
 
@@ -55,19 +59,42 @@ const {
 } = awilix;
 
 module.exports = (config) => {
+  // creates a Dependency Injection (DI) container
   const DIContainer = awilix.createContainer();
 
+  // Configures the application modules, as well as their scope...
   const modules = {
-    config: asValue(config, { lifetime: Lifetime.SINGLETON }),
 
-    pkiUtils: asValue(pkiUtils, { lifetime: Lifetime.SINGLETON }),
+    logger: asClass(Logger, {
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({ sid: 'X509-Identity-Mgmt - Main' }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    stateManager: asClass(ServiceStateManager.Manager, {
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        services: ['server', 'db', 'ejbca'],
+        config: {
+          lightship: {
+            port: config.server.hcport,
+          },
+        },
+      }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    // --------------------------------------------------------
+
+    pkiUtils: asValue(pkiUtils, {
+      lifetime: Lifetime.SINGLETON,
+    }),
 
     dnUtils: asFunction(dnUtils, {
       injector: () => ({
         config: {
           allowedAttrs: config.certificate.subject.allowedattrs,
-          // allowedAttrsConstraints: config.certificate.subject.allowedattrsconstraints,
-          allowedAttrsConstraints: ['CN=^[0-9A-Za-z ]{1,255}$'],
+          allowedAttrsConstraints: config.certificate.subject.allowedattrsconstraints,
           mandatoryAttrs: config.certificate.subject.mandatoryattrs,
           constantAttrs: {
             O: config.certificate.subject.constantattrs.o,
@@ -77,11 +104,65 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    logger: asClass(Logger, {
-      injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({ sid: 'X509-Identity-Mgmt - Main' }),
+    // --------------------------------------------------------
+
+    db: asFunction(db, {
+      injector: () => {
+        const sm = DIContainer.resolve('stateManager');
+        return {
+          healthCheck: ({
+            ready: sm.signalReady.bind(sm, 'db'),
+            notReady: sm.signalNotReady.bind(sm, 'db'),
+          }),
+          config: config.mongo.conn,
+        };
+      },
       lifetime: Lifetime.SINGLETON,
     }),
+
+    certificateModel: asFunction(certificateModel, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    trustedCAModel: asFunction(trustedCAModel, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    // --------------------------------------------------------
+
+    ejbcaHealthCheck: asClass(EjbcaHealthCheck, {
+      injector: () => {
+        const sm = DIContainer.resolve('stateManager');
+        return {
+          healthCheck: ({
+            ready: sm.signalReady.bind(sm, 'ejbca'),
+            notReady: sm.signalNotReady.bind(sm, 'ejbca'),
+          }),
+          url: config.ejbca.healthcheck.url,
+          interval: config.ejbca.healthcheck.intervalms,
+        };
+      },
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    ejbcaSoap: asClass(EjbcaSoap, {
+      injector: () => ({
+        wsdl: config.ejbca.wsdl,
+        pkcs12: config.ejbca.pkcs12,
+        pkcs12secret: config.ejbca.pkcs12secret,
+        trustedCA: config.ejbca.trustedca,
+      }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    ejbcaFacade: asClass(EjbcaFacade, {
+      injector: () => ({
+        forceCRLRenew: config.ejbca.forcecrlrenew,
+      }),
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    // --------------------------------------------------------
 
     server: asFunction(server, {
       injector: () => ({ config: config.server }),
@@ -117,25 +198,9 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
+    // --------------------------------------------------------
+
     defaultErrorHandler: asFunction(defaultErrorHandler, {
-      lifetime: Lifetime.SINGLETON,
-    }),
-
-    ejbcaFacade: asFunction(ejbcaFacade, {
-      injector: () => ({ config: config.ejbca }),
-      lifetime: Lifetime.SINGLETON,
-    }),
-
-    db: asFunction(db, {
-      injector: () => ({ config: config.mongo }),
-      lifetime: Lifetime.SINGLETON,
-    }),
-
-    certificateModel: asFunction(certificateModel, {
-      lifetime: Lifetime.SINGLETON,
-    }),
-
-    trustedCAModel: asFunction(trustedCAModel, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -233,7 +298,11 @@ module.exports = (config) => {
     }),
   };
 
+  // It registers all modules in the container so that they are instantiated only
+  // when they are needed. Thus, the container makes the inversion of control over
+  // the creation of objects and injection of dependencies.
   DIContainer.register(modules);
 
+  // Returns the configured di-container.
   return DIContainer;
 };
