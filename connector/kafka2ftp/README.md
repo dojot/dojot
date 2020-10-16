@@ -21,7 +21,7 @@ The **kafka2ftp** service provides a connector solution for forwarding messages 
 
 ### Message forwarding service to FTP servers
 
-The **kafka2ftp**  subscribes to the topic *tenant* .dojot.ftp (*tenant* is defined in the environment variable), in which messages are produced with information about the filename, encoding format and file content. These messages are processed by the service and sent to the corresponding FTP server. Example of message received by this service below:
+The **kafka2ftp** subscribes to the topic *tenant*.dojot.ftp (*tenant* is defined in the environment variable), in which messages are produced with information about the filename, encoding format and file content. These messages are processed by the service and sent to the corresponding FTP server. Example of a message received by this service:
 
 ```json
 {
@@ -82,7 +82,7 @@ Before proceeding, **make sure you configure your environment**.
 Key                        | Purpose                                                  | Default Value      | Valid Values |
 -------------------------- | -------------------------------------------------------- | ---------------    | -----------  |
 FTP_FTPS                   | Explicit FTPS over TLS                                   | false              | String (true or false)                |
-FTP_HOST                   | Server FTP host                                          | localhost          | String                       |
+FTP_HOST                   | Server FTP host                                          | localhost          | hostname/IP                       |
 FTP_PASSWORD               | Server FTP Password                                      | guest              | String                       |
 FTP_PORT                   | Server FTP port                                          | 21                 | Natural number                      |
 FTP_REMOTE_DIR             | Path where files will be sent (This path must exist previously)   | /                  | Path                         |
