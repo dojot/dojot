@@ -16,84 +16,86 @@ secured with mutual TLS. In future releases, the communication with Kafka will a
 
 # **Configurations**
 
-## **Environment Variables**
+Before running the V2K Bridge service within your environment, make sure you configure the variables
+to match your needs.
 
-Before running the V2K Bridge service within your environment, make sure you configure the
-environment variables to match your needs.
+You can select the configuration file via the `V2K_APP_USER_CONFIG_FILE` variable. Its default value
+is `production.conf`.
 
-### **App**
+For more information about the usage of the configuration files and environment variables, check the
+__ConfigManager__ module in our[Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
 
-Key                              | Purpose                                            | Default Value           | Valid Values     |
--------------------------------- | -------------------------------------------------- | ----------------------- | ---------------- |
-V2K_APP_BASEDIR                  | Base directory where the project is located        | /opt/v2k_bridge         | string           |
-V2K_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3                       | number           |
-V2K_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3                       | number           |
-V2K_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | x509-identity-mgmt:3000 | hostname/IP:port |
-V2K_APP_HOSTNAME                 | Hostname to be used in the certificate common name | v2k-bridge              | hostname/IP      |
+## **App**
 
-### **Kafka Messenger**
+Configurations used in the service.
 
-Key                                | Purpose                       | Default Value | Valid Values |
----------------------------------- | ----------------------------- | ------------- | ------------ |
-V2K_MESSENGER_PRODUCE_TOPIC_SUFFIX | Kafka production topic suffix | device-data   | string       |
+| Key | Purpose | Default Value | Valid Values
+| --- | ------- | ------------- | ------------
+| backpressure.handlers | Number of parallel handlers for the backpressure queue processing mechanism | 4 | integer
+| backpressure.queue.length.max | Maximum backpressure queue length in bytes | 1048576 | integer
+| messenger.produce.topic.suffix | Kafka production topic suffix | device-data | string
+| logger.transports.console.level | Console logger level | info | string
+| logger.verbose | Whether to enable logger verbosity or not | false | boolean
+| subscription.qos | QoS to be used when subscribing to the MQTT broker | 1 | _0_, _1_, _2_
+| subscription.topic | Subscription topic | $share/group/+/attrs | string
 
-### **MQTT**
+## **MQTT**
 
-Key                                    | Purpose                                                   | Default Value                                       | Valid Values                   |
--------------------------------------- | --------------------------------------------------------- | --------------------------------------------------- | ------------------------------ |
-V2K_MQTT_BACKPRESSURE_QUEUE_LENGTH_MAX | Maximum backpressure queue length in bytes                | 1048576                                             | integer                        |
-V2K_MQTT_BACKPRESSURE_HANDLERS         | Number of parallel handlers backpressure queue processing | 4                                                   | integer                        |
-V2K_MQTT_CLIENT_KEEPALIVE              | MQTT client keepalive                                     | 60                                                  | integer                        |
-V2K_MQTT_CLIENT_ID                     | MQTT client client id                                     | ${V2K_APP_HOSTNAME}                                 | string                         |
-V2K_MQTT_CLIENT_SECURE                 | MQTT client secure                                        | true                                                | true, false (case insensitive) |
-V2K_MQTT_CLIENT_SUBSCRIPTION_QOS       | MQTT client Quality of service                            | 1                                                   | integer                        |
-V2K_MQTT_CLIENT_SUBSCRIPTION_TOPIC     | MQTT client topic to subscribe                            | $share/group/+/attrs                                | string                         |
-V2K_MQTT_CLIENT_USERNAME               | MQTT client username                                      | ${V2K_APP_HOSTNAME}                                 | string                         |
-V2K_MQTT_SERVER_ADDRESS                | MQTT broker host                                          | vernemq-k8s                                         | hostname/IP                    |
-V2K_MQTT_SERVER_PORT                   | MQTT broker port                                          | 8883                                                | integer                        |
-V2K_MQTT_TLS_CA_FILE                   | CA certificate file location                              | ${V2K_APP_BASEDIR}/app/cert/ca.crt                  | string                         |
-V2K_MQTT_TLS_CERTIFICATE_FILE          | MQTT client certificate file                              | ${V2K_APP_BASEDIR}/app/cert/${V2K_APP_HOSTNAME}.crt | string                         |
-V2K_MQTT_TLS_KEY_FILE                  | MQTT client key file                                      | ${V2K_APP_BASEDIR}/app/cert/${V2K_APP_HOSTNAME}.key | string                         |
+Configurations passed directly to the [NPM MQTT library](https://www.npmjs.com/package/mqtt). We do
+not set the default values for all of them, but you can change the value of the ones we did not
+mentioned here via environment variables.
 
-### **Microservice SDK**
+Check the documentation for more information on these variables.
 
-You can configure the Kafka Producer with variables from the Microservice SDK and librdkafka. For
-more details on these configurations, please read the
-[librdkafka official configuration guide](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
-and [Microservice SDK documentation](https://www.npmjs.com/package/@dojot/microservice-sdk).
+__NOTE THAT__ the module adapts the dotted version of the variables to the camelCase one that the
+library accepts.
 
-SDK configurations:
+| Key | Default Value | Valid Values
+| --- | ------------- | ------------
+| mqtt.ca                  | /opt/v2k_bridge/app/cert/ca.crt                      | path
+| mqtt.cert                | /opt/v2k_bridge/app/cert/${HOSTNAME:-v2k-bridge}.crt | path
+| mqtt.clean               | false                                                | boolean
+| mqtt.client.id           | ${HOSTNAME:-v2k-bridge}                              | string
+| mqtt.host                | vernemq-k8s                                          | string
+| mqtt.keep.alive           | 60                                                   | integer
+| mqtt.key                 | /opt/v2k_bridge/app/cert/${HOSTNAME:-v2k-bridge}.key | path
+| mqtt.port                | 8883                                                 | integer
+| mqtt.protocol            | mqtts                                                | _mqtt_ and _mqtts_
+| mqtt.reject.unauthorized | true                                                 | boolean
+| mqtt.username            | ${HOSTNAME:-v2k-bridge}                              | string
 
-#### **Logger**
+## **SDK Producer**
 
-Key                                 | Default Value |
------------------------------------ | ------------- |
-V2K_LOGGER_TRANSPORTS_CONSOLE_LEVEL | info          |
-V2K_LOGGER_VERBOSE                  | false         |
+These parameters are passed directly to the SDK producer. Check the
+[official repository](https://github.com/dojot/dojot-microservice-sdk-js) for more info on the
+values.
 
-#### **Producer**
+| Key | Default Value | Valid Values
+| --- | ------------- | ------------
+| sdk.producer.connect.timeout.ms    | 5000  | integer
+| sdk.producer.disconnect.timeout.ms | 10000 | integer
+| sdk.producer.flush.timeout.ms      | 2000  | integer
+| sdk.producer.pool.interval.ms      | 100   | integer
 
-Key                                    | Default Value |
--------------------------------------- | ------------- |
-V2K_SDK_PRODUCER_CONNECT_TIMEOUT_MS    | 5000          |
-V2K_SDK_PRODUCER_DISCONNECT_TIMEOUT_MS | 10000         |
-V2K_SDK_PRODUCER_FLUSH_TIMEOUT_MS      | 2000          |
-V2K_SDK_PRODUCER_POOL_INTERVAL_MS      | 100           |
+### **kafka.producer object**
 
-#### **librdkafka**
+| Key | Default Value | Valid Values
+| --- | ------------- | ------------
+| producer.acks | -1 | integer
+| producer.batch.num.messages | 10000 | integer
+| producer.compression.codec | gzip | string
+| producer.dr_cb | true | boolean
+| producer.enable.idempotence | false | boolean
+| producer.max.in.flight.requests.per.connection | 1000000 | integer
+| producer.metadata.broker.list | kafka-server:9092 | string
+| producer.retries | 2 | integer
+| producer.queue.buffering.max.kbytes | 1048576 | integer
+| producer.queue.buffering.max.ms | 0.5 | float
+| producer.retry.backoff.ms | 100 | integer
+| producer.socket.keepalive.enable | false | boolean
 
-Key                                             | Default Value       |
------------------------------------------------ | ------------------- |
-V2K_KAFKA_ACKS                                  | -1                  |
-V2K_KAFKA_BATCH_NUM_MESSAGES                    | 10000               |
-V2K_KAFKA_CLIENT_ID                             | ${V2K_APP_HOSTNAME} |
-V2K_KAFKA_COMPRESSION_CODEC                     | gzip                |
-V2K_KAFKA_DR_CB                                 | true                |
-V2K_KAFKA_ENABLE_IDEMPOTENCE                    | false               |
-V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION | 1000000             |
-V2K_KAFKA_METADATA_BROKER_LIST                  | kafka-server:9092   |
-V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES            | 1048576             |
-V2K_KAFKA_QUEUE_BUFFERING_MAX_MS                | 0.5                 |
-V2K_KAFKA_RETRIES                               | 2                   |
-V2K_KAFKA_RETRY_BACKOFF_MS                      | 100                 |
-V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE               | false               |
+### **kafka.topics object**
+
+| Key | Default Value | Valid Values
+| --- | ------------- | ------------
+| topic.acks | -1 | integer
