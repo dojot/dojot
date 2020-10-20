@@ -1,6 +1,6 @@
 const utils = require('../../app/utils');
 
-describe('Testing utils', () => {
+describe('Utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
