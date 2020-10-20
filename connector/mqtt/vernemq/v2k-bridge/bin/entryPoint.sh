@@ -10,6 +10,8 @@ if [ ! -z "${DEBUG+x}" ]; then
 fi
 
 # Set environment variables that are used by the program
+# TODO: when integrating the Sidecar, double check these variables
+# TODO: when integrating the SDK Health Check facility, double check these variables
 export V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/opt/v2k_bridge"}
 export V2K_APP_CONNECTION_RETRY_COUNT=${V2K_APP_CONNECTION_RETRY_COUNT:-"3"}
 export V2K_APP_CONNECTION_RETRY_TIMEOUT=${V2K_APP_CONNECTION_RETRY_TIMEOUT:-"3"}
