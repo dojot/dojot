@@ -21,6 +21,3 @@ coverage:
 
 ignore:
   - "tools/certgen/**/*"
-
-fixes:
-  - "/home/runner/work/dojot/dojot/::"
