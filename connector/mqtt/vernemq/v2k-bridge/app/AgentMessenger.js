@@ -1,6 +1,5 @@
-const { Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
 
-const appConfig = require('./config');
 const Utils = require('./utils');
 const MQTTClient = require('./MQTTClient');
 
@@ -12,13 +11,17 @@ const MQTTClient = require('./MQTTClient');
 class AgentMessenger {
   /**
    * Create an agentMessenger
-   *
-   * @param {Object} config - the configuration
    */
-  constructor(config) {
+  constructor() {
+    this.config = ConfigManager.getConfig('V2K');
+
     this.initialized = false;
-    this.producer = new Producer({ ...appConfig.sdk, kafka: appConfig.kafka });
-    this.mqttClient = new MQTTClient(this, config || appConfig.mqtt);
+    this.producer = new Producer({
+      ...this.config.sdk,
+      'kafka.producer': this.config.producer,
+      'kafka.topic': this.config.topic,
+    });
+    this.mqttClient = new MQTTClient(this);
     this.logger = new Logger('AgentMessenger');
   }
 
@@ -35,8 +38,8 @@ class AgentMessenger {
       // initializing mqtt client
       this.logger.info('Initializing MQTTClient');
       this.mqttClient.init();
-    }).catch(() => {
-      this.logger.error('An error occurred while initializing the Kafka Producer. Bailing out!');
+    }).catch((error) => {
+      this.logger.error(error.stack || error);
       process.exit(1);
     });
   }
@@ -46,8 +49,8 @@ class AgentMessenger {
    *
    * @function sendMessage
    *
-   * @param {string} topic - topic to produce
-   * @param {Object} message - message to produce
+   * @param {string} topic
+   * @param {Object} message
    */
   sendMessage(topic, message) {
     let jsonPayload;
@@ -60,7 +63,7 @@ class AgentMessenger {
       deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);
       messageKey = `${deviceDataMessage.metadata.tenant}:${deviceDataMessage.metadata.deviceid}`;
       kafkaTopic = `${deviceDataMessage.metadata.tenant}.${
-        appConfig.messenger['produce.topic.suffix']}`;
+        this.config.messenger['produce.topic.suffix']}`;
       deviceDataMessage = JSON.stringify(deviceDataMessage);
     } catch (error) {
       this.logger.error(`Failed to create the message. Error: ${error.stack || error}`);
