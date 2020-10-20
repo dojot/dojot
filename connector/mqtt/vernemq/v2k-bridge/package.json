@@ -46,10 +46,9 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "app/**/*.js",
-      "utils/**/*.js",
       "!index.js"
     ],
-    "coverageDirectory": "./coverage/",
+    "coverageDirectory": "coverage/",
     "coverageThreshold": {
       "global": {
         "branches": 80,
@@ -64,7 +63,6 @@
       "."
     ],
     "testPathIgnorePatterns": [
-      "./coverage",
       "./node_modules"
     ],
     "testRegex": [
