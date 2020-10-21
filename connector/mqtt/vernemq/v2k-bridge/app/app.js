@@ -2,7 +2,7 @@ const { Logger } = require('@dojot/microservice-sdk');
 
 const util = require('util');
 const { unflatten } = require('flat');
-
+//12344555
 const config = require('./config');
 const AgentMessenger = require('./AgentMessenger');
 
