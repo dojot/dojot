@@ -4,7 +4,7 @@ const util = require('util');
 
 const AgentMessenger = require('./app/AgentMessenger');
 
-//ABCDEF
+// ABCDEF
 
 /*
  * TODO: the idea is to create a default environment variable that will be used internally by the
