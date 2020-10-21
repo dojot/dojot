@@ -39,7 +39,8 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        file: connector/mqtt/vernemq/v2k-bridge/coverage/lcov.info # create when run npm run coverage
+        #file: connector/mqtt/vernemq/v2k-bridge/coverage/lcov.info # create when run npm run coverage
+        directory: connector/mqtt/vernemq/v2k-bridge/coverage
         flags: V2KBridge # Flags allow you to isolate coverage reports for different tests
         name: v2k-bridge # Custom defined name for the upload
 
