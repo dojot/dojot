@@ -4,7 +4,7 @@ const https = require('https');
 const { Logger } = require('@dojot/microservice-sdk');
 const { app: appCfg, server: serverCfg } = require('./app/Config');
 
-//test 123
+// test 123
 
 Logger.setTransport('console', {
   level: appCfg.log.log_console_level,
