@@ -38,7 +38,6 @@ jobs:
         directory: connector/mqtt/vernemq/v2k-bridge/coverage
         flags: V2KBridge # Flags allow you to isolate coverage reports for different tests
         name: v2k-bridge # Custom defined name for the upload
-        verbose: true
 
   docker-hub:
     needs: unit-tests
