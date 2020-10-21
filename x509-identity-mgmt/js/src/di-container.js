@@ -30,6 +30,8 @@ const responseCompressController = require('./controllers/response-compress-cont
 
 const requestIdController = require('./controllers/request-id-controller');
 
+const beaconController = require('./controllers/beacon-controller');
+
 const requestLogController = require('./controllers/request-log-controller');
 
 const paginateController = require('./controllers/paginate-controller');
@@ -77,7 +79,10 @@ module.exports = (config) => {
         services: ['server', 'db', 'ejbca'],
         config: {
           lightship: {
-            port: config.server.hcport,
+            port: config.server.healthcheck.port,
+            shutdownDelay: config.server.shutdown.delay,
+            gracefulShutdownTimeout: config.server.shutdown.gracefultimeoutms,
+            shutdownHandlerTimeout: config.server.shutdown.handlertimeoutms,
           },
         },
       }),
@@ -139,7 +144,7 @@ module.exports = (config) => {
             notReady: sm.signalNotReady.bind(sm, 'ejbca'),
           }),
           url: config.ejbca.healthcheck.url,
-          interval: config.ejbca.healthcheck.intervalms,
+          delay: config.ejbca.healthcheck.delayms,
         };
       },
       lifetime: Lifetime.SINGLETON,
@@ -176,6 +181,7 @@ module.exports = (config) => {
           // The order of the controllers matters
           DIContainer.resolve('responseCompressController'),
           DIContainer.resolve('requestIdController'),
+          DIContainer.resolve('beaconController'),
           DIContainer.resolve('requestLogController'),
           DIContainer.resolve('paginateController'),
           DIContainer.resolve('jsonBodyParsingController'),
@@ -212,6 +218,11 @@ module.exports = (config) => {
     }),
 
     requestIdController: asFunction(requestIdController, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    beaconController: asFunction(beaconController, {
+      injector: () => ({ DIContainer }),
       lifetime: Lifetime.SINGLETON,
     }),
 
