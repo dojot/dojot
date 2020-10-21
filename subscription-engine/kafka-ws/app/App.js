@@ -12,7 +12,7 @@ const accessControlRouter = require('./routes/AccessControlRouter');
 const ticketRouter = require('./routes/TicketRouter');
 const topicsRouter = require('./routes/TopicsRouter');
 
-//test1234
+// test1234
 const app = express();
 
 function configure(server) {
