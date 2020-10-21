@@ -29,7 +29,6 @@ module.exports = ({ DIContainer, logger }) => ({
     const beacon = stateManager.createBeacon({
       requestId: req.id,
     });
-    logger.debug('Beacon alive:', beacon);
 
     onFinished(res, (err) => {
       if (err) {
@@ -38,7 +37,6 @@ module.exports = ({ DIContainer, logger }) => ({
       // After all Beacons are killed, it is possible
       // to proceed with the shutdown routine
       beacon.die();
-      logger.debug('Beacon died:', beacon);
     });
 
     // proceeds to the next controller...
