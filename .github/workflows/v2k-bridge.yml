@@ -28,9 +28,10 @@ jobs:
 
     - name: npm install, build, and test
       run: |
-        cd connector/mqtt/vernemq/v2k-bridge/
+        cd connector/mqtt/vernemq/v2k-bridges
         npm ci
         npm run build --if-present
+        npm run lint
         npm test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

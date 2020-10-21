@@ -4,8 +4,8 @@
   "private": true,
   "description": "Service to bridge messages from VerneMQ to Apache Kafka according to dojot rules.",
   "engines": {
-    "node": ">=12.18.4",
-    "npm": ">=6.14.8"
+    "node": ">=12.18",
+    "npm": ">=6.14"
   },
   "homepage": "https://github.com/dojot/dojot",
   "repository": {
@@ -16,7 +16,7 @@
   "main": "index.js",
   "scripts": {
     "app": "node index.js",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watchAll"
   },
   "keywords": [
@@ -48,7 +48,6 @@
       "app/**/*.js",
       "!index.js"
     ],
-    "coverageDirectory": "coverage/",
     "coverageThreshold": {
       "global": {
         "branches": 80,
@@ -62,8 +61,9 @@
       "app",
       "."
     ],
+    "testEnvironment": "node",
     "testPathIgnorePatterns": [
-      "./node_modules"
+      "/node_modules/"
     ],
     "testRegex": [
       "test/unit/*"
