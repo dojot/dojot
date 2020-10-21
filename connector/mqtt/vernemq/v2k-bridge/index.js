@@ -2,6 +2,8 @@ const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const util = require('util');
 
+//test12
+
 const AgentMessenger = require('./app/AgentMessenger');
 
 /*
