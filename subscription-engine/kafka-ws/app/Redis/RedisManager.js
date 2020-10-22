@@ -1,10 +1,10 @@
 const redis = require('redis');
 
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('kafka-ws:redis-manager');
 
-const { redis: redisConfig } = require('../Config');
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
 /**
  * Class to manage a generic purpose connection to Redis
@@ -16,12 +16,10 @@ class RedisManager {
   constructor() {
     logger.info('Creating the RedisManager singleton...');
 
+    this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).redis;
+
     // TODO: Implement "retry_strategy"
-    const redisOptions = {
-      host: redisConfig.host,
-      port: redisConfig.port,
-      db: redisConfig.database,
-    };
+    const redisOptions = { ...this.config  };
 
     this.redisClient = redis.createClient(redisOptions);
     logger.info('RedisManager singleton creation complete!');

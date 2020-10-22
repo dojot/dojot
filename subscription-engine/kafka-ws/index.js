@@ -1,36 +1,46 @@
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const { Logger } = require('@dojot/microservice-sdk');
-const { app: appCfg, server: serverCfg } = require('./app/Config');
+const util = require('util');
 
-Logger.setTransport('console', {
-  level: appCfg.log.log_console_level,
-});
-if (appCfg.log.log_file) {
-  Logger.setTransport('file', {
-    level: appCfg.log.log_file_level,
-    filename: appCfg.log.log_file_filename,
-  });
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+
+// Loading the configurations with the configManager
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+
+const userConfigFile = process.env.KAFKA_WS_APP_USER_CONFIG_FILE || 'production.conf';
+
+ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
+
+const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
+
+Logger.setTransport('console', { level: config.logger['transports.console.level'] });
+
+if (config.logger['file.enable']) {
+  const fileLoggerConfig = { level: config.logger['file.level'], filename: config.logger['file.filename']}
+  Logger.setTransport('file', fileLoggerConfig)
 }
-Logger.setVerbose(appCfg.log.log_verbose);
+
+Logger.setVerbose(config.logger.verbose);
 
 const application = require('./app/App');
 const websocketTarball = require('./app/WebsocketTarball');
 const terminus = require('./app/Terminus');
 
-const logger = new Logger();
+const logger = new Logger('app');
+
+logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
 let server = null;
 
-if (serverCfg.tls) {
+if (config.server.tls) {
   logger.info('Initializing the HTTP server (Using TLS Protocol)...');
   const options = {
-    cert: fs.readFileSync(serverCfg.tls_cert_file),
-    key: fs.readFileSync(serverCfg.tls_key_file),
-    ca: [fs.readFileSync(serverCfg.tls_ca_file)],
+    cert: fs.readFileSync(config.server.cert),
+    key: fs.readFileSync(config.server.key),
+    ca: [fs.readFileSync(config.server.ca)],
     rejectUnauthorized: true,
-    requestCert: serverCfg.request_cert,
+    requestCert: config.server.request_cert,
   };
   server = https.createServer(options, application.expressApp);
 } else {
@@ -41,7 +51,7 @@ if (serverCfg.tls) {
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
 
-server.listen(serverCfg.port, serverCfg.host, async () => {
+server.listen(config.server.port, config.server.host, async () => {
   logger.info('HTTP server is ready to accept connections!');
   logger.info(server.address());
 

@@ -4,7 +4,10 @@ const unless = require('express-unless');
 const createError = require('http-errors');
 const service = require('../services/TicketService');
 
-const { app: appCfg } = require('../Config');
+const { ConfigManager } = require('@dojot/microservice-sdk');
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+
+const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).ticket;
 
 /* The "/ticket" route (as well as "/public" route)
  * should not require a ticket to be accessed, so skip
@@ -53,7 +56,7 @@ module.exports = () => {
   /* Performs introspection of the ticket-related JWT token
    * and makes it available to the next middlewares */
   const tokenIntrospectionMiddleware = jwt({
-    secret: appCfg.ticket.secret,
+    secret: config.secret,
     requestProperty: 'token',
   });
 

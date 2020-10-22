@@ -1,4 +1,4 @@
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const { v4: uuidv4 } = require('uuid');
 
 const { WSError } = require('./Errors').Errors;
@@ -14,7 +14,11 @@ const {
   isObjectEmpty,
   addTimeFromNow,
 } = require('./Utils');
-const { server: serverConfig } = require('./Config');
+
+// Loading the configurations with the configManager
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
+const serverConfig = { ...config.server };
 
 const logger = new Logger('kafka-ws:websocket-tarball');
 
