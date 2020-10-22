@@ -11,7 +11,6 @@ const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 const logger = new Logger('kafka-ws:terminus');
 
 function setup(server) {
-
   const healthCheck = async () => ({ server: 'ok' });
 
   const onSignal = () => {

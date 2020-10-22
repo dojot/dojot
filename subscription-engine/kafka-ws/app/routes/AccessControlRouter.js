@@ -2,9 +2,9 @@ const express = require('express');
 const jwt = require('express-jwt');
 const unless = require('express-unless');
 const createError = require('http-errors');
+const { ConfigManager } = require('@dojot/microservice-sdk');
 const service = require('../services/TicketService');
 
-const { ConfigManager } = require('@dojot/microservice-sdk');
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).ticket;

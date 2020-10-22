@@ -19,7 +19,7 @@ class RedisManager {
     this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).redis;
 
     // TODO: Implement "retry_strategy"
-    const redisOptions = { ...this.config  };
+    const redisOptions = { ...this.config };
 
     this.redisClient = redis.createClient(redisOptions);
     logger.info('RedisManager singleton creation complete!');

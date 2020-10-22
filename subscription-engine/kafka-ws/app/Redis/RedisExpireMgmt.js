@@ -13,10 +13,9 @@ class RedisExpireMgmt {
    * @constructor
    */
   constructor() {
-
     /* Load redis configuration */
     this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).redis;
-    
+
     this.expirationMap = new Map();
 
     // TODO:  ADD TLS and  PASSWORD options for Redis
