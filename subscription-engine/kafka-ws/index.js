@@ -16,6 +16,7 @@ const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
 Logger.setTransport('console', { level: config.logger['transports.console.level'] });
 
+
 if (config.logger['transports.file.enable']) {
   const fileLoggerConfig = { level: config.logger['transports.file.level'], filename: config.logger['transports.file.filename'] };
   Logger.setTransport('file', fileLoggerConfig);
