@@ -36,7 +36,44 @@ const http = require('http');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
-const cfg = require('../../app/Config');
+
+const mockConfig = {
+  app: {
+    'node.env': 'development',
+  },
+  ticket: {
+    secret: 'secret',
+  },
+  morgan: {
+    'log.format': ['m', 'o', 'r', 'g', 'a', 'n'],
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 8080,
+    tls: false,
+    ca: '/opt/kafka-ws/certs/ca-cert.pem',
+    key: '/opt/kafka-ws/certs/server-key.pem',
+    cert: '/opt/kafka-ws/certs/server-cert.pem',
+    'jwt.exp.time': false,
+    'connection.max.life.time': 7200,
+    'request.cert': true,
+    'reject.unauthorized:boolean': true,
+  },
+};
+
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
 
 const jwtSignAsync = promisify(jwt.sign).bind(jwt);
 
@@ -72,7 +109,7 @@ describe('Integration tests related to websocket access control', () => {
     beforeAll((done) => {
       jwtSignAsync(
         { service: tenant },
-        cfg.app.ticket.secret,
+        mockConfig.ticket.secret,
         { expiresIn: 60 },
       ).then((token) => new Promise(((resolve, reject) => {
         req.get('/kafka-ws/v1/ticket')

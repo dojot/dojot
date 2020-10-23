@@ -16,9 +16,9 @@ const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
 Logger.setTransport('console', { level: config.logger['transports.console.level'] });
 
-if (config.logger['file.enable']) {
-  const fileLoggerConfig = { level: config.logger['file.level'], filename: config.logger['file.filename']}
-  Logger.setTransport('file', fileLoggerConfig)
+if (config.logger['transports.file.enable']) {
+  const fileLoggerConfig = { level: config.logger['transports.file.level'], filename: config.logger['transports.file.filename'] };
+  Logger.setTransport('file', fileLoggerConfig);
 }
 
 Logger.setVerbose(config.logger.verbose);
@@ -39,8 +39,8 @@ if (config.server.tls) {
     cert: fs.readFileSync(config.server.cert),
     key: fs.readFileSync(config.server.key),
     ca: [fs.readFileSync(config.server.ca)],
-    rejectUnauthorized: true,
-    requestCert: config.server.request_cert,
+    rejectUnauthorized: config.server['reject.unauthorized'],
+    requestCert: config.server['request.cert'],
   };
   server = https.createServer(options, application.expressApp);
 } else {

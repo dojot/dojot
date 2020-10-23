@@ -1,6 +1,24 @@
-const { ConditionApplier } = require('../../app/Conditions');
+const mockConfig = {
+  server: {
 
-jest.mock('@dojot/microservice-sdk');
+  },
+};
+
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+
+const { ConditionApplier } = require('../../app/Conditions');
 
 describe('Testing Conditions', () => {
   beforeAll(() => {

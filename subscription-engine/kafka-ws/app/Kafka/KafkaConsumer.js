@@ -14,7 +14,6 @@ class KafkaConsumer {
   * Instance KafkaConsumer
   */
   constructor() {
-
     this.consumerConfig = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).consumer;
 
     logger.debug('constructor: Instance KafkaConsumer');

@@ -1,16 +1,33 @@
-const redismock = require('redis-mock');
-const RedisExpireMgmt = require('../../app/Redis/RedisExpireMgmt');
-
-jest.mock('@dojot/microservice-sdk');
-/* eslint-disable-next-line */
-jest.mock('redis', () => require('redis-mock'));
-jest.mock('../../app/Config.js', () => ({
+const mockConfig = {
   redis: {
     host: 'redis',
     port: 6379,
     database: 1,
   },
-}));
+};
+
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+
+const redismock = require('redis-mock');
+const RedisExpireMgmt = require('../../app/Redis/RedisExpireMgmt');
+
+
+/* eslint-disable-next-line */
+jest.mock('redis', () => require('redis-mock'));
+
 
 let redisExpireMgmt = null;
 let callbackTestXXX = null;

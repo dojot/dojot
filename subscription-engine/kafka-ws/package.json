@@ -72,7 +72,6 @@
       "!app/App.js",
       "!app/Terminus.js",
       "!app/Errors/*",
-      "!app/Config.js",
       "!app/WhereProcessing/Parser.js"
     ],
     "testEnvironment": "node",
@@ -89,7 +88,8 @@
   "author": "@eduardogmisiuk",
   "contributors": [
     "@mprevide",
-    "@thiagodpf"
+    "@thiagodpf",
+    "@jonaphael"
   ],
   "license": "GPL-3.0"
 }

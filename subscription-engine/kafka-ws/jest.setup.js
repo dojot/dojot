@@ -1,8 +1,10 @@
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
-const { app: appCfg } = require('./app/Config');
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
-Logger.setTransport('console', {
-  level: appCfg.log.log_console_level,
-});
-Logger.setVerbose(appCfg.log.log_verbose);
+ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, 'default.conf');
+
+const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
+
+Logger.setTransport('console', { level: config.logger['logger.transports.console.level'] });
+Logger.setVerbose(config.logger.verbose);
