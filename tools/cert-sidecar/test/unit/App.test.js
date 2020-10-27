@@ -64,7 +64,6 @@ jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 const App = require('../../app/App');
 const CronsCertsMgmt = require('../../app/CronsCertsMgmt');
-const CertificatesMgmt = require('../../app/CertificatesMgmt');
 
 describe('Utils', () => {
   let app = null;
