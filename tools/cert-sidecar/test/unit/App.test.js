@@ -46,9 +46,18 @@ const mockState = {
   registerShutdown: jest.fn(),
 };
 
+const mockCerMInit = jest.fn();
+const mockCertificatesMgmt = jest.fn().mockImplementation(() => ({
+  init: mockCerMInit,
+  certHasRevoked: jest.fn(() => Promise.resolve()),
+  certsWillExpire: jest.fn(() => Promise.resolve()),
+  retrieveCRL: jest.fn(() => Promise.resolve()),
+}));
+
+
 jest.mock('../../app/Utils', () => mockUtil);
 jest.mock('../../app/CronsCertsMgmt');
-jest.mock('../../app/CertificatesMgmt');
+jest.mock('../../app/CertificatesMgmt', () => mockCertificatesMgmt);
 jest.mock('superagent');
 jest.mock('../../app/ServiceStateMgmt', () => mockState);
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
@@ -85,7 +94,8 @@ describe('Utils', () => {
     const spyDefineShutdown = jest.spyOn(App, 'defineShutdown');
 
     const spyInitCrons = jest.spyOn(CronsCertsMgmt.prototype, 'initCrons');
-    const spyInit = jest.spyOn(CertificatesMgmt.prototype, 'init');
+
+    mockCerMInit.mockResolvedValueOnce();
 
     await app.init();
 
@@ -96,6 +106,31 @@ describe('Utils', () => {
     expect(mockState.registerShutdown).toHaveBeenCalled();
 
     expect(spyInitCrons).toHaveBeenCalled();
-    expect(spyInit).toHaveBeenCalled();
+    expect(mockCerMInit).toHaveBeenCalled();
+  });
+
+
+  test('init: some errors', async () => {
+    expect.assertions(7);
+    const msgError = 'Cannot init ';
+
+    const spyCreateHeathChecker = jest.spyOn(App, 'createHeathChecker');
+    const spyDefineShutdown = jest.spyOn(App, 'defineShutdown');
+
+    const spyInitCrons = jest.spyOn(CronsCertsMgmt.prototype, 'initCrons');
+
+    mockCerMInit.mockRejectedValueOnce(new Error(msgError));
+
+    try {
+      await app.init();
+    } catch (e) {
+      expect(spyCreateHeathChecker).toHaveBeenCalled();
+      expect(spyDefineShutdown).toHaveBeenCalled();
+      expect(mockState.addHealthChecker).toHaveBeenCalled();
+      expect(mockState.registerShutdown).toHaveBeenCalled();
+      expect(spyInitCrons).not.toHaveBeenCalled();
+      expect(mockCerMInit).toHaveBeenCalled();
+      expect(e.message).toBe(msgError);
+    }
   });
 });
