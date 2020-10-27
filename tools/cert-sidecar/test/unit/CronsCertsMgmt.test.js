@@ -192,7 +192,6 @@ describe('CronsCertsMgmt', () => {
     cronsCertsMgmt.certHasRevokedFunc = () => Promise.reject(new Error('ERROR'));
     cronsCertsMgmt.cronCertHasRevoked();
     expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 */3 * * *');
-    // expect(mockState.shutdown).toHaveBeenCalled();
   });
 
 
@@ -208,7 +207,6 @@ describe('CronsCertsMgmt', () => {
     cronsCertsMgmt.retrieveCRLFunc = () => Promise.reject(new Error('ERROR'));
     cronsCertsMgmt.cronUpdateCRL();
     expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 */2 * * *');
-    // expect(mockState.shutdown).toHaveBeenCalled();
   });
 
 
@@ -224,6 +222,5 @@ describe('CronsCertsMgmt', () => {
     cronsCertsMgmt.certsWillExpireFunc = () => Promise.reject(new Error('ERROR'));
     cronsCertsMgmt.cronCertsWillExpire();
     expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 1 * * *');
-    // expect(mockState.shutdown).toHaveBeenCalled();
   });
 });

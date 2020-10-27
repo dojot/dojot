@@ -2,14 +2,6 @@ const mockConfig = {
   app: { 'sidecar.to': 'app' },
 };
 
-// const fs = require('fs').promises;
-// const { CronJob } = require('cron');
-// const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
-
-// const {
-//   app: configApp,
-// } = ConfigManager.getConfig('CERT_SC');
-
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -20,12 +12,6 @@ const mockSdk = {
     info: () => jest.fn(),
     warn: () => jest.fn(),
   })),
-//   Logger: jest.fn(() => ({
-//     debug: (x) => console.log(x),
-//     error: (x, y) => console.log(x, y),
-//     info: (x) => console.log(x),
-//     warn: (x) => console.log(x),
-//   })),
 };
 
 const mockWriteFile = jest.fn();
@@ -44,7 +30,6 @@ const mockFS = {
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
-// jest.mock('cron');
 jest.mock('fs', () => mockFS);
 
 const mockCronJobStart = jest.fn();
