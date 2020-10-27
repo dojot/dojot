@@ -1,32 +1,10 @@
 const mockProcess = require('jest-mock-process');
 
-jest.mock('fs');
-jest.mock('@dojot/microservice-sdk');
-jest.mock('../../app/AgentMessenger');
-
 /**
  * Mocks
  */
-const fakeMqttConfig = {
-  'backpressure.handlers': 1,
-  'backpressure.queue.length.max': 10,
-  'client.keepalive': 0,
-  'client.id': 'fake',
-  'client.username': 'fake',
-  'server.address': 'fake',
-  'server.port': 0,
-  'tls.ca.file': 'fake',
-  'tls.certificate.file': 'fake',
-  'tls.key.file': 'fake',
-};
-
-const mockConfig = {
-  fakeMqtt: {
-    on: jest.fn(),
-    reconnect: jest.fn(),
-    subscribe: jest.fn(),
-    end: jest.fn(),
-  },
+const mockAgentMessenger = {
+  sendMessage: jest.fn(),
 };
 
 const mockAsyncQueue = {
@@ -34,12 +12,59 @@ const mockAsyncQueue = {
   push: jest.fn((data, callback) => callback()),
 };
 
+const mockConfig = {
+  backpressure: {
+    handlers: 1,
+    'queue.length.max': 10,
+  },
+  // The keys are already in camelCase to facilitate the code
+  mqtt: {
+    ca: 'ca.crt',
+    cert: 'dev.crt',
+    clientId: 'testClient',
+    key: 'dev.key',
+    protocol: 'mqtts',
+  },
+  subscription: {
+    qos: 1,
+    topic: 'testTopic',
+  },
+};
+
+const mockFs = {
+  readFileSync: jest.fn(),
+};
+
+const mockMqtt = {
+  end: jest.fn(),
+  on: jest.fn(),
+  reconnect: jest.fn(),
+  subscribe: jest.fn(),
+};
+
+const mockMqttClient = {
+  connect: jest.fn(() => mockMqtt),
+};
+
+const mockSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Kafka: jest.fn(() => ({
+    Producer: jest.fn(),
+  })),
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  })),
+};
+
 /**
  * Manual mocks
  */
-jest.mock('mqtt', () => ({
-  connect: jest.fn(() => mockConfig.fakeMqtt),
-}));
+jest.mock('../../app/AgentMessenger', () => mockAgentMessenger);
 
 jest.mock('async', () => ({
   queue: (callback) => {
@@ -48,12 +73,15 @@ jest.mock('async', () => ({
   },
 }));
 
-const mqtt = require('mqtt');
-const { mqtt: mqttConfig } = require('../../app/config');
-const MQTTClient = require('../../app/MQTTClient');
-const AgentMessenger = require('../../app/AgentMessenger');
+jest.mock('fs', () => mockFs);
 
-describe('Testing v2k bridge client', () => {
+jest.mock('mqtt', () => mockMqttClient);
+
+jest.mock('@dojot/microservice-sdk', () => mockSdk);
+
+const MQTTClient = require('../../app/MQTTClient');
+
+describe('MQTTClient', () => {
   let mockExit;
 
   beforeEach(() => {
@@ -65,146 +93,174 @@ describe('Testing v2k bridge client', () => {
     mockExit.mockRestore();
   });
 
-  const expectClientInitialization = (client, agent, config = mqttConfig) => {
-    expect(client.config).toEqual(config);
-    expect(client.isConnected).toEqual(false);
+  describe('constructor', () => {
+    it('should successfully create a client', () => {
+      mockFs.readFileSync
+        .mockReturnValueOnce('caCertValue')
+        .mockReturnValueOnce('keyValue')
+        .mockReturnValueOnce('certValue');
 
-    expect(client.clientId).toEqual(config['client.id']);
-    expect(client.username).toEqual(config['client.username']);
-    expect(client.host).toEqual(config['server.address']);
-    expect(client.keepAlive).toEqual(config['client.keepalive']);
-    expect(client.agentMessenger).toEqual(agent);
+      const certificates = {
+        ca: 'caCertValue',
+        cert: 'certValue',
+        key: 'keyValue',
+      };
 
-    expect(client.privateKey).not.toBeNull();
-    expect(client.clientCrt).not.toBeNull();
-    expect(client.ca).not.toBeNull();
+      const client = new MQTTClient(mockAgentMessenger);
 
-    expect(client.messageQueue).toBeNull();
-    expect(client.currentMessageQueueLength).toEqual(0);
-  };
+      expect(client.logger).toBeDefined();
+      expect(client.agentMessenger).toBeDefined();
+      expect(client.config).toEqual(mockConfig);
+      expect(client.isConnected).toBeFalsy();
+      expect(client.mqttOptions).toEqual({ ...mockConfig.mqtt, ...certificates });
+      expect(client.messageQueue).toEqual(null);
+      expect(client.currentMessageQueueLength).toEqual(0);
+    });
 
-  it('Should create a client sucessfully', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    expectClientInitialization(client, agent, fakeMqttConfig);
+    it('should not create a client - no AgentMessenger instance was passed', () => {
+      expect(() => new MQTTClient()).toThrow();
+    });
   });
 
-  it('Should create a client sucessfully without config', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent);
-    expectClientInitialization(client, agent);
+  describe('init', () => {
+    let mqttClient;
+
+    beforeEach(() => {
+      mqttClient = new MQTTClient(mockAgentMessenger);
+    });
+
+    it('should successfully initialize the client - MQTTClient not connected', () => {
+      const connectSpy = jest.spyOn(mqttClient, 'connect');
+      const asyncQueueWorkerSpy = jest.spyOn(mqttClient, 'asyncQueueWorker');
+
+      mqttClient.init();
+
+      expect(connectSpy).toHaveBeenCalled();
+      expect(mqttClient.mqttc.on).toHaveBeenCalledTimes(4);
+      expect(asyncQueueWorkerSpy).toHaveBeenCalled();
+      expect(mqttClient.mqttc).toBeDefined();
+      expect(mqttClient.messageQueue).toBeDefined();
+      expect(mockAsyncQueue.drain).toHaveBeenCalled();
+      expect(mqttClient.isConnected).toBeFalsy();
+    });
+
+    it('should successfully initialize the client - MQTTClient already connected', () => {
+      const connectSpy = jest.spyOn(mqttClient, 'connect');
+      const asyncQueueWorkerSpy = jest.spyOn(mqttClient, 'asyncQueueWorker');
+
+      mqttClient.init();
+      // We need to clear the mocks before proceeding
+      jest.clearAllMocks();
+      mqttClient.isConnected = true;
+      mqttClient.secureMode = true;
+      mqttClient.init();
+
+      expect(connectSpy).toHaveBeenCalled();
+      expect(mqttClient.mqttc.on).toHaveBeenCalledTimes(4);
+      expect(asyncQueueWorkerSpy).toHaveBeenCalled();
+      expect(mqttClient.mqttc).toBeDefined();
+      expect(mqttClient.messageQueue).toBeDefined();
+      expect(mockAsyncQueue.drain).toHaveBeenCalled();
+      expect(mqttClient.isConnected).toBeTruthy();
+    });
   });
 
-  it('Should init sucessfully the client', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    const connectSpy = jest.spyOn(client, 'connect');
-    const asyncQueueWorkerSpy = jest.spyOn(client, 'asyncQueueWorker');
+  describe('Internal functions', () => {
+    let mqttClient;
 
-    // call twice to test if condition
-    client.init();
-    client.isConnected = true;
-    client.secureMode = true;
-    client.init();
+    beforeEach(() => {
+      mqttClient = new MQTTClient(mockAgentMessenger);
+      mqttClient.init();
+      jest.clearAllMocks();
+    });
 
-    expect(asyncQueueWorkerSpy).toHaveBeenCalled();
-    expect(connectSpy).toHaveBeenCalled();
-    expect(mockConfig.fakeMqtt.on).toHaveBeenCalled();
-    expect(mockAsyncQueue.drain).toHaveBeenCalled();
-  });
+    describe('onConnect', () => {
+      it('should successfully connect to the broker', () => {
+        const subscribeSpy = jest.spyOn(mqttClient, 'subscribe');
+        expect(mqttClient.isConnected).toBeFalsy();
 
-  it('Should connect the client (callback)', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    client.init();
-    const subscribeSpy = jest.spyOn(client, 'subscribe');
+        mqttClient.onConnect();
 
-    // insert two times to test the if condition
-    client.onConnect();
-    client.onConnect();
-    expect(subscribeSpy).toHaveBeenCalledTimes(2);
-    expect(client.isConnected).toEqual(true);
-  });
+        expect(mqttClient.isConnected).toBeTruthy();
+        expect(subscribeSpy).toHaveBeenCalled();
+      });
+    });
 
-  it('Should connect the client mqtt', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    client.secureMode = true;
-    client.connect();
-    client.isConnected = true;
-    client.connect();
-    expect(mqtt.connect).toHaveBeenCalledTimes(1);
-    expect(mqtt.connect).toHaveBeenCalledWith(client.mqttOptions);
-  });
+    describe('onDisconnect', () => {
+      it('should reconnect the client after a disconnection', () => {
+        mqttClient.onDisconnect();
 
-  it('Should reconnect the client after disconnect', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
+        expect(mqttClient.isConnected).toBeFalsy();
+        expect(mockMqtt.reconnect).toHaveBeenCalled();
+      });
+    });
 
-    client.init();
-    client.onDisconnect();
+    describe('onError', () => {
+      it('should exit after an error has occurred', () => {
+        mqttClient.onError(new Error('testError'));
 
-    expect(mockConfig.fakeMqtt.reconnect).toHaveBeenCalled();
-  });
+        expect(mockExit).toHaveBeenCalledTimes(1);
+      });
+    });
 
-  it('Should exit after an error', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
+    describe('onMessage', () => {
+      it('should push a message to the queue (callback) once - dup is false', () => {
+        mqttClient.isConnected = true;
+        mqttClient.onMessage('any', 'any', { dup: false });
+        expect(mockAsyncQueue.push).toHaveBeenCalledTimes(1);
+      });
 
-    client.init();
-    client.onError('fake');
+      it('should push a message to the queue (callback) once - dup is true', () => {
+        mqttClient.isConnected = true;
+        mqttClient.onMessage('any', 'any', { dup: true });
+        expect(mockAsyncQueue.push).toHaveBeenCalledTimes(0);
+      });
 
-    expect(mockExit).toHaveBeenCalled();
-  });
+      it('should not push a message to the queue (callback) - queue is full', () => {
+        mqttClient.isConnected = false;
+        mqttClient.onMessage();
+        mqttClient.currentMessageQueueLength = 10 * 1000 * 10000;
+        mqttClient.onMessage();
 
-  it('should push a message to the queue (callback) once', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
+        expect(mockAsyncQueue.push).not.toHaveBeenCalled();
+        expect(mockMqtt.end).toHaveBeenCalled();
+      });
+    });
 
-    client.init();
-    client.isConnected = true;
-    client.onMessage('any', 'any', { dup: false });
-    client.onMessage('any', 'any', { dup: true });
-    expect(mockAsyncQueue.push).toHaveBeenCalledTimes(1);
-  });
+    describe('connect', () => {
+      it('should successfully connect to the broker', () => {
+        mqttClient.connect();
+        expect(mockMqttClient.connect).toHaveBeenCalledTimes(1);
+      });
 
-  it('should not push a message to the queue (callback)', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    client.init();
-    client.onMessage();
-    client.currentMessageQueueLength = 10 * 1000 * 10000;
-    client.onMessage();
+      it('should not connect to the broker - client is already connected', () => {
+        mqttClient.isConnected = true;
+        mqttClient.connect();
+        expect(mockMqttClient.connect).not.toHaveBeenCalled();
+      });
+    });
 
-    expect(mockAsyncQueue.push).not.toHaveBeenCalled();
-    expect(mockConfig.fakeMqtt.end).toHaveBeenCalled();
-  });
+    describe('subscribe', () => {
+      it('should successfully subscribe', () => {
+        mqttClient.isConnected = true;
+        mqttClient.subscribe();
+        expect(mockMqtt.subscribe).toHaveBeenCalledTimes(1);
+      });
 
-  it('should not subscribe to topic', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    client.init();
-    client.isConnected = false;
-    client.subscribe();
-    expect(mockConfig.fakeMqtt.subscribe).not.toHaveBeenCalled();
-  });
+      it('should not subscribe - client is not connected', () => {
+        mqttClient.isConnected = false;
+        mqttClient.subscribe();
+        expect(mockMqtt.subscribe).not.toHaveBeenCalled();
+      });
+    });
 
-  it('should subscribe to topic', () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    client.init();
-    client.isConnected = true;
-    client.subscribe();
-    expect(mockConfig.fakeMqtt.subscribe).toHaveBeenCalled();
-  });
-
-  it('The agent should send message when asyncQueueWorker runs', async () => {
-    const agent = new AgentMessenger(fakeMqttConfig);
-    const client = new MQTTClient(agent, fakeMqttConfig);
-    client.init();
-    const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
-    const { topic, message } = fakeMessage;
-    client.asyncQueueWorker(fakeMessage);
-    expect(client.agentMessenger.sendMessage).toHaveBeenCalledWith(topic, message);
+    describe('asyncQueueWorker', () => {
+      it('should send a message', () => {
+        const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
+        const { topic, message } = fakeMessage;
+        mqttClient.asyncQueueWorker(fakeMessage);
+        expect(mqttClient.agentMessenger.sendMessage).toHaveBeenCalledWith(topic, message);
+      });
+    });
   });
 });

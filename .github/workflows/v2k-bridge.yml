@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x]
+        node-version: [12.x]
     steps:
 
     - name: checkout
@@ -35,8 +35,7 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
-        file: connector/mqtt/vernemq/v2k-bridge/coverage/lcov.info # create when run npm run coverage
+        directory: connector/mqtt/vernemq/v2k-bridge/coverage
         flags: V2KBridge # Flags allow you to isolate coverage reports for different tests
         name: v2k-bridge # Custom defined name for the upload
 

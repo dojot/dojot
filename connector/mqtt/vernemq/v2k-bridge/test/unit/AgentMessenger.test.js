@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-unused-vars */
 jest.mock('../../app/utils');
 jest.mock('../../app/MQTTClient.js');
 
@@ -15,26 +13,23 @@ let rejectMock;
 
 // MOCKS
 const mockConfig = {
-  Producer: {
-    connect: jest.fn(),
-    produce: jest.fn((topic, message, key) => new Promise((resolve, reject) => {
-      resolve = jest.fn(resolve);
-      reject = jest.fn(reject);
-      resolveMock = resolve;
-      rejectMock = reject;
-
-      if (mockShouldResolve) {
-        resolve();
-      } else {
-        reject(new Error('testError'));
-      }
-    })),
-  },
-
-  Logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
+  ConfigManager: {
+    messenger: {
+      'produce.topic.suffix': 'device-data',
+    },
+    producer: {
+      acks: -1,
+    },
+    subscription: {
+      qos: 1,
+      topic: 'testTopic',
+    },
+    sdk: {
+      'batch.num.messages': 100,
+    },
+    topic: {
+      acks: -1,
+    },
   },
 
   kafkaConfig: {
@@ -53,11 +48,30 @@ const mockConfig = {
     },
   },
 
-  mqttConfig: {
-    client: 'test',
-    subscribe: jest.fn(),
+  Logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
   },
 
+  Producer: {
+    connect: jest.fn(),
+    // eslint-disable-next-line no-unused-vars
+    produce: jest.fn((topic, message, key) => new Promise((resolve, reject) => {
+      // eslint-disable-next-line no-param-reassign
+      resolve = jest.fn(resolve);
+      // eslint-disable-next-line no-param-reassign
+      reject = jest.fn(reject);
+      resolveMock = resolve;
+      rejectMock = reject;
+
+      if (mockShouldResolve) {
+        resolve();
+      } else {
+        reject(new Error('testError'));
+      }
+    })),
+  },
 };
 
 jest.mock('@dojot/microservice-sdk', () => ({
@@ -65,22 +79,16 @@ jest.mock('@dojot/microservice-sdk', () => ({
     Producer: jest.fn(() => mockConfig.Producer),
   },
   Logger: jest.fn(() => mockConfig.Logger),
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig.ConfigManager),
+  },
 }));
 
-let mockedProducer;
+describe('AgentMessenger', () => {
+  let agentMessenger;
 
-async function expectConfigs() {
-  mockConfig.Producer.connect.mockReturnValue(Promise.resolve());
-
-  await mockedProducer.init();
-
-  expect(mockConfig.Producer.connect).toHaveBeenCalled();
-  expect(mockedProducer.mqttClient.init).toHaveBeenCalled();
-  expect(mockedProducer.logger).toBeDefined();
-}
-
-describe('Testing AgentMessenger messenger', () => {
   beforeEach(() => {
+    agentMessenger = new AgentMessenger();
     jest.clearAllMocks();
   });
 
@@ -88,86 +96,77 @@ describe('Testing AgentMessenger messenger', () => {
     mockExit.mockRestore();
   });
 
-  it('Should init correctly the agent messenger with config and publish data', () => {
-    mockedProducer = new AgentMessenger(mockConfig.kafkaConfig);
-    expectConfigs();
+  describe('constructor', () => {
+    it('should successfully create a new instance', () => {
+      expect(agentMessenger.config).toEqual(mockConfig.ConfigManager);
+      expect(agentMessenger.producer).toBeDefined();
+      expect(agentMessenger.mqttClient).toBeDefined();
+      expect(agentMessenger.logger).toBeDefined();
+    });
   });
 
-  it('Should init correctly the agent messenger without config', () => {
-    mockedProducer = new AgentMessenger();
+  describe('init', () => {
+    it('should correctly initialize', async () => {
+      mockConfig.Producer.connect.mockReturnValue(Promise.resolve());
 
-    expectConfigs();
+      await agentMessenger.init();
+
+      expect(mockConfig.Producer.connect).toHaveBeenCalled();
+      expect(agentMessenger.mqttClient.init).toHaveBeenCalled();
+      expect(agentMessenger.logger).toBeDefined();
+    });
+
+    it('should not correctly initialize - Promise rejected', async () => {
+      const reason = 'error';
+      mockConfig.Producer.connect.mockReturnValue(Promise.reject(reason));
+
+      try {
+        await agentMessenger.init();
+      } catch (error) {
+        expect(error).toEqual(reason);
+      }
+    });
   });
 
-  it('Should not init correctly the agent messenger', async () => {
-    const reason = 'error';
-    mockedProducer = new AgentMessenger(mockConfig.kafkaConfig);
-    mockConfig.Producer.connect.mockReturnValue(Promise.reject(reason));
-
-    try {
-      await mockedProducer.init();
-    } catch (error) {
-      expect(error).toEqual(reason);
-    }
-  });
-
-  it('Should send message', () => {
-    mockedProducer = new AgentMessenger(mockConfig.kafkaConfig);
-    mockShouldResolve = true;
-    expectConfigs();
-
+  describe('sendMessage', () => {
     const generateFakeData = {
       metadata: {
         tenant: 'fake',
         deviceid: 'fake',
       },
     };
-    utils.generateDojotDeviceDataMessage = jest.fn().mockReturnValue(generateFakeData);
-
     const fakeMessage = '{ "name":"John", "age":30, "city":"New York"}';
-    mockedProducer.sendMessage('test', fakeMessage);
-    expect(mockedProducer.producer.produce).toHaveBeenCalled();
-    expect(resolveMock).toHaveBeenCalled();
-  });
 
-  it('Should not send message', () => {
-    mockedProducer = new AgentMessenger(mockConfig.kafkaConfig);
-    mockShouldResolve = false;
-    expectConfigs();
+    beforeAll(() => {
+      utils.generateDojotDeviceDataMessage = jest.fn().mockReturnValue(generateFakeData);
+    });
 
-    const generateFakeData = {
-      metadata: {
-        tenant: 'fake',
-        deviceid: 'fake',
-      },
-    };
-    utils.generateDojotDeviceDataMessage = jest.fn().mockReturnValue(generateFakeData);
+    it('should send message', () => {
+      mockShouldResolve = true;
 
-    const fakeMessage = '{ "name":"John", "age":30, "city":"New York"}';
-    mockedProducer.sendMessage('test', fakeMessage);
-    expect(mockedProducer.producer.produce).toHaveBeenCalled();
-    expect(rejectMock).toHaveBeenCalled();
-  });
+      agentMessenger.sendMessage('test', fakeMessage);
 
-  it('Should not send malformed message', () => {
-    mockedProducer = new AgentMessenger(mockConfig.kafkaConfig);
-    expectConfigs();
+      expect(agentMessenger.producer.produce).toHaveBeenCalled();
+      expect(resolveMock).toHaveBeenCalled();
+    });
 
-    const generateFakeData = {
-      metadata: {
-        tenant: 'fake',
-        deviceid: 'fake',
-      },
-    };
-    utils.generateDojotDeviceDataMessage = jest.fn().mockReturnValue(generateFakeData);
-    const fakeMessage = 'error format';
+    it('should not send the message - rejected Promise', () => {
+      mockShouldResolve = false;
 
-    try {
-      mockedProducer.sendMessage('test', fakeMessage);
-    } catch (error) {
-      expect(error).toBeDefined();
-    } finally {
-      expect(mockConfig.Producer.produce).not.toHaveBeenCalled();
-    }
+      agentMessenger.sendMessage('test', fakeMessage);
+
+      expect(agentMessenger.producer.produce).toHaveBeenCalled();
+      expect(rejectMock).toHaveBeenCalled();
+    });
+
+    it('should not send the message - malformed message', () => {
+      try {
+        agentMessenger.sendMessage('test', 'error format');
+      } catch (error) {
+        expect(error).toBeDefined();
+      } finally {
+        expect(mockConfig.Producer.produce).not.toHaveBeenCalled();
+      }
+    });
   });
 });
