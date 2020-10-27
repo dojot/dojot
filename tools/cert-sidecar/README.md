@@ -26,7 +26,7 @@ The **Cert-Sidecar** generates a set of files to help configure a service to use
 One of the things that **Cert-Sidecar** does is generate a key pair and then a CSR (Certificate Signing Request), which can look like a *certification intent*. Then **Cert-Sidecar** sends this CSR to *x509-identity-mgmt* to obtain a public certificate. In addition, **Cert-Sidecar** retrieves the root certificate from the CA and the CRL (certificate revocation lists) from *x509-identity-mgmt*.See the diagram below:
 
 <p align="center">
-<img src="./doc/diagrams/diagram.png">
+<img src="./docs/diagrams/diagram.png">
 </p>
 
 Another important point in **Cert-Sidecar** is to guarantee the validity of the current public certificate and the root certificate of the CA, in each of the configured times the **Cert-Sidecar** will verify:
