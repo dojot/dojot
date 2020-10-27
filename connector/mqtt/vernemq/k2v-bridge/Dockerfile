@@ -6,21 +6,16 @@ WORKDIR /opt/k2v_bridge
 
 RUN apk --no-cache add \
       bash \
-      ca-certificates \
-      cyrus-sasl-dev \
       g++ \
+      ca-certificates \
       lz4-dev \
-      make \
       musl-dev \
+      cyrus-sasl-dev \
+      openssl-dev \
+      make \
       python
 
-RUN apk add --no-cache --virtual \
-      .build-deps \
-      gcc \
-      zlib-dev \
-      libc-dev \
-      bsd-compat-headers \
-      py-setuptools bash
+RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
 
 COPY package.json .
 COPY package-lock.json .
@@ -40,11 +35,8 @@ WORKDIR /opt/k2v_bridge
 
 RUN apk --no-cache add \
       bash \
-      curl \
-      jq \
       libsasl \
       lz4-libs \
-      openssl \
       tini
 
 COPY --from=base /opt/k2v_bridge /opt/k2v_bridge

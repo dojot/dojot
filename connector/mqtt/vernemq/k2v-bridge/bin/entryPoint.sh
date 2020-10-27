@@ -13,7 +13,6 @@ fi
 export K2V_APP_BASEDIR=${K2V_APP_BASEDIR:-"/opt/k2v_bridge"}
 export K2V_APP_CONNECTION_RETRY_COUNT=${K2V_APP_CONNECTION_RETRY_COUNT:-"3"}
 export K2V_APP_CONNECTION_RETRY_TIMEOUT=${K2V_APP_CONNECTION_RETRY_TIMEOUT:-"3"}
-export K2V_APP_EJBCA_ADDRESS=${K2V_APP_EJBCA_ADDRESS:-"x509-identity-mgmt:3000"}
 export K2V_APP_HOSTNAME=${K2V_APP_HOSTNAME:-$HOSTNAME}
 export K2V_APP_HOSTNAME=${K2V_APP_HOSTNAME:-"k2v-bridge"}
 
@@ -49,9 +48,6 @@ export K2V_SDK_SUBSCRIPTION_BACKOFF_DELTA_MS=${K2V_SDK_SUBSCRIPTION_BACKOFF_DELT
 export K2V_SDK_SUBSCRIPTION_BACKOFF_MAX_MS=${K2V_SDK_SUBSCRIPTION_BACKOFF_MAX_MS:-"60000"}
 export K2V_SDK_SUBSCRIPTION_BACKOFF_MIN_MS=${K2V_SDK_SUBSCRIPTION_BACKOFF_MIN_MS:-"1000"}
 
-# readonly variables
-readonly K2V_VERNE_DATA_BROKER_ADDRESS=${DATA_BROKER_ADDRESS:-"data-broker:80"}
-
 # Split kafka brokers by comma
 readonly KAFKA_BROKERS=${K2V_KAFKA_METADATA_BROKER_LIST//,/ }
 
@@ -86,10 +82,5 @@ if [ "$has_responded" == false ]; then
 fi
 echo -e "Connection established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
 
-#
-# EJBCA - to authenticate user
-echo "Trying to authenticate with CA.."
-${K2V_APP_BASEDIR}/bin/scripts_tls/ejbca_client.sh
-echo "Authenticated!"
 
 exec "$@"

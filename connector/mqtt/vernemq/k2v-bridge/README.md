@@ -27,7 +27,6 @@ Key                              | Purpose                                      
 K2V_APP_BASEDIR                  | Base directory where the project is located        | /opt/k2v_bridge         | string           |
 K2V_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3                       | number           |
 K2V_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3                       | number           |
-K2V_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | x509-identity-mgmt:3000 | hostname/IP:port |
 K2V_APP_HOSTNAME                 | Hostname to be used in the certificate common name | k2v-bridge              | hostname/IP      |
 
 
