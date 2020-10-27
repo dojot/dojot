@@ -1,5 +1,4 @@
 const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
-const ServiceStateMgmt = require('./ServiceStateMgmt');
 const X509Utils = require('./X509/X509Utils');
 const x509Req = require('./X509/X509IdentityMgmtRequests');
 const {
@@ -101,11 +100,6 @@ class CertificatesMgmt {
       } else {
         logger.info('Init: CRL is disabled');
       }
-
-      // Signals to the health check service that the service is ready.
-      logger.debug('Init: Signaling that the service is ready...');
-      ServiceStateMgmt.signalReady();
-      logger.debug('Init: ...signaled.');
     } catch (e) {
       logger.error('init:', e);
       throw e;

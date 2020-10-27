@@ -47,6 +47,10 @@ class App {
       App.defineShutdown();
       await this.certMgmt.init();
       this.cronsMgmt.initCrons();
+      // Signals to the health check service that the service is ready.
+      logger.debug('Init: Signaling that the service is ready...');
+      ServiceState.signalReady();
+      logger.debug('Init: ...signaled.');
     } catch (e) {
       logger.error('init:', e);
       throw e;

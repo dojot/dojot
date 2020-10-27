@@ -49,11 +49,6 @@ const mockX509Req = {
   getCRL: jest.fn(),
 };
 
-const mockServiceState = {
-  signalReady: jest.fn(),
-  shutdown: jest.fn(() => Promise.resolve()),
-};
-
 const mockX509Utils = {
   generatePrivateKey: jest.fn(),
   generateCsr: jest.fn(),
@@ -62,7 +57,6 @@ const mockX509Utils = {
 
 
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
-jest.mock('../../app/ServiceStateMgmt', () => mockServiceState);
 jest.mock('../../app/Utils', () => mockUtil);
 jest.mock('../../app/X509/X509Utils', () => mockX509Utils);
 jest.mock('../../app/X509/X509IdentityMgmtRequests', () => mockX509Req);
@@ -112,7 +106,6 @@ describe('CertificatesMgmt', () => {
 
 
     await certificatesMgmt.init();
-    expect(mockServiceState.signalReady).toHaveBeenCalled();
 
     // private key
     expect(mockX509Utils.generatePrivateKey).toHaveBeenCalled();

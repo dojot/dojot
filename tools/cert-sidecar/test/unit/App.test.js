@@ -41,9 +41,10 @@ const mockUtil = {
 };
 
 const mockState = {
-  shutdown: jest.fn(),
+  shutdown: jest.fn(() => Promise.resolve()),
   addHealthChecker: jest.fn(),
   registerShutdown: jest.fn(),
+  signalReady: jest.fn(),
 };
 
 const mockCerMInit = jest.fn();
@@ -103,7 +104,7 @@ describe('Utils', () => {
 
     expect(mockState.addHealthChecker).toHaveBeenCalled();
     expect(mockState.registerShutdown).toHaveBeenCalled();
-
+    expect(mockState.signalReady).toHaveBeenCalled();
     expect(spyInitCrons).toHaveBeenCalled();
     expect(mockCerMInit).toHaveBeenCalled();
   });
