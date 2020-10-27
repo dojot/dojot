@@ -102,7 +102,7 @@ Cron configurations
 | cron.crl.time | Cron patterns for updating CRL. [Read up on cron patterns](http://crontab.org/) | 0 */2 * * * | string | CERT_SC_CRON_CRL_TIME
 | cron.expiration | Enables the use of *cron* for checking expiration for Public Certificate and Public CA certificate.  | true | boolean | CERT_SC_CRON_EXPIRATION
 | cron.expiration.time |  Cron patterns for checking expiration. [Read up on cron patterns](http://crontab.org/) | 0 1 * * * | string | CERT_SC_CRON_EXPIRATION_TIME
-| cron.revoke | Enables the use of *cron* for checking if the  Public Certificate is revoked. Note: *x509 identity mgmt*  is not yet supported for revoking internal certificates | false | boolean | CERT_SC_CRON_REVOKE
+| cron.revoke | Enables the use of *cron* for checking if the  Public Certificate is revoked. This needs `certs.crl` to be true. Note: *x509 identity mgmt*  is not yet supported for revoking internal certificates | false | boolean | CERT_SC_CRON_REVOKE
 | cron.revoke.time |  Cron patterns for checking revoking. [Read up on cron patterns](http://crontab.org/) | 0 */3 * * * | string | CERT_SC_CRON_REVOKE_TIME
 
 #### x509 identity mgmt

@@ -94,7 +94,7 @@ describe('CronsCertsMgmt', () => {
 
 
   test('initCrons: revoke ', async (done) => {
-    mockConfig.certs.crl = false;
+    mockConfig.certs.crl = true;
     mockConfig.cron.crl = false;
     mockConfig.cron.expiration = false;
     mockConfig.cron.revoke = true;

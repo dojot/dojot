@@ -50,7 +50,7 @@ class CronsCertsMgmt {
       logger.info('initCrons: Cron for Check Expiration is disabled');
     }
 
-    if (configCron.revoke) {
+    if (configCron.revoke && configCerts.crl) {
       this.cronCertHasRevoked();
     } else {
       logger.info('initCrons: Cron for Check has Revoke is disabled');
