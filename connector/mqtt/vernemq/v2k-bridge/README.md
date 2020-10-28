@@ -17,12 +17,12 @@ secured with mutual TLS. In future releases, the communication with Kafka will a
 # **Table of contents**
 
 1. [Configurations](#configurations)
-   1. [App](##app)
-   2. [MQTT](##mqtt)
-   3. [SDK Producer](##sdk-producer)
-      1. [Main object](###main-object)
-      2. [kafka.producer object](###kafka.producer-object)
-      3. [kafka.topic object](###kafka.topic-object)
+   1. [App](#app)
+   2. [MQTT](#mqtt)
+   3. [SDK Producer](#sdk-producer)
+      1. [Main object](#main-object)
+      2. [kafka.producer object](#kafkaproducer-object)
+      3. [kafka.topic object](#kafkatopic-object)
 
 
 # **Configurations**
