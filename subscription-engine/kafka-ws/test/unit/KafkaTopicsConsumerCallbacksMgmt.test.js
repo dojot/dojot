@@ -27,7 +27,6 @@ const mockMicroServiceSdk = {
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
 
 const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
-// jest.mock('@dojot/microservice-sdk');
 
 jest.mock('../../app/Kafka/KafkaConsumer');
 
