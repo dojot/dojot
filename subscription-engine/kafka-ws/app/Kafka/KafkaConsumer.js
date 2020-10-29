@@ -1,7 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
 const { ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
-const { config } = require('../Redis/RedisManager');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
