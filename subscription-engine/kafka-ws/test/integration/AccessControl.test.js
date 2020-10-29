@@ -43,6 +43,7 @@ const mockConfig = {
   },
   ticket: {
     secret: 'secret',
+    'expiration.sec': 60
   },
   morgan: {
     'log.format': ['m', 'o', 'r', 'g', 'a', 'n'],
