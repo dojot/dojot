@@ -11,8 +11,8 @@
   "scripts": {
     "cert-sidecar": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest --no-cache --detectOpenHandles",
-    "test:watch": "jest --watchAll --no-cache --runInBand",
+    "test": "jest",
+    "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js ."
   },
