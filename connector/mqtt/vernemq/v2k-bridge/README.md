@@ -17,12 +17,12 @@ secured with mutual TLS. In future releases, the communication with Kafka will a
 # **Table of contents**
 
 1. [Configurations](#configurations)
-   1. [App](##app)
-   2. [MQTT](##mqtt)
-   3. [SDK Producer](##sdk-producer)
-      1. [Main object](###main-object)
-      2. [kafka.producer object](###kafka.producer-object)
-      3. [kafka.topic object](###kafka.topic-object)
+   1. [App](#app)
+   2. [MQTT](#mqtt)
+   3. [SDK Producer](#sdk-producer)
+      1. [Main object](#main-object)
+      2. [kafka.producer object](#kafkaproducer-object)
+      3. [kafka.topic object](#kafkatopic-object)
 
 
 # **Configurations**
@@ -31,7 +31,8 @@ Before running the V2K Bridge service within your environment, make sure you con
 to match your needs.
 
 You can select the configuration file via the `V2K_APP_USER_CONFIG_FILE` variable. Its default value
-is `production.conf`.
+is `production.conf`. Check the [config directory](./config) for the user configurations that are
+available by default.
 
 For more information about the usage of the configuration files and environment variables, check the
 __ConfigManager__ module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
