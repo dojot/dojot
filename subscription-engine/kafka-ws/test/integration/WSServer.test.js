@@ -29,7 +29,6 @@ jest.mock('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 
 const websocketTarball = require('../../app/WebsocketTarball');
 
-
 describe('Testing WSServer - works fine', () => {
   beforeEach(() => {
     jest.clearAllMocks();

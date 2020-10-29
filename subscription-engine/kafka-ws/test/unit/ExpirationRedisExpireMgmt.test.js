@@ -24,10 +24,8 @@ jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
 const redismock = require('redis-mock');
 const RedisExpireMgmt = require('../../app/Redis/RedisExpireMgmt');
 
-
 /* eslint-disable-next-line */
 jest.mock('redis', () => require('redis-mock'));
-
 
 let redisExpireMgmt = null;
 let callbackTestXXX = null;
