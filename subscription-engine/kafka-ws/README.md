@@ -331,7 +331,7 @@ redis.port | Redis port | 6379 | integer | KAFKA_WS_REDIS_PORT
 redis.db | Redis database | 1 | integer | KAFKA_WS_REDIS_DB
 
 ## **Kafka Consumer**
-Configurations fot the kafka Consumer
+Configurations for the kafka Consumer
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
 ------| ----------| ----------------|--------------|------------------------

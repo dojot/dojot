@@ -2,6 +2,8 @@ const mockConfig = {
   consumer: {
     'group.id': 'kafka_test',
     'metadata.broker.list': 'kafka:9092',
+  },
+  topic: {
     'auto.offset.reset': 'largest',
   },
 };

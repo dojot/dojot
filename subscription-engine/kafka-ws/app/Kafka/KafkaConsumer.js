@@ -1,6 +1,7 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
 const { ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
+const { config } = require('../Redis/RedisManager');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -14,10 +15,10 @@ class KafkaConsumer {
   * Instance KafkaConsumer
   */
   constructor() {
-    this.consumerConfig = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).consumer;
+    this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
     logger.debug('constructor: Instance KafkaConsumer');
-    this.consumer = new Consumer(this.consumerConfig);
+    this.consumer = new Consumer({ ...this.config.consumer }, { ...this.config.topic });
     // only one callback by topic
     this.registeredCallbacks = new Map();
   }
