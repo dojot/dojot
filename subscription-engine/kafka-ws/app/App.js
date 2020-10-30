@@ -6,11 +6,13 @@ const createError = require('http-errors');
 const morgan = require('morgan');
 /* This library is about what happens when you hit an async error. */
 require('express-async-errors');
-const { Logger } = require('@dojot/microservice-sdk');
-const { app: appCfg, nodeEnv } = require('./Config');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const accessControlRouter = require('./routes/AccessControlRouter');
 const ticketRouter = require('./routes/TicketRouter');
 const topicsRouter = require('./routes/TopicsRouter');
+
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
 const app = express();
 
@@ -37,7 +39,7 @@ function configure(server) {
   };
   morgan.token('id', (req) => req.id);
 
-  app.use(morgan(appCfg.morganLogFormat, { stream: logger.stream }));
+  app.use(morgan(config.morgan['log.format'].join(' '), { stream: logger.stream }));
 
   /* Open API - Routes available through the API Gateway
    * First the request goes through the ticket router,
@@ -62,7 +64,7 @@ function configure(server) {
     if (status === 500) {
       logger.error(err);
       res.status(status).json({
-        message: (nodeEnv !== 'development') ? 'An unexpected error has occurred.' : err.message,
+        message: (config.app['node.env'] !== 'development') ? 'An unexpected error has occurred.' : err.message,
       });
     } else if (err.responseBody) {
       res.status(status).json(err.responseBody);

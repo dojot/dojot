@@ -1,16 +1,33 @@
+const mockConfig = {
+  consumer: {
+    'group.id': 'kafka_test',
+    'metadata.broker.list': 'kafka:9092',
+  },
+  topic: {
+    'auto.offset.reset': 'largest',
+  },
+};
+
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Kafka: {
+    Consumer: jest.fn(),
+    Producer: jest.fn(),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+
 const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const KafkaWSConsumers = require('../../app/Kafka/KafkaConsumer');
-
-jest.mock('@dojot/microservice-sdk');
-
-jest.mock('../../app/Config.js', () => ({
-  kafka: {
-    consumer: {
-      'group.id': 'kafka_test',
-      'metadata.broker.list': 'kafka:9092',
-    },
-  },
-}));
 
 let kafkaWSConsumers = null;
 describe('Testing KafkaWSConsumers - works fine', () => {

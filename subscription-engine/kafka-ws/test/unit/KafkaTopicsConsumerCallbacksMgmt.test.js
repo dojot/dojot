@@ -1,6 +1,32 @@
-const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
+const mockConfig = {
+  consumer: {
+    'group.id': 'kafka_test',
+    'metadata.broker.list': 'kafka:9092',
+  },
+  topic: {
+    'auto.offset.reset': 'largest',
+  },
+};
 
-jest.mock('@dojot/microservice-sdk');
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Kafka: {
+    Consumer: jest.fn(),
+    Producer: jest.fn(),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+
+const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 
 jest.mock('../../app/Kafka/KafkaConsumer');
 

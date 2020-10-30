@@ -1,4 +1,4 @@
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const { v4: uuidv4 } = require('uuid');
 
 const { WSError } = require('./Errors').Errors;
@@ -14,7 +14,10 @@ const {
   isObjectEmpty,
   addTimeFromNow,
 } = require('./Utils');
-const { server: serverConfig } = require('./Config');
+
+// Loading the configurations with the configManager
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+const serverConfig = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).server;
 
 const logger = new Logger('kafka-ws:websocket-tarball');
 
@@ -30,14 +33,14 @@ const getMaxLifetime = (expirationTimestampJWT) => {
   let expirationJWT = 0;
 
   // takes the jwt expiration timestamp if configured to use it.
-  expirationJWT = serverConfig.jwt_exp_time && expirationTimestampJWT != null
+  expirationJWT = serverConfig['jwt.exp.time'] && expirationTimestampJWT != null
     ? expirationTimestampJWT : 0;
 
   // calculate the expiration timestamp based on
   // the maximum connection life setting if configured to use it (>0).
   // TODO: find a better way to do this
-  const expirationMaxLifetime = serverConfig.connection_max_life_time > 0
-    ? addTimeFromNow(serverConfig.connection_max_life_time) : 0;
+  const expirationMaxLifetime = serverConfig['connection.max.life.time'] > 0
+    ? addTimeFromNow(serverConfig['connection.max.life.time']) : 0;
 
   // get the highest value between the configured expiration and the jwt expiration
   const expirationMax = expirationMaxLifetime > expirationJWT
@@ -169,7 +172,7 @@ class Tarball {
    * @param {*} idWsConnection
    */
   setExpiration(ws, expirationTimestampFromJWT, idWsConnection) {
-    if (serverConfig.jwt_exp_time || serverConfig.connection_max_life_time > 0) {
+    if (serverConfig['jwt.exp.time'] || serverConfig['connection.max.life.time'] > 0) {
       const boundClose = ws.close.bind(ws);
       // TODO: add something like refresh tokens instead of maximum lifetime
       // TODO: temporary solution while we cannot generate JWT tokens
