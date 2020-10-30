@@ -1,8 +1,9 @@
 const redis = require('redis');
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('kafka-ws:redis-expire-mgmt');
-const { redis: redisConfig } = require('../Config');
+
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
 /**
  * class to manage connection expirations using redis
@@ -12,6 +13,9 @@ class RedisExpireMgmt {
    * @constructor
    */
   constructor() {
+    /* Load redis configuration */
+    this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).redis;
+
     this.expirationMap = new Map();
 
     // TODO:  ADD TLS and  PASSWORD options for Redis
@@ -22,16 +26,9 @@ class RedisExpireMgmt {
     //   ...
     // };
 
-    const redisOptions = {
-      host: redisConfig.host,
-      port: redisConfig.port,
-      db: redisConfig.database,
-      // tls: tls_options
-    };
-
     this.clients = {
-      pub: redis.createClient(redisOptions),
-      sub: redis.createClient(redisOptions),
+      pub: redis.createClient(this.config),
+      sub: redis.createClient(this.config),
     };
   }
 
@@ -89,12 +86,12 @@ class RedisExpireMgmt {
 
     return new Promise((resolve, reject) => {
       // Subscribe to the "notify-keyspace-events" channel used for expired type events in a db
-      this.clients.sub.subscribe(`__keyevent@${redisConfig.database}__:expired`, (error) => {
+      this.clients.sub.subscribe(`__keyevent@${this.config.db}__:expired`, (error) => {
         if (error) {
           logger.error(`Error on connect: ${error}`);
           return reject(error);
         }
-        logger.info(`Subscribed to __keyevent@${redisConfig.database}__:expired event channel`);
+        logger.info(`Subscribed to __keyevent@${this.config.db}__:expired event channel`);
         this.clients.sub.on('message', (chan, idConnection) => this.onMessage(chan, idConnection));
         return resolve();
       });
