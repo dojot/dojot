@@ -294,6 +294,8 @@ Before proceeding, **make sure you configure your environment**.
 
 You can select the configuration file via the `KAFKA_WS_APP_USER_CONFIG_FILE` variable. Its default value is `production.env`
 
+Check the [config directory](./config) for the user configurations that are available by default.
+
 For more information about the usage of the configuration files and environment variables, check the
 __ConfigManager__ module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
 You can also check the [ConfigManager environment variables documentation](https://github.com/dojot/dojot-microservice-sdk-js/blob/master/lib/configManager/README.md#environment-variables) for more details.
