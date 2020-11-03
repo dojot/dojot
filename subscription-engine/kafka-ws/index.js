@@ -26,6 +26,7 @@ Logger.setVerbose(config.logger.verbose);
 const application = require('./app/App');
 const websocketTarball = require('./app/WebsocketTarball');
 const terminus = require('./app/Terminus');
+const StateManager = require('./app/StateManager');
 
 const logger = new Logger('app');
 
@@ -55,8 +56,13 @@ server.listen(config.server.port, config.server.host, async () => {
   logger.info('HTTP server is ready to accept connections!');
   logger.info(server.address());
 
+  StateManager.signalReady('server');
   // Initializes the sticky tarball
   await websocketTarball.init();
+});
+
+server.on('close  ', () => {
+  StateManager.signalNotReady('server');
 });
 
 /* adds health checks and graceful shutdown to the application */

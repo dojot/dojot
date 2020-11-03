@@ -1,6 +1,7 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
 const { ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
+const StateManager = require('../StateManager');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -20,6 +21,9 @@ class KafkaConsumer {
     this.consumer = new Consumer({ ...this.config.consumer }, { ...this.config.topic });
     // only one callback by topic
     this.registeredCallbacks = new Map();
+
+    // handle for interval, to delete when de-initializing class
+    this.stateManagerInterval = null;
   }
 
   /**
@@ -29,11 +33,27 @@ class KafkaConsumer {
     try {
       logger.info('init: Kafka starting...');
       await this.consumer.init();
+      const stateManagerStatusHandleBind = this.handleStatusForStateManager.bind(this);
+      this.stateManagerInterval = setInterval(() => stateManagerStatusHandleBind, 5000);
+      this.stateManagerInterval.unref();
       logger.info('init: ...Kafka started ');
     } catch (error) {
       logger.error(`init: Error starting kafka ${error.stack}`);
       throw error;
     }
+  }
+
+  handleStatusForStateManager() {
+    this.consumer.getStatus().then((data) => {
+      if (data.connected) {
+        StateManager.signalReady('kafka');
+      } else {
+        StateManager.signalNotReady('kafka');
+      }
+    }).catch((err) => {
+      StateManager.signalNotReady('kafka');
+      logger.warn(`Error ${err}`);
+    });
   }
 
   /**

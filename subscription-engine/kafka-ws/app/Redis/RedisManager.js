@@ -1,6 +1,8 @@
 const redis = require('redis');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const StateManager = require('../StateManager');
+
 
 const logger = new Logger('kafka-ws:redis-manager');
 
@@ -21,6 +23,11 @@ class RedisManager {
     // TODO: Implement "retry_strategy"
     this.redisClient = redis.createClient(this.config);
     logger.info('RedisManager singleton creation complete!');
+
+    this.redisClient.on('connect', () => StateManager.signalReady('redis'));
+    this.redisClient.on('reconnecting', () => StateManager.signalReady('redis'));
+    this.redisClient.on('end', () => StateManager.signalNotReadyReady('redis'));
+
     return Object.seal(this);
   }
 
