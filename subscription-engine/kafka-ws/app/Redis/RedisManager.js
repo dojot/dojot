@@ -3,7 +3,6 @@ const redis = require('redis');
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const StateManager = require('../StateManager');
 
-
 const logger = new Logger('kafka-ws:redis-manager');
 
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
