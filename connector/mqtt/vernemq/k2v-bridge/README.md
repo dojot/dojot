@@ -13,76 +13,101 @@ If there are more instances than partitions, the exceeding ones will not consume
 To increase security of messages' transmission, the communication between the bridge and VerneMQ is
 secured with mutual TLS. In future releases, the communication with Kafka will also use mutual TLS.
 
-# **Configurations**
+# Table of Contents
 
-## **Environment Variables**
+1. [Configurations](#configurations)
+   1. [App](#app)
+   2. [MQTT](#mqtt)
+   3. [SDK Consumer](#sdk-consumer)
+      1. [Main object](#main-object)
+      2. [kafka.consumer object](#kafkaconsumer-object)
+      2. [kafka.topic object](#kafkatopic-object)
+
+# **Configurations**
 
 Before running the K2V Bridge service within your environment, make sure you configure the
 environment variables to match your needs.
 
-### **App**
+You can select the configuration file via the `K2V_APP_USER_CONFIG_FILE` variable. Its default value
+is `production.conf`. Check the [config directory](./config) for the user configurations that are
+available by default.
 
-Key                              | Purpose                                            | Default Value           | Valid Values     |
--------------------------------- | -------------------------------------------------- | ----------------------- | ---------------- |
-K2V_APP_BASEDIR                  | Base directory where the project is located        | /opt/k2v_bridge         | string           |
-K2V_APP_CONNECTION_RETRY_COUNT   | Number of retries when checking services health    | 3                       | number           |
-K2V_APP_CONNECTION_RETRY_TIMEOUT | Seconds to wait between each health check          | 3                       | number           |
-K2V_APP_EJBCA_ADDRESS            | Address of the EJBCA service                       | x509-identity-mgmt:3000 | hostname/IP:port |
-K2V_APP_HOSTNAME                 | Hostname to be used in the certificate common name | k2v-bridge              | hostname/IP      |
+For more information about the usage of the configuration files and environment variables, check the
+__ConfigManager__ module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
+You can also check the [ConfigManager environment variables documentation](https://github.com/dojot/dojot-microservice-sdk-js/blob/master/lib/configManager/README.md#environment-variables) for more details.
 
+In short, all the parameters in the next sections are mapped to environment variables that begin
+with `K2V_`. You can either use environment variables or configuration files to change their values.
+You can also create new parameters via environment variables by following the fore mentioned
+convention.
 
-### **Kafka Messenger**
+## **App**
 
-Key                                | Purpose                        | Default Value               | Valid Values |
----------------------------------- | ------------------------------ | --------------------------- | ------------ |
-K2V_MESSENGER_CONSUME_TOPIC_SUFFIX | Kafka consumption topic suffix | dojot.device-manager.device | string       |
+Key | Purpose | Default Value | Valid Values | Environment variable
+--- | ------- | ------------- | ------------ | --------------------
+log.console.level | Console log level | info | info, warn, error, debug | K2V_LOG_CONSOLE_LEVEL
+log.file.enable | Whether to enable file logging or not | false | boolean | K2V_LOG_FILE_ENABLE
+log.file.filename | File log filename | k2v-%DATE%.log | string | K2V_LOG_FILE_FILENAME
+log.file.level | File log level | info | info, warn, error, debug | K2V_LOG_FILE_LEVEL
+log.verbose | Whether to enable or not log verbosity | false | boolean | K2V_LOG_VERBOSE
+messenger.consume.topic.suffix | Suffix of the Kafka topic to be consumed | dojot.device-manager.device | string | K2V_MESSENGER_CONSUME_TOPIC_SUFFIX
+publish.qos | MQTT publishing QoS level | 1 | 0, 1, 2 | K2V_PUBLISH_QOS
+publish.topic.suffix | MQTT publishing topic suffix | /config | string | K2V_PUBLISH_TOPIC_SUFFIX
 
-### **MQTT**
+## **MQTT**
 
-Key                                  | Purpose                                  | Default Value                                       | Valid Values           |
------------------------------------- | ---------------------------------------- | --------------------------------------------------- | ---------------------- |
-K2V_MQTT_CLIENT_ID                   | MQTT client id                           | ${K2V_APP_HOSTNAME}                                 | string                 |
-K2V_MQTT_CLIENT_KEEPALIVE            | MQTT client keepalive                    | 60                                                  | integer                |
-K2V_MQTT_CLIENT_PUBLISH_QOS          | MQTT client quality of service           | 1                                                   | integer                |
-K2V_MQTT_CLIENT_PUBLISH_TOPIC_SUFFIX | Suffix of the MQTT topic to publish to   | /config                                             | string                 |
-K2V_MQTT_CLIENT_SECURE               | MQTT client secure                       | true                                                | boolean/string/integer |
-K2V_MQTT_CLIENT_USERNAME             | MQTT client username                     | ${K2V_APP_HOSTNAME}                                 | string                 |
-K2V_MQTT_SERVER_ADDRESS              | MQTT broker host                         | vernemq-k8s                                         | hostname/IP            |
-K2V_MQTT_SERVER_PORT                 | MQTT broker port                         | 8883                                                | integer                |
-K2V_MQTT_TLS_CA_FILE                 | CA certificate file location             | ${K2V_APP_BASEDIR}/app/cert/ca.crt                  | string                 |
-K2V_MQTT_TLS_CERTIFICATE_FILE        | MQTT client certificate file location    | ${K2V_APP_BASEDIR}/app/cert/${K2V_APP_HOSTNAME}.crt | string                 |
-K2V_MQTT_TLS_KEY_FILE                | MQTT client key file location            | ${K2V_APP_BASEDIR}/app/cert/${K2V_APP_HOSTNAME}.key | string                 |
+Configurations passed directly to the [NPM MQTT library](https://www.npmjs.com/package/mqtt). We do
+not set the default values for all of them, but you can change the value of the ones we did not
+mentioned here via environment variables.
 
-### **Microservice SDK**
+Check the library's documentation for more information on the parameters.
 
-You can configure the Kafka Consumer with variables from the Microservice SDK and librdkafka. For
-more details on these configurations, please read the
-[librdkafka official configuration guide](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
-and the [Microservice SDK documentation](https://www.npmjs.com/package/@dojot/microservice-sdk).
+__NOTE THAT__ the module adapts the dotted version of the variables to the camelCase one that the
+library accepts, i.e. `client.id` is converted to `clientId`.
 
-#### **Logger**
+Key | Default Value | Valid Values | Environment variable
+--- | ------------- | ------------ | --------------------
+mqtt.ca | /opt/k2v_bridge/app/cert/ca.crt | string | K2V_MQTT_CA
+mqtt.cert | /opt/k2v_bridge/app/cert/${K2V_APP_HOSTNAME:-k2v-bridge}.crt | string | K2V_MQTT_CERT
+mqtt.clean | false | boolean | K2V_MQTT_CLEAN
+mqtt.client.id | ${K2V_APP_HOSTNAME:-k2v-bridge} | string | K2V_MQTT_CLIENT_ID
+mqtt.host | vernemq-k8s | string | K2V_MQTT_HOST
+mqtt.keep.alive | 60 | integer | K2V_MQTT_KEEP_ALIVE
+mqtt.key | /opt/k2v_bridge/app/cert/${K2V_APP_HOSTNAME:-k2v-bridge}.key | string | K2V_MQTT_KEY
+mqtt.port | 8883 | integer | K2V_MQTT_PORT
+mqtt.protocol | mqtts | string | K2V_MQTT_PROTOCOL
+mqtt.reject.unauthorized | true | boolean | K2V_MQTT_REJECT_UNAUTHORIZED
+mqtt.username | ${K2V_APP_HOSTNAME:-k2v-bridge} | string | K2V_MQTT_USERNAME
 
-Key                                 | Default Value |
------------------------------------ | ------------- |
-K2V_LOGGER_TRANSPORTS_CONSOLE_LEVEL | info          |
-K2V_LOGGER_VERBOSE                  | false         |
+## **SDK Consumer**
 
-#### **Consumer**
+These parameters are passed directly to the SDK producer. Check the
+[official repository](https://github.com/dojot/dojot-microservice-sdk-js) for more info on the
+values.
 
-Key                                   | Default Value |
-------------------------------------- | ------------- |
-K2V_SDK_COMMIT_INTERVAL_MS            | 5000          |
-K2V_SDK_IN_PROCESSING_MAX_MESSAGES    | 1             |
-K2V_SDK_QUEUED_MAX_MESSAGES_BYTES     | 10485760      |
-K2V_SDK_SUBSCRIPTION_BACKOFF_DELTA_MS | 1000          |
-K2V_SDK_SUBSCRIPTION_BACKOFF_MAX_MS   | 60000         |
-K2V_SDK_SUBSCRIPTION_BACKOFF_MIN_MS   | 1000          |
+### **Main object**
 
-#### **librdkafka**
+Key | Default Value | Valid Values | Environment variable
+--- | ------------- | ------------ | --------------------
+sdk.in.processing.max.messages | 1 | integer | K2V_SDK_IN_PROCESSING_MAX_MESSAGES
+sdk.queued.max.messages.bytes | 10485760 | integer | K2V_SDK_QUEUED_MAX_MESSAGES_BYTES
+sdk.subscription.backoff.min.ms | 1000 | integer | K2V_SDK_SUBSCRIPTION_BACKOFF_MIN_MS
+sdk.subscription.backoff.max.ms | 60000 | integer | K2V_SDK_SUBSCRIPTION_BACKOFF_MAX_MS
+sdk.subscription.backoff.delta.ms | 1000 | integer | K2V_SDK_SUBSCRIPTION_BACKOFF_DELTA_MS
+sdk.commit.interval.ms | 5000 | integer | K2V_SDK_COMMIT_INTERVAL_MS
 
-Key                                             | Default Value       |
------------------------------------------------ | ------------------- |
-K2V_KAFKA_CLIENT_ID                             | ${K2V_APP_HOSTNAME} |
-K2V_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION | 1000000             |
-K2V_KAFKA_METADATA_BROKER_LIST                  | kafka-server:9092   |
-K2V_KAFKA_SOCKET_KEEPALIVE_ENABLE               | false               |
+### **kafka.consumer object**
+
+Key | Default Value | Valid Values | Environment variable
+--- | ------------- | ------------ | --------------------
+consumer.client.id | ${K2V_APP_HOSTNAME:-k2v-bridge} | string | K2V_CONSUMER_CLIENT_ID
+consumer.group.id | k2v-bridge-group-id | string | K2V_CONSUMER_GROUP_ID
+consumer.max.in.flight.requests.per.connection | 1000000 | integer | K2V_CONSUMER_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION
+consumer.metadata.broker.list | kafka-server:9092 | string | K2V_CONSUMER_METADATA_BROKER_LIST
+consumer.socket.keepalive.enable | false | boolean | K2V_CONSUMER_SOCKET_KEEPALIVE_ENABLE
+
+### **kafka.topic object**
+
+| Key | Default Value | Valid Values | Environment variable
+| --- | ------------- | ------------ | --------------------
+| topic.acks | -1 | integer | V2K_TOPIC_ACKS
