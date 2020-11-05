@@ -35,13 +35,13 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        file: connector/mqtt/vernemq/k2v-bridge/coverage/lcov.info # create when run npm run coverage
+        directory: connector/mqtt/vernemq/k2v-bridge/coverage
         flags: K2VBridge # Flags allow you to isolate coverage reports for different tests
         name: k2v-bridge # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests
-    name: (connector/mqtt/vernemq/k2v-bridge) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    name: (connector/mqtt/vernemq/k2v-bridge) Build and Publish image to DockerHub #  path to help identify in Status checks each job
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
     steps:
