@@ -20,6 +20,9 @@ jest.mock('redis', () => ({
           },
         };
       },
+      on(label, cb) {
+        cb();
+      },
     };
     return redisClient;
   },
@@ -62,6 +65,11 @@ const mockConfig = {
   },
 };
 
+const managerMock = {
+  signalNotReady: jest.fn(),
+  signalReady: jest.fn(),
+};
+
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -72,6 +80,9 @@ const mockMicroServiceSdk = {
     error: jest.fn(),
     info: jest.fn(),
   })),
+  ServiceStateManager: {
+    Manager: jest.fn(() => managerMock),
+  },
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);

@@ -17,6 +17,9 @@ const mockMicroServiceSdk = {
     Consumer: jest.fn(),
     Producer: jest.fn(),
   },
+  ServiceStateManager: {
+    Manager: jest.fn(),
+  },
   Logger: jest.fn(() => ({
     debug: jest.fn(),
     error: jest.fn(),

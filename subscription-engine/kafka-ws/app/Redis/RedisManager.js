@@ -25,7 +25,7 @@ class RedisManager {
 
     this.redisClient.on('connect', () => StateManager.signalReady('redis'));
     this.redisClient.on('reconnecting', () => StateManager.signalReady('redis'));
-    this.redisClient.on('end', () => StateManager.signalNotReadyReady('redis'));
+    this.redisClient.on('end', () => StateManager.signalNotReady('redis'));
 
     return Object.seal(this);
   }

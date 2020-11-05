@@ -61,7 +61,7 @@ server.listen(config.server.port, config.server.host, async () => {
   await websocketTarball.init();
 });
 
-server.on('close  ', () => {
+server.on('close', () => {
   StateManager.signalNotReady('server');
 });
 
