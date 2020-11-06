@@ -9,7 +9,8 @@
         "dev": "cross-env NODE_ENV=development node --trace-sync-io index",
         "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request X509IDMGMT_LOGGER_CONSOLE_LEVEL=debug X509IDMGMT_SERVER_PORT=3737 X509IDMGMT_SERVER_HEALTHCHECK_PORT=9797 X509IDMGMT_EJBCA_PKCS12=./tls/ejbcaclient.p12 X509IDMGMT_EJBCA_PKCS12SECRET=./tls/ejbcaclient.secret X509IDMGMT_EJBCA_TRUSTEDCA=./tls/ejbcaclient-trustedca.pem X509IDMGMT_MONGO_CONN_OPTIONS_USER=root X509IDMGMT_MONGO_CONN_OPTIONS_PASS=pass X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE=admin  node --inspect-brk --trace-sync-io index",
         "test": "cross-env NODE_ENV=test jest --verbose",
-        "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand"
+        "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
+        "check-licenses": "apache2-license-checker"
     },
     "author": {
         "name": "Thiago de Paula Ferreira",
@@ -51,6 +52,7 @@
         "soap": "^0.31.0"
     },
     "devDependencies": {
+        "@bbc/apache2-license-checker": "^1.1.4",
         "cross-env": "^7.0.2",
         "eslint": "^6.8.0",
         "eslint-config-airbnb-base": "^14.1.0",

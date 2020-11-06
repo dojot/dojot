@@ -18,7 +18,7 @@ module.exports = ({ DIContainer }) => ({
     req.scope.register({
       logger: asClass(Logger, {
         injectionMode: InjectionMode.CLASSIC,
-        injector: () => ({ sid: `X509-Identity-Mgmt - ${req.id}` }),
+        injector: () => ({ sid: `X509-Identity-Mgmt - Req.ID:${req.id}` }),
         lifetime: Lifetime.SCOPED,
       }),
     });

@@ -11,11 +11,9 @@ const { ServiceUnavailable } = require('../sdk/web/backing/error-template');
  *
  * @param {object} injected dependencies
  */
-module.exports = ({ DIContainer, logger }) => ({
+module.exports = ({ stateManager, logger }) => ({
   name: 'beacon-controller',
   middleware: (req, res, next) => {
-    const stateManager = DIContainer.resolve('stateManager');
-
     if (stateManager.lightship.isServerShuttingDown()) {
       const msg = 'Detected that the service is shutting down; '
       + 'No requests will be accepted by this instance anymore';

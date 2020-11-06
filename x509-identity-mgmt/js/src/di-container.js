@@ -56,11 +56,20 @@ const InternalCAService = require('./services/internal-ca-service');
 
 const TrustedCAService = require('./services/trusted-ca-service');
 
+const decorate = require('./decorators/decorate');
+
+const LogExecutionTimeAsync = require('./decorators/log-execution-time-async');
+
+const InspectMethodAsync = require('./decorators/inspect-method-async');
+
 const {
   asFunction, asValue, asClass, Lifetime, InjectionMode,
 } = awilix;
 
 module.exports = (config) => {
+  const isDebug = () => (config.logger.console.level.toLowerCase() === 'debug'
+      || (config.logger.file && config.logger.file.level.toLowerCase() === 'debug'));
+
   // creates a Dependency Injection (DI) container
   const DIContainer = awilix.createContainer();
 
@@ -89,7 +98,9 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
+    // +-------+
+    // | Utils |
+    // +-------+
 
     pkiUtils: asValue(pkiUtils, {
       lifetime: Lifetime.SINGLETON,
@@ -109,7 +120,9 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
+    // +---------+
+    // | MongoDB |
+    // +---------+
 
     db: asFunction(db, {
       injector: () => {
@@ -133,7 +146,9 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
+    // +-------+
+    // | EJBCA |
+    // +-------+
 
     ejbcaHealthCheck: asClass(EjbcaHealthCheck, {
       injector: () => {
@@ -167,7 +182,9 @@ module.exports = (config) => {
       lifetime: Lifetime.SCOPED,
     }),
 
-    // --------------------------------------------------------
+    // +-------------+
+    // | Web service |
+    // +-------------+
 
     server: asFunction(server, {
       injector: () => ({ config: config.server }),
@@ -204,13 +221,17 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
+    // +----------------------+
+    // | Route Error Handlers |
+    // +----------------------+
 
     defaultErrorHandler: asFunction(defaultErrorHandler, {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
+    // +--------------------+
+    // | Route Interceptors |
+    // +--------------------+
 
     responseCompressController: asFunction(responseCompressController, {
       injector: () => ({ config: undefined }),
@@ -222,7 +243,6 @@ module.exports = (config) => {
     }),
 
     beaconController: asFunction(beaconController, {
-      injector: () => ({ DIContainer }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -257,7 +277,9 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
+    // +--------+
+    // | Routes |
+    // +--------+
 
     throwAwayRoutes: asFunction(throwAwayRoutes, {
       injector: () => ({ mountPoint: '/internal/api/v1' }),
@@ -279,8 +301,24 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    // --------------------------------------------------------
-    certificateService: asClass(CertificateService, {
+    // +----------+
+    // | Services |
+    // +----------+
+
+    certificateService: asFunction((dependencies) => {
+      const instance = Reflect.construct(CertificateService, [dependencies]);
+      if (isDebug()) {
+        const methods = Reflect.ownKeys(CertificateService.prototype).filter(
+          ((key) => key !== 'constructor' && typeof CertificateService.prototype[key] === 'function'),
+        );
+        const decorators = [
+          dependencies.logExecutionTimeAsyncDecorator,
+          dependencies.inspectMethodAsyncDecorator,
+        ];
+        decorate(instance, methods, decorators);
+      }
+      return instance;
+    }, {
       injector: () => ({
         certValidity: config.certificate.validity,
         checkPublicKey: config.certificate.checkpublickey,
@@ -307,6 +345,19 @@ module.exports = (config) => {
       }),
       lifetime: Lifetime.SCOPED,
     }),
+
+    // +------------+
+    // | Decorators |
+    // +------------+
+
+    logExecutionTimeAsyncDecorator: asClass(LogExecutionTimeAsync, {
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    inspectMethodAsyncDecorator: asClass(InspectMethodAsync, {
+      lifetime: Lifetime.SCOPED,
+    }),
+
   };
 
   // It registers all modules in the container so that they are instantiated only
