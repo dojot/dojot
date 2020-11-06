@@ -14,14 +14,14 @@ ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
-Logger.setTransport('console', { level: config.logger['transports.console.level'] });
+Logger.setTransport('console', { level: config.log['console.level'] });
 
-if (config.logger['transports.file.enable']) {
-  const fileLoggerConfig = { level: config.logger['transports.file.level'], filename: config.logger['transports.file.filename'] };
+if (config.log['file.enable']) {
+  const fileLoggerConfig = { level: config.log['file.level'], filename: config.log['file.filename'] };
   Logger.setTransport('file', fileLoggerConfig);
 }
 
-Logger.setVerbose(config.logger.verbose);
+Logger.setVerbose(config.log.verbose);
 
 const application = require('./app/App');
 const websocketTarball = require('./app/WebsocketTarball');

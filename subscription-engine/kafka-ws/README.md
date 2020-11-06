@@ -309,11 +309,11 @@ Configuration used in this service
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
 ------| ----------| ----------------|--------------|------------------------
 | app.node.env  | Is used (by convention) to state in which environment it is running | production | production or development | NODE_ENV
-| logger.transports.console.level  | Console logger level | info | string | KAFKA_WS_LOGGER_TRANSPORTS_CONSOLE_LEVEL
-| logger.verbose | Whether to enable logger verbosity or not | false | boolean | KAFKA_WS_LOGGER_VERBOSE
-| logger.transports.file.enable | Whether to enable logging in file or not | false | boolean | KAFKA_WS_LOGGER_TRANSPORTS_FILE_ENABLE
-| logger.transports.file.level | Whether to enable file logger verbosity or not | info | string | KAFKA_WS_LOGGER_TRANSPORTS_FILE_LEVEL
-| logger.transports.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOGGER_TRANSPORTS_FILE_FILENAME
+| log.console.level  | Console logger level | info | string | KAFKA_WS_LOG_CONSOLE_LEVEL
+| log.verbose | Whether to enable logger verbosity or not | false | boolean | KAFKA_WS_LOG_VERBOSE
+| log.file.enable | Whether to enable logging in file or not | false | boolean | KAFKA_WS_LOG_FILE_ENABLE
+| log.file.level | Whether to enable file logger verbosity or not | info | string | KAFKA_WS_LOG_FILE_LEVEL
+| log.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOG_FILE_FILENAME
 
 ## **Ticket**
 Ticket management
