@@ -4,7 +4,7 @@
 
 const utils = require('../../app/utils');
 
-describe('Testing project utils', () => {
+describe('utils', () => {
   it('should generate the configuration topic', () => {
     expect(utils.generateDojotActuationTopic('test', 'test', '/test')).toEqual('test:test/test');
     expect(utils.generateDojotActuationTopic('test', 1)).toEqual('test:1undefined');
