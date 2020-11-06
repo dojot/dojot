@@ -81,7 +81,7 @@ mqtt.username | ${K2V_APP_HOSTNAME:-k2v-bridge} | string | K2V_MQTT_USERNAME
 
 ## **SDK Consumer**
 
-These parameters are passed directly to the SDK producer. Check the
+These parameters are passed directly to the SDK consumer. Check the
 [official repository](https://github.com/dojot/dojot-microservice-sdk-js) for more info on the
 values.
 
@@ -111,3 +111,4 @@ consumer.socket.keepalive.enable | false | boolean | K2V_CONSUMER_SOCKET_KEEPALI
 | Key | Default Value | Valid Values | Environment variable
 | --- | ------------- | ------------ | --------------------
 | topic.acks | -1 | integer | K2V_TOPIC_ACKS
+| topic.auto.offset.reset | beginning | string | K2V_TOPIC_AUTO_OFFSET_RESET
