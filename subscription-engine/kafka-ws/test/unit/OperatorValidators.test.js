@@ -3,7 +3,6 @@
 const OperatorValidator = require('../../app/WhereProcessing/OperatorValidator');
 const { Errors } = require('../../app/Errors');
 
-
 describe('Test Operator Validators', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -14,7 +13,6 @@ describe('Test Operator Validators', () => {
     expect(() => OperatorValidator.bool([''])).toThrow(Errors.InvalidValue);
     expect(OperatorValidator.bool(['true'])).toEqual(true);
   });
-
 
   it('should test in and not in function', () => {
     expect(OperatorValidator.in(['TEST'])).toEqual(['TEST']);
