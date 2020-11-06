@@ -110,4 +110,4 @@ consumer.socket.keepalive.enable | false | boolean | K2V_CONSUMER_SOCKET_KEEPALI
 
 | Key | Default Value | Valid Values | Environment variable
 | --- | ------------- | ------------ | --------------------
-| topic.acks | -1 | integer | V2K_TOPIC_ACKS
+| topic.acks | -1 | integer | K2V_TOPIC_ACKS
