@@ -5,7 +5,7 @@ const jwtDecode = require('jwt-decode');
  * The token validation is not performed, as it is expected
  * to be validated by the API Gateway. */
 module.exports = () => ({
-  name: 'token-parsing-controller',
+  name: 'token-parsing-interceptor',
   middleware: (req, res, next) => {
     const err = new createError.Unauthorized();
     if (req.path.includes('throw-away')) {

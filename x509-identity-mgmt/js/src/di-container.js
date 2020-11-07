@@ -6,17 +6,21 @@ const pkiUtils = require('./core/pki-utils');
 
 const dnUtils = require('./core/dn-utils');
 
-const server = require('./sdk/web/server');
+const schemaValidator = require('./core/schema-validator');
 
-const framework = require('./sdk/web/framework');
+const serverFactory = require('./sdk/web/server-factory');
 
-const defaultErrorHandler = require('./sdk/web/backing/default-error-handler');
+const expressFactory = require('./sdk/web/framework/express-factory');
+
+const defaultErrorHandler = require('./sdk/web/framework/backing/default-error-handler');
+
+const errorTemplate = require('./sdk/web/framework/backing/error-template');
 
 const db = require('./db/mongo-client');
 
-const certificateModel = require('./db/certificate-model');
+const CertificateModel = require('./db/certificate-model');
 
-const trustedCAModel = require('./db/trusted-ca-model');
+const TrustedCAModel = require('./db/trusted-ca-model');
 
 const EjbcaSoap = require('./ejbca/ejbca-soap-client');
 
@@ -24,31 +28,31 @@ const EjbcaFacade = require('./ejbca/ejbca-facade');
 
 const EjbcaHealthCheck = require('./ejbca/ejbca-health-check');
 
-const scopedDIController = require('./controllers/scoped-di-controller');
+const responseCompressInterceptor = require('./sdk/web/framework/interceptors/response-compress-interceptor');
 
-const responseCompressController = require('./controllers/response-compress-controller');
+const requestIdInterceptor = require('./sdk/web/framework/interceptors/request-id-interceptor');
 
-const requestIdController = require('./controllers/request-id-controller');
+const beaconInterceptor = require('./sdk/web/framework/interceptors/beacon-interceptor');
 
-const beaconController = require('./controllers/beacon-controller');
+const requestLogInterceptor = require('./sdk/web/framework/interceptors/request-log-interceptor');
 
-const requestLogController = require('./controllers/request-log-controller');
+const paginateInterceptor = require('./sdk/web/framework/interceptors/paginate-interceptor');
 
-const paginateController = require('./controllers/paginate-controller');
+const jsonBodyParsingInterceptor = require('./sdk/web/framework/interceptors/json-body-parsing-interceptor');
 
-const jsonBodyParsingController = require('./controllers/json-body-parsing-controller');
+const staticFileInterceptor = require('./sdk/web/framework/interceptors/static-file-interceptor');
 
-const tokenParsingController = require('./controllers/token-parsing-controller');
+const scopedDIInterceptor = require('./express/interceptors/scoped-di-interceptor');
 
-const staticFileController = require('./controllers/static-file-controller');
+const tokenParsingInterceptor = require('./express/interceptors/token-parsing-interceptor');
 
-const throwAwayRoutes = require('./routes/throw-away-routes');
+const throwAwayRoutes = require('./express/routes/throw-away-routes');
 
-const internalCARoutes = require('./routes/internal-ca-routes');
+const internalCARoutes = require('./express/routes/internal-ca-routes');
 
-const trustedCARoutes = require('./routes/trusted-ca-routes');
+const trustedCARoutes = require('./express/routes/trusted-ca-routes');
 
-const certificateRoutes = require('./routes/certificate-routes');
+const certificateRoutes = require('./express/routes/certificate-routes');
 
 const CertificateService = require('./services/certificate-service');
 
@@ -56,19 +60,29 @@ const InternalCAService = require('./services/internal-ca-service');
 
 const TrustedCAService = require('./services/trusted-ca-service');
 
-const decorate = require('./decorators/decorate');
+const decoration = require('./decorators/decoration');
 
+const LogExecutionTime = require('./decorators/log-execution-time');
 const LogExecutionTimeAsync = require('./decorators/log-execution-time-async');
 
+const InspectMethod = require('./decorators/inspect-method');
 const InspectMethodAsync = require('./decorators/inspect-method-async');
+
+const defsSchema = require('../schemas/defs.json');
+const regTrustCaSchema = require('../schemas/register-trusted-ca-certificate.json');
+const updTrustCaSchema = require('../schemas/update-trusted-ca-certificate.json');
+const regOrGenCertSchema = require('../schemas/register-or-generate-certificate.json');
+const chOwnCertSchema = require('../schemas/change-owner-certificate.json');
 
 const {
   asFunction, asValue, asClass, Lifetime, InjectionMode,
 } = awilix;
 
-module.exports = (config) => {
-  const isDebug = () => (config.logger.console.level.toLowerCase() === 'debug'
-      || (config.logger.file && config.logger.file.level.toLowerCase() === 'debug'));
+function createObject(config) {
+  const levelDebug = () => (config.logger.console.level.toLowerCase() === 'debug'
+  || (config.logger.file && config.logger.file.level.toLowerCase() === 'debug'));
+
+  const { fromDecoratedClass, fromDecoratedFactory } = decoration({ levelDebug });
 
   // creates a Dependency Injection (DI) container
   const DIContainer = awilix.createContainer();
@@ -102,11 +116,11 @@ module.exports = (config) => {
     // | Utils |
     // +-------+
 
-    pkiUtils: asValue(pkiUtils, {
-      lifetime: Lifetime.SINGLETON,
+    pkiUtils: asFunction(fromDecoratedFactory(pkiUtils), {
+      lifetime: Lifetime.SCOPED,
     }),
 
-    dnUtils: asFunction(dnUtils, {
+    dnUtils: asFunction(fromDecoratedFactory(dnUtils), {
       injector: () => ({
         config: {
           allowedAttrs: config.certificate.subject.allowedattrs,
@@ -115,6 +129,23 @@ module.exports = (config) => {
           constantAttrs: {
             O: config.certificate.subject.constantattrs.o,
           },
+        },
+      }),
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    errorTemplate: asValue(errorTemplate, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    schemaValidator: asFunction(schemaValidator, {
+      injector: () => ({
+        schemas: {
+          defs: defsSchema,
+          regTrustCa: regTrustCaSchema,
+          updTrustCa: updTrustCaSchema,
+          regOrGenCert: regOrGenCertSchema,
+          chOwnCert: chOwnCertSchema,
         },
       }),
       lifetime: Lifetime.SINGLETON,
@@ -138,12 +169,12 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    certificateModel: asFunction(certificateModel, {
-      lifetime: Lifetime.SINGLETON,
+    certificateModel: asFunction(fromDecoratedClass(CertificateModel), {
+      lifetime: Lifetime.SCOPED,
     }),
 
-    trustedCAModel: asFunction(trustedCAModel, {
-      lifetime: Lifetime.SINGLETON,
+    trustedCAModel: asFunction(fromDecoratedClass(TrustedCAModel), {
+      lifetime: Lifetime.SCOPED,
     }),
 
     // +-------+
@@ -175,7 +206,7 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    ejbcaFacade: asClass(EjbcaFacade, {
+    ejbcaFacade: asFunction(fromDecoratedClass(EjbcaFacade), {
       injector: () => ({
         forceCRLRenew: config.ejbca.forcecrlrenew,
       }),
@@ -186,25 +217,25 @@ module.exports = (config) => {
     // | Web service |
     // +-------------+
 
-    server: asFunction(server, {
+    server: asFunction(serverFactory, {
       injector: () => ({ config: config.server }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    framework: asFunction(framework, {
+    framework: asFunction(expressFactory, {
       injector: () => ({
         config: config.framework,
-        controllers: [
-          // The order of the controllers matters
-          DIContainer.resolve('responseCompressController'),
-          DIContainer.resolve('requestIdController'),
-          DIContainer.resolve('beaconController'),
-          DIContainer.resolve('requestLogController'),
-          DIContainer.resolve('paginateController'),
-          DIContainer.resolve('jsonBodyParsingController'),
-          DIContainer.resolve('tokenParsingController'),
-          DIContainer.resolve('staticFileController'),
-          DIContainer.resolve('scopedDIController'),
+        interceptors: [
+          // The order of the interceptors matters
+          DIContainer.resolve('responseCompressInterceptor'),
+          DIContainer.resolve('requestIdInterceptor'),
+          DIContainer.resolve('beaconInterceptor'),
+          DIContainer.resolve('requestLogInterceptor'),
+          DIContainer.resolve('paginateInterceptor'),
+          DIContainer.resolve('jsonBodyParsingInterceptor'),
+          DIContainer.resolve('tokenParsingInterceptor'),
+          DIContainer.resolve('staticFileInterceptor'),
+          DIContainer.resolve('scopedDIInterceptor'),
         ],
         routes: ([
           // The order of the routes matters
@@ -213,7 +244,7 @@ module.exports = (config) => {
           DIContainer.resolve('trustedCARoutes'),
           DIContainer.resolve('certificateRoutes'),
         ]).flat(),
-        errorhandlers: [
+        errorHandlers: [
           // The order of the error handlers matters
           DIContainer.resolve('defaultErrorHandler'),
         ],
@@ -233,25 +264,25 @@ module.exports = (config) => {
     // | Route Interceptors |
     // +--------------------+
 
-    responseCompressController: asFunction(responseCompressController, {
+    responseCompressInterceptor: asFunction(responseCompressInterceptor, {
       injector: () => ({ config: undefined }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    requestIdController: asFunction(requestIdController, {
+    requestIdInterceptor: asFunction(requestIdInterceptor, {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    beaconController: asFunction(beaconController, {
+    beaconInterceptor: asFunction(beaconInterceptor, {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    requestLogController: asFunction(requestLogController, {
+    requestLogInterceptor: asFunction(requestLogInterceptor, {
       injector: () => ({ logFormat: config.framework.logformat }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    paginateController: asFunction(paginateController, {
+    paginateInterceptor: asFunction(paginateInterceptor, {
       injector: () => ({
         limit: config.framework.paginate.limit,
         maxLimit: config.framework.paginate.maxlimit,
@@ -259,20 +290,25 @@ module.exports = (config) => {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    jsonBodyParsingController: asFunction(jsonBodyParsingController, {
+    jsonBodyParsingInterceptor: asFunction(jsonBodyParsingInterceptor, {
       injector: () => ({ config: config.framework.bodyparser }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    tokenParsingController: asFunction(tokenParsingController, {
+    tokenParsingInterceptor: asFunction(tokenParsingInterceptor, {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    staticFileController: asFunction(staticFileController, {
+    staticFileInterceptor: asFunction(staticFileInterceptor, {
+      injector: () => ({
+        path: '/api/v1/schemas',
+        baseDirectory: require.main.filename,
+        staticFilePath: 'schemas',
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    scopedDIController: asFunction(scopedDIController, {
+    scopedDIInterceptor: asFunction(scopedDIInterceptor, {
       injector: () => ({ DIContainer }),
       lifetime: Lifetime.SINGLETON,
     }),
@@ -305,20 +341,7 @@ module.exports = (config) => {
     // | Services |
     // +----------+
 
-    certificateService: asFunction((dependencies) => {
-      const instance = Reflect.construct(CertificateService, [dependencies]);
-      if (isDebug()) {
-        const methods = Reflect.ownKeys(CertificateService.prototype).filter(
-          ((key) => key !== 'constructor' && typeof CertificateService.prototype[key] === 'function'),
-        );
-        const decorators = [
-          dependencies.logExecutionTimeAsyncDecorator,
-          dependencies.inspectMethodAsyncDecorator,
-        ];
-        decorate(instance, methods, decorators);
-      }
-      return instance;
-    }, {
+    certificateService: asFunction(fromDecoratedClass(CertificateService), {
       injector: () => ({
         certValidity: config.certificate.validity,
         checkPublicKey: config.certificate.checkpublickey,
@@ -329,14 +352,14 @@ module.exports = (config) => {
       lifetime: Lifetime.SCOPED,
     }),
 
-    internalCAService: asClass(InternalCAService, {
+    internalCAService: asFunction(fromDecoratedClass(InternalCAService), {
       injector: () => ({
         rootCA: config.ejbca.rootca,
       }),
       lifetime: Lifetime.SCOPED,
     }),
 
-    trustedCAService: asClass(TrustedCAService, {
+    trustedCAService: asFunction(fromDecoratedClass(TrustedCAService), {
       injector: () => ({
         rootCA: config.ejbca.rootca,
         queryMaxTimeMS: config.mongo.query.maxtimems,
@@ -350,7 +373,15 @@ module.exports = (config) => {
     // | Decorators |
     // +------------+
 
+    logExecutionTimeDecorator: asClass(LogExecutionTime, {
+      lifetime: Lifetime.SCOPED,
+    }),
+
     logExecutionTimeAsyncDecorator: asClass(LogExecutionTimeAsync, {
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    inspectMethodDecorator: asClass(InspectMethod, {
       lifetime: Lifetime.SCOPED,
     }),
 
@@ -367,4 +398,6 @@ module.exports = (config) => {
 
   // Returns the configured di-container.
   return DIContainer;
-};
+}
+
+module.exports = (config) => createObject(config);

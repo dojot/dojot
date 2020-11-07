@@ -143,7 +143,7 @@ const checkHandlers = ({ handlers }, logger) => {
   return false;
 };
 
-module.exports = (routesToBeRegistered, framework, logger) => {
+const registerRoutes = (routesToBeRegistered, framework, logger) => {
   let routes = routesToBeRegistered;
   if (!Array.isArray(routes)) {
     routes = [routes];
@@ -191,3 +191,5 @@ module.exports = (routesToBeRegistered, framework, logger) => {
     framework.use(mountPoint, mountRouter);
   });
 };
+
+module.exports = registerRoutes;

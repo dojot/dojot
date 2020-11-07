@@ -2,7 +2,7 @@ const morgan = require('morgan');
 
 /* HTTP request logger:
  * http://expressjs.com/en/resources/middleware/morgan.html */
-module.exports = ({ logFormat, logger }) => {
+function createInterceptor(logFormat, logger, path = '/') {
   /* setup the logger */
   const defaultFormat = [
     ':id',
@@ -14,7 +14,8 @@ module.exports = ({ logFormat, logger }) => {
   morgan.token('id', (req) => req.id);
 
   return {
-    name: 'request-log-controller',
+    path,
+    name: 'request-log-interceptor',
     middleware: morgan(logFormat || defaultFormat, {
       stream: {
         write: (message) => {
@@ -23,4 +24,6 @@ module.exports = ({ logFormat, logger }) => {
       },
     }),
   };
-};
+}
+
+module.exports = ({ logFormat, logger, path }) => createInterceptor(logFormat, logger, path);

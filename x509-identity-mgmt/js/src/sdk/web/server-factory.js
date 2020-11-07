@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const containsAll = (source, target) => target.every((el) => source.includes(el));
 
-module.exports = ({ config, logger }) => {
+function createObject(config, logger) {
   let server = null;
   if (containsAll(Object.keys(config), ['cert', 'key', 'ca'])) {
     const serverCfg = { ...config };
@@ -23,4 +23,6 @@ module.exports = ({ config, logger }) => {
   }
   logger.debug('Web Server created!');
   return server;
-};
+}
+
+module.exports = ({ config, logger }) => createObject(config, logger);

@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const MongoQS = require('mongo-querystring');
@@ -19,6 +18,8 @@ const trustedCASchema = new Schema({
   tenant: String,
 });
 trustedCASchema.index({ tenant: 1, caFingerprint: 1 });
+
+const mongooseModel = mongoose.model('TrustedCA', trustedCASchema);
 
 const projectableFields = [
   'caFingerprint',
@@ -49,9 +50,13 @@ const mongoQS = new MongoQS({
   },
 });
 
-module.exports = ({ db }) => ({
-  model: mongoose.model('TrustedCA', trustedCASchema),
-  parseConditionFields: (candidates) => {
+class TrustedCAModel {
+  constructor({ db }) {
+    Object.defineProperty(this, 'db', { value: db });
+    Object.defineProperty(this, 'model', { value: mongooseModel });
+  }
+
+  static parseConditionFields(candidates) {
     const conditionFields = { ...candidates };
     Object.entries(conditionFields).forEach(
       ([key, value]) => {
@@ -65,9 +70,15 @@ module.exports = ({ db }) => ({
       },
     );
     return mongoQS.parse(conditionFields);
-  },
-  parseProjectionFields: (commaSeparatedFields) => (
-    db.parseProjectionFields(commaSeparatedFields, projectableFields)
-  ),
-  sanitizeFields: (cert) => db.sanitizeFields(cert, projectableFields),
-});
+  }
+
+  parseProjectionFields(commaSeparatedFields) {
+    return this.db.parseProjectionFields(commaSeparatedFields, projectableFields);
+  }
+
+  sanitizeFields(cert) {
+    return this.db.sanitizeFields(cert, projectableFields);
+  }
+}
+
+module.exports = TrustedCAModel;

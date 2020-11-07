@@ -1,13 +1,13 @@
 const sanitize = (obj, logger) => {
-  const controllerPattern = {
+  const interceptorPattern = {
     name: '',
     path: [],
     middleware: [],
   };
-  logger.debug('\tSanitizing the controller so that only the pattern remains: ', controllerPattern);
+  logger.debug('\tSanitizing the interceptor so that only the pattern remains: ', interceptorPattern);
 
   const subset = Object.fromEntries(
-    Object.entries(obj).filter(([key]) => Object.keys(controllerPattern).includes(key)),
+    Object.entries(obj).filter(([key]) => Object.keys(interceptorPattern).includes(key)),
   );
 
   if (subset.name && typeof subset.name !== 'string') {
@@ -22,13 +22,13 @@ const sanitize = (obj, logger) => {
     subset.middleware = [subset.middleware];
   }
 
-  return { ...controllerPattern, ...subset };
+  return { ...interceptorPattern, ...subset };
 };
 
 const checkPath = ({ path }, logger) => {
-  logger.debug('\tChecking if the controller has valid path values...');
+  logger.debug('\tChecking if the interceptor has valid path values...');
   if (!path.length) {
-    logger.debug("\tThe controller has no path value. Using '/' (root path)!");
+    logger.debug("\tThe interceptor has no path value. Using '/' (root path)!");
     return true;
   }
 
@@ -49,9 +49,9 @@ const checkPath = ({ path }, logger) => {
 };
 
 const checkMiddleware = ({ middleware }, logger) => {
-  logger.debug('\tChecking if the controller has middlewares to handle requests...');
+  logger.debug('\tChecking if the interceptor has middlewares to handle requests...');
   if (!middleware.length) {
-    logger.debug('\tThe controller has no middleware to handle requests. This is a problem!');
+    logger.debug('\tThe interceptor has no middleware to handle requests. This is a problem!');
     return false;
   }
 
@@ -75,28 +75,30 @@ const checkMiddleware = ({ middleware }, logger) => {
   return false;
 };
 
-module.exports = (controllersToBeRegistered, framework, logger) => {
-  let controllers = controllersToBeRegistered;
-  if (!Array.isArray(controllers)) {
-    controllers = [controllers];
+const registerInterceptors = (interceptorsToBeRegistered, framework, logger) => {
+  let interceptors = interceptorsToBeRegistered;
+  if (!Array.isArray(interceptors)) {
+    interceptors = [interceptors];
   }
 
-  controllers.forEach((controllerToBeRegistered) => {
-    logger.debug(`\tController to be registered: ${controllerToBeRegistered.name}`);
+  interceptors.forEach((interceptorToBeRegistered) => {
+    logger.debug(`\tInterceptor to be registered: ${interceptorToBeRegistered.name}`);
 
-    const controller = sanitize(controllerToBeRegistered, logger);
+    const interceptor = sanitize(interceptorToBeRegistered, logger);
 
-    if (checkPath(controller, logger) && checkMiddleware(controller, logger)) {
-      if (controller.path.length) {
-        framework.use(controller.path, controller.middleware);
-        logger.debug(`\tController registered! -> ${controller.name}`);
-        logger.debug(`\t---> Path pattern: ${controller.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
+    if (checkPath(interceptor, logger) && checkMiddleware(interceptor, logger)) {
+      if (interceptor.path.length) {
+        framework.use(interceptor.path, interceptor.middleware);
+        logger.debug(`\tInterceptor registered! -> ${interceptor.name}`);
+        logger.debug(`\t---> Path pattern: ${interceptor.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
       } else {
-        framework.use(controller.middleware);
-        logger.debug(`\tController registered! -> ${controller.name}`);
+        framework.use(interceptor.middleware);
+        logger.debug(`\tInterceptor registered! -> ${interceptor.name}`);
       }
     } else {
-      logger.debug(`\tController not registered! -> ${controller.name}`);
+      logger.debug(`\tInterceptor not registered! -> ${interceptor.name}`);
     }
   });
 };
+
+module.exports = registerInterceptors;

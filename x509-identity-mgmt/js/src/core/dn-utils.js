@@ -1,5 +1,3 @@
-const { BadRequest } = require('../sdk/web/backing/error-template');
-
 /* A distinguished name for an X.509 certificate consists
  * of a sequence of relative distinguished names (RDN).
  * For details on these SubjectDN attributes,
@@ -113,10 +111,13 @@ const parseAllowedAttrsRegex = (arr) => arr.reduce((obj, attr) => {
  * object when you call the function.
  *
  * @param {object} config Settings for creating a new object.
+ * @param {object} errorTemplate to throw errors with HTTP code.
  *
  * @returns a factory function
  */
-function factoryFunction(config) {
+function createObject(config, errorTemplate) {
+  const { BadRequest } = errorTemplate;
+
   /* List of allowed attributes on SubjectDN */
   const allowed = [...config.allowedAttrs];
 
@@ -232,7 +233,7 @@ function factoryFunction(config) {
    * @param {boolean} includeConstantAttrs include attributes to be overwritten in SubjectDN
    * @return {string} The Distinguished Name (DN object).
    */
-  return (relativeDNs, includeConstantAttrs = false) => {
+  function from(relativeDNs, includeConstantAttrs = false) {
     let $ = {};
 
     // defines the object's methods using the default values for the Property Descriptor
@@ -246,9 +247,7 @@ function factoryFunction(config) {
     $ = relativeDNs.typesAndValues.reduce(
       (obj, attr) => {
         const rdn = RelativeDistinguishedNamesCatalog.find((el) => el.OID === attr.type);
-
         const key = (rdn) ? (rdn.shortName || rdn.name) : attr.type;
-
         if (!Reflect.has(obj, key)) {
           // defines the object's properties as enumerable and writable
           Reflect.defineProperty(obj, key, {
@@ -257,7 +256,6 @@ function factoryFunction(config) {
             value: attr.value.valueBlock.value,
           });
         }
-
         return obj;
       }, $,
     );
@@ -277,9 +275,10 @@ function factoryFunction(config) {
         ),
       );
     }
-
     return $;
-  };
+  }
+
+  return { from };
 }
 
 /**
@@ -287,9 +286,4 @@ function factoryFunction(config) {
  * It consists of a sequence of Relative Distinguished Names (RDNs), which are themselves
  * sets of attribute type and value pairs.
  */
-module.exports = ({ config }) => {
-  const from = factoryFunction(config);
-  return {
-    from,
-  };
-};
+module.exports = ({ config, errorTemplate }) => createObject(config, errorTemplate);

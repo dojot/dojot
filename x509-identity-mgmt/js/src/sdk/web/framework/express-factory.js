@@ -5,19 +5,12 @@ const createError = require('http-errors');
 /* This library is about what happens when you hit an async error. */
 require('express-async-errors');
 
-const registerControllers = require('./backing/register-controllers');
+const registerInterceptors = require('./backing/register-interceptors');
 
 const registerRoutes = require('./backing/register-routes');
 
-module.exports = ({
-  config,
-  controllers,
-  routes,
-  errorhandlers,
-  server,
-  logger,
-}) => {
-  logger.debug('Configuring the Express Framework...');
+function createObject(config, interceptors, routes, errorHandlers, server, logger) {
+  logger.debug('Creating and configuring the Express Framework...');
   const framework = express();
 
   if (config.websocket) {
@@ -33,12 +26,12 @@ module.exports = ({
     logger.debug('\tTrust Proxy support enabled!');
   }
 
-  // Configures middlewares as the highest level "controllers" for the application.
+  // Configures middlewares as the highest level "interceptors" for the application.
   // These middlewares are executed before any logic associated with HTTP methods.
-  if (controllers) {
-    logger.debug('\tRegistering highest level "controllers" for the application...');
-    registerControllers(controllers, framework, logger);
-    logger.debug('\tControllers for the application have been registered!');
+  if (interceptors) {
+    logger.debug('\tRegistering highest level "interceptors" for the application...');
+    registerInterceptors(interceptors, framework, logger);
+    logger.debug('\tInterceptors for the application have been registered!');
   }
 
   if (routes) {
@@ -52,13 +45,22 @@ module.exports = ({
     next(new createError.NotFound());
   });
 
-  if (errorhandlers) {
+  if (errorHandlers) {
     logger.debug('\tUsing custom error handler!');
-    errorhandlers.forEach((errorHandler) => {
+    errorHandlers.forEach((errorHandler) => {
       framework.use(errorHandler);
     });
   }
 
   logger.debug('Express Framework successfully configured!');
   return framework;
-};
+}
+
+module.exports = ({
+  config,
+  interceptors,
+  routes,
+  errorHandlers,
+  server,
+  logger,
+}) => createObject(config, interceptors, routes, errorHandlers, server, logger);

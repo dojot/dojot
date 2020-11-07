@@ -1,5 +1,3 @@
-const { BadRequest, NotFound, Conflict } = require('../sdk/web/backing/error-template');
-
 /**
  * Service to handle Trusted CAs
  */
@@ -9,7 +7,7 @@ class TrustedCAService {
    */
   constructor({
     trustedCAModel, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils,
-    rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
+    rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit, errorTemplate,
   }) {
     Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
     Object.defineProperty(this, 'tenant', { value: tenant });
@@ -25,6 +23,8 @@ class TrustedCAService {
     Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
     Object.defineProperty(this, 'parseCertCndtFlds', { value: certificateModel.parseConditionFields.bind(certificateModel) });
     Object.defineProperty(this, 'caCertLimit', { value: caCertLimit });
+
+    Object.defineProperty(this, 'error', { value: errorTemplate });
   }
 
   /**
@@ -47,7 +47,7 @@ class TrustedCAService {
       .lean()
       .exec();
     if (!result) {
-      throw NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
     return result;
   }
@@ -133,7 +133,7 @@ class TrustedCAService {
     ).maxTimeMS(this.queryMaxTimeMS).exec();
 
     if (!result) {
-      throw NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
   }
 
@@ -150,7 +150,7 @@ class TrustedCAService {
     const ff = this.parseCertCndtFlds({ tenant, caFingerprint, autoRegistered: false });
     const certCount = await this.CertificateModel.countDocuments(ff);
     if (certCount > 0) {
-      throw BadRequest('There are certificates dependent on the CA to be removed, '
+      throw this.error.BadRequest('There are certificates dependent on the CA to be removed, '
       + "however these certificates are not marked as 'autoRegistered'. Therefore, "
       + 'they must be removed manually before removing their CA certificate.');
     }
@@ -179,7 +179,7 @@ class TrustedCAService {
       const count = await this.TrustedCAModel.countDocuments(filterFields);
 
       if (count >= this.caCertLimit) {
-        throw BadRequest('The number of registered CAs has been exceeded.');
+        throw this.error.BadRequest('The number of registered CAs has been exceeded.');
       }
     }
   }
@@ -200,7 +200,7 @@ class TrustedCAService {
     };
     const count = await this.TrustedCAModel.countDocuments(filterFields);
     if (count) {
-      throw Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
+      throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
     }
   }
 

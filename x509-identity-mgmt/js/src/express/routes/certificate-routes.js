@@ -2,11 +2,11 @@ const HttpStatus = require('http-status-codes');
 
 const sanitize = require('./sanitize-params');
 
-const { validateRegOrGenCert, validateChangeOwnerCert } = require('../core/schema-validator');
-
 const CERT_SERVICE = 'certificateService';
 
-module.exports = ({ mountPoint, certificateModel }) => {
+module.exports = ({ mountPoint, certificateModel, schemaValidator }) => {
+  const { validateRegOrGenCert, validateChangeOwnerCert } = schemaValidator;
+
   const certsRoute = {
     mountPoint,
     name: 'certificates-route',

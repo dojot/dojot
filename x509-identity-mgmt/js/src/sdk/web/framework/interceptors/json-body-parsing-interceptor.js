@@ -5,7 +5,12 @@ const express = require('express');
  * It also controls the maximum request body size by "limit" option,
  * the value is passed for parsing to the Bytes Library:
  * https://www.npmjs.com/package/bytes */
-module.exports = ({ config }) => ({
-  name: 'json-body-parsing-controller',
-  middleware: express.json({ limit: config.limit }),
-});
+function createInterceptor(config, path = '/') {
+  return {
+    path,
+    name: 'json-body-parsing-interceptor',
+    middleware: express.json({ limit: config.limit }),
+  };
+}
+
+module.exports = ({ config, path }) => createInterceptor(config, path);

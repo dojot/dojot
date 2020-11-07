@@ -7,7 +7,7 @@ const { Logger } = require('@dojot/microservice-sdk');
 // create a scoped DI container
 // https://github.com/jeffijoe/awilix#containercreatescope
 module.exports = ({ DIContainer }) => ({
-  name: 'scoped-di-controller',
+  name: 'scoped-di-interceptor',
   middleware: (req, res, next) => {
     req.scope = DIContainer.createScope();
 
@@ -23,6 +23,7 @@ module.exports = ({ DIContainer }) => ({
       }),
     });
 
+    // This logger takes priority over the global logger within the DI container
     req.logger = req.scope.resolve('logger');
 
     next();

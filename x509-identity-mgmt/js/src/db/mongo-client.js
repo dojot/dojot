@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-const { BadRequest } = require('../sdk/web/backing/error-template');
-
 /**
  * To fix all deprecation warnings:
  * https://mongoosejs.com/docs/deprecations.html
@@ -11,68 +9,68 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
+function createObject(config, healthCheck, logger, errorTemplate) {
+  const { BadRequest } = errorTemplate;
 
-function parseProjectionFields(commaSeparatedFields, projectableFields) {
-  const queryFields = (commaSeparatedFields)
-    ? commaSeparatedFields.split(',')
-    : null;
+  function parseProjectionFields(commaSeparatedFields, projectableFields) {
+    const queryFields = (commaSeparatedFields)
+      ? commaSeparatedFields.split(',')
+      : null;
 
-  /* Defines the fields that will be returned by the query */
-  let fields = [...projectableFields];
-  if (queryFields) {
-    const invalidFields = queryFields.filter((el) => !projectableFields.includes(el));
-    if (invalidFields.length) {
-      const errorMsg = `The fields provided are not valid: [${invalidFields.join(',')}]`;
-      throw BadRequest(errorMsg);
+    /* Defines the fields that will be returned by the query */
+    let fields = [...projectableFields];
+    if (queryFields) {
+      const invalidFields = queryFields.filter((el) => !projectableFields.includes(el));
+      if (invalidFields.length) {
+        const errorMsg = `The fields provided are not valid: [${invalidFields.join(',')}]`;
+        throw BadRequest(errorMsg);
+      }
+      fields = [...queryFields];
     }
-    fields = [...queryFields];
+
+    // you cannot specify an embedded document and a field
+    // within that document embedded in the same projection
+    fields = fields.filter(
+      (fname) => !fields.some((other) => other.startsWith(`${fname}.`)),
+    );
+
+    return fields;
   }
 
-  // you cannot specify an embedded document and a field
-  // within that document embedded in the same projection
-  fields = fields.filter(
-    (fname) => !fields.some((other) => other.startsWith(`${fname}.`)),
-  );
-
-  return fields;
-}
-
-function getComplexFieldMap(dottedAllowedFields) {
-  return dottedAllowedFields.reduce((map, el) => {
-    const field = el.substring(0, el.indexOf('.'));
-    if (field) {
-      const remaining = el.substring(el.indexOf('.') + 1);
-      let arr = map.get(field);
-      if (!arr) {
-        arr = [];
-        map.set(field, arr);
+  function getComplexFieldMap(dottedAllowedFields) {
+    return dottedAllowedFields.reduce((map, el) => {
+      const field = el.substring(0, el.indexOf('.'));
+      if (field) {
+        const remaining = el.substring(el.indexOf('.') + 1);
+        let arr = map.get(field);
+        if (!arr) {
+          arr = [];
+          map.set(field, arr);
+        }
+        arr.push(remaining);
       }
-      arr.push(remaining);
-    }
-    return map;
-  }, new Map());
-}
+      return map;
+    }, new Map());
+  }
 
-function sanitizeFields(obj, dottedAllowedFields) {
-  const objFields = Object.keys(obj);
-  const allowedFields = new Set(dottedAllowedFields.map((el) => el.split('.')[0]));
-  const notAllowedFields = objFields.filter((f) => !allowedFields.has(f));
+  function sanitizeFields(obj, dottedAllowedFields) {
+    const objFields = Object.keys(obj);
+    const allowedFields = new Set(dottedAllowedFields.map((el) => el.split('.')[0]));
+    const notAllowedFields = objFields.filter((f) => !allowedFields.has(f));
 
-  /* Removes non-allowed fields from the object */
-  notAllowedFields.forEach((f) => Reflect.deleteProperty(obj, f));
+    /* Removes non-allowed fields from the object */
+    notAllowedFields.forEach((f) => Reflect.deleteProperty(obj, f));
 
-  /* Sanitizes complex fields kept in the object */
-  getComplexFieldMap(dottedAllowedFields).forEach((nestedAllowedFields, allowedField) => {
-    if (Reflect.has(obj, allowedField)) {
-      sanitizeFields(Reflect.get(obj, allowedField), nestedAllowedFields);
-    }
-  });
+    /* Sanitizes complex fields kept in the object */
+    getComplexFieldMap(dottedAllowedFields).forEach((nestedAllowedFields, allowedField) => {
+      if (Reflect.has(obj, allowedField)) {
+        sanitizeFields(Reflect.get(obj, allowedField), nestedAllowedFields);
+      }
+    });
 
-  return obj;
-}
+    return obj;
+  }
 
-
-module.exports = ({ config, healthCheck, logger }) => {
   /* Flag indicating whether the MongoDB Driver had the first successful connection */
   let initialized = false;
 
@@ -164,4 +162,8 @@ module.exports = ({ config, healthCheck, logger }) => {
     parseProjectionFields,
     sanitizeFields,
   };
-};
+}
+
+module.exports = ({
+  config, healthCheck, logger, errorTemplate,
+}) => createObject(config, healthCheck, logger, errorTemplate);

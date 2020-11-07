@@ -25,6 +25,8 @@ const certificateSchema = new Schema({
 });
 certificateSchema.index({ tenant: 1, fingerprint: 1 });
 
+const mongooseModel = mongoose.model('Certificate', certificateSchema);
+
 const projectableFields = [
   'fingerprint',
   'caFingerprint',
@@ -63,9 +65,13 @@ const mongoQS = new MongoQS({
   },
 });
 
-module.exports = ({ db }) => ({
-  model: mongoose.model('Certificate', certificateSchema),
-  parseConditionFields: (candidates) => {
+class CertificateModel {
+  constructor({ db }) {
+    Object.defineProperty(this, 'db', { value: db });
+    Object.defineProperty(this, 'model', { value: mongooseModel });
+  }
+
+  static parseConditionFields(candidates) {
     const conditionFields = { ...candidates };
     Object.entries(conditionFields).forEach(
       ([key, value]) => {
@@ -79,9 +85,15 @@ module.exports = ({ db }) => ({
       },
     );
     return mongoQS.parse(conditionFields);
-  },
-  parseProjectionFields: (commaSeparatedFields) => (
-    db.parseProjectionFields(commaSeparatedFields, projectableFields)
-  ),
-  sanitizeFields: (cert) => db.sanitizeFields(cert, projectableFields),
-});
+  }
+
+  parseProjectionFields(commaSeparatedFields) {
+    return this.db.parseProjectionFields(commaSeparatedFields, projectableFields);
+  }
+
+  sanitizeFields(cert) {
+    return this.db.sanitizeFields(cert, projectableFields);
+  }
+}
+
+module.exports = CertificateModel;

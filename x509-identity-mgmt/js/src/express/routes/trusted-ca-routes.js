@@ -2,13 +2,14 @@ const HttpStatus = require('http-status-codes');
 
 const sanitize = require('./sanitize-params');
 
-const { validateNewTrustedCA, validateUpdTrustedCA } = require('../core/schema-validator');
-
-const { BadRequest } = require('../sdk/web/backing/error-template');
-
 const CA_SERVICE = 'trustedCAService';
 
-module.exports = ({ mountPoint, trustedCAModel }) => {
+module.exports = ({
+  mountPoint, trustedCAModel, schemaValidator, errorTemplate,
+}) => {
+  const { validateNewTrustedCA, validateUpdTrustedCA } = schemaValidator;
+  const { BadRequest } = errorTemplate;
+
   const trustedCAsRoute = {
     mountPoint,
     name: 'trusted-cas-route',

@@ -1,14 +1,13 @@
 const HttpStatus = require('http-status-codes');
 
-const { validateRegOrGenCert } = require('../core/schema-validator');
-
-const { BadRequest } = require('../sdk/web/backing/error-template');
-
 const CERT_SERVICE = 'certificateService';
 
 const CA_SERVICE = 'internalCAService';
 
-module.exports = ({ mountPoint }) => {
+module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
+  const { validateRegOrGenCert } = schemaValidator;
+  const { BadRequest } = errorTemplate;
+
   const throwAwayRoute = {
     mountPoint,
     name: 'throw-away-route',

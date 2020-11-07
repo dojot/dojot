@@ -1,5 +1,3 @@
-const { NotFound, BadRequest, Conflict } = require('../sdk/web/backing/error-template');
-
 /**
  * Service to handle certificates
  */
@@ -10,7 +8,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils,
     dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration, logger,
+    caCertAutoRegistration, logger, errorTemplate,
   }) {
     Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
     Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
@@ -24,6 +22,7 @@ class CertificateService {
     Object.defineProperty(this, 'caCertAutoRegistration', { value: caCertAutoRegistration });
     Object.defineProperty(this, 'logger', { value: logger });
     Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
+    Object.defineProperty(this, 'error', { value: errorTemplate });
   }
 
   /**
@@ -104,7 +103,7 @@ class CertificateService {
         // If "caFingerprint" is informed and also a root CA certificate in the payload,
         // we must ensure that the two are the same, otherwise, we must return an error.
         if (caFingerprint && caFingerprint !== rootCAFingerprint) {
-          throw BadRequest('The fingerprint of the CA defined in the payload of the request '
+          throw this.error.BadRequest('The fingerprint of the CA defined in the payload of the request '
             + 'does not match the fingerprint of the certificate of the root CA that was '
             + 'also informed in the certificate chain.');
         }
@@ -112,7 +111,7 @@ class CertificateService {
     }
 
     if (!rootCAFingerprint) {
-      throw BadRequest('It was not possible to obtain the fingerprint of the root CA. '
+      throw this.error.BadRequest('It was not possible to obtain the fingerprint of the root CA. '
         + 'Make sure to inform it in the request payload or inform the root CA '
         + 'certificate as the last one in the chain of certificates.');
     }
@@ -132,7 +131,7 @@ class CertificateService {
         });
         registeredRootCAPem = rootCAPem;
       } else {
-        throw BadRequest('The root CA certificate is not registered as a trusted certificate yet.');
+        throw this.error.BadRequest('The root CA certificate is not registered as a trusted certificate yet.');
       }
     }
 
@@ -182,7 +181,7 @@ class CertificateService {
     ).maxTimeMS(this.queryMaxTimeMS).exec();
 
     if (!result) {
-      throw NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
   }
 
@@ -207,7 +206,7 @@ class CertificateService {
       .exec();
 
     if (!result) {
-      throw NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
 
     return result;
@@ -303,7 +302,7 @@ class CertificateService {
     const filterFields = { fingerprint, tenant: this.tenant };
     const count = await this.CertificateModel.countDocuments(filterFields);
     if (count) {
-      throw Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
+      throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
     }
   }
 }
