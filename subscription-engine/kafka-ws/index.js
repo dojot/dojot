@@ -49,7 +49,7 @@ server.listen(serverCfg.port, serverCfg.host, async () => {
   try {
     await websocketTarball.init();
   } catch (err) {
-    logger.error('Unexpected service startup error!', err)
+    logger.error('Unexpected service startup error!', err);
     process.kill(process.pid);
   }
 });
