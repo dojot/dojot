@@ -64,6 +64,9 @@ process.on('unhandledRejection', (reason, promise) => {
   unhandledRejections.set(promise, reason);
 
   logger.debug(`unhandledRejection: List of Unhandled Rejection size ${unhandledRejections.size}`);
+
+  // TODO: stop server (connection redis, kafka consumer, etc.)
+  process.kill(process.pid);
 });
 
 process.on('rejectionHandled', (promise) => {
