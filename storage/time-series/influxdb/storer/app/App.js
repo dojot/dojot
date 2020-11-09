@@ -67,16 +67,17 @@ class App {
       this.createHealthCheckers();
       this.defineShutdown();
 
+      const influxIsReady = await this.influxState.isReady();
+      if (!influxIsReady) {
+        throw new Error('Influxdb is not ready');
+      }
+
       // initializes kafka consumer
       await this.kafkaConsumer.init();
 
       const kafkaIsConnected = await this.kafkaConsumer.isConnected();
       if (!kafkaIsConnected) {
         throw new Error('Kafka is not ready');
-      }
-      const influxIsReady = await this.influxState.isReady();
-      if (!influxIsReady) {
-        throw new Error('Influxdb is not ready');
       }
 
       // create the initial org, user and bucket
