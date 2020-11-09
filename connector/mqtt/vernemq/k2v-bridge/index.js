@@ -1,17 +1,29 @@
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const util = require('util');
-const { unflatten } = require('flat');
 
-const config = require('./config');
-const MQTTClient = require('./MqttClient');
-const utils = require('./utils');
+const MQTTClient = require('./app/MqttClient');
+const utils = require('./app/utils');
+
+/*
+ * TODO: the idea is to create a default environment variable that will be used internally by the
+ * ConfigManager to automatically select the user config file. Since this is not something we care
+ * to much now, this will do the trick.
+ */
+const userConfigFile = process.env.K2V_APP_USER_CONFIG_FILE || 'production.conf';
+ConfigManager.loadSettings('K2V', userConfigFile);
+const config = ConfigManager.getConfig('K2V');
 
 // Logger configuration
-const logConfig = unflatten(config.logger);
-Logger.setTransport('console', logConfig.transports.console);
-Logger.setVerbose(logConfig.verbose);
-const logger = new Logger('app');
+Logger.setVerbose(config.log.verbose);
+Logger.setTransport('console', { level: config.log['console.level'] });
+if (config.log['file.enable']) {
+  Logger.setTransport('file', {
+    level: config.log['file.level'],
+    filename: config.log['file.filename'],
+  });
+}
+const logger = new Logger('k2v:index');
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 

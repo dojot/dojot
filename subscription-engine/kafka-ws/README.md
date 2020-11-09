@@ -292,30 +292,76 @@ operators](###applying-conditions-where) for more info
 
 Before proceeding, **make sure you configure your environment**.
 
-Key                    | Purpose                                                                                     | Default Value                       | Valid Values                  |
----------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------- |
-NODE_ENV               | Is used (by convention) to state in which environment it is running                         | production                          | *production* or *development* |
-LOG_LEVEL              | Log level                                                                                   | info                                | info, warn, debug, error      |
-LOG_VERBOSE            | Enables verbose mode for logging                                                            | false                               | true or false / 1 or 0        |
-LOG_FILE               | Enables logging on files  (location: /var/log/kafka-ws-logs-%DATE%.log)                     | false                               | true or false / 1 or 0        |
-LOG_FILE_LEVEL         | Log level to log on files                                                                   | debug                               | info, warn, debug, error      |
-KAFKA_HOSTS            | comma-separated list of Kafka hosts (with port)                                             | kafka-server:9092                   | list of hostname:port         |
-KAFKA_WS_HOST          | Kafka WS address                                                                            | 0.0.0.0                             | hostname                      |
-KAFKA_WS_PORT          | Kafka WS port                                                                               | 8080                                | valid port                    |
-KAFKA_WS_TLS           | Enables TLS (Needs: KAFKA_WS_TLS_CA_FILE, KAFKA_WS_TLS_KEY_FILE and KAFKA_WS_TLS_CERT_FILE) | false                               | true or false / 1 or 0        |
-KAFKA_WS_TLS_CA_FILE   | Kafka WS ca file location                                                                   | /opt/kafka-ws/certs/ca-cert.pem     | valid path                    |
-KAFKA_WS_TLS_KEY_FILE  | Kafka WS key file location                                                                  | /opt/kafka-ws/certs/server-key.pem  | valid path                    |
-KAFKA_WS_TLS_CERT_FILE | Kafka WS certificate file location                                                          | /opt/kafka-ws/certs/server-cert.pem | valid path                    |
-KAFKA_WS_JWT_EXP_TIME  | Enables use of expiration time from the informed JWT when requesting a *single-use ticket*. | false                               | true or false / 1 or 0        |
-TICKET_EXPIRATION_SEC  | Duration time (in seconds) of the *single-use ticket*.                                      | 60                                  | seconds                       |
-TICKET_SECRET          | Secret used to sign *single-use tickets* and prevent forgery                                | Random value                        | string                        |
-KAFKA_WS_MAX_LIFE_TIME | Maximum lifetime of a connection   (-1 to disable)                                          | 7200                                | seconds                       |
-REDIS_HOST             | Redis host                                                                                  | kafka-ws-redis                      | string                        |
-REDIS_PORT             | Redis port                                                                                  | 6379                                | number                        |
-REDIS_DATABASE         | Redis database                                                                              | 1                                   | number                        |
-KAFKA_WS_REQUEST_CERT  | Whether the service should request for a client certificate or not                          | false                               | boolean                       |
+You can select the configuration file via the `KAFKA_WS_APP_USER_CONFIG_FILE` variable. Its default value is `production.env`
 
-__NOTE THAT__ a websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_MAX_LIFE_TIME. If KAFKA_WS_JWT_EXP_TIME is set to false and KAFKA_WS_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
+Check the [config directory](./config) for the user configurations that are available by default.
+
+For more information about the usage of the configuration files and environment variables, check the
+__ConfigManager__ module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
+You can also check the [ConfigManager environment variables documentation](https://github.com/dojot/dojot-microservice-sdk-js/blob/master/lib/configManager/README.md#environment-variables) for more details.
+
+In short, all the parameters in the next sections are mapped to environment variables that begin
+with `KAFKA_WS`. You can either use environment variables or configuration files to change their values.
+
+## **App**
+Configuration used in this service
+
+| Key | Purpose   | Default Value   | Valid Values | Environment variable
+------| ----------| ----------------|--------------|------------------------
+| app.node.env  | Is used (by convention) to state in which environment it is running | production | production or development | NODE_ENV
+| logger.transports.console.level  | Console logger level | info | string | KAFKA_WS_LOGGER_TRANSPORTS_CONSOLE_LEVEL
+| logger.verbose | Whether to enable logger verbosity or not | false | boolean | KAFKA_WS_LOGGER_VERBOSE
+| logger.transports.file.enable | Whether to enable logging in file or not | false | boolean | KAFKA_WS_LOGGER_TRANSPORTS_FILE_ENABLE
+| logger.transports.file.level | Whether to enable file logger verbosity or not | info | string | KAFKA_WS_LOGGER_TRANSPORTS_FILE_LEVEL
+| logger.transports.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOGGER_TRANSPORTS_FILE_FILENAME
+
+## **Ticket**
+Ticket management
+
+| Key | Purpose   | Default Value   | Valid Values | Environment variable
+------| ----------| ----------------|--------------|------------------------
+ticket.secret|Secret used to sign single-use tickets and prevent forgery | Random value | string | KAFKA_WS_TICKET_SECRET
+ticket.expiration.sec| Duration time (in seconds) of the single-use ticket. | 60 | integer | KAFKA_WS_TICKET_DURATION_SECRET
+
+## **Redis**
+Redis database management configuration
+
+| Key | Purpose   | Default Value   | Valid Values | Environment variable
+------| ----------| ----------------|--------------|------------------------
+redis.host| Redis host | kafka-ws-redis | string | KAFKA_WS_REDIS_HOST
+redis.port | Redis port | 6379 | integer | KAFKA_WS_REDIS_PORT
+redis.db | Redis database | 1 | integer | KAFKA_WS_REDIS_DB
+
+## **Kafka Consumer**
+Configurations for the kafka Consumer
+
+| Key | Purpose   | Default Value   | Valid Values | Environment variable
+------| ----------| ----------------|--------------|------------------------
+consumer.group.id| The kafka Consumer group id| kafka-ws | string | KAFKA_WS_CONSUMER_GROUP_ID
+consumer.metadata.broker.list | Kafka hosts (with port) must be separated by a comma| kafka:9092 | string |  KAFKA_WS_CONSUMER_METADATA_BROKER_LIST
+consumer.auto.offset.reset | The kafka Consumer auto offset reset value when not committed positions is out of range | largest | string | KAFKA_WS_CONSUMER_AUTO_OFFSET_RESET
+
+## **Server**
+Configurations for the server running in the service
+
+| Key | Purpose   | Default Value   | Valid Values | Environment variable
+------| ----------| ----------------|--------------|------------------------
+server.host | Kafka WS address |0.0.0.0 | string | KAFKA_WS_SERVER_HOST
+server.port | Kafka WS port | 8080 | integer | KAFKA_WS_SERVER_PORT
+server.tls | Enables TLS | false | boolean | KAFKA_WS_SERVER_TLS
+server.ca | Kafka WS ca file location | /opt/kafka-ws/certs/ca-cert.pem| path | KAFKA_WS_SERVER_CA
+server.key | KAFKA WS key file location | /opt/kafka-ws/certs/server-key.pem | path | KAFKA_WS_SERVER_KEY
+server.cert | Kafka WS certificate file location | /opt/kafka-ws/certs/server-cert.pem | path | KAFKA_WS_SERVER_CERT
+server.jwt.exp.time | Enables use of expiration time from the informed JWT when requesting a single-use ticket. | boolean | KAFKA_WS_SERVER_JWT_EXP_TIME
+server.connection.max.life.time| Maximum lifetime of a connection (-1 to disable) | 7200 | integer | KAFKA_WS_SERVER_CONNECTION_MAX_LIFE_TIME
+server.request.cert | Whether the service should request for a client certificate or not | false | boolean | KAFKA_WS_SERVER_REQUEST_CERT
+server.reject.unauthorized | Kafka reject unauthorized | true | boolean | KAFKA_WS_SERVER_REJECT_UNAUTHORIZED
+
+----
+> **_NOTE:_**  Enabling server.tls you must set server.ca, server.key and server.cert also. 
+----
+
+__NOTE THAT__ a websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_SERVER_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_SERVER_MAX_LIFE_TIME. If KAFKA_WS_SERVER_JWT_EXP_TIME is set to false and KAFKA_WS_SERVER_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
 
 __NOTE THAT__ it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) when requesting a *single-use ticket* can access the kafka topic, generally topics start with `tenant.*`
 

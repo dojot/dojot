@@ -1,6 +1,5 @@
-const { Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
 
-const config = require('./config');
 const utils = require('./utils');
 
 /**
@@ -17,9 +16,23 @@ class AgentMessenger {
    * @param {Object} mqttClient - a mqtt client to connect to VerneMQ broker.
    */
   constructor(mqttClient) {
+    if (!mqttClient) {
+      throw new Error('no MQTT client was passed');
+    }
+
     this.mqttClient = mqttClient;
-    this.consumer = new Consumer({ ...config.sdk, kafka: config.kafka });
-    this.logger = new Logger('AgentMessenger');
+
+    const config = ConfigManager.getConfig('K2V');
+    this.consumeTopicSuffix = config.messenger['consume.topic.suffix'];
+
+    this.consumer = new Consumer({
+      ...config.sdk,
+      'kafka.consumer': config.consumer,
+      'kafka.topic': config.topic,
+    });
+    this.logger = new Logger('k2v:agent-messenger');
+
+    this.wasInitialized = false;
   }
 
   /**
@@ -28,14 +41,19 @@ class AgentMessenger {
    * @function init
    */
   init() {
+    if (this.wasInitialized) {
+      this.logger.debug('Kafka Consumer already online, skipping its initialization');
+      return;
+    }
     this.logger.info('Initializing Kafka Consumer...');
     this.consumer.init().then(() => {
-      const topic = new RegExp(`^.+${config.messenger['consume.topic.suffix'].replace(/\./g, '\\.')}`);
+      const topic = new RegExp(`^.+${this.consumeTopicSuffix.replace(/\./g, '\\.')}`);
 
       this.consumer.registerCallback(topic, (data) => {
         this.mqttClient.publishMessage(data);
       });
 
+      this.wasInitialized = true;
       this.logger.info('... Kafka Consumer was initialized');
     }).catch((error) => {
       this.logger.error('Error while initializing the Kafka Consumer');
