@@ -265,20 +265,25 @@ function createObject(config) {
     // +--------------------+
 
     responseCompressInterceptor: asFunction(responseCompressInterceptor, {
-      injector: () => ({ config: undefined }),
+      injector: () => ({ config: undefined, path: '/' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
     requestIdInterceptor: asFunction(requestIdInterceptor, {
+      injector: () => ({ path: '/' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
     beaconInterceptor: asFunction(beaconInterceptor, {
+      injector: () => ({ path: '/' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
     requestLogInterceptor: asFunction(requestLogInterceptor, {
-      injector: () => ({ logFormat: config.framework.logformat }),
+      injector: () => ({
+        logFormat: config.framework.logformat,
+        path: '/',
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -286,16 +291,21 @@ function createObject(config) {
       injector: () => ({
         limit: config.framework.paginate.limit,
         maxLimit: config.framework.paginate.maxlimit,
+        path: '/',
       }),
       lifetime: Lifetime.SINGLETON,
     }),
 
     jsonBodyParsingInterceptor: asFunction(jsonBodyParsingInterceptor, {
-      injector: () => ({ config: config.framework.bodyparser }),
+      injector: () => ({
+        config: config.framework.bodyparser,
+        path: '/',
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
     tokenParsingInterceptor: asFunction(tokenParsingInterceptor, {
+      injector: () => ({ path: '/' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -309,7 +319,7 @@ function createObject(config) {
     }),
 
     scopedDIInterceptor: asFunction(scopedDIInterceptor, {
-      injector: () => ({ DIContainer }),
+      injector: () => ({ DIContainer, path: '/' }),
       lifetime: Lifetime.SINGLETON,
     }),
 

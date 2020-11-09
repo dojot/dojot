@@ -2,9 +2,10 @@ const HttpStatus = require('http-status-codes');
 
 const sanitize = require('./sanitize-params');
 
+const CERT_MODEL = 'certificateModel';
 const CERT_SERVICE = 'certificateService';
 
-module.exports = ({ mountPoint, certificateModel, schemaValidator }) => {
+module.exports = ({ mountPoint, schemaValidator }) => {
   const { validateRegOrGenCert, validateChangeOwnerCert } = schemaValidator;
 
   const certsRoute = {
@@ -17,15 +18,16 @@ module.exports = ({ mountPoint, certificateModel, schemaValidator }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const queryFields = certificateModel.parseProjectionFields(req.query.fields);
-            const filterFields = certificateModel.parseConditionFields(req.query);
-
+            const model = req.scope.resolve(CERT_MODEL);
             const service = req.scope.resolve(CERT_SERVICE);
+
+            const queryFields = model.parseProjectionFields(req.query.fields);
+            const filterFields = model.parseConditionFields(req.query);
 
             const { itemCount, results } = await service.listCertificates(
               queryFields, filterFields, req.query.limit, req.offset,
             );
-            results.forEach((cert) => certificateModel.sanitizeFields(cert));
+            results.forEach((cert) => model.sanitizeFields(cert));
 
             const paging = req.getPaging(itemCount);
             res.status(HttpStatus.OK).json({ paging, certificates: results });
@@ -74,14 +76,15 @@ module.exports = ({ mountPoint, certificateModel, schemaValidator }) => {
         method: 'get',
         middleware: [
           async (req, res) => {
-            const { fingerprint } = req.params;
-            const queryFields = certificateModel.parseProjectionFields(req.query.fields);
-            const filterFields = certificateModel.parseConditionFields({ fingerprint });
-
+            const model = req.scope.resolve(CERT_MODEL);
             const service = req.scope.resolve(CERT_SERVICE);
 
+            const { fingerprint } = req.params;
+            const queryFields = model.parseProjectionFields(req.query.fields);
+            const filterFields = model.parseConditionFields({ fingerprint });
+
             const result = await service.getCertificate(queryFields, filterFields);
-            certificateModel.sanitizeFields(result);
+            model.sanitizeFields(result);
 
             res.status(HttpStatus.OK).json(result);
           },
@@ -93,10 +96,11 @@ module.exports = ({ mountPoint, certificateModel, schemaValidator }) => {
         middleware: [
           validateChangeOwnerCert(),
           async (req, res) => {
-            const { fingerprint } = req.params;
-            const filterFields = certificateModel.parseConditionFields({ fingerprint });
-
+            const model = req.scope.resolve(CERT_MODEL);
             const service = req.scope.resolve(CERT_SERVICE);
+
+            const { fingerprint } = req.params;
+            const filterFields = model.parseConditionFields({ fingerprint });
 
             await service.changeOwnership(filterFields, req.body.belongsTo);
 
@@ -109,11 +113,12 @@ module.exports = ({ mountPoint, certificateModel, schemaValidator }) => {
         method: 'delete',
         middleware: [
           async (req, res) => {
-            const { fingerprint } = req.params;
-            const queryFields = certificateModel.parseProjectionFields(null);
-            const filterFields = certificateModel.parseConditionFields({ fingerprint });
-
+            const model = req.scope.resolve(CERT_MODEL);
             const service = req.scope.resolve(CERT_SERVICE);
+
+            const { fingerprint } = req.params;
+            const queryFields = model.parseProjectionFields(null);
+            const filterFields = model.parseConditionFields({ fingerprint });
 
             const certToRemove = await service.getCertificate(queryFields, filterFields);
             await service.deleteCertificate(certToRemove);

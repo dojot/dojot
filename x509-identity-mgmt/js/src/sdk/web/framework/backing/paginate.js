@@ -36,7 +36,7 @@ function addBehaviors(req, res) {
 const pagingMiddleware = (limit, maxLimit) => ([
   paginate.middleware(limit, maxLimit),
   (req, res, next) => {
-    if (req.query.limit < 1) req.query.limit = 1;
+    if (req.query.limit < 1) req.query.limit = limit;
     addBehaviors(req, res);
     next();
   },

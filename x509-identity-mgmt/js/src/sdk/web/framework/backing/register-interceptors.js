@@ -82,21 +82,19 @@ const registerInterceptors = (interceptorsToBeRegistered, framework, logger) => 
   }
 
   interceptors.forEach((interceptorToBeRegistered) => {
-    logger.debug(`\tInterceptor to be registered: ${interceptorToBeRegistered.name}`);
+    logger.debug('\tInterceptor to be registered: ', { name: interceptorToBeRegistered.name });
 
     const interceptor = sanitize(interceptorToBeRegistered, logger);
 
     if (checkPath(interceptor, logger) && checkMiddleware(interceptor, logger)) {
       if (interceptor.path.length) {
         framework.use(interceptor.path, interceptor.middleware);
-        logger.debug(`\tInterceptor registered! -> ${interceptor.name}`);
-        logger.debug(`\t---> Path pattern: ${interceptor.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
       } else {
         framework.use(interceptor.middleware);
-        logger.debug(`\tInterceptor registered! -> ${interceptor.name}`);
       }
+      logger.debug('\tInterceptor registered! -> ', interceptor);
     } else {
-      logger.debug(`\tInterceptor not registered! -> ${interceptor.name}`);
+      logger.debug('\tInterceptor NOT registered! -> ', interceptor);
     }
   });
 };

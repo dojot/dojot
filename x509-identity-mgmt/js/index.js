@@ -1,7 +1,7 @@
-if (process.env.X509IDMGMT_LOGGER_CONSOLE_LEVEL === 'debug') {
-  // ServiceStateManager (lightship) is using 'Roarr' to implement logging.
-  process.env.ROARR_LOG = true;
-}
+// if (process.env.X509IDMGMT_LOGGER_CONSOLE_LEVEL === 'debug') {
+// ServiceStateManager (lightship) is using 'Roarr' to implement logging.
+// process.env.ROARR_LOG = true;
+// }
 
 const { createHttpTerminator } = require('http-terminator');
 

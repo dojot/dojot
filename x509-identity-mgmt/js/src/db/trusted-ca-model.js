@@ -34,10 +34,10 @@ const projectableFields = [
   'tenant',
 ];
 
-const mongoQS = new MongoQS({
+const mongoQS = Object.freeze(new MongoQS({
   keyRegex: /^[a-zA-Z0-9-_.]+$/i,
   arrRegex: /^[a-zA-Z0-9-_.]+(\[])?$/i,
-  whitelist: {
+  whitelist: Object.freeze({
     caFingerprint: true,
     caPem: true,
     subjectDN: true,
@@ -47,16 +47,17 @@ const mongoQS = new MongoQS({
     modifiedAt: true,
     allowAutoRegistration: true,
     tenant: true,
-  },
-});
+  }),
+}));
 
 class TrustedCAModel {
   constructor({ db }) {
     Object.defineProperty(this, 'db', { value: db });
     Object.defineProperty(this, 'model', { value: mongooseModel });
+    Object.defineProperty(this, 'mongoQS', { value: mongoQS });
   }
 
-  static parseConditionFields(candidates) {
+  parseConditionFields(candidates) {
     const conditionFields = { ...candidates };
     Object.entries(conditionFields).forEach(
       ([key, value]) => {
@@ -69,7 +70,7 @@ class TrustedCAModel {
         }
       },
     );
-    return mongoQS.parse(conditionFields);
+    return this.mongoQS.parse(conditionFields);
   }
 
   parseProjectionFields(commaSeparatedFields) {

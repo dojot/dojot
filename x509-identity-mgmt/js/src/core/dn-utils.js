@@ -278,7 +278,9 @@ function createObject(config, errorTemplate) {
     return $;
   }
 
-  return { from };
+  return Reflect.construct(function DNUtils() {
+    this.from = from;
+  }, []);
 }
 
 /**

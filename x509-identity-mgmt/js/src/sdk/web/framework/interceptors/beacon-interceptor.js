@@ -24,9 +24,9 @@ function createInterceptor(stateManager, logger, path = '/') {
 
       // Beacon is live upon creation. Shutdown handlers are suspended
       // until there are no live beacons
-      const beacon = stateManager.createBeacon({
-        requestId: req.id,
-      });
+      const beacon = stateManager.createBeacon({ requestId: req.id });
+
+      logger.debug('Incoming request:', { id: req.id });
 
       onFinished(res, (err) => {
         if (err) {
@@ -35,6 +35,8 @@ function createInterceptor(stateManager, logger, path = '/') {
         // After all Beacons are killed, it is possible
         // to proceed with the shutdown routine
         beacon.die();
+
+        logger.debug('request has been finished:', { id: req.id });
       });
 
       // proceeds to the next middleware...

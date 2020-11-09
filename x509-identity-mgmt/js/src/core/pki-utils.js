@@ -299,19 +299,19 @@ function createObject(errorTemplate) {
     }
   }
 
-  return {
-    parseCSR,
-    parseCert,
-    checkPublicKey,
-    getFingerprint,
-    getSerialNumber,
-    checkRemainingDays,
-    assertLeaf,
-    assertRootCA,
-    isRootCA,
-    checkChainOfTrust,
-    checkRootExternalCN,
-  };
+  return Reflect.construct(function PKIUtils() {
+    this.parseCSR = parseCSR;
+    this.parseCert = parseCert;
+    this.checkPublicKey = checkPublicKey;
+    this.getFingerprint = getFingerprint;
+    this.getSerialNumber = getSerialNumber;
+    this.checkRemainingDays = checkRemainingDays;
+    this.assertLeaf = assertLeaf;
+    this.assertRootCA = assertRootCA;
+    this.isRootCA = isRootCA;
+    this.checkChainOfTrust = checkChainOfTrust;
+    this.checkRootExternalCN = checkRootExternalCN;
+  }, []);
 }
 
 module.exports = ({ errorTemplate }) => createObject(errorTemplate);

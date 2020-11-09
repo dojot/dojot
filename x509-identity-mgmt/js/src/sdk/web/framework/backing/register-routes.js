@@ -152,7 +152,7 @@ const registerRoutes = (routesToBeRegistered, framework, logger) => {
   const mountingMap = new Map();
 
   routes.forEach((routeToBeRegistered) => {
-    logger.debug(`\tRoute to be registered: ${routeToBeRegistered.name}`);
+    logger.debug('\tRoute to be registered: ', { name: routeToBeRegistered.name });
 
     const route = sanitize(routeToBeRegistered, logger);
 
@@ -179,11 +179,9 @@ const registerRoutes = (routesToBeRegistered, framework, logger) => {
           : expressRoute[method](middleware)
       ));
 
-      logger.debug(`\tRoute registered! -> ${route.name}`);
-      logger.debug(`\t---> Mount point: ${mountPoint}`);
-      logger.debug(`\t---> Path pattern: ${route.path.reduce((acc, cur) => `${acc}, ${cur.toString()}`)}`);
+      logger.debug('\tRoute registered! -> ', route);
     } else {
-      logger.debug(`\tRoute NOT registered! -> ${route.name}`);
+      logger.debug('\tRoute NOT registered! -> ', route);
     }
   });
 

@@ -2,10 +2,11 @@ const HttpStatus = require('http-status-codes');
 
 const sanitize = require('./sanitize-params');
 
+const CA_MODEL = 'trustedCAModel';
 const CA_SERVICE = 'trustedCAService';
 
 module.exports = ({
-  mountPoint, trustedCAModel, schemaValidator, errorTemplate,
+  mountPoint, schemaValidator, errorTemplate,
 }) => {
   const { validateNewTrustedCA, validateUpdTrustedCA } = schemaValidator;
   const { BadRequest } = errorTemplate;
@@ -42,15 +43,16 @@ module.exports = ({
         method: 'get',
         middleware: [
           async (req, res) => {
-            const queryFields = trustedCAModel.parseProjectionFields(req.query.fields);
-            const filterFields = trustedCAModel.parseConditionFields(req.query);
-
+            const caModel = req.scope.resolve(CA_MODEL);
             const caService = req.scope.resolve(CA_SERVICE);
+
+            const queryFields = caModel.parseProjectionFields(req.query.fields);
+            const filterFields = caModel.parseConditionFields(req.query);
 
             const { itemCount, results } = await caService.listCertificates(
               queryFields, filterFields, req.query.limit, req.offset,
             );
-            results.forEach((cert) => trustedCAModel.sanitizeFields(cert));
+            results.forEach((cert) => caModel.sanitizeFields(cert));
 
             const paging = req.getPaging(itemCount);
             res.status(HttpStatus.OK).json({ paging, 'trusted-cas': results });
@@ -74,14 +76,15 @@ module.exports = ({
         method: 'get',
         middleware: [
           async (req, res) => {
-            const { caFingerprint } = req.params;
-            const queryFields = trustedCAModel.parseProjectionFields(req.query.fields);
-            const filterFields = trustedCAModel.parseConditionFields({ caFingerprint });
-
+            const caModel = req.scope.resolve(CA_MODEL);
             const caService = req.scope.resolve(CA_SERVICE);
 
+            const { caFingerprint } = req.params;
+            const queryFields = caModel.parseProjectionFields(req.query.fields);
+            const filterFields = caModel.parseConditionFields({ caFingerprint });
+
             const result = await caService.getCertificate(queryFields, filterFields);
-            trustedCAModel.sanitizeFields(result);
+            caModel.sanitizeFields(result);
 
             res.status(HttpStatus.OK).json(result);
           },
@@ -93,10 +96,11 @@ module.exports = ({
         middleware: [
           validateUpdTrustedCA(),
           async (req, res) => {
-            const { caFingerprint } = req.params;
-            const filterFields = trustedCAModel.parseConditionFields({ caFingerprint });
-
+            const caModel = req.scope.resolve(CA_MODEL);
             const caService = req.scope.resolve(CA_SERVICE);
+
+            const { caFingerprint } = req.params;
+            const filterFields = caModel.parseConditionFields({ caFingerprint });
 
             await caService.changeAutoRegistration(filterFields, req.body.allowAutoRegistration);
 
@@ -109,11 +113,12 @@ module.exports = ({
         method: 'delete',
         middleware: [
           async (req, res) => {
-            const { caFingerprint } = req.params;
-            const queryFields = trustedCAModel.parseProjectionFields(null);
-            const filterFields = trustedCAModel.parseConditionFields({ caFingerprint });
-
+            const caModel = req.scope.resolve(CA_MODEL);
             const caService = req.scope.resolve(CA_SERVICE);
+
+            const { caFingerprint } = req.params;
+            const queryFields = caModel.parseProjectionFields(null);
+            const filterFields = caModel.parseConditionFields({ caFingerprint });
 
             const certToRemove = await caService.getCertificate(queryFields, filterFields);
             await caService.deleteCertificate(certToRemove);
