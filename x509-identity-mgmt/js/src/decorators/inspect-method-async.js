@@ -9,7 +9,11 @@ class InspectMethodAsync {
     const name = `${target.constructor.name}.${methodName}`;
     this.logger.debug(`${name} - Arguments: `, { [typeof args]: args });
     const result = await method.apply(target, args);
-    this.logger.debug(`${name} - Returns: `, { [typeof result]: result });
+    if (typeof result === 'undefined') {
+      this.logger.debug(`${name} - Returns: nothing`);
+    } else {
+      this.logger.debug(`${name} - Returns: `, { [typeof result]: result });
+    }
     return result;
   }
 }

@@ -18,7 +18,7 @@ const namedCurves = [
   '1.3.132.0.35', // P-521
 ];
 
-function createObject(errorTemplate) {
+function createObject(logger, errorTemplate) {
   const { BadRequest } = errorTemplate;
 
   /**
@@ -138,6 +138,7 @@ function createObject(errorTemplate) {
       const suffix = (algoID) ? ` The key algorithm with OID=${algoID} is not supported` : '';
       throw BadRequest(`The public key algorithm must be RSA or ECDSA.${suffix}`);
     }
+    logger.debug('The public key is supported.');
   }
 
   /**
@@ -190,6 +191,7 @@ function createObject(errorTemplate) {
     if (remainingDays < minimumValidityDays) {
       throw BadRequest(`The certificate must be valid for more than ${minimumValidityDays} days.`);
     }
+    logger.debug(`Certificate remaining days: ${remainingDays}`);
   }
 
   /**
@@ -215,6 +217,7 @@ function createObject(errorTemplate) {
     if (selfSigned) {
       throw BadRequest('The certificate is self-signed.');
     }
+    logger.debug('The certificate is the low end of the chain.');
   }
 
   /**
@@ -244,6 +247,7 @@ function createObject(errorTemplate) {
     if (!selfSigned) {
       throw BadRequest('The certificate is not a Root CA certificate (self signed).');
     }
+    logger.debug('The certificate belongs to a root CA.');
   }
 
   /**
@@ -279,6 +283,7 @@ function createObject(errorTemplate) {
     if (!result) {
       throw BadRequest('The certificate chain of trust is not valid.');
     }
+    logger.debug('The certificate chain of trust is valid.');
   }
 
   /**
@@ -314,4 +319,4 @@ function createObject(errorTemplate) {
   }, []);
 }
 
-module.exports = ({ errorTemplate }) => createObject(errorTemplate);
+module.exports = ({ logger, errorTemplate }) => createObject(logger, errorTemplate);
