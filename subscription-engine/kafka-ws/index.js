@@ -46,7 +46,12 @@ server.listen(serverCfg.port, serverCfg.host, async () => {
   logger.info(server.address());
 
   // Initializes the sticky tarball
-  await websocketTarball.init();
+  try {
+    await websocketTarball.init();
+  } catch (err) {
+    logger.error('Unexpected service startup error!', err)
+    process.kill(process.pid);
+  }
 });
 
 /* adds health checks and graceful shutdown to the application */
@@ -64,9 +69,6 @@ process.on('unhandledRejection', (reason, promise) => {
   unhandledRejections.set(promise, reason);
 
   logger.debug(`unhandledRejection: List of Unhandled Rejection size ${unhandledRejections.size}`);
-
-  // TODO: stop server (connection redis, kafka consumer, etc.)
-  process.kill(process.pid);
 });
 
 process.on('rejectionHandled', (promise) => {
