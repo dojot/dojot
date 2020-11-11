@@ -32,6 +32,7 @@ WORKDIR /opt/kafka-ws
 
 RUN apk --no-cache add \
     bash \
+    redis \
     libsasl \
     lz4-libs \
     tini
