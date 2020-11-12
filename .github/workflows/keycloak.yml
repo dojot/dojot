@@ -30,7 +30,7 @@ jobs:
         cp -r ../patch/services .
 
     - name: Run tests
-      run: mvn clean install -f keycloak/services
+      run: mvn clean install -f keycloak/services -Dtest=!DefaultHttpClientFactoryTest#createHttpClientProviderWithUnvailableURL
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
