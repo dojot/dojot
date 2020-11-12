@@ -1,0 +1,74 @@
+name: Keycloak
+
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'keycloak/services/**'
+
+jobs:
+  unit-tests:
+    name: Test Keycloak services module
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Set up JDK 1.8
+      uses: joschi/setup-jdk@v2
+      with:
+        java-version: '8'
+
+    - name: Override default implementation
+      run: |
+        mv keycloak patch
+        git clone https://github.com/keycloak/keycloak.git && cd keycloak
+        git checkout . && git checkout tags/10.0.1 -b keycloak-10.0.1
+        cp -r ../patch/services .
+
+    - name: Run tests
+      run: mvn clean install -f keycloak/services
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        # Keep in mind that secrets are not available in forks of repositories, that's the reason we use an open token
+        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612
+        # Created when 'mvn clean install' was executed
+        file: keycloak/services/target/site/jacoco/jacoco.xml
+        # Flags allow you to isolate coverage reports for different tests
+        flags: Keycloak
+        # Custom name for the upload
+        name: keycloak
+
+  docker-hub:
+    needs: unit-tests
+    # Path to help identify each job in the status checks
+    name: (keycloak) Build and Publish image to DockerHUb
+    runs-on: ubuntu-latest
+    # If this is a PR, it won't run
+    if: contains(github.ref, 'refs/pull/') == false
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.16
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/keycloak
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: keycloak
+        # Label with the built image's commit
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
+        # Whether tag will be based in the branch name or in the tag name
