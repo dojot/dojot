@@ -15,7 +15,7 @@ readonly KAFKA_WS_APP_CONNECTION_RETRY_TIMEOUT=${KAFKA_WS_APP_CONNECTION_RETRY_T
 
 readonly KAFKA_WS_CONSUMER_METADATA_BROKER_LIST=${KAFKA_WS_CONSUMER_METADATA_BROKER_LIST:-"kafka:9092"}
 
-has_responded=false
+kafka_has_responded=false
 
 # Split kafka brokers by comma
 readonly KAFKA_BROKERS=${KAFKA_WS_CONSUMER_METADATA_BROKER_LIST//,/ }
@@ -30,19 +30,19 @@ do
         response=$(nc -zv ${address_splited[0]} ${address_splited[1]} &> /dev/null; echo $?)
 
         if [ "${response}" == 0 ]; then
-            has_responded=true
+            kafka_has_responded=true
             break
         fi
     done
 
-    if [ "$has_responded" == true ]; then
+    if [ "$kafka_has_responded" == true ]; then
         break
     fi
 
     sleep ${KAFKA_WS_APP_CONNECTION_RETRY_TIMEOUT}
 done
 
-if [ "$has_responded" == false ]; then
+if [ "$kafka_has_responded" == false ]; then
     echo "No Kafka brokers available, exiting ..."
     exit 1
 fi
