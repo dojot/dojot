@@ -10,6 +10,8 @@ const Utils = require('./Utils');
 class AgentMessenger {
   /**
    * Create an agentMessenger
+   *
+   * @constructor
    */
   constructor() {
     this.config = ConfigManager.getConfig('V2K');
@@ -23,10 +25,12 @@ class AgentMessenger {
   }
 
   /**
-   * Initialize the Kafka Producer. When it connects, initializes the MQTT connection.
+   * Initialize the Kafka Producer. It initializes the MQTT connection after a successful
+   * connection.
+   *
+   * @param {Object} mqttClient
    *
    * @function init
-   *
    * @public
    */
   init(mqttClient) {
@@ -46,11 +50,10 @@ class AgentMessenger {
   /**
    * Produce a given message to a given topic.
    *
-   * @function sendMessage
-   *
    * @param {string} topic
    * @param {Object} message
    *
+   * @function sendMessage
    * @public
    */
   sendMessage(topic, message) {
@@ -90,6 +93,7 @@ class AgentMessenger {
    *
    * @returns {Promise<void>}
    *
+   * @function healthChecker
    * @public
    */
   healthChecker(signalReady, signalNotReady) {
@@ -115,6 +119,7 @@ class AgentMessenger {
    *
    * @returns {Promise<void>}
    *
+   * @function shutdownHandler
    * @public
    */
   shutdownHandler() {
