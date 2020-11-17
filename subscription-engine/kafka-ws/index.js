@@ -58,7 +58,12 @@ server.listen(config.server.port, config.server.host, async () => {
 
   StateManager.signalReady('server');
   // Initializes the sticky tarball
-  await websocketTarball.init();
+  try {
+    await websocketTarball.init();
+  } catch (err) {
+    logger.error('Unexpected service startup error!', err);
+    process.kill(process.pid);
+  }
 });
 
 server.on('close', () => {

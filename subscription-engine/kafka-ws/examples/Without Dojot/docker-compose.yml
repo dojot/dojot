@@ -70,6 +70,7 @@ services:
       KAFKA_WS_SERVER_HOST: 0.0.0.0
       KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
       KAFKA_WS_SERVER_MAX_LIFE_TIME: 120
+      KAFKA_WS_REDIS_HOST: "redis"
       # tls example
       # KAFKA_WS_SERVER_TLS: "true"
       # KAFKA_WS_SERVER_TLS_CA_FILE: /certs/ca-cert.pem

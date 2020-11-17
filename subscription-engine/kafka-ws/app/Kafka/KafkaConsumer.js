@@ -17,8 +17,12 @@ class KafkaConsumer {
   constructor() {
     this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
+    const consumerConfig = {
+      'kafka.consumer': { ...this.config.consumer },
+      'kafka.topic': { ...this.config.topic },
+    };
     logger.debug('constructor: Instance KafkaConsumer');
-    this.consumer = new Consumer({ ...this.config.consumer }, { ...this.config.topic });
+    this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
 
