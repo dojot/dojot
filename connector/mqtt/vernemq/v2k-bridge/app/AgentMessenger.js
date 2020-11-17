@@ -26,6 +26,8 @@ class AgentMessenger {
    * Initialize the Kafka Producer. When it connects, initializes the MQTT connection.
    *
    * @function init
+   *
+   * @public
    */
   init(mqttClient) {
     this.logger.info('Initializing Kafka Producer...');
@@ -48,6 +50,8 @@ class AgentMessenger {
    *
    * @param {string} topic
    * @param {Object} message
+   *
+   * @public
    */
   sendMessage(topic, message) {
     let jsonPayload;
@@ -85,6 +89,8 @@ class AgentMessenger {
    * @param {Function} signalNotReady
    *
    * @returns {Promise<void>}
+   *
+   * @public
    */
   healthChecker(signalReady, signalNotReady) {
     return new Promise((resolve) => {
@@ -108,6 +114,8 @@ class AgentMessenger {
    * Shutdown handler to be passed to the ServiceStateManager.
    *
    * @returns {Promise<void>}
+   *
+   * @public
    */
   shutdownHandler() {
     this.logger.warn('Shutting down Kafka connection...');

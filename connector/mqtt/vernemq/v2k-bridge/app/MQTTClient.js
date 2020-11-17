@@ -65,6 +65,8 @@ class MQTTClient {
    * to a MQTT broker.
    *
    * @function init
+   *
+   * @public
    */
   init() {
     this.logger.info('Initializing the MQTT client...');
@@ -97,6 +99,9 @@ class MQTTClient {
    * Reached when the MQTTClient connects successfully to the MQTT broker.
    *
    * @callback MQTTClient~onConnect
+   *
+   * @private
+   * @callback mqtt~connect
    */
   onConnect() {
     this.logger.info(`Client ${this.mqttOptions.clientId} connected successfully!`);
@@ -108,6 +113,9 @@ class MQTTClient {
    * Reached when the MQTTClient disconnects from the broker.
    *
    * @callback MQTTClient~onDisconnect
+   *
+   * @private
+   * @callback mqtt~disconnect
    */
   onDisconnect() {
     this.logger.warn(`Client ${this.mqttOptions.clientId} disconnected, reconnecting...`);
@@ -119,6 +127,9 @@ class MQTTClient {
    * Handles MQTT errors.
    *
    * @param {*} error
+   *
+   * @private
+   * @callback mqtt~error
    */
   onError(error) {
     this.logger.error(error.stack || error);
@@ -134,6 +145,9 @@ class MQTTClient {
    * @param {string} topic
    * @param {Object} message
    * @param {Object} packet
+   *
+   * @private
+   * @callback mqtt~message
    */
   onMessage(topic, message, packet) {
     if (this.isConnected) {
@@ -158,6 +172,9 @@ class MQTTClient {
    * Handles the packets that are received by the broker.
    *
    * @param {mqtt.Packet} packet
+   *
+   * @private
+   * @callback mqtt~packetreceive
    */
   onPacketReceive(packet) {
     switch (packet.cmd) {
@@ -177,6 +194,8 @@ class MQTTClient {
    * Connects the MQTTClient to a MQTT broker.
    *
    * @function connect
+   *
+   * @private
    */
   connect() {
     if (this.isConnected === false) {
@@ -191,6 +210,8 @@ class MQTTClient {
    * Subscribes the client to its topics.
    *
    * @function subscribe
+   *
+   * @private
    */
   subscribe() {
     this.logger.info(`Subscribing to the topic ${this.config.subscription.topic}...`);
@@ -205,10 +226,11 @@ class MQTTClient {
   /**
    * Worker that sends the message.
    *
-   * @private
    * @function asyncQueueWorker
    *
    * @param {Object} data
+   *
+   * @private
    */
   asyncQueueWorker(data) {
     const { topic, message } = data;
@@ -219,6 +241,8 @@ class MQTTClient {
    * Shutdown handler to be passed to the ServiceStateManager.
    *
    * @returns {Promise<void>}
+   *
+   * @public
    */
   shutdownHandler() {
     return new Promise((resolve) => {
