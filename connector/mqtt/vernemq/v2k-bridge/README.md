@@ -49,8 +49,8 @@ Configurations used in the service.
 | --- | ------- | ------------- | ------------ | --------------------
 | backpressure.handlers | Number of parallel handlers for the backpressure queue processing mechanism | 4 | integer | V2K_BACKPRESSURE_HANDLERS
 | backpressure.queue.length.max | Maximum backpressure queue length in bytes | 1048576 | integer | V2K_BACKPRESSURE_QUEUE_LENGTH_MAX
-| logger.transports.console.level | Console logger level | info | string | V2K_LOGGER_TRANSPORTS_CONSOLE_LEVEL
-| logger.verbose | Whether to enable logger verbosity or not | false | boolean | V2K_LOGGER_VERBOSE
+| log.console.level | Console logger level | info | string | V2K_LOG_CONSOLE_LEVEL
+| log.verbose | Whether to enable logger verbosity or not | false | boolean | V2K_LOG_VERBOSE
 | messenger.produce.topic.suffix | Kafka production topic suffix | device-data | string | V2K_MESSENGER_PRODUCE_TOPIC_SUFFIX
 | subscription.qos | QoS to be used when subscribing to the MQTT broker | 1 | _0_, _1_, _2_ | V2K_SUBSCRIPTION_QOS
 | subscription.topic | Subscription topic | $share/group/+/attrs | string | V2K_SUBSCRIPTION_TOPIC
@@ -117,3 +117,13 @@ values.
 | Key | Default Value | Valid Values | Environment variable
 | --- | ------------- | ------------ | --------------------
 | topic.acks | -1 | integer | V2K_TOPIC_ACKS
+
+## Service State Manager
+
+These parameters are passed directly to the SDK ServiceStateManager. Check the
+[official repository](https://github.com/dojot/dojot-microservice-sdk-js) for more info on the
+values.
+
+| Key | Default Value | Valid Values | Environment variable
+| --- | ------------- | ------------ | --------------------
+| lightship.detect.kubernetes | false | boolean | V2K_LIGHTSHIP_DETECT_KUBERNETES
