@@ -49,8 +49,11 @@ Configurations used in the service.
 | --- | ------- | ------------- | ------------ | --------------------
 | backpressure.handlers | Number of parallel handlers for the backpressure queue processing mechanism | 4 | integer | V2K_BACKPRESSURE_HANDLERS
 | backpressure.queue.length.max | Maximum backpressure queue length in bytes | 1048576 | integer | V2K_BACKPRESSURE_QUEUE_LENGTH_MAX
-| log.console.level | Console logger level | info | string | V2K_LOG_CONSOLE_LEVEL
-| log.verbose | Whether to enable logger verbosity or not | false | boolean | V2K_LOG_VERBOSE
+| log.console.level | Console log level | info | info, warn, error, debug | V2K_LOG_CONSOLE_LEVEL
+| log.file.enable | Whether to enable file logging or not | false | boolean | V2K_LOG_FILE_ENABLE
+| log.file.filename | File log filename | v2k-%DATE%.log | string | V2K_LOG_FILE_FILENAME
+| log.file.level | File log level | info | info, warn, error, debug | V2K_LOG_FILE_LEVEL
+| log.verbose | Whether to enable or not log verbosity | false | boolean | V2K_LOG_VERBOSE
 | messenger.produce.topic.suffix | Kafka production topic suffix | device-data | string | V2K_MESSENGER_PRODUCE_TOPIC_SUFFIX
 | subscription.qos | QoS to be used when subscribing to the MQTT broker | 1 | _0_, _1_, _2_ | V2K_SUBSCRIPTION_QOS
 | subscription.topic | Subscription topic | $share/group/+/attrs | string | V2K_SUBSCRIPTION_TOPIC

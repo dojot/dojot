@@ -21,8 +21,14 @@ loadSettings('V2K', userConfigFile);
 const config = getConfig('V2K');
 
 // Logger configuration
-Logger.setTransport('console', { level: config.log['console.level'] });
 Logger.setVerbose(config.log.verbose);
+Logger.setTransport('console', { level: config.log['console.level'] });
+if (config.log['file.enable']) {
+  Logger.setTransport('file', {
+    level: config.log['file.level'],
+    filename: config.log['file.filename'],
+  });
+}
 const logger = new Logger('app');
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
