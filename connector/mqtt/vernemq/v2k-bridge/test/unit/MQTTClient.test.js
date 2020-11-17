@@ -140,7 +140,7 @@ describe('MQTTClient', () => {
       mqttClient.init();
 
       expect(connectSpy).toHaveBeenCalled();
-      expect(mockMqtt.on).toHaveBeenCalledTimes(5);
+      expect(mockMqtt.on).toHaveBeenCalledTimes(4);
       expect(asyncQueueWorkerSpy).toHaveBeenCalled();
       expect(mqttClient.mqttClient).toBeDefined();
       expect(mqttClient.messageQueue).toBeDefined();
@@ -160,7 +160,7 @@ describe('MQTTClient', () => {
       mqttClient.init();
 
       expect(connectSpy).toHaveBeenCalled();
-      expect(mockMqtt.on).toHaveBeenCalledTimes(5);
+      expect(mockMqtt.on).toHaveBeenCalledTimes(4);
       expect(asyncQueueWorkerSpy).toHaveBeenCalled();
       expect(mqttClient.mqttClient).toBeDefined();
       expect(mqttClient.messageQueue).toBeDefined();
@@ -232,14 +232,6 @@ describe('MQTTClient', () => {
       });
     });
 
-    describe('onPacketReceive', () => {
-      it('should call signalReady after receiving a SUBACK', () => {
-        mqttClient.onPacketReceive({ cmd: 'suback' });
-
-        expect(mockSdk.ServiceStateManager.signalReady).toHaveBeenCalled();
-      });
-    });
-
     describe('connect', () => {
       it('should successfully connect to the broker', () => {
         mqttClient.connect();
@@ -254,16 +246,28 @@ describe('MQTTClient', () => {
     });
 
     describe('subscribe', () => {
-      it('should successfully subscribe', () => {
-        mqttClient.isConnected = true;
+      it('should successfully subscribe - granted array has one object', () => {
         mqttClient.subscribe();
-        expect(mockMqtt.subscribe).toHaveBeenCalledTimes(1);
+
+        expect(mockMqtt.unsubscribe).toHaveBeenCalled();
+        expect(mockMqtt.subscribe).toHaveBeenCalled();
+
+        const cb = mockMqtt.subscribe.mock.calls[0][2];
+        cb(undefined, [{}]);
+
+        expect(mockSdk.ServiceStateManager.signalReady).toHaveBeenCalled();
       });
 
-      it('should not subscribe - client is not connected', () => {
-        mqttClient.isConnected = false;
+      it('should not have been subscribed - granted array is empty', () => {
         mqttClient.subscribe();
-        expect(mockMqtt.subscribe).not.toHaveBeenCalled();
+
+        expect(mockMqtt.unsubscribe).toHaveBeenCalled();
+        expect(mockMqtt.subscribe).toHaveBeenCalled();
+
+        const cb = mockMqtt.subscribe.mock.calls[0][2];
+        cb(undefined, []);
+
+        expect(mockExit).toHaveBeenCalled();
       });
     });
 

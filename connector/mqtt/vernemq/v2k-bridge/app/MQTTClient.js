@@ -76,7 +76,6 @@ class MQTTClient {
     this.mqttClient.on('disconnect', this.onDisconnect.bind(this));
     this.mqttClient.on('error', this.onError.bind(this));
     this.mqttClient.on('message', this.onMessage.bind(this));
-    this.mqttClient.on('packetreceive', this.onPacketReceive.bind(this));
 
     // Creates an async queue
     this.messageQueue = async.queue((data, done) => {
@@ -162,28 +161,6 @@ class MQTTClient {
   }
 
   /**
-   * Handles the packets that are received by the broker.
-   *
-   * @param {mqtt.Packet} packet
-   *
-   * @function onPacketReceive
-   * @private
-   */
-  onPacketReceive(packet) {
-    switch (packet.cmd) {
-      // The MQTT library does not provide a onSubscribe callback, so we need to retrieve its packet
-      // to properly set the service state
-      case 'suback':
-        this.logger.info('... successfully subscribed to the topic');
-        this.serviceStateManager.signalReady(this.stateService);
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  /**
    * Connects the MQTTClient to a MQTT broker.
    *
    * @function connect
@@ -206,12 +183,22 @@ class MQTTClient {
    */
   subscribe() {
     this.logger.info(`Subscribing to the topic ${this.config.subscription.topic}...`);
-    if (this.isConnected === true) {
-      this.mqttClient.subscribe(
-        this.config.subscription.topic,
-        { qos: this.config.subscription.qos },
-      );
-    }
+    // Since we are reusing the sessions, we need to unsubscribe to the topic to be able to
+    // correctly subscribe to it again when the client reconnects to the broker
+    this.mqttClient.unsubscribe(this.config.subscription.topic);
+    this.mqttClient.subscribe(
+      this.config.subscription.topic,
+      { qos: this.config.subscription.qos },
+      (error, granted) => {
+        if (granted.length > 0) {
+          this.logger.info('... successfully subscribed to the topic');
+          this.serviceStateManager.signalReady(this.stateService);
+        } else {
+          this.logger.error('Could not subscribe to the topic. Bailing out!');
+          process.exit(1);
+        }
+      },
+    );
   }
 
   /**
