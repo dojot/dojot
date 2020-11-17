@@ -49,10 +49,4 @@ manager.addHealthChecker(
 manager.registerShutdownHandler(agentMessenger.shutdownHandler.bind(agentMessenger));
 manager.registerShutdownHandler(mqttClient.shutdownHandler.bind(mqttClient));
 
-try {
-  agentMessenger.init(mqttClient);
-} catch (error) {
-  logger.error('An error occurred while initializing the Agent Messenger. Bailing out!');
-  logger.error(error.stack || error);
-  process.exit(1);
-}
+agentMessenger.init(mqttClient);

@@ -42,6 +42,7 @@ class AgentMessenger {
       this.logger.info('Initializing MQTTClient');
       mqttClient.init();
     }).catch((error) => {
+      this.logger.error('An error occurred while initializing the Agent Messenger. Bailing out!');
       this.logger.error(error.stack || error);
       process.exit(1);
     });
