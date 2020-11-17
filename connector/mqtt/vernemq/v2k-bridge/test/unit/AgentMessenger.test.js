@@ -49,13 +49,16 @@ const mockConfig = {
   },
 
   Logger: {
-    info: jest.fn(),
-    error: jest.fn(),
     debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
   },
 
   Producer: {
     connect: jest.fn(),
+    disconnect: jest.fn(),
+    getStatus: jest.fn(),
     // eslint-disable-next-line no-unused-vars
     produce: jest.fn((topic, message, key) => new Promise((resolve, reject) => {
       // eslint-disable-next-line no-param-reassign
@@ -100,19 +103,26 @@ describe('AgentMessenger', () => {
     it('should successfully create a new instance', () => {
       expect(agentMessenger.config).toEqual(mockConfig.ConfigManager);
       expect(agentMessenger.producer).toBeDefined();
-      expect(agentMessenger.mqttClient).toBeDefined();
       expect(agentMessenger.logger).toBeDefined();
     });
   });
 
   describe('init', () => {
+    let mqttClient;
+
+    beforeEach(() => {
+      mqttClient = {
+        init: jest.fn(),
+      };
+    });
+
     it('should correctly initialize', async () => {
       mockConfig.Producer.connect.mockReturnValue(Promise.resolve());
 
-      await agentMessenger.init();
+      await agentMessenger.init(mqttClient);
 
       expect(mockConfig.Producer.connect).toHaveBeenCalled();
-      expect(agentMessenger.mqttClient.init).toHaveBeenCalled();
+      expect(mqttClient.init).toHaveBeenCalled();
       expect(agentMessenger.logger).toBeDefined();
     });
 
@@ -121,7 +131,7 @@ describe('AgentMessenger', () => {
       mockConfig.Producer.connect.mockReturnValue(Promise.reject(reason));
 
       try {
-        await agentMessenger.init();
+        await agentMessenger.init(mqttClient);
       } catch (error) {
         expect(error).toEqual(reason);
       }
@@ -167,6 +177,48 @@ describe('AgentMessenger', () => {
       } finally {
         expect(mockConfig.Producer.produce).not.toHaveBeenCalled();
       }
+    });
+  });
+
+  describe('healthChecker', () => {
+    let signalReady;
+    let signalNotReady;
+
+    beforeEach(() => {
+      signalReady = jest.fn();
+      signalNotReady = jest.fn();
+    });
+
+    it('should signal as ready - is connected to Kafka', async () => {
+      mockConfig.Producer.getStatus.mockReturnValue(Promise.resolve({ connected: true }));
+
+      await agentMessenger.healthChecker(signalReady, signalNotReady);
+
+      expect(signalReady).toHaveBeenCalled();
+    });
+
+    it('should signal as not ready - is not connected to Kafka', async () => {
+      mockConfig.Producer.getStatus.mockReturnValue(Promise.resolve({ connected: false }));
+
+      await agentMessenger.healthChecker(signalReady, signalNotReady);
+
+      expect(signalNotReady).toHaveBeenCalled();
+    });
+
+    it('should signal as not ready - Promise was rejected', async () => {
+      mockConfig.Producer.getStatus.mockReturnValue(Promise.reject());
+
+      await agentMessenger.healthChecker(signalReady, signalNotReady);
+
+      expect(signalNotReady).toHaveBeenCalled();
+    });
+  });
+
+  describe('shutdownHandler', () => {
+    it('should call the disconnect function from the producer', () => {
+      agentMessenger.shutdownHandler();
+
+      expect(agentMessenger.producer.disconnect).toHaveBeenCalled();
     });
   });
 });

@@ -40,6 +40,7 @@ const mockMqtt = {
   on: jest.fn(),
   reconnect: jest.fn(),
   subscribe: jest.fn(),
+  unsubscribe: jest.fn(),
 };
 
 const mockMqttClient = {
@@ -58,25 +59,27 @@ const mockSdk = {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
   })),
+  ServiceStateManager: {
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+  },
 };
 
 /**
  * Manual mocks
  */
 jest.mock('../../app/AgentMessenger', () => mockAgentMessenger);
-
 jest.mock('async', () => ({
   queue: (callback) => {
     callback(jest.fn(), jest.fn());
     return mockAsyncQueue;
   },
 }));
-
 jest.mock('fs', () => mockFs);
-
 jest.mock('mqtt', () => mockMqttClient);
-
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 const MQTTClient = require('../../app/MQTTClient');
@@ -106,10 +109,11 @@ describe('MQTTClient', () => {
         key: 'keyValue',
       };
 
-      const client = new MQTTClient(mockAgentMessenger);
+      const client = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager);
 
       expect(client.logger).toBeDefined();
       expect(client.agentMessenger).toBeDefined();
+      expect(client.serviceStateManager).toBeDefined();
       expect(client.config).toEqual(mockConfig);
       expect(client.isConnected).toBeFalsy();
       expect(client.mqttOptions).toEqual({ ...mockConfig.mqtt, ...certificates });
@@ -117,7 +121,7 @@ describe('MQTTClient', () => {
       expect(client.currentMessageQueueLength).toEqual(0);
     });
 
-    it('should not create a client - no AgentMessenger instance was passed', () => {
+    it('should not create a client - no AgentMessenger nor ServiceStateManager instance was passed', () => {
       expect(() => new MQTTClient()).toThrow();
     });
   });
@@ -126,7 +130,7 @@ describe('MQTTClient', () => {
     let mqttClient;
 
     beforeEach(() => {
-      mqttClient = new MQTTClient(mockAgentMessenger);
+      mqttClient = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager);
     });
 
     it('should successfully initialize the client - MQTTClient not connected', () => {
@@ -136,9 +140,9 @@ describe('MQTTClient', () => {
       mqttClient.init();
 
       expect(connectSpy).toHaveBeenCalled();
-      expect(mqttClient.mqttc.on).toHaveBeenCalledTimes(4);
+      expect(mockMqtt.on).toHaveBeenCalledTimes(5);
       expect(asyncQueueWorkerSpy).toHaveBeenCalled();
-      expect(mqttClient.mqttc).toBeDefined();
+      expect(mqttClient.mqttClient).toBeDefined();
       expect(mqttClient.messageQueue).toBeDefined();
       expect(mockAsyncQueue.drain).toHaveBeenCalled();
       expect(mqttClient.isConnected).toBeFalsy();
@@ -156,9 +160,9 @@ describe('MQTTClient', () => {
       mqttClient.init();
 
       expect(connectSpy).toHaveBeenCalled();
-      expect(mqttClient.mqttc.on).toHaveBeenCalledTimes(4);
+      expect(mockMqtt.on).toHaveBeenCalledTimes(5);
       expect(asyncQueueWorkerSpy).toHaveBeenCalled();
-      expect(mqttClient.mqttc).toBeDefined();
+      expect(mqttClient.mqttClient).toBeDefined();
       expect(mqttClient.messageQueue).toBeDefined();
       expect(mockAsyncQueue.drain).toHaveBeenCalled();
       expect(mqttClient.isConnected).toBeTruthy();
@@ -169,7 +173,7 @@ describe('MQTTClient', () => {
     let mqttClient;
 
     beforeEach(() => {
-      mqttClient = new MQTTClient(mockAgentMessenger);
+      mqttClient = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager);
       mqttClient.init();
       jest.clearAllMocks();
     });
@@ -191,7 +195,7 @@ describe('MQTTClient', () => {
         mqttClient.onDisconnect();
 
         expect(mqttClient.isConnected).toBeFalsy();
-        expect(mockMqtt.reconnect).toHaveBeenCalled();
+        expect(mockSdk.ServiceStateManager.signalNotReady).toHaveBeenCalled();
       });
     });
 
@@ -199,7 +203,8 @@ describe('MQTTClient', () => {
       it('should exit after an error has occurred', () => {
         mqttClient.onError(new Error('testError'));
 
-        expect(mockExit).toHaveBeenCalledTimes(1);
+        expect(mqttClient.isConnected).toBeFalsy();
+        expect(mockSdk.ServiceStateManager.signalNotReady).toHaveBeenCalled();
       });
     });
 
@@ -224,6 +229,14 @@ describe('MQTTClient', () => {
 
         expect(mockAsyncQueue.push).not.toHaveBeenCalled();
         expect(mockMqtt.end).toHaveBeenCalled();
+      });
+    });
+
+    describe('onPacketReceive', () => {
+      it('should call signalReady after receiving a SUBACK', () => {
+        mqttClient.onPacketReceive({ cmd: 'suback' });
+
+        expect(mockSdk.ServiceStateManager.signalReady).toHaveBeenCalled();
       });
     });
 
@@ -259,7 +272,18 @@ describe('MQTTClient', () => {
         const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
         const { topic, message } = fakeMessage;
         mqttClient.asyncQueueWorker(fakeMessage);
-        expect(mqttClient.agentMessenger.sendMessage).toHaveBeenCalledWith(topic, message);
+        expect(mockAgentMessenger.sendMessage).toHaveBeenCalledWith(topic, message);
+      });
+    });
+
+    describe('shutdownHandler', () => {
+      it('should close the connection', (done) => {
+        mqttClient.shutdownHandler();
+
+        expect(mockMqtt.unsubscribe).toHaveBeenCalled();
+        expect(mockMqtt.end).toHaveBeenCalled();
+
+        done();
       });
     });
   });
