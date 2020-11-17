@@ -1,8 +1,8 @@
-jest.mock('../../app/utils');
+jest.mock('../../app/Utils');
 jest.mock('../../app/MQTTClient.js');
 
 const mockProcess = require('jest-mock-process');
-const utils = require('../../app/utils');
+const utils = require('../../app/Utils');
 const AgentMessenger = require('../../app/AgentMessenger');
 
 const mockExit = mockProcess.mockProcessExit();

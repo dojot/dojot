@@ -1,6 +1,6 @@
 const { ConfigManager, Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
 
-const Utils = require('./utils');
+const Utils = require('./Utils');
 
 /**
  * Class representing an AgentMessenger

@@ -1,4 +1,4 @@
-const utils = require('../../app/utils');
+const utils = require('../../app/Utils');
 
 describe('Utils', () => {
   beforeEach(() => {
