@@ -28,13 +28,14 @@
   "author": "Eduardo Garcia Misiuk, Jonaphael Aristil, Muhamed Avila",
   "license": "GPL-3.0, ISC",
   "dependencies": {
-    "@dojot/microservice-sdk": "0.1.6",
+    "@dojot/microservice-sdk": "0.1.8",
     "async": "^3.1.1",
     "lodash.camelcase": "^4.3.0",
     "md5": "^2.2.1",
     "mqtt": "^4.2.1"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.15",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.19.1",
