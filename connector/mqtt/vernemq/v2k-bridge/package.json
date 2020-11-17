@@ -32,7 +32,7 @@
     "async": "^3.1.1",
     "lodash.camelcase": "^4.3.0",
     "md5": "^2.2.1",
-    "mqtt": "^4.2.1"
+    "mqtt": "^4.2.5"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
