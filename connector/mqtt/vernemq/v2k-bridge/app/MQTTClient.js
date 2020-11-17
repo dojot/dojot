@@ -14,22 +14,33 @@ class MQTTClient {
   /**
    * Creates an MQTTClient.
    *
+   * @param {Object} agentMessenger - AgentMessenger instance
+   * @param {Object} serviceStateManager - ServiceStateManager instance
+   *
    * @constructor
-   * @param {Object} agentMessenger - the client agent messenger
    */
-  constructor(agentMessenger) {
+  constructor(agentMessenger, serviceStateManager) {
     if (!agentMessenger) {
-      throw new Error('no agent messenger was passed');
+      throw new Error('no AgentMessenger instance was passed');
     }
+    if (!serviceStateManager) {
+      throw new Error('no ServiceStateMessenger instance was passed');
+    }
+    this.logger = new Logger('v2k:mqtt-client');
 
-    this.logger = new Logger('MQTTClient');
-
-    this.mqttc = undefined;
     this.agentMessenger = agentMessenger;
+    this.serviceStateManager = serviceStateManager;
+    /**
+     * The service to be registered in the ServiceStateManager
+     * @type {string}
+     */
+    this.stateService = 'mqtt';
+    this.serviceStateManager.registerService(this.stateService);
 
-    this.config = ConfigManager.getConfig('V2K');
+    this.mqttClient = undefined;
     this.isConnected = false;
 
+    this.config = ConfigManager.getConfig('V2K');
     const certificates = {
       ca: fs.readFileSync(`${this.config.mqtt.ca}`),
       key: fs.readFileSync(`${this.config.mqtt.key}`),
@@ -57,11 +68,14 @@ class MQTTClient {
    */
   init() {
     this.logger.info('Initializing the MQTT client...');
+
     this.connect();
-    this.mqttc.on('connect', this.onConnect.bind(this));
-    this.mqttc.on('disconnect', this.onDisconnect.bind(this));
-    this.mqttc.on('error', this.onError.bind(this));
-    this.mqttc.on('message', this.onMessage.bind(this));
+
+    this.mqttClient.on('connect', this.onConnect.bind(this));
+    this.mqttClient.on('disconnect', this.onDisconnect.bind(this));
+    this.mqttClient.on('error', this.onError.bind(this));
+    this.mqttClient.on('message', this.onMessage.bind(this));
+    this.mqttClient.on('packetreceive', this.onPacketReceive.bind(this));
 
     // Creates an async queue
     this.messageQueue = async.queue((data, done) => {
@@ -72,7 +86,7 @@ class MQTTClient {
     // When the processing finishes, reconnects to the broker
     this.messageQueue.drain(() => {
       if (this.isConnected === false) {
-        this.mqttc.reconnect();
+        this.mqttClient.reconnect();
       }
     });
 
@@ -96,9 +110,9 @@ class MQTTClient {
    * @callback MQTTClient~onDisconnect
    */
   onDisconnect() {
-    this.logger.info(`Client ${this.mqttOptions.clientId} disconnected, reconnecting...`);
+    this.logger.warn(`Client ${this.mqttOptions.clientId} disconnected, reconnecting...`);
     this.isConnected = false;
-    this.mqttc.reconnect();
+    this.serviceStateManager.signalNotReady(this.stateService);
   }
 
   /**
@@ -107,12 +121,9 @@ class MQTTClient {
    * @param {*} error
    */
   onError(error) {
-    this.logger.error('An error has occurred in the MQTT connection.');
-    if (error) {
-      this.logger.error(error.stack || error);
-    }
-    this.logger.error('Bailing out!');
-    process.exit(1);
+    this.logger.error(error.stack || error);
+    this.isConnected = false;
+    this.serviceStateManager.signalNotReady(this.stateService);
   }
 
   /**
@@ -125,7 +136,6 @@ class MQTTClient {
    * @param {Object} packet
    */
   onMessage(topic, message, packet) {
-    // pause
     if (this.isConnected) {
       const size = message.toString().length;
       // check if message is duplicated
@@ -139,8 +149,27 @@ class MQTTClient {
     }
 
     if (this.currentMessageQueueLength > this.config.backpressure['queue.length.max']) {
-      this.mqttc.end(true);
+      this.mqttClient.end(true);
       this.isConnected = false;
+    }
+  }
+
+  /**
+   * Handles the packets that are received by the broker.
+   *
+   * @param {mqtt.Packet} packet
+   */
+  onPacketReceive(packet) {
+    switch (packet.cmd) {
+      // The MQTT library does not provide a onSubscribe callback, so we need to retrieve its packet
+      // to properly set the service state
+      case 'suback':
+        this.logger.info('... successfully subscribed to the topic');
+        this.serviceStateManager.signalReady(this.stateService);
+        break;
+
+      default:
+        break;
     }
   }
 
@@ -154,7 +183,7 @@ class MQTTClient {
       this.logger.info(
         `Connecting to broker ${this.mqttOptions.host}:${this.mqttOptions.port} with ${this.mqttOptions.protocol.toUpperCase()} protocol`,
       );
-      this.mqttc = mqtt.connect(this.mqttOptions);
+      this.mqttClient = mqtt.connect(this.mqttOptions);
     }
   }
 
@@ -164,9 +193,12 @@ class MQTTClient {
    * @function subscribe
    */
   subscribe() {
-    this.logger.info(`Subscribing to the topic ${this.config.subscription.topic}`);
+    this.logger.info(`Subscribing to the topic ${this.config.subscription.topic}...`);
     if (this.isConnected === true) {
-      this.mqttc.subscribe(this.config.subscription.topic, { qos: this.config.subscription.qos });
+      this.mqttClient.subscribe(
+        this.config.subscription.topic,
+        { qos: this.config.subscription.qos },
+      );
     }
   }
 
@@ -181,6 +213,23 @@ class MQTTClient {
   asyncQueueWorker(data) {
     const { topic, message } = data;
     this.agentMessenger.sendMessage(topic, message);
+  }
+
+  /**
+   * Shutdown handler to be passed to the ServiceStateManager.
+   *
+   * @returns {Promise<void>}
+   */
+  shutdownHandler() {
+    return new Promise((resolve) => {
+      this.logger.warn('Closing MQTT connection...');
+      this.logger.warn('Unsubscribing from topics...');
+      this.mqttClient.unsubscribe(this.config.subscription.topic);
+      this.mqttClient.end(() => {
+        this.logger.warn('MQTT connection was closed!');
+        return resolve();
+      });
+    });
   }
 }
 
