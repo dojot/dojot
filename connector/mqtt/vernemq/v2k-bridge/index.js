@@ -2,7 +2,7 @@ const {
   ConfigManager: { getConfig, loadSettings, transformObjectKeys },
   Logger,
   ServiceStateManager,
-} = require('@emisiuk/microservice-sdk');
+} = require('@dojot/microservice-sdk');
 
 const camelCase = require('lodash.camelcase');
 const util = require('util');
