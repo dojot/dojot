@@ -49,6 +49,7 @@ Configurations used in the service.
 | --- | ------- | ------------- | ------------ | --------------------
 | backpressure.handlers | Number of parallel handlers for the backpressure queue processing mechanism | 4 | integer | V2K_BACKPRESSURE_HANDLERS
 | backpressure.queue.length.max | Maximum backpressure queue length in bytes | 1048576 | integer | V2K_BACKPRESSURE_QUEUE_LENGTH_MAX
+| healthcheck.kafka.interval.ms | Milliseconds between each call of Kafka's health checker function | 30000 | integer | V2K_HEALTHCHECK_KAFKA_INTERVAL_MS
 | log.console.level | Console log level | info | info, warn, error, debug | V2K_LOG_CONSOLE_LEVEL
 | log.file.enable | Whether to enable file logging or not | false | boolean | V2K_LOG_FILE_ENABLE
 | log.file.filename | File log filename | v2k-%DATE%.log | string | V2K_LOG_FILE_FILENAME
