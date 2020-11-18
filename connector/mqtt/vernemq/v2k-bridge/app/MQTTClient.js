@@ -73,7 +73,8 @@ class MQTTClient {
     this.connect();
 
     this.mqttClient.on('connect', this.onConnect.bind(this));
-    this.mqttClient.on('disconnect', this.onDisconnect.bind(this));
+    this.mqttClient.on('reconnect', this.onReconnect.bind(this));
+    this.mqttClient.on('close', this.onClose.bind(this));
     this.mqttClient.on('error', this.onError.bind(this));
     this.mqttClient.on('message', this.onMessage.bind(this));
 
@@ -106,13 +107,23 @@ class MQTTClient {
   }
 
   /**
-   * Reached when the MQTTClient disconnects from the broker.
+   * Called whenever a reconnect call has been made.
    *
-   * @function onDisconnect
+   * @function onReconnect
    * @private
    */
-  onDisconnect() {
-    this.logger.warn(`Client ${this.mqttOptions.clientId} disconnected, reconnecting...`);
+  onReconnect() {
+    this.logger.info('Trying to reconnect to the broker...');
+  }
+
+  /**
+   * Reached when the MQTTClient disconnects from the broker.
+   *
+   * @function onClose
+   * @private
+   */
+  onClose() {
+    this.logger.warn(`Client ${this.mqttOptions.clientId} disconnected`);
     this.isConnected = false;
     this.serviceStateManager.signalNotReady(this.stateService);
   }

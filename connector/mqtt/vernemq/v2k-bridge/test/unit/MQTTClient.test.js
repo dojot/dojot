@@ -140,7 +140,7 @@ describe('MQTTClient', () => {
       mqttClient.init();
 
       expect(connectSpy).toHaveBeenCalled();
-      expect(mockMqtt.on).toHaveBeenCalledTimes(4);
+      expect(mockMqtt.on).toHaveBeenCalledTimes(5);
       expect(asyncQueueWorkerSpy).toHaveBeenCalled();
       expect(mqttClient.mqttClient).toBeDefined();
       expect(mqttClient.messageQueue).toBeDefined();
@@ -160,7 +160,7 @@ describe('MQTTClient', () => {
       mqttClient.init();
 
       expect(connectSpy).toHaveBeenCalled();
-      expect(mockMqtt.on).toHaveBeenCalledTimes(4);
+      expect(mockMqtt.on).toHaveBeenCalledTimes(5);
       expect(asyncQueueWorkerSpy).toHaveBeenCalled();
       expect(mqttClient.mqttClient).toBeDefined();
       expect(mqttClient.messageQueue).toBeDefined();
@@ -190,9 +190,9 @@ describe('MQTTClient', () => {
       });
     });
 
-    describe('onDisconnect', () => {
+    describe('onClose', () => {
       it('should reconnect the client after a disconnection', () => {
-        mqttClient.onDisconnect();
+        mqttClient.onClose();
 
         expect(mqttClient.isConnected).toBeFalsy();
         expect(mockSdk.ServiceStateManager.signalNotReady).toHaveBeenCalled();
