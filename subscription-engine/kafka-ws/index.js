@@ -29,6 +29,7 @@ const terminus = require('./app/Terminus');
 const StateManager = require('./app/StateManager');
 
 const logger = new Logger('app');
+const stateService = 'server';
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
@@ -49,6 +50,9 @@ if (config.server.tls) {
   server = http.createServer(application.expressApp);
 }
 
+// register service in stateManager
+StateManager.registerService(stateService);
+
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
 
@@ -56,7 +60,7 @@ server.listen(config.server.port, config.server.host, async () => {
   logger.info('HTTP server is ready to accept connections!');
   logger.info(server.address());
 
-  StateManager.signalReady('server');
+  StateManager.signalReady(stateService);
   // Initializes the sticky tarball
   try {
     await websocketTarball.init();
@@ -67,7 +71,7 @@ server.listen(config.server.port, config.server.host, async () => {
 });
 
 server.on('close', () => {
-  StateManager.signalNotReady('server');
+  StateManager.signalNotReady(stateService);
 });
 
 /* adds health checks and graceful shutdown to the application */

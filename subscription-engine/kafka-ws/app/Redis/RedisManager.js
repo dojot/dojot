@@ -23,9 +23,20 @@ class RedisManager {
     this.redisClient = redis.createClient(this.config);
     logger.info('RedisManager singleton creation complete!');
 
-    this.redisClient.on('connect', () => StateManager.signalReady('redis'));
-    this.redisClient.on('reconnecting', () => StateManager.signalReady('redis'));
-    this.redisClient.on('end', () => StateManager.signalNotReady('redis'));
+    const stateService = 'redis';
+    StateManager.registerService(stateService);
+    this.redisClient.on('connect', () => StateManager.signalReady(stateService));
+    /**
+     * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
+     * and some unexpected behaviors happens.
+     *
+     * The error event doesn't mean the service is unhealthy, because it can be
+     * AbortError, ParserError AggregateError, or others subclasses of RedisError
+     * When the client disconnects to redis the 'end' event is fired, there we can consider
+     * the service is unhealthy
+     */
+    this.redisClient.on('error', (error) => logger.warn(`${error}`));
+    this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
 
     return Object.seal(this);
   }

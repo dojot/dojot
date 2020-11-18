@@ -28,6 +28,12 @@ class KafkaConsumer {
 
     // handle for interval, to delete when de-initializing class
     this.stateManagerInterval = null;
+
+    // healthChecker
+    this.stateService = 'kafka';
+    this.healthCheckerBind = this.healthChecker.bind(this);
+    StateManager.registerService(this.stateService);
+    StateManager.addHealthChecker(this.stateService, this.healthCheckerBind, 5000);
   }
 
   /**
@@ -37,9 +43,6 @@ class KafkaConsumer {
     try {
       logger.info('init: Kafka starting...');
       await this.consumer.init();
-      const stateManagerStatusHandleBind = this.handleStatusForStateManager.bind(this);
-      this.stateManagerInterval = setInterval(() => stateManagerStatusHandleBind, 5000);
-      this.stateManagerInterval.unref();
       logger.info('init: ...Kafka started ');
     } catch (error) {
       logger.error(`init: Error starting kafka ${error.stack}`);
@@ -47,15 +50,15 @@ class KafkaConsumer {
     }
   }
 
-  handleStatusForStateManager() {
+  healthChecker(signalReady, signalNotReady) {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
-        StateManager.signalReady('kafka');
+        signalReady();
       } else {
-        StateManager.signalNotReady('kafka');
+        signalNotReady();
       }
     }).catch((err) => {
-      StateManager.signalNotReady('kafka');
+      signalNotReady();
       logger.warn(`Error ${err}`);
     });
   }
