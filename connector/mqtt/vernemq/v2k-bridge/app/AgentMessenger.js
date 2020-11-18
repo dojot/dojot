@@ -37,9 +37,6 @@ class AgentMessenger {
     this.logger.info('Initializing Kafka Producer...');
     this.producer.connect().then(() => {
       this.logger.info('... Kafka Producer was initialized');
-
-      // initializing mqtt client
-      this.logger.info('Initializing MQTTClient');
       mqttClient.init();
     }).catch((error) => {
       this.logger.error('An error occurred while initializing the Agent Messenger. Bailing out!');
