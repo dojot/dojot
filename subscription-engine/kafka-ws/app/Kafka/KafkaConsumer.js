@@ -1,4 +1,5 @@
 const { Logger, ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
+const StateManager = require('../StateManager');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -22,6 +23,9 @@ class KafkaConsumer {
     this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
+
+    // graceful shutdown
+    StateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
   }
 
   /**
@@ -38,6 +42,12 @@ class KafkaConsumer {
     }
   }
 
+  /**
+   * HealthChecker to be passed to the ServiceStateManager
+   *
+   * @param {*} signalReady
+   * @param {*} signalNotReady
+   */
   healthChecker(signalReady, signalNotReady) {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
@@ -48,6 +58,15 @@ class KafkaConsumer {
     }).catch((err) => {
       signalNotReady();
       logger.warn(`Error ${err}`);
+    });
+  }
+
+  /**
+   *  Shutdown handler to be passed to the ServiceStateManager.
+   */
+  shutdownHandler() {
+    return this.consumer.finish().then(() => {
+      this.logger.warn('Kafka Consumer finished!');
     });
   }
 
