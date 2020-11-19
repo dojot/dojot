@@ -25,6 +25,7 @@ class RedisManager {
 
     const stateService = 'redis';
     StateManager.registerService(stateService);
+    StateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
     this.redisClient.on('connect', () => StateManager.signalReady(stateService));
     /**
      * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
@@ -39,6 +40,19 @@ class RedisManager {
     this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
 
     return Object.seal(this);
+  }
+
+  /**
+   * Shutdown handler to be passed to the ServiceStateManager.
+   *
+   * @returns {Promise<void>}
+   *
+   * @function shutdown Handler
+   * @public
+   */
+  shutdownHandler() {
+    logger.warn('Shutting redis, disconnecting...');
+    return this.redisClient.end(true);
   }
 
   /**

@@ -34,6 +34,7 @@ class KafkaConsumer {
     this.healthCheckerBind = this.healthChecker.bind(this);
     StateManager.registerService(this.stateService);
     StateManager.addHealthChecker(this.stateService, this.healthCheckerBind, 5000);
+    StateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
   }
 
   /**
@@ -50,6 +51,12 @@ class KafkaConsumer {
     }
   }
 
+  /**
+   * HealthChecker to be passed to the ServiceStateManager
+   *
+   * @param {*} signalReady
+   * @param {*} signalNotReady
+   */
   healthChecker(signalReady, signalNotReady) {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
@@ -60,6 +67,15 @@ class KafkaConsumer {
     }).catch((err) => {
       signalNotReady();
       logger.warn(`Error ${err}`);
+    });
+  }
+
+  /**
+   *  Shutdown handler to be passed to the ServiceStateManager.
+   */
+  shutdownHandler() {
+    return this.consumer.finish().then(() => {
+      this.logger.warn('Kafka Consumer finished!');
     });
   }
 

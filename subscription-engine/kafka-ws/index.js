@@ -52,6 +52,7 @@ if (config.server.tls) {
 
 // register service in stateManager
 StateManager.registerService(stateService);
+StateManager.registerShutdownHandler(websocketTarball.onClose);
 
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
