@@ -35,6 +35,7 @@ class App {
   constructor() {
     logger.debug('constructor: instantiate app...');
     try {
+      // TODO create a influx class to wrapper influx classes
       this.kafkaConsumer = new KafkaConsumer();
       this.influxOrgs = new InfluxOrgs(
         configInflux.url,
@@ -215,7 +216,7 @@ class App {
 
     const boundKafkaFinish = this.kafkaConsumer
       .finish.bind(this.kafkaConsumer);
-
+    // TODO: Split and register 3 times
     const shutdownFunc = async () => {
       logger.warn('ShutdownHandler: Closing the influxdb-storer...');
       try {
@@ -248,6 +249,7 @@ class App {
     const boundIsHealthInflux = this.influxState
       .isHealth.bind(this.influxState);
 
+    // TODO: move that to wrapper influx
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
       const isHealth = await boundIsHealthInflux();
       if (isHealth) {
@@ -263,7 +265,7 @@ class App {
 
     const boundIsConnectedKafka = this.kafkaConsumer
       .isConnected.bind(this.kafkaConsumer);
-
+    // TODO: move that to wrapper kafka
     const kafkaHealthChecker = async (signalReady, signalNotReady) => {
       const isConnected = await boundIsConnectedKafka();
       if (isConnected) {
