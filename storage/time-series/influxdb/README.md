@@ -1,6 +1,6 @@
 # InfluxDB Storer and Retriever
 
-The services **InfluxDB Storer** and **InfluxDB Retriever** work together, the **InfluxDB Storer** is responsible for consuming Kafka data from dojot devices and writing it to **InfluxDB** while the **InfluxDB Retriever** has the role of obtaining the data that were written by **InfluxDB Storer** in **InfluxDB** via API Rest.
+The services **InfluxDB Storer** and **InfluxDB Retriever** work together, the **InfluxDB Storer** is responsible for consuming Kafka data from dojot devices and writing it to **InfluxDB**, while the **InfluxDB Retriever** has the role of obtaining the data that were written by **InfluxDB Storer** in **InfluxDB** via API Rest.
 See the image below for a better understanding:
 
 ![Architecture](./docs/imgs/arq.png)
