@@ -1,4 +1,3 @@
-
 const mockConfig = {
   consumer: {
     'group.id': 'kafka_test',
