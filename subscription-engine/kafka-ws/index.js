@@ -29,7 +29,7 @@ const terminus = require('./app/Terminus');
 const StateManager = require('./app/StateManager');
 
 const logger = new Logger('app');
-const stateService = 'server';
+const stateService = 'http';
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 

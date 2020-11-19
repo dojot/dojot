@@ -26,14 +26,10 @@ class KafkaConsumer {
     // only one callback by topic
     this.registeredCallbacks = new Map();
 
-    // handle for interval, to delete when de-initializing class
-    this.stateManagerInterval = null;
-
     // healthChecker
-    this.stateService = 'kafka';
     this.healthCheckerBind = this.healthChecker.bind(this);
-    StateManager.registerService(this.stateService);
-    StateManager.addHealthChecker(this.stateService, this.healthCheckerBind, 5000);
+    StateManager.registerService('kafka');
+    StateManager.addHealthChecker('kafka', this.healthCheckerBind, 5000);
   }
 
   /**
