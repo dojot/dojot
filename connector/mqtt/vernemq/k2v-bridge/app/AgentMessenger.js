@@ -141,7 +141,6 @@ class AgentMessenger {
   async shutdownHandler() {
     this.logger.warn('Shutting down Kafka connection...');
     await this.finish();
-
   }
 }
 

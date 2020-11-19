@@ -9,7 +9,6 @@ const util = require('util');
 const mqtt = require('mqtt');
 
 const utils = require('./utils');
-const AgentMessenger = require('./AgentMessenger');
 
 /**
  * Class representing a MQTTClient
@@ -19,7 +18,7 @@ class MQTTClient {
   /**
    * Creates a MQTTClient
    *
-   * @param {AgentMessenger} agentMessenger
+   * @param {Object} agentMessenger
    * @param {Object} serviceStateManager
    *
    * @constructor
