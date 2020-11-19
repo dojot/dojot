@@ -1,0 +1,94 @@
+{
+  "name": "influxdb-retriever",
+  "version": "0.0.1",
+  "description": "The InfluxDB Retriever is responsible for retrieving data from device data time series in InfluxDB.",
+  "engines": {
+    "node": ">=12.18",
+    "npm": ">=6.14"
+  },
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "influxdb-retriever": "node index.js",
+    "dev": "nodemon index.js --ignore ./config -V",
+    "test": "jest",
+    "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
+    "check-licenses": "apache2-license-checker"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot"
+  },
+  "keywords": [
+    "dojot"
+  ],
+  "files": [
+    "package-lock.json",
+    "app/**/*.js",
+    "test/",
+    "!test/unit/coverage/"
+  ],
+  "author": "@mprevide",
+  "dependencies": {
+    "@dojot/microservice-sdk": "0.1.8",
+    "@google-cloud/precise-date": "^2.0.3",
+    "@influxdata/influxdb-client": "^1.8.0",
+    "@influxdata/influxdb-client-apis": "^1.8.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "express-openapi-validator": "^4.7.1",
+    "express-paginate": "^1.0.2",
+    "express-request-id": "^1.4.1",
+    "flat": "^5.0.2",
+    "http-errors": "^1.8.0",
+    "http-status-codes": "^2.1.4",
+    "http-terminator": "^2.0.3",
+    "jwt-decode": "^3.1.2",
+    "lodash.camelcase": "^4.3.0",
+    "morgan": "^1.10.0",
+    "on-finished": "^2.3.0",
+    "swagger-ui-express": "^4.1.4",
+    "yamljs": "^0.3.0"
+  },
+  "jest": {
+    "verbose": true,
+    "testRegex": [
+      "test/unit/*"
+    ],
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!index.js",
+      "!app/sdk/**/*.js"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "lib"
+    ],
+    "collectCoverage": true,
+    "clearMocks": true,
+    "testPathIgnorePatterns": [
+      "test/unit/coverage"
+    ],
+    "coverageDirectory": "test/unit/coverage",
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  },
+  "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "jest": "^26.4.2",
+    "nodemon": "^2.0.4"
+  }
+}
