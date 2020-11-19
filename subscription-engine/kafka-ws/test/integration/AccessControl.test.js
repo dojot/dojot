@@ -65,11 +65,6 @@ const mockConfig = {
   },
 };
 
-const managerMock = {
-  signalNotReady: jest.fn(),
-  signalReady: jest.fn(),
-};
-
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -79,10 +74,14 @@ const mockMicroServiceSdk = {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
   })),
-  ServiceStateManager: {
-    Manager: jest.fn(() => managerMock),
-  },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback()),
+  })),
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);

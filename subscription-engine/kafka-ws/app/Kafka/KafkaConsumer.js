@@ -37,7 +37,7 @@ class KafkaConsumer {
   }
 
   /**
-  * Inicialize Kafka consumer
+  * Initialize Kafka consumer
   */
   async init() {
     try {

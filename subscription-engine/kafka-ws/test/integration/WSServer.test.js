@@ -12,9 +12,12 @@ const mockMicroServiceSdk = {
   Kafka: {
     Consumer: jest.fn(),
   },
-  ServiceStateManager: {
-    Manager: jest.fn(),
-  },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback()),
+  })),
   Logger: jest.fn(() => ({
     debug: jest.fn(),
     error: jest.fn(),

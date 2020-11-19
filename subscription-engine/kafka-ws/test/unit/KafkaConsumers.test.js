@@ -14,12 +14,17 @@ const mockMicroServiceSdk = {
     transformObjectKeys: jest.fn((obj) => obj),
   },
   Kafka: {
-    Consumer: jest.fn(),
+    Consumer: jest.fn(() => ({
+      getStatus: jest.fn(() => Promise.resolve()),
+    })),
     Producer: jest.fn(),
   },
-  ServiceStateManager: {
-    Manager: jest.fn(),
-  },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback()),
+  })),
   Logger: jest.fn(() => ({
     debug: jest.fn(),
     error: jest.fn(),
@@ -42,6 +47,8 @@ describe('Testing KafkaWSConsumers - works fine', () => {
         .mockReturnValueOnce('idCallback1'),
       unregisterCallback: jest.fn()
         .mockImplementationOnce(() => () => Promise.resolve()),
+      getStatus: jest.fn()
+        .mockImplementationOnce(() => Promise.resolve({ connected: true })),
     });
     kafkaWSConsumers = new KafkaWSConsumers();
   });
@@ -108,6 +115,8 @@ describe('Should not init correctly', () => {
   beforeAll(() => {
     Consumer.mockReturnValue({
       init: jest.fn()
+        .mockImplementationOnce(() => Promise.reject(new Error('Error'))),
+      getStatus: jest.fn()
         .mockImplementationOnce(() => Promise.reject(new Error('Error'))),
     });
     kafkaWSConsumers = new KafkaWSConsumers();
