@@ -17,9 +17,16 @@ const mockMicroServiceSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    // addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
+  })),
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+jest.mock('../../app/StateManager');
 
 const redismock = require('redis-mock');
 const RedisExpireMgmt = require('../../app/Redis/RedisExpireMgmt');

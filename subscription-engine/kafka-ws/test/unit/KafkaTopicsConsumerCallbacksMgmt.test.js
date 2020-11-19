@@ -21,7 +21,7 @@ const mockMicroServiceSdk = {
     registerService: jest.fn(),
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
-    addHealthChecker: jest.fn((service, callback) => callback()),
+    addHealthChecker: jest.fn((service, callback, timeout) => callback(service, timeout)),
   })),
   Logger: jest.fn(() => ({
     debug: jest.fn(),
@@ -31,6 +31,7 @@ const mockMicroServiceSdk = {
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+jest.mock('../../app/StateManager');
 
 const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 
