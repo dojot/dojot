@@ -17,7 +17,7 @@ class AgentMessenger {
    */
   constructor(serviceStateManager) {
     this.config = ConfigManager.getConfig('K2V');
-    this.consumeTopicSuffix = this.config.messenger['consume.topic.suffix'];
+    this.consumerTopicSuffix = this.config.messenger['consumer.topic.suffix'];
 
     this.logger = new Logger('k2v:agent-messenger');
 
@@ -59,7 +59,7 @@ class AgentMessenger {
         'kafka.topic': this.config.topic,
       });
       await this.consumer.init();
-      const topic = new RegExp(`^.+${this.consumeTopicSuffix.replace(/\./g, '\\.')}`);
+      const topic = new RegExp(`^.+${this.consumerTopicSuffix.replace(/\./g, '\\.')}`);
 
       this.publishCallbackId = this.consumer.registerCallback(
         topic,
@@ -91,7 +91,7 @@ class AgentMessenger {
       await this.consumer.finish();
       this.consumer = undefined;
     } catch (error) {
-      this.logger.debug('Error while finishing Kafka connection, going on like nothing');
+      this.logger.debug('Error while finishing Kafka connection, going on like nothing happened');
     }
     this.serviceStateManager.signalNotReady(this.stateService);
   }
