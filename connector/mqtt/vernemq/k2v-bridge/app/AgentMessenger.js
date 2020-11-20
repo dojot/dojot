@@ -16,6 +16,10 @@ class AgentMessenger {
    * @constructor
    */
   constructor(serviceStateManager) {
+    if (!serviceStateManager) {
+      throw new Error('no ServiceStateManager instance was passed');
+    }
+
     this.config = ConfigManager.getConfig('K2V');
     this.consumerTopicSuffix = this.config.messenger['consumer.topic.suffix'];
 
@@ -61,10 +65,7 @@ class AgentMessenger {
       await this.consumer.init();
       const topic = new RegExp(`^.+${this.consumerTopicSuffix.replace(/\./g, '\\.')}`);
 
-      this.publishCallbackId = this.consumer.registerCallback(
-        topic,
-        mqttClient.publishMessage.bind(mqttClient),
-      );
+      this.consumer.registerCallback(topic, mqttClient.publishMessage.bind(mqttClient));
 
       this.serviceStateManager.signalReady(this.stateService);
       this.wasInitialized = true;
@@ -107,27 +108,21 @@ class AgentMessenger {
    * @function healthChecker
    * @public
    */
-  healthChecker(signalReady, signalNotReady) {
-    return new Promise((resolve) => {
-      if (this.consumer) {
-        this.consumer.getStatus()
-          .then((status) => {
-            if (status.connected) {
-              signalReady();
-            } else {
-              signalNotReady();
-            }
-            return resolve();
-          })
-          .catch(() => {
-            signalNotReady();
-            return resolve();
-          });
-      } else {
+  async healthChecker(signalReady, signalNotReady) {
+    if (this.consumer) {
+      try {
+        const status = await this.consumer.getStatus();
+        if (status.connected) {
+          signalReady();
+        } else {
+          signalNotReady();
+        }
+      } catch (error) {
         signalNotReady();
-        return resolve();
       }
-    });
+    } else {
+      signalNotReady();
+    }
   }
 
   /**
