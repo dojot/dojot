@@ -3,6 +3,7 @@ const utils = require('../../app/utils');
 
 // Mock objects
 const mockAgentMessenger = {
+  finish: jest.fn(),
   init: jest.fn(),
 };
 
@@ -32,11 +33,21 @@ const mockDefaultConfig = {
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
+  warn: jest.fn(),
 };
 
 const mockMqtt = {
+  end: jest.fn(),
   on: jest.fn(),
   publish: jest.fn(),
+};
+
+const mockServiceStateManager = {
+  registerService: jest.fn(),
+  registerShutdownHandler: jest.fn(),
+  addHealthChecker: jest.fn(),
+  signalNotReady: jest.fn(),
+  signalReady: jest.fn(),
 };
 
 // Lib mocks
@@ -47,6 +58,7 @@ jest.mock('@dojot/microservice-sdk', () => ({
     transformObjectKeys: jest.fn((obj) => obj),
   },
   Logger: jest.fn(() => mockLogger),
+  ServiceStateManager: jest.fn(() => mockServiceStateManager),
 }));
 
 jest.mock('fs', () => ({
@@ -63,27 +75,38 @@ jest.mock('../../app/utils', () => ({
   killApplication: jest.fn(),
 }));
 
-describe.only('MQTTClient', () => {
+describe('MQTTClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('constructor', () => {
     it('should successfully create a MQTTClient instance', () => {
-      const client = new MQTTClient();
+      const client = new MQTTClient(mockAgentMessenger, mockServiceStateManager);
+
+      expect(client.logger).toBeDefined();
+      expect(client.mqttOptions).toBeDefined();
+      expect(client.agentMessenger).toEqual(mockAgentMessenger);
+      expect(client.serviceStateManager).toEqual(mockServiceStateManager);
+      expect(client.mqttClient).toBeUndefined();
+      expect(client.stateService).toEqual('mqtt');
 
       expect(client.isConnected).toBeFalsy();
       expect(client.publishConfig).toBe(mockDefaultConfig.publish);
-      expect(client.mqttOptions).toBeDefined();
-      expect(client.mqttClient).toBeNull();
-      expect(client.agentMessenger).toBeNull();
-      expect(client.logger).toBeDefined();
+
+      expect(mockServiceStateManager.registerService).toHaveBeenCalled();
+      expect(mockServiceStateManager.registerShutdownHandler).toHaveBeenCalled();
+    });
+
+    it('should not instantiate the class - obligatory parameters not passed', () => {
+      expect(() => new MQTTClient()).toThrow();
+      expect(() => new MQTTClient(mockAgentMessenger)).toThrow();
     });
   });
 
   describe('init', () => {
     it('should successfully initialize the MQTT client', () => {
-      const client = new MQTTClient();
+      const client = new MQTTClient(mockAgentMessenger, mockServiceStateManager);
 
       client.init();
 
@@ -97,39 +120,38 @@ describe.only('MQTTClient', () => {
     let client;
 
     beforeEach(() => {
-      client = new MQTTClient();
+      client = new MQTTClient(mockAgentMessenger, mockServiceStateManager);
       client.init();
     });
 
     describe('onConnect', () => {
-      it('should successfully connect to the broker', () => {
-        client.onConnect();
+      it('should successfully connect to the broker', async () => {
+        await client.onConnect();
 
         expect(client.isConnected).toBeTruthy();
+
         expect(mockAgentMessenger.init).toHaveBeenCalled();
+        expect(mockServiceStateManager.signalReady).toHaveBeenCalled();
+      });
+
+      it('should not connect to the broker - already connected', async () => {
+        client.isConnected = true;
+
+        await client.onConnect();
+
+        expect(mockAgentMessenger.init).not.toHaveBeenCalled();
+        expect(mockServiceStateManager.signalReady).not.toHaveBeenCalled();
       });
     });
 
     describe('onClose', () => {
-      it('should successfully disconnect the client', () => {
-        client.onClose();
+      it('should successfully disconnect the client', async () => {
+        await client.onClose();
 
         expect(client.isConnected).toBeFalsy();
-      });
-    });
 
-    describe('onError', () => {
-      it('should exit the process when an error occurs - no error instance', () => {
-        client.onError();
-
-        expect(utils.killApplication).toHaveBeenCalled();
-      });
-
-      it('should exit the process when an error occurs - with error instance', () => {
-        client.onError(new Error('testError'));
-
-        expect(utils.killApplication).toHaveBeenCalled();
-        expect(mockLogger.error).toHaveBeenCalledTimes(3);
+        expect(mockAgentMessenger.finish).toHaveBeenCalled();
+        expect(mockServiceStateManager.signalNotReady).toHaveBeenCalled();
       });
     });
   });
@@ -139,11 +161,11 @@ describe.only('MQTTClient', () => {
     const topic = 'tenant:deviceid/config';
 
     beforeEach(() => {
-      client = new MQTTClient();
+      client = new MQTTClient(mockAgentMessenger, mockServiceStateManager);
       client.init();
     });
 
-    it('should successfully publish a message', () => {
+    it('should successfully publish a message', async () => {
       const attrs = { key: 'value' };
       const value = Buffer.from(
         JSON.stringify(
@@ -160,7 +182,7 @@ describe.only('MQTTClient', () => {
       );
       const data = { value };
 
-      client.onConnect();
+      await client.onConnect();
       client.publishMessage(data);
 
       expect(mockMqtt.publish).toHaveBeenCalledWith(
@@ -190,7 +212,7 @@ describe.only('MQTTClient', () => {
     describe('publish callback', () => {
       let publishCallback;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         const attrs = { key: 'value' };
         const value = Buffer.from(
           JSON.stringify(
@@ -207,7 +229,7 @@ describe.only('MQTTClient', () => {
         );
         const data = { value };
 
-        client.onConnect();
+        await client.onConnect();
         client.publishMessage(data);
 
         // eslint-disable-next-line prefer-destructuring
@@ -231,6 +253,19 @@ describe.only('MQTTClient', () => {
 
         expect(mockLogger.error).toHaveBeenCalledTimes(2);
       });
+    });
+  });
+
+  describe('shutdownHandler', () => {
+    it('should close the connection', () => {
+      const mqttClient = new MQTTClient(mockAgentMessenger, mockServiceStateManager);
+      mqttClient.init();
+
+      mockMqtt.end.mockResolvedValueOnce();
+
+      mqttClient.shutdownHandler();
+
+      expect(mockMqtt.end).toHaveBeenCalled();
     });
   });
 });
