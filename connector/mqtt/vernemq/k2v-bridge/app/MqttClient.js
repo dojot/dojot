@@ -36,8 +36,6 @@ class MQTTClient {
 
     this.serviceStateManager = serviceStateManager;
     this.stateService = 'mqtt';
-    this.serviceStateManager.registerService(this.stateService);
-    this.serviceStateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
 
     this.mqttClient = undefined;
     this.isConnected = false;

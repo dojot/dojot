@@ -27,13 +27,6 @@ class AgentMessenger {
 
     this.stateService = 'kafka';
     this.serviceStateManager = serviceStateManager;
-    this.serviceStateManager.registerService(this.stateService);
-    this.serviceStateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
-    this.serviceStateManager.addHealthChecker(
-      this.stateService,
-      this.healthChecker.bind(this),
-      this.config.healthcheck['kafka.interval.ms'],
-    );
 
     this.consumer = undefined;
     this.wasInitialized = false;

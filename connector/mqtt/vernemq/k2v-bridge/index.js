@@ -39,6 +39,17 @@ const serviceStateManager = new ServiceStateManager({
 const agentMessenger = new AgentMessenger(serviceStateManager);
 const mqttClient = new MQTTClient(agentMessenger, serviceStateManager);
 
+// Registering the services, shutdown handlers and health checkers
+serviceStateManager.registerService('kafka');
+serviceStateManager.registerService('mqtt');
+serviceStateManager.registerShutdownHandler(agentMessenger.shutdownHandler.bind(agentMessenger));
+serviceStateManager.registerShutdownHandler(mqttClient.shutdownHandler.bind(mqttClient));
+serviceStateManager.addHealthChecker(
+  'kafka',
+  agentMessenger.healthChecker.bind(agentMessenger),
+  config.healthcheck['kafka.interval.ms'],
+);
+
 try {
   mqttClient.init();
 } catch (error) {
