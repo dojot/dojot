@@ -246,9 +246,10 @@ class DojotConsumer {
    *  @throws If Cannot finish
    */
   async finish() {
-    this.logger.warn('Finishing Kafka...');
+    this.logger.warn('finish: Finishing Kafka...');
     try {
       await this.consumer.finish();
+      logger.warn('finish: Kafka Consumer finished!');
     } catch (e) {
       logger.error('finish:', e);
       throw new Error('Cannot finish');

@@ -58,7 +58,7 @@ class App {
 
       const boundQueryData = this
         .influxDB.getInfluxQueryInstance()
-        .queryData.bind(this.influxDB.getInfluxQueryInstance());
+        .queryDataByField.bind(this.influxDB.getInfluxQueryInstance());
 
       this.server.registerShutdown();
 

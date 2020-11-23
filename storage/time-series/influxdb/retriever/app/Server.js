@@ -51,7 +51,7 @@ class Server {
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('Stopping the server from accepting new connections...');
       await httpTerminator.terminate();
-      logger.debug('The server no longer accepts connections!');
+      logger.warn('The server no longer accepts connections!');
     });
   }
 }

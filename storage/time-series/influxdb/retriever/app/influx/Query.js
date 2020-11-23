@@ -54,7 +54,7 @@ class Query {
  * @returns {Promise.<{result: { timeIsoData(string): value (*) }, totalItems: number}| error>}
  *                            A promise that returns a result e a totalItems
  */
-  async queryData(org, measurement, field, filters = {}, page = {}, order = 'desc') {
+  async queryDataByField(org, measurement, field, filters = {}, page = {}, order = 'desc') {
     try {
       logger.debug('queryData:');
       logger.debug(`queryData: org=${org}`);

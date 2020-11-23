@@ -184,6 +184,7 @@ convention.
 | log.file | Enables logging on file (location: /var/log/influxdb-storer-logs-%DATE%.log) | false | boolean  | STORER_LOG_FILE
 | log.file.level  | Log level to log on files | debug | string  | STORER_LOG_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | STORER_LOG_VERBOSE
+| kafka.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *kafka* service in milliseconds.  | 60000 | integer  | STORER_KAFKA_HEATHCHECK_MS
 | subscribe.topics.suffix.device.data  | Suffix for the dojot topic that receives data from devices. | device-data | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_DEVICE_DATA
 | subscribe.topics.suffix.device.manager | Suffix for the dojot topic that sends data to devices and receives device lifecycle events. | dojot.device-manager.device | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_DEVICE_MANAGER
 | subscribe.topics.suffix.tenants  | Suffix for dojot topic that receives exclusion and tenant creation events. | dojot.tenancy | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_TENANTS

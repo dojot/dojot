@@ -7,7 +7,7 @@ const logger = new Logger('influxdb-storer:influxdb/WriterData');
  * This class handle with writer data in a specific bucket.
  * @class
  */
-class WriterData {
+class Writer {
   /**
    *
    * @param {String} url   Url to access influxdb
@@ -96,12 +96,12 @@ class WriterData {
    * writeSuccess does not currently appear to be called and there would be a cost
    * to parse the data that comes in rows. https://github.com/influxdata/influxdb-client-js/issues/279
    */
-  async writer(org, measurement, attrs, timestamp) {
+  async writerData(org, measurement, attrs, timestamp) {
     logger.debug(`writer: Pushing  data to ${org} org, ${measurement} measu and ${timestamp} timestamp and attrs`);
     if (typeof attrs === 'object') {
       try {
         const point = new Point(measurement);
-        point.timestamp(WriterData.parseDataToInfluxDB(timestamp));
+        point.timestamp(Writer.parseDataToInfluxDB(timestamp));
         Object.entries(attrs).forEach(([key, value]) => {
           logger.debug(`writer: setting key=${key}, value=${value}, type=${typeof value}`);
           if (typeof value === 'number') {
@@ -182,4 +182,4 @@ class WriterData {
   }
 }
 
-module.exports = WriterData;
+module.exports = Writer;
