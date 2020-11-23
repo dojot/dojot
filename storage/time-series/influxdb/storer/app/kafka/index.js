@@ -66,9 +66,6 @@ class Kafka {
       logger.debug('ShutdownHandler: Trying Unregister Callback for kafka consumer...');
       await boundKafkaUnregisterCallbacks();
       logger.warn('ShutdownHandler: Unregistered callback for kafka consumer.');
-    });
-
-    this.serviceState.registerShutdownHandler(async () => {
       logger.debug('ShutdownHandler: Trying finish kafka consumer...');
       await boundKafkaFinish();
       logger.warn('ShutdownHandler: Finished kafka consumer.');
