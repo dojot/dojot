@@ -60,10 +60,6 @@ describe('AgentMessenger', () => {
       expect(agentMessenger.serviceStateManager).toEqual(mockServiceStateManager);
       expect(agentMessenger.wasInitialized).toBeFalsy();
       expect(agentMessenger.stateService).toEqual('kafka');
-
-      expect(agentMessenger.serviceStateManager.registerService).toHaveBeenCalled();
-      expect(agentMessenger.serviceStateManager.registerShutdownHandler).toHaveBeenCalled();
-      expect(agentMessenger.serviceStateManager.addHealthChecker).toHaveBeenCalled();
     });
 
     it('should not create an Agent Messenger - no MQTTClient instance was passed', () => {

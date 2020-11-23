@@ -93,9 +93,6 @@ describe('MQTTClient', () => {
 
       expect(client.isConnected).toBeFalsy();
       expect(client.publishConfig).toBe(mockDefaultConfig.publish);
-
-      expect(mockServiceStateManager.registerService).toHaveBeenCalled();
-      expect(mockServiceStateManager.registerShutdownHandler).toHaveBeenCalled();
     });
 
     it('should not instantiate the class - obligatory parameters not passed', () => {
