@@ -246,13 +246,13 @@ class DojotConsumer {
    *  @throws If Cannot finish
    */
   async finish() {
-    this.logger.warn('finish: Finishing Kafka...');
+    logger.warn('finish: Finishing Kafka...');
     try {
       await this.consumer.finish();
+      this.consumer = null;
       logger.warn('finish: Kafka Consumer finished!');
     } catch (e) {
       logger.error('finish:', e);
-      throw new Error('Cannot finish');
     }
   }
 
@@ -284,7 +284,6 @@ class DojotConsumer {
       }
     } catch (e) {
       logger.error('unregisterCallbacks:', e);
-      throw new Error('Cannot unregister callback');
     }
   }
 }
