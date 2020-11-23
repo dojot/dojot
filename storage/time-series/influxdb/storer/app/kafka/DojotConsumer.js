@@ -64,7 +64,7 @@ class DojotConsumer {
         switch (type) {
           case 'CREATE':
             if (!tenant) {
-              logger.warn('registerCallbackForTenantEvents: CREATE missing tenant');
+              logger.warn('registerCallbackForTenantEvents: CREATE - missing tenant');
             } else {
               await handleTenantCreateEvent(tenant);
             }
@@ -72,7 +72,7 @@ class DojotConsumer {
           case 'DELETE':
             if (handleTenantDeleteEvent) {
               if (!tenant) {
-                logger.warn('registerCallbackForTenantEvents: CREATE missing tenant');
+                logger.warn('registerCallbackForTenantEvents: DELETE - missing tenant');
               } else {
                 await handleTenantDeleteEvent(tenant);
               }
@@ -111,7 +111,7 @@ class DojotConsumer {
     const callback = async (data) => {
       try {
         const { value: payload } = data;
-        logger.debug(`registerCallbacksForDeviceMgmtEvents: Receiving data ${payload.toString()}`);
+        logger.debug(`registerCallbacksForDeviceMgmtEvents: Receiving data - ${payload.toString()}`);
         const {
           event,
           meta: { service: tenant, timestamp },
@@ -129,9 +129,9 @@ class DojotConsumer {
             break;
           case 'remove':
             if (!deviceid) {
-              logger.warn('registerCallbacksForDeviceMgmtEvents: remove missing deviceid');
+              logger.warn('registerCallbacksForDeviceMgmtEvents: remove - missing deviceid');
             } else if (!tenant) {
-              logger.warn('registerCallbacksForDeviceMgmtEvents: remove missing tenant');
+              logger.warn('registerCallbacksForDeviceMgmtEvents: remove - missing tenant');
             } else if (handleDeviceRemoveEvent) {
               await handleDeviceRemoveEvent(tenant, deviceid);
             } else {
@@ -165,7 +165,7 @@ class DojotConsumer {
     const callback = async (data) => {
       try {
         const { value: payload } = data;
-        logger.debug(`registerCallbacksForDeviceDataEvents: Receiving data ${payload.toString()}`);
+        logger.debug(`registerCallbacksForDeviceDataEvents: Receiving data - ${payload.toString()}`);
         const {
           metadata:
           { deviceid, tenant, timestamp },
@@ -209,11 +209,11 @@ class DojotConsumer {
   static async handleData(deviceid, tenant, timestamp, attrs, handleData) {
     const attrsCopy = { ...attrs };
     if (!deviceid) {
-      logger.warn('registerCallbacksForDeviceMgmtEvents: configure missing deviceid');
+      logger.warn('registerCallbacksForDeviceMgmtEvents: configure - missing deviceid');
     } else if (!tenant) {
-      logger.warn('registerCallbacksForDeviceMgmtEvents: configure missing tenant');
+      logger.warn('registerCallbacksForDeviceMgmtEvents: configure - missing tenant');
     } else if (!attrs) {
-      logger.warn('registerCallbacksForDeviceMgmtEvents: configure missing attrs');
+      logger.warn('registerCallbacksForDeviceMgmtEvents: configure - missing attrs');
     } else if (DojotConsumer.checkIfShouldPersist(attrsCopy)) {
       delete attrsCopy.shouldPersist;
       await handleData(tenant, deviceid, timestamp, attrsCopy);

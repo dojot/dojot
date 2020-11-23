@@ -16,7 +16,7 @@ const logger = new Logger('influxdb-retriever:influx/QueryData');
  * This class handle with query data in a specific bucket.
  * @class
  */
-class Query {
+class DataQuery {
   /**
    *
    * @param {String} url   Url to access influxdb
@@ -54,7 +54,7 @@ class Query {
  * @returns {Promise.<{result: { timeIsoData(string): value (*) }, totalItems: number}| error>}
  *                            A promise that returns a result e a totalItems
  */
-  async queryDataByField(org, measurement, field, filters = {}, page = {}, order = 'desc') {
+  async queryByField(org, measurement, field, filters = {}, page = {}, order = 'desc') {
     try {
       logger.debug('queryData:');
       logger.debug(`queryData: org=${org}`);
@@ -121,4 +121,4 @@ class Query {
   }
 }
 
-module.exports = Query;
+module.exports = DataQuery;

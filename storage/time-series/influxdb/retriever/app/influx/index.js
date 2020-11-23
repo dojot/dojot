@@ -3,7 +3,7 @@ const {
   Logger,
 } = require('@dojot/microservice-sdk');
 const InfluxState = require('./State');
-const InfluxQuery = require('./Query');
+const InfluxDataQuery = require('./DataQuery');
 
 const logger = new Logger('influxdb-retriever:Influx');
 
@@ -20,7 +20,7 @@ class InfluxDB {
    *                                    providing health check and shutdown utilities.
    */
   constructor(serviceState) {
-    this.influxQuery = new InfluxQuery(
+    this.influxDataQuery = new InfluxDataQuery(
       configInflux.url,
       configInflux['default.token'],
       configInflux['default.bucket'],
@@ -36,8 +36,8 @@ class InfluxDB {
    *  Returns a Query instance
    * @returns {Query}
    */
-  getInfluxQueryInstance() {
-    return this.influxQuery;
+  getInfluxDataQueryInstance() {
+    return this.influxDataQuery;
   }
 
   /**

@@ -5,7 +5,7 @@ const {
 const camelCase = require('lodash.camelcase');
 const flatten = require('flat');
 const InfluxState = require('./State');
-const InfluxWriter = require('./Writer');
+const InfluxDataWriter = require('./DataWriter');
 const InfluxOrgs = require('./Organizations');
 const InfluxMeasurement = require('./Measurements');
 
@@ -38,7 +38,7 @@ class InfluxDB {
       configInflux['default.bucket'],
       configInflux['retention.hrs'],
     );
-    this.influxWriter = new InfluxWriter(
+    this.influxDataWriter = new InfluxDataWriter(
       configInflux.url,
       configInflux['default.token'],
       configInflux['default.bucket'],
@@ -68,8 +68,8 @@ class InfluxDB {
  *  Returns a Writer instance
  * @returns {Writer}
  */
-  getInfluxWriterInstance() {
-    return this.influxWriter;
+  getInfluxDataWriterInstance() {
+    return this.influxDataWriter;
   }
 
   /**
@@ -113,8 +113,8 @@ class InfluxDB {
    *  Register a shutdown to the http server
    */
   async registerShutdown() {
-    const boundInfluxWriterCloseAll = this.influxWriter
-      .closeAll.bind(this.influxWriter);
+    const boundInfluxWriterCloseAll = this.influxDataWriter
+      .closeAll.bind(this.influxDataWriter);
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('ShutdownHandler: Trying close all writer...');
       await boundInfluxWriterCloseAll();

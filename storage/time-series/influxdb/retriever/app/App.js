@@ -57,8 +57,8 @@ class App {
       this.influxDB.createInfluxHealthChecker();
 
       const boundQueryData = this
-        .influxDB.getInfluxQueryInstance()
-        .queryDataByField.bind(this.influxDB.getInfluxQueryInstance());
+        .influxDB.getInfluxDataQueryInstance()
+        .queryByField.bind(this.influxDB.getInfluxDataQueryInstance());
 
       this.server.registerShutdown();
 

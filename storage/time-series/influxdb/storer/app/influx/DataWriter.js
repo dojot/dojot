@@ -6,8 +6,8 @@ const logger = new Logger('influxdb-storer:influxdb/WriterData');
 /**
  * This class handle with writer data in a specific bucket.
  * @class
- */
-class Writer {
+ */ 
+class DataWriter {
   /**
    *
    * @param {String} url   Url to access influxdb
@@ -54,7 +54,7 @@ class Writer {
    *
    * @throws If Cannot get Writer for a org
    */
-  getWriter(org) {
+  getWriteAPI(org) {
     logger.debug(`getWriter:  Getting witter for ${org} org..`);
     try {
       if (!this.writers.has(org)) {
@@ -96,12 +96,12 @@ class Writer {
    * writeSuccess does not currently appear to be called and there would be a cost
    * to parse the data that comes in rows. https://github.com/influxdata/influxdb-client-js/issues/279
    */
-  async writerData(org, measurement, attrs, timestamp) {
+  async write(org, measurement, attrs, timestamp) {
     logger.debug(`writer: Pushing  data to ${org} org, ${measurement} measu and ${timestamp} timestamp and attrs`);
     if (typeof attrs === 'object') {
       try {
         const point = new Point(measurement);
-        point.timestamp(Writer.parseDataToInfluxDB(timestamp));
+        point.timestamp(DataWriter.parseDataToInfluxDB(timestamp));
         Object.entries(attrs).forEach(([key, value]) => {
           logger.debug(`writer: setting key=${key}, value=${value}, type=${typeof value}`);
           if (typeof value === 'number') {
@@ -113,7 +113,7 @@ class Writer {
           }
         });
         logger.debug(`writer: The point will be write is ${point.toString()} in ${org} org`);
-        this.getWriter(org).writePoint(point);
+        this.getWriteAPI(org).writePoint(point);
       } catch (e) {
         logger.error('writer:', e);
         throw new Error('Cannot write data');
@@ -170,8 +170,8 @@ class Writer {
   async closeOne(org) {
     try {
       if (this.writers.has(org)) {
-        this.writers.delete(org);
         await this.writers.get(org).close();
+        this.writers.delete(org);
         logger.warn(`closeOne: The ${org} orgs was closed`);
       } else {
         logger.warn(`closeOne: The ${org} orgs doest exist to Write yet`);
@@ -182,4 +182,4 @@ class Writer {
   }
 }
 
-module.exports = Writer;
+module.exports = DataWriter;

@@ -37,8 +37,7 @@
     "@influxdata/influxdb-client": "^1.8.0",
     "@influxdata/influxdb-client-apis": "^1.8.0",
     "flat": "^5.0.2",
-    "lodash.camelcase": "^4.3.0",
-    "moment": "^2.29.1"
+    "lodash.camelcase": "^4.3.0"
   },
   "jest": {
     "verbose": true,
@@ -73,6 +72,7 @@
     "eslint": "^7.13.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-security": "^1.4.0",
     "jest": "^26.4.2",
     "nodemon": "^2.0.4"
   }

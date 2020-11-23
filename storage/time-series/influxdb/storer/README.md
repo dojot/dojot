@@ -182,7 +182,7 @@ convention.
 | delete.tenant.data.enable | Deleted all data related to a tenant (organization) if it was deleted.  | true | boolean  | STORER_DELETE_TENANT_DATA_ENABLE
 | log.console.level | Console logger level | info | info, debug, error, warn | STORER_LOG_CONSOLE_LEVEL
 | log.file | Enables logging on file (location: /var/log/influxdb-storer-logs-%DATE%.log) | false | boolean  | STORER_LOG_FILE
-| log.file.level  | Log level to log on files | debug | string  | STORER_LOG_LEVEL
+| log.file.level  | Log level to log on files | debug | string  | STORER_LOG_FILE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | STORER_LOG_VERBOSE
 | kafka.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *kafka* service in milliseconds.  | 60000 | integer  | STORER_KAFKA_HEATHCHECK_MS
 | subscribe.topics.suffix.device.data  | Suffix for the dojot topic that receives data from devices. | device-data | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_DEVICE_DATA

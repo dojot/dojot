@@ -4,7 +4,13 @@
         "es6": true,
         "node": true
     },
-    "extends": "airbnb-base",
+    "plugins": [
+        "security"
+    ],
+    "extends": [
+        "airbnb-base",
+        "plugin:security/recommended"
+    ],
     "rules": {
         /* the rule import/no-unresolved is needed to avoid problems with the codefactor */
         "import/no-unresolved": "off",

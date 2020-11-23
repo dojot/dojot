@@ -77,8 +77,8 @@ class App {
   initCallbacksDevicesCreateAndDelData() {
     // create callback to handle receive data
     const boundInfluxWriter = this.influxDB
-      .getInfluxWriterInstance().writerData.bind(this.influxDB
-        .getInfluxWriterInstance());
+      .getInfluxDataWriterInstance().write.bind(this.influxDB
+        .getInfluxDataWriterInstance());
 
     const callbackWriteData = async (tenant, deviceid, timestamp, attrs) => {
       logger.debug('callbackWriteData: init');
@@ -151,7 +151,7 @@ class App {
 
     // create callback to handle tenant delete
     const boundWriterCloseOrg = this.influxDB
-      .getInfluxWriterInstance().closeOne.bind(this.influxDB.getInfluxWriterInstance());
+      .getInfluxDataWriterInstance().closeOne.bind(this.influxDB.getInfluxDataWriterInstance());
     const boundDeleteOrgWithBucket = this.influxDB.getInfluxOrgInstance()
       .deleteOrg.bind(this.influxDB.getInfluxOrgInstance());
     const callbackDeleteTenant = async (tenant) => {
