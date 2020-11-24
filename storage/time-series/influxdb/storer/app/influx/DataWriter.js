@@ -6,7 +6,7 @@ const logger = new Logger('influxdb-storer:influxdb/WriterData');
 /**
  * This class handle with writer data in a specific bucket.
  * @class
- */ 
+ */
 class DataWriter {
   /**
    *
