@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-regexp */
+/* eslint-disable security-node/non-literal-reg-expr */
 const {
   ConfigManager,
   Kafka: { Consumer },
@@ -54,6 +56,7 @@ class DojotConsumer {
   registerCallbackForTenantEvents(handleTenantCreateEvent, handleTenantDeleteEvent = null) {
     const topicSuffix = config.subscribe['topics.suffix.tenants'];
     logger.debug(`registerCallbackForTenantEvents: Register Callbacks for topics with suffix ${topicSuffix}`);
+    // TODO: better understand why this regex is unsafe and change it
     const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
     const callback = async (data) => {
       try {
@@ -106,6 +109,7 @@ class DojotConsumer {
   ) {
     const topicSuffix = config.subscribe['topics.suffix.device.manager'];
     logger.debug(`registerCallbacksForDeviceMgmtEvents: Register Callback for topics with suffix ${topicSuffix}`);
+    // TODO: better understand why this regex is unsafe and change it
     const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
 
     const callback = async (data) => {
@@ -160,6 +164,7 @@ class DojotConsumer {
   registerCallbacksForDeviceDataEvents(handleDeviceData) {
     const topicSuffix = config.subscribe['topics.suffix.device.data'];
     logger.debug(`registerCallbacksForDeviceDataEvents: Register Callback for topic with suffix ${topicSuffix}`);
+    // TODO: better understand why this regex is unsafe and change it
     const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
 
     const callback = async (data) => {

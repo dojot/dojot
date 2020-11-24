@@ -14,13 +14,13 @@ const configServerCamelCase = ConfigManager
 */
 class Server {
   /**
-   * @param {@dojot/microservice-sdk.ServiceStateManager} serviceState Manages the services' states,
-   *                                    providing health check and shutdown utilities.
+ * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
+ *          with register service 'server'} serviceState
+ *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
     this.server = ServerFactory({ config: configServerCamelCase, logger });
     this.serviceState = serviceState;
-    this.serviceState.registerService('server');
   }
 
   /**

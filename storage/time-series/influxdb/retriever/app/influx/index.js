@@ -16,8 +16,9 @@ class InfluxDB {
   /**
    * @constructor
    *
-   * @param {@dojot/microservice-sdk.ServiceStateManager} serviceState Manages the services' states,
-   *                                    providing health check and shutdown utilities.
+ * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
+ *          with register service 'influxdb'} serviceState
+ *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
     this.influxDataQuery = new InfluxDataQuery(
@@ -29,7 +30,6 @@ class InfluxDB {
       configInflux.url,
     );
     this.serviceState = serviceState;
-    this.serviceState.registerService('influxdb');
   }
 
   /**
@@ -52,11 +52,8 @@ class InfluxDB {
    * Create a 'healthCheck' for influxDB
    */
   createInfluxHealthChecker() {
-    const boundIsHealthInflux = this.influxState
-      .isHealth.bind(this.influxState);
-
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
-      const isHealth = await boundIsHealthInflux();
+      const isHealth = await this.influxState.isHealth();
       if (isHealth) {
         logger.debug('influxdbHealthChecker: Server is healthy');
         signalReady();

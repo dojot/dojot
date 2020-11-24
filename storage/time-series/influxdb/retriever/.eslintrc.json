@@ -5,11 +5,13 @@
         "node": true
     },
     "plugins": [
-        "security"
+        "security",
+        "security-node"
     ],
     "extends": [
         "airbnb-base",
-        "plugin:security/recommended"
+        "plugin:security/recommended",
+        "plugin:security-node/recommended"
     ],
     "rules": {
         /* the rule import/no-unresolved is needed to avoid problems with the codefactor */

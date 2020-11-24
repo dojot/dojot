@@ -22,12 +22,12 @@ const configInfluxWriteOptionsCamelCase = transformObjectKeys(configInfluxWriteO
  */
 class InfluxDB {
   /**
-     * @constructor
-     *
-     * @param {@dojot/microservice-sdk
-     *                  .ServiceStateManager} serviceState Manages the services' states,
-     *                                    providing health check and shutdown utilities.
-     */
+ * @constructor
+ *
+ * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
+ *          with register service 'influxdb'} serviceState
+ *          Manages the services' states, providing health check and shutdown utilities.
+*/
   constructor(serviceState) {
     this.influxOrgs = new InfluxOrgs(
       configInflux.url,
@@ -53,7 +53,6 @@ class InfluxDB {
       configInflux.url,
     );
     this.serviceState = serviceState;
-    this.serviceState.registerService('influxdb');
   }
 
   /**
@@ -89,14 +88,11 @@ class InfluxDB {
   }
 
   /**
-     * Create a 'healthCheck' for influxDB
-     */
+   * Create a 'healthCheck' for influxDB
+   */
   createHealthChecker() {
-    const boundIsHealthInflux = this.influxState
-      .isHealth.bind(this.influxState);
-
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
-      const isHealth = await boundIsHealthInflux();
+      const isHealth = await this.influxState.isHealth();
       if (isHealth) {
         logger.debug('influxdbHealthChecker: Server is healthy');
         signalReady();
@@ -113,11 +109,9 @@ class InfluxDB {
    *  Register a shutdown to the http server
    */
   async registerShutdown() {
-    const boundInfluxWriterCloseAll = this.influxDataWriter
-      .closeAll.bind(this.influxDataWriter);
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('ShutdownHandler: Trying close all writer...');
-      await boundInfluxWriterCloseAll();
+      await this.influxDataWriter.closeAll();
       logger.warn('ShutdownHandler: Closed all writer.');
     });
   }

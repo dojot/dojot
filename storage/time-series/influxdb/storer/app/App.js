@@ -16,6 +16,8 @@ const {
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
 });
+serviceState.registerService('influxdb');
+serviceState.registerService('kafka');
 
 const logger = new Logger('influxdb-storer:App');
 

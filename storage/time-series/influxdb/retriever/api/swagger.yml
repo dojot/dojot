@@ -2,7 +2,7 @@
   info:
     description: "Dojot device attribute data recovery service"
     version: 0.0.1 #TODO: Change version based in github tag
-    title: "InfluxDB-Retriver:  Dojot Time Series Service"
+    title: "InfluxDB-Retriever:  Dojot Time Series Service"
   tags:
     - name: devices
       description: Device data
@@ -76,7 +76,7 @@
       dateFrom:
         name: dateFrom
         in: query
-        description: Start time of a time-based query results
+        description: Start time of a time-based query results. Default is 1970-01-01T00:00:00.000Z.
         required: false
         examples:
           init:
@@ -91,7 +91,7 @@
       dateTo:
         name: dateTo
         in: query
-        description: End time of a time-based query results
+        description: End time of a time-based query results. Default is current date.
         required: false
         examples:
           future:
@@ -184,7 +184,7 @@
                       number:
                         default: 1
                       url:
-                        default: /api/v1/devices...
+                        default: /tss/v1/devices...
               next:
                 description: It can happen that the next is filled even when there is no data for a next page to avoid unnecessary counts. But don't worry, as the next one will be accessible and with next null.
                 anyOf:
@@ -195,7 +195,7 @@
                         number:
                           default: 2
                         url:
-                          default: /api/v1/devices...
+                          default: /tss/v1/devices...
                   - $ref: '#/components/schemas/pagination'
           data:
             type: array

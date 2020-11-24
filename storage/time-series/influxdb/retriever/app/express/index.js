@@ -33,8 +33,9 @@ const { express: configExpress, paginate: configPaginate } = ConfigManager.getCo
  * @param {((req: any, res: any, next: any) => any)[]} routes[].handlers.middleware
  *                                                      Function to handle the verb http
  *
- * @param {@dojot/microservice-sdk.ServiceStateManager} serviceState Manages the services' states,
- *                                    providing health check and shutdown utilities.
+ *
+ * @param {an instance of @dojot/microservice-sdk.ServiceStateManager} serviceState
+ *          Manages the services' states, providing health check and shutdown utilities.
  *
  * @param {string}openApiPath FilePath to OpenApi
  *

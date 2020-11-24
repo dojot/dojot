@@ -12,6 +12,8 @@ const { lightship: configLightship } = getConfig('RETRIEVER');
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
 });
+serviceState.registerService('server');
+serviceState.registerService('influxdb');
 
 const logger = new Logger('influxdb-retriever:App');
 

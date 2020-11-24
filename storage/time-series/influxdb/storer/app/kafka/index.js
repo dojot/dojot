@@ -14,15 +14,15 @@ class Kafka {
   /**
    * @constructor
    *
-   * @param {@dojot/microservice-sdk
-   *                  .ServiceStateManager} serviceState Manages the services' states,
-   *                                    providing health check and shutdown utilities.
+ * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
+ *          with register service 'kafka'} serviceState
+ *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
     this.kafkaConsumer = new KafkaConsumer();
     this.serviceState = serviceState;
-    this.serviceState.registerService('kafka');
   }
+
 
   /**
    *  Returns a KafkaConsume instance
@@ -36,10 +36,10 @@ class Kafka {
  * Create a 'healthCheck'
  */
   createHealthChecker() {
-    const boundIsConnectedKafka = this.kafkaConsumer
-      .isConnected.bind(this.kafkaConsumer);
+    // const boundIsConnectedKafka = this.kafkaConsumer
+    //   .isConnected.bind(this.kafkaConsumer);
     const kafkaHealthChecker = async (signalReady, signalNotReady) => {
-      const isConnected = await boundIsConnectedKafka();
+      const isConnected = await this.kafkaConsumer.isConnected();
       if (isConnected) {
         logger.debug('kafkaHealthChecker: Server is healthy');
         signalReady();
@@ -56,18 +56,12 @@ class Kafka {
    *  Register a shutdown
    */
   async registerShutdown() {
-    const boundKafkaUnregisterCallbacks = this.kafkaConsumer
-      .unregisterCallbacks.bind(this.kafkaConsumer);
-
-    const boundKafkaFinish = this.kafkaConsumer
-      .finish.bind(this.kafkaConsumer);
-
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('ShutdownHandler: Trying Unregister Callback for kafka consumer...');
-      await boundKafkaUnregisterCallbacks();
+      this.kafkaConsumer.unregisterCallbacks();
       logger.warn('ShutdownHandler: Unregistered callback for kafka consumer.');
       logger.debug('ShutdownHandler: Trying finish kafka consumer...');
-      await boundKafkaFinish();
+      await this.kafkaConsumer.finish();
       logger.warn('ShutdownHandler: Finished kafka consumer.');
     });
   }
