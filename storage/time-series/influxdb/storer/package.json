@@ -31,6 +31,14 @@
     "!test/unit/coverage/"
   ],
   "author": "@mprevide",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "homepage": "https://github.com/dojot",
   "dependencies": {
     "@dojot/microservice-sdk": "0.1.8",
     "@google-cloud/precise-date": "^2.0.3",

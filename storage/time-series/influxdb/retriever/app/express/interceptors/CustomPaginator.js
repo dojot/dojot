@@ -30,15 +30,8 @@ module.exports = ({ defaultLimit, maxLimit }) => ({
     logger.debug(`CustomPaginator2: req.params=${util.inspect(req.params)}`);
     logger.debug(`CustomPaginator2: req.query=${util.inspect(req.query)}`);
 
-    // disable limit=0 to get infinite (all) result
+    // disable limit=0 to avoid getting infinite (all) results
     if (req.query.limit < 1) req.query.limit = defaultLimit;
-
-    // if there is no add dateTo to
-    // the pagination makes sense even
-    // if new values are to be inserted
-    if (!req.query.dateTo) {
-      req.query.dateTo = new Date().toISOString();
-    }
 
     /**
        * Create the object to be returned along with the data when a

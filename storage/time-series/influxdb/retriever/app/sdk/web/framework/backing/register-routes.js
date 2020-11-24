@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 const express = require('express');
 
 const allowedRoutingMethods = (method) => [
@@ -196,7 +197,6 @@ const registerRoutes = (routesToBeRegistered, framework, logger) => {
     }
   });
 
-  console.log('mountingMap', mountingMap);
   mountingMap.forEach((mountRouter, mountPoint) => {
     framework.use(mountPoint, mountRouter);
   });

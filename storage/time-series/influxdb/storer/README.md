@@ -130,7 +130,7 @@ In this topic the idea is to explain what this service does with each message it
   - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**).
   - `DELETE`: This message will trigger the deletion of an existing *Organization* (**tenant**).
 
-- `*.device-data`: This message will trigger a data insertion. It `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* with their respective values.
+- `*.device-data`: This message will trigger a data insertion. It `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values.
 
 - `*.dojot.device-manager.device`
   - `configure`: The same behavior as  `*.device-data`.
@@ -152,7 +152,7 @@ The services dependencies are listed in the next topics.
 ### Others Services
 
 - Kafka (tested using Kafka version 2.12)
-- InfluxDB (tested using InfluxDB version 2.0.0-rc)
+- InfluxDB (tested using InfluxDB version 2.0.2)
 
 ## Running the service
 
@@ -255,7 +255,10 @@ values.
 | Key | Default Value | Valid Values | Environment variable
 | --- | ------------- | ------------ | --------------------
 | lightship.detect.kubernetes | false | boolean | STORER_LIGHTSHIP_DETECT_KUBERNETES
-
+| lightship.graceful.shutdown.timeout | 60000 | number | STORER_LIGHTSHIP_GRACEFUL_SHUTDOWN_TIMEOUT
+| lightship.port | 9000 | number | STORER_LIGHTSHIP_PORT
+| lightship.shutdown.delay | 5000 | number | STORER_SHUTDOWN_DELAY
+| lightship.shutdown.handler.timeout | 5000 | number | STORER_SHUTDOWN_HANDLER_TIMEOUT
 ### How to run
 
 Beforehand, you need an already running dojot instance in your machine. Check out the

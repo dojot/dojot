@@ -46,10 +46,8 @@ class State {
   async isReady() {
     try {
       const result = await this.readyAPI.getReady();
-      // ATTENTION:  It's expected a JavaScript object, but is returned a serialized object see https://github.com/influxdata/influxdb-client-js/issues/277
-      const resultObj = JSON.parse(result);
-      logger.debug(`isReady: ${resultObj.status === 'ready' ? 'OK' : 'NOT OK'}`, resultObj);
-      return resultObj.status === 'ready';
+      logger.debug(`isReady: ${result.status === 'ready' ? 'OK' : 'NOT OK'}`, result);
+      return result.status === 'ready';
     } catch (e) {
       logger.error('isReady:', e);
       return false;

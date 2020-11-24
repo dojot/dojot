@@ -2,8 +2,8 @@
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const swaggerUi = require('swagger-ui-express');
-
-const YAML = require('yamljs');
+const yaml = require('js-yaml');
+const fs = require('fs');
 const ExpressFactory = require('../sdk/web/framework/express-factory');
 
 const logger = new Logger('influxdb-retriever:express');
@@ -39,15 +39,27 @@ const { express: configExpress, paginate: configPaginate } = ConfigManager.getCo
  *
  * @param {string}openApiPath FilePath to OpenApi
  *
+ * @throws  Some error when try load open api in yaml
+ *
  * @returns {express}
  */
-module.exports = (routes, serviceState, openApiPath) => (
-  ExpressFactory({
+module.exports = (routes, serviceState, openApiPath) => {
+  let openApiJson = null;
+  try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    openApiJson = yaml.safeLoad(fs.readFileSync(openApiPath, 'utf8'));
+    logger.debug(`OpenApi Json load: ${JSON.stringify(openApiJson)}`);
+  } catch (e) {
+    logger.error('Some error when try load open api in yaml', e);
+    throw e;
+  }
+
+  return ExpressFactory({
     interceptors: [
       {
         name: 'swagger-ui',
         path: '/tss/v1/api-docs',
-        middleware: [...swaggerUi.serve, swaggerUi.setup(YAML.load(openApiPath))],
+        middleware: [...swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
       dojotTenantJwtParseInterceptor(),
       paginateInterceptor({
@@ -72,5 +84,5 @@ module.exports = (routes, serviceState, openApiPath) => (
     config: {
       trustproxy: configExpress.trustproxy,
     },
-  })
-);
+  });
+};

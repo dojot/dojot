@@ -14,7 +14,7 @@ function createInterceptor(stateManager, logger, path = '/') {
     path,
     name: 'beacon-interceptor',
     middleware: (req, res, next) => {
-      if (stateManager.lightship.isServerShuttingDown()) {
+      if (stateManager.isServerShuttingDown()) {
         const msg = 'Detected that the service is shutting down; '
         + 'No requests will be accepted by this instance anymore';
         logger.error(msg);

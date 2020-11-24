@@ -85,7 +85,7 @@ services:
     #command: ["npm", "run", "dev"]
 
   influxdb:
-    image: quay.io/influxdb/influxdb:2.0.0-rc
+    image: quay.io/influxdb/influxdb:v2.0.2
     command: influxd --log-level=debug --reporting-disabled
     restart: always
     volumes:

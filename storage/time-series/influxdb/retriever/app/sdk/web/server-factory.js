@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 const http = require('http');
 const https = require('https');
 const fs = require('fs');

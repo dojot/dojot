@@ -21,7 +21,7 @@ The **InfluxDB Retriever** is responsible for retrieving data from device data t
 
 ## Overview
 
-The **InfluxDB Retriever** service is used when it is necessary to obtain device data time series. Through its REST interface it is possible to apply time period filters, use pagination and use ordination. The link to the api documentations of the available endpoints:
+The **InfluxDB Retriever** service is used when it is necessary to obtain device data time series. Through its REST interface it is possible to apply time period filters, use pagination and use ordination. The link to the API documentation for the available endpoints:
 
 - [Latest retriever API documentation](https://dojot.github.io/dojot/storage/time-series/influxdb/retriever/doc.html)
 - [Development retriever API documentation](https://dojot.github.io/dojot/storage/time-series/influxdb/retriever/doc.html?version=development)
@@ -41,7 +41,7 @@ The mapping between the elements of influxdb and dojot devices are:
 - *Organization*: It will be the **tenant**
 - *Measurement*: It will be the **deviceId**
 - *Bucket* : By default it is called *devices*, but this value can be changed in Storer.
-- *Fields*:  Each `key` from `attrs` will be a *field* with their respective values.
+- *Fields*:  Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values.
 
 ## Dependencies
 
@@ -56,7 +56,7 @@ none
 
 ### Others Services
 
-- InfluxDB (tested using InfluxDB version 2.0.0-rc)
+- InfluxDB (tested using InfluxDB version 2.0.2)
 
 ## Running the service
 
@@ -84,7 +84,7 @@ convention.
 | --- | ------- | ------------- | ------------ | --------------------
 | log.console.level | Console logger level | info | info, debug, error, warn | RETRIEVER_LOG_CONSOLE_LEVEL
 | log.file | Enables logging on file (location: /var/log/influxdb-retriever-logs-%DATE%.log) | false | boolean  | RETRIEVER_LOG_FILE
-| log.file.level  | Log level to log on files | debug | string  | RETRIEVER_LOG_LEVEL
+| log.file.level  | Log level to log on files | debug | string  | RETRIEVER_LOG_FILE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | RETRIEVER_LOG_VERBOSE
 | express.trustproxy | Enables reverse proxy support  | true | boolean | RETRIEVER_EXPRESS_TRUSTPROXY
 | paginate.default.max.limit |  Sets maximum and default the item numbers on each page  | 256 | integer | RETRIEVER_PAGINATE_DEFAULT_MAX_LIMIT
@@ -119,6 +119,10 @@ values.
 | Key | Default Value | Valid Values | Environment variable
 | --- | ------------- | ------------ | --------------------
 | lightship.detect.kubernetes | false | boolean | RETRIEVER_LIGHTSHIP_DETECT_KUBERNETES
+| lightship.graceful.shutdown.timeout | 60000 | number | RETRIEVER_LIGHTSHIP_GRACEFUL_SHUTDOWN_TIMEOUT
+| lightship.port | 9000 | number | RETRIEVER_LIGHTSHIP_PORT
+| lightship.shutdown.delay | 5000 | number | RETRIEVER_SHUTDOWN_DELAY
+| lightship.shutdown.handler.timeout | 5000 | number | RETRIEVER_SHUTDOWN_HANDLER_TIMEOUT
 
 ### How to run
 

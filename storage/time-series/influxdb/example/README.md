@@ -11,7 +11,7 @@ To run this example, type:
 docker-compose up
 ```
 
-Then, you can access [http://localhost:3000/tss/v1/api-docs/](http://localhost:3000/tss/v1/api-docs/) in your browser and use the iterative api documentation to use the REST API provided by InfluxDB-Retriever.
+Then, you can access [http://localhost:3000/tss/v1/api-docs/](http://localhost:3000/tss/v1/api-docs/) in your browser and use the iterative API documentation to use the REST API provided by InfluxDB-Retriever.
 
 To obtain the data entered by kafka you can use these values:
 

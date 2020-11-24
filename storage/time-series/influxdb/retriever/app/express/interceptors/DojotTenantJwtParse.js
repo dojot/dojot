@@ -13,13 +13,18 @@ const jwtDecode = require('jwt-decode');
 module.exports = () => ({
   name: 'dojot-tenant-jwt-parse-interceptor',
   middleware: (req, res, next) => {
-    // TODO: ignore api-docs
     const err = new createError.Unauthorized();
     if (req.headers.authorization) {
       const authHeader = req.headers.authorization.split(' ');
       if (authHeader.length === 2 && authHeader[0] === 'Bearer') {
         const token = authHeader[1];
-        const payload = jwtDecode(token);
+        let payload = {};
+        try {
+          payload = jwtDecode(token);
+        } catch (e) {
+          err.message = e.message;
+          return next(err);
+        }
         if (payload.service) {
           req.tenant = payload.service;
           return next();

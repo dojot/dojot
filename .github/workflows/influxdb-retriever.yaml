@@ -31,8 +31,8 @@ jobs:
         cd storage/time-series/influxdb/retriever/
         npm ci
         npm run build --if-present
-        #npm run lint
-        #npm run test
+        npm run lint
+        npm run test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
@@ -67,7 +67,7 @@ jobs:
         tag_names: true # tag will be based in branch name or tag name
 
   gh-pages:
-    needs: docker-hub
+    needs: unit-tests
     name: (storage/time-series/influxdb/retriever) Generate documentation and Publish in gh-pages
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
@@ -88,7 +88,7 @@ jobs:
       - name: Generate docs
         env:
           FOLDER_TO_GH_PAGES: storage/time-series/influxdb/retriever
-          PATH_SWAGGER_YML: ./storage/time-series/influxdb/retriever/api/swagger.yml
+          PATH_SWAGGER_YML: ./storage/time-series/influxdb/retriever/api/v1.yml
           VERSION_NAME: ${{ steps.version_doc.outputs.version }}
         run: |
           sh .github/workflows/scripts/swagger.sh

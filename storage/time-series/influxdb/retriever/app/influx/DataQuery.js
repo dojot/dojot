@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const createError = require('http-errors');
 const {
   InfluxDB,
@@ -10,7 +11,7 @@ const {
 const util = require('util');
 const { Logger } = require('@dojot/microservice-sdk');
 
-const logger = new Logger('influxdb-retriever:influx/QueryData');
+const logger = new Logger('influxdb-retriever:influx/DataQuery');
 
 /**
  * This class handle with query data in a specific bucket.
@@ -32,6 +33,95 @@ class DataQuery {
 
     this.influxDB = new InfluxDB({ url, token });
     this.defaultBucket = defaultBucket;
+    // prefix adds to all fields to be written
+    this.prefixFields = 'dojot.';
+    this.prefixFieldsSize = (this.prefixFields).length;
+  }
+
+  /**
+ * Fetch data for a given field considering the time
+ * slot and paging filter for a default bucket and an given org.
+ *
+ * @param {String} org Organization Name
+ * @param {String} measurement Measurement Name
+ * @param {object} filters Filters for query
+ * @param {string} filters.dateFrom=1970-01-01T00:00:00.000Z
+ * @param {string} filter.dateTo=(current time)
+ * @param {object} page Paginate information for query
+ * @param {number} page.limit=256
+ * @param {number} page.page=1
+ * @param {{String='desc','asc'}} order=desc Defines whether the order by **time** should be
+ *                                            ascending (asc) or descending (desc)
+ *
+ * @returns {Promise.<{result: [{ ts: timeIsoData, attrs: [label:string, value:any }],
+ *                            totalItems: number}| error>}
+ *                            A promise that returns a result e a totalItems
+ */
+  async queryByMeasurement(org, measurement, filters = {}, page = {}, order = 'desc') {
+    try {
+      logger.debug('queryByMeasurement:');
+      logger.debug(`queryByMeasurement: org=${org}`);
+      logger.debug(`queryByMeasurement: measurement=${measurement}`);
+      logger.debug(`queryByMeasurement: filters=${util.inspect(filters)}`);
+      logger.debug(`queryByMeasurement: page=${util.inspect(page)}`);
+
+      const {
+        start, stop, limit, offset,
+      } = DataQuery.commonQueryParams(page, filters);
+
+      const orderExp = DataQuery.commonQueryOrderExpression(order);
+
+      const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
+      |> range(start: ${start} , stop: ${stop})
+      |> filter(fn: (r) => r._measurement == ${fluxString(measurement)})
+      |> drop(columns: ["_start", "_stop", "_measurement"])
+      |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+      ${fluxExpression(orderExp)}
+      |> limit(n: ${limit} , offset: ${offset})`;
+
+      logger.debug(`queryByMeasurement: fluxQuery=${fluxQuery}`);
+
+      const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
+      const prefix = this.prefixFields;
+      const prefixSize = this.prefixFieldsSize;
+
+      return new Promise((resolve, reject) => {
+        const result = [];
+        queryApi.queryRows(fluxQuery, {
+          next(row, tableMeta) {
+            const o = tableMeta.toObject(row);
+            logger.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o)}`);
+            const point = {
+              ts: o._time,
+              attrs: [],
+            };
+
+            delete o._time;
+            Object.entries(o).forEach(([key, value]) => {
+              // check if has 'dojot.' at begin
+              // https://measurethat.net/Benchmarks/Show/5016/1/replace-vs-substring-vs-slice-from-beginning-brackets-s
+              if (key.substring(0, prefixSize) === prefix && value !== null) {
+                point.attrs.push({
+                  label: key.slice(prefixSize),
+                  value: DataQuery.parseValue(value),
+                });
+              }
+            });
+            result.push(point);
+          },
+          error(error) {
+            return reject(DataQuery.commonHandleError(error));
+          },
+          complete() {
+            logger.debug(`queryByMeasurement: totalItems=${result.length} result=${util.inspect(result)}`);
+            return resolve({ result, totalItems: result.length });
+          },
+        });
+      });
+    } catch (e) {
+      logger.error('queryByMeasurement:', e);
+      throw e;
+    }
   }
 
 
@@ -51,37 +141,33 @@ class DataQuery {
  * @param {{String='desc','asc'}} order=desc Defines whether the order by **time** should be
  *                                            ascending (asc) or descending (desc)
  *
- * @returns {Promise.<{result: { timeIsoData(string): value (*) }, totalItems: number}| error>}
+ * @returns {Promise.<{result: [{ ts: timeIsoData(string), value: any }],
+ *                            totalItems: number}| error>}
  *                            A promise that returns a result e a totalItems
  */
   async queryByField(org, measurement, field, filters = {}, page = {}, order = 'desc') {
     try {
-      logger.debug('queryData:');
-      logger.debug(`queryData: org=${org}`);
-      logger.debug(`queryData: measurement=${measurement}`);
-      logger.debug(`queryData: field=${field}`);
-      logger.debug(`queryData: filters=${util.inspect(filters)}`);
-      logger.debug(`queryData: page=${util.inspect(page)}`);
+      logger.debug('queryByField:');
+      logger.debug(`queryByField: org=${org}`);
+      logger.debug(`queryByField: measurement=${measurement}`);
+      logger.debug(`queryByField: field=${field}`);
+      logger.debug(`queryByField: filters=${util.inspect(filters)}`);
+      logger.debug(`queryByField: page=${util.inspect(page)}`);
 
+      const {
+        start, stop, limit, offset,
+      } = DataQuery.commonQueryParams(page, filters);
 
-      const limit = page.limit ? fluxInteger(page.limit) : 256;
-      const offset = page.page && page.page >= 1 ? fluxInteger(page.page - 1) : 0;
-      const start = filters.dateFrom ? fluxDateTime(filters.dateFrom) : 0;
-      const stop = filters.dateTo ? fluxDateTime(filters.dateTo) : fluxExpression('now()');
-
-      let orderExp = '';
-      if (order === 'desc') {
-        orderExp = '|> sort(columns: ["_time"], desc: true)';
-      }
+      const orderExp = DataQuery.commonQueryOrderExpression(order);
 
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
         |> range(start: ${start} , stop: ${stop})
-        |> filter(fn: (r) => r._measurement == ${fluxString(measurement)} and r._field == ${fluxString(field)})
+        |> filter(fn: (r) => r._measurement == ${fluxString(measurement)} and r._field == ${fluxString(`dojot.${field}`)})
         |> drop(columns: ["_start", "_stop", "_measurement"])
         ${fluxExpression(orderExp)}
         |> limit(n: ${limit} , offset: ${offset})`;
 
-      logger.debug(`queryData: fluxQuery=${fluxQuery}`);
+      logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
 
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
 
@@ -90,34 +176,83 @@ class DataQuery {
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
+            logger.debug(`queryByField: queryRows.next=${JSON.stringify(o)}`);
             // when storer write the data it just check if is a number or a boolean
             // the others types are writer as string with json stringify
             result.push({
-              // eslint-disable-next-line no-underscore-dangle
               ts: o._time,
-              value: typeof value === 'number' || typeof value === 'boolean'
-              // eslint-disable-next-line no-underscore-dangle
-                ? o._value : JSON.parse(o._value),
+              value: DataQuery.parseValue(o._value),
             });
           },
           error(error) {
-            const { message } = error.body ? JSON.parse(error.body) : {};
-            const { statusMessage, statusCode } = error;
-            if (statusMessage && statusCode && message) {
-              return reject(createError(statusCode, `InfluxDB: ${statusMessage} -> ${message}`));
-            }
-            return reject(error);
+            return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryData: totalItems=${result.length} result=${util.inspect(result)}`);
+            logger.debug(`queryByField: totalItems=${result.length} result=${util.inspect(result)}`);
             return resolve({ result, totalItems: result.length });
           },
         });
       });
     } catch (e) {
-      logger.error('queryData:', e);
+      logger.error('queryByField:', e);
       throw e;
     }
+  }
+
+  /**
+   *
+   * @param {*} error
+   * @returns
+   */
+  static commonHandleError(error) {
+    const { message } = error.body ? JSON.parse(error.body) : {};
+    const { statusMessage, statusCode } = error;
+    let newError = error;
+    if (statusMessage && statusCode && message) {
+      newError = createError(statusCode, `InfluxDB: ${statusMessage} -> ${message}`);
+    }
+    return (newError);
+  }
+
+  /**
+   *
+   * @param {*} page
+   * @param {*} filters
+   *
+   * @returns
+   */
+  static commonQueryParams(page, filters) {
+    const limit = page.limit ? fluxInteger(page.limit) : 256;
+    const offset = page.page && page.page >= 1 ? fluxInteger(page.page - 1) : 0;
+    const start = filters.dateFrom ? fluxDateTime(filters.dateFrom) : 0;
+    const stop = filters.dateTo ? fluxDateTime(filters.dateTo) : fluxExpression('now()');
+    return {
+      start, stop, limit, offset,
+    };
+  }
+
+  /**
+   *
+   * @param {*} order
+   * @returns
+   */
+  static commonQueryOrderExpression(order) {
+    let orderExp = '';
+    if (order === 'desc') {
+      orderExp = '|> sort(columns: ["_time"], desc: true)';
+    }
+    return orderExp;
+  }
+
+  /**
+   * Parse value  that was saved in influxdb to know what its type and what action should be taken
+   * @param {any} value
+   *
+   * @returns The parsed value
+   */
+  static parseValue(value) {
+    return typeof value === 'number' || typeof value === 'boolean'
+      ? value : JSON.parse(value);
   }
 }
 
