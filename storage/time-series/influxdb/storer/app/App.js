@@ -76,10 +76,6 @@ class App {
    */
   initCallbacksDevicesCreateAndDelData() {
     // create callback to handle receive data
-    const boundInfluxWriter = this.influxDB
-      .getInfluxDataWriterInstance().write.bind(this.influxDB
-        .getInfluxDataWriterInstance());
-
     const callbackWriteData = async (tenant, deviceid, timestamp, attrs) => {
       logger.debug('callbackWriteData: init');
       logger.debug(`callbackWriteData: tenant=${tenant}`);
@@ -87,7 +83,8 @@ class App {
       logger.debug(`callbackWriteData: timestamp=${timestamp}`);
       logger.debug(`callbackWriteData: attrs=${JSON.stringify(attrs)}`);
       try {
-        await boundInfluxWriter(tenant, deviceid, attrs, timestamp);
+        await this.influxDB
+          .getInfluxDataWriterInstance().write(tenant, deviceid, attrs, timestamp);
       } catch (e) {
         // TODO: We need to think in a strategy when something like this happen.
         // One possibility would be to report some statistics like ratio of
@@ -98,15 +95,14 @@ class App {
     };
 
     // create callback to handle delete device
-    const boundInfluxMeasurementDelete = this.influxDB
-      .getInfluxMeasurementInstance()
-      .deleteMeasurement.bind(this.influxMeasurement);
     const callbackDeleteMeasurement = async (tenant, deviceid) => {
       logger.debug('callbackDeleteMeasurement: init');
       logger.debug(`callbackDeleteMeasurement: tenant=${tenant}`);
       logger.debug(`callbackDeleteMeasurement: deviceid=${deviceid}`);
       try {
-        await boundInfluxMeasurementDelete(tenant, deviceid);
+        await this.influxDB
+          .getInfluxMeasurementInstance()
+          .deleteMeasurement(tenant, deviceid);
       } catch (e) {
         // TODO: We need to think in a strategy when something like this happen.
         // One possibility would be to report some statistics like ratio of
@@ -131,15 +127,12 @@ class App {
    */
   initCallbacksTenantToCreateAndDelOrgs() {
     // create callback to handle tenant create
-    const boundCreateOrgWithBucket = this.influxDB
-      .getInfluxOrgInstance().createOrgWithDefaultBucket.bind(
-        this.influxDB.getInfluxOrgInstance(),
-      );
     const callbackCreateTenant = async (tenant) => {
       logger.debug('callbackCreateTenant: init');
       logger.debug(`callbackCreateTenant: tenant=${tenant}`);
       try {
-        await boundCreateOrgWithBucket(tenant);
+        await this.influxDB
+          .getInfluxOrgInstance().createOrgWithDefaultBucket(tenant);
       } catch (e) {
         // TODO: We need to think in a strategy when something like this happen.
         // One possibility would be to report some statistics like ratio of
@@ -150,16 +143,14 @@ class App {
     };
 
     // create callback to handle tenant delete
-    const boundWriterCloseOrg = this.influxDB
-      .getInfluxDataWriterInstance().closeOne.bind(this.influxDB.getInfluxDataWriterInstance());
-    const boundDeleteOrgWithBucket = this.influxDB.getInfluxOrgInstance()
-      .deleteOrg.bind(this.influxDB.getInfluxOrgInstance());
     const callbackDeleteTenant = async (tenant) => {
       logger.debug('callbackDeleteTenant: init');
       logger.debug(`callbackDeleteTenant: tenant=${tenant}`);
       try {
-        await boundDeleteOrgWithBucket(tenant);
-        await boundWriterCloseOrg(tenant);
+        await this.influxDB.getInfluxOrgInstance()
+          .deleteOrg(tenant);
+        await this.influxDB
+          .getInfluxDataWriterInstance().closeOne(tenant);
       } catch (e) {
         // TODO: We need to think in a strategy when something like this happen.
         // One possibility would be to report some statistics like ratio of
