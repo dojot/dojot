@@ -35,7 +35,6 @@ class MQTTClient {
     this.agentMessenger = agentMessenger;
 
     this.serviceStateManager = serviceStateManager;
-    this.stateService = 'mqtt';
 
     this.mqttClient = undefined;
     this.isConnected = false;
@@ -90,7 +89,7 @@ class MQTTClient {
       await this.agentMessenger.init(this);
       this.isConnected = true;
       this.logger.info('MQTT connection established');
-      this.serviceStateManager.signalReady(this.stateService);
+      this.serviceStateManager.signalReady('mqtt');
     }
   }
 
@@ -107,7 +106,7 @@ class MQTTClient {
   async onClose() {
     await this.agentMessenger.finish();
     this.isConnected = false;
-    this.serviceStateManager.signalNotReady(this.stateService);
+    this.serviceStateManager.signalNotReady('mqtt');
     this.logger.warn('MQTT connection closed');
   }
 

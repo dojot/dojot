@@ -25,7 +25,6 @@ class AgentMessenger {
 
     this.logger = new Logger('k2v:agent-messenger');
 
-    this.stateService = 'kafka';
     this.serviceStateManager = serviceStateManager;
 
     this.consumer = undefined;
@@ -60,11 +59,11 @@ class AgentMessenger {
 
       this.consumer.registerCallback(topic, mqttClient.publishMessage.bind(mqttClient));
 
-      this.serviceStateManager.signalReady(this.stateService);
+      this.serviceStateManager.signalReady('kafka');
       this.wasInitialized = true;
       this.logger.info('... Kafka Consumer was initialized');
     } catch (error) {
-      this.serviceStateManager.signalNotReady(this.stateService);
+      this.serviceStateManager.signalNotReady('kafka');
       this.logger.error('Error while initializing the Kafka Consumer');
       if (error) {
         this.logger.error(error.stack || error);
@@ -87,7 +86,7 @@ class AgentMessenger {
     } catch (error) {
       this.logger.debug('Error while finishing Kafka connection, going on like nothing happened');
     }
-    this.serviceStateManager.signalNotReady(this.stateService);
+    this.serviceStateManager.signalNotReady('kafka');
   }
 
   /**

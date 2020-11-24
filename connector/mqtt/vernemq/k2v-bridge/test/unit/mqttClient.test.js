@@ -89,7 +89,6 @@ describe('MQTTClient', () => {
       expect(client.agentMessenger).toEqual(mockAgentMessenger);
       expect(client.serviceStateManager).toEqual(mockServiceStateManager);
       expect(client.mqttClient).toBeUndefined();
-      expect(client.stateService).toEqual('mqtt');
 
       expect(client.isConnected).toBeFalsy();
       expect(client.publishConfig).toBe(mockDefaultConfig.publish);
