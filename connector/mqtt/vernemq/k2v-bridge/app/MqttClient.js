@@ -1,10 +1,10 @@
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
+const camelCase = require('lodash.camelcase');
 const fs = require('fs');
 const util = require('util');
 const mqtt = require('mqtt');
 
-const { mqtt: mqttConfig } = require('./config');
 const utils = require('./utils');
 const AgentMessenger = require('./AgentMessenger');
 
@@ -21,24 +21,28 @@ class MQTTClient {
   constructor() {
     this.isConnected = false;
 
-    this.clientId = mqttConfig['client.id'];
-    this.keepalive = mqttConfig['client.keepalive'];
-    this.publishQos = mqttConfig['client.publish.qos'];
-    this.secureMode = mqttConfig['client.secure'];
-    this.username = mqttConfig['client.username'];
+    const config = ConfigManager.getConfig('K2V');
+    this.publishConfig = config.publish;
 
-    this.host = mqttConfig['server.address'];
-    this.port = mqttConfig['server.port'];
+    const certificates = {
+      ca: fs.readFileSync(`${config.mqtt.ca}`),
+      key: fs.readFileSync(`${config.mqtt.key}`),
+      cert: fs.readFileSync(`${config.mqtt.cert}`),
+    };
+    /**
+     * The certificates parameters received from the ConfigManager are the location of the files.
+     * Since the whole `mqtt` scope object will be passed to the MQTT client, we need to overwrite
+     * the certificates parameters with their files' contents.
+     */
+    this.mqttOptions = ConfigManager.transformObjectKeys(
+      { ...config.mqtt, ...certificates },
+      camelCase,
+    );
 
-    this.privateKey = fs.readFileSync(`${mqttConfig['tls.key.file']}`);
-    this.clientCrt = fs.readFileSync(`${mqttConfig['tls.certificate.file']}`);
-    this.ca = fs.readFileSync(`${mqttConfig['tls.ca.file']}`);
-
-    this.mqttc = null;
-    this.mqttOptions = null;
+    this.mqttClient = null;
     this.agentMessenger = null;
 
-    this.logger = new Logger('MQTTClient');
+    this.logger = new Logger('k2v:mqtt-client');
   }
 
   /**
@@ -52,27 +56,13 @@ class MQTTClient {
 
     this.agentMessenger = new AgentMessenger(this);
 
-    this.mqttOptions = {
-      username: this.username,
-      clientId: this.clientId,
-      host: this.host,
-      port: this.port,
-      protocol: this.secureMode ? 'mqtts' : 'mqtt',
-      ca: this.ca,
-      key: this.privateKey,
-      cert: this.clientCrt,
-      keepAlive: this.keepalive,
-      clean: false,
-      rejectUnauthorized: true,
-    };
-
-    this.mqttc = mqtt.connect(this.mqttOptions);
+    this.mqttClient = mqtt.connect(this.mqttOptions);
 
     this.logger.info('Binding event callbacks...');
-    this.mqttc.on('connect', this.onConnect.bind(this));
-    this.mqttc.on('disconnect', this.onDisconnect.bind(this));
-    this.mqttc.on('error', this.onError.bind(this));
-    this.logger.info('... Binded event callbacks');
+    this.mqttClient.on('connect', this.onConnect.bind(this));
+    this.mqttClient.on('close', this.onClose.bind(this));
+    this.mqttClient.on('error', this.onError.bind(this));
+    this.logger.info('... bound event callbacks');
   }
 
   /**
@@ -87,13 +77,13 @@ class MQTTClient {
   }
 
   /**
-   * Reached when the MQTTClient disconnects from the broker.
+   * Reached when the MQTT connection from the broker is closed.
    * @access private
-   * @callback MQTTClient~onDisconnect
+   * @callback MQTTClient~onClose
    */
-  onDisconnect() {
+  onClose() {
     this.isConnected = false;
-    this.logger.info('MQTT connection ended, trying to reconnect...');
+    this.logger.info('MQTT connection close, trying to reconnect...');
     // TODO: stop Kafka message consumption
     // TODO: better disconnection handling
   }
@@ -123,19 +113,19 @@ class MQTTClient {
    */
   publishMessage(data) {
     try {
-      if (this.isConnected && this.mqttc) {
+      if (this.isConnected && this.mqttClient) {
         const value = JSON.parse(data.value.toString());
 
         const topic = utils.generateDojotActuationTopic(
           value.meta.service,
           value.data.id,
-          mqttConfig['client.publish.topic.suffix'],
+          this.publishConfig['topic.suffix'],
         );
 
-        this.mqttc.publish(
+        this.mqttClient.publish(
           topic,
           JSON.stringify(value.data.attrs),
-          { qos: this.publishQos },
+          { qos: this.publishConfig.qos },
           (error, packet) => {
             if (error) {
               this.logger.error(error.stack || error);

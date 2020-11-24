@@ -1,82 +1,105 @@
 const AgentMessenger = require('../../app/AgentMessenger');
 const MQTTClient = require('../../app/MqttClient');
 
-const mockConfig = {
-  Kafka: {
-    Consumer: {
-      init: jest.fn(),
-      registerCallback: jest.fn(),
-    },
-  },
-  Logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-  },
+const mockConsumer = {
+  init: jest.fn(),
+  registerCallback: jest.fn(),
 };
 
-jest.mock('../../app/config', () => ({
+const mockDefaultConfig = {
   kafka: { },
   messenger: {
-    'consume.topic.suffix': '/fake',
+    'consume.topic.suffix': 'dojot.device-manager.device',
   },
   sdk: { },
-}));
+  topic: { },
+};
+
+const mockLogger = {
+  debug: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn(),
+};
 
 jest.mock('../../app/MqttClient', () => jest.fn(() => ({
   publishMessage: jest.fn(),
 })));
 
 jest.mock('@dojot/microservice-sdk', () => ({
-  Kafka: {
-    Consumer: jest.fn(() => mockConfig.Kafka.Consumer),
+  ConfigManager: {
+    getConfig: jest.fn(() => mockDefaultConfig),
   },
-  Logger: jest.fn(() => mockConfig.Logger),
+  Kafka: {
+    Consumer: jest.fn(() => mockConsumer),
+  },
+  Logger: jest.fn(() => mockLogger),
 }));
 
 jest.mock('../../app/utils', () => ({
   killApplication: jest.fn(),
 }));
 
-describe('Test AgentMessenger', () => {
+describe('AgentMessenger', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should successfully create an Agent Messenger', () => {
-    const mqttClient = new MQTTClient();
-    const agentMessenger = new AgentMessenger(mqttClient);
+  describe('constructor', () => {
+    it('should successfully create an Agent Messenger', () => {
+      const agentMessenger = new AgentMessenger(new MQTTClient());
 
-    expect(agentMessenger.mqttClient).toEqual(mqttClient);
-    expect(agentMessenger.consumer).toBeDefined();
+      expect(agentMessenger.mqttClient).toBeDefined();
+      expect(agentMessenger.consumer).toBeDefined();
+    });
+
+    it('should not create an Agent Messenger - no MQTTClient instance was passed', () => {
+      expect(() => new AgentMessenger()).toThrow();
+    });
   });
 
-  it('should successfully initialize the Agent Messenger', async () => {
-    mockConfig.Kafka.Consumer.init.mockReturnValue(Promise.resolve());
-    const mqttClient = new MQTTClient();
-    const agentMessenger = new AgentMessenger(mqttClient);
-    await agentMessenger.init();
-    expect(mockConfig.Kafka.Consumer.registerCallback).toHaveBeenCalledTimes(1);
-  });
+  describe('init', () => {
+    let agentMessenger;
 
-  it('should fail the initialization of the Agent Messenger', async () => {
-    mockConfig.Kafka.Consumer.init.mockReturnValue(Promise.reject(new Error('fakeError')));
-    const mqttClient = new MQTTClient();
-    const agentMessenger = new AgentMessenger(mqttClient);
-    await agentMessenger.init();
+    beforeEach(() => {
+      agentMessenger = new AgentMessenger(new MQTTClient());
+    });
 
-    expect(agentMessenger.mqttClient.publishMessage).not.toHaveBeenCalled();
-  });
+    it('should successfully initialize the Agent Messenger', async () => {
+      mockConsumer.init.mockReturnValue(Promise.resolve());
 
-  it('should send a message when the registered callback is called', async () => {
-    mockConfig.Kafka.Consumer.init.mockReturnValue(Promise.resolve());
-    const mqttClient = new MQTTClient();
-    const agentMessenger = new AgentMessenger(mqttClient);
-    await agentMessenger.init();
-    expect(mockConfig.Kafka.Consumer.registerCallback).toHaveBeenCalledTimes(1);
+      await agentMessenger.init();
 
-    // Retrieving the callback passed to registerCallback
-    const callback = mockConfig.Kafka.Consumer.registerCallback.mock.calls[0][1];
-    callback({});
-    expect(agentMessenger.mqttClient.publishMessage).toHaveBeenCalledTimes(1);
+      expect(mockConsumer.registerCallback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not initialize the Agent Messenger - is already initialized', async () => {
+      // Faster way for faking the initialization
+      agentMessenger.wasInitialized = true;
+
+      await agentMessenger.init();
+
+      expect(mockConsumer.init).not.toHaveBeenCalled();
+    });
+
+    it('should fail the initialization of the Agent Messenger', async () => {
+      mockConsumer.init.mockReturnValue(Promise.reject(new Error('fakeError')));
+
+      await agentMessenger.init();
+
+      expect(agentMessenger.mqttClient.publishMessage).not.toHaveBeenCalled();
+    });
+
+    it('should send a message when the registered callback is called', async () => {
+      mockConsumer.init.mockReturnValue(Promise.resolve());
+
+      await agentMessenger.init();
+
+      expect(mockConsumer.registerCallback).toHaveBeenCalledTimes(1);
+
+      // Retrieving the callback passed to registerCallback
+      const callback = mockConsumer.registerCallback.mock.calls[0][1];
+      callback({});
+      expect(agentMessenger.mqttClient.publishMessage).toHaveBeenCalledTimes(1);
+    });
   });
 });
