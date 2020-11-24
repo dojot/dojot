@@ -48,7 +48,7 @@ jest.mock('@dojot/microservice-sdk', () => ({
   Logger: jest.fn(() => mockLogger),
 }));
 
-jest.mock('../../app/utils', () => ({
+jest.mock('../../app/Utils', () => ({
   killApplication: jest.fn(),
 }));
 

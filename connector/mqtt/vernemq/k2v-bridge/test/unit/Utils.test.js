@@ -2,7 +2,7 @@
  * Unit test for utils file
  */
 
-const utils = require('../../app/utils');
+const utils = require('../../app/Utils');
 
 describe('utils', () => {
   it('generateDojotActuationTopic', () => {

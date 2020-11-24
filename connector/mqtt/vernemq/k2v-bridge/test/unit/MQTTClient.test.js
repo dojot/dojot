@@ -1,5 +1,5 @@
-const MQTTClient = require('../../app/MqttClient');
-const utils = require('../../app/utils');
+const MQTTClient = require('../../app/MQTTClient');
+const utils = require('../../app/Utils');
 
 // Mock objects
 const mockAgentMessenger = {
@@ -70,7 +70,7 @@ jest.mock('mqtt', () => ({
 
 jest.mock('../../app/AgentMessenger', () => jest.fn(() => mockAgentMessenger));
 
-jest.mock('../../app/utils', () => ({
+jest.mock('../../app/Utils', () => ({
   generateDojotActuationTopic: jest.fn(() => 'tenant:deviceid/config'),
   killApplication: jest.fn(),
 }));

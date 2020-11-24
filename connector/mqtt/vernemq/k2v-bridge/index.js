@@ -8,8 +8,8 @@ const util = require('util');
 const camelCase = require('lodash.camelcase');
 
 const AgentMessenger = require('./app/AgentMessenger');
-const MQTTClient = require('./app/MqttClient');
-const utils = require('./app/utils');
+const MQTTClient = require('./app/MQTTClient');
+const Utils = require('./app/Utils');
 
 /*
  * TODO: the idea is to create a default environment variable that will be used internally by the
@@ -55,5 +55,5 @@ try {
 } catch (error) {
   logger.error('An error occurred while initializing the MQTT Client. Bailing out!');
   logger.error(error.stack || error);
-  utils.killApplication();
+  Utils.killApplication();
 }

@@ -1,6 +1,6 @@
 const { ConfigManager, Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
 
-const utils = require('./utils');
+const Utils = require('./Utils');
 
 /**
  * An agent to consume messages from pre-defined topics in Apache Kafka,
@@ -69,7 +69,7 @@ class AgentMessenger {
         this.logger.error(error.stack || error);
       }
       this.logger.error('Bailing out!');
-      utils.killApplication();
+      Utils.killApplication();
     }
   }
 

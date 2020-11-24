@@ -8,7 +8,7 @@ const fs = require('fs');
 const util = require('util');
 const mqtt = require('mqtt');
 
-const utils = require('./utils');
+const Utils = require('./Utils');
 
 /**
  * Class representing a MQTTClient
@@ -123,7 +123,7 @@ class MQTTClient {
       if (this.isConnected && this.mqttClient) {
         const value = JSON.parse(data.value.toString());
 
-        const topic = utils.generateDojotActuationTopic(
+        const topic = Utils.generateDojotActuationTopic(
           value.meta.service,
           value.data.id,
           this.publishConfig['topic.suffix'],
