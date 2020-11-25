@@ -45,12 +45,13 @@ convention.
 
 Key | Purpose | Default Value | Valid Values | Environment variable
 --- | ------- | ------------- | ------------ | --------------------
+healthcheck.kafka.interval.ms | Milliseconds between each call of Kafka's health checker function | 30000 | integer | K2V_HEALTHCHECK_KAFKA_INTERVAL_MS
 log.console.level | Console log level | info | info, warn, error, debug | K2V_LOG_CONSOLE_LEVEL
 log.file.enable | Whether to enable file logging or not | false | boolean | K2V_LOG_FILE_ENABLE
 log.file.filename | File log filename | k2v-%DATE%.log | string | K2V_LOG_FILE_FILENAME
 log.file.level | File log level | info | info, warn, error, debug | K2V_LOG_FILE_LEVEL
 log.verbose | Whether to enable or not log verbosity | false | boolean | K2V_LOG_VERBOSE
-messenger.consume.topic.suffix | Suffix of the Kafka topic to be consumed | dojot.device-manager.device | string | K2V_MESSENGER_CONSUME_TOPIC_SUFFIX
+messenger.consumer.topic.suffix | Suffix of the Kafka topic to be consumed | dojot.device-manager.device | string | K2V_MESSENGER_CONSUMER_TOPIC_SUFFIX
 publish.qos | MQTT publishing QoS level | 1 | 0, 1, 2 | K2V_PUBLISH_QOS
 publish.topic.suffix | MQTT publishing topic suffix | /config | string | K2V_PUBLISH_TOPIC_SUFFIX
 
