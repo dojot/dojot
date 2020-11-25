@@ -309,6 +309,8 @@ Configuration used in this service
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
 ------| ----------| ----------------|--------------|------------------------
 | app.node.env  | Is used (by convention) to state in which environment it is running | production | production or development | NODE_ENV
+| app.connection.retry.timeout | (Timeout in seconds) to ckeck connection with kafka and redis before running the service | 3 | integer | KAFKA_WS_APP_CONNECTION_RETRY_TIMEOUT
+| app.connection.retry.count | How many times to try to check kafka and redis connection check before running the service | 5 | integer | KAFKA_WS_APP_CONNECTION_RETRY_COUNT
 | log.console.level  | Console logger level | info | string | KAFKA_WS_LOG_CONSOLE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | KAFKA_WS_LOG_VERBOSE
 | log.file.enable | Whether to enable logging in file or not | false | boolean | KAFKA_WS_LOG_FILE_ENABLE

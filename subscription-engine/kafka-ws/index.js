@@ -5,6 +5,11 @@ const util = require('util');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
+const application = require('./app/App');
+const websocketTarball = require('./app/WebsocketTarball');
+const terminus = require('./app/Terminus');
+const StateManager = require('./app/StateManager');
+
 // Loading the configurations with the configManager
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
@@ -23,10 +28,6 @@ if (config.log['file.enable']) {
 
 Logger.setVerbose(config.log.verbose);
 
-const application = require('./app/App');
-const websocketTarball = require('./app/WebsocketTarball');
-const terminus = require('./app/Terminus');
-const StateManager = require('./app/StateManager');
 
 const logger = new Logger('app');
 const stateService = 'http';
@@ -50,8 +51,6 @@ if (config.server.tls) {
   server = http.createServer(application.expressApp);
 }
 
-// register service in stateManager
-StateManager.registerService(stateService);
 
 /* Configures the application's HTTP and WS routes */
 application.configure(server);

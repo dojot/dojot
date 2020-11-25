@@ -7,6 +7,9 @@ class StateManager {
     const { lightship } = getConfig('KAFKA_WS');
     const serviceConf = { lightship: transformObjectKeys(lightship, camelCase) };
     this.serviceStateManager = new ServiceStateManager(serviceConf);
+    this.serviceStateManager.registerService('kafka');
+    this.serviceStateManager.registerService('http');
+    this.serviceStateManager.registerService('redis');
   }
 }
 

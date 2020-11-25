@@ -24,7 +24,6 @@ class RedisManager {
     logger.info('RedisManager singleton creation complete!');
 
     const stateService = 'redis';
-    StateManager.registerService(stateService);
     this.redisClient.on('connect', () => StateManager.signalReady(stateService));
     /**
      * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException

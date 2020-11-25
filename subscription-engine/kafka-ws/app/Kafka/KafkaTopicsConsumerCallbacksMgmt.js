@@ -1,5 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
+const StateManager = require('../StateManager');
 
 const KafkaWSConsumers = require('./KafkaConsumer');
 
@@ -17,6 +18,7 @@ class KafkaTopicsConsumerCallbacksMgmt {
     // only one callback by topic
     this.topic = new Map();
     this.kafka = new KafkaWSConsumers();
+    StateManager.addHealthChecker('kafka', this.kafka.healthChecker.bind(this.kafka), 5000);
   }
 
   /**
