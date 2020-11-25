@@ -25,6 +25,7 @@ class RedisManager {
 
     const stateService = 'redis';
     this.redisClient.on('connect', () => StateManager.signalReady(stateService));
+    this.redisClient.on('reconnecting', () => StateManager.signalNotReady(stateService));
     /**
      * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
      * and some unexpected behaviors happens.

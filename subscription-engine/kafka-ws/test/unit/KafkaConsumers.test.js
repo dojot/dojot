@@ -48,9 +48,7 @@ describe('Testing KafkaWSConsumers - works fine', () => {
       unregisterCallback: jest.fn()
         .mockImplementationOnce(() => () => Promise.resolve()),
       getStatus: jest.fn()
-        .mockImplementationOnce(() => Promise.resolve({ connected: true }))
-        .mockImplementationOnce(() => Promise.resolve({ connected: false }))
-        .mockImplementationOnce(() => Promise.reject()),
+        .mockImplementationOnce(() => Promise.resolve({ connected: true })),
     });
     kafkaWSConsumers = new KafkaWSConsumers();
   });
@@ -59,6 +57,11 @@ describe('Testing KafkaWSConsumers - works fine', () => {
   });
 
   it('Should test health check function', () => {
+    Consumer().getStatus
+      .mockImplementationOnce(() => Promise.resolve({ connected: true }))
+      .mockImplementationOnce(() => Promise.resolve({ connected: false }))
+      .mockImplementationOnce(() => Promise.reject());
+
     const ready = jest.fn();
     const notReady = jest.fn();
     kafkaWSConsumers.healthChecker(ready, notReady);
@@ -71,6 +74,8 @@ describe('Testing KafkaWSConsumers - works fine', () => {
     // reject status
     kafkaWSConsumers.healthChecker(ready, notReady);
     expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(3);
+
+    Consumer.mockClear();
   });
 
   it('Should init correctly ', async () => {

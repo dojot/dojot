@@ -6,6 +6,9 @@ const mockConfig = {
   topic: {
     'auto.offset.reset': 'largest',
   },
+  healthcheck: {
+    'kafka.interval.ms': 3000,
+  },
 };
 
 const mockMicroServiceSdk = {
