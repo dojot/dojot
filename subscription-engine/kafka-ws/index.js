@@ -28,7 +28,6 @@ if (config.log['file.enable']) {
 
 Logger.setVerbose(config.log.verbose);
 
-
 const logger = new Logger('app');
 const stateService = 'http';
 
@@ -50,7 +49,6 @@ if (config.server.tls) {
   logger.info('Initializing the HTTP server...');
   server = http.createServer(application.expressApp);
 }
-
 
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
