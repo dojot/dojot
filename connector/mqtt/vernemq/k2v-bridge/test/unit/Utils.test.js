@@ -2,10 +2,10 @@
  * Unit test for utils file
  */
 
-const utils = require('../../app/utils');
+const utils = require('../../app/Utils');
 
 describe('utils', () => {
-  it('should generate the configuration topic', () => {
+  it('generateDojotActuationTopic', () => {
     expect(utils.generateDojotActuationTopic('test', 'test', '/test')).toEqual('test:test/test');
     expect(utils.generateDojotActuationTopic('test', 1)).toEqual('test:1undefined');
     expect(utils.generateDojotActuationTopic(1, 'test', '/config')).toEqual('1:test/config');
