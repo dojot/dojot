@@ -36,8 +36,6 @@ class Kafka {
  * Create a 'healthCheck'
  */
   createHealthChecker() {
-    // const boundIsConnectedKafka = this.kafkaConsumer
-    //   .isConnected.bind(this.kafkaConsumer);
     const kafkaHealthChecker = async (signalReady, signalNotReady) => {
       const isConnected = await this.kafkaConsumer.isConnected();
       if (isConnected) {
