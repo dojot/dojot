@@ -16,6 +16,7 @@ const mockMicroServiceSdk = {
   Kafka: {
     Consumer: jest.fn(() => ({
       getStatus: jest.fn(() => Promise.resolve()),
+      finish: jest.fn(() => Promise.resolve()),
     })),
     Producer: jest.fn(),
   },
@@ -50,6 +51,8 @@ describe('Testing KafkaWSConsumers - works fine', () => {
         .mockImplementationOnce(() => () => Promise.resolve()),
       getStatus: jest.fn()
         .mockImplementationOnce(() => Promise.resolve({ connected: true })),
+      finish: jest.fn()
+        .mockImplementationOnce(() => Promise.resolve()),
     });
     kafkaWSConsumers = new KafkaWSConsumers();
   });
@@ -59,7 +62,6 @@ describe('Testing KafkaWSConsumers - works fine', () => {
 
   it('Should test health check function', () => {
     Consumer().getStatus
-      .mockImplementationOnce(() => Promise.resolve({ connected: true }))
       .mockImplementationOnce(() => Promise.resolve({ connected: false }))
       .mockImplementationOnce(() => Promise.reject());
 
@@ -77,6 +79,10 @@ describe('Testing KafkaWSConsumers - works fine', () => {
     expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(3);
 
     Consumer.mockClear();
+  });
+
+  it('should finish - graceful shutdown', () => {
+    kafkaWSConsumers.shutdownHandler();
   });
 
   it('Should init correctly ', async () => {
