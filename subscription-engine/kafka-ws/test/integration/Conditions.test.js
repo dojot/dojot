@@ -14,6 +14,12 @@ const mockMicroServiceSdk = {
     error: jest.fn(),
     info: jest.fn(),
   })),
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback()),
+  })),
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);

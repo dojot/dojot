@@ -1,6 +1,7 @@
 const redis = require('redis');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const StateManager = require('../StateManager');
 
 const logger = new Logger('kafka-ws:redis-manager');
 
@@ -21,6 +22,22 @@ class RedisManager {
     // TODO: Implement "retry_strategy"
     this.redisClient = redis.createClient(this.config);
     logger.info('RedisManager singleton creation complete!');
+
+    const stateService = 'redis';
+    this.redisClient.on('connect', () => StateManager.signalReady(stateService));
+    this.redisClient.on('reconnecting', () => StateManager.signalNotReady(stateService));
+    /**
+     * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
+     * and some unexpected behaviors happens.
+     *
+     * The error event doesn't mean the service is unhealthy, because it can be
+     * AbortError, ParserError AggregateError, or others subclasses of RedisError
+     * When the client disconnects to redis the 'end' event is fired, there we can consider
+     * the service is unhealthy
+     */
+    this.redisClient.on('error', (error) => logger.warn(`${error}`));
+    this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
+
     return Object.seal(this);
   }
 

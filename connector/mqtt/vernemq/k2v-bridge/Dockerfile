@@ -54,3 +54,6 @@ COPY --from=base /opt/k2v_bridge /opt/k2v_bridge
 ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["./bin/entryPoint.sh", "npm", "run", "app"]
+
+HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=3 \
+      CMD curl -s "http://localhost:9000/health" | grep -q "SERVER_IS_READY"

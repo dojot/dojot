@@ -20,6 +20,9 @@ jest.mock('redis', () => ({
           },
         };
       },
+      on(label, cb) {
+        cb();
+      },
     };
     return redisClient;
   },
@@ -71,6 +74,13 @@ const mockMicroServiceSdk = {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
+  })),
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback()),
   })),
 };
 

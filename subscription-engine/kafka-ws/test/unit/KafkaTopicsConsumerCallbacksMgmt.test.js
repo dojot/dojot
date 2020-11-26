@@ -6,6 +6,9 @@ const mockConfig = {
   topic: {
     'auto.offset.reset': 'largest',
   },
+  healthcheck: {
+    'kafka.interval.ms': 3000,
+  },
 };
 
 const mockMicroServiceSdk = {
@@ -17,6 +20,12 @@ const mockMicroServiceSdk = {
     Consumer: jest.fn(),
     Producer: jest.fn(),
   },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback, timeout) => callback(service, timeout)),
+  })),
   Logger: jest.fn(() => ({
     debug: jest.fn(),
     error: jest.fn(),
@@ -25,6 +34,7 @@ const mockMicroServiceSdk = {
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+jest.mock('../../app/StateManager');
 
 const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 

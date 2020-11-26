@@ -1,6 +1,4 @@
-const { Logger } = require('@dojot/microservice-sdk');
-
-const { ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
+const { Logger, ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -27,7 +25,7 @@ class KafkaConsumer {
   }
 
   /**
-  * Inicialize Kafka consumer
+  * Initialize Kafka consumer
   */
   async init() {
     try {
@@ -38,6 +36,19 @@ class KafkaConsumer {
       logger.error(`init: Error starting kafka ${error.stack}`);
       throw error;
     }
+  }
+
+  healthChecker(signalReady, signalNotReady) {
+    this.consumer.getStatus().then((data) => {
+      if (data.connected) {
+        signalReady();
+      } else {
+        signalNotReady();
+      }
+    }).catch((err) => {
+      signalNotReady();
+      logger.warn(`Error ${err}`);
+    });
   }
 
   /**

@@ -6,5 +6,5 @@ ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, 'default.conf');
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
-Logger.setTransport('console', { level: config.logger['transports.console.level'] });
-Logger.setVerbose(config.logger.verbose);
+Logger.setTransport('console', { level: config.log['console.level'] });
+Logger.setVerbose(config.log.verbose);
