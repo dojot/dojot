@@ -1,6 +1,28 @@
 const { ProcessingRuleManager } = require('../../app/ProcessingRule');
 
-jest.mock('@dojot/microservice-sdk');
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => {}),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Kafka: {
+    Consumer: jest.fn(),
+  },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
+  })),
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+jest.mock('../../app/StateManager');
 
 let processingRuleManager = null;
 describe('Testing ProcessingRuleManager', () => {

@@ -1,5 +1,6 @@
-const { Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager: { getConfig }, Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
+const StateManager = require('../StateManager');
 
 const KafkaWSConsumers = require('./KafkaConsumer');
 
@@ -26,6 +27,8 @@ class KafkaTopicsConsumerCallbacksMgmt {
     try {
       logger.debug('init: Starting KafkaTopicsCallbacksMgmt');
       await this.kafka.init();
+      const healthCheckerInterval = getConfig('KAFKA_WS').healthcheck['kafka.interval.ms'];
+      StateManager.addHealthChecker('kafka', this.kafka.healthChecker.bind(this.kafka), healthCheckerInterval);
     } catch (error) {
       logger.error(`init: Error starting KafkaTopicsCallbacksMgmt ${error.stack}`);
       throw error;
