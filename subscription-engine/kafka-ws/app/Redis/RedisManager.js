@@ -50,18 +50,15 @@ class RedisManager {
    * @function shutdown Handler
    * @public
    */
-  shutdownHandler() {
+  async shutdownHandler() {
     logger.warn('Shutting redis, disconnecting...');
-    return new Promise((resolve, reject) => {
-      this.redisClient.quit((err) => {
-        if (err) {
-          logger.warn(`Error ending ${err}`);
-          return reject(err);
-        }
-        logger.info('Redis shutdown successfully!');
-        return resolve('Redis shutdown successfully!');
+    await new Promise((resolve) => {
+      this.redisClient.quit(() => {
+        resolve('Redis shutdown successfully!');
       });
     });
+
+    await new Promise((resolve) => setImmediate(resolve));
   }
 
   /**
