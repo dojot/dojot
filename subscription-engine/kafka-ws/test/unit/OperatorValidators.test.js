@@ -1,37 +1,3 @@
-const mockConfig = {
-  consumer: {
-    'group.id': 'kafka_test',
-    'metadata.broker.list': 'kafka:9092',
-  },
-  topic: {
-    'auto.offset.reset': 'largest',
-  },
-};
-
-const mockMicroServiceSdk = {
-  ConfigManager: {
-    getConfig: jest.fn(() => mockConfig),
-    transformObjectKeys: jest.fn((obj) => obj),
-  },
-  Kafka: {
-    Consumer: jest.fn(),
-    Producer: jest.fn(),
-  },
-  ServiceStateManager: jest.fn(() => ({
-    registerService: jest.fn(),
-    signalReady: jest.fn(),
-    signalNotReady: jest.fn(),
-    addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
-    registerShutdownHandler: jest.fn(),
-  })),
-  Logger: jest.fn(() => ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-  })),
-};
-
-jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
 jest.mock('../../app/StateManager');
 
 const OperatorValidator = require('../../app/WhereProcessing/OperatorValidator');

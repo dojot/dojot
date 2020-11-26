@@ -29,6 +29,7 @@ class KafkaTopicsConsumerCallbacksMgmt {
       await this.kafka.init();
       const healthCheckerInterval = getConfig('KAFKA_WS').healthcheck['kafka.interval.ms'];
       StateManager.addHealthChecker('kafka', this.kafka.healthChecker.bind(this.kafka), healthCheckerInterval);
+      StateManager.registerShutdownHandler(this.kafka.shutdownHandler.bind(this.kafka));
     } catch (error) {
       logger.error(`init: Error starting KafkaTopicsCallbacksMgmt ${error.stack}`);
       throw error;

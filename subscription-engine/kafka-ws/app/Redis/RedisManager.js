@@ -52,7 +52,16 @@ class RedisManager {
    */
   shutdownHandler() {
     logger.warn('Shutting redis, disconnecting...');
-    return this.redisClient.end(true);
+    return new Promise((resolve, reject) => {
+      this.redisClient.quit((err) => {
+        if (err) {
+          logger.warn(`Error ending ${err}`);
+          return reject(err);
+        }
+        logger.info('Redis shutdown successfully!');
+        return resolve('Redis shutdown successfully!');
+      });
+    });
   }
 
   /**

@@ -1,5 +1,4 @@
 const { Logger, ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
-const StateManager = require('../StateManager');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -23,9 +22,6 @@ class KafkaConsumer {
     this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
-
-    // graceful shutdown
-    StateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
   }
 
   /**
