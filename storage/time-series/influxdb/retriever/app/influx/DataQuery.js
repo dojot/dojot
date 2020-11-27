@@ -200,9 +200,9 @@ class DataQuery {
   }
 
   /**
-   *
-   * @param {*} error
-   * @returns
+   * Handles error coming from the influx lib to be used by the sdk web lib
+   * @param {Error} error
+   * @returns  {Error}
    */
   static commonHandleError(error) {
     const { message } = error.body ? JSON.parse(error.body) : {};
@@ -215,9 +215,13 @@ class DataQuery {
   }
 
   /**
-   *
-   * @param {*} page
-   * @param {*} filters
+   * Handles query filters that are common
+   * @param {object} filters Filters for query
+   * @param {string} filters.dateFrom
+   * @param {string} filter.dateTo
+   * @param {object} page Paginate information for query
+   * @param {number} page.limit
+   * @param {number} page.page
    *
    * @returns
    */
@@ -232,8 +236,10 @@ class DataQuery {
   }
 
   /**
+   * Handles query order that is common
    *
-   * @param {*} order
+   * @param {{String='desc','asc'}} order Defines whether the order by **time** should be
+   *                                            ascending (asc) or descending (desc)
    * @returns
    */
   static commonQueryOrderExpression(order) {
