@@ -144,6 +144,8 @@ describe('Test Influx Data Query', () => {
           result: '_result',
           table: 0,
           _time: 'ts-time-1',
+          'dojot.array': '',
+          'dojot.nulled': '',
           'dojot.bool': false,
           'dojot.float': 15.5,
           'dojot.string': '"value"',

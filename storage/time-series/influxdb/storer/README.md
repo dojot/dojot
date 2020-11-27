@@ -130,7 +130,7 @@ In this topic the idea is to explain what this service does with each message it
   - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**).
   - `DELETE`: This message will trigger the deletion of an existing *Organization* (**tenant**).
 
-- `*.device-data`: This message will trigger a data insertion. It `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values.
+- `*.device-data`: This message will trigger a data insertion. It `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values and its values if it is not numeric or Boolean being parsed to a JSON.
 
 - `*.dojot.device-manager.device`
   - `configure`: The same behavior as  `*.device-data`.

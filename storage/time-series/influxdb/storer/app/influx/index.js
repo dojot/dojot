@@ -3,7 +3,7 @@ const {
   Logger,
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
-const flatten = require('flat');
+const { flatten, unflatten } = require('flat');
 const InfluxState = require('./State');
 const InfluxDataWriter = require('./DataWriter');
 const InfluxOrgs = require('./Organizations');
@@ -11,11 +11,12 @@ const InfluxMeasurement = require('./Measurements');
 
 const logger = new Logger('influxdb-storer:Influx');
 const { influx: configInflux } = getConfig('STORER');
-
-const { write: { options: influxWriteOptions } } = flatten.unflatten(configInflux);
-const configInfluxWriteOptions = influxWriteOptions ? flatten(influxWriteOptions) : {};
-const configInfluxWriteOptionsCamelCase = transformObjectKeys(configInfluxWriteOptions, camelCase);
-
+let configInfluxWriteOptionsCamelCase = {};
+if (configInflux['write.options'] && typeof configInflux['write.options'] === 'object') {
+  const { write: { options: influxWriteOptions } } = unflatten(configInflux);
+  const configInfluxWriteOptions = influxWriteOptions ? flatten(influxWriteOptions) : {};
+  configInfluxWriteOptionsCamelCase = transformObjectKeys(configInfluxWriteOptions, camelCase);
+}
 
 /**
  * Wrapper for InfluxDB

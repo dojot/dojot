@@ -100,7 +100,11 @@ class DataQuery {
             Object.entries(o).forEach(([key, value]) => {
               // check if has 'dojot.' at begin
               // https://measurethat.net/Benchmarks/Show/5016/1/replace-vs-substring-vs-slice-from-beginning-brackets-s
-              if (key.substring(0, prefixSize) === prefix && value !== null) {
+              if (key.substring(0, prefixSize) === prefix
+                // boolean and numbers that do not exist at that point are null
+                && value !== null
+                // strings that don't exist for that point are empty
+                && value !== '') {
                 point.attrs.push({
                   label: key.slice(prefixSize),
                   value: DataQuery.parseValue(value),
@@ -252,12 +256,15 @@ class DataQuery {
 
   /**
    * Parse value  that was saved in influxdb to know what its type and what action should be taken
+   *
+   * When a null or empty value was persisted it would be under the effect of json.parse
+   *
    * @param {any} value
    *
    * @returns The parsed value
    */
   static parseValue(value) {
-    return typeof value === 'number' || typeof value === 'boolean'
+    return value === null || typeof value === 'number' || typeof value === 'boolean'
       ? value : JSON.parse(value);
   }
 }

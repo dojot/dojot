@@ -166,8 +166,7 @@ components:
       required: false
       schema:
         type: integer
-        minimum: 0
-        exclusiveMinimum: true
+        minimum: 1
         default: 256
     page:
       name: page
@@ -176,8 +175,7 @@ components:
       required: false
       schema:
         type: integer
-        minimum: 0
-        exclusiveMinimum: true
+        minimum: 1
         default: 1
     order:
       in: query

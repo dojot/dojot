@@ -84,7 +84,7 @@ class DojotConsumer {
             }
             break;
           default:
-            logger.debug('registerCallbackForTenantEvents: event was discarded ');
+            logger.debug('registerCallbackForTenantEvents: event was discarded');
         }
       } catch (e) {
         logger.error('registerCallbackForTenantEvents:', e);
@@ -139,7 +139,7 @@ class DojotConsumer {
             } else if (handleDeviceRemoveEvent) {
               await handleDeviceRemoveEvent(tenant, deviceid);
             } else {
-              logger.debug('registerCallbacksForDeviceMgmtEvents: callbackDelete not enable');
+              logger.debug('registerCallbacksForDeviceMgmtEvents: handleDeviceRemoveEvent not enable');
             }
             break;
           default:
@@ -214,16 +214,16 @@ class DojotConsumer {
   static async handleData(deviceid, tenant, timestamp, attrs, handleData) {
     const attrsCopy = { ...attrs };
     if (!deviceid) {
-      logger.warn('registerCallbacksForDeviceMgmtEvents: configure - missing deviceid');
+      logger.warn('handleData: configure - missing deviceid');
     } else if (!tenant) {
-      logger.warn('registerCallbacksForDeviceMgmtEvents: configure - missing tenant');
+      logger.warn('handleData: configure - missing tenant');
     } else if (!attrs) {
-      logger.warn('registerCallbacksForDeviceMgmtEvents: configure - missing attrs');
+      logger.warn('handleData: configure - missing attrs');
     } else if (DojotConsumer.checkIfShouldPersist(attrsCopy)) {
       delete attrsCopy.shouldPersist;
       await handleData(tenant, deviceid, timestamp, attrsCopy);
     } else {
-      logger.debug('registerCallbacksForDeviceMgmtEvents: shouldPersist is false');
+      logger.debug('handleData: shouldPersist is false');
     }
   }
 
@@ -270,12 +270,14 @@ class DojotConsumer {
     try {
       if (this.idCallbackTenant) {
         this.consumer.unregisterCallback(this.idCallbackTenant);
+        this.idCallbackTenant = null;
         logger.debug('unregisterCallbacks: Unregistered callback for tenant');
       } else {
         logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for tenant');
       }
       if (this.idCallbackDeviceManager) {
         this.consumer.unregisterCallback(this.idCallbackDeviceManager);
+        this.idCallbackDeviceManager = null;
         logger.debug('unregisterCallbacks: Unregistered Callback for DeviceManager');
       } else {
         logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for DeviceManager');
@@ -283,6 +285,7 @@ class DojotConsumer {
 
       if (this.idCallbackDeviceData) {
         this.consumer.unregisterCallback(this.idCallbackDeviceData);
+        this.idCallbackDeviceData = null;
         logger.debug('unregisterCallbacks: Unregistered Callback for DeviceData');
       } else {
         logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for DeviceData');
