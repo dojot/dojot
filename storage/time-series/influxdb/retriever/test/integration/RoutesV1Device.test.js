@@ -143,6 +143,42 @@ describe('Test Devices Routes', () => {
       });
   });
 
+  test('Data from attr on a device -  More results then limit and page 2', (done) => {
+    mockQueryDataByField.mockResolvedValueOnce({
+      result: [
+        {
+          ts: '2020-11-25T16:37:10.590Z',
+          value: 'string',
+        },
+      ],
+      totalItems: 1,
+    });
+    request(app)
+      .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toStrictEqual({
+          data: [{ ts: '2020-11-25T16:37:10.590Z', value: 'string' }],
+          paging: {
+            previous: {
+              number: 1,
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=1&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
+            },
+            current: {
+              number: 2,
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
+            },
+            next: {
+              number: 3,
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=3&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
+            },
+          },
+        });
+        done();
+      });
+  });
+
   test('Data from attr on a device -  Test endpoint 2', (done) => {
     mockQueryDataByField.mockResolvedValueOnce({
       result: [

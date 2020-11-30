@@ -73,8 +73,31 @@ describe('Influx', () => {
     expect(mockStateIsReady).toBeCalled();
   });
 
-  test('createInfluxHealthChecker', () => {
+  test('createInfluxHealthChecker - heath', async () => {
     influx.createInfluxHealthChecker();
-    expect(mockAddHealthChecker).toBeCalled();
+
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+    mockStateIsHealth.mockResolvedValue(true);
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).toHaveBeenCalled();
+    expect(notReady).not.toHaveBeenCalled();
+  });
+
+  test('createInfluxHealthChecker - not heath', async () => {
+    influx.createInfluxHealthChecker();
+
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+    mockStateIsHealth.mockResolvedValue(false);
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).not.toHaveBeenCalled();
+    expect(notReady).toHaveBeenCalled();
   });
 });

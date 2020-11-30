@@ -46,7 +46,6 @@ jest.mock('../../app/influx', () => mockInflux);
 
 const App = require('../../app/App');
 
-
 describe('App', () => {
   let app = null;
   beforeAll(() => {

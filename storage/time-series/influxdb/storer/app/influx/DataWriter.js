@@ -123,7 +123,7 @@ class DataWriter {
         throw new Error('Cannot write data');
       }
     } else {
-      logger.warn('The attrs param is not a object');
+      logger.warn('writer: The attrs param is not a object');
     }
   }
 

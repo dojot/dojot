@@ -42,6 +42,16 @@ jest.mock('../../app/sdk/web/server-factory', () => mockServerFactory);
 
 jest.mock('http-errors');
 
+const mockTerminate = jest.fn();
+const mockHttpTerminator = {
+  createHttpTerminator: jest.fn(() => ({
+    terminate: mockTerminate,
+  })),
+};
+
+jest.mock('http-terminator', () => mockHttpTerminator);
+
+
 const Server = require('../../app/Server');
 
 
@@ -86,6 +96,9 @@ describe('Server', () => {
 
   test('check when error was emitted ', async () => {
     await server.registerShutdown();
+    const callback = mockRegisterShutdownHandler.mock.calls[0][0];
+    callback();
     expect(mockRegisterShutdownHandler).toHaveBeenCalled();
+    expect(mockTerminate).toHaveBeenCalled();
   });
 });

@@ -89,7 +89,7 @@ describe('Kafka', () => {
 
   test('createHealthChecker - ready', async () => {
     kafka.createHealthChecker();
-    const ready =  jest.fn();
+    const ready = jest.fn();
     const notReady = jest.fn();
 
     const callback = mockAddHealthChecker.mock.calls[0][1];
