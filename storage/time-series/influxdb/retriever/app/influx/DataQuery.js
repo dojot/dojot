@@ -192,7 +192,7 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByField: totalItems=${result.length} result=${util.inspect(result)}`);
+            logger.debug(`queryByField: totalItems=${result.length} result=${JSON.stringify(result)}`);
             return resolve({ result, totalItems: result.length });
           },
         });
