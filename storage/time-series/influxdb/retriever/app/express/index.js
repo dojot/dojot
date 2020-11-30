@@ -1,16 +1,12 @@
 
-const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 
 const swaggerUi = require('swagger-ui-express');
 const yaml = require('js-yaml');
 const fs = require('fs');
-const ExpressFactory = require('../sdk/web/framework/express-factory');
 
 const logger = new Logger('influxdb-retriever:express');
 
-const requestIdInterceptor = require('../sdk/web/framework/interceptors/request-id-interceptor');
-const responseCompressInterceptor = require('../sdk/web/framework/interceptors/response-compress-interceptor');
-const beaconInterceptor = require('../sdk/web/framework/interceptors/beacon-interceptor');
 const paginateInterceptor = require('./interceptors/CustomPaginator');
 const dojotTenantJwtParseInterceptor = require('./interceptors/DojotTenantJwtParse');
 const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
@@ -54,7 +50,7 @@ module.exports = (routes, serviceState, openApiPath) => {
     throw e;
   }
 
-  return ExpressFactory({
+  return WebUtils.framework.createExpress({
     interceptors: [
       {
         name: 'swagger-ui',
@@ -67,12 +63,12 @@ module.exports = (routes, serviceState, openApiPath) => {
         maxLimit: configPaginate['default.max.limit'],
       }),
       openApiValidatorInterceptor({ openApiPath }),
-      requestIdInterceptor({}),
-      beaconInterceptor({
+      WebUtils.framework.interceptors.requestIdInterceptor(),
+      WebUtils.framework.interceptors.beaconInterceptor({
         stateManager: serviceState,
         logger,
       }),
-      responseCompressInterceptor({
+      WebUtils.framework.interceptors.responseCompressInterceptor({
         config: {},
       }),
     ],

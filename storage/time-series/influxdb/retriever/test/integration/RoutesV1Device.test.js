@@ -6,6 +6,8 @@ const mockConfig = {
 const validToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlIjoidGVuYW50MSIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.pmuFC9u1K3oxHlf4nUsjJp1KyRz-JxWN1QS7L5AJMno';
 const tokenWithoutTenant = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
+const { WebUtils } = jest.requireActual('@dojot/microservice-sdk');
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -17,6 +19,7 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils,
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 

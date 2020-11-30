@@ -4,6 +4,14 @@ const mockConfig = {
   server: { host: '0.0.0.0', port: 3000 },
 };
 
+const reqEventMapMock = {};
+const mockServerFactory = () => ({
+  on: jest.fn().mockImplementation((event, onCallback) => {
+    reqEventMapMock[event] = onCallback;
+  }),
+  listen: jest.fn(),
+  address: jest.fn(),
+});
 const mockLogError = jest.fn();
 const mockSdk = {
   ConfigManager: {
@@ -16,6 +24,9 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils: {
+    createServer: mockServerFactory,
+  },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
@@ -29,16 +40,6 @@ const serviceStateMock = {
   registerShutdownHandler: mockRegisterShutdownHandler,
   shutdown: mockShutdown,
 };
-
-const reqEventMapMock = {};
-const mockServerFactory = () => ({
-  on: jest.fn().mockImplementation((event, onCallback) => {
-    reqEventMapMock[event] = onCallback;
-  }),
-  listen: jest.fn(),
-  address: jest.fn(),
-});
-jest.mock('../../app/sdk/web/server-factory', () => mockServerFactory);
 
 jest.mock('http-errors');
 

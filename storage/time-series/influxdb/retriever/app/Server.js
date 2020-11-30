@@ -1,8 +1,8 @@
 
-const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
-const ServerFactory = require('./sdk/web/server-factory');
+// const ServerFactory = require('./sdk/web/server-factory');
 
 const logger = new Logger('influxdb-retriever:Server');
 const { server: configServer } = ConfigManager.getConfig('RETRIEVER');
@@ -19,7 +19,7 @@ class Server {
  *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
-    this.server = ServerFactory({ config: configServerCamelCase, logger });
+    this.server = WebUtils.createServer({ config: configServerCamelCase, logger });
     this.serviceState = serviceState;
   }
 
