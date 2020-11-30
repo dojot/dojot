@@ -4,6 +4,13 @@ const mockConfig = {
     port: 6379,
     database: 1,
   },
+  log: {
+    verbose: false,
+    'console.level': 'info',
+    'file.enable': false,
+    'file.level': 'info',
+    'file.filename': 'kafka-ws-logs-%DATE%.log',
+  },
 };
 
 const mockMicroServiceSdk = {
@@ -26,6 +33,16 @@ const mockMicroServiceSdk = {
   })),
 };
 
+
+const mockRedis = {
+  createClient: jest.fn(() => ({
+    on: jest.fn(),
+    quit: jest.fn((callback) => callback()),
+  })),
+};
+
+jest.mock('redis', () => mockRedis);
+
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
 jest.mock('../../app/StateManager');
 
@@ -37,8 +54,7 @@ beforeEach(() => {
 
 describe('isNumber', () => {
   it('Init Shutdown redis successfully', async () => {
-    RedisManger.redisClient.quit = jest.fn((callback) => callback());
-    await RedisManger.shutdownHandler();
+    await RedisManger.shutdownProcess();
     expect(RedisManger.redisClient.quit).toHaveBeenCalled();
   });
 });

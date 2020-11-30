@@ -1,5 +1,3 @@
-jest.mock('../../app/StateManager');
-
 const OperatorValidator = require('../../app/WhereProcessing/OperatorValidator');
 const { Errors } = require('../../app/Errors');
 

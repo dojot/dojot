@@ -44,7 +44,7 @@ class KafkaConsumer {
    * @param {*} signalReady
    * @param {*} signalNotReady
    */
-  healthChecker(signalReady, signalNotReady) {
+  checkHealth(signalReady, signalNotReady) {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
         signalReady();
@@ -60,9 +60,9 @@ class KafkaConsumer {
   /**
    *  Shutdown handler to be passed to the ServiceStateManager.
    */
-  shutdownHandler() {
+  shutdownProcess() {
     return this.consumer.finish().then(() => {
-      this.logger.warn('Kafka Consumer finished!');
+      logger.warn('Kafka Consumer finished!');
     });
   }
 

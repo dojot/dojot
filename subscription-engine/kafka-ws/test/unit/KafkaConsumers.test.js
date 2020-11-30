@@ -31,10 +31,12 @@ const mockMicroServiceSdk = {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
   })),
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+jest.mock('redis');
 
 const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 const KafkaWSConsumers = require('../../app/Kafka/KafkaConsumer');
@@ -67,22 +69,23 @@ describe('Testing KafkaWSConsumers - works fine', () => {
 
     const ready = jest.fn();
     const notReady = jest.fn();
-    kafkaWSConsumers.healthChecker(ready, notReady);
+    kafkaWSConsumers.checkHealth(ready, notReady);
     expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(1);
 
     // else branch
-    kafkaWSConsumers.healthChecker(ready, notReady);
+    kafkaWSConsumers.checkHealth(ready, notReady);
     expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(2);
 
     // reject status
-    kafkaWSConsumers.healthChecker(ready, notReady);
+    kafkaWSConsumers.checkHealth(ready, notReady);
     expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(3);
 
     Consumer.mockClear();
   });
 
   it('should finish - graceful shutdown', () => {
-    kafkaWSConsumers.shutdownHandler();
+    kafkaWSConsumers.shutdownProcess();
+    expect(mockMicroServiceSdk.Kafka.Consumer().finish).toHaveBeenCalledTimes(1);
   });
 
   it('Should init correctly ', async () => {

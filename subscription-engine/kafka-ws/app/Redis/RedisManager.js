@@ -26,18 +26,18 @@ class RedisManager {
     const stateService = 'redis';
     this.redisClient.on('connect', () => StateManager.signalReady(stateService));
     this.redisClient.on('reconnecting', () => StateManager.signalNotReady(stateService));
-    /**
-     * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
-     * and some unexpected behaviors happens.
-     *
-     * The error event doesn't mean the service is unhealthy, because it can be
-     * AbortError, ParserError AggregateError, or others subclasses of RedisError
-     * When the client disconnects to redis the 'end' event is fired, there we can consider
-     * the service is unhealthy
-     */
+    // /**
+    //  * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
+    //  * and some unexpected behaviors happens.
+    //  *
+    //  * The error event doesn't mean the service is unhealthy, because it can be
+    //  * AbortError, ParserError AggregateError, or others subclasses of RedisError
+    //  * When the client disconnects to redis the 'end' event is fired, there we can consider
+    //  * the service is unhealthy
+    //  */
     this.redisClient.on('error', (error) => logger.warn(`${error}`));
     this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
-    StateManager.registerShutdownHandler(this.shutdownHandler.bind(this));
+    StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
     return Object.seal(this);
   }
@@ -50,11 +50,11 @@ class RedisManager {
    * @function shutdown Handler
    * @public
    */
-  async shutdownHandler() {
-    logger.warn('Shutting redis, disconnecting...');
+  async shutdownProcess() {
+    logger.warn('Disconnecting from Redis...');
     await new Promise((resolve) => {
       this.redisClient.quit(() => {
-        resolve('Redis shutdown successfully!');
+        resolve('successfully disconnected from Redis!');
       });
     });
 
