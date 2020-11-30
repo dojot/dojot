@@ -66,8 +66,8 @@ const mongoQS = Object.freeze(new MongoQS({
 }));
 
 class CertificateModel {
-  constructor({ db }) {
-    Object.defineProperty(this, 'db', { value: db });
+  constructor({ mongoClient }) {
+    Object.defineProperty(this, 'mongoClient', { value: mongoClient });
     Object.defineProperty(this, 'model', { value: mongooseModel });
     Object.defineProperty(this, 'mongoQS', { value: mongoQS });
   }
@@ -89,11 +89,11 @@ class CertificateModel {
   }
 
   parseProjectionFields(commaSeparatedFields) {
-    return this.db.parseProjectionFields(commaSeparatedFields, projectableFields);
+    return this.mongoClient.parseProjectionFields(commaSeparatedFields, projectableFields);
   }
 
   sanitizeFields(cert) {
-    return this.db.sanitizeFields(cert, projectableFields);
+    return this.mongoClient.sanitizeFields(cert, projectableFields);
   }
 }
 

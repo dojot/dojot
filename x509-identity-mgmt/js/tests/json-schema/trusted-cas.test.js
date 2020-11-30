@@ -4,11 +4,7 @@ const faker = require('faker');
 
 const { generateCert } = require('../util.test');
 
-const DIContainer = require('../../src/di-container');
-
-const container = DIContainer(global.config);
-
-const framework = container.resolve('framework');
+const framework = global.container.resolve('framework');
 
 const req = request(framework);
 
@@ -28,7 +24,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure!',
+          message: 'Input data schema validation failure.',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -57,7 +53,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure!',
+          message: 'Input data schema validation failure.',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -94,7 +90,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure!',
+          message: 'Input data schema validation failure.',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -123,7 +119,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure!',
+          message: 'Input data schema validation failure.',
           schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
           schemaErrors: [
             {
@@ -131,9 +127,9 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
               dataPath: '.caPem',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/pattern',
               params: {
-                pattern: '^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5})+$',
+                pattern: '^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$',
               },
-              message: 'should match pattern "^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5})+$"',
+              message: 'should match pattern "^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$"',
             },
           ],
         });
@@ -151,7 +147,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure!',
+          message: 'Input data schema validation failure.',
           schema$id: 'http://www.dojot.com.br/schemas/upd-trust-ca',
           schemaErrors: [
             {
@@ -179,7 +175,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure!',
+          message: 'Input data schema validation failure.',
           schema$id: 'http://www.dojot.com.br/schemas/upd-trust-ca',
           schemaErrors: [
             {

@@ -1,10 +1,7 @@
 const request = require('supertest');
-const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
-const container = DIContainer(global.config);
-
-const framework = container.resolve('framework');
+const framework = global.container.resolve('framework');
 
 const req = request(framework);
 

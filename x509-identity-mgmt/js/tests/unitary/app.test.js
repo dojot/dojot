@@ -7,17 +7,14 @@ global.config.framework.trustproxy = true;
 
 const { asValue } = require('awilix');
 const request = require('supertest');
-const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
-const container = DIContainer(global.config);
-
 // register some request-specific data..
-container.register({
+global.container.register({
   tenant: asValue('admin'),
 });
 
-const framework = container.resolve('framework');
+const framework = global.container.resolve('framework');
 
 const req = request(framework);
 

@@ -9,7 +9,7 @@ const { unflatten } = require('flat');
 
 const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
 
-const DIContainer = require('./src/di-container');
+const DIContainer = require('./src/DIContainer');
 
 const userConfigFile = process.env.X509IDMGMT_USER_CONFIG_FILE || 'production.conf';
 ConfigManager.loadSettings('X509IDMGMT', userConfigFile);
@@ -28,17 +28,11 @@ if (config.logger.file) {
 Logger.setVerbose(config.logger.verbose);
 
 const container = DIContainer(config);
-
 const logger = container.resolve('logger');
-
 const stateManager = container.resolve('stateManager');
-
 const ejbcaHealthCheck = container.resolve('ejbcaHealthCheck');
-
-const db = container.resolve('db');
-
+const mongoClient = container.resolve('mongoClient');
 const server = container.resolve('server');
-
 const framework = container.resolve('framework');
 
 // Emitted each time there is a request. Note that there may be multiple
@@ -71,14 +65,16 @@ server.on('error', (e) => {
 server.listen(config.server.port);
 
 // Starts the process of connecting to the database
-db.connect();
-
-// The EJBCA healthchack is done at intervals directly in the Event Loop
-ejbcaHealthCheck.start();
+mongoClient.connect();
 
 // create an instance of http-terminator and instead of
 // using server.close(), use httpTerminator.terminate()
 const httpTerminator = createHttpTerminator({ server });
+
+// The EJBCA healthchack is done at intervals directly in the Event Loop
+stateManager.addHealthChecker('ejbca',
+  ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
+  config.ejbca.healthcheck.delayms);
 
 // register handlers to gracefully shutdown the components...
 stateManager.registerShutdownHandler(async () => {
@@ -88,17 +84,10 @@ stateManager.registerShutdownHandler(async () => {
   return Promise.resolve(true);
 });
 
-stateManager.registerShutdownHandler(async () => {
-  logger.debug('Stopping the EJBCA health check...');
-  await ejbcaHealthCheck.stop();
-  logger.debug('EJBCA healthcheck stopped!');
-  return Promise.resolve(true);
-});
-
 stateManager.registerShutdownHandler(() => {
   logger.debug('Closing the connection to MongoDB...');
   return new Promise((resolve, reject) => {
-    db.close((err) => {
+    mongoClient.close((err) => {
       if (err) {
         logger.error('Error closing connection to MongoDB', err);
         reject(err);

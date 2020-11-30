@@ -8,7 +8,6 @@ const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
 const request = require('supertest');
-const DIContainer = require('../../src/di-container');
 const {
   token, caCert, caFingerprint, caCRL,
 } = require('../util.test');
@@ -54,9 +53,7 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
-const container = DIContainer(global.config);
-
-const framework = container.resolve('framework');
+const framework = global.container.resolve('framework');
 
 const req = request(framework);
 

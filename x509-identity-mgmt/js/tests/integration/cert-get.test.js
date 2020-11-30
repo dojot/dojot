@@ -1,10 +1,7 @@
 const request = require('supertest');
-const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
-const container = DIContainer(global.config);
-
-const certificateModel = container.resolve('certificateModel');
+const certificateModel = global.container.resolve('certificateModel');
 certificateModel.model = {
   find: jest.fn().mockReturnThis(),
   findOne: jest.fn().mockReturnThis(),
@@ -17,7 +14,7 @@ certificateModel.model = {
   countDocuments: jest.fn().mockResolvedValue(),
 };
 
-const framework = container.resolve('framework');
+const framework = global.container.resolve('framework');
 
 const req = request(framework);
 

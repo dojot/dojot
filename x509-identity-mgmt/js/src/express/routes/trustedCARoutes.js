@@ -1,6 +1,6 @@
 const HttpStatus = require('http-status-codes');
 
-const sanitize = require('./sanitize-params');
+const sanitizeParams = require('./sanitizeParams');
 
 const CA_MODEL = 'trustedCAModel';
 const CA_SERVICE = 'trustedCAService';
@@ -22,7 +22,7 @@ module.exports = ({
         middleware: [
           validateNewTrustedCA(),
           async (req, res) => {
-            const pemArr = req.body.caPem.match(sanitize.certRegExp);
+            const pemArr = req.body.caPem.match(sanitizeParams.certRegExp);
             if (!pemArr || pemArr.length > 1) {
               throw BadRequest('Only one CA certificate is expected per request.');
             }
@@ -68,7 +68,7 @@ module.exports = ({
     path: ['/trusted-cas/:caFingerprint'],
     params: [{
       name: 'caFingerprint',
-      trigger: sanitize.fingerprint,
+      trigger: sanitizeParams.fingerprint,
     }],
     handlers: [
       {

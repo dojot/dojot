@@ -6,7 +6,6 @@ const fs = require('fs');
 const soap = require('soap');
 const readline = require('readline');
 const request = require('supertest');
-const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
 fs.promises = {
@@ -32,9 +31,7 @@ soap.createClientAsync.mockReturnValue({
 
 soap.ClientSSLSecurityPFX.mockImplementation(() => {});
 
-const container = DIContainer(global.config);
-
-const certificateModel = container.resolve('certificateModel');
+const certificateModel = global.container.resolve('certificateModel');
 certificateModel.model = {
   findOne: jest.fn().mockReturnThis(),
   findByIdAndDelete: jest.fn().mockReturnThis(),

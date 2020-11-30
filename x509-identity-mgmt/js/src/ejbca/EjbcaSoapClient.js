@@ -18,6 +18,7 @@ async function checkSecurityFiles({ pkcs12, pkcs12secret, logger }) {
 }
 
 async function getFirstLine(pathToFile) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const readable = fs.createReadStream(pathToFile);
   const reader = readline.createInterface({ input: readable });
   const firstLine = await new Promise((resolve) => {
@@ -34,12 +35,14 @@ async function createClient({
   wsdl, pkcs12, pkcs12secret, trustedCA,
 }) {
   // loads PKCS#12 binary file (standard ASN.1 - DER encoding)
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const p12Der = await fs.promises.readFile(pkcs12);
 
   // retrieves the PKCS#12 passphrase
   const passphrase = await getFirstLine(pkcs12secret);
 
   // loads the trusted CA PEM encoded certificate
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const ca = await fs.promises.readFile(trustedCA);
 
   // Creates a SOAP client based on the WSDL provided by the EJBCA server
@@ -53,7 +56,7 @@ async function createClient({
   return client;
 }
 
-class EjbcaSoap {
+class EjbcaSoapClient {
   constructor({
     wsdl, pkcs12, pkcs12secret, trustedCA, logger,
   }) {
@@ -119,4 +122,4 @@ class EjbcaSoap {
   }
 }
 
-module.exports = EjbcaSoap;
+module.exports = EjbcaSoapClient;

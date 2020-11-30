@@ -1,72 +1,50 @@
 const awilix = require('awilix');
 
-const { Logger, ServiceStateManager } = require('@dojot/microservice-sdk');
+const { Logger, ServiceStateManager, WebUtils } = require('@dojot/microservice-sdk');
 
-const pkiUtils = require('./core/pki-utils');
+const pkiUtils = require('./core/pkiUtils');
 
-const dnUtils = require('./core/dn-utils');
+const dnUtils = require('./core/dnUtils');
 
-const schemaValidator = require('./core/schema-validator');
+const schemaValidator = require('./core/schemaValidator');
 
-const serverFactory = require('./sdk/web/server-factory');
+const mongoClient = require('./db/mongoClient');
 
-const expressFactory = require('./sdk/web/framework/express-factory');
+const CertificateModel = require('./db/CertificateModel');
 
-const defaultErrorHandler = require('./sdk/web/framework/backing/default-error-handler');
+const TrustedCAModel = require('./db/TrustedCAModel');
 
-const errorTemplate = require('./sdk/web/framework/backing/error-template');
+const EjbcaSoapClient = require('./ejbca/EjbcaSoapClient');
 
-const db = require('./db/mongo-client');
+const EjbcaFacade = require('./ejbca/EjbcaFacade');
 
-const CertificateModel = require('./db/certificate-model');
+const EjbcaHealthCheck = require('./ejbca/EjbcaHealthCheck');
 
-const TrustedCAModel = require('./db/trusted-ca-model');
+const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
 
-const EjbcaSoap = require('./ejbca/ejbca-soap-client');
+const tokenParsingInterceptor = require('./express/interceptors/tokenParsingInterceptor');
 
-const EjbcaFacade = require('./ejbca/ejbca-facade');
+const throwAwayRoutes = require('./express/routes/throwAwayRoutes');
 
-const EjbcaHealthCheck = require('./ejbca/ejbca-health-check');
+const internalCARoutes = require('./express/routes/internalCARoutes');
 
-const responseCompressInterceptor = require('./sdk/web/framework/interceptors/response-compress-interceptor');
+const trustedCARoutes = require('./express/routes/trustedCARoutes');
 
-const requestIdInterceptor = require('./sdk/web/framework/interceptors/request-id-interceptor');
+const certificateRoutes = require('./express/routes/certificateRoutes');
 
-const beaconInterceptor = require('./sdk/web/framework/interceptors/beacon-interceptor');
+const CertificateService = require('./services/CertificateService');
 
-const requestLogInterceptor = require('./sdk/web/framework/interceptors/request-log-interceptor');
+const InternalCAService = require('./services/InternalCAService');
 
-const paginateInterceptor = require('./sdk/web/framework/interceptors/paginate-interceptor');
-
-const jsonBodyParsingInterceptor = require('./sdk/web/framework/interceptors/json-body-parsing-interceptor');
-
-const staticFileInterceptor = require('./sdk/web/framework/interceptors/static-file-interceptor');
-
-const scopedDIInterceptor = require('./express/interceptors/scoped-di-interceptor');
-
-const tokenParsingInterceptor = require('./express/interceptors/token-parsing-interceptor');
-
-const throwAwayRoutes = require('./express/routes/throw-away-routes');
-
-const internalCARoutes = require('./express/routes/internal-ca-routes');
-
-const trustedCARoutes = require('./express/routes/trusted-ca-routes');
-
-const certificateRoutes = require('./express/routes/certificate-routes');
-
-const CertificateService = require('./services/certificate-service');
-
-const InternalCAService = require('./services/internal-ca-service');
-
-const TrustedCAService = require('./services/trusted-ca-service');
+const TrustedCAService = require('./services/TrustedCAService');
 
 const decoration = require('./decorators/decoration');
 
-const LogExecutionTime = require('./decorators/log-execution-time');
-const LogExecutionTimeAsync = require('./decorators/log-execution-time-async');
+const LogExecutionTime = require('./decorators/LogExecutionTime');
+const LogExecutionTimeAsync = require('./decorators/LogExecutionTimeAsync');
 
-const InspectMethod = require('./decorators/inspect-method');
-const InspectMethodAsync = require('./decorators/inspect-method-async');
+const InspectMethod = require('./decorators/InspectMethod');
+const InspectMethodAsync = require('./decorators/InspectMethodAsync');
 
 const defsSchema = require('../schemas/defs.json');
 const regTrustCaSchema = require('../schemas/register-trusted-ca-certificate.json');
@@ -77,6 +55,16 @@ const chOwnCertSchema = require('../schemas/change-owner-certificate.json');
 const {
   asFunction, asValue, asClass, Lifetime, InjectionMode,
 } = awilix;
+
+const {
+  responseCompressInterceptor,
+  requestIdInterceptor,
+  beaconInterceptor,
+  requestLogInterceptor,
+  paginateInterceptor,
+  jsonBodyParsingInterceptor,
+  staticFileInterceptor,
+} = WebUtils.framework.interceptors;
 
 function createObject(config) {
   const levelDebug = () => (config.logger.console.level.toLowerCase() === 'debug'
@@ -96,19 +84,20 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    stateManager: asClass(ServiceStateManager.Manager, {
-      injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({
-        services: ['server', 'db', 'ejbca'],
-        config: {
-          lightship: {
-            port: config.server.healthcheck.port,
-            shutdownDelay: config.server.shutdown.delay,
-            gracefulShutdownTimeout: config.server.shutdown.gracefultimeoutms,
-            shutdownHandlerTimeout: config.server.shutdown.handlertimeoutms,
-          },
+    stateManager: asFunction(() => {
+      const stateManager = new ServiceStateManager({
+        lightship: {
+          port: config.server.healthcheck.port,
+          shutdownDelay: config.server.shutdown.delay,
+          gracefulShutdownTimeout: config.server.shutdown.gracefultimeoutms,
+          shutdownHandlerTimeout: config.server.shutdown.handlertimeoutms,
         },
-      }),
+      });
+      stateManager.registerService('server');
+      stateManager.registerService('mongodb');
+      stateManager.registerService('ejbca');
+      return stateManager;
+    }, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -134,7 +123,7 @@ function createObject(config) {
       lifetime: Lifetime.SCOPED,
     }),
 
-    errorTemplate: asValue(errorTemplate, {
+    errorTemplate: asValue(WebUtils.framework.errorTemplate, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -155,13 +144,13 @@ function createObject(config) {
     // | MongoDB |
     // +---------+
 
-    db: asFunction(db, {
+    mongoClient: asFunction(mongoClient, {
       injector: () => {
         const sm = DIContainer.resolve('stateManager');
         return {
           healthCheck: ({
-            ready: sm.signalReady.bind(sm, 'db'),
-            notReady: sm.signalNotReady.bind(sm, 'db'),
+            ready: sm.signalReady.bind(sm, 'mongodb'),
+            notReady: sm.signalNotReady.bind(sm, 'mongodb'),
           }),
           config: config.mongo.conn,
         };
@@ -182,21 +171,14 @@ function createObject(config) {
     // +-------+
 
     ejbcaHealthCheck: asClass(EjbcaHealthCheck, {
-      injector: () => {
-        const sm = DIContainer.resolve('stateManager');
-        return {
-          healthCheck: ({
-            ready: sm.signalReady.bind(sm, 'ejbca'),
-            notReady: sm.signalNotReady.bind(sm, 'ejbca'),
-          }),
-          url: config.ejbca.healthcheck.url,
-          delay: config.ejbca.healthcheck.delayms,
-        };
-      },
+      injector: () => ({
+        url: config.ejbca.healthcheck.url,
+        delay: config.ejbca.healthcheck.delayms,
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    ejbcaSoap: asClass(EjbcaSoap, {
+    ejbcaSoap: asClass(EjbcaSoapClient, {
       injector: () => ({
         wsdl: config.ejbca.wsdl,
         pkcs12: config.ejbca.pkcs12,
@@ -217,12 +199,12 @@ function createObject(config) {
     // | Web service |
     // +-------------+
 
-    server: asFunction(serverFactory, {
+    server: asFunction(WebUtils.createServer, {
       injector: () => ({ config: config.server }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    framework: asFunction(expressFactory, {
+    framework: asFunction(WebUtils.framework.createExpress, {
       injector: () => ({
         config: config.framework,
         interceptors: [
@@ -248,6 +230,9 @@ function createObject(config) {
           // The order of the error handlers matters
           DIContainer.resolve('defaultErrorHandler'),
         ],
+        supportWebsockets: false,
+        supportTrustProxy: true,
+        catchInvalidRequest: true,
       }),
       lifetime: Lifetime.SINGLETON,
     }),
@@ -256,7 +241,7 @@ function createObject(config) {
     // | Route Error Handlers |
     // +----------------------+
 
-    defaultErrorHandler: asFunction(defaultErrorHandler, {
+    defaultErrorHandler: asFunction(WebUtils.framework.defaultErrorHandler, {
       lifetime: Lifetime.SINGLETON,
     }),
 

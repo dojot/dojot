@@ -1,10 +1,7 @@
 const request = require('supertest');
-const DIContainer = require('../../src/di-container');
 const { token } = require('../util.test');
 
-const container = DIContainer(global.config);
-
-const certificateModel = container.resolve('certificateModel');
+const certificateModel = global.container.resolve('certificateModel');
 certificateModel.model = {
   findOneAndUpdate: jest.fn().mockReturnThis(),
   maxTimeMS: jest.fn().mockReturnThis(),

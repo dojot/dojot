@@ -6,8 +6,8 @@
     "scripts": {
         "lint": "./node_modules/.bin/eslint src/*.js",
         "start": "cross-env NODE_ENV=production node index",
-        "dev": "cross-env NODE_ENV=development node --trace-sync-io index",
-        "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request X509IDMGMT_LOGGER_CONSOLE_LEVEL=debug X509IDMGMT_SERVER_PORT=3737 X509IDMGMT_SERVER_HEALTHCHECK_PORT=9797 X509IDMGMT_EJBCA_PKCS12=./tls/ejbcaclient.p12 X509IDMGMT_EJBCA_PKCS12SECRET=./tls/ejbcaclient.secret X509IDMGMT_EJBCA_TRUSTEDCA=./tls/ejbcaclient-trustedca.pem X509IDMGMT_MONGO_CONN_OPTIONS_USER=root X509IDMGMT_MONGO_CONN_OPTIONS_PASS=pass X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE=admin  node --inspect-brk --trace-sync-io index",
+        "dev": "cross-env NODE_ENV=development node --trace-sync-io --unhandled-rejections=strict index",
+        "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request X509IDMGMT_LOGGER_CONSOLE_LEVEL=debug X509IDMGMT_SERVER_PORT=3737 X509IDMGMT_SERVER_HEALTHCHECK_PORT=9797 X509IDMGMT_EJBCA_PKCS12=./tls/ejbcaclient.p12 X509IDMGMT_EJBCA_PKCS12SECRET=./tls/ejbcaclient.secret X509IDMGMT_EJBCA_TRUSTEDCA=./tls/ejbcaclient-trustedca.pem X509IDMGMT_MONGO_CONN_OPTIONS_USER=root X509IDMGMT_MONGO_CONN_OPTIONS_PASS=pass X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE=admin  node --inspect-brk --trace-sync-io --unhandled-rejections=strict index",
         "test": "cross-env NODE_ENV=test jest --verbose",
         "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
         "check-licenses": "apache2-license-checker"
@@ -26,9 +26,9 @@
         "EJBCA",
         "dojot"
     ],
-    "license": "GPL-3.0",
+    "license": "Apache-2.0",
     "dependencies": {
-        "@dojot/microservice-sdk": "^0.1.6",
+        "@dojot/microservice-sdk": "^0.1.9",
         "ajv": "^6.12.0",
         "asn1js": "^2.0.26",
         "awilix": "^4.2.6",
@@ -49,7 +49,7 @@
         "on-finished": "^2.3.0",
         "pkijs": "^2.1.88",
         "serve-index": "^1.9.1",
-        "soap": "^0.31.0"
+        "soap": "^0.35.0"
     },
     "devDependencies": {
         "@bbc/apache2-license-checker": "^1.1.4",
@@ -58,6 +58,7 @@
         "eslint-config-airbnb-base": "^14.1.0",
         "eslint-plugin-import": "^2.20.2",
         "eslint-plugin-jest": "^23.8.2",
+        "eslint-plugin-security": "^1.4.0",
         "faker": "^4.1.0",
         "jest": "^25.2.7",
         "supertest": "^4.0.2"

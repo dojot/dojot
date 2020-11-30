@@ -87,8 +87,7 @@ class CertificateService {
     this.pkiUtils.checkRemainingDays(certToBeRegistered, this.certMinimumValidityDays);
 
     // ensures that the certificate is not a CA certificate
-    // and that it is also not self-signed
-    await this.pkiUtils.assertLeaf(certToBeRegistered);
+    this.pkiUtils.assertLeaf(certToBeRegistered);
 
     // ensures that the certificate has not yet been registered for the tentant
     await this.checkExistingCertificate(certFingerprint);

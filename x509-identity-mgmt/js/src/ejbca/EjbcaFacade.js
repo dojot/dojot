@@ -42,7 +42,7 @@ class EjbcaFacade {
   /**
    * Delegates to the Certificate Authority (EJBCA) the issue of a certificate to the informed CSR.
    *
-   * @param {object} subjectDN to be included in the certificate to be generated.
+   * @param {string} subjectDN to be included in the certificate to be generated.
    * @param {number} validity of the certificate to be generated.
    * @param {string} csrPem encoded with request for certificate signing.
    */
@@ -154,7 +154,7 @@ class EjbcaFacade {
    * Revokes a certificate issued by the EJBCA. The serial number of the certificate
    * will be included in the next CRL that the EJBCA issues.
    *
-   * @param {object} issuerDN of the CA that issued the certificate to be revoked.
+   * @param {string} issuerDN of the CA that issued the certificate to be revoked.
    * @param {string} certificateSN Serial number of the certificate to be revoked.
    */
   async revokeCertificate(issuerDN, certificateSN) {

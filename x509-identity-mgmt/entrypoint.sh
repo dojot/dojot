@@ -10,7 +10,7 @@
 
 # Start the nodejs service
 cd /opt/x509-identity-mgmt || exit
-node index.js &
+node --unhandled-rejections=strict index.js &
 status=$?
 export NODEJS_PID=$!
 
