@@ -15,6 +15,9 @@ Then, you can access [http://localhost:3000/tss/v1/api-docs/](http://localhost:3
 
 To obtain the data entered by kafka you can use these values:
 
+- In *Server variables*  you can provide the following **url**:
+  - http://localhost:3000/
+
 - In **Authorized** you can provide the following token:
 
 `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXJ2aWNlIjoidGVuYW50MSIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.pmuFC9u1K3oxHlf4nUsjJp1KyRz-JxWN1QS7L5AJMno`

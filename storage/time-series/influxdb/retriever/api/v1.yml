@@ -110,7 +110,7 @@ servers:
   description: URL for Time Series Service
   variables:
     url:
-      default: 'http://localhost:3000/'
+      default: 'http://localhost:8000/'
 components:
   securitySchemes:
     bearerAuth:
