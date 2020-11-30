@@ -33,7 +33,6 @@ const mockMicroServiceSdk = {
   })),
 };
 
-
 const mockRedis = {
   createClient: jest.fn(() => ({
     on: jest.fn(),
