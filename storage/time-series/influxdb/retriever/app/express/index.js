@@ -11,8 +11,6 @@ const paginateInterceptor = require('./interceptors/CustomPaginator');
 const dojotTenantJwtParseInterceptor = require('./interceptors/DojotTenantJwtParse');
 const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
 
-const defaultErrorHandler = require('../sdk/web/framework/backing/default-error-handler');
-
 const { express: configExpress, paginate: configPaginate } = ConfigManager.getConfig('RETRIEVER');
 
 
@@ -74,7 +72,7 @@ module.exports = (routes, serviceState, openApiPath) => {
     ],
     routes: (routes).flat(),
     errorHandlers: [
-      defaultErrorHandler({ logger }),
+      WebUtils.framework.defaultErrorHandler({ logger }),
     ],
     logger,
     config: {
