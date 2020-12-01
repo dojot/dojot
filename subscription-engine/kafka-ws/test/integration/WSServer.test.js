@@ -17,11 +17,13 @@ const mockMicroServiceSdk = {
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
     addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
+    registerShutdownHandler: jest.fn(),
   })),
   Logger: jest.fn(() => ({
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
   })),
 };
 

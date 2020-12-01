@@ -50,6 +50,9 @@ if (config.server.tls) {
   server = http.createServer(application.expressApp);
 }
 
+// register shutdown
+StateManager.registerShutdownHandler(websocketTarball.onClose);
+
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
 
