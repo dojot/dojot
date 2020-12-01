@@ -155,7 +155,7 @@ components:
           value: "2025-10-01T20:40:44.000123456Z"
       schema:
         type: string
-        format: date-time
+        format: date-time #TODO: Not being properly checked
     limit:
       name: limit
       in: query
@@ -166,7 +166,7 @@ components:
       required: false
       schema:
         type: integer
-        minimum: 1
+        minimum: 1 #TODO: Not being properly checked
         default: 256
     page:
       name: page
@@ -175,7 +175,7 @@ components:
       required: false
       schema:
         type: integer
-        minimum: 1
+        minimum: 1 #TODO: Not being properly checked
         default: 1
     order:
       in: query
