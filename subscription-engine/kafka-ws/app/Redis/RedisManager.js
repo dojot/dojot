@@ -26,15 +26,15 @@ class RedisManager {
     const stateService = 'redis';
     this.redisClient.on('connect', () => StateManager.signalReady(stateService));
     this.redisClient.on('reconnecting', () => StateManager.signalNotReady(stateService));
-    // /**
-    //  * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
-    //  * and some unexpected behaviors happens.
-    //  *
-    //  * The error event doesn't mean the service is unhealthy, because it can be
-    //  * AbortError, ParserError AggregateError, or others subclasses of RedisError
-    //  * When the client disconnects to redis the 'end' event is fired, there we can consider
-    //  * the service is unhealthy
-    //  */
+    /**
+     * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
+     * and some unexpected behaviors happens.
+     *
+     * The error event doesn't mean the service is unhealthy, because it can be
+     * AbortError, ParserError AggregateError, or others subclasses of RedisError
+     * When the client disconnects to redis the 'end' event is fired, there we can consider
+     * the service is unhealthy
+     */
     this.redisClient.on('error', (error) => logger.warn(`${error}`));
     this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
