@@ -136,7 +136,9 @@ In this topic the idea is to explain what this service does with each message it
   - `configure`: The same behavior as  `*.device-data`.
   - `remove`: This message will trigger the deletion of a *measurement* (**deviceid**) in an *Organization* (**tenant**).
 
-__NOTE THAT__ When service starts will be created a default Organization with a default bucket, a default user with a default password and a default token. You can change all of these default values, see more at [general configurations](#general-configurations).
+<!-- __NOTE THAT__ When service starts will be created a default Organization with a default bucket, a default user with a default password and a default token. You can change all of these default values, see more at [general configurations](#general-configurations). -->
+
+__NOTE THAT__ When service starts a default Organization with a default bucket, a default user with a default password and a default token must have already been created, optionally with a retention. You need to configure all of these values, see more at [general configurations](#general-configurations).
 
 ## Dependencies
 
@@ -199,7 +201,7 @@ convention.
 | influx.default.token | Configure a token (this token will be allowed to write/read in all organizations) | dojot@token_default | string  | STORER_INFLUX_DEFAULT_TOKEN
 | influx.default.user | Set up a username | dojot | string  | STORER_INFLUX_DEFAULT_USER
 | influx.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *InfluxDB* service in milliseconds.  | 60000 | integer  | STORER_INFLUX_HEATHCHECK_MS
-| influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). | 168 | integer |STORER_INFLUX_RETENTION_HRS
+| influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). | 168 | integer | STORER_INFLUX_RETENTION_HRS
 | influx.url | Address of the *InfluxDB* service  | http://influxdb:8086 | url | STORER_INFLUX_URL
 
 ##### InfluxDB Write Options

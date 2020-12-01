@@ -60,9 +60,6 @@ class App {
       // initializes kafka consumer
       await this.kafka.getKafkaConsumerInstance().init();
 
-      // create the initial org, user and bucket
-      await this.influxDB.getInfluxOrgInstance().initOnboarding();
-
       // associate by callback kafka consumers and influxdb actions
       this.initCallbacksTenantToCreateAndDelOrgs();
       this.initCallbacksDevicesCreateAndDelData();

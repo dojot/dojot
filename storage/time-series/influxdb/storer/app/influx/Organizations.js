@@ -157,38 +157,6 @@ class Organizations {
   }
 
   /**
-   *  Set up initial user, org and bucket
-   *  Post an onboarding request to set up initial user, org and bucket.
-   *
-   *  @throws If Cannot onboard initial Org
-   */
-  async initOnboarding() {
-    logger.debug(`initOnboarding: Init default ${this.defaultOrg} org...`);
-    try {
-      const { allowed } = await this.setupApi.getSetup();
-      if (allowed) {
-        const res = await this.setupApi.postSetup({
-          body: {
-            org: this.defaultOrg,
-            bucket: this.defaultBucket,
-            username: this.defaultUser,
-            password: this.defaultPassword,
-            token: this.defaultToken,
-            retentionPeriodHrs: this.retentionPeriodHrs,
-          },
-        });
-        logger.info(`initOnboarding: The default ${this.defaultOrg} org was created`);
-        logger.debug('initOnboarding:', res);
-      } else {
-        logger.warn(`initOnboarding: Default ${this.defaultOrg} org already onboard.`);
-      }
-    } catch (e) {
-      logger.error(`initOnboarding: Some error when try to onboarding a new ${this.defaultOrg} org.`, e);
-      throw new Error('Cannot onboard initial Org');
-    }
-  }
-
-  /**
    * Create a organization with a default bucket
    *
    * @param {String} org New organization name

@@ -23,7 +23,6 @@ jest.mock('@dojot/microservice-sdk', () => mockSdk);
 const mockStateIsReady = jest.fn();
 const mockCreateInfluxHealthChecker = jest.fn();
 const mockInfluxRegisterShutdown = jest.fn();
-const mockInfluxInitOnboarding = jest.fn();
 const mockCreateOrgWithDefaultBucket = jest.fn();
 const mockDeleteOrg = jest.fn();
 const mockCloseOne = jest.fn();
@@ -36,7 +35,6 @@ const mockInflux = jest.fn().mockImplementation(() => ({
     isReady: mockStateIsReady,
   })),
   getInfluxOrgInstance: jest.fn().mockImplementation(() => ({
-    initOnboarding: mockInfluxInitOnboarding,
     createOrgWithDefaultBucket: mockCreateOrgWithDefaultBucket,
     deleteOrg: mockDeleteOrg,
   })),
@@ -109,8 +107,6 @@ describe('App', () => {
 
     expect(mockKafkaHealthChecker).toBeCalled();
     expect(mockKafkaRegisterShutdown).toBeCalled();
-
-    expect(mockInfluxInitOnboarding).toBeCalled();
 
     expect(mockKafkaConInit).toBeCalled();
 

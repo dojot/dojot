@@ -84,13 +84,24 @@ services:
     # - ../storer/app/:/opt/influxdb-storer/app/:Z
     #command: ["npm", "run", "dev"]
 
+  influxdb-setup:
+    image: quay.io/influxdb/influxdb:v2.0.2
+    restart:  on-failure
+    volumes:
+      - influx-config:/root/.influxdbv2/
+      - ./init-influx.sh:/init-influx.sh:Z
+    entrypoint:
+      - /init-influx.sh
+    depends_on:
+      - influxdb
+
   influxdb:
     image: quay.io/influxdb/influxdb:v2.0.2
-    command: influxd --log-level=debug --reporting-disabled
+    command: influxd --reporting-disabled
     restart: always
     volumes:
-      - influxdata:/var/lib/influxdb
-      - influxdata-config:/root/.influxdbv2
+      - influx-data:/var/lib/influxdb
+      - influx-config:/root/.influxdbv2
     ports:
       - "8086:8086"
     healthcheck:
@@ -101,5 +112,5 @@ services:
         max-size: 100m
 
 volumes:
-  influxdata:
-  influxdata-config:
+  influx-data:
+  influx-config:

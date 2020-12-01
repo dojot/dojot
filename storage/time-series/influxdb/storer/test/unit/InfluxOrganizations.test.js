@@ -64,16 +64,6 @@ describe('Test Influx Orgs', () => {
     orgs = new Organizations('url', 'token', 'user', 'pass', 'orgDefault', 'defaultBucket', 100);
   });
 
-  test('initOnboarding - test ok ', async () => {
-    mockGetSetup.mockResolvedValueOnce({ allowed: true });
-    await orgs.initOnboarding();
-    expect(mockPostSetup).toHaveBeenCalledWith({
-      body: {
-        bucket: 'defaultBucket', org: 'orgDefault', password: 'pass', retentionPeriodHrs: 100, token: 'token', username: 'user',
-      },
-    });
-  });
-
   test('createOrgWithDefaultBucket - org and bucket doest exist test ok ', async () => {
     mockGetOrgs.mockResolvedValueOnce(null);
     mockPostOrgs.mockResolvedValueOnce({ id: 123 });

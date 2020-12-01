@@ -1,6 +1,10 @@
 
 # Example
 
+## Influxdb initial settings
+
+In this example, a script is executed for the initial settings of influxdb (creation of organization, user, password, token, ...). The `influxdb-setup` service in`docker-compose.yml` is responsible for running the `init-influx.sh` script that creates such initial configurations.
+
 ## Simulating dojot kafka messages with InfluxDB
 
 This example simulates dojot kafka messages that are consumed by InfluxDB-Storer and can be accessed by InfluxDB-Retriever via REST.

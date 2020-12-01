@@ -36,9 +36,9 @@ const mockInfluxDataWriter = jest.fn().mockImplementation(() => ({
 }));
 jest.mock('../../app/influx/DataWriter', () => mockInfluxDataWriter);
 
-const mockInfluxInitOnboarding = jest.fn();
+const mockInfluxCreateOrgWithDefaultBucket = jest.fn();
 const mockInfluxOrg = jest.fn().mockImplementation(() => ({
-  initOnboarding: mockInfluxInitOnboarding,
+  createOrgWithDefaultBucket: mockInfluxCreateOrgWithDefaultBucket,
 }));
 jest.mock('../../app/influx/Organizations', () => mockInfluxOrg);
 
@@ -106,8 +106,8 @@ describe('Influx', () => {
   });
 
   test('getInfluxOrgInstance', () => {
-    influx.getInfluxOrgInstance().initOnboarding();
-    expect(mockInfluxInitOnboarding).toBeCalled();
+    influx.getInfluxOrgInstance().createOrgWithDefaultBucket();
+    expect(mockInfluxCreateOrgWithDefaultBucket).toBeCalled();
   });
 
   test('createInfluxHealthChecker - not heath', async () => {
