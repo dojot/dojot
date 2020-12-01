@@ -48,12 +48,19 @@ module.exports = (routes, serviceState, openApiPath) => {
     throw e;
   }
 
+  const {
+    responseCompressInterceptor,
+    requestIdInterceptor,
+    beaconInterceptor,
+    requestLogInterceptor,
+  } = WebUtils.framework.interceptors;
+
   return WebUtils.framework.createExpress({
     interceptors: [
       {
         name: 'swagger-ui',
         path: '/tss/v1/api-docs',
-        middleware: [...swaggerUi.serve, swaggerUi.setup(openApiJson)],
+        middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
       dojotTenantJwtParseInterceptor(),
       paginateInterceptor({
@@ -61,19 +68,19 @@ module.exports = (routes, serviceState, openApiPath) => {
         maxLimit: configPaginate['default.max.limit'],
       }),
       openApiValidatorInterceptor({ openApiPath }),
-      WebUtils.framework.interceptors.requestIdInterceptor(),
-      WebUtils.framework.interceptors.beaconInterceptor({
+      requestIdInterceptor(),
+      beaconInterceptor({
         stateManager: serviceState,
         logger,
       }),
-      WebUtils.framework.interceptors.responseCompressInterceptor({
-        config: {},
+      responseCompressInterceptor({
+        supportTrustProxy: configExpress.trustproxy,
+      }),
+      requestLogInterceptor({
+        logger,
       }),
     ],
     routes: (routes).flat(),
-    errorHandlers: [
-      WebUtils.framework.defaultErrorHandler({ logger }),
-    ],
     logger,
     config: {
       trustproxy: configExpress.trustproxy,
