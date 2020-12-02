@@ -37,8 +37,28 @@ class RedisManager {
      */
     this.redisClient.on('error', (error) => logger.warn(`${error}`));
     this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
+    StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
     return Object.seal(this);
+  }
+
+  /**
+   * Shutdown handler to be passed to the ServiceStateManager.
+   *
+   * @returns {Promise<void>}
+   *
+   * @function shutdown Handler
+   * @public
+   */
+  async shutdownProcess() {
+    logger.warn('Disconnecting from Redis...');
+    await new Promise((resolve) => {
+      this.redisClient.quit(() => {
+        resolve('successfully disconnected from Redis!');
+      });
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
   }
 
   /**

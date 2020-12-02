@@ -38,7 +38,13 @@ class KafkaConsumer {
     }
   }
 
-  healthChecker(signalReady, signalNotReady) {
+  /**
+   * HealthChecker to be passed to the ServiceStateManager
+   *
+   * @param {*} signalReady
+   * @param {*} signalNotReady
+   */
+  checkHealth(signalReady, signalNotReady) {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
         signalReady();
@@ -48,6 +54,15 @@ class KafkaConsumer {
     }).catch((err) => {
       signalNotReady();
       logger.warn(`Error ${err}`);
+    });
+  }
+
+  /**
+   *  Shutdown handler to be passed to the ServiceStateManager.
+   */
+  shutdownProcess() {
+    return this.consumer.finish().then(() => {
+      logger.warn('Kafka Consumer finished!');
     });
   }
 
