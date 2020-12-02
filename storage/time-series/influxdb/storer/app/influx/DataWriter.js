@@ -4,7 +4,7 @@ const { parseDateTimeToUnixNs } = require('../Utils');
 
 const logger = new Logger('influxdb-storer:influxdb/WriterData');
 /**
- * This class handle with writer data in a specific bucket.
+ * This class handles with writer data in a specific bucket.
  * @class
  */
 class DataWriter {
@@ -51,7 +51,7 @@ class DataWriter {
   }
 
   /**
-   * Get an instance of  WriteApi for the supplied organization and bucket.
+   * Gets an instance of  WriteApi for the supplied organization and bucket.
    *
    * @param {string} org Organization Name
    *
@@ -93,7 +93,7 @@ class DataWriter {
    * NOTE: in the future, the strategy must change to ensure that a message is not lost,
    * the commit must be manual for kafka for example, but here a batch strategy from the library.
    * When something goes wrong when writing, an exception is not thrown and
-   * as the messages are sent in batch there is no way to be sure which message was write
+   * as the messages are sent in batch there is no way to be sure which message was written
    * to commit or not, even changing the batch to 1 and deactivating the auto flush,
    * something that can be used to confirm the data is not returned.
    * writeSuccess does not currently appear to be called and there would be a cost

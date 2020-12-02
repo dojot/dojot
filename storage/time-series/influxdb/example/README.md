@@ -1,4 +1,3 @@
-
 # Example
 
 ## Influxdb initial settings

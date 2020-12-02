@@ -41,7 +41,7 @@ class App {
   }
 
   /**
-   * Initialize the kafka and influxdb (including HeathChecker and Shutdown)
+   * Initializes the kafka and influxdb (including HeathChecker and Shutdown)
    */
   async init() {
     logger.info('init: Initializing the influxdb-storer ...');

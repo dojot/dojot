@@ -89,7 +89,7 @@ class InfluxDB {
   }
 
   /**
-   * Create a 'healthCheck' for influxDB
+   * Creates a 'healthCheck' for influxDB
    */
   createHealthChecker() {
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
@@ -107,7 +107,7 @@ class InfluxDB {
 
 
   /**
-   *  Register a shutdown to the http server
+   *  Registers a shutdown to the http server
    */
   async registerShutdown() {
     this.serviceState.registerShutdownHandler(async () => {

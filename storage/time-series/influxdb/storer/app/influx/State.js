@@ -23,7 +23,7 @@ class State {
   }
 
   /**
-   * Check if influxdb is Heath
+   * Checks if influxdb is Health
    * @returns {Promise.<boolean>} true if exist or false otherwise
    *
    */

@@ -22,7 +22,9 @@
     "url": "https://github.com/dojot/dojot"
   },
   "keywords": [
-    "dojot"
+    "dojot",
+    "time-series",
+    "device data"
   ],
   "files": [
     "package-lock.json",

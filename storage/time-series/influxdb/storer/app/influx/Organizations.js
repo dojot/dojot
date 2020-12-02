@@ -5,7 +5,7 @@ const { Logger } = require('@dojot/microservice-sdk');
 const logger = new Logger('influxdb-storer:influx/Organizations');
 
 /**
- * This class handle with to create organizations, buckets and set Retention.
+ * This class handles with the creation of organizations, buckets and set Retention.
  * @class
  */
 class Organizations {
@@ -54,7 +54,7 @@ class Organizations {
   }
 
   /**
-   * Check if some org exists
+   * Checks if some org exists
    *
    * @param {String} org Organization Name
    * @returns {Promise.<boolean>} true if exist or false otherwise
@@ -134,7 +134,7 @@ class Organizations {
   }
 
   /**
-   * Delete a organization
+   * Deletes a organization
    *
    * @param {String} org Organization to delete
    *
@@ -157,7 +157,7 @@ class Organizations {
   }
 
   /**
-   * Create a organization with a default bucket
+   * Creates a organization with a default bucket
    *
    * @param {String} org New organization name
    *

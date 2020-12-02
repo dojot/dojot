@@ -5,7 +5,7 @@ See the image below for a better understanding:
 
 ![Architecture](./docs/imgs/arq.png)
 
-__NOTE THAT__ When the services starts a default Organization with a default bucket, a default user with a default password and a default token must have already been created, optionally with a retention. You can see an example in the [example](./example) folder.
+__NOTE THAT__ It's mandatory to set default organization, bucket, user, and password before starting the services, optionally a retention. You can see an example in the [example](./example) folder.
 ## InfluxDB Storer
 
 Check the [storer](./storer) directory for more details.

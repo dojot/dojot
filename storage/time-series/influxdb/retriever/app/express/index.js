@@ -15,7 +15,7 @@ const { express: configExpress, paginate: configPaginate } = ConfigManager.getCo
 
 
 /**
- * Creates a  express and receives the routes to register
+ * Creates an express and receives the routes to register
  *
  * @param {object[]} routes Array of object with object
  * @param {string} routes[].mountPoint  Mount Point from routes

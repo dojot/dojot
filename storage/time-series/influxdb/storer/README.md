@@ -29,7 +29,7 @@ The **InfluxDB Storer** is responsible for consuming dojot's messages from Apach
 
 ### Dojot's messages from Kafka topics
 
-The **InfluxDB-Storer** consumes dojot's messages from kafka topics with the suffixes below and can handle the messages described below in each topic.
+The **InfluxDB-Storer** consumes the following dojot's messages:
 
 - `*.dojot.tenancy` (Messages related to tenants' life cycle)
   - `CREATE` (Tenant was created):
@@ -124,19 +124,18 @@ Whereas that:
 
 ### Writing data from kafka in InfluxDB
 
-In this topic the idea is to explain what this service does with each message it receives.
+In this section the idea is to explain what this service does with each message it consumes.
 
 - `*.dojot.tenancy`
   - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**).
   - `DELETE`: This message will trigger the deletion of an existing *Organization* (**tenant**).
 
-- `*.device-data`: This message will trigger a data insertion. It `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values and its values if it is not numeric or Boolean being parsed to a JSON.
+- `*.device-data`: This message will trigger a data insertion. It `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values being serialized to a string, except when they are numeric or boolean values.
 
 - `*.dojot.device-manager.device`
   - `configure`: The same behavior as  `*.device-data`.
   - `remove`: This message will trigger the deletion of a *measurement* (**deviceid**) in an *Organization* (**tenant**).
 
-<!-- __NOTE THAT__ When service starts will be created a default Organization with a default bucket, a default user with a default password and a default token. You can change all of these default values, see more at [general configurations](#general-configurations). -->
 
 __NOTE THAT__ When service starts a default Organization with a default bucket, a default user with a default password and a default token must have already been created, optionally with a retention. You need to configure all of these values, see more at [general configurations](#general-configurations).
 
@@ -184,9 +183,9 @@ convention.
 | delete.tenant.data.enable | Deleted all data related to a tenant (organization) if it was deleted.  | true | boolean  | STORER_DELETE_TENANT_DATA_ENABLE
 | log.console.level | Console logger level | info | info, debug, error, warn | STORER_LOG_CONSOLE_LEVEL
 | log.file | Enables logging on file (location: /var/log/influxdb-storer-logs-%DATE%.log) | false | boolean  | STORER_LOG_FILE
-| log.file.level  | Log level to log on files | debug | string  | STORER_LOG_FILE_LEVEL
+| log.file.level  | Log level to log on files | info | string  | STORER_LOG_FILE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | STORER_LOG_VERBOSE
-| kafka.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *kafka* service in milliseconds.  | 60000 | integer  | STORER_KAFKA_HEATHCHECK_MS
+| kafka.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *kafka* service in milliseconds.  | 30000 | integer  | STORER_KAFKA_HEATHCHECK_MS
 | subscribe.topics.suffix.device.data  | Suffix for the dojot topic that receives data from devices. | device-data | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_DEVICE_DATA
 | subscribe.topics.suffix.device.manager | Suffix for the dojot topic that sends data to devices and receives device lifecycle events. | dojot.device-manager.device | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_DEVICE_MANAGER
 | subscribe.topics.suffix.tenants  | Suffix for dojot topic that receives exclusion and tenant creation events. | dojot.tenancy | string  | STORER_SUBSCRIBE_TOPICS_SUFFIX_TENANTS
@@ -200,7 +199,7 @@ convention.
 | influx.default.password | Set a password for the default user | dojot@password | string  | STORER_INFLUX_DEFAULT_PASSWORD
 | influx.default.token | Configure a token (this token will be allowed to write/read in all organizations) | dojot@token_default | string  | STORER_INFLUX_DEFAULT_TOKEN
 | influx.default.user | Set up a username | dojot | string  | STORER_INFLUX_DEFAULT_USER
-| influx.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *InfluxDB* service in milliseconds.  | 60000 | integer  | STORER_INFLUX_HEATHCHECK_MS
+| influx.heathcheck.ms | Defines how often the communication with InfluxDB is verified in milliseconds.   | 30000 | integer  | STORER_INFLUX_HEATHCHECK_MS
 | influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). | 168 | integer | STORER_INFLUX_RETENTION_HRS
 | influx.url | Address of the *InfluxDB* service  | http://influxdb:8086 | url | STORER_INFLUX_URL
 
@@ -273,8 +272,7 @@ Generate the Docker image:
 docker build -t <username>/influxdb-storer:<tag> -f  .
 ```
 
-Then the image tagged a `<username>/influxdb-storer:<tag>` will be made available. You can send it to
-your DockerHub registry to made it available for non-local dojot installations:
+Then an image tagged as`<username>/influxdb-storer:<tag>` will be made available. You can send it to your DockerHub registry to made it available for non-local dojot installations:
 
 ```shell
 docker push <username>/influxdb-storer:<tag>

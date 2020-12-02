@@ -41,7 +41,7 @@ The mapping between the elements of influxdb and dojot devices are:
 - *Organization*: It will be the **tenant**
 - *Measurement*: It will be the **deviceId**
 - *Bucket* : By default it is called *devices*, but this value can be changed in Storer.
-- *Fields*:  Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values and its values if it is not numeric or Boolean being parsed in a JSON.
+- *Fields*:  Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values and its values if it is not numeric or boolean being parsed in a JSON.
 
 ## Dependencies
 
@@ -84,10 +84,10 @@ convention.
 | --- | ------- | ------------- | ------------ | --------------------
 | log.console.level | Console logger level | info | info, debug, error, warn | RETRIEVER_LOG_CONSOLE_LEVEL
 | log.file | Enables logging on file (location: /var/log/influxdb-retriever-logs-%DATE%.log) | false | boolean  | RETRIEVER_LOG_FILE
-| log.file.level  | Log level to log on files | debug | string  | RETRIEVER_LOG_FILE_LEVEL
+| log.file.level  | Log level to log on files | info | string  | RETRIEVER_LOG_FILE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | RETRIEVER_LOG_VERBOSE
 | express.trustproxy | Enables reverse proxy support  | true | boolean | RETRIEVER_EXPRESS_TRUSTPROXY
-| paginate.default.max.limit |  Sets maximum and default the item numbers on each page  | 256 | integer | RETRIEVER_PAGINATE_DEFAULT_MAX_LIMIT
+| paginate.default.max.limit |  Sets the default/maximum number of records/points in a page. | 256 | integer | RETRIEVER_PAGINATE_DEFAULT_MAX_LIMIT
 
 #### Server Configurations
 
@@ -98,8 +98,8 @@ convention.
 | server.ca | File path to list of supplied CAs. If passed enable TLS  | none | path  | RETRIEVER_SERVER_CA
 | server.cert | File path to  certificate.  | none | path| RETRIEVER_SERVER_CERT
 | server.key | File path to key certificate. | none | path |  RETRIEVER_SERVER_KEY
-| server.reject.unauthorized | If true, the server certificate is verified against the list of supplied CAs. | none | boolean | RETRIEVER_SERVER_REJECT_UNAUTHORIZED
-| server.request.cert | Whether to authenticate the remote peer by requesting a certificate. Clients always request a server certificate. | none | boolean | RETRIEVER_SERVER_REQUEST_CERT
+| server.reject.unauthorized | If true, the server certificate is verified against the list of supplied CAs. It is considered only if 'server.ca' is passed. | none | boolean | RETRIEVER_SERVER_REJECT_UNAUTHORIZED
+| server.request.cert | Whether to authenticate the remote peer by requesting a certificate. Clients always request a server certificate. It is considered only if 'server.ca' is passed. | none | boolean | RETRIEVER_SERVER_REQUEST_CERT
 
 #### InfluxDB Configurations
 
@@ -107,7 +107,7 @@ convention.
 | --- | ------- | ------------- | ------------ | --------------------
 | influx.default.bucket | Bucket name for all created buckets | devices | string  | RETRIEVER_INFLUX_DEFAULT_BUCKET
 | influx.default.token | Configure a token (this token will be allowed to write/read in all organizations) | dojot@token_default | string  | RETRIEVER_INFLUX_DEFAULT_TOKEN
-| influx.heathcheck.ms | Specific how often it is to check if it is possible to communicate with the *InfluxDB* service in milliseconds.  | 60000 | integer  | RETRIEVER_INFLUX_HEATHCHECK_MS
+| influx.heathcheck.ms | Defines how often the communication with InfluxDB is verified in milliseconds. | 30000 | integer  | RETRIEVER_INFLUX_HEATHCHECK_MS
 | influx.url | Address of the *InfluxDB* service  | http://influxdb:8086 | url | RETRIEVER_INFLUX_URL
 
 #### Service State Manager
@@ -136,7 +136,7 @@ Generate the Docker image:
 docker build -t <username>/influxdb-retriever:<tag> -f  .
 ```
 
-Then the image tagged a `<username>/influxdb-retriever:<tag>` will be made available. You can send it to
+Then an image tagged as `<username>/influxdb-retriever:<tag>` will be made available. You can send it to
 your DockerHub registry to made it available for non-local dojot installations:
 
 ```shell

@@ -6,14 +6,14 @@ sleep 30
 
 for ((i=0; ; i++))
 do
-    echo "Creating tenant2 in dojot-management2.dojot.tenancy"
+    echo "Create tenant2 in dojot-management2.dojot.tenancy"
 
     echo "{ \"type\": \"CREATE\", \"tenant\":\"tenant2\"}"  |\
     kafkacat -b kafka:9092 -P -t dojot-management2.dojot.tenancy
 
     sleep 5
 
-    echo "Creating tenant1 in dojot-management.dojot.tenancy"
+    echo "Create tenant1 in dojot-management.dojot.tenancy"
 
     echo "{ \"type\": \"CREATE\", \"tenant\":\"tenant1\"}"  |\
     kafkacat -b kafka:9092 -P -t dojot-management.dojot.tenancy
@@ -142,7 +142,7 @@ do
 
     sleep 20
 
-    echo "Deleting tenant2 in dojot-management2.dojot.tenancy"
+    echo "Delete tenant2 in dojot-management2.dojot.tenancy"
 
     echo "{ \"type\": \"DELETE\", \"tenant\":\"tenant2\"}"  |\
     kafkacat -b kafka:9092 -P -t dojot-management2.dojot.tenancy

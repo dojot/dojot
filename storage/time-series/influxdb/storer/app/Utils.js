@@ -2,7 +2,7 @@
 const { PreciseDate } = require('@google-cloud/precise-date');
 
 /**
- * Check if match with RFC3339
+ * Checks if match with RFC3339
  *
  * @param {String} dateTime
  *

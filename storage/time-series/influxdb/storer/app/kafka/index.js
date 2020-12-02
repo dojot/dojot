@@ -33,7 +33,7 @@ class Kafka {
   }
 
   /**
- * Create a 'healthCheck'
+ * Creates a 'healthCheck'
  */
   createHealthChecker() {
     const kafkaHealthChecker = async (signalReady, signalNotReady) => {
@@ -51,7 +51,7 @@ class Kafka {
 
 
   /**
-   *  Register a shutdown
+   *  Registers a shutdown
    */
   async registerShutdown() {
     this.serviceState.registerShutdownHandler(async () => {

@@ -9,7 +9,7 @@ const logger = new Logger('influxdb-retriever:express/interceptors/CustomPaginat
 /**
  * Express middleware to paginate data
  *
- * @param {object} config  A object with the key limit, the default  a
+ * @param {object} config  An object with the key limit, the default  a
  *                         Number to limit results returned per page ,
  *                         and maxLimit a Number to restrict the number
  *                         of results returned to per page
@@ -17,7 +17,7 @@ const logger = new Logger('influxdb-retriever:express/interceptors/CustomPaginat
 module.exports = ({ defaultLimit, maxLimit }) => ({
   name: 'custom-paginator-interceptor',
   middleware: [(req, res, next) => {
-    // check if was passed a value greater then configured maximum limit
+    // check if was passed a value greater than the configured maximum limit
     logger.debug(`CustomPaginator1: req.params=${util.inspect(req.params)}`);
     logger.debug(`CustomPaginator1: req.query=${util.inspect(req.query)}`);
     if (req.query.limit > maxLimit) {

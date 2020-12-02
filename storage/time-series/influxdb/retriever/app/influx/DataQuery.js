@@ -15,6 +15,12 @@ const logger = new Logger('influxdb-retriever:influx/DataQuery');
 
 /**
  * This class handle with query data in a specific bucket.
+ *
+ * Note that: We proposed a paging approach using limit and offset, which is not wrong;
+ * but it would be more efficient a strategy based on time displacements, i.e,
+ * manipulating the dataFrom and dataTo in order to reduce the
+ * data set in each iteration.
+ *
  * @class
  */
 class DataQuery {
@@ -38,7 +44,7 @@ class DataQuery {
     this.prefixFieldsSize = (this.prefixFields).length;
   }
 
-  /**
+ /**
  * Fetch data for a given field considering the time
  * slot and paging filter for a default bucket and an given org.
  *

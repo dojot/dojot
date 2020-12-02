@@ -186,7 +186,7 @@ class DojotConsumer {
   }
 
   /**
-   * Check if `attrs` has a key shouldPersist and if exist if its value is true
+   * Checks if `attrs` has a key shouldPersist and if exist if its value is true
    *
    * @param {object} attrs  Object key:value
    * @returns {boolean} false if should persists exists and its value is false and true otherwise.
@@ -206,12 +206,12 @@ class DojotConsumer {
    * @param {string} tenant the tenant that issued the event
    * @param {string|number} timestamp date-time (unix timestamp ms or RFC3339,
    * @param {Object} attrs Object of type key value (key:value)
-   * @param {async function(string, string, number|string, object)} handleData
+   * @param {async function(string, string, number|string, object)} callback
    *                              Receive tenant, deviceid, date-time (unix timestamp ms
    *                              or RFC3339,
    *                              attrs (key:value)
    */
-  static async handleData(deviceid, tenant, timestamp, attrs, handleData) {
+  static async handleData(deviceid, tenant, timestamp, attrs, callback) {
     const attrsCopy = { ...attrs };
     if (!deviceid) {
       logger.warn('handleData: configure - missing deviceid');
@@ -221,7 +221,7 @@ class DojotConsumer {
       logger.warn('handleData: configure - missing attrs');
     } else if (DojotConsumer.checkIfShouldPersist(attrsCopy)) {
       delete attrsCopy.shouldPersist;
-      await handleData(tenant, deviceid, timestamp, attrsCopy);
+      await callback(tenant, deviceid, timestamp, attrsCopy);
     } else {
       logger.debug('handleData: shouldPersist is false');
     }
@@ -246,7 +246,7 @@ class DojotConsumer {
   }
 
   /**
-   * Finish kafka consumer
+   * Finishes kafka consumer
    *
    *  @throws If Cannot finish
    */
