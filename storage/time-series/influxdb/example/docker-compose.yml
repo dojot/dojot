@@ -75,6 +75,7 @@ services:
       STORER_INFLUX_RETENTION_HRS: 0
       STORER_LOG_VERBOSE: "true"
       STORER_LOG_CONSOLE_LEVEL: "debug"
+      STORER_DELETE_DEVICE_DATA_ENABLE: "true"
     restart: always
     logging:
       driver: json-file
