@@ -90,7 +90,7 @@ class DataQuery {
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o)}`);
+            logger.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o, null, 2)}`);
             const point = {
               ts: o._time,
               attrs: [],
@@ -117,7 +117,7 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByMeasurement: totalItems=${result.length} result=${util.inspect(result)}`);
+            logger.debug(`queryByMeasurement: totalItems=${result.length} result=${JSON.stringify(result, null, 2)}`);
             return resolve({ result, totalItems: result.length });
           },
         });
@@ -180,7 +180,7 @@ class DataQuery {
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryByField: queryRows.next=${JSON.stringify(o)}`);
+            logger.debug(`queryByField: queryRows.next=${JSON.stringify(o, null, 2)}`);
             // when storer write the data it just check if is a number or a boolean
             // the others types are writer as string with json stringify
             result.push({
@@ -192,7 +192,7 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByField: totalItems=${result.length} result=${JSON.stringify(result)}`);
+            logger.debug(`queryByField: totalItems=${result.length} result=${JSON.stringify(result, null, 2)}`);
             return resolve({ result, totalItems: result.length });
           },
         });
