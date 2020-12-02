@@ -122,6 +122,8 @@ A8kqWCU6i7xXu3mHe0ahYzFdBm3Vq8Ze+aG8HGW51Q648378JRmeaOg9EmON0cRg
 JnGjd/T1dkjCRizV6Av/9vpHhM435Q==
 -----END CERTIFICATE-----`;
 
+const p256CertFingerprint = 'A3:A1:5A:14:BE:B7:27:4E:7C:95:81:1F:A0:1B:2A:09:A1:23:91:79:F6:66:54:4B:21:55:D5:75:79:3E:F5:33';
+
 const certWithoutExtension = `-----BEGIN CERTIFICATE-----
 MIIDQzCCAisCFEfuIcuOPDmfAiGgXKdHlfzxDT16MA0GCSqGSIb3DQEBCwUAMF4x
 CzAJBgNVBAYTAkJSMQswCQYDVQQHDAJTUDEOMAwGA1UECwwFZG9qb3QxEzARBgNV
@@ -336,6 +338,7 @@ const certChain = [
   Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ
   -----END CERTIFICATE-----`,
 ];
+const certChainHostFingerprint = 'E5:81:5A:DF:11:A9:0C:CC:51:8F:6A:99:D2:6C:67:16:29:D6:68:E1:EA:C2:C0:A7:E7:9B:84:09:AF:9C:29:14';
 
 const certChainRootCAFingerprint = '06:87:26:03:31:A7:24:03:D9:09:F1:05:E6:9B:CF:0D:32:E1:BD:24:93:FF:C6:D9:20:6D:11:BC:D6:77:07:39';
 
@@ -348,6 +351,7 @@ module.exports = {
   rsaCSR,
   p256CSR,
   p256Cert,
+  p256CertFingerprint,
   certWithoutExtension,
   token,
   caCert,
@@ -356,5 +360,6 @@ module.exports = {
   intermediateCaCert,
   caCRL,
   certChain,
+  certChainHostFingerprint,
   certChainRootCAFingerprint,
 };

@@ -165,7 +165,7 @@ class CertificateService {
   }
 
   /**
-   * Changes the one that is associated with a certificate
+   * Changes the ownership that is associated with a certificate
    *
    * @param {object} filterFields Filter fields to find the correct certificate in the database
    * @param {object} belongsTo Data of whom the certificate should be associated
@@ -187,7 +187,7 @@ class CertificateService {
   /**
    * Retrieves a certificate from the database
    *
-   * @param {object} queryFields Certificate fields that must be returned in the record
+   * @param {array} queryFields Certificate fields that must be returned in the record
    * @param {object} filterFields Filter fields to find the correct certificate in the database
    *
    * @returns Returns the record that represents the certificate in the database
@@ -214,7 +214,7 @@ class CertificateService {
   /**
    * Retrieves from the database a set of certificates that meet the search criteria
    *
-   * @param {object} queryFields Certificate fields that must be returned in each record
+   * @param {array} queryFields Certificate fields that must be returned in each record
    * @param {object} filterFields Filter fields to find the correct certificates in the database
    * @param {number} limit Limit of records that must be returned
    * @param {number} offset Offset in relation to the first record found by the query

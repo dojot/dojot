@@ -10,7 +10,8 @@
         "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request X509IDMGMT_LOGGER_CONSOLE_LEVEL=debug X509IDMGMT_SERVER_PORT=3737 X509IDMGMT_SERVER_HEALTHCHECK_PORT=9797 X509IDMGMT_EJBCA_PKCS12=./tls/ejbcaclient.p12 X509IDMGMT_EJBCA_PKCS12SECRET=./tls/ejbcaclient.secret X509IDMGMT_EJBCA_TRUSTEDCA=./tls/ejbcaclient-trustedca.pem X509IDMGMT_MONGO_CONN_OPTIONS_USER=root X509IDMGMT_MONGO_CONN_OPTIONS_PASS=pass X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE=admin  node --inspect-brk --trace-sync-io --unhandled-rejections=strict index",
         "test": "cross-env NODE_ENV=test jest --verbose",
         "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
-        "check-licenses": "apache2-license-checker"
+        "check-licenses": "apache2-license-checker",
+        "eslint": "eslint src/**"
     },
     "author": {
         "name": "Thiago de Paula Ferreira",
@@ -21,12 +22,19 @@
         "type": "git",
         "url": "git://github.com/dojot/dojot.git"
     },
+    "homepage": "https://github.com/dojot",
     "keywords": [
         "x.509",
         "EJBCA",
         "dojot"
     ],
     "license": "Apache-2.0",
+    "licenses": [
+        {
+          "type": "Apache-2.0",
+          "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ],
     "dependencies": {
         "@dojot/microservice-sdk": "^0.1.9",
         "ajv": "^6.12.0",

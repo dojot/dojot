@@ -19,10 +19,13 @@ const config = unflatten(ConfigManager.getConfig('x509idmgmt'));
 Logger.setTransport('console', {
   level: config.logger.console.level.toLowerCase(),
 });
-if (config.logger.file) {
+if (config.logger.file.enable) {
   Logger.setTransport('file', {
     level: config.logger.file.level.toLowerCase(),
     filename: config.logger.file.name,
+    dirname: config.logger.file.dir,
+    maxFiles: config.logger.file.max,
+    maxSize: config.logger.file.size,
   });
 }
 Logger.setVerbose(config.logger.verbose);
