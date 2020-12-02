@@ -1,6 +1,6 @@
 {
   "name": "v2kbridge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Service to bridge messages from VerneMQ to Apache Kafka according to dojot rules.",
   "homepage": "https://github.com/dojot/dojot",
@@ -11,8 +11,10 @@
   },
   "main": "app.js",
   "scripts": {
-    "app": "node app/app.js",
-    "test": "jest test/unit/*.js"
+    "app": "node index.js",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "check-licenses": "apache2-license-checker"
   },
   "keywords": [
     "dojot",
@@ -21,7 +23,13 @@
     "kafka"
   ],
   "author": "Eduardo Garcia Misiuk, Jonaphael Aristil, Muhamed Avila",
-  "license": "GPL-3.0, ISC",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "dependencies": {
     "@dojot/microservice-sdk": "0.1.3",
     "async": "^3.1.1",
@@ -43,6 +51,7 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.19.1",
     "jest": "^24.9.0",
-    "jest-mock-process": "^1.3.2"
+    "jest-mock-process": "^1.3.2",
+    "@bbc/apache2-license-checker": "^1.1.4"
   }
 }
