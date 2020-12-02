@@ -28,6 +28,15 @@ do
 
     sleep 5
 
+
+    echo "Publish in andreia"
+
+    echo "{ \"metadata\": { \"deviceid\": \"bb2461\", \"tenant\":\"admin\", \"timestamp\": \"2020-11-01T01:13:43.735Z\" }, \"attrs\":  { \"altitude\": \"429.1000061035156\", \"device\": \"bb2461\", \"location\": \"-22.5656314, -44.1732218\", \"odometer\": 18011, \"x552\": \"5520008335E00465BFE\"}}"  |\
+    kafkacat -b kafka:9092 -P -t tenant1.device-data
+
+    sleep 5
+
+
     echo "Publish in tenant1.device-data with should pesister = false and timestamp 1604587074598 ms (Thu Nov 05 2020 14:37:54)"
 
     echo "{ \"metadata\": { \"deviceid\": \"1234\", \"tenant\":\"tenant1\", \"timestamp\": 1604587074598 }, \"attrs\":  { \"string\": \"Thu Nov 05 2020 14:37:54\", \"shouldPersist\": false }}"  |\

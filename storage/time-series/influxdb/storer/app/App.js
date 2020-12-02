@@ -111,6 +111,9 @@ class App {
       }
     };
 
+    // we do not check for performance reasons whether the topic prefix
+    // that was received a message matches the tenant within the message.
+
     this.kafka.getKafkaConsumerInstance().registerCallbacksForDeviceDataEvents(
       callbackWriteData,
     );
