@@ -44,7 +44,7 @@ class DataQuery {
     this.prefixFieldsSize = (this.prefixFields).length;
   }
 
- /**
+  /**
  * Fetch data for a given field considering the time
  * slot and paging filter for a default bucket and an given org.
  *
