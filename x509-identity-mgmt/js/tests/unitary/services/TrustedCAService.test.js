@@ -22,6 +22,7 @@ function modelMock() {
   modelRef.findOne = jest.fn(() => modelRef);
   modelRef.findOneAndUpdate = jest.fn(() => modelRef);
   modelRef.findByIdAndDelete = jest.fn(() => modelRef);
+  modelRef.deleteMany = jest.fn(() => modelRef);
   modelRef.select = jest.fn(() => modelRef);
   modelRef.limit = jest.fn(() => modelRef);
   modelRef.skip = jest.fn(() => modelRef);
@@ -287,6 +288,131 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model.lean).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.countDocuments).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('self registration', () => {
+    let containerCradle = null;
+
+    beforeEach(() => {
+      containerCradle = { ...containerCradleTemplate };
+      containerCradle.trustedCAModel = modelMock();
+    });
+
+    it('should change the self-registration of certificates issued by the trusted CA', async () => {
+      const results = {};
+      containerCradle.trustedCAModel.model.exec = jest.fn(() => results);
+
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.changeAutoRegistration({}, true))
+        .resolves.toBeUndefined();
+
+      expect(containerCradle.trustedCAModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an exception because the trusted CA certificate was not found', async () => {
+      const results = null;
+      containerCradle.trustedCAModel.model.exec = jest.fn(() => results);
+
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.changeAutoRegistration({}, true))
+        .rejects.toThrow();
+
+      expect(containerCradle.trustedCAModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('removing trusted CA certificate', () => {
+    let containerCradle = null;
+
+    beforeEach(() => {
+      containerCradle = { ...containerCradleTemplate };
+      containerCradle.trustedCAModel = modelMock();
+      containerCradle.certificateModel = modelMock();
+    });
+
+    it('should remove the certificate from the CA and its self-registered', async () => {
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.deleteCertificate({ caFingerprint: util.caFingerprint }))
+        .resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.parseConditionFields).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.deleteMany).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.trustedCAModel.model.findByIdAndDelete).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an exception because there are certificates that have not been self-registered', async () => {
+      containerCradle.certificateModel.model.countDocuments = jest.fn(() => 1);
+
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.deleteCertificate({ caFingerprint: util.caFingerprint }))
+        .rejects.toThrow();
+
+      expect(containerCradle.certificateModel.parseConditionFields).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.deleteMany).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.trustedCAModel.model.findByIdAndDelete).toHaveBeenCalledTimes(0);
+      expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('obtaining CA certificate in PEM format', () => {
+    let containerCradle = null;
+
+    beforeEach(() => {
+      containerCradle = { ...containerCradleTemplate };
+      containerCradle.trustedCAModel = modelMock();
+      containerCradle.certificateModel = modelMock();
+    });
+
+    it('should obtain the PEM from the trusted CA certificate', async () => {
+      containerCradle.trustedCAModel.model.exec = jest.fn(() => ({ caPem: util.caCert }));
+
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.getPEM(util.caFingerprint))
+        .resolves.toEqual(util.caCert);
+
+      expect(containerCradle.trustedCAModel.parseConditionFields).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.findOne).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.select).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.lean).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an exception because no CA certificate was found', async () => {
+      containerCradle.trustedCAModel.model.exec = jest.fn(() => null);
+
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.getPEM(util.caFingerprint))
+        .rejects.toThrow();
+
+      expect(containerCradle.trustedCAModel.parseConditionFields).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.findOne).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.select).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.lean).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
     });
   });
 });
