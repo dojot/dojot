@@ -10,7 +10,7 @@ const logger = new Logger('influxdb-storer:Influx');
 /**
  * Wrapper for Kafka
  */
-class Kafka {
+class DojotKafka {
   /**
    * @constructor
    *
@@ -21,8 +21,50 @@ class Kafka {
   constructor(serviceState) {
     this.kafkaConsumer = new KafkaConsumer();
     this.serviceState = serviceState;
+
+    this.callbacksConsumerDevice = {
+      dataDevice: null,
+      deleteDevice: null,
+    };
+
+    this.callbacksConsumerTenant = {
+      createTenant: null,
+      deleteTenant: null,
+    };
   }
 
+  /**
+   * Initialize kafka
+   */
+  async init() {
+    await this.kafkaConsumer.init();
+  }
+
+  /**
+   * Set callbacks to handle device events
+   *
+   * @param {async function(string, string, number|string, object)} writeDeviceData
+   *                              Receive tenant, deviceid, date-time (unix timestamp ms
+   *                              or RFC3339,
+   *                              attrs (key:value)
+   * @param {async function(string, string)} deleteDevice=null Receive tenant,
+   *                                         deviceid (default = null)
+   */
+  setCallbacksConsumerDevice(dataDevice, deleteDevice = null) {
+    this.callbacksConsumerDevice.dataDevice = dataDevice;
+    this.callbacksConsumerDevice.deleteDevice = deleteDevice;
+  }
+
+  /**
+   *Set callbacks to handle tenant events
+   *
+   * @param {async function(string)} createTenant Receive the tenant name created
+   * @param {async function(string)} deleteTenant=null Receive the tenant name deleted
+   */
+  setCallbacksConsumerTenant(createTenant, deleteTenant = null) {
+    this.callbacksConsumerTenant.createTenant = createTenant;
+    this.callbacksConsumerTenant.deleteTenant = deleteTenant;
+  }
 
   /**
    *  Returns a KafkaConsume instance
@@ -33,16 +75,43 @@ class Kafka {
   }
 
   /**
- * Creates a 'healthCheck'
- */
+  * Register consumer callbacks that were set in  setCallbacksConsumerDevice
+  * and setCallbacksConsumerTenant
+  */
+  registerCallbacksConsumer() {
+    this.kafkaConsumer.registerCallbacksForDeviceDataEvents(
+      this.callbacksConsumerDevice.dataDevice,
+    );
+
+    this.kafkaConsumer.registerCallbacksForDeviceMgmtEvents(
+      this.callbacksConsumerDevice.dataDevice,
+      this.callbacksConsumerDevice.deleteDevice,
+    );
+    this.kafkaConsumer.registerCallbackForTenantEvents(
+      this.callbacksConsumerTenant.createTenant,
+      this.callbacksConsumerTenant.deleteTenant,
+    );
+  }
+
+  /**
+  * Unregister consumer callbacks that were set in  setCallbacksConsumerDevice
+  * and setCallbacksConsumerTenant
+  */
+  unregisterCallbacksConsumer() {
+    this.kafkaConsumer.unregisterCallbacks();
+  }
+
+  /**
+  * Creates a 'healthCheck'
+  */
   createHealthChecker() {
     const kafkaHealthChecker = async (signalReady, signalNotReady) => {
       const isConnected = await this.kafkaConsumer.isConnected();
       if (isConnected) {
-        logger.debug('kafkaHealthChecker: Server is healthy');
+        logger.debug('createHealthChecker: Kafka is healthy');
         signalReady();
       } else {
-        logger.warn('kafkaHealthChecker: Server is not healthy');
+        logger.warn('createHealthChecker: Kafka is not healthy');
         signalNotReady();
       }
     };
@@ -65,4 +134,4 @@ class Kafka {
   }
 }
 
-module.exports = Kafka;
+module.exports = DojotKafka;

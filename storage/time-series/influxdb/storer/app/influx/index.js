@@ -54,12 +54,13 @@ class InfluxDB {
       configInflux.url,
     );
     this.serviceState = serviceState;
+    this.isHealth = null;
   }
 
   /**
- *  Returns a Org instance
- * @returns {Organizations}
- */
+   *  Returns a Org instance
+   * @returns {Organizations}
+   */
   getInfluxOrgInstance() {
     return this.influxOrgs;
   }
@@ -73,32 +74,47 @@ class InfluxDB {
   }
 
   /**
- *  Returns a Measurement instance
- * @returns {Measurement}
- */
+   *  Returns a Measurement instance
+   * @returns {Measurement}
+   */
   getInfluxMeasurementInstance() {
     return this.influxMeasurement;
   }
 
   /**
-     *  Returns a State instance
-     * @returns {State}
-     */
+   *  Returns a State instance
+   * @returns {State}
+   */
   getInfluxStateInstance() {
     return this.influxState;
   }
 
   /**
    * Creates a 'healthCheck' for influxDB
+   *
+   * @param {function()} cbHealth Callback to be called if the service is
+   *                               healthy and this.isHealth is not null.
+   * @param {function()} cbNotHealth Callback to be called if the service is
+   *                                 not healthy and this.isHealth is not null.
    */
-  createHealthChecker() {
+  createHealthChecker(cbHealth, cbNotHealth) {
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
       const isHealth = await this.influxState.isHealth();
       if (isHealth) {
-        logger.debug('influxdbHealthChecker: Server is healthy');
+        logger.debug('createHealthChecker: InfluxDB is healthy');
+        if (this.isHealth !== null && !this.isHealth) {
+          logger.debug('createHealthChecker: Calling callback health');
+          cbHealth();
+        }
+        this.isHealth = true;
         signalReady();
       } else {
-        logger.warn('influxdbHealthChecker: Server is not healthy');
+        logger.warn('createHealthChecker: InfluxDB is not healthy');
+        if (this.isHealth !== null && this.isHealth) {
+          logger.warn('createHealthChecker: Calling callback not health');
+          cbNotHealth();
+        }
+        this.isHealth = false;
         signalNotReady();
       }
     };

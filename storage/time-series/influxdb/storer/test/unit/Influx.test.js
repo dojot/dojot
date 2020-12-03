@@ -110,8 +110,10 @@ describe('Influx', () => {
     expect(mockInfluxCreateOrgWithDefaultBucket).toBeCalled();
   });
 
-  test('createInfluxHealthChecker - not heath', async () => {
-    influx.createHealthChecker();
+  test('createInfluxHealthChecker - not heath and this.isHeath = null', async () => {
+    const ok = jest.fn();
+    const notOk = jest.fn();
+    influx.createHealthChecker(ok, notOk);
 
     const callback = mockAddHealthChecker.mock.calls[0][1];
     mockStateIsHealth.mockResolvedValue(false);
@@ -122,10 +124,15 @@ describe('Influx', () => {
     expect(mockAddHealthChecker).toHaveBeenCalled();
     expect(ready).not.toHaveBeenCalled();
     expect(notReady).toHaveBeenCalled();
+    // because this.isHeath = null
+    expect(ok).not.toHaveBeenCalled();
+    expect(notOk).not.toHaveBeenCalled();
   });
 
-  test('createInfluxHealthChecker - heath', async () => {
-    influx.createHealthChecker();
+  test('createInfluxHealthChecker - heath and this.isHeath = false', async () => {
+    const ok = jest.fn();
+    const notOk = jest.fn();
+    influx.createHealthChecker(ok, notOk);
 
     const callback = mockAddHealthChecker.mock.calls[0][1];
     mockStateIsHealth.mockResolvedValue(true);
@@ -135,7 +142,27 @@ describe('Influx', () => {
 
     expect(mockAddHealthChecker).toHaveBeenCalled();
     expect(ready).toHaveBeenCalled();
+    expect(ok).toHaveBeenCalled();
     expect(notReady).not.toHaveBeenCalled();
+    expect(notOk).not.toHaveBeenCalled();
+  });
+
+  test('createInfluxHealthChecker - not heath and this.isHeath = true', async () => {
+    const ok = jest.fn();
+    const notOk = jest.fn();
+    influx.createHealthChecker(ok, notOk);
+
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+    mockStateIsHealth.mockResolvedValue(false);
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).not.toHaveBeenCalled();
+    expect(ok).not.toHaveBeenCalled();
+    expect(notReady).toHaveBeenCalled();
+    expect(notOk).toHaveBeenCalled();
   });
 
   test('registerShutdown', async () => {

@@ -48,21 +48,39 @@ class App {
     try {
       const influxIsReady = await this.influxDB.getInfluxStateInstance().isReady();
       if (!influxIsReady) {
-        throw new Error('Influxdb is not ready');
+        throw new Error('InfluxDB is not ready');
       }
 
-      this.influxDB.createHealthChecker();
+      const boundKafkaRegisterCallbacksConsumer = this.kafka
+        .registerCallbacksConsumer.bind(this.kafka);
+
+      const boundKafkaUnregisterCallbacksConsumer = this.kafka
+        .unregisterCallbacksConsumer.bind(this.kafka);
+
+      // when the influxdb service is unhealthy the kafka consumer
+      // callbacks will be unregistered and when the service becomes healthy
+      // they will be registered again.
+      this.influxDB.createHealthChecker(
+        boundKafkaRegisterCallbacksConsumer,
+        boundKafkaUnregisterCallbacksConsumer,
+      );
+      // defines shutdown behavior for influx
       this.influxDB.registerShutdown();
 
+      // create health check to know if it is possible to connect with kafka
       this.kafka.createHealthChecker();
+      // defines shutdown behavior for kafka
       this.kafka.registerShutdown();
 
-      // initializes kafka consumer
-      await this.kafka.getKafkaConsumerInstance().init();
+      // initializes kafka
+      await this.kafka.init();
 
       // associate by callback kafka consumers and influxdb actions
-      this.initCallbacksTenantToCreateAndDelOrgs();
-      this.initCallbacksDevicesCreateAndDelData();
+      this.setCallbacksKafkaConsumerTenant();
+      this.setCallbacksKafkaConsumerDevice();
+
+      // register callbacks that were set in kafka
+      this.kafka.registerCallbacksConsumer();
     } catch (e) {
       logger.error('init:', e);
       throw e;
@@ -73,7 +91,7 @@ class App {
   /**
    * Associates callbacks with kafka devices events to manipulation of influxdb data
    */
-  initCallbacksDevicesCreateAndDelData() {
+  setCallbacksKafkaConsumerDevice() {
     // create callback to handle receive data
     const callbackWriteData = async (tenant, deviceid, timestamp, attrs) => {
       logger.debug('callbackWriteData: init');
@@ -111,23 +129,14 @@ class App {
       }
     };
 
-    // we do not check for performance reasons whether the topic prefix
-    // that was received a message matches the tenant within the message.
-
-    this.kafka.getKafkaConsumerInstance().registerCallbacksForDeviceDataEvents(
-      callbackWriteData,
-    );
-
-    this.kafka.getKafkaConsumerInstance().registerCallbacksForDeviceMgmtEvents(
-      callbackWriteData,
-      configDelete['device.data.enable'] ? callbackDeleteMeasurement : null,
-    );
+    this.kafka.setCallbacksConsumerDevice(callbackWriteData,
+      configDelete['device.data.enable'] ? callbackDeleteMeasurement : null);
   }
 
   /**
    * Associates callbacks with kafka tenant events to manipulation of influxdb organizations
    */
-  initCallbacksTenantToCreateAndDelOrgs() {
+  setCallbacksKafkaConsumerTenant() {
     // create callback to handle tenant create
     const callbackCreateTenant = async (tenant) => {
       logger.debug('callbackCreateTenant: init');
@@ -162,7 +171,7 @@ class App {
       }
     };
 
-    this.kafka.getKafkaConsumerInstance().registerCallbackForTenantEvents(
+    this.kafka.setCallbacksConsumerTenant(
       callbackCreateTenant,
       configDelete['tenant.data.enable'] ? callbackDeleteTenant : null,
     );

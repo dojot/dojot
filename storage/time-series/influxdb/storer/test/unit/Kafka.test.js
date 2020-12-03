@@ -20,11 +20,17 @@ const mockKafkaConsumerInit = jest.fn();
 const mockKafkaFinish = jest.fn().mockResolvedValue();
 const mockKafkaUnreg = jest.fn();
 const mockKafkaIsConn = jest.fn();
+const mockRegisterCallbacksForDeviceDataEvents = jest.fn();
+const mockRegisterCallbacksForDeviceMgmtEvents = jest.fn();
+const mockRegisterCallbackForTenantEvents = jest.fn();
 const mockKafkaConsumer = jest.fn().mockImplementation(() => ({
   init: mockKafkaConsumerInit,
   unregisterCallbacks: mockKafkaUnreg,
   finish: mockKafkaFinish,
   isConnected: mockKafkaIsConn,
+  registerCallbacksForDeviceDataEvents: mockRegisterCallbacksForDeviceDataEvents,
+  registerCallbacksForDeviceMgmtEvents: mockRegisterCallbacksForDeviceMgmtEvents,
+  registerCallbackForTenantEvents: mockRegisterCallbackForTenantEvents,
 }));
 jest.mock('../../app/kafka/DojotConsumer', () => mockKafkaConsumer);
 
@@ -59,9 +65,14 @@ describe('Kafka', () => {
     kafka = new Kafka(serviceStateMock);
   });
 
-  test('getKafkaConsumerInstance', () => {
-    kafka.getKafkaConsumerInstance().init();
+  test('init', () => {
+    kafka.init();
     expect(mockKafkaConsumerInit).toBeCalled();
+  });
+
+  test('getKafkaConsumerInstance', () => {
+    kafka.getKafkaConsumerInstance().isConnected();
+    expect(mockKafkaIsConn).toBeCalled();
   });
 
   test('registerShutdown ', async () => {
@@ -72,6 +83,26 @@ describe('Kafka', () => {
     expect(mockKafkaFinish).toHaveBeenCalled();
     expect(mockKafkaUnreg).toHaveBeenCalled();
   });
+
+  test('registerCallbacksConsumer', async () => {
+    const dataDevice = jest.fn();
+    const deleteDevice = jest.fn();
+    const createTenant = jest.fn();
+    const deleteTenant = jest.fn();
+    kafka.setCallbacksConsumerDevice(dataDevice, deleteDevice);
+    kafka.setCallbacksConsumerTenant(createTenant, deleteTenant);
+    kafka.registerCallbacksConsumer();
+
+    expect(mockRegisterCallbacksForDeviceDataEvents).toHaveBeenCalledWith(dataDevice);
+    expect(mockRegisterCallbacksForDeviceMgmtEvents).toHaveBeenCalledWith(dataDevice, deleteDevice);
+    expect(mockRegisterCallbackForTenantEvents).toHaveBeenCalledWith(createTenant, deleteTenant);
+  });
+
+  test('unregisterCallbacksConsumer', async () => {
+    kafka.unregisterCallbacksConsumer();
+    expect(mockKafkaUnreg).toHaveBeenCalled();
+  });
+
 
   test('createHealthChecker - not ready', async () => {
     kafka.createHealthChecker();

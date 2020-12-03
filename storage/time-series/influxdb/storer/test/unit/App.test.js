@@ -52,16 +52,20 @@ jest.mock('../../app/influx', () => mockInflux);
 const mockKafkaHealthChecker = jest.fn();
 const mockKafkaRegisterShutdown = jest.fn();
 const mockKafkaConInit = jest.fn();
-const mockKafkaRegisterCallbackForTenantEvents = jest.fn();
-const mockKafkaRegisterCallbacksForDeviceDataEvents = jest.fn();
-const mockKafkaRegisterCallbacksForDeviceMgmtEvents = jest.fn();
+const mockKafkaSetCallbacksConsumerTenant = jest.fn();
+const mockKafkaSetCallbacksConsumerDevice = jest.fn();
 const mockKafka = jest.fn().mockImplementation(() => ({
   createHealthChecker: mockKafkaHealthChecker,
+  registerCallbacksConsumer: jest.fn(),
+  unregisterCallbacksConsumer: jest.fn(),
+  init: mockKafkaConInit,
+  setCallbacksConsumerTenant: mockKafkaSetCallbacksConsumerTenant,
+  setCallbacksConsumerDevice: mockKafkaSetCallbacksConsumerDevice,
   getKafkaConsumerInstance: jest.fn().mockImplementation(() => ({
-    init: mockKafkaConInit,
-    registerCallbackForTenantEvents: mockKafkaRegisterCallbackForTenantEvents,
-    registerCallbacksForDeviceDataEvents: mockKafkaRegisterCallbacksForDeviceDataEvents,
-    registerCallbacksForDeviceMgmtEvents: mockKafkaRegisterCallbacksForDeviceMgmtEvents,
+    init: jest.fn(),
+    registerCallbackForTenantEvents: jest.fn(),
+    registerCallbacksForDeviceDataEvents: jest.fn(),
+    registerCallbacksForDeviceMgmtEvents: jest.fn(),
   })),
   registerShutdown: mockKafkaRegisterShutdown,
 }));
@@ -93,7 +97,7 @@ describe('App', () => {
     try {
       await app.init(() => {});
     } catch (e) {
-      expect(e.message).toBe('Influxdb is not ready');
+      expect(e.message).toBe('InfluxDB is not ready');
     }
   });
 
@@ -110,10 +114,10 @@ describe('App', () => {
 
     expect(mockKafkaConInit).toBeCalled();
 
-    expect(mockKafkaRegisterCallbackForTenantEvents).toBeCalled();
+    expect(mockKafkaSetCallbacksConsumerTenant).toBeCalled();
 
-    const callbackCreateTenant = mockKafkaRegisterCallbackForTenantEvents.mock.calls[0][0];
-    const callbackDeleteTenant = mockKafkaRegisterCallbackForTenantEvents.mock.calls[0][1];
+    const callbackCreateTenant = mockKafkaSetCallbacksConsumerTenant.mock.calls[0][0];
+    const callbackDeleteTenant = mockKafkaSetCallbacksConsumerTenant.mock.calls[0][1];
 
     await callbackCreateTenant('tenant1');
 
@@ -124,12 +128,12 @@ describe('App', () => {
     expect(mockDeleteOrg).toBeCalledWith('tenant1');
     expect(mockCloseOne).toBeCalledWith('tenant1');
 
-    const callbackWriteData = mockKafkaRegisterCallbacksForDeviceDataEvents.mock.calls[0][0];
+    const callbackWriteData = mockKafkaSetCallbacksConsumerDevice.mock.calls[0][0];
     await callbackWriteData('tenant1', 'deviceid', 'attrs', 'timestamp');
     expect(mockWrite).toBeCalledWith('tenant1', 'deviceid', 'timestamp', 'attrs');
 
-    const callbackWriteData2 = mockKafkaRegisterCallbacksForDeviceMgmtEvents.mock.calls[0][0];
-    const callbackDeleteMeasurement = mockKafkaRegisterCallbacksForDeviceMgmtEvents
+    const callbackWriteData2 = mockKafkaSetCallbacksConsumerDevice.mock.calls[0][0];
+    const callbackDeleteMeasurement = mockKafkaSetCallbacksConsumerDevice
       .mock.calls[0][1];
     await callbackWriteData2('tenant2', 'deviceid2', 'attrs2', 'timestamp2');
     expect(mockWrite).toBeCalledWith('tenant2', 'deviceid2', 'timestamp2', 'attrs2');

@@ -32,7 +32,7 @@ class DataWriter {
     }
 
     this.writeOptions.writeFailed = (error, lines, attempts) => {
-      logger.error(`writeFailed: lines: ${lines.toString()} attempts:${attempts}`, error);
+      logger.debug(`writeFailed: lines: ${lines.toString()} attempts:${attempts}`, error);
     };
 
     this.writeOptions.writeSuccess = (lines) => {

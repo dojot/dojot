@@ -51,7 +51,7 @@ class DojotConsumer {
    * Registers callbacks to handle tenant events (creation and removal)
    *
    * @param {async function(string)} handleTenantCreateEvent Receive the tenant name created
-   * @param {async function(string)} handleTenantDeleteEvent Receive the tenant name deleted
+   * @param {async function(string)} handleTenantDeleteEvent=null Receive the tenant name deleted
    */
   registerCallbackForTenantEvents(handleTenantCreateEvent, handleTenantDeleteEvent = null) {
     const topicSuffix = config.subscribe['topics.suffix.tenants'];
@@ -101,7 +101,7 @@ class DojotConsumer {
    *                              Receive tenant, deviceid, date-time (unix timestamp ms
    *                              or RFC3339,
    *                              attrs (key:value)
-   * @param {async function(string, string)} handleDeviceRemoveEvent Receive tenant,
+   * @param {async function(string, string)} handleDeviceRemoveEvent=null Receive tenant,
    *                                         deviceid (default = null)
    */
   registerCallbacksForDeviceMgmtEvents(
