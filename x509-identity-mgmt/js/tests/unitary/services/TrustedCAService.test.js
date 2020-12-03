@@ -1,4 +1,4 @@
-const { Logger, WebUtils } = require('@dojot/microservice-sdk');
+const { WebUtils } = require('@dojot/microservice-sdk');
 
 const TrustedCAService = require('../../../src/services/TrustedCAService');
 

@@ -2,14 +2,14 @@ const CertificateModel = require('../../../src/db/CertificateModel');
 
 describe("Unit tests of script 'CertificateModel.js'", () => {
   let certificateModel = null;
-  let db = null;
+  let mongoClient = null;
 
   beforeAll(() => {
-    db = {
+    mongoClient = {
       parseProjectionFields: jest.fn(),
       sanitizeFields: jest.fn(),
     };
-    certificateModel = new CertificateModel({ db });
+    certificateModel = new CertificateModel({ mongoClient });
   });
 
   afterEach(() => {
@@ -40,8 +40,8 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
   it('should parse projection fields', () => {
     const commaSeparatedFields = 'validity,belongsTo';
     certificateModel.parseProjectionFields(commaSeparatedFields);
-    expect(db.parseProjectionFields).toHaveBeenCalledTimes(1);
-    expect(db.parseProjectionFields.mock.calls[0][0]).toBe(commaSeparatedFields);
+    expect(mongoClient.parseProjectionFields).toHaveBeenCalledTimes(1);
+    expect(mongoClient.parseProjectionFields.mock.calls[0][0]).toBe(commaSeparatedFields);
   });
 
   it('this should sanitize (in depth) object attributes', () => {
@@ -50,8 +50,8 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
       pem: null,
     };
     certificateModel.sanitizeFields(cert);
-    expect(db.sanitizeFields).toHaveBeenCalledTimes(1);
-    expect(db.sanitizeFields.mock.calls[0][0]).toEqual(cert);
+    expect(mongoClient.sanitizeFields).toHaveBeenCalledTimes(1);
+    expect(mongoClient.sanitizeFields.mock.calls[0][0]).toEqual(cert);
   });
 
   it('should throw an exception because it is a invalid conditional field', () => {

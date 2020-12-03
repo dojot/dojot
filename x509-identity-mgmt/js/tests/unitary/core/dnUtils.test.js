@@ -1,5 +1,6 @@
 const createDnUtils = require('../../../src/core/dnUtils');
-const errorTemplate = require('../../../src/sdk/web/framework/backing/error-template');
+
+const { errorTemplate } = global;
 
 describe("Unit tests of script 'dnUtils.js'", () => {
   describe('creation of an object where all its methods are executed without any problem', () => {

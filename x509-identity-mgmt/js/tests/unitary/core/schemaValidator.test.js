@@ -1,5 +1,4 @@
 const createSchemaValidator = require('../../../src/core/schemaValidator');
-const errorTemplate = require('../../../src/sdk/web/framework/backing/error-template');
 const utils = require('../../util.test');
 
 const defsSchema = require('../../../schemas/defs.json');
@@ -7,6 +6,8 @@ const regTrustCaSchema = require('../../../schemas/register-trusted-ca-certifica
 const updTrustCaSchema = require('../../../schemas/update-trusted-ca-certificate.json');
 const regOrGenCertSchema = require('../../../schemas/register-or-generate-certificate.json');
 const chOwnCertSchema = require('../../../schemas/change-owner-certificate.json');
+
+const { errorTemplate } = global;
 
 describe("Unit tests of script 'schemaValidator.js'", () => {
   let schemas = null;

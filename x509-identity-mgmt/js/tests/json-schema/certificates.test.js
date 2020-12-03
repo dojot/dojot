@@ -1,12 +1,25 @@
+const { Logger, WebUtils } = require('@dojot/microservice-sdk');
+
 const request = require('supertest');
 
 const faker = require('faker');
 
 const {
-  generateCert, generateCSR, p256CSR, p256Cert, token,
+  generateCert, generateCSR, p256CSR, certChain,
 } = require('../util.test');
 
-const framework = global.container.resolve('framework');
+const certificateChain = certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2');
+
+const framework = WebUtils.framework.createExpress({
+  logger: new Logger('certificates.test.js'),
+  interceptors: [
+    global.jsonBodyParsingInterceptor,
+  ],
+  routes: ([
+    global.certificateRoutes,
+  ]).flat(),
+  supportTrustProxy: global.config.framework.trustproxy,
+});
 
 const req = request(framework);
 
@@ -14,95 +27,96 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // --------------------
   // test required fields
   // --------------------
-  it("should have required property 'certificatePem' or 'csr'",
+  it("should have required property 'certificateChain' or 'csr'",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'required',
-              dataPath: '',
-              schemaPath: '#/oneOf/0/required',
-              params: {
-                missingProperty: 'certificatePem',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'required',
+                dataPath: '',
+                schemaPath: '#/oneOf/0/required',
+                params: {
+                  missingProperty: 'certificateChain',
+                },
+                message: "should have required property 'certificateChain'",
               },
-              message: "should have required property 'certificatePem'",
-            },
-            {
-              keyword: 'required',
-              dataPath: '',
-              schemaPath: '#/oneOf/1/required',
-              params: {
-                missingProperty: 'csr',
+              {
+                keyword: 'required',
+                dataPath: '',
+                schemaPath: '#/oneOf/1/required',
+                params: {
+                  missingProperty: 'csr',
+                },
+                message: "should have required property 'csr'",
               },
-              message: "should have required property 'csr'",
-            },
-            {
-              keyword: 'oneOf',
-              dataPath: '',
-              schemaPath: '#/oneOf',
-              params: {
-                passingSchemas: null,
+              {
+                keyword: 'oneOf',
+                dataPath: '',
+                schemaPath: '#/oneOf',
+                params: {
+                  passingSchemas: null,
+                },
+                message: 'should match exactly one schema in oneOf',
               },
-              message: 'should match exactly one schema in oneOf',
-            },
-          ],
+            ],
+          },
         });
       }));
 
-  it("should match exactly one schema in oneOf ('certificatePem' or 'csr')",
+  it("should match exactly one schema in oneOf ('certificateChain' or 'csr')",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: p256Cert,
+        certificateChain,
         csr: p256CSR,
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'not',
-              dataPath: '',
-              schemaPath: '#/dependencies/certificatePem/not',
-              params: {},
-              message: 'should NOT be valid',
-            },
-            {
-              keyword: 'not',
-              dataPath: '',
-              schemaPath: '#/dependencies/csr/not',
-              params: {},
-              message: 'should NOT be valid',
-            },
-            {
-              keyword: 'oneOf',
-              dataPath: '',
-              schemaPath: '#/oneOf',
-              params: {
-                passingSchemas: [
-                  0,
-                  1,
-                ],
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'not',
+                dataPath: '',
+                schemaPath: '#/dependencies/certificateChain/not',
+                params: {},
+                message: 'should NOT be valid',
               },
-              message: 'should match exactly one schema in oneOf',
-            },
-          ],
+              {
+                keyword: 'not',
+                dataPath: '',
+                schemaPath: '#/dependencies/csr/not',
+                params: {},
+                message: 'should NOT be valid',
+              },
+              {
+                keyword: 'oneOf',
+                dataPath: '',
+                schemaPath: '#/oneOf',
+                params: {
+                  passingSchemas: [
+                    0,
+                    1,
+                  ],
+                },
+                message: 'should match exactly one schema in oneOf',
+              },
+            ],
+          },
         });
       }));
 
   it("should match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: p256Cert,
+        certificateChain,
         belongsTo: {
           device: '1234567890',
           application: 'kafka-consumer',
@@ -111,97 +125,100 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'not',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/device/not',
-              params: {},
-              message: 'should NOT be valid',
-            },
-            {
-              keyword: 'not',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/application/not',
-              params: {},
-              message: 'should NOT be valid',
-            },
-            {
-              keyword: 'oneOf',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
-              params: {
-                passingSchemas: [
-                  0,
-                  1,
-                ],
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'not',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/device/not',
+                params: {},
+                message: 'should NOT be valid',
               },
-              message: 'should match exactly one schema in oneOf',
-            },
-          ],
+              {
+                keyword: 'not',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/application/not',
+                params: {},
+                message: 'should NOT be valid',
+              },
+              {
+                keyword: 'oneOf',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
+                params: {
+                  passingSchemas: [
+                    0,
+                    1,
+                  ],
+                },
+                message: 'should match exactly one schema in oneOf',
+              },
+            ],
+          },
         });
       }));
 
   // --------------------
   // test all field types
   // --------------------
-  it("should 'certificatePem' be string",
+  it("should 'certificateChain' be string",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: null,
+        certificateChain: null,
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'type',
-              dataPath: '.certificatePem',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/type',
-              params: {
-                type: 'string',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'type',
+                dataPath: '.certificateChain',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/type',
+                params: {
+                  type: 'string',
+                },
+                message: 'should be string',
               },
-              message: 'should be string',
-            },
-          ],
+            ],
+          },
         });
       }));
 
   it("should 'csr' be string",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
         csr: null,
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'type',
-              dataPath: '.csr',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/type',
-              params: {
-                type: 'string',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'type',
+                dataPath: '.csr',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/type',
+                params: {
+                  type: 'string',
+                },
+                message: 'should be string',
               },
-              message: 'should be string',
-            },
-          ],
+            ],
+          },
         });
       }));
 
   it("should 'belongsTo.device' be string",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: p256Cert,
+        certificateChain,
         belongsTo: {
           device: 1010,
         },
@@ -209,27 +226,28 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'type',
-              dataPath: '.belongsTo.device',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
-              params: {
-                type: 'string,null',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'type',
+                dataPath: '.belongsTo.device',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
+                params: {
+                  type: 'string,null',
+                },
+                message: 'should be string,null',
               },
-              message: 'should be string,null',
-            },
-          ],
+            ],
+          },
         });
       }));
 
   it("should 'belongsTo.application' be an enumerated string",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: p256Cert,
+        certificateChain,
         belongsTo: {
           application: 1010,
         },
@@ -237,73 +255,74 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
-              keyword: 'type',
-              dataPath: '.belongsTo.application',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
-              params: {
-                type: 'string,null',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [
+              {
+                keyword: 'type',
+                dataPath: '.belongsTo.application',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
+                params: {
+                  type: 'string,null',
+                },
+                message: 'should be string,null',
               },
-              message: 'should be string,null',
-            },
-            {
-              keyword: 'enum',
-              dataPath: '.belongsTo.application',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
-              params: {
-                allowedValues: [
-                  'kafka-consumer',
-                ],
+              {
+                keyword: 'enum',
+                dataPath: '.belongsTo.application',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
+                params: {
+                  allowedValues: [
+                    'kafka-consumer',
+                  ],
+                },
+                message: 'should be equal to one of the allowed values',
               },
-              message: 'should be equal to one of the allowed values',
-            },
-          ],
+            ],
+          },
         });
       }));
 
   // ---------------------
   // test all field limits
   // ---------------------
-  it("should 'certificatePem' NOT be longer than 65536 characters",
+  it("should 'certificateChain' NOT be longer than 65536 characters",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: generateCert(65536 + 1), /* (+1 to test) */
+        certificateChain: generateCert(65536 + 1), /* (+1 to test) */
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [{
-            dataPath: '.certificatePem',
-            keyword: 'maxLength',
-            message: 'should NOT be longer than 65536 characters',
-            params: {
-              limit: 65536,
-            },
-            schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/maxLength',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [{
+              dataPath: '.certificateChain',
+              keyword: 'maxLength',
+              message: 'should NOT be longer than 65536 characters',
+              params: {
+                limit: 65536,
+              },
+              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/maxLength',
+            }],
           },
-          ],
         });
       }));
 
   it("should 'csr' NOT be longer than 65536 characters",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
         csr: generateCSR(65536 + 1), /* (+1 to test) */
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [{
               dataPath: '.csr',
               keyword: 'maxLength',
               message: 'should NOT be longer than 65536 characters',
@@ -311,69 +330,66 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
                 limit: 65536,
               },
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/maxLength',
-            },
-          ],
+            }],
+          },
         });
       }));
 
   // --------------------
   // test all field regex
   // --------------------
-  it("should 'certificatePem' match the regex pattern",
+  it("should 'certificateChain' match the regex pattern",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: '',
+        certificateChain: '',
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [{
               keyword: 'pattern',
-              dataPath: '.certificatePem',
+              dataPath: '.certificateChain',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/pattern',
               params: {
-                pattern: '^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5})+$',
+                pattern: '^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$',
               },
-              message: 'should match pattern "^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5})+$"',
-            },
-          ],
+              message: 'should match pattern "^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$"',
+            }],
+          },
         });
       }));
 
   it("should 'csr' match the regex pattern",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
         csr: '',
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.csr',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/pattern',
               params: {
-                pattern: '^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}$',
+                pattern: '^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)?$',
               },
-              message: 'should match pattern "^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}$"',
-            },
-          ],
+              message: 'should match pattern "^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)?$"',
+            }],
+          },
         });
       }));
 
   it("should 'belongsTo.device' match the regex pattern",
     () => req.post('/api/v1/certificates')
-      .set('Authorization', `Bearer ${token}`)
       .send({
-        certificatePem: p256Cert,
+        certificateChain,
         belongsTo: {
           device: '',
         },
@@ -381,10 +397,10 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
@@ -392,8 +408,8 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
                 pattern: '^[0-9a-fA-F]{10}$',
               },
               message: 'should match pattern "^[0-9a-fA-F]{10}$"',
-            },
-          ],
+            }],
+          },
         });
       }));
 });
@@ -404,15 +420,14 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // --------------------
   it("should have required property 'belongsTo'",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
-      .set('Authorization', `Bearer ${token}`)
       .send()
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaErrors: [{
               keyword: 'required',
               dataPath: '',
               schemaPath: '#/required',
@@ -420,14 +435,13 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 missingProperty: 'belongsTo',
               },
               message: "should have required property 'belongsTo'",
-            },
-          ],
+            }],
+          },
         });
       }));
 
   it("should 'belongsTo' match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
-      .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
           device: 1010,
@@ -437,65 +451,67 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
-          schemaErrors: [
-            {
-              keyword: 'not',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/device/not',
-              params: {},
-              message: 'should NOT be valid',
-            },
-            {
-              keyword: 'not',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/application/not',
-              params: {},
-              message: 'should NOT be valid',
-            },
-            {
-              keyword: 'type',
-              dataPath: '.belongsTo.device',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
-              params: {
-                type: 'string,null',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaErrors: [
+              {
+                keyword: 'not',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/device/not',
+                params: {},
+                message: 'should NOT be valid',
               },
-              message: 'should be string,null',
-            },
-            {
-              keyword: 'type',
-              dataPath: '.belongsTo.application',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
-              params: {
-                type: 'string,null',
+              {
+                keyword: 'not',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/application/not',
+                params: {},
+                message: 'should NOT be valid',
               },
-              message: 'should be string,null',
-            },
-            {
-              keyword: 'enum',
-              dataPath: '.belongsTo.application',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
-              params: {
-                allowedValues: [
-                  'kafka-consumer',
-                ],
+              {
+                keyword: 'type',
+                dataPath: '.belongsTo.device',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
+                params: {
+                  type: 'string,null',
+                },
+                message: 'should be string,null',
               },
-              message: 'should be equal to one of the allowed values',
-            },
-            {
-              keyword: 'oneOf',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
-              params: {
-                passingSchemas: [
-                  0,
-                  1,
-                ],
+              {
+                keyword: 'type',
+                dataPath: '.belongsTo.application',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
+                params: {
+                  type: 'string,null',
+                },
+                message: 'should be string,null',
               },
-              message: 'should match exactly one schema in oneOf',
-            },
-          ],
+              {
+                keyword: 'enum',
+                dataPath: '.belongsTo.application',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
+                params: {
+                  allowedValues: [
+                    'kafka-consumer',
+                  ],
+                },
+                message: 'should be equal to one of the allowed values',
+              },
+              {
+                keyword: 'oneOf',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
+                params: {
+                  passingSchemas: [
+                    0,
+                    1,
+                  ],
+                },
+                message: 'should match exactly one schema in oneOf',
+              },
+            ],
+          },
         });
       }));
 
@@ -504,44 +520,44 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // --------------------
   it("should 'belongsTo' be object",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
-      .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: null,
       })
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
-          schemaErrors: [
-            {
-              keyword: 'type',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/type',
-              params: {
-                type: 'object',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaErrors: [
+              {
+                keyword: 'type',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/type',
+                params: {
+                  type: 'object',
+                },
+                message: 'should be object',
               },
-              message: 'should be object',
-            },
-            {
-              keyword: 'oneOf',
-              dataPath: '.belongsTo',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
-              params: {
-                passingSchemas: [
-                  0,
-                  1,
-                ],
+              {
+                keyword: 'oneOf',
+                dataPath: '.belongsTo',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
+                params: {
+                  passingSchemas: [
+                    0,
+                    1,
+                  ],
+                },
+                message: 'should match exactly one schema in oneOf',
               },
-              message: 'should match exactly one schema in oneOf',
-            },
-          ],
+            ],
+          },
         });
       }));
 
   it("should 'belongsTo.device' should be string",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
-      .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
           device: 1010,
@@ -550,10 +566,10 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaErrors: [{
               keyword: 'type',
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
@@ -561,14 +577,13 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 type: 'string,null',
               },
               message: 'should be string,null',
-            },
-          ],
+            }],
+          },
         });
       }));
 
   it("should 'belongsTo.application' be an enumerated string",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
-      .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
           application: 1010,
@@ -577,30 +592,32 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
-          schemaErrors: [
-            {
-              keyword: 'type',
-              dataPath: '.belongsTo.application',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
-              params: {
-                type: 'string,null',
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaErrors: [
+              {
+                keyword: 'type',
+                dataPath: '.belongsTo.application',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
+                params: {
+                  type: 'string,null',
+                },
+                message: 'should be string,null',
               },
-              message: 'should be string,null',
-            },
-            {
-              keyword: 'enum',
-              dataPath: '.belongsTo.application',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
-              params: {
-                allowedValues: [
-                  'kafka-consumer',
-                ],
+              {
+                keyword: 'enum',
+                dataPath: '.belongsTo.application',
+                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
+                params: {
+                  allowedValues: [
+                    'kafka-consumer',
+                  ],
+                },
+                message: 'should be equal to one of the allowed values',
               },
-              message: 'should be equal to one of the allowed values',
-            },
-          ],
+            ],
+          },
         });
       }));
 
@@ -609,7 +626,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // --------------------
   it("should 'belongsTo.device' match the regex pattern",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
-      .set('Authorization', `Bearer ${token}`)
       .send({
         belongsTo: {
           device: '',
@@ -618,10 +634,10 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
       .expect(400)
       .then((res) => {
         expect(res.body).toEqual({
-          message: 'Input data schema validation failure.',
-          schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
-          schemaErrors: [
-            {
+          error: 'Input data schema validation failure.',
+          detail: {
+            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
@@ -629,8 +645,8 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 pattern: '^[0-9a-fA-F]{10}$',
               },
               message: 'should match pattern "^[0-9a-fA-F]{10}$"',
-            },
-          ],
+            }],
+          },
         });
       }));
 });

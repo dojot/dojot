@@ -206,7 +206,6 @@ function createObject(config) {
 
     framework: asFunction(WebUtils.framework.createExpress, {
       injector: () => ({
-        config: config.framework,
         interceptors: [
           // The order of the interceptors matters
           DIContainer.resolve('responseCompressInterceptor'),
@@ -230,8 +229,8 @@ function createObject(config) {
           // The order of the error handlers matters
           DIContainer.resolve('defaultErrorHandler'),
         ],
+        supportTrustProxy: config.framework.trustproxy,
         supportWebsockets: false,
-        supportTrustProxy: true,
         catchInvalidRequest: true,
       }),
       lifetime: Lifetime.SINGLETON,

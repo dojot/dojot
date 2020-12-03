@@ -34,7 +34,8 @@ mongoose.connection = new EventEmitter();
 mongoose.connection.close = jest.fn();
 
 const createMongoClient = require('../../../src/db/mongoClient');
-const errorTemplate = require('../../../src/sdk/web/framework/backing/error-template');
+
+const { errorTemplate } = global;
 
 describe("Unit tests of script 'mongoClient.js'", () => {
   let mongoClient = null;

@@ -1,8 +1,9 @@
 const pkijs = require('pkijs');
 const { Logger } = require('@dojot/microservice-sdk');
 const createPkiUtils = require('../../../src/core/pkiUtils');
-const errorTemplate = require('../../../src/sdk/web/framework/backing/error-template');
 const util = require('../../util.test');
+
+const { errorTemplate } = global;
 
 const logger = new Logger('pkiUtils.test.js');
 
