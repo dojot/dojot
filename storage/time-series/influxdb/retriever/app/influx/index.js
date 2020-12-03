@@ -55,10 +55,10 @@ class InfluxDB {
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
       const isHealth = await this.influxState.isHealth();
       if (isHealth) {
-        logger.debug('influxdbHealthChecker: Server is healthy');
+        logger.debug('influxdbHealthChecker: InfluxDB is healthy');
         signalReady();
       } else {
-        logger.warn('influxdbHealthChecker: Server is not healthy');
+        logger.warn('influxdbHealthChecker: InfluxDB is not healthy');
         signalNotReady();
       }
     };
