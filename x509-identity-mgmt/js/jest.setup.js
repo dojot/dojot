@@ -7,25 +7,12 @@ const Sanitizer = require('@dojot/microservice-sdk/lib/configManager/fileManager
 /** Mock to fix the problem with the fixed path of the default configuration file. */
 require('@dojot/microservice-sdk/lib/configManager/fileManager/Reader').readDefaultConfig = () => {
   const data = readFileSync('./config/default.conf').toString();
-  const config = Sanitizer.sanitize(data);
-  return config;
+  return Sanitizer.sanitize(data);
 };
 
 Logger.setTransport('console');
 ConfigManager.loadSettings('X509IDMGMT');
 global.config = unflatten(ConfigManager.getConfig('x509idmgmt'));
-
-/* eslint-disable no-console */
-// global.console = {
-//  log: jest.fn(), // console.log are ignored in tests
-//
-//  // Keep native behaviour for other methods, use those to print out
-//  // things in the tests themselves, not 'console.log'...
-//  error: console.error,
-//  warn: console.warn,
-//  info: console.info,
-//  debug: console.debug,
-// };
 
 const createSchemaValidator = require('./src/core/schemaValidator');
 const defsSchema = require('./schemas/defs.json');

@@ -155,7 +155,7 @@ class TrustedCAService {
       + 'they must be removed manually before removing their CA certificate.');
     }
 
-    // TODO: When we start using MongoDB >= 4.4 we can use transactions here...
+    // When we start using MongoDB >= 4.4 we can use transactions here...
     await this.CertificateModel.deleteMany({ tenant, caFingerprint, autoRegistered: true })
       .maxTimeMS(this.queryMaxTimeMS)
       .exec();

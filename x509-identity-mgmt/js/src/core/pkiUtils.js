@@ -90,10 +90,8 @@ function createObject(logger, errorTemplate) {
   function parseCSR(pem) {
     const asn1Data = getASN1(pem);
 
-    /* creates an object PKCS#10 (from RFC2986) */
-    const csr = new pkijs.CertificationRequest({ schema: asn1Data.result });
-
-    return csr;
+    /* creates an CSR object PKCS#10 (from RFC2986) */
+    return new pkijs.CertificationRequest({ schema: asn1Data.result });
   }
 
   /**
@@ -106,9 +104,7 @@ function createObject(logger, errorTemplate) {
     const asn1Data = getASN1(pem);
 
     /* creates an x.509v3 certificate (from RFC5280) */
-    const cert = new pkijs.Certificate({ schema: asn1Data.result });
-
-    return cert;
+    return new pkijs.Certificate({ schema: asn1Data.result });
   }
 
   /**
@@ -152,13 +148,11 @@ function createObject(logger, errorTemplate) {
     const hash = crypto.createHash('sha256');
     hash.update(getBase64DER(pem), 'base64');
 
-    /* perform a SHA256 hash on it */
-    const fingerprint = hash.digest('hex')
+    /* perform a SHA256 hash on it (fingerprint) */
+    return hash.digest('hex')
       .match(/.{2}/g)
       .join(':')
       .toUpperCase();
-
-    return fingerprint;
   }
 
   /**

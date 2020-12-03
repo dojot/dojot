@@ -1,11 +1,15 @@
 const http = require('http');
 
 async function check(url, timeout) {
-  const allOk = await new Promise((resolve) => {
+  return new Promise((resolve) => {
     const req = http.get(url, { timeout }, (res) => {
       let data = '';
+
       /* A chunk of data has been recieved. */
-      res.on('data', (chunk) => { data += chunk; });
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
       /* The whole response has been received. Print out the result. */
       res.on('end', () => {
         if (data === 'ALLOK') {
@@ -21,7 +25,6 @@ async function check(url, timeout) {
       resolve(false);
     });
   });
-  return allOk;
 }
 
 class EjbcaHealthCheck {

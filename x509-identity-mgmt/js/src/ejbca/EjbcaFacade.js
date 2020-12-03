@@ -140,14 +140,11 @@ class EjbcaFacade {
     // PEM format is just the DER binary data that has been base64 encoded,
     // split into 64 character lines, and wrapped between:
     // '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----'
-    const certPemWrapped = [
+    return [
       '-----BEGIN CERTIFICATE-----',
       certBase64encoded,
       '-----END CERTIFICATE-----',
     ].join('\n');
-
-    // returns the certificate wrapped in PEM format
-    return certPemWrapped;
   }
 
   /**
@@ -236,14 +233,11 @@ class EjbcaFacade {
     /* PEM format is just the DER binary data that has been base64 encoded,
      * split into 64 character lines, and wrapped between:
      * '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' */
-    const certPemWrapped = [
+    return [
       '-----BEGIN CERTIFICATE-----',
       certBase64encoded,
       '-----END CERTIFICATE-----',
     ].join('\n');
-
-    /* returns the certificate wrapped in PEM format */
-    return certPemWrapped;
   }
 
   /**
@@ -295,14 +289,11 @@ class EjbcaFacade {
     // PEM format is just the DER binary data that has been base64 encoded,
     // split into 64 character lines, and wrapped between:
     // '-----BEGIN X509 CRL-----' and '-----END X509 CRL-----'
-    const crlPemWrapped = [
+    return [
       '-----BEGIN X509 CRL-----',
       crlBase64encoded,
       '-----END X509 CRL-----',
     ].join('\n');
-
-    // returns the CRL wrapped in PEM format
-    return crlPemWrapped;
   }
 }
 
