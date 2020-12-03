@@ -93,9 +93,11 @@ class InfluxDB {
    * Creates a 'healthCheck' for influxDB
    *
    * @param {function()} cbHealth Callback to be called if the service is
-   *                               healthy and this.isHealth is not null.
+   *                              healthy, this.isHealth is not null
+   *                              and if the value of this.isHealth is to change.
    * @param {function()} cbNotHealth Callback to be called if the service is
-   *                                 not healthy and this.isHealth is not null.
+   *                                 not healthy,  this.isHealth is not null
+   *                                 and if the value of this.isHealth is to change.
    */
   createHealthChecker(cbHealth, cbNotHealth) {
     const influxdbHealthChecker = async (signalReady, signalNotReady) => {
