@@ -15,6 +15,8 @@ services:
     depends_on:
       - zookeeper
     restart: always
+    ports:
+      - "9092:9092"
     healthcheck:
       test: ["CMD", "bash", "-c", "unset" , "JMX_PORT" ,";" ,"kafka-topics.sh","--zookeeper","zookeeper:2181","--list"]
       interval: 30s
@@ -89,7 +91,7 @@ services:
     image: quay.io/influxdb/influxdb:v2.0.2
     restart:  on-failure
     volumes:
-      - influx-config:/root/.influxdbv2/
+      - influxdb-volume:/root/.influxdbv2/
       - ./init-influx.sh:/init-influx.sh:Z
     entrypoint:
       - /init-influx.sh
@@ -101,8 +103,7 @@ services:
     command: influxd --reporting-disabled
     restart: always
     volumes:
-      - influx-data:/var/lib/influxdb
-      - influx-config:/root/.influxdbv2
+      - influxdb-volume:/root/.influxdbv2
     ports:
       - "8086:8086"
     healthcheck:
@@ -113,5 +114,4 @@ services:
         max-size: 100m
 
 volumes:
-  influx-data:
-  influx-config:
+  influxdb-volume:
