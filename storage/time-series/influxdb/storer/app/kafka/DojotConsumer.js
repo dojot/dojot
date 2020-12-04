@@ -6,6 +6,8 @@ const {
   Logger,
 } = require('@dojot/microservice-sdk');
 
+const util = require('util');
+
 const config = ConfigManager.getConfig('STORER');
 
 const logger = new Logger('influxdb-storer:kafka/DojotConsumer');
@@ -87,7 +89,7 @@ class DojotConsumer {
             logger.debug('registerCallbackForTenantEvents: event was discarded');
         }
       } catch (e) {
-        logger.error('registerCallbackForTenantEvents:', e);
+        logger.error(`registerCallbackForTenantEvents (Received data - ${util.inspect(data)} - value:  ${data.value ? data.value.toString() : ''}): `, e);
       }
     };
     this.idCallbackTenant = this.consumer.registerCallback(topic, callback);
@@ -146,7 +148,7 @@ class DojotConsumer {
             logger.debug(`registerCallbacksForDeviceMgmtEvents: ${event} event was discarded `);
         }
       } catch (e) {
-        logger.error('registerCallbacksForDeviceMgmtEvents:', e);
+        logger.error(`registerCallbacksForDeviceMgmtEvents (Received data - ${util.inspect(data)} - value:  ${data.value ? data.value.toString() : ''}): `, e);
       }
     };
     this.idCallbackDeviceManager = this.consumer.registerCallback(topic, callback);
@@ -178,7 +180,7 @@ class DojotConsumer {
         } = JSON.parse(payload);
         await DojotConsumer.handleData(deviceid, tenant, timestamp, attrs, handleDeviceData);
       } catch (e) {
-        logger.error('registerCallbacksForDeviceDataEvents:', e);
+        logger.error(`registerCallbacksForDeviceDataEvents (Received data - ${util.inspect(data)} - value:  ${data.value ? data.value.toString() : ''}): `, e);
       }
     };
     this.idCallbackDeviceData = this.consumer.registerCallback(topic, callback);

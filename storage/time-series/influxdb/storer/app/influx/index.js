@@ -31,7 +31,6 @@ class InfluxDB {
  *          Manages the services' states, providing health check and shutdown utilities.
 */
   constructor(serviceState) {
-    console.log('configInfluxWriteOptionsCamelCase', configInfluxWriteOptionsCamelCase);
     this.influxOrgs = new InfluxOrgs(
       configInflux.url,
       configInflux['default.token'],
