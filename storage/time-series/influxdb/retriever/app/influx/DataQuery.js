@@ -113,7 +113,7 @@ class DataQuery {
                 && value !== '') {
                 point.attrs.push({
                   label: key.slice(prefixSize),
-                  value: DataQuery.parseValue(value),
+                  value: JSON.parse(value),
                 });
               }
             });
@@ -191,7 +191,7 @@ class DataQuery {
             // the others types are writer as string with json stringify
             result.push({
               ts: o._time,
-              value: DataQuery.parseValue(o._value),
+              value: JSON.parse(o._value),
             });
           },
           error(error) {
@@ -258,20 +258,6 @@ class DataQuery {
       orderExp = '|> sort(columns: ["_time"], desc: true)';
     }
     return orderExp;
-  }
-
-  /**
-   * Parse value  that was saved in influxdb to know what its type and what action should be taken
-   *
-   * When a null or empty value was persisted it would be under the effect of json.parse
-   *
-   * @param {any} value
-   *
-   * @returns The parsed value
-   */
-  static parseValue(value) {
-    return value === null || typeof value === 'number' || typeof value === 'boolean'
-      ? value : JSON.parse(value);
   }
 }
 

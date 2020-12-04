@@ -41,7 +41,7 @@ The mapping between the elements of influxdb and dojot devices are:
 - *Organization*: It will be the **tenant**
 - *Measurement*: It will be the **deviceId**
 - *Bucket* : By default it is called *devices*, but this value can be changed in Storer.
-- *Fields*:  Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values and its values if it is not numeric or boolean being parsed in a JSON.
+- *Fields*:  Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values and its values being parsed in a JSON.
 
 ## Dependencies
 
