@@ -65,6 +65,12 @@ describe('Test Influx Data Writer', () => {
   test('write - test ok iso date', async () => {
     mockParseDateTimeToUnixNs.mockReturnValueOnce('timestamp');
     await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
+
+    expect(mockPointString).toHaveBeenCalledTimes(3);
+    expect(mockPointString).toHaveBeenCalledWith('dojot.a', '1');
+    expect(mockPointString).toHaveBeenCalledWith('dojot.b', 'false');
+    expect(mockPointString).toHaveBeenCalledWith('dojot.c', '"c"');
+
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
     expect(mockParseDateTimeToUnixNs).toHaveBeenCalled();
     expect(mockPointTs).toHaveBeenCalledWith('timestamp');
@@ -72,8 +78,13 @@ describe('Test Influx Data Writer', () => {
 
   test('write - test ok ts int', async () => {
     await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 123);
-    // TODO improve this  toHaveBeenCalledWith to get the attrs
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
+
+    expect(mockPointString).toHaveBeenCalledTimes(3);
+    expect(mockPointString).toHaveBeenCalledWith('dojot.a', '1');
+    expect(mockPointString).toHaveBeenCalledWith('dojot.b', 'false');
+    expect(mockPointString).toHaveBeenCalledWith('dojot.c', '"c"');
+
     expect(mockParseDateTimeToUnixNs).not.toHaveBeenCalled();
     expect(mockPointTs).toHaveBeenCalledWith('123000000');
   });
@@ -83,6 +94,12 @@ describe('Test Influx Data Writer', () => {
       throw new Error('Invalid date');
     });
     await dataQuery.write('org2', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
+
+    expect(mockPointString).toHaveBeenCalledTimes(3);
+    expect(mockPointString).toHaveBeenCalledWith('dojot.a', '1');
+    expect(mockPointString).toHaveBeenCalledWith('dojot.b', 'false');
+    expect(mockPointString).toHaveBeenCalledWith('dojot.c', '"c"');
+
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
     expect(mockParseDateTimeToUnixNs).toHaveBeenCalled();
     expect(mockPointTs).toHaveBeenCalledWith('');
