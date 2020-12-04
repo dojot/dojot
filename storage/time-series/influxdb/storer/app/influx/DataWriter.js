@@ -99,8 +99,9 @@ class DataWriter {
    * as the messages are sent in batch there is no way to be sure which message was written
    * to commit or not, even changing the batch to 1 and deactivating the auto flush,
    * something that can be used to confirm the data is not returned.
-   * writeSuccess does not currently appear to be called and there would be a cost
-   * to parse the data that comes in rows. https://github.com/influxdata/influxdb-client-js/issues/279
+   * WriteSuccess and writeFailed could be used for this,
+   * but it returns the data in a way that it would be necessary to parse
+   * and could have a cost.
    */
   async write(org, measurement, attrs, timestamp) {
     logger.debug(`writer: Pushing  data to ${org} org, ${measurement} measu and ${timestamp} timestamp and attrs`);
@@ -114,8 +115,7 @@ class DataWriter {
           point.stringField(newKey, JSON.stringify(value));
         });
         logger.debug(`writer: The point will be write is ${point.toString()} in ${org} org`);
-        const writeApi = this.getWriteAPI(org);
-        writeApi.writePoint(point);
+        this.getWriteAPI(org).writePoint(point);
       } catch (e) {
         logger.error('writer:', e);
         throw new Error('Cannot write data');
