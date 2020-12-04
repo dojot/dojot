@@ -10,7 +10,7 @@ RUN mkdir -p /opt/tls \
 
 # Install Node.js
 RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
-    && yum install -y nodejs \
+    && yum install -y nodejs-12.20.0 \
     && yum install -y gcc-c++ make \
     && yum clean packages
 
