@@ -1,8 +1,5 @@
 FROM primekey/ejbca-ce:6.15.2.6
 
-ENV NODE_APP_PORT "3000"
-ENV HEALTHCHECK_URL "http://localhost:${NODE_APP_PORT}/healthcheck"
-
 # User 'root'
 USER 0
 
@@ -53,4 +50,4 @@ USER 10001
 CMD ["/opt/entrypoint.sh"]
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=2 \
-    CMD HC=$(curl -sS $HEALTHCHECK_URL) && echo $HC && grep -q '"status":"ok"' <<< "$HC"
+    CMD curl -s "http://localhost:9000/health" | grep -q "SERVER_IS_READY"
