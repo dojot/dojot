@@ -66,15 +66,14 @@ describe('Test Influx Data Writer', () => {
     mockParseDateTimeToUnixNs.mockReturnValueOnce('timestamp');
     await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
-    expect(mockPointFloat).toHaveBeenCalled();
     expect(mockParseDateTimeToUnixNs).toHaveBeenCalled();
     expect(mockPointTs).toHaveBeenCalledWith('timestamp');
   });
 
   test('write - test ok ts int', async () => {
     await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 123);
+    // TODO improve this  toHaveBeenCalledWith to get the attrs
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
-    expect(mockPointFloat).toHaveBeenCalled();
     expect(mockParseDateTimeToUnixNs).not.toHaveBeenCalled();
     expect(mockPointTs).toHaveBeenCalledWith('123000000');
   });
@@ -85,7 +84,6 @@ describe('Test Influx Data Writer', () => {
     });
     await dataQuery.write('org2', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
-    expect(mockPointFloat).toHaveBeenCalled();
     expect(mockParseDateTimeToUnixNs).toHaveBeenCalled();
     expect(mockPointTs).toHaveBeenCalledWith('');
   });

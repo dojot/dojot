@@ -12,7 +12,8 @@ const InfluxMeasurement = require('./Measurements');
 const logger = new Logger('influxdb-storer:Influx');
 const { influx: configInflux } = getConfig('STORER');
 let configInfluxWriteOptionsCamelCase = {};
-if (configInflux['write.options'] && typeof configInflux['write.options'] === 'object') {
+
+if (configInflux && typeof configInflux === 'object') {
   const { write: { options: influxWriteOptions } } = unflatten(configInflux);
   const configInfluxWriteOptions = influxWriteOptions ? flatten(influxWriteOptions) : {};
   configInfluxWriteOptionsCamelCase = transformObjectKeys(configInfluxWriteOptions, camelCase);
@@ -30,6 +31,7 @@ class InfluxDB {
  *          Manages the services' states, providing health check and shutdown utilities.
 */
   constructor(serviceState) {
+    console.log('configInfluxWriteOptionsCamelCase', configInfluxWriteOptionsCamelCase);
     this.influxOrgs = new InfluxOrgs(
       configInflux.url,
       configInflux['default.token'],

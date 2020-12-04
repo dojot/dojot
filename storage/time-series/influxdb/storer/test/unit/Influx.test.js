@@ -3,12 +3,18 @@ const mockConfig = {
     url: 'abc',
     'default.token': 'abc',
     'default.bucket': 'abc',
+    write: {
+      options: {
+
+      },
+    },
   },
 };
 
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn(),
   },
   Logger: jest.fn(() => ({
     debug: jest.fn(),
@@ -50,7 +56,13 @@ jest.mock('../../app/influx/Measurements', () => mockInfluxMeasurements);
 
 
 const mockFlat = {
-  unflatten: jest.fn(),
+  unflatten: jest.fn().mockReturnValueOnce({
+    write: {
+      options: {
+
+      },
+    },
+  }),
   flatten: jest.fn(),
 };
 

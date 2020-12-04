@@ -44,8 +44,8 @@
   "dependencies": {
     "@dojot/microservice-sdk": "0.1.9",
     "@google-cloud/precise-date": "^2.0.3",
-    "@influxdata/influxdb-client": "^1.8.0",
-    "@influxdata/influxdb-client-apis": "^1.8.0",
+    "@influxdata/influxdb-client": "^1.9.0",
+    "@influxdata/influxdb-client-apis": "^1.9.0",
     "flat": "^5.0.2",
     "lodash.camelcase": "^4.3.0"
   },
@@ -79,7 +79,7 @@
   },
   "devDependencies": {
     "@bbc/apache2-license-checker": "^1.1.4",
-    "eslint": "^7.13.0",
+    "eslint": "^7.14.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-security": "^1.4.0",

@@ -1,5 +1,6 @@
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
 const { Logger } = require('@dojot/microservice-sdk');
+
 const { parseDateTimeToUnixNs } = require('../Utils');
 
 const logger = new Logger('influxdb-storer:influxdb/WriterData');
@@ -22,7 +23,7 @@ class DataWriter {
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
-    logger.debug('constructor: writeOptions=', writeOptions);
+    logger.debug(`constructor: writeOptions=${JSON.stringify(writeOptions)}`);
     this.bucket = defaultBucket;
     this.precision = 'ns';
     this.writeOptions = writeOptions;
@@ -38,6 +39,8 @@ class DataWriter {
     this.writeOptions.writeSuccess = (lines) => {
       logger.debug(`writeSuccess: lines: ${lines.toString()}`);
     };
+
+    logger.debug(`final writeOptions: ${JSON.stringify(writeOptions)}`);
 
     this.influxDB = new InfluxDB({ url, token });
 
@@ -108,16 +111,11 @@ class DataWriter {
         Object.entries(attrs).forEach(([key, value]) => {
           logger.debug(`writer: setting key=${key}, value=${value}, type=${typeof value}`);
           const newKey = `${this.prefixFields}${key}`;
-          if (typeof value === 'number') {
-            point.floatField(newKey, value);
-          } else if (typeof value === 'boolean') {
-            point.booleanField(newKey, value);
-          } else {
-            point.stringField(newKey, JSON.stringify(value));
-          }
+          point.stringField(newKey, JSON.stringify(value));
         });
         logger.debug(`writer: The point will be write is ${point.toString()} in ${org} org`);
-        this.getWriteAPI(org).writePoint(point);
+        const writeApi = this.getWriteAPI(org);
+        writeApi.writePoint(point);
       } catch (e) {
         logger.error('writer:', e);
         throw new Error('Cannot write data');
