@@ -87,6 +87,11 @@ describe('Test Influx Orgs', () => {
     });
   });
 
+  test('hasDefaultBucketInOrg - org exist ', async () => {
+    mockGetBuckets.mockResolvedValueOnce({ buckets: [{ id: 'abc' }] });
+    const has = await orgs.hasDefaultBucketInOrg('org2');
+    expect(has).toBe(true);
+  });
 
   test('createOrgWithDefaultBucket - org exist and bucket doest  exist test ok ', async () => {
     mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
