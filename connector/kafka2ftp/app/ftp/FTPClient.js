@@ -1,6 +1,6 @@
 const { Client } = require('basic-ftp');
 const util = require('util');
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 const retry = require('async-retry');
 const { retryOptions: { retries: numberOfRetries } } = require('../Config');
 
@@ -22,23 +22,25 @@ class FTPClient {
     this.config = config;
     this.connectionName = connectionName;
     this.isSending = false;
-    this.tagLogger = { filename: `kafka2ftp:app/FTPClient.${connectionName}` };
+    this.logger = new Logger(`kafka2ftp:app/FTPClient.${connectionName}`);
 
     // Use 0 to disable timeouts
     this.client = new Client(0);
 
-    logger.info('Init ftp connection...', this.tagLogger);
-    logger.debug(`constructor: ...with config: ${util.inspect(config, { depth: null })}`, this.tagLogger);
+    this.logger.info('Init ftp connection...');
+    this.logger.debug(`constructor: ...with config: ${util.inspect(config, { depth: null })}`);
 
-    this.client.ftp.verbose = logger.debug;
-    this.client.ftp.log = logger.debug;
+    const boundLoggerDebug = this.logger.debug.bind(this);
+
+    this.client.ftp.verbose = boundLoggerDebug;
+    this.client.ftp.log = boundLoggerDebug;
   }
 
   /**
    * Checks if it is in an upload process
    */
   isSendingFile() {
-    logger.debug(`isSendingFile:  ${this.isSending ? 'yes' : 'no'}`, this.tagLogger);
+    this.logger.debug(`isSendingFile:  ${this.isSending ? 'yes' : 'no'}`);
     return this.isSending;
   }
 
@@ -46,9 +48,9 @@ class FTPClient {
    * Set if it is in an upload process
    */
   setSendingFile(isUploading) {
-    logger.debug(`setSendingFile: old value ${this.isSending ? 'yes' : 'no'}`, this.tagLogger);
+    this.logger.debug(`setSendingFile: old value ${this.isSending ? 'yes' : 'no'}`);
     this.isSending = isUploading;
-    logger.debug(`setSendingFile: new value ${this.isSending ? 'yes' : 'no'}`, this.tagLogger);
+    this.logger.debug(`setSendingFile: new value ${this.isSending ? 'yes' : 'no'}`);
   }
 
   /**
@@ -57,10 +59,10 @@ class FTPClient {
    */
   handleEventEndOnSocketAndReconnect() {
     this.client.ftp.socket.on('end', async () => {
-      logger.info('handleEventEndOnSocketAndReconnect: ... Connection ended', this.tagLogger);
-      logger.debug('handleEventEndOnSocketAndReconnect: Reconnection...', this.tagLogger);
+      this.logger.info('handleEventEndOnSocketAndReconnect: ... Connection ended');
+      this.logger.debug('handleEventEndOnSocketAndReconnect: Reconnection...');
       await this.connect();
-      logger.info('handleEventEndOnSocketAndReconnect: ...Reconnected', this.tagLogger);
+      this.logger.info('handleEventEndOnSocketAndReconnect: ...Reconnected');
     });
   }
 
@@ -69,22 +71,22 @@ class FTPClient {
    *
    */
   async connect() {
-    logger.debug('connect: Trying connect ', this.tagLogger);
+    this.logger.debug('connect: Trying connect ');
 
     try {
       const response = await this.client.access(this.config);
 
-      logger.debug(`connect: Reponse in connect:  ${util.inspect(response, { depth: null })} `, this.tagLogger);
+      this.logger.debug(`connect: Reponse in connect:  ${util.inspect(response, { depth: null })} `);
 
       const { code } = response;
       if (code >= 200 && code < 300) {
         this.handleEventEndOnSocketAndReconnect();
-        logger.info('connect: ...Connected', this.tagLogger);
+        this.logger.info('connect: ...Connected');
       } else {
         throw new Error('connect: No connected');
       }
     } catch (error) {
-      logger.error(`connect: Catch: ${error.stack}`, this.tagLogger);
+      this.logger.error(`connect: Catch: ${error.stack}`);
       throw error;
     }
   }
@@ -93,16 +95,16 @@ class FTPClient {
    * Disconnects from FTP
    */
   disconnect() {
-    logger.debug('disconnect: Disconnecting...', this.tagLogger);
+    this.logger.debug('disconnect: Disconnecting...');
     this.client.close();
-    logger.debug('disconnect: Disconnected...', this.tagLogger);
+    this.logger.debug('disconnect: Disconnected...');
   }
 
   /**
    * Checks if is connected
    */
   isConnected() {
-    logger.debug(`isConnected: ${!this.client.closed ? 'yes' : 'no'}`, this.tagLogger);
+    this.logger.debug(`isConnected: ${!this.client.closed ? 'yes' : 'no'}`);
     return !this.client.closed;
   }
 
@@ -114,28 +116,28 @@ class FTPClient {
   async upload(filename, stream, isRetry = false) {
     try {
       if (!this.isConnected()) {
-        logger.debug('upload: Reconnect...', this.tagLogger);
+        this.logger.debug('upload: Reconnect...');
         await this.connect();
-        logger.debug('upload: Reconnected...', this.tagLogger);
+        this.logger.debug('upload: Reconnected...');
       }
 
-      logger.debug(`upload: Uploading... ${filename}`, this.tagLogger);
+      this.logger.debug(`upload: Uploading... ${filename}`);
       const response = await this.client.uploadFrom(stream, filename);
       const { code } = response;
-      logger.debug(`upload: Reponse in upload: ${util.inspect(response, { depth: null })}`, this.tagLogger);
+      this.logger.debug(`upload: Reponse in upload: ${util.inspect(response, { depth: null })}`);
       if (code >= 200 && code < 300) {
-        logger.debug('upload: ...uploaded', this.tagLogger);
+        this.logger.debug('upload: ...uploaded');
       } else {
         throw new Error('upload: Not uploaded');
       }
     } catch (error) {
       if (isRetry) {
-        logger.debug('upload: Will throw a error', this.tagLogger);
-        logger.error(`upload: Caught ${filename}: ${error.stack}`, this.tagLogger);
+        this.logger.debug('upload: Will throw a error');
+        this.logger.error(`upload: Caught ${filename}: ${error.stack}`);
         throw error;
       } else {
-        logger.warn(`upload: Caught ${filename}: ${error.stack}`, this.tagLogger);
-        logger.debug('upload: Will retry', this.tagLogger);
+        this.logger.warn(`upload: Caught ${filename}: ${error.stack}`);
+        this.logger.debug('upload: Will retry');
         await this.uploadRetry(filename, stream);
       }
     }
@@ -150,16 +152,16 @@ class FTPClient {
    */
   async uploadRetry(filename, stream) {
     await retry(async () => {
-      logger.debug('uploadRetry: Retrying connect.... ', this.tagLogger);
+      this.logger.debug('uploadRetry: Retrying connect.... ');
       await this.connect();
-      logger.debug('uploadRetry: ... connected ', this.tagLogger);
-      logger.info(`uploadRetry: Retrying upload ${filename}... `, this.tagLogger);
+      this.logger.debug('uploadRetry: ... connected ');
+      this.logger.info(`uploadRetry: Retrying upload ${filename}... `);
       await this.upload(filename, stream);
-      logger.debug('uploadRetry: ...uploaded ', this.tagLogger);
+      this.logger.debug('uploadRetry: ...uploaded ');
     }, {
       retries: numberOfRetries,
     }).catch((error) => {
-      logger.error(`uploadRetry: Caught ${filename}: ${error.stack}`, this.tagLogger);
+      this.logger.error(`uploadRetry: Caught ${filename}: ${error.stack}`);
     });
   }
 }

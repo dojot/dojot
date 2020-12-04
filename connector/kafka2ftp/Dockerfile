@@ -1,4 +1,4 @@
-FROM node:10.16.3-alpine AS base
+FROM node:12.18-alpine AS base
 
 WORKDIR /opt/kafka2ftp
 
@@ -13,7 +13,14 @@ RUN apk --no-cache add \
     make \
     python
 
-RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
+RUN apk add --no-cache --virtual \
+    .build-deps \
+    gcc \
+    zlib-dev \
+    libc-dev \
+    bsd-compat-headers\
+    py-setuptools\
+    bash
 
 COPY package.json .
 COPY package-lock.json .
@@ -22,7 +29,7 @@ COPY app ./app
 
 RUN npm install
 
-FROM node:10.16.3-alpine
+FROM node:12.18-alpine
 
 WORKDIR /opt/kafka2ftp
 
