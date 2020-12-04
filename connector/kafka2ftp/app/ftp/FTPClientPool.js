@@ -1,4 +1,4 @@
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
 const FTPClient = require('./FTPClient.js');
 const { sleep } = require('../Utils');
@@ -24,10 +24,10 @@ class FTPClientPool {
     this.ftpConnections = [];
     this.currentIndex = -1;
 
-    this.tagLogger = { filename: `kafka2ftp:app/FTPClientPool.${poolId}` };
+    this.logger = new Logger(`kafka2ftp:app/FTPClientPool.${poolId}`);
 
-    logger.info(`constructor: create ${this.maxConnec} intances of ftp`, this.tagLogger);
-    logger.debug(`constructor: ftp instance configuration ${util.inspect(this.ftpConfig, { depth: null })}`, this.tagLogger);
+    this.logger.info(`constructor: create ${this.maxConnec} instances of ftp`);
+    this.logger.debug(`constructor: ftp instance configuration ${util.inspect(this.ftpConfig, { depth: null })}`);
 
     for (let i = 0; i < this.maxConnec; i += 1) {
       this.ftpConnections.push(new FTPClient(this.ftpConfig, `${poolId}.${i + 1}`));
@@ -38,18 +38,18 @@ class FTPClientPool {
    * Initializes ftp connection pool
    */
   async initConnections() {
-    logger.info('initConnections: Initializes FTP connection pool', this.tagLogger);
+    this.logger.info('initConnections: Initializes FTP connection pool');
     // To connect ftp clients in parallel with promises, foreach does not return promises.
     let someError = false;
     await Promise.all(this.ftpConnections.map(async (ftpConnection) => {
       await ftpConnection.connect().catch((error) => {
         someError = true;
-        logger.error(`initConnections: Initializes ftp connection pool ${error.stack}`, this.tagLogger);
+        this.logger.error(`initConnections: Initializes ftp connection pool ${error.stack}`);
       });
     }));
 
     if (someError) {
-      logger.error('initConnections: Can\'t init some connections', this.tagLogger);
+      this.logger.error('initConnections: Can\'t init some connections');
       throw new Error("initConnections: Can't init connections");
     }
   }
@@ -65,7 +65,7 @@ class FTPClientPool {
 
     // Checks if the ftp connection is currently being used, if so try to get another one.
     if (ftpConnection === undefined || ftpConnection.isSendingFile()) {
-      logger.debug('nextConnectionIndex: Connection is currently being used,waiting 0.5 seconds to try again.', this.tagLogger);
+      this.logger.debug('nextConnectionIndex: Connection is currently being used,waiting 0.5 seconds to try again.');
       await sleep(500);
       return this.nextConnection();
     }
@@ -86,14 +86,14 @@ class FTPClientPool {
       this.currentIndex = this.currentIndex < this.ftpConnections.length - 1
         ? this.currentIndex + 1 : 0;
     }
-    logger.debug(`nextConnectionIndex: The next possible connection ID is ${this.currentIndex}`, this.tagLogger);
+    this.logger.debug(`nextConnectionIndex: The next possible connection ID is ${this.currentIndex}`);
   }
 
   /**
    * Destroys all FTP connections
    */
   async destroyConnections() {
-    logger.debug('destroyConnections: Destroys all FTP connections', this.tagLogger);
+    this.logger.debug('destroyConnections: Destroys all FTP connections');
     this.ftpConnections.forEach((ftpConnection) => {
       ftpConnection.disconnect();
     });
@@ -106,18 +106,18 @@ class FTPClientPool {
    * @param {ReadStream} stream
    */
   uploadFile(filename, stream) {
-    logger.debug(`uploadFile: Sending ${filename}`, this.tagLogger);
+    this.logger.debug(`uploadFile: Sending ${filename}`);
 
     this.nextConnection().then((ftpConnectCurrent) => {
-      logger.debug('uploadFile: Get an available connection', this.tagLogger);
+      this.logger.debug('uploadFile: Get an available connection');
       ftpConnectCurrent.upload(this.remoteDir + filename, stream).then(() => {
         // release connect
         ftpConnectCurrent.setSendingFile(false);
-        logger.debug(`uploadFile: File uploaded ${filename} successfully`, this.tagLogger);
+        this.logger.debug(`uploadFile: File uploaded ${filename} successfully`);
       }).catch((error) => {
         // release connect
         ftpConnectCurrent.setSendingFile(false);
-        logger.error(`uploadFile: Error when trying to upload file${filename}: ${error.stack}`, this.tagLogger);
+        this.logger.error(`uploadFile: Error when trying to upload file${filename}: ${error.stack}`);
       });
     });
   }

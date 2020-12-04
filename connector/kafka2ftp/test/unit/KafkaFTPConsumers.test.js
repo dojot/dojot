@@ -1,8 +1,22 @@
-
-const { Kafka: { ConsumerBackPressure } } = require('@dojot/microservice-sdk');
-const KafkaFTPConsumers = require('../../app/KafkaFTPConsumers');
-
-jest.mock('@dojot/microservice-sdk');
+const mockConsumer = {
+  finish: jest.fn(),
+  getStatus: jest.fn(),
+  init: jest.fn(),
+  registerCallback: jest.fn(() => 'idRegisterCallback'),
+  unregisterCallback: jest.fn(),
+};
+const mockSdk = {
+  Kafka: {
+    Consumer: jest.fn(() => mockConsumer),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  })),
+};
+jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 jest.mock('../../app/Config.js', () => ({
   kafka: {
@@ -13,20 +27,16 @@ jest.mock('../../app/Config.js', () => ({
   },
 }));
 
+const KafkaFTPConsumers = require('../../app/KafkaFTPConsumers');
+
 let kafkaFTPConsumers = null;
 describe('Testing FTPClient', () => {
   beforeAll(() => {
-    ConsumerBackPressure.mockReturnValue({
-      init: jest.fn()
-        .mockImplementationOnce(() => Promise.reject(new Error('Error')))
-        .mockImplementationOnce(() => Promise.resolve()),
-      registerCallback: jest.fn()
-        .mockReturnValueOnce(1)
-        .mockReturnValueOnce(2),
-      unregisterCallback: jest.fn()
-        .mockImplementationOnce(() => Promise.resolve())
-        .mockImplementationOnce(() => Promise.reject(new Error('Error'))),
-    });
+    mockConsumer.init.mockImplementationOnce(() => Promise.reject(new Error('Error'))).mockImplementationOnce(() => Promise.resolve());
+    mockConsumer.registerCallback.mockReturnValueOnce(1)
+      .mockReturnValueOnce(2);
+    mockConsumer.unregisterCallback.mockImplementationOnce(() => Promise.resolve())
+      .mockImplementationOnce(() => Promise.reject(new Error('Error')));
     kafkaFTPConsumers = new KafkaFTPConsumers();
   });
   beforeEach(() => {
