@@ -4,6 +4,10 @@ const mockConfig = {
     'topics.suffix.device.manager': '123',
     'topics.suffix.device.data': 'xyz',
   },
+  delete: {
+    'device.data.enable': false,
+    'tenant.data.enable': false,
+  },
 };
 const mockConsumer = {
   finish: jest.fn(),
@@ -76,8 +80,9 @@ describe('App', () => {
     callback({ value: JSON.stringify({ type: 'DELETE', tenant: 'tenant1' }) });
 
     expect(mockConsumer.registerCallback.mock.calls[0][0]).toStrictEqual(/^.+abc/);
+
     expect(handleTenantCreateEvent).toHaveBeenCalled();
-    expect(mockLogDebug).toHaveBeenCalledWith('registerCallbackForTenantEvents: callbackDelete not enable');
+    expect(mockLogDebug).toHaveBeenCalledWith('registerCallbackForTenantEvents: callbackDelete not enable. Received data: {"type":"DELETE","tenant":"tenant1"}');
   });
 
   test('registerCallbackForTenantEvents - delete', () => {
@@ -104,8 +109,8 @@ describe('App', () => {
     expect(mockConsumer.registerCallback.mock.calls[0][0]).toStrictEqual(/^.+abc/);
     expect(handleTenantCreateEvent).not.toHaveBeenCalled();
     expect(handleTenantDeleteEvent).not.toHaveBeenCalled();
-    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbackForTenantEvents: CREATE - missing tenant');
-    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbackForTenantEvents: DELETE - missing tenant');
+    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbackForTenantEvents: CREATE - missing tenant. Received data: {"type":"CREATE"}');
+    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbackForTenantEvents: DELETE - missing tenant. Received data: {"type":"DELETE"}');
   });
 
   test('registerCallbackForTenantEvents - invalid event', () => {
@@ -117,7 +122,7 @@ describe('App', () => {
 
     expect(mockConsumer.registerCallback.mock.calls[0][0]).toStrictEqual(/^.+abc/);
     expect(handleTenantCreateEvent).not.toHaveBeenCalled();
-    expect(mockLogDebug).toHaveBeenCalledWith('registerCallbackForTenantEvents: event was discarded');
+    expect(mockLogDebug).toHaveBeenCalledWith('registerCallbackForTenantEvents: event was discarded. Received data: {"type":"XXXXX","tenant":"tenant1"}');
   });
 
   test('registerCallbacksForDeviceMgmtEvents - configure', () => {
@@ -147,7 +152,7 @@ describe('App', () => {
     });
     expect(mockConsumer.registerCallback.mock.calls[0][0]).toStrictEqual(/^.+123/);
     expect(handleTenantCreateEvent).toHaveBeenCalledWith('tenant1', '1234', 'ts', { a: 'a' });
-    expect(mockLogDebug).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: handleDeviceRemoveEvent not enable');
+    expect(mockLogDebug).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: handleDeviceRemoveEvent not enable. Received data: {"event":"remove","meta":{"service":"tenant1","timestamp":"ts"},"data":{"id":"1234","attrs":{"a":"a"}}}');
   });
 
   test('registerCallbacksForDeviceMgmtEvents - remove', () => {
@@ -185,7 +190,7 @@ describe('App', () => {
         },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: remove - missing deviceid');
+    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: remove - missing deviceid. Received data: {"event":"remove","data":{},"meta":{"service":"tenant1"}}');
     callback({
       value: JSON.stringify({
         event: 'remove',
@@ -193,7 +198,8 @@ describe('App', () => {
         meta: {},
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: remove - missing tenant');
+    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: remove - missing deviceid. Received data: {"event":"remove","data":{},"meta":{"service":"tenant1"}}');
+    expect(mockLogWarn).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: remove - missing tenant. Received data: {"event":"remove","data":{"id":"1234"},"meta":{}}');
   });
 
   test('registerCallbacksForDeviceDataEvents', () => {
@@ -221,7 +227,7 @@ describe('App', () => {
         attrs: { a: 'a', shouldPersist: true },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('handleData: configure - missing deviceid');
+    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing deviceid. Msg info: timestamp=ts tenant=tenant1');
     callback({
       value: JSON.stringify({
         metadata: {
@@ -231,7 +237,7 @@ describe('App', () => {
         attrs: { a: 'a', shouldPersist: true },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('handleData: configure - missing tenant');
+    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing tenant. Msg info: timestamp=ts');
     callback({
       value: JSON.stringify({
         metadata: {
@@ -241,7 +247,7 @@ describe('App', () => {
         },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('handleData: configure - missing attrs');
+    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing attrs. Msg info: timestamp=ts tenant=tenant1 deviceid=1234');
     callback({
       value: JSON.stringify({
         metadata: {
@@ -252,7 +258,7 @@ describe('App', () => {
         attrs: { a: 'a', shouldPersist: false },
       }),
     });
-    expect(mockLogDebug).toHaveBeenCalledWith('handleData: shouldPersist is false');
+    expect(mockLogDebug).toHaveBeenCalledWith('handleData: shouldPersist is false.  Msg info: timestamp=ts tenant=tenant1 deviceid=1234 attrs={"a":"a","shouldPersist":false}');
   });
 
 
