@@ -25,6 +25,7 @@ class InfluxDB {
       configInflux.url,
       configInflux['default.token'],
       configInflux['default.bucket'],
+      configInflux['max.timeout.ms'],
     );
     this.influxState = new InfluxState(
       configInflux.url,

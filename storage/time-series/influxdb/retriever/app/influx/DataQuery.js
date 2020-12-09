@@ -29,15 +29,16 @@ class DataQuery {
    * @param {String} url   Url to access influxdb
    * @param {String} token  A token with write permission in all orgs
    * @param {String} defaultBucket  Bucket Name for all data write
-   *
+   * @param {Number} timeout  Request timeout in the communication with the influxdb in milliseconds.
    */
-  constructor(url, token, defaultBucket) {
+  constructor(url, token, defaultBucket, timeout) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
+    logger.debug(`constructor: timeout=${timeout}`);
 
-    this.influxDB = new InfluxDB({ url, token });
+    this.influxDB = new InfluxDB({ url, token , timeout });
     this.defaultBucket = defaultBucket;
     // prefix adds to all fields to be written
     this.prefixFields = 'dojot.';

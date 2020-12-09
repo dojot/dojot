@@ -108,6 +108,7 @@ convention.
 | influx.default.bucket | Bucket name for all created buckets | devices | string  | RETRIEVER_INFLUX_DEFAULT_BUCKET
 | influx.default.token | Configure a token (this token will be allowed to write/read in all organizations) | dojot@token_default | string  | RETRIEVER_INFLUX_DEFAULT_TOKEN
 | influx.heathcheck.ms | Defines how often the communication with InfluxDB is verified in milliseconds. | 30000 | integer  | RETRIEVER_INFLUX_HEATHCHECK_MS
+| influx.max.timeout.ms | Request timeout in the communication with the influxdb in milliseconds. | 30000 | integer  | RETRIEVER_INFLUX_MAX_TIMEOUT_MS
 | influx.url | Address of the *InfluxDB* service  | http://influxdb:8086 | url | RETRIEVER_INFLUX_URL
 
 #### Service State Manager
