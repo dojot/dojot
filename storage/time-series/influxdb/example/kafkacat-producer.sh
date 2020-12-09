@@ -114,14 +114,14 @@ do
 
     sleep 5
 
-    echo "Publish in tenant1.device-data with a attr empty and  2020-11-07T14:58:10.10Z"
+    echo "Publish in tenant1.device-data with a attr empty and  and timestamp as 2020-11-07T14:58:10.10Z"
 
     echo "{ \"metadata\": { \"deviceid\": \"1234\", \"tenant\":\"tenant1\", \"timestamp\": \"2020-11-07T14:58:10.10Z\" }, \"attrs\":  {  \"string\": \"2020-11-07T14:58:10.10Z\", \"string_empty\": \"\" }}"  |\
     kafkacat -b kafka:9092 -P -t tenant1.device-data
 
     sleep 5
 
-    echo "Publish in tenant1.device-data with  attrs as empty obj  and  2020-11-07T19:58:10.10Z"
+    echo "Publish in tenant1.device-data with  attrs as empty obj  and timestamp as  2020-11-07T19:58:10.10Z"
 
     echo "{ \"metadata\": { \"deviceid\": \"1234\", \"tenant\":\"tenant1\", \"timestamp\": \"2020-11-07T19:58:10.10Z\" }, \"attrs\":  { }}"  |\
     kafkacat -b kafka:9092 -P -t tenant1.device-data
