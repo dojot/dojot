@@ -69,7 +69,7 @@ class DojotConsumer {
         switch (type) {
           case 'CREATE':
             if (!tenant) {
-              logger.warn('registerCallbackForTenantEvents: CREATE - missing tenant');
+              logger.warn(`registerCallbackForTenantEvents: CREATE - missing tenant. Received data: ${data.value.toString()}`);
             } else {
               await handleTenantCreateEvent(tenant);
             }
@@ -77,16 +77,16 @@ class DojotConsumer {
           case 'DELETE':
             if (handleTenantDeleteEvent) {
               if (!tenant) {
-                logger.warn('registerCallbackForTenantEvents: DELETE - missing tenant');
+                logger.warn(`registerCallbackForTenantEvents: DELETE - missing tenant. Received data: ${data.value.toString()}`);
               } else {
                 await handleTenantDeleteEvent(tenant);
               }
             } else {
-              logger.debug('registerCallbackForTenantEvents: callbackDelete not enable');
+              logger.debug(`registerCallbackForTenantEvents: callbackDelete not enable. Received data: ${data.value.toString()}`);
             }
             break;
           default:
-            logger.debug('registerCallbackForTenantEvents: event was discarded');
+            logger.debug(`registerCallbackForTenantEvents: event was discarded. Received data: ${data.value.toString()}`);
         }
       } catch (e) {
         logger.error(`registerCallbackForTenantEvents (Received data - ${util.inspect(data)} - value:  ${data.value ? data.value.toString() : ''}): `, e);
@@ -135,17 +135,17 @@ class DojotConsumer {
             break;
           case 'remove':
             if (!deviceid) {
-              logger.warn('registerCallbacksForDeviceMgmtEvents: remove - missing deviceid');
+              logger.warn(`registerCallbacksForDeviceMgmtEvents: remove - missing deviceid. Received data: ${data.value.toString()}`);
             } else if (!tenant) {
-              logger.warn('registerCallbacksForDeviceMgmtEvents: remove - missing tenant');
+              logger.warn(`registerCallbacksForDeviceMgmtEvents: remove - missing tenant. Received data: ${data.value.toString()}`);
             } else if (handleDeviceRemoveEvent) {
               await handleDeviceRemoveEvent(tenant, deviceid);
             } else {
-              logger.debug('registerCallbacksForDeviceMgmtEvents: handleDeviceRemoveEvent not enable');
+              logger.debug(`registerCallbacksForDeviceMgmtEvents: handleDeviceRemoveEvent not enable. Received data: ${data.value.toString()}`);
             }
             break;
           default:
-            logger.debug(`registerCallbacksForDeviceMgmtEvents: ${event} event was discarded `);
+            logger.debug(`registerCallbacksForDeviceMgmtEvents: ${event} event was discarded. Received data: ${data.value.toString()}`);
         }
       } catch (e) {
         logger.error(`registerCallbacksForDeviceMgmtEvents (Received data - ${util.inspect(data)} - value:  ${data.value ? data.value.toString() : ''}): `, e);
@@ -215,17 +215,21 @@ class DojotConsumer {
    */
   static async handleData(deviceid, tenant, timestamp, attrs, callback) {
     const attrsCopy = { ...attrs };
-    if (!deviceid) {
-      logger.warn('handleData: configure - missing deviceid');
-    } else if (!tenant) {
-      logger.warn('handleData: configure - missing tenant');
+    if (!tenant) {
+      logger.warn(`handleData: missing tenant. Msg info: timestamp=${timestamp}`);
+    } else if (!deviceid) {
+      logger.warn(`handleData: missing deviceid. Msg info: timestamp=${timestamp} tenant=${tenant}`);
     } else if (!attrs) {
-      logger.warn('handleData: configure - missing attrs');
+      logger.warn(`handleData: missing attrs. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid}`);
+    } else if (typeof attrs !== 'object') {
+      logger.warn(`handleData: attrs is not a object. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
+    } else if (Object.keys(attrs).length === 0) {
+      logger.warn(`handleData: attrs is a empty object. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     } else if (DojotConsumer.checkIfShouldPersist(attrsCopy)) {
       delete attrsCopy.shouldPersist;
       await callback(tenant, deviceid, timestamp, attrsCopy);
     } else {
-      logger.debug('handleData: shouldPersist is false');
+      logger.debug(`handleData: shouldPersist is false.  Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     }
   }
 

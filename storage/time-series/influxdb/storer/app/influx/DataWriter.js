@@ -104,7 +104,7 @@ class DataWriter {
    * and could have a cost.
    */
   async write(org, measurement, attrs, timestamp) {
-    logger.debug(`writer: Pushing  data to ${org} org, ${measurement} measu and ${timestamp} timestamp and attrs`);
+    logger.debug(`writer: Pushing  data to ${org} org, ${measurement} measurement and ${timestamp} timestamp and attrs=${JSON.stringify(attrs)}`);
     if (typeof attrs === 'object') {
       try {
         const point = new Point(measurement);

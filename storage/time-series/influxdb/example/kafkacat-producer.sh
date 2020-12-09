@@ -121,6 +121,20 @@ do
 
     sleep 5
 
+    echo "Publish in tenant1.device-data with  attrs as empty obj  and  2020-11-07T19:58:10.10Z"
+
+    echo "{ \"metadata\": { \"deviceid\": \"1234\", \"tenant\":\"tenant1\", \"timestamp\": \"2020-11-07T19:58:10.10Z\" }, \"attrs\":  { }}"  |\
+    kafkacat -b kafka:9092 -P -t tenant1.device-data
+
+    sleep 5
+
+    echo "Publish in tenant1.device-data with  attrs as string  and  2020-11-07T20:58:10.10Z"
+
+    echo "{ \"metadata\": { \"deviceid\": \"1234\", \"tenant\":\"tenant1\", \"timestamp\": \"2020-11-07T20:58:10.10Z\" }, \"attrs\": \"2020-11-07T20:58:10.10Z\" }"  |\
+    kafkacat -b kafka:9092 -P -t tenant1.device-data
+
+    sleep 5
+
     echo "Publish in tenant1.device-data a without attrs"
 
     echo "{ \"metadata\": { \"deviceid\": \"1234\", \"tenant\":\"tenant1\", \"timestamp\": \"2020-11-08T13:58:10.10Z\" }}"  |\
