@@ -27,7 +27,7 @@ COPY package-lock.json .
 
 COPY app ./app
 
-RUN npm install
+RUN npm install --only=prod
 
 FROM node:12.18-alpine
 
