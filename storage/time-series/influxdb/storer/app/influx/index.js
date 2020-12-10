@@ -106,7 +106,7 @@ class InfluxDB {
       if (isHealth) {
         logger.debug('createHealthChecker: InfluxDB is healthy');
         if (this.isHealth !== null && !this.isHealth) {
-          logger.debug('createHealthChecker: Calling callback health');
+          logger.info('createHealthChecker: Calling callback health');
           cbHealth();
         }
         this.isHealth = true;
