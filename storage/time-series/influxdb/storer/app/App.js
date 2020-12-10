@@ -57,6 +57,14 @@ class App {
       const boundKafkaUnregisterCallbacksConsumer = this.kafka
         .unregisterCallbacksConsumer.bind(this.kafka);
 
+
+      // create health check to know if it is possible to connect with kafka
+      this.kafka.createHealthChecker();
+      // defines shutdown behavior for kafka
+      // All registered shutdown handlers are
+      // executed in the order they have been registered.
+      this.kafka.registerShutdown();
+
       // when the influxdb service is unhealthy the kafka consumer
       // callbacks will be unregistered and when the service becomes healthy
       // they will be registered again.
@@ -65,12 +73,9 @@ class App {
         boundKafkaUnregisterCallbacksConsumer,
       );
       // defines shutdown behavior for influx
+      // All registered shutdown handlers are
+      // executed in the order they have been registered.
       this.influxDB.registerShutdown();
-
-      // create health check to know if it is possible to connect with kafka
-      this.kafka.createHealthChecker();
-      // defines shutdown behavior for kafka
-      this.kafka.registerShutdown();
 
       // initializes kafka
       await this.kafka.init();
