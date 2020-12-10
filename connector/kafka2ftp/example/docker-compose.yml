@@ -85,6 +85,6 @@ services:
       driver: json-file
       options:
         max-size: 100m
-    volumes:
-    - ../app/:/opt/kafka2ftp/app/:Z
-    command: ["npm", "run", "dev"]
+    #volumes:
+    #- ../app/:/opt/kafka2ftp/app/:Z
+    #command: ["npm", "run", "dev"]
