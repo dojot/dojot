@@ -216,11 +216,11 @@ class DojotConsumer {
   static async handleData(deviceid, tenant, timestamp, attrs, callback) {
     const attrsCopy = { ...attrs };
     if (!tenant) {
-      logger.warn(`handleData: missing tenant. Msg info: timestamp=${timestamp}`);
+      logger.warn(`handleData: missing tenant. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     } else if (!deviceid) {
-      logger.warn(`handleData: missing deviceid. Msg info: timestamp=${timestamp} tenant=${tenant}`);
+      logger.warn(`handleData: missing deviceid. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     } else if (!attrs) {
-      logger.warn(`handleData: missing attrs. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid}`);
+      logger.warn(`handleData: missing attrs. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     } else if (typeof attrs !== 'object') {
       logger.warn(`handleData: attrs is not a object. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     } else if (Object.keys(attrs).length === 0) {
