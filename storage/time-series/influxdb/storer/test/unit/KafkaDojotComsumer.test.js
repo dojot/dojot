@@ -227,7 +227,7 @@ describe('App', () => {
         attrs: { a: 'a', shouldPersist: true },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing deviceid. Msg info: timestamp=ts tenant=tenant1');
+    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing deviceid. Msg info: timestamp=ts tenant=tenant1 deviceid=undefined attrs={"a":"a","shouldPersist":true}');
     callback({
       value: JSON.stringify({
         metadata: {
@@ -237,7 +237,7 @@ describe('App', () => {
         attrs: { a: 'a', shouldPersist: true },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing tenant. Msg info: timestamp=ts');
+    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing tenant. Msg info: timestamp=ts tenant=undefined deviceid=1234 attrs={"a":"a","shouldPersist":true}');
     callback({
       value: JSON.stringify({
         metadata: {
@@ -247,7 +247,7 @@ describe('App', () => {
         },
       }),
     });
-    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing attrs. Msg info: timestamp=ts tenant=tenant1 deviceid=1234');
+    expect(mockLogWarn).toHaveBeenCalledWith('handleData: missing attrs. Msg info: timestamp=ts tenant=tenant1 deviceid=1234 attrs=undefined');
     callback({
       value: JSON.stringify({
         metadata: {
