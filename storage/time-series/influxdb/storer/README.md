@@ -205,7 +205,7 @@ convention.
 
 ##### InfluxDB Write Options
 
-You can pass any configuration available at https://influxdata.github.io/influxdb-client-js/influxdb-client.writeoptions.html (only note the pattern camelCase to lowercase with `.`).
+You can pass any configuration available at https://influxdata.github.io/influxdb-client-js/influxdb-client.writeoptions.html, just be careful with valid values other than strings.(only note the pattern camelCase to lowercase with `.`).
 
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
@@ -214,6 +214,7 @@ You can pass any configuration available at https://influxdata.github.io/influxd
 | influx.write.options.max.retries | Maximum number of retries follow an exponential backoff strategy | 3  | integer  | STORER_INFLUX_WRITE_OPTIONS_MAX_RETRIES
 | influx.write.options.max.retry.delay | Maximum delay between retries in milliseconds | 15000  | integer | STORER_INFLUX_WRITE_OPTIONS_MAX_RETRY_DELAY
 | influx.write.options.min.retry.delay | Minimum delay between retries in milliseconds | 1000  | integer  | STORER_INFLUX_WRITE_OPTIONS_MIN_RETRY_DELAY
+| influx.write.options.max.buffer.lines | Maximum size of the retry buffer - it contains items that could not be sent for the first time  | 60000  | integer  | STORER_INFLUX_WRITE_OPTIONS_MAX_BUFFER_LINES
 
 #### SDK Consumer
 

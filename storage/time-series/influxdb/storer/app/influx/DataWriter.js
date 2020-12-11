@@ -1,5 +1,6 @@
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
 const { Logger } = require('@dojot/microservice-sdk');
+const util = require('util');
 
 const { parseDateTimeToUnixNs } = require('../Utils');
 
@@ -50,7 +51,7 @@ class DataWriter {
       logger.debug(`writeSuccess: lines: ${lines.toString()}`);
     };
 
-    logger.debug(`final writeOptions: ${JSON.stringify(writeOptions)}`);
+    logger.debug(`final writeOptions: ${util.inspect(writeOptions)}`);
 
     this.influxDB = new InfluxDB({ url, token });
 
