@@ -1,0 +1,105 @@
+name: InfluxDB Retriever (storage/time-series/influxdb/retriever)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'storage/time-series/influxdb/retriever/**'
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'storage/time-series/influxdb/retriever/**'
+
+jobs:
+  unit-tests:
+    name: (storage/time-series/influxdb/retriever) Unit Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: npm install, build, and test
+      run: |
+        cd storage/time-series/influxdb/retriever/
+        npm ci
+        npm run build --if-present
+        npm run lint
+        npm run check-licenses
+        npm run test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        directory: storage/time-series/influxdb/retriever
+        flags: influxdbRetriever # Flags allow you to isolate coverage reports for different tests
+        name: influxdb-retriever # Custom defined name for the upload
+
+  docker-hub:
+    needs: unit-tests
+    name: (storage/time-series/influxdb/retriever) Build and Publish image to DockerHub #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.16
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/influxdb-retriever
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: storage/time-series/influxdb/retriever/
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
+
+  gh-pages:
+    needs: unit-tests
+    name: (storage/time-series/influxdb/retriever) Generate documentation and Publish in gh-pages
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Version Doc
+        id: version_doc
+        env:
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
+          echo Documentation Version $TAG_VERSION
+          echo ::set-output name=version::$TAG_VERSION
+      # I need to improve this, find another way to do
+      - name: Generate docs
+        env:
+          FOLDER_TO_GH_PAGES: storage/time-series/influxdb/retriever
+          PATH_SWAGGER_YML: ./storage/time-series/influxdb/retriever/api/v1.yml
+          VERSION_NAME: ${{ steps.version_doc.outputs.version }}
+        run: |
+          sh .github/workflows/scripts/swagger.sh
+
+      - name: Publish Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./swagger-docs
+          destination_dir: storage/time-series/influxdb/retriever
+          keep_files: true
+          allow_empty_commit: false
