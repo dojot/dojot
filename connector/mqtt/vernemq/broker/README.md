@@ -5,10 +5,6 @@ modifications for Dojot's integration.
 
 # **Configuration**
 
-There are two configurations for the dojot VerneMQ service: the one provided by the VerneMQ itself and the Dojot's
-one.
-
-
 ## **VerneMQ**
 
 To configure VerneMQ, you simply pass a configuration file encoded in base64 for the `VERNEMQ_CONF`
