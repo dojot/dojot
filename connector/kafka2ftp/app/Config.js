@@ -1,8 +1,9 @@
-const parseFTPS = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
+const parseBool = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 const config = {
-  app: {
-    logLevel: process.env.LOG_LEVEL || 'info',
+  log: {
+    'console.level': process.env.LOG_CONSOLE_LEVEL || 'info',
+    verbose: parseBool(process.env.LOG_VERBOSE || false),
   },
   kafka: {
     consumer: {
@@ -15,7 +16,7 @@ const config = {
     ftp: {
       host: process.env.FTP_HOST || 'localhost',
       port: parseInt(process.env.FTP_PORT, 10) || 21,
-      secure: parseFTPS(process.env.FTP_FTPS || false),
+      secure: parseBool(process.env.FTP_FTPS || false),
       secureOptions: null,
       user: process.env.FTP_USER || 'anonymous',
       password: process.env.FTP_PASSWORD || 'guest',

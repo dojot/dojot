@@ -1,9 +1,7 @@
-const { logger } = require('@dojot/dojot-module-logger');
-const { Kafka: { ConsumerBackPressure } } = require('@dojot/microservice-sdk');
+const { Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
 const { kafka: { consumer: consumerConfig } } = require('./Config');
 
-const TAG = { filename: 'kafka2ftp:app/KafkaFTPConsumers' };
-
+const logger = new Logger('kafka2ftp:app/KafkaFTPConsumers');
 
 /**
  * Consume kafka messages to n tenants from the topic {tenant}.dojot.ftp
@@ -13,21 +11,21 @@ class KafkaFTPConsumers {
    *
    */
   constructor() {
-    logger.debug('constructor: Instance Kafka', TAG);
-    this.consumer = new ConsumerBackPressure(consumerConfig);
+    logger.debug('constructor: Instance Kafka');
+    this.consumer = new Consumer({ 'kafka.consumer': consumerConfig });
     this.registeredCallbacks = [];
   }
 
   /**
-   * Inicialze Kafka
+   * Initialize Kafka
    */
   async init() {
     try {
-      logger.info('init: Kafka starting...', TAG);
+      logger.info('init: Kafka starting...');
       await this.consumer.init();
-      logger.info('init: ...Kafka started ', TAG);
+      logger.info('init: ...Kafka started ');
     } catch (error) {
-      logger.error(`init: Error starting kafka ${error.stack}`, TAG);
+      logger.error(`init: Error starting kafka ${error.stack}`);
       throw error;
     }
   }
@@ -38,7 +36,7 @@ class KafkaFTPConsumers {
    * @param {function} callback
    */
   registerCallback(tenant, callback) {
-    logger.debug(`registerCallback: Register Callback for tenant ${tenant}`, TAG);
+    logger.debug(`registerCallback: Register Callback for tenant ${tenant}`);
     const idCallback = this.consumer.registerCallback(`${tenant}.dojot.ftp`, callback);
     this.registeredCallbacks.push({ tenant, idCallback });
   }
@@ -47,7 +45,7 @@ class KafkaFTPConsumers {
    * Unregister All Callbacks
    */
   async unregisterCallbacks() {
-    logger.debug('unregisterCallbacks: Unregister All Callbacks', TAG);
+    logger.debug('unregisterCallbacks: Unregister All Callbacks');
     await Promise.all(this.registeredCallbacks.map(async (obj) => {
       const { idCallback } = obj;
       this.consumer.unregisterCallback(idCallback);
