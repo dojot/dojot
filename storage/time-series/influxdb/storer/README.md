@@ -257,10 +257,11 @@ values.
 | Key | Default Value | Valid Values | Environment variable
 | --- | ------------- | ------------ | --------------------
 | lightship.detect.kubernetes | false | boolean | STORER_LIGHTSHIP_DETECT_KUBERNETES
-| lightship.graceful.shutdown.timeout | 60000 | number | STORER_LIGHTSHIP_GRACEFUL_SHUTDOWN_TIMEOUT
+| lightship.graceful.shutdown.timeout | 120000 | number | STORER_LIGHTSHIP_GRACEFUL_SHUTDOWN_TIMEOUT
 | lightship.port | 9000 | number | STORER_LIGHTSHIP_PORT
 | lightship.shutdown.delay | 5000 | number | STORER_SHUTDOWN_DELAY
-| lightship.shutdown.handler.timeout | 5000 | number | STORER_SHUTDOWN_HANDLER_TIMEOUT
+| lightship.shutdown.handler.timeout | 15000 | number | STORER_SHUTDOWN_HANDLER_TIMEOUT
+
 ### How to run
 
 Beforehand, you need an already running dojot instance in your machine. Check out the
