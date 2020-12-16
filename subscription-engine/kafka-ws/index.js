@@ -5,6 +5,11 @@ const util = require('util');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
+const application = require('./app/App');
+const websocketTarball = require('./app/WebsocketTarball');
+const terminus = require('./app/Terminus');
+const StateManager = require('./app/StateManager');
+
 // Loading the configurations with the configManager
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
@@ -14,20 +19,17 @@ ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
-Logger.setTransport('console', { level: config.logger['transports.console.level'] });
+Logger.setTransport('console', { level: config.log['console.level'] });
 
-if (config.logger['transports.file.enable']) {
-  const fileLoggerConfig = { level: config.logger['transports.file.level'], filename: config.logger['transports.file.filename'] };
+if (config.log['file.enable']) {
+  const fileLoggerConfig = { level: config.log['file.level'], filename: config.log['file.filename'] };
   Logger.setTransport('file', fileLoggerConfig);
 }
 
-Logger.setVerbose(config.logger.verbose);
-
-const application = require('./app/App');
-const websocketTarball = require('./app/WebsocketTarball');
-const terminus = require('./app/Terminus');
+Logger.setVerbose(config.log.verbose);
 
 const logger = new Logger('app');
+const stateService = 'http';
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
@@ -48,6 +50,9 @@ if (config.server.tls) {
   server = http.createServer(application.expressApp);
 }
 
+// register shutdown
+StateManager.registerShutdownHandler(websocketTarball.onClose);
+
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
 
@@ -55,8 +60,18 @@ server.listen(config.server.port, config.server.host, async () => {
   logger.info('HTTP server is ready to accept connections!');
   logger.info(server.address());
 
+  StateManager.signalReady(stateService);
   // Initializes the sticky tarball
-  await websocketTarball.init();
+  try {
+    await websocketTarball.init();
+  } catch (err) {
+    logger.error('Unexpected service startup error!', err);
+    process.kill(process.pid);
+  }
+});
+
+server.on('close', () => {
+  StateManager.signalNotReady(stateService);
 });
 
 /* adds health checks and graceful shutdown to the application */

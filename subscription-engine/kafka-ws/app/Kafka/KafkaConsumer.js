@@ -1,6 +1,4 @@
-const { Logger } = require('@dojot/microservice-sdk');
-
-const { ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
+const { Logger, ConfigManager, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -16,14 +14,18 @@ class KafkaConsumer {
   constructor() {
     this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
+    const consumerConfig = {
+      'kafka.consumer': { ...this.config.consumer },
+      'kafka.topic': { ...this.config.topic },
+    };
     logger.debug('constructor: Instance KafkaConsumer');
-    this.consumer = new Consumer({ ...this.config.consumer }, { ...this.config.topic });
+    this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
   }
 
   /**
-  * Inicialize Kafka consumer
+  * Initialize Kafka consumer
   */
   async init() {
     try {
@@ -34,6 +36,34 @@ class KafkaConsumer {
       logger.error(`init: Error starting kafka ${error.stack}`);
       throw error;
     }
+  }
+
+  /**
+   * HealthChecker to be passed to the ServiceStateManager
+   *
+   * @param {*} signalReady
+   * @param {*} signalNotReady
+   */
+  checkHealth(signalReady, signalNotReady) {
+    this.consumer.getStatus().then((data) => {
+      if (data.connected) {
+        signalReady();
+      } else {
+        signalNotReady();
+      }
+    }).catch((err) => {
+      signalNotReady();
+      logger.warn(`Error ${err}`);
+    });
+  }
+
+  /**
+   *  Shutdown handler to be passed to the ServiceStateManager.
+   */
+  shutdownProcess() {
+    return this.consumer.finish().then(() => {
+      logger.warn('Kafka Consumer finished!');
+    });
   }
 
   /**

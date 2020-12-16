@@ -1,10 +1,11 @@
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
 const ReadStream = require('./ReadStream');
 const { extractPayloadFileInfo } = require('./Utils');
 
-const TAG = { filename: 'kafka2ftp:app/HandleMessage' };
+
+const logger = new Logger('kafka2ftp:app/HandleMessage');
 
 /**
  * Creates callback to link kafka messages with
@@ -12,7 +13,7 @@ const TAG = { filename: 'kafka2ftp:app/HandleMessage' };
  * @param {function} callbackPushFile
  */
 const createCallbackToHandleMsgAndUpload = (callbackPushFile) => (data) => {
-  logger.debug(`createCallbackToHandleMsgAndUpload: Message received from Kafka:  ${util.inspect(data, { depth: null })} `, TAG);
+  logger.debug(`createCallbackToHandleMsgAndUpload: Message received from Kafka:  ${util.inspect(data, { depth: null })} `);
 
   try {
     const { filename, encoding, content } = extractPayloadFileInfo(data);
@@ -22,7 +23,7 @@ const createCallbackToHandleMsgAndUpload = (callbackPushFile) => (data) => {
 
     callbackPushFile(filename, stream);
   } catch (error) {
-    logger.error(`createCallbackToHandleMsgAndUpload: Caught an error ${error.stack}`, TAG);
+    logger.error(`createCallbackToHandleMsgAndUpload: Caught an error ${error.stack}`);
     throw error;
   }
 };
