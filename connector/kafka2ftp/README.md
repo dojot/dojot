@@ -27,7 +27,7 @@ The **kafka2ftp** subscribes to the topic *tenant*.dojot.ftp (*tenant* is define
 {
   "metadata": {
      "msgId": "33846252-659f-42cc-8831-e2ccb923a702",
-     "ts": 1571858674,
+     "ts": 1604587086699,
      "service": "ServiceA",
      "contentType": "application/vnd.dojot.ftp+json"
   },
@@ -90,7 +90,8 @@ FTP_TENANT                 | Tenant is a context identifier into dojot. This def
 FTP_USER                   | Server FTP Username                                      | anonymous          | String                       |
 KAFKA_GROUP_ID             | The Kafka consumer group ID to be used                   | kafka2ftp          | String       |
 KAFKA_HOSTS                | Addresses of the kafka brokers separated by a comma      | kafka:9092         | hostname/IP  |
-LOG_LEVEL                  | logger level                                             | info               | debug, error, warning, info  |
+LOG_CONSOLE_LEVEL                  | logger level                                             | info               | debug, error, warn, info  |
+LOG_VERBOSE                  | Whether to enable logger verbosity or not     | false               | boolean  |
 MAX_CONCURRENT_CONNECTIONS | The maximum number of FTP connections at the same time.                                            | 10                 | Natural number               |
 RETRIES      | The maximum number of times to attempt the upload       | 13                 | Natural number               |
 
