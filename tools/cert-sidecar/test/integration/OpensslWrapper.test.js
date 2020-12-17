@@ -59,8 +59,9 @@ jest.mock('moment', () => mockMoment);
 jest.mock('pem', () => mockPem);
 
 
-const X509Utils = require('../../app/X509/X509Utils');
+const OpensslWrapper = require('../../app/opensslWrapper');
 
+let openssl = null;
 describe('X509Utils', () => {
   beforeAll(() => {
   });
@@ -75,19 +76,13 @@ describe('X509Utils', () => {
   afterEach(() => {
   });
 
-  test('constructor: some erro', async () => {
-    expect.assertions(1);
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const x509Utils = new X509Utils();
-    } catch (e) {
-      expect(e.message).toBe('Cannot instantiate X509Utils');
-    }
+  test('constructor: ok', () => {
+    openssl = new OpensslWrapper();
   });
 
   test('generateCsr: ok', async () => {
     mockCreateCSR.mockResolvedValueOnce({ csr: 'CSR' });
-    const newCsr = await X509Utils.generateCsr('privateKey',
+    const newCsr = await openssl.getOpenSSL().generateCsr('privateKey',
       'commonName',
       ['altname']);
 
@@ -99,7 +94,7 @@ describe('X509Utils', () => {
     expect.assertions(2);
     mockCreateCSR.mockRejectedValueOnce(new Error());
     try {
-      await X509Utils.generateCsr('privateKey',
+      await openssl.getOpenSSL().generateCsr('privateKey',
         'commonName');
     } catch (e) {
       expect(mockCreateCSR).toHaveBeenCalled();
@@ -109,7 +104,7 @@ describe('X509Utils', () => {
 
   test('generatePrivateKey: ok', async () => {
     mockCreatePrivateKey.mockResolvedValueOnce({ key: 'privateKey' });
-    const newCsr = await X509Utils.generatePrivateKey();
+    const newCsr = await openssl.getOpenSSL().generatePrivateKey();
     expect(mockCreatePrivateKey).toHaveBeenCalled();
     expect(newCsr).toBe('privateKey');
   });
@@ -118,7 +113,7 @@ describe('X509Utils', () => {
     expect.assertions(2);
     mockCreatePrivateKey.mockRejectedValueOnce(new Error());
     try {
-      await X509Utils.generatePrivateKey();
+      await openssl.getOpenSSL().generatePrivateKey();
     } catch (e) {
       expect(mockCreatePrivateKey).toHaveBeenCalled();
       expect(e.message).toBe('Cannot generate a PrivateKey');
@@ -127,14 +122,14 @@ describe('X509Utils', () => {
 
   test('getDER: ok', () => {
     const crl = fs.readFileSync(`${__dirname}/crl.pem`, { encoding: 'utf8', flag: 'r' });
-    const crlDER = X509Utils.getDER(crl);
+    const crlDER = openssl.getOpenSSL().getDER(crl);
     expect(crlDER).toBe('MIIC9DCB3QIBATANBgkqhkiG9w0BAQsFADB6MSMwIQYKCZImiZPyLGQBAQwTYy0wNTMyZTdhNTI1NWExZDMzNzEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0XDTIwMTAyNjAwMDQxOFoXDTIwMTAyNzAwMDQxOFqgLzAtMB8GA1UdIwQYMBaAFM8XtKpRsn9ssZA64WADmUXtQoOJMAoGA1UdFAQDAgEEMA0GCSqGSIb3DQEBCwUAA4ICAQCrTCAcqsl/pfkeqjM6vluJORaiH0R5hiNYCfgXFtBho6V4e0jDqjun5Jb4+Sd8FYlLxkorev0vBEzNCxu/r4ZsZ3RA09HdiNU7piMnyaOmUoGhPhczk0rGGO7/3uE5lV8aZLyGXMxGorq7jqD++o3XD9WVaMZrivq5aYek+CMQosEc0gOZpL0LSLyGvp1Uexartj/Ro3EVpwy8GWtlGNXJe5hyQVHm9c0OoWva9oEcIObYJK/vj0DdhWnIC9BdzOIAj/GzpQhlNQ9iVs25M2Rfr/ukVaAQaKhoqpvfb3/DnAeP24BK3/I+8S0u8Szwbu5hH9AqLGVp+faMEXAm1S6hAz+LIAFu718MZ4qxvLMPqxJ97ABJh3+m7skld7hnJ5sgRVvjfbAlzwQg34BhESquLSlD3TtrCHvLn/QGZ2ApsspVAWEv5WoUXuymjeFoFrHnacREon6EKO/n2S7LYdg2ejyKDD3V0s04CcM+OVN97/Shhp/lANHHpRiBQp0d3gLEk5LfgJ9LaM0wM+h4xMQseOhLb0EfQJkywXb8ObMcYrE7nllwdSUqdUhcc3y6B2xmpCIdT7AH/R5JUQuje7H9xz2SXqRAwK4DlgUPsrw89kmiXJzM/SIpPPvT/0Bhl0qxopxfEJ0FKD94ZqP0BpV3Pp1WY8wIBhcIGZDCVV0QVQ==');
   });
 
   test('getDER: some error', () => {
     expect.assertions(1);
     try {
-      X509Utils.getDER(null);
+      openssl.getOpenSSL().getDER(null);
     } catch (e) {
       expect(e.message).toBe('Cannot get DER from PEM');
     }
@@ -142,7 +137,7 @@ describe('X509Utils', () => {
 
   test('getFingerprint: ok', () => {
     mockCryptoHashDigest.mockReturnValueOnce('Fingerprint');
-    const crlDER = X509Utils.getFingerprint('CRL');
+    const crlDER = openssl.getOpenSSL().getFingerprint('CRL');
 
     expect(crlDER).toBe('FI:NG:ER:PR:IN');
   });
@@ -151,7 +146,7 @@ describe('X509Utils', () => {
     mockCryptoHashDigest.mockReturnValueOnce('');
     expect.assertions(1);
     try {
-      X509Utils.getFingerprint('CRL');
+      openssl.getOpenSSL().getFingerprint('CRL');
     } catch (e) {
       expect(e.message).toBe('Cannot get Fingerprint from PEM');
     }
@@ -159,7 +154,7 @@ describe('X509Utils', () => {
 
   test('verifySigningChain: ok', async () => {
     mockVerifySigningChain.mockResolvedValueOnce(true);
-    const isChainOk = await X509Utils.verifySigningChain('ca', 'cert');
+    const isChainOk = await openssl.getOpenSSL().verifySigningChain('ca', 'cert');
     expect(mockVerifySigningChain).toHaveBeenCalled();
     expect(isChainOk).toBe(true);
   });
@@ -168,7 +163,7 @@ describe('X509Utils', () => {
     expect.assertions(2);
     mockVerifySigningChain.mockRejectedValueOnce(new Error());
     try {
-      await X509Utils.verifySigningChain('ca', 'cert');
+      await openssl.getOpenSSL().verifySigningChain('ca', 'cert');
     } catch (e) {
       expect(mockVerifySigningChain).toHaveBeenCalled();
       expect(e.message).toBe('Cannot verify signing chain');
@@ -177,7 +172,7 @@ describe('X509Utils', () => {
 
   test('readCertInfo: ok', async () => {
     mockReadCertificateInfo.mockResolvedValueOnce({ a: 'a' });
-    const certInfo = await X509Utils.readCertInfo('cert');
+    const certInfo = await openssl.getOpenSSL().readCertInfo('cert');
     expect(mockReadCertificateInfo).toHaveBeenCalledWith('cert');
     expect(certInfo).toStrictEqual({ a: 'a' });
   });
@@ -186,7 +181,7 @@ describe('X509Utils', () => {
     expect.assertions(2);
     mockReadCertificateInfo.mockRejectedValueOnce(new Error());
     try {
-      await X509Utils.readCertInfo('ca', 'cert');
+      await openssl.getOpenSSL().readCertInfo('ca', 'cert');
     } catch (e) {
       expect(mockReadCertificateInfo).toHaveBeenCalled();
       expect(e.message).toBe('Cannot read certificate info');
@@ -199,7 +194,7 @@ describe('X509Utils', () => {
     mockReadCertificateInfo.mockResolvedValueOnce({
       validity: { end: 123 },
     });
-    const isExp = await X509Utils.isCertExpiredInSec('cert', 10);
+    const isExp = await openssl.getOpenSSL().isCertExpiredInSec('cert', 10);
     expect(mockReadCertificateInfo).toHaveBeenCalledWith('cert');
     expect(isExp).toBe(false);
   });
@@ -208,7 +203,7 @@ describe('X509Utils', () => {
     expect.assertions(2);
     mockReadCertificateInfo.mockRejectedValueOnce(new Error());
     try {
-      await X509Utils.isCertExpiredInSec('ca', 10);
+      await openssl.getOpenSSL().isCertExpiredInSec('ca', 10);
     } catch (e) {
       expect(mockReadCertificateInfo).toHaveBeenCalled();
       expect(e.message).toBe('Cannot check if certificate will expire');
@@ -217,14 +212,14 @@ describe('X509Utils', () => {
 
 
   test('certHasRevoked: ok', async () => {
-    const certInfo = await X509Utils.certHasRevoked('cert', 'crl', 'ca');
+    const certInfo = await openssl.getOpenSSL().certHasRevoked('cert', 'crl', 'ca');
     expect(mockOpensslExec).toHaveBeenCalled();
     expect(certInfo).toBe(false);
   });
 
 
   test('certHasRevoked: is revoked', async () => {
-    const certInfo = await X509Utils.certHasRevoked('cert', 'crl', 'ca');
+    const certInfo = await openssl.getOpenSSL().certHasRevoked('cert', 'crl', 'ca');
     expect(mockOpensslExec).toHaveBeenCalled();
     expect(certInfo).toBe(true);
   });
@@ -232,7 +227,7 @@ describe('X509Utils', () => {
   test('certHasRevoked: reject', async () => {
     expect.assertions(2);
     try {
-      await X509Utils.certHasRevoked('cert', 'crl', 'ca');
+      await openssl.getOpenSSL().certHasRevoked('cert', 'crl', 'ca');
     } catch (e) {
       expect(mockOpensslExec).toHaveBeenCalled();
       expect(e.message).toBe('Cannot check if certificate has revoked');

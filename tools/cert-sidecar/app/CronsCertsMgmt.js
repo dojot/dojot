@@ -1,6 +1,5 @@
 
 const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
-const ServiceStateMgmt = require('./ServiceStateMgmt');
 const { cronJob } = require('./Utils');
 
 const {
@@ -8,9 +7,6 @@ const {
   certs: configCerts,
   app: configApp,
 } = ConfigManager.getConfig('CERT_SC');
-
-const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:CronsCertsMgmt`);
-
 
 /**
 * This class create some crons to getting news CRLs and check if
@@ -20,106 +16,112 @@ class CronsCertsMgmt {
   /**
    * Constructor CronsCertsMgmt
    *
-   * @param {function} retrieveCRL
-   * @param {function} certsWillExpire
-   * @param {function} certHasRevoked
+   * @param {Promise<void|error>} retrieveCRL
+   * @param {Promise<void|error>} certsWillExpire
+   * @param {Promise<void|error>} certHasRevoked
+   * @param {Promise<void|error>} errorHandle=null
    */
-  constructor(retrieveCRL, certsWillExpire, certHasRevoked) {
-    logger.debug('constructor: CronsMgmt');
-    this.retrieveCRLFunc = retrieveCRL;
-    this.certHasRevokedFunc = certHasRevoked;
-    this.certsWillExpireFunc = certsWillExpire;
+  constructor(
+    retrieveCRL,
+    certsWillExpire,
+    certHasRevoked,
+    errorHandle = null,
+  ) {
+    this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:CronsCertsMgmt`);
+    this.logger.debug('constructor: CronsCertsMgmt');
+    this.retrieveCRL = retrieveCRL;
+    this.certHasRevoked = certHasRevoked;
+    this.certsWillExpire = certsWillExpire;
+    this.errorHandle = errorHandle;
   }
 
   /**
    * Create crons to getting news CRLs and check if
    * certificates are expiration and revoked.
    */
-  initCrons() {
-    logger.info('initCrons: Initializing the crons...');
+  init() {
+    this.logger.info('initCrons: Initializing the crons...');
 
     if (configCron.crl && configCerts.crl) {
       this.cronUpdateCRL();
     } else {
-      logger.info('initCrons: Cron for Update CRL is disabled');
+      this.logger.info('initCrons: Cron for Update CRL is disabled');
     }
 
     if (configCron.expiration) {
       this.cronCertsWillExpire();
     } else {
-      logger.info('initCrons: Cron for Check Expiration is disabled');
+      this.logger.info('initCrons: Cron for Check Expiration is disabled');
     }
 
     if (configCron.revoke && configCerts.crl) {
       this.cronCertHasRevoked();
     } else {
-      logger.info('initCrons: Cron for Check has Revoke is disabled');
+      this.logger.info('initCrons: Cron for Check has Revoke is disabled');
     }
 
-    logger.info('initCrons: crons initialized');
+    this.logger.info('initCrons: crons initialized');
   }
 
   /**
-   * Create a cron to check if certificate has revoke based in 'cron.revoke.time'
+   * Create a cron to check if certificate has revoke based on 'cron.revoke.time'
    */
   cronCertHasRevoked() {
-    logger.info('cronCertHasRevoked: Creating cron to check revoking...');
-    const boundCertHasRevoked = this.certHasRevokedFunc.bind(this);
+    this.logger.info('cronCertHasRevoked: Creating cron to check revoking...');
     cronJob(
       async () => {
-        await boundCertHasRevoked()
+        await this.certHasRevoked()
           .catch(async (e) => {
-            logger.error('Cron to certHasRevoked:', e);
-            // call shutdown in catch because the cron is running at other process
-            // and catch from index can't catch this exception
-            await ServiceStateMgmt.shutdown();
+            this.logger.error('cronCertHasRevoked:', e);
+            if (this.errorHandle) {
+              await this.errorHandle();
+            }
           });
       },
       configCron['revoke.time'],
     );
-    logger.info('cronCertHasRevoked: ...ending create cron to check revoking...');
+    this.logger.info('cronCertHasRevoked: ...ending create cron to check revoking...');
   }
 
   /**
    * Create a cron to check if certificate has expired based in 'cron.expiration.time'
    */
   cronCertsWillExpire() {
-    logger.info('cronCertsWillExpire: Creating cron to check expiration...');
-    const boundCertsWillExpire = this.certsWillExpireFunc.bind(this);
+    this.logger.info('cronCertsWillExpire: Creating cron to check expiration...');
     cronJob(
       async () => {
-        await boundCertsWillExpire()
+        await this.certsWillExpire()
           .catch(async (e) => {
-            logger.error('Cron to certsWillExpire:', e);
-            // call shutdown in catch because the cron is running at other process
-            // and catch from index can't catch this exception
-            await ServiceStateMgmt.shutdown();
+            this.logger.error('cronCertsWillExpire:', e);
+            if (this.errorHandle) {
+              await this.errorHandle();
+            }
           });
       },
       configCron['expiration.time'],
     );
-    logger.info('cronCertsWillExpire: ...ending create cron to check expiration...');
+    this.logger.info('cronCertsWillExpire: ...ending create cron to check expiration...');
   }
 
   /**
    * Create a cron to retrieve CRL based in 'cron.crl.time'
    */
   cronUpdateCRL() {
-    logger.info('cronRetrieveCRL: Creating cron to retrieve CRL...');
-    const boundRetrieveCRL = this.retrieveCRLFunc.bind(this);
+    this.logger.info('cronRetrieveCRL: Creating cron to retrieve CRL...');
     cronJob(
       async () => {
-        await boundRetrieveCRL()
+        await this.retrieveCRL()
           .catch(async (e) => {
-            logger.error('Cron to RetrieveCRL:', e);
-            // call shutdown in catch because the cron is running at other process
-            // and catch from index can't catch this exception
-            await ServiceStateMgmt.shutdown();
+            this.logger.error('cronUpdateCRL:', e);
+
+            if (this.errorHandle) {
+              await this.errorHandle();
+            }
           });
       },
       configCron['crl.time'],
     );
-    logger.info('cronRetrieveCRL: ...ending create  cron to retrieve CRL.');
+    this.logger.info('cronRetrieveCRL: ...ending create  cron to retrieve CRL.');
   }
 }
 

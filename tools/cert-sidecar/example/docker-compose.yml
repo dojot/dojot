@@ -23,7 +23,7 @@ services:
       autoheal: "true"
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://server-cert-sidecar:9000/live"]
+      test: ["CMD", "curl", "-f", "http://server-cert-sidecar:8889/live"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -51,10 +51,12 @@ services:
       CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
       CERT_SC_CERTS_HOSTNAMES: '["server"]'
       # CERT_SC_CRON_CRL: 'true'
-      # CERT_SC_CRON_CRL_TIME: '* * * * *'
+      # CERT_SC_CRON_CRL_TIME: '0 */1 * * * *'
       # CERT_SC_CERTS_CRL: 'true'
     volumes:
       - server-cert-side-volume:/certs
+    #   - ../app/:/opt/cert-sidecar/app/:Z
+    # command: ["npm", "run", "dev"]
     logging:
       driver: json-file
       options:
@@ -68,7 +70,7 @@ services:
     labels: # allow docker-autoheal to restart if unhealthy
       autoheal: "true"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://client-cert-sidecar:9000/live"]
+      test: ["CMD", "curl", "-f", "http://client-cert-sidecar:8889/live"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -96,10 +98,12 @@ services:
       CERT_SC_APP_SIDECAR_TO: 'client'
       CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
       # CERT_SC_CRON_CRL: 'true'
-      # CERT_SC_CRON_CRL_TIME: '* * * * *'
+      # CERT_SC_CRON_CRL_TIME: '0 */1 * * * *'
       # CERT_SC_CERTS_CRL: 'true'
     volumes:
       - client-cert-side-volume:/certs
+    #   - ../app/:/opt/cert-sidecar/app/:Z
+    # command: ["npm", "run", "dev"]
     logging:
       driver: json-file
       options:
@@ -138,9 +142,9 @@ services:
           max-size: 100m
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:v0.5.0-rc.1
-    # ports:
-    #   - 3000:3000
+    image: dojot/x509-identity-mgmt:v0.5.0
+    ports:
+      - 3000:3000
     depends_on:
       - postgres
       - mongodb

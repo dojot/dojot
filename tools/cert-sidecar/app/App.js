@@ -1,19 +1,25 @@
 const {
-  ConfigManager,
+  ServiceStateManager,
+  ConfigManager: { getConfig, transformObjectKeys },
   Logger,
 } = require('@dojot/microservice-sdk');
 
-const superagent = require('superagent');
-const ServiceState = require('./ServiceStateMgmt');
-const CertificatesMgmt = require('./CertificatesMgmt');
+const camelCase = require('lodash.camelcase');
+const CertificatesMgmt = require('./certificatesMgmt');
 const CronsCertsMgmt = require('./CronsCertsMgmt');
-const { deleteFile, createFilename } = require('./Utils');
+const OpensslWrapper = require('./opensslWrapper');
+const X509IdentityMgmt = require('./x509IdentityMgmt');
 
 const {
-  app: configApp, certs: configCerts, x509: configX509,
-} = ConfigManager.getConfig('CERT_SC');
+  app: configApp,
+  lightship: configLightship,
+} = getConfig('CERT_SC');
 
-const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:App`);
+
+const serviceState = new ServiceStateManager({
+  lightship: transformObjectKeys(configLightship, camelCase),
+});
+serviceState.registerService('x509IdentityMgmt');
 
 /**
  * Wrapper to initialize the cert-sidecar
@@ -21,89 +27,58 @@ const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:App`);
 class App {
   /**
   * Constructor App
-  * that instantiate CertificatesMgmt and CronsCertsMgmt
+  * that instantiate OpensslWrapper, X509IdentityMgmt,
+  * CertificatesMgmt and CronsCertsMgmt
   */
   constructor() {
-    this.certMgmt = new CertificatesMgmt();
+    this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:App`);
+    this.opensslWrapper = new OpensslWrapper();
+    this.x509IdentityMgmt = new X509IdentityMgmt(serviceState);
 
-    const boundCertHasRevoked = this.certMgmt.certHasRevoked.bind(this.certMgmt);
-    const boundCertWillExpire = this.certMgmt.certsWillExpire.bind(this.certMgmt);
-    const boundRetrieveCRL = this.certMgmt.retrieveCRL.bind(this.certMgmt);
+    this.certMgmt = new CertificatesMgmt(
+      this.opensslWrapper,
+      this.x509IdentityMgmt,
+      serviceState,
+    );
+
+    const boundCertHasRevoked = this.certMgmt.getCertificates()
+      .certHasRevoked.bind(this.certMgmt.getCertificates());
+    const boundCertWillExpire = this.certMgmt.getCertificates()
+      .certsWillExpire.bind(this.certMgmt.getCertificates());
+    const boundRetrieveCRL = this.certMgmt.getCertificates()
+      .retrieveCRL.bind(this.certMgmt.getCertificates());
+
+    let errorHandleShutdown = null;
+    if (configApp.shutdown) {
+      errorHandleShutdown = serviceState.shutdown();
+    } else {
+      this.logger.info('constructor: The service to gracefully shutdown if after many attempts it is not possible to obtain new certificates is disabled');
+    }
 
     this.cronsMgmt = new CronsCertsMgmt(
       boundRetrieveCRL,
       boundCertWillExpire,
       boundCertHasRevoked,
+      errorHandleShutdown,
     );
   }
 
   /**
-   * Initialize the cert-sidecar (including crons, HeathChecker and Shutdown)
+   * Initialize the cert-sidecar
    */
   async init() {
-    logger.info('init: Initializing the cert-sidecar...');
+    this.logger.info('init: Initializing the cert-sidecar...');
     try {
-      App.createHeathChecker();
-      App.defineShutdown();
+      this.x509IdentityMgmt.init();
       await this.certMgmt.init();
-      this.cronsMgmt.initCrons();
-      // Signals to the health check service that the service is ready.
-      logger.debug('Init: Signaling that the service is ready...');
-      ServiceState.signalReady();
-      logger.debug('Init: ...signaled.');
+      this.cronsMgmt.init();
     } catch (e) {
-      logger.error('init:', e);
+      this.logger.error('init:', e);
+      // Inside it will be checked if the deletion is active
+      await this.certMgmt.getCertificates().deleteAllFiles();
       throw e;
     }
-    logger.info('init: ...cert-sidecar initialized.');
-  }
-
-  /**
-  * Defines the behaver for the shutdown
-  */
-  static defineShutdown() {
-    const shutdownFunc = async () => {
-      logger.warn('ShutdownHandler: Closing the certificates-sidecar...');
-      logger.info(`ShutdownHandler: Trying delete files inside ${configCerts['files.basepath']}...`);
-
-      // the files in 'certs.files.basepath' will be delete
-      try {
-        if (configCerts.crl) {
-          await deleteFile(createFilename(configCerts['files.crl'], configCerts['files.basepath']));
-        }
-
-        await deleteFile(createFilename(configCerts['files.ca'], configCerts['files.basepath']));
-        await deleteFile(createFilename(configCerts['files.cert'], configCerts['files.basepath']));
-        await deleteFile(createFilename(configCerts['files.key'], configCerts['files.basepath']));
-
-        logger.info('ShutdownHandler: the service was gracefully shut down');
-      } catch (e) {
-        logger.error(`ShutdownHandler: Cannot delete files inside ${configCerts['files.basepath']}...`);
-        throw e;
-      }
-    };
-    ServiceState.registerShutdown(shutdownFunc);
-  }
-
-  /**
-  * Create a Health Checker  to check if it's possible
-  * communication with x509-identity-mgmt
-  */
-  static createHeathChecker() {
-    const x509HealthChecker = (signalReady, signalNotReady) => {
-      superagent
-        .get(`${configX509.url}${configX509['path.ca']}`)
-        .send()
-        .then(() => {
-          logger.info('x509HealthChecker: Server is healthy');
-          signalReady();
-        })
-        .catch(() => {
-          logger.warn('x509HealthChecker: Server is not healthy, cannot communication with x509-identity-mgmt');
-          signalNotReady();
-        });
-    };
-    ServiceState.addHealthChecker(x509HealthChecker, configX509.healthchecker);
+    this.logger.info('init: ...cert-sidecar initialized.');
   }
 }
 

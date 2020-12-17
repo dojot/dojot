@@ -8,14 +8,12 @@ const {
   app: configApp,
 } = ConfigManager.getConfig('CERT_SC');
 
-const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509/x509Utils`);
-
-class X509Utils {
+class OpensslUtils {
   /**
-   * @throws Will throw an error if try instantiate.
+   *
    */
   constructor() {
-    throw new Error('Cannot instantiate X509Utils');
+    this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509/x509Utils`);
   }
 
   /**
@@ -31,7 +29,7 @@ class X509Utils {
    *
    * @returns {String} new CSR
    */
-  static async generateCsr(privateKey,
+  async generateCsr(privateKey,
     commonName,
     altNames = [],
     hash = 'sha256',
@@ -43,13 +41,13 @@ class X509Utils {
       altNames,
       ...options,
     };
-    logger.debug('generateCsr: Generating a CSR...', csrOptions);
+    this.logger.debug('generateCsr: Generating a CSR...', csrOptions);
     try {
       const { csr } = await opensslWrapper.createCSR(csrOptions);
-      logger.debug(`generateCsr: CSR created:${csr}`);
+      this.logger.debug(`generateCsr: CSR created:${csr}`);
       return csr;
     } catch (err) {
-      logger.error('generateCsr:', err);
+      this.logger.error('generateCsr:', err);
       throw new Error('Cannot generate a CSR');
     }
   }
@@ -64,15 +62,15 @@ class X509Utils {
    *
    * @returns {String} new PrivateKey
    */
-  static async generatePrivateKey(keyBitsize = 2048, options = {}) {
+  async generatePrivateKey(keyBitsize = 2048, options = {}) {
     try {
       const { key } = await opensslWrapper.createPrivateKey(keyBitsize, options);
 
-      logger.debug('generatePrivateKey: Generating a PrivateKey...'
+      this.logger.debug('generatePrivateKey: Generating a PrivateKey...'
         + ` keyBitsize=${keyBitsize}`, options);
       return key;
     } catch (error) {
-      logger.error('generatePrivateKey:', error);
+      this.logger.error('generatePrivateKey:', error);
       throw new Error('Cannot generate a PrivateKey');
     }
   }
@@ -86,13 +84,13 @@ class X509Utils {
    *
    * @return {String} DER in base64.
    */
-  static getDER(pem) {
-    logger.debug('getDER: Retrieving a DEM from a PEM...');
+  getDER(pem) {
+    this.logger.debug('getDER: Retrieving a DEM from a PEM...');
     try {
       /* remove PEM header/footer and all non-base64 characters */
       return pem.replace(/(^-.+?-.+$|[^A-Za-z0-9+/=])/gm, '');
     } catch (error) {
-      logger.error('getDER:', error);
+      this.logger.error('getDER:', error);
       throw new Error('Cannot get DER from PEM');
     }
   }
@@ -107,11 +105,11 @@ class X509Utils {
    *
    * @return {string} The Certificate fingerprint (256 bits) represented in hexadecimal.
    */
-  static getFingerprint(pem) {
-    logger.debug('getFingerprint: Calculating a fingerprint from a PEM...');
+  getFingerprint(pem) {
+    this.logger.debug('getFingerprint: Calculating a fingerprint from a PEM...');
     try {
       const hash = crypto.createHash('sha256');
-      hash.update(X509Utils.getDER(pem), 'base64');
+      hash.update(this.getDER(pem), 'base64');
 
       /* perform a SHA256 hash on it */
       const fingerprint = hash.digest('hex')
@@ -121,7 +119,7 @@ class X509Utils {
 
       return fingerprint;
     } catch (error) {
-      logger.error('getFingerprint:', error);
+      this.logger.error('getFingerprint:', error);
       throw new Error('Cannot get Fingerprint from PEM');
     }
   }
@@ -136,13 +134,13 @@ class X509Utils {
    *
    * @returns {Boolean} a boolean valid
    */
-  static async verifySigningChain(caCert, cert) {
-    logger.debug('verifySigningChain: Verifying the signing chain...');
+  async verifySigningChain(caCert, cert) {
+    this.logger.debug('verifySigningChain: Verifying the signing chain...');
     try {
       const isChainOk = await opensslWrapper.verifySigningChain(cert, caCert);
       return isChainOk;
     } catch (error) {
-      logger.error('verifySigningChain:', error);
+      this.logger.error('verifySigningChain:', error);
       throw new Error('Cannot verify signing chain');
     }
   }
@@ -160,14 +158,14 @@ class X509Utils {
    *                   state, locality, organization, organizationUnit,
    *                   commonName, emailAddress
    */
-  static async readCertInfo(cert) {
-    logger.info('readCertInfo: Reading a certificate or a CSR...');
+  async readCertInfo(cert) {
+    this.logger.info('readCertInfo: Reading a certificate or a CSR...');
     try {
       const certInfo = await opensslWrapper.readCertificateInfo(cert);
-      logger.debug('readCertInfo: Reading a certificate or a CSR ', certInfo);
+      this.logger.debug('readCertInfo: Reading a certificate or a CSR ', certInfo);
       return certInfo;
     } catch (error) {
-      logger.error(`readCertInfo:${cert}`, error);
+      this.logger.error(`readCertInfo:${cert}`, error);
       throw new Error('Cannot read certificate info');
     }
   }
@@ -182,16 +180,16 @@ class X509Utils {
    *
    * @returns {Boolean} a boolean valid
    */
-  static async isCertExpiredInSec(cert, expirationSec) {
-    logger.debug('isCertExpiredInSec: Checking if certificate will expire...');
+  async isCertExpiredInSec(cert, expirationSec) {
+    this.logger.debug('isCertExpiredInSec: Checking if certificate will expire...');
     try {
-      const certInfo = await X509Utils.readCertInfo(cert);
+      const certInfo = await this.readCertInfo(cert);
       const secondsLeft = moment(certInfo.validity.end).diff(moment().utc(), 'seconds');
-      logger.debug(`isCertExpiredInSec: has left ${secondsLeft} s`);
+      this.logger.debug(`isCertExpiredInSec: has left ${secondsLeft} s`);
 
       return expirationSec > secondsLeft;
     } catch (error) {
-      logger.error('isCertExpiredInSec:', error);
+      this.logger.error('isCertExpiredInSec:', error);
       throw new Error('Cannot check if certificate will expire');
     }
   }
@@ -206,8 +204,8 @@ class X509Utils {
    * @throws Will throw an error if cannot check if certificate has revoked
    * @returns {Boolean} a boolean valid
    */
-  static async certHasRevoked(cert, crl, ca) {
-    logger.debug('certHasRevoked: Checking if certificate has revoked...');
+  async certHasRevoked(cert, crl, ca) {
+    this.logger.debug('certHasRevoked: Checking if certificate has revoked...');
     try {
       const msgOpenSSL = await new Promise((resolve, reject) => {
         opensslExec([
@@ -232,11 +230,11 @@ class X509Utils {
         return false;
       }
     } catch (error) {
-      logger.error('certHasRevoked:', error);
+      this.logger.error('certHasRevoked:', error);
       throw new Error('Cannot check if certificate has revoked');
     }
     return true;
   }
 }
 
-module.exports = X509Utils;
+module.exports = OpensslUtils;

@@ -4,31 +4,39 @@ const axiosRetry = require('axios-retry');
 
 const {
   app: configApp,
-  x509: configX509,
 } = ConfigManager.getConfig('CERT_SC');
-
-const x509Api = axios.create({
-  baseURL: configX509.url,
-  timeout: configX509.timeout,
-  headers: { 'content-type': 'application/json' },
-});
-axiosRetry(x509Api, {
-  retries: configX509.retries,
-  retryDelay: axiosRetry.exponentialDelay,
-});
-
-const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509/X509IdentityMgmtRequests`);
 
 /**
  * This class call X509IdentityMgmt api to sign a csr,
  * retrieve ca certificate and crl
  */
-class X509IdentityMgmtRequests {
+class Requests {
   /**
-   * @throws Will throw an error if try instantiate x509IdentityMgmtAPI
+   *
+   * @param {*} url
+   * @param {*} timeout
+   * @param {*} retries
+   * @param {*} paths
+   * @param {*} paths.sign
+   * @param {*} paths.crl
+   * @param {*} paths.ca
    */
-  constructor() {
-    throw new Error('Cannot instantiate x509IdentityMgmtAPI');
+  constructor(url,
+    timeout,
+    retries,
+    paths) {
+    this.axiosX509 = axios.create({
+      baseURL: url,
+      timeout,
+      headers: { 'content-type': 'application/json' },
+    });
+    this.paths = paths;
+    axiosRetry(this.axiosX509, {
+      retries,
+      retryDelay: axiosRetry.exponentialDelay,
+    });
+
+    this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509IdentityMgmt/Client`);
   }
 
   /**
@@ -40,27 +48,27 @@ class X509IdentityMgmtRequests {
    *
    * @returns {String|null}  PEM encoded  certificate
    */
-  static async createCertificateByCSR(csr) {
-    logger.debug('createCert: Creating a certificate from a CSR...');
+  async createCertificateByCSR(csr) {
+    this.logger.debug('createCert: Creating a certificate from a CSR...');
     try {
       const {
         status,
         statusText,
         data,
-      } = await x509Api.post(
-        configX509['path.sign'],
+      } = await this.axiosX509.post(
+        this.paths.sign,
         { csr },
       );
       if (status === 201) {
         return data.certificatePem;
       }
 
-      logger.warn('Cannot create a certificate from CSR.  '
+      this.logger.warn('Cannot create a certificate from CSR.  '
       + `The API returns: code=${status}; message=${statusText}`);
 
       return null;
     } catch (error) {
-      logger.error('signCSR:', error);
+      this.logger.error('signCSR:', error);
       throw new Error('Cannot create a certificate from CSR');
     }
   }
@@ -72,25 +80,25 @@ class X509IdentityMgmtRequests {
    *
    * @returns {String|null} PEM encoded CRL
    */
-  static async getCRL() {
-    logger.debug('createCert: Getting the CRL...');
+  async getCRL() {
+    this.logger.debug('createCert: Getting the CRL...');
     try {
       const {
         status,
         statusText,
         data,
-      } = await x509Api.get(
-        configX509['path.crl'],
+      } = await this.axiosX509.get(
+        this.paths.crl,
       );
       if (status === 200) {
         return data.crl;
       }
 
-      logger.warn('getCRL: Cannot retrieve CRL.  '
+      this.logger.warn('getCRL: Cannot retrieve CRL.  '
       + `The API returns: code=${status}; message=${statusText}`);
       return null;
     } catch (error) {
-      logger.error('getCRL:', error);
+      this.logger.error('getCRL:', error);
       throw new Error('Cannot retrieve CRL');
     }
   }
@@ -102,29 +110,29 @@ class X509IdentityMgmtRequests {
    *
    * @returns {String|null} PEM encoded Certificate
    */
-  static async getCACertificate() {
-    logger.debug('createCert: Getting the CA certificate...');
+  async getCACertificate() {
+    this.logger.debug('createCert: Getting the CA certificate...');
     try {
       const {
         status,
         statusText,
         data,
-      } = await x509Api.get(
-        configX509['path.ca'],
+      } = await this.axiosX509.get(
+        this.paths.ca,
       );
 
       if (status === 200) {
         return data.caPem;
       }
 
-      logger.warn('getCACert: Cannot retrieve CA certificate.  '
+      this.logger.warn('getCACert: Cannot retrieve CA certificate.  '
       + `The API returns: code=${status}; message=${statusText}`);
       return null;
     } catch (error) {
-      logger.error('getCACert:', error);
+      this.logger.error('getCACert:', error);
       throw new Error('Cannot retrieve CA certificate');
     }
   }
 }
 
-module.exports = X509IdentityMgmtRequests;
+module.exports = Requests;

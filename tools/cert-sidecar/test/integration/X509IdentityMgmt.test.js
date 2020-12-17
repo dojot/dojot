@@ -23,6 +23,15 @@ const mockSdk = {
     warn: () => jest.fn(),
   })),
 };
+jest.mock('@dojot/microservice-sdk', () => mockSdk);
+
+const mockAddHealthChecker = jest.fn();
+const mockRegisterShutdownHandler = jest.fn();
+const serviceStateMock = {
+  addHealthChecker: mockAddHealthChecker,
+  registerShutdownHandler: mockRegisterShutdownHandler,
+};
+
 
 const mockAxiosGet = jest.fn();
 const mockAxiosPost = jest.fn();
@@ -34,15 +43,15 @@ const mockAxios = {
     }),
   },
 };
-
-jest.mock('@dojot/microservice-sdk', () => mockSdk);
 jest.mock('axios', () => mockAxios);
 jest.mock('axios-retry');
 
-const X509IdentityMgmtRequests = require('../../app/X509/X509IdentityMgmtRequests');
+const X509IdentityMgmt = require('../../app/x509IdentityMgmt');
 
-describe('X509IdentityMgmtRequests', () => {
+let x509Req = null;
+describe('x509Req.getRequests().getRequests().', () => {
   beforeAll(() => {
+    x509Req = null;
   });
 
   beforeEach(() => {
@@ -55,14 +64,8 @@ describe('X509IdentityMgmtRequests', () => {
   afterEach(() => {
   });
 
-  test('constructor: some erro', async () => {
-    expect.assertions(1);
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const x509Req = new X509IdentityMgmtRequests();
-    } catch (e) {
-      expect(e.message).toBe('Cannot instantiate x509IdentityMgmtAPI');
-    }
+  test('constructor', () => {
+    x509Req = new X509IdentityMgmt(serviceStateMock);
   });
 
   test('createCertificateByCSR: ok', async () => {
@@ -72,7 +75,7 @@ describe('X509IdentityMgmtRequests', () => {
         certificatePem: 'CERT',
       },
     });
-    const newCert = await X509IdentityMgmtRequests.createCertificateByCSR('CSR');
+    const newCert = await x509Req.getRequests().createCertificateByCSR('CSR');
 
     expect(mockAxiosPost).toHaveBeenCalled();
     expect(newCert).toBe('CERT');
@@ -82,7 +85,7 @@ describe('X509IdentityMgmtRequests', () => {
     mockAxiosPost.mockResolvedValueOnce({
       status: 400,
     });
-    const newCert = await X509IdentityMgmtRequests.createCertificateByCSR('CSR');
+    const newCert = await x509Req.getRequests().createCertificateByCSR('CSR');
 
     expect(mockAxiosPost).toHaveBeenCalled();
     expect(newCert).toBe(null);
@@ -93,7 +96,7 @@ describe('X509IdentityMgmtRequests', () => {
     expect.assertions(2);
     mockAxiosPost.mockRejectedValueOnce(new Error());
     try {
-      await X509IdentityMgmtRequests.createCertificateByCSR('CSR');
+      await x509Req.getRequests().createCertificateByCSR('CSR');
     } catch (e) {
       expect(mockAxiosPost).toHaveBeenCalled();
       expect(e.message).toBe('Cannot create a certificate from CSR');
@@ -107,7 +110,7 @@ describe('X509IdentityMgmtRequests', () => {
         crl: 'CRL',
       },
     });
-    const newCRL = await X509IdentityMgmtRequests.getCRL();
+    const newCRL = await x509Req.getRequests().getCRL();
 
     expect(mockAxiosGet).toHaveBeenCalled();
     expect(newCRL).toBe('CRL');
@@ -117,7 +120,7 @@ describe('X509IdentityMgmtRequests', () => {
     mockAxiosGet.mockResolvedValueOnce({
       status: 400,
     });
-    const newCert = await X509IdentityMgmtRequests.getCRL();
+    const newCert = await x509Req.getRequests().getCRL();
 
     expect(mockAxiosGet).toHaveBeenCalled();
     expect(newCert).toBe(null);
@@ -127,7 +130,7 @@ describe('X509IdentityMgmtRequests', () => {
     expect.assertions(2);
     mockAxiosGet.mockRejectedValueOnce(new Error());
     try {
-      await X509IdentityMgmtRequests.getCRL();
+      await x509Req.getRequests().getCRL();
     } catch (e) {
       expect(mockAxiosGet).toHaveBeenCalled();
       expect(e.message).toBe('Cannot retrieve CRL');
@@ -141,7 +144,7 @@ describe('X509IdentityMgmtRequests', () => {
         caPem: 'CA',
       },
     });
-    const newCRL = await X509IdentityMgmtRequests.getCACertificate();
+    const newCRL = await x509Req.getRequests().getCACertificate();
 
     expect(mockAxiosGet).toHaveBeenCalled();
     expect(newCRL).toBe('CA');
@@ -151,7 +154,7 @@ describe('X509IdentityMgmtRequests', () => {
     mockAxiosGet.mockResolvedValueOnce({
       status: 400,
     });
-    const newCert = await X509IdentityMgmtRequests.getCACertificate();
+    const newCert = await x509Req.getRequests().getCACertificate();
 
     expect(mockAxiosGet).toHaveBeenCalled();
     expect(newCert).toBe(null);
@@ -161,10 +164,59 @@ describe('X509IdentityMgmtRequests', () => {
     expect.assertions(2);
     mockAxiosGet.mockRejectedValueOnce(new Error());
     try {
-      await X509IdentityMgmtRequests.getCACertificate();
+      await x509Req.getRequests().getCACertificate();
     } catch (e) {
       expect(mockAxiosGet).toHaveBeenCalled();
       expect(e.message).toBe('Cannot retrieve CA certificate');
     }
+  });
+
+  test('createInfluxHealthChecker - heath', async () => {
+    x509Req.createHealthChecker();
+
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+    mockAxiosGet.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        caPem: 'CA',
+      },
+    });
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).toHaveBeenCalled();
+    expect(notReady).not.toHaveBeenCalled();
+  });
+
+  test('createInfluxHealthChecker - not heath', async () => {
+    x509Req.createHealthChecker();
+
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+    mockAxiosGet.mockResolvedValueOnce({
+      status: 400,
+    });
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).not.toHaveBeenCalled();
+    expect(notReady).toHaveBeenCalled();
+  });
+
+  test('createInfluxHealthChecker - not heath 2', async () => {
+    x509Req.createHealthChecker();
+
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+    mockAxiosGet.mockRejectedValueOnce(new Error());
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).not.toHaveBeenCalled();
+    expect(notReady).toHaveBeenCalled();
   });
 });

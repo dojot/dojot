@@ -25,7 +25,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /live # from sidecar-container
-            port: 9000
+            port: 8889
           failureThreshold: 3 #times before giving up and restarting the container
           initialDelaySeconds: 10
           periodSeconds: 30
@@ -34,7 +34,7 @@ spec:
         startupProbe:
           httpGet:
             path: /live
-            port: 9000
+            port: 8889
           failureThreshold: 30
           initialDelaySeconds: 10
           periodSeconds: 5
@@ -61,7 +61,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /ready
-            port: 9000
+            port: 8889
           failureThreshold: 1 #times before giving up will be marked Unready
           initialDelaySeconds: 5
           periodSeconds: 5
@@ -70,7 +70,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /live
-            port: 9000
+            port: 8889
           failureThreshold: 3 #times before giving up will restarting the container
           initialDelaySeconds: 10
           periodSeconds: 30
@@ -79,7 +79,7 @@ spec:
         startupProbe:
           httpGet:
             path: /live
-            port: 9000
+            port: 8889
           failureThreshold: 30
           initialDelaySeconds: 10
           periodSeconds: 5

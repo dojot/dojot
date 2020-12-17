@@ -29,13 +29,14 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: npm install, build, lint and test
+    - name: npm install, build, lint, check-licenses and test
       run: |
         cd tools/cert-sidecar
         npm ci
         npm run build --if-present
         npm run lint
-        npm test
+        npm run check-licenses
+        npm run test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
@@ -49,7 +50,7 @@ jobs:
   docker-hub:
     needs: unit-tests
     # Path to help identify each job in the status checks
-    name: (tools/cert-sidecar) Build and Publish image to DockerHUb
+    name: (tools/cert-sidecar) Build and Publish image to Docker Hub
     runs-on: ubuntu-latest
     # If this is a PR, it won't run
     if: contains(github.ref, 'refs/pull/') == false

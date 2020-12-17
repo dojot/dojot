@@ -13,12 +13,19 @@ RUN apk --no-cache add \
     make \
     python
 
-RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
+RUN apk add --no-cache --virtual  \
+    .build-deps  \
+    gcc  \
+    zlib-dev  \
+    libc-dev  \
+    bsd-compat-headers  \
+    py-setuptools  \
+    bash
 
 COPY package.json package.json
 COPY package-lock.json package-lock.json
 
-RUN npm install
+RUN npm install --only=prod
 
 COPY app ./app
 COPY config ./config
@@ -42,5 +49,5 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["npm", "run", "cert-sidecar"]
 
-HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=2 \
-    CMD curl -f http://localhost:9000/health || exit 1
+HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
+    CMD curl -f http://localhost:8889/health || exit 1

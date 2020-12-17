@@ -1,32 +1,17 @@
 const mockConfig = {
-  x509: {
-    url: 'http://x509-identity-mgmt:3000',
-    'path.sign': '/internal/api/v1/throw-away',
-    'path.crl': '/internal/api/v1/throw-away/ca/crl',
-    'path.ca': '/internal/api/v1/throw-away/ca',
-    retries: 9,
-    timeout: 1000,
-    healthchecker: 60000,
-  },
   app: { 'sidecar.to': 'app' },
-  certs: {
-    hostnames: ['localhost'],
-    'common.name': 'generic-commonName',
-    'expiration.checkend': 43200,
-    crl: true,
-    'files.basepath':
-     '/certs',
-    'files.crl': 'crl.pem',
-    'files.ca': 'ca.pem',
-    'files.cert': 'cert.pem',
-    'files.key': 'key.pem',
-  },
+  lightship: { a: 'abc' },
 };
 
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
   },
+  ServiceStateManager:
+  jest.fn().mockImplementation(() => ({
+    registerService: jest.fn(),
+  })),
   Logger: jest.fn(() => ({
     debug: () => jest.fn(),
     error: () => jest.fn(),
@@ -35,38 +20,49 @@ const mockSdk = {
   })),
 };
 
+jest.mock('@dojot/microservice-sdk', () => mockSdk);
+
+
 const mockUtil = {
   createFilename: jest.fn((a, b) => `${b}/${a}`),
   deleteFile: jest.fn(() => Promise.resolve()),
 };
-
-const mockState = {
-  shutdown: jest.fn(() => Promise.resolve()),
-  addHealthChecker: jest.fn(),
-  registerShutdown: jest.fn(),
-  signalReady: jest.fn(),
-};
-
-const mockCerMInit = jest.fn();
-const mockCertificatesMgmt = jest.fn().mockImplementation(() => ({
-  init: mockCerMInit,
-  certHasRevoked: jest.fn(() => Promise.resolve()),
-  certsWillExpire: jest.fn(() => Promise.resolve()),
-  retrieveCRL: jest.fn(() => Promise.resolve()),
-}));
-
-
 jest.mock('../../app/Utils', () => mockUtil);
-jest.mock('../../app/CronsCertsMgmt');
-jest.mock('../../app/CertificatesMgmt', () => mockCertificatesMgmt);
-jest.mock('superagent');
-jest.mock('../../app/ServiceStateMgmt', () => mockState);
-jest.mock('@dojot/microservice-sdk', () => mockSdk);
+
+const mockCertInit = jest.fn();
+const mockCertificatesMgmt = jest.fn().mockImplementation(() => ({
+  init: mockCertInit,
+  defineShutdown: jest.fn(),
+  getCertificates: jest.fn().mockImplementation(() => ({
+    certHasRevoked: jest.fn(),
+    certsWillExpire: jest.fn(),
+    retrieveCRL: jest.fn(),
+    deleteAllFiles: jest.fn(),
+  })),
+}));
+jest.mock('../../app/certificatesMgmt', () => mockCertificatesMgmt);
+
+
+const mockOpensslWrapper = jest.fn();
+jest.mock('../../app/opensslWrapper', () => mockOpensslWrapper);
+
+const mockX509Init = jest.fn();
+const mockX509IdentityMgmt = jest.fn().mockImplementation(() => ({
+  init: mockX509Init,
+}));
+jest.mock('../../app/x509IdentityMgmt', () => mockX509IdentityMgmt);
+
+
+const mockCronsInit = jest.fn();
+const mockCrons = jest.fn().mockImplementation(() => ({
+  init: mockCronsInit,
+}));
+jest.mock('../../app/CronsCertsMgmt', () => mockCrons);
+
 
 const App = require('../../app/App');
-const CronsCertsMgmt = require('../../app/CronsCertsMgmt');
 
-describe('Utils', () => {
+describe('App', () => {
   let app = null;
   beforeAll(() => {
     app = null;
@@ -82,55 +78,13 @@ describe('Utils', () => {
   afterEach(() => {
   });
 
-  test('instantiate class', () => {
+  test('instantiate class and init', async () => {
     app = new App();
-
-    expect(app.certMgmt).toBeDefined();
-    expect(app.cronsMgmt).toBeDefined();
-  });
-
-  test('init: ok', async () => {
-    const spyCreateHeathChecker = jest.spyOn(App, 'createHeathChecker');
-    const spyDefineShutdown = jest.spyOn(App, 'defineShutdown');
-
-    const spyInitCrons = jest.spyOn(CronsCertsMgmt.prototype, 'initCrons');
-
-    mockCerMInit.mockResolvedValueOnce();
 
     await app.init();
 
-    expect(spyCreateHeathChecker).toHaveBeenCalled();
-    expect(spyDefineShutdown).toHaveBeenCalled();
-
-    expect(mockState.addHealthChecker).toHaveBeenCalled();
-    expect(mockState.registerShutdown).toHaveBeenCalled();
-    expect(mockState.signalReady).toHaveBeenCalled();
-    expect(spyInitCrons).toHaveBeenCalled();
-    expect(mockCerMInit).toHaveBeenCalled();
-  });
-
-
-  test('init: some errors', async () => {
-    expect.assertions(7);
-    const msgError = 'Cannot init ';
-
-    const spyCreateHeathChecker = jest.spyOn(App, 'createHeathChecker');
-    const spyDefineShutdown = jest.spyOn(App, 'defineShutdown');
-
-    const spyInitCrons = jest.spyOn(CronsCertsMgmt.prototype, 'initCrons');
-
-    mockCerMInit.mockRejectedValueOnce(new Error(msgError));
-
-    try {
-      await app.init();
-    } catch (e) {
-      expect(spyCreateHeathChecker).toHaveBeenCalled();
-      expect(spyDefineShutdown).toHaveBeenCalled();
-      expect(mockState.addHealthChecker).toHaveBeenCalled();
-      expect(mockState.registerShutdown).toHaveBeenCalled();
-      expect(spyInitCrons).not.toHaveBeenCalled();
-      expect(mockCerMInit).toHaveBeenCalled();
-      expect(e.message).toBe(msgError);
-    }
+    expect(mockX509Init).toBeCalled();
+    expect(mockCertInit).toBeCalled();
+    expect(mockCronsInit).toBeCalled();
   });
 });

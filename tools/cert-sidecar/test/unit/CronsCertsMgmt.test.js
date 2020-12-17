@@ -11,7 +11,7 @@ const mockConfig = {
   certs: {
     hostnames: ['localhost'],
     'common.name': 'generic-commonName',
-    'expiration.checkend': 43200,
+    'expiration.checkend.sec': 43200,
     crl: true,
     'files.basepath': '/certs',
     'files.crl': 'crl.pem',
@@ -21,32 +21,30 @@ const mockConfig = {
   },
 };
 
+const mockLoggerError = jest.fn();
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
   },
   Logger: jest.fn(() => ({
     debug: () => jest.fn(),
-    error: () => jest.fn(),
+    error: () => mockLoggerError,
     info: () => jest.fn(),
     warn: () => jest.fn(),
   })),
 };
 
-const mockState = {
-  shutdown: jest.fn(),
-};
-const mockMomentCronJob = jest.fn();
+const mockCronJob = jest.fn();
 const mockUtil = {
-  cronJob: mockMomentCronJob,
+  cronJob: mockCronJob,
 };
 
 const mockRetrieveCRL = jest.fn();
 const mockCertHasRevoked = jest.fn();
 const mockCertsWillExpire = jest.fn();
+const mockErrorHandle = jest.fn();
 
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
-jest.mock('../../app/ServiceStateMgmt', () => mockState);
 jest.mock('../../app/Utils', () => mockUtil);
 
 const CronsCertsMgmt = require('../../app/CronsCertsMgmt');
@@ -68,15 +66,17 @@ describe('CronsCertsMgmt', () => {
   });
   test('instantiate class', () => {
     cronsCertsMgmt = new CronsCertsMgmt(mockRetrieveCRL,
+      mockCertsWillExpire,
       mockCertHasRevoked,
-      mockCertsWillExpire);
+      mockErrorHandle);
 
-    expect(cronsCertsMgmt.retrieveCRLFunc).toBeDefined();
-    expect(cronsCertsMgmt.certHasRevokedFunc).toBeDefined();
-    expect(cronsCertsMgmt.certsWillExpireFunc).toBeDefined();
+    expect(cronsCertsMgmt.retrieveCRL).toBeDefined();
+    expect(cronsCertsMgmt.certHasRevoked).toBeDefined();
+    expect(cronsCertsMgmt.certsWillExpire).toBeDefined();
+    expect(cronsCertsMgmt.errorHandle).toBeDefined();
   });
 
-  test('initCrons: disable all', async () => {
+  test('init: disable all', async () => {
     mockConfig.certs.crl = false;
     mockConfig.cron.crl = false;
     mockConfig.cron.expiration = false;
@@ -86,141 +86,175 @@ describe('CronsCertsMgmt', () => {
     const spyCronCertsWillExpire = jest.spyOn(cronsCertsMgmt, 'cronCertsWillExpire');
     const spyCronCertHasRevoked = jest.spyOn(cronsCertsMgmt, 'cronCertHasRevoked');
 
-    cronsCertsMgmt.initCrons();
+    cronsCertsMgmt.init();
     expect(spyCronUpdateCRL).not.toHaveBeenCalled();
     expect(spyCronCertsWillExpire).not.toHaveBeenCalled();
     expect(spyCronCertHasRevoked).not.toHaveBeenCalled();
   });
 
-
-  test('initCrons: revoke ', async (done) => {
+  test('init: revoke ', async () => {
     mockConfig.certs.crl = true;
     mockConfig.cron.crl = false;
     mockConfig.cron.expiration = false;
     mockConfig.cron.revoke = true;
 
+    mockCertHasRevoked.mockResolvedValue('ok');
+
     const spyCronUpdateCRL = jest.spyOn(cronsCertsMgmt, 'cronUpdateCRL');
     const spyCronCertsWillExpire = jest.spyOn(cronsCertsMgmt, 'cronCertsWillExpire');
     const spyCronCertHasRevoked = jest.spyOn(cronsCertsMgmt, 'cronCertHasRevoked');
+    const spyCertHasRevokedFunc = jest.spyOn(cronsCertsMgmt, 'certHasRevoked');
 
-    mockMomentCronJob
-    // eslint-disable-next-line no-unused-vars
-      .mockImplementation((callback, frequency) => {
-        callback();
-      });
+    cronsCertsMgmt.init();
 
-    cronsCertsMgmt.certHasRevokedFunc = () => {
-      done();
-      return Promise.resolve();
-    };
+    const callback = mockCronJob.mock.calls[0][0];
+    await callback();
 
-    cronsCertsMgmt.initCrons();
     expect(spyCronUpdateCRL).not.toHaveBeenCalled();
     expect(spyCronCertsWillExpire).not.toHaveBeenCalled();
     expect(spyCronCertHasRevoked).toHaveBeenCalled();
 
-    expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 */3 * * *');
+    expect(mockCertHasRevoked).toHaveBeenCalled();
+
+    expect(mockCronJob).toBeCalledWith(callback, '0 */3 * * *');
+    expect(spyCertHasRevokedFunc).toHaveBeenCalled();
   });
 
-  test('initCrons: crl ', async (done) => {
+  test('init: crl ', async () => {
     mockConfig.certs.crl = true;
     mockConfig.cron.crl = true;
     mockConfig.cron.expiration = false;
     mockConfig.cron.revoke = false;
 
+    mockRetrieveCRL.mockResolvedValue('ok');
+
     const spyCronUpdateCRL = jest.spyOn(cronsCertsMgmt, 'cronUpdateCRL');
     const spyCronCertsWillExpire = jest.spyOn(cronsCertsMgmt, 'cronCertsWillExpire');
     const spyCronCertHasRevoked = jest.spyOn(cronsCertsMgmt, 'cronCertHasRevoked');
+    const spyRetrieveCRLFunc = jest.spyOn(cronsCertsMgmt, 'retrieveCRL');
 
-    mockMomentCronJob
-    // eslint-disable-next-line no-unused-vars
-      .mockImplementation((callback, frequency) => {
-        callback();
-      });
+    cronsCertsMgmt.init();
 
-    cronsCertsMgmt.retrieveCRLFunc = () => {
-      done();
-      return Promise.resolve();
-    };
+    const callback = mockCronJob.mock.calls[0][0];
+    await callback();
 
-    cronsCertsMgmt.initCrons();
     expect(spyCronUpdateCRL).toHaveBeenCalled();
     expect(spyCronCertsWillExpire).not.toHaveBeenCalled();
     expect(spyCronCertHasRevoked).not.toHaveBeenCalled();
 
-    expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 */2 * * *');
+    expect(mockRetrieveCRL).toHaveBeenCalled();
+
+    expect(mockCronJob).toBeCalledWith(expect.any(Function), '0 */2 * * *');
+    expect(spyRetrieveCRLFunc).toHaveBeenCalled();
   });
 
-  test('initCrons: expiration ', async (done) => {
+  test('init: expiration ', async () => {
     mockConfig.certs.crl = false;
     mockConfig.cron.crl = false;
     mockConfig.cron.expiration = true;
     mockConfig.cron.revoke = false;
 
+    mockCertsWillExpire.mockResolvedValue('ok');
+
     const spyCronUpdateCRL = jest.spyOn(cronsCertsMgmt, 'cronUpdateCRL');
     const spyCronCertsWillExpire = jest.spyOn(cronsCertsMgmt, 'cronCertsWillExpire');
     const spyCronCertHasRevoked = jest.spyOn(cronsCertsMgmt, 'cronCertHasRevoked');
+    const spyCertsWillExpireFunc = jest.spyOn(cronsCertsMgmt, 'certsWillExpire');
 
-    mockMomentCronJob
-    // eslint-disable-next-line no-unused-vars
-      .mockImplementation((callback, frequency) => {
-        callback();
-      });
+    cronsCertsMgmt.init();
 
-    cronsCertsMgmt.certsWillExpireFunc = () => {
-      done();
-      return Promise.resolve();
-    };
+    const callback = mockCronJob.mock.calls[0][0];
+    await callback();
 
-    cronsCertsMgmt.initCrons();
     expect(spyCronUpdateCRL).not.toHaveBeenCalled();
     expect(spyCronCertsWillExpire).toHaveBeenCalled();
     expect(spyCronCertHasRevoked).not.toHaveBeenCalled();
 
-    expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 1 * * *');
+    expect(mockCronJob).toBeCalledWith(expect.any(Function), '0 1 * * *');
+
+    expect(mockCertsWillExpire).toHaveBeenCalled();
+    expect(spyCertsWillExpireFunc).toHaveBeenCalled();
+  });
+
+  test('cronUpdateCRL: some error ', async () => {
+    const spyErrorHandle = jest.spyOn(cronsCertsMgmt, 'errorHandle');
+    const spyRetrieveCRLFunc = jest.spyOn(cronsCertsMgmt, 'retrieveCRL');
+
+    mockErrorHandle.mockResolvedValueOnce('ok');
+    mockRetrieveCRL.mockRejectedValueOnce(new Error());
+
+    cronsCertsMgmt.cronUpdateCRL();
+
+    const callback = mockCronJob.mock.calls[0][0];
+
+    await callback();
+
+    expect(mockCronJob).toBeCalledWith(callback, '0 */2 * * *');
+    expect(spyErrorHandle).toHaveBeenCalled();
+    expect(spyRetrieveCRLFunc).toHaveBeenCalled();
   });
 
   test('cronCertHasRevoked: some error ', async () => {
-    mockMomentCronJob
-    // eslint-disable-next-line no-unused-vars
-      .mockImplementation((callback, frequency) => {
-        callback();
-      });
+    const spyCertHasRevokedFunc = jest.spyOn(cronsCertsMgmt, 'certHasRevoked');
+    const spyErrorHandle = jest.spyOn(cronsCertsMgmt, 'errorHandle');
 
-    mockState.shutdown = jest.fn().mockResolvedValue('ok');
+    mockErrorHandle.mockResolvedValueOnce('ok');
+    mockCertHasRevoked.mockRejectedValueOnce(new Error());
 
-    cronsCertsMgmt.certHasRevokedFunc = () => Promise.reject(new Error('ERROR'));
     cronsCertsMgmt.cronCertHasRevoked();
-    expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 */3 * * *');
-  });
 
+    const callback = mockCronJob.mock.calls[0][0];
 
-  test('cronUpdateCRL: some error ', async () => {
-    mockMomentCronJob
-      // eslint-disable-next-line no-unused-vars
-      .mockImplementation((callback, frequency) => {
-        callback();
-      });
+    await callback();
 
-    mockState.shutdown = jest.fn().mockResolvedValue('ok');
-
-    cronsCertsMgmt.retrieveCRLFunc = () => Promise.reject(new Error('ERROR'));
-    cronsCertsMgmt.cronUpdateCRL();
-    expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 */2 * * *');
+    expect(mockCronJob).toBeCalledWith(callback, '0 */3 * * *');
+    expect(spyErrorHandle).toHaveBeenCalled();
+    expect(spyCertHasRevokedFunc).toHaveBeenCalled();
   });
 
 
   test('cronCertsWillExpire: some error ', async () => {
-    mockMomentCronJob
-      // eslint-disable-next-line no-unused-vars
-      .mockImplementation((callback, frequency) => {
-        callback();
-      });
+    const spyCertsWillExpireFunc = jest.spyOn(cronsCertsMgmt, 'certsWillExpire');
+    const spyErrorHandle = jest.spyOn(cronsCertsMgmt, 'errorHandle');
 
-    mockState.shutdown = jest.fn().mockResolvedValue('ok');
+    mockErrorHandle.mockResolvedValueOnce('ok');
+    mockCertsWillExpire.mockRejectedValueOnce(new Error());
 
-    cronsCertsMgmt.certsWillExpireFunc = () => Promise.reject(new Error('ERROR'));
     cronsCertsMgmt.cronCertsWillExpire();
-    expect(mockMomentCronJob).toBeCalledWith(expect.any(Function), '0 1 * * *');
+
+    const callback = mockCronJob.mock.calls[0][0];
+
+    await callback();
+
+    expect(mockCronJob).toBeCalledWith(callback, '0 1 * * *');
+    expect(spyErrorHandle).toHaveBeenCalled();
+    expect(spyCertsWillExpireFunc).toHaveBeenCalled();
+  });
+
+  test('instantiate class without error handle', () => {
+    cronsCertsMgmt = new CronsCertsMgmt(mockRetrieveCRL,
+      mockCertsWillExpire,
+      mockCertHasRevoked);
+
+    expect(cronsCertsMgmt.retrieveCRL).toBeDefined();
+    expect(cronsCertsMgmt.certHasRevoked).toBeDefined();
+    expect(cronsCertsMgmt.certsWillExpire).toBeDefined();
+    expect(cronsCertsMgmt.errorHandle).toBe(null);
+  });
+
+  test('cronCertsWillExpire: some error without error handle ', async () => {
+    const spyCertsWillExpireFunc = jest.spyOn(cronsCertsMgmt, 'certsWillExpire');
+
+    mockErrorHandle.mockResolvedValueOnce('ok');
+    mockCertsWillExpire.mockRejectedValueOnce(new Error());
+
+    cronsCertsMgmt.cronCertsWillExpire();
+
+    const callback = mockCronJob.mock.calls[0][0];
+
+    await callback();
+
+    expect(mockCronJob).toBeCalledWith(callback, '0 1 * * *');
+    expect(spyCertsWillExpireFunc).toHaveBeenCalled();
   });
 });
