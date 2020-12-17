@@ -73,9 +73,7 @@ module.exports = (routes, serviceState, openApiPath) => {
         stateManager: serviceState,
         logger,
       }),
-      responseCompressInterceptor({
-        supportTrustProxy: configExpress.trustproxy,
-      }),
+      responseCompressInterceptor({}),
       requestLogInterceptor({
         logger,
       }),
@@ -83,7 +81,7 @@ module.exports = (routes, serviceState, openApiPath) => {
     routes: (routes).flat(),
     logger,
     config: {
-      trustproxy: configExpress.trustproxy,
+      supportTrustProxy: configExpress.trustproxy,
     },
   });
 };
