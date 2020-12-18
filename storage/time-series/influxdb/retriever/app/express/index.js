@@ -73,15 +73,13 @@ module.exports = (routes, serviceState, openApiPath) => {
         stateManager: serviceState,
         logger,
       }),
-      responseCompressInterceptor({}),
+      responseCompressInterceptor(),
       requestLogInterceptor({
         logger,
       }),
     ],
     routes: (routes).flat(),
     logger,
-    config: {
-      supportTrustProxy: configExpress.trustproxy,
-    },
+    supportTrustProxy: configExpress.trustproxy,
   });
 };
