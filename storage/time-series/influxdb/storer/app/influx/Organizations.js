@@ -15,8 +15,6 @@ class Organizations {
    * @param {string} defaultToken Set up initial token
    *                              (This token must have permission to write/read
    *                              in all organizations)
-   * @param {string} defaultUser Set up initial user
-   * @param {string} defaultPassword Set up initial password
    * @param {string} defaultOrg Organization Name Set up initial Organization
    * @param {string} defaultBucket Bucket Name for all buckets created
    * @param {Number} retentionPeriodHrs Retention Period in hours
@@ -24,16 +22,12 @@ class Organizations {
    */
   constructor(url,
     defaultToken,
-    defaultUser,
-    defaultPassword,
     defaultOrg,
     defaultBucket,
     retentionPeriodHrs) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: defaultToken=${defaultToken}`);
-    logger.debug(`constructor: defaultUser=${defaultUser}`);
-    logger.debug(`constructor: defaultPassword=${defaultPassword}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
     logger.debug(`constructor: retentionPeriodHrs=${retentionPeriodHrs}`);
 
@@ -43,8 +37,6 @@ class Organizations {
     this.bucketsAPI = new BucketsAPI(influxDB);
 
     this.defaultToken = defaultToken;
-    this.defaultUser = defaultUser;
-    this.defaultPassword = defaultPassword;
     this.defaultOrg = defaultOrg;
     this.defaultBucket = defaultBucket;
     this.retentionPeriodHrs = retentionPeriodHrs;
