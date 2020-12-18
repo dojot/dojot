@@ -34,8 +34,6 @@ class InfluxDB {
     this.influxOrgs = new InfluxOrgs(
       configInflux.url,
       configInflux['default.token'],
-      configInflux['default.user'],
-      configInflux['default.password'],
       configInflux['default.organization'],
       configInflux['default.bucket'],
       configInflux['retention.hrs'],
