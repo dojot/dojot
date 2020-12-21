@@ -9,6 +9,6 @@ module.exports = ({ openApiPath }) => ({
   middleware: OpenApiValidator.middleware({
     apiSpec: openApiPath,
     validateRequests: true,
-    validateResponses: true,
+    validateResponses: false,
   }),
 });
