@@ -82,7 +82,6 @@ class DataQuery {
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
       |> range(start: ${start} , stop: ${stop})
       |> filter(fn: (r) => r._measurement == ${fluxString(measurement)})
-      |> drop(columns: ["_start", "_stop", "_measurement"])
       |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
       ${fluxExpression(orderExp)}
       |> limit(n: ${limit} , offset: ${offset})`;
@@ -175,7 +174,6 @@ class DataQuery {
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
         |> range(start: ${start} , stop: ${stop})
         |> filter(fn: (r) => r._measurement == ${fluxString(measurement)} and r._field == ${fluxString(`dojot.${field}`)})
-        |> drop(columns: ["_start", "_stop", "_measurement"])
         ${fluxExpression(orderExp)}
         |> limit(n: ${limit} , offset: ${offset})`;
 
