@@ -131,6 +131,7 @@ components:
 
           It must be `greater` than or `equal` to `1970-01-01T00:00:00.000Z`
       required: false
+      allowReserved: true
       examples:
         init:
           summary: Minimum possible date-time
@@ -151,6 +152,7 @@ components:
 
         It must be `greater` than the `dateFrom`.
       required: false
+      allowReserved: true
       examples:
         future:
           summary: An example of a date-time in the future
