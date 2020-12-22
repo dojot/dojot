@@ -179,7 +179,7 @@ Authorization: Bearer JWT
 Content-type: application/json
 
 {
-    "csr": <string>
+  "csr": <string>
 }
 ~~~
 
@@ -228,8 +228,8 @@ HTTP/1.1 201 Created
 Content-type: application/json
 
 {
-    "certificateFingerprint": <string>,
-    "certificatePem": <string>
+  "certificateFingerprint": <string>,
+  "certificatePem": <string>
 }
 ~~~
 
@@ -333,8 +333,8 @@ HTTP/1.1 200 Success
 Content-type: application/json
 
 {
-    "certificateFingerprint": <string>,
-    "caPem": <string>
+  "certificateFingerprint": <string>,
+  "caPem": <string>
 }
 ~~~
 
@@ -445,26 +445,26 @@ HTTP/1.1 200 Success
 Content-type: application/json
 
 {
-    "paging": {
-        "previous": {
-            "number": 1,
-            "url": "/x509/v1/certificates?page=1&..."
-        },
-        "current": {
-            "number": 2,
-            "url": "/x509/v1/certificates?page=2&..."
-        },
-        "next": {
-            "number": 3,
-            "url": "/x509/v1/certificates?page=3&..."
-        },
-        "totalItems": 60,
-        "totalPages": 12,
-        "limitPerPage": 5
+  "paging": {
+    "previous": {
+      "number": 1,
+      "url": "/x509/v1/certificates?page=1&..."
     },
-    "certificates": [
-        ... same as Get x.509 Certificate ...
-    ]
+    "current": {
+      "number": 2,
+      "url": "/x509/v1/certificates?page=2&..."
+    },
+    "next": {
+      "number": 3,
+      "url": "/x509/v1/certificates?page=3&..."
+    },
+    "totalItems": 60,
+    "totalPages": 12,
+    "limitPerPage": 5
+  },
+  "certificates": [
+    ...same_as_Get_x.509_Certificate...
+  ]
 }
 ~~~
 
@@ -584,7 +584,7 @@ Authorization: Bearer JWT
 Content-type: application/json
 
 {
-    "caPem": <string>
+  "caPem": <string>
 }
 ~~~
 
@@ -762,11 +762,11 @@ Authorization: Bearer JWT
 Content-type: application/json
 
 {
-    "certificateChain": <string>,
-    "caFingerprint": <string>,
-    "belongsTo": {
-      "device": <string>
-    }
+  "certificateChain": <string>,
+  "caFingerprint": <string>,
+  "belongsTo": {
+    "device": <string>
+  }
 }
 ~~~
 
