@@ -329,4 +329,36 @@ describe('Test Influx Data Query', () => {
       expect(e.message).toBe('Generic error');
     }
   });
+
+  test('commonLimitExpression - case 1', () => {
+    const {
+      limit, offset,
+    } = DataQuery.commonQueryParams({ limit: 256, page: 1 }, {});
+    const limitExp = DataQuery.commonLimitExpression(limit, offset);
+    expect(limitExp).toBe('|> limit(n: 256 , offset: 0)');
+  });
+
+  test('commonLimitExpression - case 2', () => {
+    const {
+      limit, offset,
+    } = DataQuery.commonQueryParams({ limit: 5, page: 1 }, {});
+    const limitExp = DataQuery.commonLimitExpression(limit, offset);
+    expect(limitExp).toBe('|> limit(n: 5 , offset: 0)');
+  });
+
+  test('commonLimitExpression - case 3', () => {
+    const {
+      limit, offset,
+    } = DataQuery.commonQueryParams({ limit: 5, page: 2 }, {});
+    const limitExp = DataQuery.commonLimitExpression(limit, offset);
+    expect(limitExp).toBe('|> limit(n: 5 , offset: 5)');
+  });
+
+  test('commonLimitExpression - case 4', () => {
+    const {
+      limit, offset,
+    } = DataQuery.commonQueryParams({ limit: 5, page: 3 }, {});
+    const limitExp = DataQuery.commonLimitExpression(limit, offset);
+    expect(limitExp).toBe('|> limit(n: 5 , offset: 10)');
+  });
 });
