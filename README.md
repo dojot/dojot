@@ -1,7 +1,5 @@
 # dojot
 
-[![License badge](https://img.shields.io/badge/license-GPL-blue.svg)](https://opensource.org/licenses/GPL-3.0)
-
 dojot was conceived with the goal of developing and demonstrating technologies for smart cities. Initially focusing on the pillars of public safety, urban mobility and health. It intends to build a multidisciplinary ecosystem in these areas.
 
 dojot is a Brazilian IoT Platform that came up with an open source proposal in order to facilitate the development of solutions and the IoT ecosystem with local content focused on Brazilian needs.
@@ -22,13 +20,7 @@ By combining this concept with the Internet of Things, we pursue IoT software de
 
 ## Repository Overview
 
-dojot follows a microservice architecture, and until the caratê release, each microservice had been kept in its own repository. In order to make easier the management and versioning of the microservices; from defendu release (planned for the first half of 2020) onwards we will keep all the microservices in this single repository.
-
-> Work in progress!
-
-## Quick Start
-
-> Work in progress!
+When the project started, it was decided to create a repository for each service that made up the dojot IoT Platform. However, over time this approach has been shown to have a high maintenance cost. Therefore, all new services are being created in this monorepository (<https://github.com/dojot/dojot>) and our goal is to migrate the other services to this one in the future.
 
 ## Getting Help
 
@@ -70,4 +62,9 @@ After raising a pull-request, it will be reviewed by dojot developers and some c
 
 ## Copyright and license
 
-dojot is **Open Source** and its under [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.en.html).
+The dojot IoT Platform is based on well-Known open source softwares such as [Apache Kafka](https://kafka.apache.org/), [RabbitMQ](https://www.rabbitmq.com/), [PostgreSQL](https://www.postgresql.org/), [MongoDB](https://www.mongodb.com/), [Redis](https://redis.io/), [Kong Gateway](https://konghq.com/kong/) and [VerneMQ](https://vernemq.com/), which have their own licenses.
+
+The services developed by the dojot team to integrate theses open-source software components and implement the business logics are copyrighed by
+CPqD <www.cpqd.com.br> and licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
+
+As a further consequence you can use and/or modify the software for free (no license costs apply).
