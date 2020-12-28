@@ -1,6 +1,44 @@
-const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
+const mockConfig = {
+  consumer: {
+    'group.id': 'kafka_test',
+    'metadata.broker.list': 'kafka:9092',
+  },
+  topic: {
+    'auto.offset.reset': 'largest',
+  },
+  healthcheck: {
+    'kafka.interval.ms': 3000,
+  },
+};
 
-jest.mock('@dojot/microservice-sdk');
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Kafka: {
+    Consumer: jest.fn(),
+    Producer: jest.fn(),
+  },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback, timeout) => callback(service, timeout)),
+    registerShutdownHandler: jest.fn(),
+  })),
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+jest.mock('../../app/StateManager');
+
+const KafkaTopicsCallbacksMgmt = require('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 
 jest.mock('../../app/Kafka/KafkaConsumer');
 

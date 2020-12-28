@@ -1,0 +1,117 @@
+version: '3.7'
+
+services:
+
+  zookeeper:
+    image: dojot/zookeeper:3.4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka:
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    depends_on:
+      - zookeeper
+    restart: always
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "unset" , "JMX_PORT" ,";" ,"kafka-topics.sh","--zookeeper","zookeeper:2181","--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_TOPICS: 'tenant1.device-data,tenant2.device-data,dojot-management.dojot.tenancy,dojot-management2.dojot.tenancy,tenant1.dojot.device-manager.device'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafkacat-producer:
+    image: dojot/confluentinc-cp-kafkacat:5.0.4-1
+    depends_on:
+      - kafka
+    restart: always
+    command: /bin/bash -c "/kafkacat-producer.sh"
+    volumes:
+      - ./kafkacat-producer.sh:/kafkacat-producer.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  influxdb-retriever:
+    build:
+      context: ./../retriever/
+      dockerfile: ./Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    environment:
+      RETRIEVER_LOG_VERBOSE: "true"
+      RETRIEVER_LOG_CONSOLE_LEVEL: "debug"
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    #volumes:
+    # - ../retriever/app/:/opt/influxdb-retriever/app/:Z
+    #command: ["npm", "run", "dev"]
+
+  influxdb-storer:
+    build:
+      context: ./../storer/
+      dockerfile: ./Dockerfile
+    depends_on:
+      - kafka
+      - influxdb
+      - kafkacat-producer
+    environment:
+      STORER_INFLUX_RETENTION_HRS: 0
+      STORER_LOG_VERBOSE: "true"
+      STORER_LOG_CONSOLE_LEVEL: "debug"
+      STORER_DELETE_DEVICE_DATA_ENABLE: "true"
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    #volumes:
+    # - ../storer/app/:/opt/influxdb-storer/app/:Z
+    #command: ["npm", "run", "dev"]
+
+  influxdb-setup:
+    image: quay.io/influxdb/influxdb:v2.0.2
+    restart:  on-failure
+    volumes:
+      - influxdb-volume:/root/.influxdbv2/
+      - ./init-influx.sh:/init-influx.sh:Z
+    entrypoint:
+      - /init-influx.sh
+    depends_on:
+      - influxdb
+
+  influxdb:
+    image: quay.io/influxdb/influxdb:v2.0.2
+    command: influxd --reporting-disabled
+    restart: always
+    volumes:
+      - influxdb-volume:/root/.influxdbv2
+    ports:
+      - "8086:8086"
+    healthcheck:
+      test: "influx ping"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+volumes:
+  influxdb-volume:

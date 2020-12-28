@@ -1,18 +1,24 @@
 {
   "name": "v2kbridge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Service to bridge messages from VerneMQ to Apache Kafka according to dojot rules.",
+  "engines": {
+    "node": ">=12.18.4",
+    "npm": ">=6.14.8"
+  },
   "homepage": "https://github.com/dojot/dojot",
   "repository": {
     "type": "git",
     "url": "https://github.com/dojot/dojot",
     "directory": "connector/mqtt/vernemq/v2k-bridge"
   },
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "app": "node app/app.js",
-    "test": "jest test/unit/*.js"
+    "app": "node index.js",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "check-licenses": "apache2-license-checker"
   },
   "keywords": [
     "dojot",
@@ -21,28 +27,56 @@
     "kafka"
   ],
   "author": "Eduardo Garcia Misiuk, Jonaphael Aristil, Muhamed Avila",
-  "license": "GPL-3.0, ISC",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "dependencies": {
-    "@dojot/microservice-sdk": "0.1.3",
+    "@dojot/microservice-sdk": "0.1.9",
     "async": "^3.1.1",
-    "flat": "^5.0.0",
+    "lodash.camelcase": "^4.3.0",
     "md5": "^2.2.1",
-    "mqtt": "^4.1.0"
-  },
-  "jest": {
-    "coverageDirectory": "./coverage/",
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "app/**/*.js",
-      "utils/**/*.js",
-      "!app/app.js"
-    ]
+    "mqtt": "^4.2.5"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.15",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.19.1",
-    "jest": "^24.9.0",
-    "jest-mock-process": "^1.3.2"
+    "jest": "^26.6.0",
+    "jest-mock-process": "^1.3.2",
+    "@bbc/apache2-license-checker": "^1.1.4"
+  },
+  "jest": {
+    "clearMocks": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!index.js"
+    ],
+    "coverageDirectory": "coverage/",
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "moduleDirectories": [
+      "node_modules",
+      "app",
+      "."
+    ],
+    "testPathIgnorePatterns": [
+      "./node_modules"
+    ],
+    "testRegex": [
+      "test/unit/*"
+    ],
+    "verbose": true
   }
 }

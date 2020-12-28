@@ -1,4 +1,34 @@
-jest.mock('@dojot/microservice-sdk');
+const mockConfig = {
+  server: {
+
+  },
+};
+
+const mockMicroServiceSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Kafka: {
+    Consumer: jest.fn(),
+  },
+  ServiceStateManager: jest.fn(() => ({
+    registerService: jest.fn(),
+    signalReady: jest.fn(),
+    signalNotReady: jest.fn(),
+    addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
+    registerShutdownHandler: jest.fn(),
+  })),
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  })),
+};
+
+jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
+
 jest.mock('ws');
 jest.mock('uuid');
 jest.mock('../../app/Errors');
@@ -6,9 +36,6 @@ jest.mock('../../app/Redis/RedisExpireMgmt');
 jest.mock('../../app/Kafka/KafkaTopicsConsumerCallbacksMgmt');
 
 const websocketTarball = require('../../app/WebsocketTarball');
-const cfg = require('../../app/Config');
-
-cfg.kafka.consumer = {};
 
 describe('Testing WSServer - works fine', () => {
   beforeEach(() => {

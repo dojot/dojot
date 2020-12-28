@@ -30,6 +30,10 @@ In the case of external certificate:
 - If the option to register the trusted CA together with the external certificate is enabled, it will be necessary for the root CA certificate to be in the chain of trust.
 - The `belongsTo` attribute identifies the `device` with which the external certificate will be associated. This attribute is not mandatory, and the client can inform this attribute later when changing the certificate registration.
 
+If the CSR does not have a valid structure or if any of the above conditions are
+not met, a response status 400 (Bad Request) will be returned, containing a
+message detailing the cause of the error.
+
 + Request Create x.509 Certificate from CSR (application/json)
 
     + Headers
@@ -142,6 +146,12 @@ In the case of external certificate:
 
             Fingerprint (as SHA256) of the certificate, where each byte (represented by hexadecimal pair of characters) are separated by a colon.
 
++ Response 400 (application/json)
+
+    + Attributes (object)
+        - message: A message describing the cause of the error (string)
+
+            A message describing the cause of the error
 
 ### List X.509 Certificates [GET]
 
@@ -272,7 +282,13 @@ Gets a certificate.
 
 ### Delete X.509 Certificate [DELETE]
 
-Deletes a x.509 certificate.
+Deletes a x.509 certificate and returns a status 204 (No Content) with no body
+indicating that the operation was successful.
+
+If there is no certificate registered in the database with the informed fingerprint,
+a response status 404 (Not Found) will be returned, which means that either the
+certificate has already been removed in a previous request or the informed
+fingerprint is invalid.
 
 + Parameters
 

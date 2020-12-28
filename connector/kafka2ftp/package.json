@@ -1,6 +1,6 @@
 {
   "name": "kafka2ftp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "The kafka2ftp service provides a connector solution for forwarding messages from Apache Kafka to FTP servers",
   "main": "app/Index.js",
@@ -10,7 +10,8 @@
     "test": "jest test/**/*.test.js --coverage",
     "test:watch": "jest --watch test/**/*.test.js --coverage",
     "lint": "eslint --ext .js .",
-    "lint:fix": "eslint --fix --ext .js ."
+    "lint:fix": "eslint --fix --ext .js .",
+    "check-licenses": "apache2-license-checker"
   },
   "repository": {
     "type": "git",
@@ -28,17 +29,17 @@
     "!test/unit/coverage/"
   ],
   "dependencies": {
-    "@dojot/dojot-module-logger": "0.0.1-alpha.5",
-    "@dojot/microservice-sdk": "0.1.1",
+    "@dojot/microservice-sdk": "0.1.9",
     "async-retry": "^1.3.1",
     "basic-ftp": "^4.5.3"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.19.1",
-    "jest": "^25.1.0",
-    "nodemon": "^2.0.2"
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "jest": "^26.4.2",
+    "nodemon": "^2.0.4"
   },
   "jest": {
     "collectCoverage": true,
@@ -54,5 +55,11 @@
     ]
   },
   "author": "@mprevide",
-  "license": "GPL-3.0"
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ]
 }

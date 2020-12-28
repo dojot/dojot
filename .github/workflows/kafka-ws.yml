@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x]
+        node-version: [12.x]
     steps:
 
     - name: checkout
@@ -40,8 +40,6 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        # Keep in mind that secrets are not available in forks of repositories, that's the reason we use an open token
-        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612
         # Created when 'npm test' was executed
         file: subscription-engine/kafka-ws/coverage/lcov.info
         # Flags allow you to isolate coverage reports for different tests

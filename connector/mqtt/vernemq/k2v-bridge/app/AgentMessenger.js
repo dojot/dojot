@@ -1,7 +1,6 @@
-const { Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Kafka: { Consumer }, Logger } = require('@dojot/microservice-sdk');
 
-const config = require('./config');
-const utils = require('./utils');
+const Utils = require('./Utils');
 
 /**
  * An agent to consume messages from pre-defined topics in Apache Kafka,
@@ -11,40 +10,124 @@ const utils = require('./utils');
 class AgentMessenger {
   /**
    * Creates an Agent Messenger
-   * @access public
-   * @constructor
    *
-   * @param {Object} mqttClient - a mqtt client to connect to VerneMQ broker.
+   * @param {Object} serviceStateManager
+   *
+   * @constructor
    */
-  constructor(mqttClient) {
-    this.mqttClient = mqttClient;
-    this.consumer = new Consumer({ ...config.sdk, kafka: config.kafka });
-    this.logger = new Logger('AgentMessenger');
+  constructor(serviceStateManager) {
+    if (!serviceStateManager) {
+      throw new Error('no ServiceStateManager instance was passed');
+    }
+
+    this.config = ConfigManager.getConfig('K2V');
+    this.consumerTopicSuffix = this.config.messenger['consumer.topic.suffix'];
+
+    this.logger = new Logger('k2v:agent-messenger');
+
+    this.serviceStateManager = serviceStateManager;
+
+    this.consumer = undefined;
+    this.wasInitialized = false;
   }
 
   /**
    * Initializes the agent messenger and registers callbacks for incoming messages.
-   * @access public
+   *
+   * @param {Object} mqttClient
+   *
+   * @return {Promise<any>}
+   *
    * @function init
+   * @public
    */
-  init() {
+  async init(mqttClient) {
+    if (this.wasInitialized) {
+      this.logger.debug('Kafka Consumer already online, skipping its initialization');
+      return;
+    }
     this.logger.info('Initializing Kafka Consumer...');
-    this.consumer.init().then(() => {
-      const topic = new RegExp(`^.+${config.messenger['consume.topic.suffix'].replace(/\./g, '\\.')}`);
 
-      this.consumer.registerCallback(topic, (data) => {
-        this.mqttClient.publishMessage(data);
+    try {
+      this.consumer = new Consumer({
+        ...this.config.sdk,
+        'kafka.consumer': this.config.consumer,
+        'kafka.topic': this.config.topic,
       });
+      await this.consumer.init();
+      const topic = new RegExp(`^.+${this.consumerTopicSuffix.replace(/\./g, '\\.')}`);
 
+      this.consumer.registerCallback(topic, mqttClient.publishMessage.bind(mqttClient));
+
+      this.serviceStateManager.signalReady('kafka');
+      this.wasInitialized = true;
       this.logger.info('... Kafka Consumer was initialized');
-    }).catch((error) => {
+    } catch (error) {
+      this.serviceStateManager.signalNotReady('kafka');
       this.logger.error('Error while initializing the Kafka Consumer');
       if (error) {
         this.logger.error(error.stack || error);
       }
       this.logger.error('Bailing out!');
-      utils.killApplication();
-    });
+      Utils.killApplication();
+    }
+  }
+
+  /**
+   * Stops Kafka message consumption.
+   *
+   * @returns {Promise<any>}
+   */
+  async finish() {
+    try {
+      this.wasInitialized = false;
+      await this.consumer.finish();
+      this.consumer = undefined;
+    } catch (error) {
+      this.logger.debug('Error while finishing Kafka connection, going on like nothing happened');
+    }
+    this.serviceStateManager.signalNotReady('kafka');
+  }
+
+  /**
+   * Health checking function to be passed to the ServiceStateManager.
+   *
+   * @param {Function} signalReady
+   * @param {Function} signalNotReady
+   *
+   * @returns {Promise<void>}
+   *
+   * @function healthChecker
+   * @public
+   */
+  async healthChecker(signalReady, signalNotReady) {
+    if (this.consumer) {
+      try {
+        const status = await this.consumer.getStatus();
+        if (status.connected) {
+          signalReady();
+        } else {
+          signalNotReady();
+        }
+      } catch (error) {
+        signalNotReady();
+      }
+    } else {
+      signalNotReady();
+    }
+  }
+
+  /**
+   * Shutdown handler to be passed to the ServiceStateManager.
+   *
+   * @returns {Promise<void>}
+   *
+   * @function shutdownHandler
+   * @public
+   */
+  async shutdownHandler() {
+    this.logger.warn('Shutting down Kafka connection...');
+    await this.finish();
   }
 }
 

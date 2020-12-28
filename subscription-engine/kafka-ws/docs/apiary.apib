@@ -8,13 +8,15 @@ from Kafka.
 
 # Group Ticket
 
-A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT access token that is issued by the platform's Authentication/Authorization service.
+A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT
+access token that is issued by the platform's Authentication/Authorization service.
 
 ## Getting a ticket [/kafka-ws/v1/ticket]
 
 ### A single-use Ticket [GET]
 
-Gets a single-use Ticket. It can only be used once and has a very short validity period, it must be used to establish a websocket connection.
+Gets a single-use ticket. It can only be used once and has a very short validity
+period, it must be used to establish a websocket connection.
 
 + Request
 
@@ -33,119 +35,21 @@ Gets a single-use Ticket. It can only be used once and has a very short validity
 
 # Group WebSocket
 
-**Kafka WebSocket service** allows the user to retrieve conditional and/or partial data from a topic
+The **Kafka WS service** allows the user to retrieve conditional and/or partial data from a topic
 in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
 language you want, as long as the client supports **RFC 6455** websockets.
 
+For more details about grammar, selectors and conditions from this endpoint, check the
+Kafka WS documentation under the `subscription-engine/kafka-ws` directory in our
+[official repository](https://github.com/dojot/dojot/).
+
+__NOTE THAT__ although it is specified as a GET endpoint, this is not an HTTP endpoint, but a
+WebSocket one. To correctly use this endpoint, you must have some kind of WebSocket client. Check
+the examples under the `subscription-engine/kafka-ws` directory in our
+[official repository](https://github.com/dojot/dojot/) for ready to use Node.JS clients.
+
 ## Retrieving conditional and/or partial messages from topic: [/kafka-ws/v1/topics/{topic}?ticket={ticket}&fields={selector}&where={conditions}]
 
-### **Where**
-
-The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
-conditions.
-
-Grammar:
-- `where → expression:*`
-- `expression → condition:+`
-- `condition → selector=(operator:):?values;`
-- `selector → parameter | parameter.selector`
-- `operator → `[see more](#header-applying-conditions)
-- `values → value | value,values`
-
-Where:
-- `:*` - zero or more
-- `:+` - one or more
-- `:?` - zero or one
-
-#### **Examples**
-
-Note: For simplicity, we will not include the `ticket` parameter in the examples, but it must always be sent, otherwise the server will refuse the connection.
-
-To ilustrate the parameters' usage, here are some examples of valid URIs:
-
-Retrieving full messages from `topic.example` topic:
-```
-/kafka-ws/v1/topics/topic.example
-```
-
-Retrieving a sensor status and temperature when the status is `failed` or `stopped`:
-```
-/kafka-ws/v1/topics/topic.example?fields=sensor/status,temperature&where=sensor.status=in:failed,stopped;
-```
-
-Retrieving the temperature and location:
-```
-/kafka-ws/v1/topics/topic.example?fields=temperature,location
-```
-
-Retrieving full messages where 5.0 ≤ temperature < 10.0:
-```
-/kafka-ws/v1/topics/topic.example?where=temperature=lt:10.0;temperature=gte:5.0;
-```
-
-Retrieving the temperature and rain when rain ≤ 15:
-```
-/kafka-ws/v1/topics/topic.example?where=rain=lte:15;&fields=temperature,rain
-```
-
----
-
-### **Selecting parameters**
-
-The rules to select parameters from a message are:
-- `a,b,c`: select multiple parameters
-- `a/b/c`: select a parameter from its parent
-- `a(b,c)`: select multiple parameters from a specific parameter
-- `a/*/c`: wildcard selection
-
-Examples:
-```
-{a: 1, b: 2, c: 3} → f(a,b) → {a: 1, b: 2}
-{a: {b: {c: 3, d: 4}}} → f(a/b/c) → {a: { b: {c: 3}}}
-{a: {b: 2, c: 3, d: 4}} → f(a(b,c)) → {a: {b: 2, c: 3}}
-{a: {b: {c: 1}, d: {e: 2}, f: {c: 2}}} → f(a/*/c) → {a: {b: {c: 1}, d: {}, f: {c: 2}}}
-```
-
----
-
-### **Applying conditions**
-
-The conditions can be applied to any parameter in the message. The permitted operators are:
-
-#### **Set operators**
-
-Applied to a parameter via a set of values. These operators are applied to N possible values.
-- `in`: returns the parameter if the value is in the list
-- `nin`: returns the parameter if the value is not in the list
-
-Examples:
-```
-{ a: 'foo', b: 'bar' } → f(a=in:bar,baz) → discard
-{ a: 'foo', b: 'bar' } → f(a=nin:bar,baz) → continue to process
-```
-
-#### **Arythmetic operators**
-
-Applied to a parameter via one value. These operators are applied to 1 possible value.
-- `neq`: not equal
-- `gt`: greater than
-- `gte`: greater or equal to
-- `lt`: less than
-- `lte`: less or equal to
-
-**Obs.:** if you do not pass an operator, it is equal.
-
-If no query string is set, then all values are returned.
-
-Examples:
-```
-{ rain: 10, temperature: 30.0 } → f(rain=11) → discard
-{ rain: 10, temperature: 30.0 } → f(rain=neq:11) → continue to process
-{ rain: 10, temperature: 30.0 } → f(rain=gt:10) → discard
-{ rain: 10, temperature: 30.0 } → f(rain=gte:10) → continue to process
-{ rain: 10, temperature: 30.0 } → f(rain=lt:10) → discard
-{ rain: 10, temperature: 30.0 } → f(rain=lte:10) → continue to process
-```
 
 + Parameters
     + topic:topic.example (required, string) - The `topic` parameter is the Kafka topic that you want to receive data from.
@@ -154,8 +58,7 @@ Examples:
     + conditions: sensor.status=in:failed,stopped; (optional, string) - The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
 conditions.
 
-
-### Retrieve kafka data [GET]
+### Retrieve Kafka data [GET]
 + Request
   + Headers
 

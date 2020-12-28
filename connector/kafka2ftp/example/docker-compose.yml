@@ -1,0 +1,90 @@
+version: '3.7'
+
+services:
+
+  zookeeper:
+    image: dojot/zookeeper:3.4
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka:
+    image: dojot/wurstmeister-kafka:2.12-2.1.1
+    depends_on:
+      - zookeeper
+    restart: always
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "unset" , "JMX_PORT" ,";" ,"kafka-topics.sh","--zookeeper","zookeeper:2181","--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_TOPICS: 'tenant1.dojot.ftp'
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafkacat-producer:
+    image: dojot/confluentinc-cp-kafkacat:5.0.4-1
+    depends_on:
+      - kafka
+    restart: always
+    command: /bin/bash -c "/kafkacat-producer.sh"
+    volumes:
+      - ./kafkacat-producer.sh:/kafkacat-producer.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  ftp-server:
+    image: fauria/vsftpd
+    ports:
+      - "20:20"
+      - "21:21"
+      - "21100-21110:21100-21110"
+    environment:
+      FTP_USER: "dojot"
+      FTP_PASS: "dojot"
+      PASV_MIN_PORT: 21100
+      PASV_MAX_PORT: 21110
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  kafka2ftp:
+    build:
+      context: ./../
+      dockerfile: ./Dockerfile
+    depends_on:
+      - kafka
+      - ftp-server
+    environment:
+      LOG_VERBOSE: "true"
+      LOG_CONSOLE_LEVEL: "debug"
+      FTP_TENANT: 'tenant1'
+      FTP_HOST: 'ftp-server'
+      FTP_PORT: 21
+      FTP_USER: 'dojot'
+      FTP_PASSWORD: 'dojot'
+      MAX_CONCURRENT_CONNECTIONS: 10
+      FTP_REMOTE_DIR: "/"
+      RETRIES: 13
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    #volumes:
+    #- ../app/:/opt/kafka2ftp/app/:Z
+    #command: ["npm", "run", "dev"]

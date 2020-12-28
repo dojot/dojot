@@ -1,10 +1,10 @@
 
-const { logger } = require('@dojot/dojot-module-logger');
+const { Logger } = require('@dojot/microservice-sdk');
 const KafkaFTPConsumers = require('./KafkaFTPConsumers');
 const { createCallbackToHandleMsgAndUpload } = require('./HandleMessageCallback');
 const FTPClientPool = require('./ftp/FTPClientPool');
 
-const TAG = { filename: 'kafka2ftp:app/Service' };
+const logger = new Logger('kafka2ftp:app/Service');
 
 /**
  *  Initializes, disconnects and associates kafka with ftp
@@ -27,7 +27,7 @@ class Service {
     * Initializes kafka and the ftp connections pool
     */
   async initService() {
-    logger.info('initService: Starting service...', TAG);
+    logger.info('initService: Starting service...');
 
     await this.kafkaFTPConsumers.init();
 
@@ -37,7 +37,7 @@ class Service {
       this.ftpConnections[tenant] = new FTPClientPool(ftp, tenant);
 
       this.ftpConnections[tenant].initConnections().catch((error) => {
-        logger.error(`initService: Caught an error ${error.stack}`, TAG);
+        logger.error(`initService: Caught an error ${error.stack}`);
         someError = true;
       });
       const boundUpload = this.ftpConnections[tenant].uploadFile.bind(this.ftpConnections[tenant]);
@@ -54,7 +54,7 @@ class Service {
      * Destroy kafka callbacks,  connections with ftp services
      */
   async stopService() {
-    logger.info('stopService: Stopping service... ', TAG);
+    logger.info('stopService: Stopping service... ');
 
     await this.kafkaFTPConsumers.unregisterCallbacks();
 

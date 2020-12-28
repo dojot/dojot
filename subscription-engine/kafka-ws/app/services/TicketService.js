@@ -1,9 +1,11 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
-const { Logger } = require('@dojot/microservice-sdk');
-const { app: appCfg } = require('../Config');
+const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const RedisManager = require('../Redis/RedisManager');
+
+const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).ticket;
 
 const jwtSignAsync = promisify(jwt.sign).bind(jwt);
 
@@ -26,7 +28,7 @@ function getRedisKey(ticket) {
  * @returns {String} A ticket calculated via HMAC
  */
 function generateTicket(token) {
-  const hmac = crypto.createHmac('sha256', appCfg.ticket.secret);
+  const hmac = crypto.createHmac('sha256', config.secret);
   hmac.update(token);
   return hmac.digest('hex');
 }
@@ -87,15 +89,15 @@ async function retrieveEncodedToken(ticket) {
  */
 async function issueTicket({ tenant, expiration }) {
   const token = await jwtSignAsync({ tenant, remainingTime: expiration },
-    appCfg.ticket.secret,
-    { expiresIn: appCfg.ticket.expiresIn });
+    config.secret,
+    { expiresIn: config['expiration.sec'] });
 
   const redis = RedisManager.getClient();
   const ticket = generateTicket(token);
 
   /* Defines an entry in Redis with a certain expiration time. */
   const setexAsync = promisify(redis.setex).bind(redis);
-  await setexAsync(getRedisKey(ticket), appCfg.ticket.expiresIn, token);
+  await setexAsync(getRedisKey(ticket), config['expiration.sec'], token);
 
   return ticket;
 }

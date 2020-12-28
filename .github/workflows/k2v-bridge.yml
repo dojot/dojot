@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x]
+        node-version: [12.x]
     steps:
 
     - name: checkout
@@ -32,18 +32,16 @@ jobs:
         npm ci
         npm run build --if-present
         npm test
-        npm run coverage
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
-        token: 6a610aca-9ca1-4ac5-97e1-18eea5f44612 # Keep in mind that secrets are not available to forks of repositories, because that the open token
-        file: connector/mqtt/vernemq/k2v-bridge/coverage/lcov.info # create when run npm run coverage
+        directory: connector/mqtt/vernemq/k2v-bridge/coverage
         flags: K2VBridge # Flags allow you to isolate coverage reports for different tests
         name: k2v-bridge # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests
-    name: (connector/mqtt/vernemq/k2v-bridge) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    name: (connector/mqtt/vernemq/k2v-bridge) Build and Publish image to DockerHub #  path to help identify in Status checks each job
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
     steps:

@@ -1,8 +1,6 @@
-const { Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager, Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
 
-const appConfig = require('./config');
-const Utils = require('./utils');
-const MQTTClient = require('./MQTTClient');
+const Utils = require('./Utils');
 
 /**
  * Class representing an AgentMessenger
@@ -13,30 +11,36 @@ class AgentMessenger {
   /**
    * Create an agentMessenger
    *
-   * @param {Object} config - the configuration
+   * @constructor
    */
-  constructor(config) {
-    this.initialized = false;
-    this.producer = new Producer({ ...appConfig.sdk, kafka: appConfig.kafka });
-    this.mqttClient = new MQTTClient(this, config || appConfig.mqtt);
-    this.logger = new Logger('AgentMessenger');
+  constructor() {
+    this.config = ConfigManager.getConfig('V2K');
+
+    this.producer = new Producer({
+      ...this.config.sdk,
+      'kafka.producer': this.config.producer,
+      'kafka.topic': this.config.topic,
+    });
+    this.logger = new Logger('v2k:agent-messenger');
   }
 
   /**
-   * Initialize the agent messenger on success init mqttClient on error exit.
+   * Initialize the Kafka Producer. It initializes the MQTT connection after a successful
+   * connection.
+   *
+   * @param {Object} mqttClient
    *
    * @function init
+   * @public
    */
-  init() {
+  init(mqttClient) {
     this.logger.info('Initializing Kafka Producer...');
     this.producer.connect().then(() => {
       this.logger.info('... Kafka Producer was initialized');
-
-      // initializing mqtt client
-      this.logger.info('Initializing MQTTClient');
-      this.mqttClient.init();
-    }).catch(() => {
-      this.logger.error('An error occurred while initializing the Kafka Producer. Bailing out!');
+      mqttClient.init();
+    }).catch((error) => {
+      this.logger.error('An error occurred while initializing the Agent Messenger. Bailing out!');
+      this.logger.error(error.stack || error);
       process.exit(1);
     });
   }
@@ -44,10 +48,11 @@ class AgentMessenger {
   /**
    * Produce a given message to a given topic.
    *
-   * @function sendMessage
+   * @param {string} topic
+   * @param {Object} message
    *
-   * @param {string} topic - topic to produce
-   * @param {Object} message - message to produce
+   * @function sendMessage
+   * @public
    */
   sendMessage(topic, message) {
     let jsonPayload;
@@ -60,7 +65,7 @@ class AgentMessenger {
       deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);
       messageKey = `${deviceDataMessage.metadata.tenant}:${deviceDataMessage.metadata.deviceid}`;
       kafkaTopic = `${deviceDataMessage.metadata.tenant}.${
-        appConfig.messenger['produce.topic.suffix']}`;
+        this.config.messenger['produce.topic.suffix']}`;
       deviceDataMessage = JSON.stringify(deviceDataMessage);
     } catch (error) {
       this.logger.error(`Failed to create the message. Error: ${error.stack || error}`);
@@ -76,6 +81,48 @@ class AgentMessenger {
         this.logger.error(error.stack || error);
       }
     });
+  }
+
+  /**
+   * Health checking function to be passed to the ServiceStateManager.
+   *
+   * @param {Function} signalReady
+   * @param {Function} signalNotReady
+   *
+   * @returns {Promise<void>}
+   *
+   * @function healthChecker
+   * @public
+   */
+  healthChecker(signalReady, signalNotReady) {
+    return new Promise((resolve) => {
+      this.producer.getStatus()
+        .then((status) => {
+          if (status.connected) {
+            signalReady();
+          } else {
+            signalNotReady();
+          }
+          return resolve();
+        })
+        .catch(() => {
+          signalNotReady();
+          return resolve();
+        });
+    });
+  }
+
+  /**
+   * Shutdown handler to be passed to the ServiceStateManager.
+   *
+   * @returns {Promise<void>}
+   *
+   * @function shutdownHandler
+   * @public
+   */
+  shutdownHandler() {
+    this.logger.warn('Shutting down Kafka connection...');
+    return this.producer.disconnect();
   }
 }
 

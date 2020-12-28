@@ -1,6 +1,6 @@
 #
 # ---- Base Image ----
-FROM node:10.16.3-alpine AS base
+FROM node:12.18-alpine AS base
 
 WORKDIR /opt/k2v_bridge
 
@@ -31,10 +31,12 @@ RUN npm install
 
 COPY ./bin/ ./bin
 COPY ./app ./app
+COPY ./config ./config
+COPY ./index.js ./index.js
 
 #
 # --- Production Image
-FROM node:10.16.3-alpine
+FROM node:12.18-alpine
 
 WORKDIR /opt/k2v_bridge
 
@@ -52,3 +54,6 @@ COPY --from=base /opt/k2v_bridge /opt/k2v_bridge
 ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["./bin/entryPoint.sh", "npm", "run", "app"]
+
+HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=3 \
+      CMD curl -s "http://localhost:9000/health" | grep -q "SERVER_IS_READY"
