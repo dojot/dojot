@@ -64,7 +64,7 @@ After raising a pull-request, it will be reviewed by dojot developers and some c
 
 The dojot IoT Platform is based on well-Known open source softwares such as [Apache Kafka](https://kafka.apache.org/), [RabbitMQ](https://www.rabbitmq.com/), [PostgreSQL](https://www.postgresql.org/), [MongoDB](https://www.mongodb.com/), [Redis](https://redis.io/), [Kong Gateway](https://konghq.com/kong/) and [VerneMQ](https://vernemq.com/), which have their own licenses.
 
-The services developed by the dojot team to integrate theses open-source software components and implement the business logics are copyrighed by
-CPqD <www.cpqd.com.br> and licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
+The services developed by the dojot team to integrate theses open-source software components and implement the business logics are copyrighted by
+CPqD <www.cpqd.com.br> and till release X were licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html). From release Y onwards, these services are being licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
 
 As a further consequence you can use and/or modify the software for free (no license costs apply).
