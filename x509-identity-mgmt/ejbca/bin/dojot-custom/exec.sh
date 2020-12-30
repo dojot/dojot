@@ -33,17 +33,19 @@ IFS=$'\n\t'
 
 function main() {
 
-    # Check whether the setup should be performed. In a first execution of the EJBCA
-    # it is necessary to execute the configurations, but once configured, the scripts
-    # only consume time verifying if the configurations have already been made, so it
-    # is interesting to skip the configuration process to obtain performance in the
-    # initialization of the container.
-    if [ "x${EJBCA_PERFORM_DOJOT_SETUP}" == "xtrue" ] ; then
+    loadScripts
 
-        loadScripts
+    while true ; do
+        if getLock; then
 
-        while true ; do
-            if getLock; then
+            echo
+            log "INFO" "Lock obtained successfully. Starting the configuration process..."
+
+            local caFound
+            caFound=$(ejbca_cmd ca listcas 2>&1 | grep "CA Name: ${DEVICES_CA}")
+
+            # If the CA is not found, we must run a new CA Setup...
+            if [ "x${caFound}" == "x" ]; then
 
                 batchIssuanceConfig
 
@@ -53,26 +55,27 @@ function main() {
 
                 createServices
 
-                createAdminEntity
-
-                generateCertServerTLS
-
-                generateCertClientTLS
-
-                # removing the lock
-                rm -f "${LOCK_FILE}"
-
-                break
-
             else
-                echo "Lock Exists: ${LOCK_FILE} owned by $(cat "$LOCK_FILE")"
-                sleep 5
+                echo
+                log "INFO" "Using existing CA Setup!"
             fi
-        done
 
-    else
-        log "WARN" "Dojot EJBCA setup is not enabled!"
-    fi
+            createAdminEntity
+
+            generateCertServerTLS
+
+            generateCertClientTLS
+
+            # removing the lock
+            rm -f "${LOCK_FILE}"
+
+            break
+
+        else
+            echo "Lock Exists: ${LOCK_FILE} owned by $(cat "$LOCK_FILE")"
+            sleep 5
+        fi
+    done
 
 }
 
@@ -128,6 +131,9 @@ function loadScripts() {
 }
 
 function getLock() {
+    echo
+    log "INFO" "Getting the Lock to perform the dojot settings in the EJBCA..."
+
     # breaks the lock after certain time to avoid deadlock
     # In practice, it removes the lock file if it has timed out
     find "${SHARED_VOLUME}/" -name ".lock" -mmin "+${LOCK_FILE_TIMEOUT}" -delete > /dev/null
