@@ -1,0 +1,34 @@
+{
+    "env": {
+        "jest": true,
+        "es6": true,
+        "node": true
+    },
+    "plugins": [
+        "security",
+        "security-node"
+    ],
+    "extends": [
+        "airbnb-base",
+        "plugin:security/recommended",
+        "plugin:security-node/recommended"
+    ],
+    "rules": {
+        /* the rule import/no-unresolved is needed to avoid problems with the codefactor */
+        "import/no-unresolved": "off",
+        /* Workaround:
+         Codefactor is using a newer version of airbnb-base, and it is not
+         availabe at NPM yet. So this line forces codefactor to keep the
+         expected behavior for the rule 'no-multiple-empty-lines' according
+         to airbnb-base version v14.x.x.
+         It should be removed when we upgrade to v18.2.0 */
+        "no-multiple-empty-lines": [
+            "error",
+            {
+                "max": 2,
+                "maxBOF": 1,
+                "maxEOF": 0
+            }
+        ]
+    }
+}
