@@ -1,9 +1,15 @@
-const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const {
+  ConfigManager: { getConfig, loadSettings, transformObjectKeys },
+  Logger,
+  ServiceStateManager,
+} = require('@dojot/microservice-sdk');
 
 const util = require('util');
+const camelCase = require('lodash.camelcase');
 
-const MQTTClient = require('./app/MqttClient');
-const utils = require('./app/utils');
+const AgentMessenger = require('./app/AgentMessenger');
+const MQTTClient = require('./app/MQTTClient');
+const Utils = require('./app/Utils');
 
 /*
  * TODO: the idea is to create a default environment variable that will be used internally by the
@@ -11,8 +17,8 @@ const utils = require('./app/utils');
  * to much now, this will do the trick.
  */
 const userConfigFile = process.env.K2V_APP_USER_CONFIG_FILE || 'production.conf';
-ConfigManager.loadSettings('K2V', userConfigFile);
-const config = ConfigManager.getConfig('K2V');
+loadSettings('K2V', userConfigFile);
+const config = getConfig('K2V');
 
 // Logger configuration
 Logger.setVerbose(config.log.verbose);
@@ -27,39 +33,27 @@ const logger = new Logger('k2v:index');
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
-const unhandledRejections = new Map();
-// the unhandledRejections Map will grow and shrink over time,
-// reflecting rejections that start unhandled and then become handled.
-process.on('unhandledRejection', (reason, promise) => {
-  // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
-  // no error handler is attached to the promise within a turn of the event loop.
-  logger.error(`Unhandled Rejection at: ${reason.stack || reason}.`);
-  unhandledRejections.set(promise, reason);
-  logger.debug(`unhandledRejection: List of Unhandled Rejection size ${unhandledRejections.size}`);
+const serviceStateManager = new ServiceStateManager({
+  lightship: transformObjectKeys(config.lightship, camelCase),
 });
-process.on('rejectionHandled', (promise) => {
-  // The 'rejectionHandled' event is emitted whenever a Promise has
-  // been rejected and an error handler was attached to it
-  // later than one turn of the Node.js event loop.
-  logger.debug('rejectionHandled: A event');
-  unhandledRejections.delete(promise);
-  logger.debug(`rejectionHandled: List of Unhandled Rejection size ${unhandledRejections.size}`);
-});
+const agentMessenger = new AgentMessenger(serviceStateManager);
+const mqttClient = new MQTTClient(agentMessenger, serviceStateManager);
 
-process.on('uncaughtException', async (ex) => {
-  // The 'uncaughtException' event is emitted when an uncaught JavaScript
-  // exception bubbles all the way back to the event loop.
-  logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
-  // TODO: stop server (connection redis, kafka consumer, etc.)
-  utils.killApplication();
-});
-
-const mqttClient = new MQTTClient();
+// Registering the services, shutdown handlers and health checkers
+serviceStateManager.registerService('kafka');
+serviceStateManager.registerService('mqtt');
+serviceStateManager.registerShutdownHandler(agentMessenger.shutdownHandler.bind(agentMessenger));
+serviceStateManager.registerShutdownHandler(mqttClient.shutdownHandler.bind(mqttClient));
+serviceStateManager.addHealthChecker(
+  'kafka',
+  agentMessenger.healthChecker.bind(agentMessenger),
+  config.healthcheck['kafka.interval.ms'],
+);
 
 try {
   mqttClient.init();
 } catch (error) {
   logger.error('An error occurred while initializing the MQTT Client. Bailing out!');
   logger.error(error.stack || error);
-  utils.killApplication();
+  Utils.killApplication();
 }

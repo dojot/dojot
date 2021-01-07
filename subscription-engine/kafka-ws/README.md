@@ -7,27 +7,27 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 # **Table of Contents**
 
 1. [Overview](#overview)
-   1. [Connecting to the service](##connecting-to-the-service)
-      1. [**First step**: Get the single-use ticket](###first-step-get-the-single-use-ticket)
-      2. [**Second step**: Establish a websocket connection](###second-step-establish-a-websocket-connection)
-      3. [Behavior when requesting a ticket and a websocket connection](###behavior-when-requesting-a-ticket-and-a-websocket-connection)
-   2. [Understanding the URI parts](##understanding-the-uri-parts)
-      1. [Fields](###fields)
-      2. [Where](###where)
-      3. [URI Examples](###uri-examples)
-   3. [Filtering flow](##filtering-flow)
-   4. [Selecting parameters (`fields`)](##selecting-parameters-fields)
-   5. [Applying conditions (`where`)](##applying-conditions-where)
-      1. [Set operators](###set-operators)
-      2. [Arithmetic operators](###arithmetic-operators)
-      3. [Boolean operators](###boolean-operators)
-   6. [Connection Error Codes](##connection-error-codes)
-      1. [HTTP error codes](###http-error-codes)
-      2. [Websocket error codes](###websocket-error-codes)
+   1. [Connecting to the service](#connecting-to-the-service)
+      1. [**First step**: Get the single-use ticket](#first-step-get-the-single-use-ticket)
+      2. [**Second step**: Establish a websocket connection](#second-step-establish-a-websocket-connection)
+      3. [Behavior when requesting a ticket and a websocket connection](#behavior-when-requesting-a-ticket-and-a-websocket-connection)
+   2. [Understanding the URI parts](#understanding-the-uri-parts)
+      1. [Fields](#fields)
+      2. [Where](#where)
+      3. [URI Examples](#uri-examples)
+   3. [Filtering flow](#filtering-flow)
+   4. [Selecting parameters (`fields`)](#selecting-parameters-fields)
+   5. [Applying conditions (`where`)](#applying-conditions-where)
+      1. [Set operators](#set-operators)
+      2. [Arithmetic operators](#arithmetic-operators)
+      3. [Boolean operators](#boolean-operators)
+   6. [Connection Error Codes](#connection-error-codes)
+      1. [HTTP error codes](#http-error-codes)
+      2. [Websocket error codes](#websocket-error-codes)
 2. [Running the service](#running-the-service)
-   1. [Configuration](##configuration)
-   2. [Parser compilation](##parser-compilation)
-   3. [Standalone Mode](##standalone-mode)
+   1. [Configuration](#configuration)
+   2. [Parser compilation](#parser-compilation)
+   3. [Standalone Mode](#standalone-mode)
 3. [Examples](#examples)
 4. [Documentation](#documentation)
 5. [Issues and help](#issues-and-help)
@@ -309,11 +309,14 @@ Configuration used in this service
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
 ------| ----------| ----------------|--------------|------------------------
 | app.node.env  | Is used (by convention) to state in which environment it is running | production | production or development | NODE_ENV
-| logger.transports.console.level  | Console logger level | info | string | KAFKA_WS_LOGGER_TRANSPORTS_CONSOLE_LEVEL
-| logger.verbose | Whether to enable logger verbosity or not | false | boolean | KAFKA_WS_LOGGER_VERBOSE
-| logger.transports.file.enable | Whether to enable logging in file or not | false | boolean | KAFKA_WS_LOGGER_TRANSPORTS_FILE_ENABLE
-| logger.transports.file.level | Whether to enable file logger verbosity or not | info | string | KAFKA_WS_LOGGER_TRANSPORTS_FILE_LEVEL
-| logger.transports.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOGGER_TRANSPORTS_FILE_FILENAME
+| app.connection.retry.timeout | (Timeout in seconds) to ckeck connection with kafka and redis before running the service | 3 | integer | KAFKA_WS_APP_CONNECTION_RETRY_TIMEOUT
+| app.connection.retry.count | How many times to try to check kafka and redis connection check before running the service | 5 | integer | KAFKA_WS_APP_CONNECTION_RETRY_COUNT
+| healthcheck.kafka.interval.ms | Milliseconds between each call of Kafka's health checker function | 50000 | integer | KAFKA_WS_HEALTHCHECK_KAFKA_INTERVAL_MS
+| log.console.level  | Console logger level | info | string | KAFKA_WS_LOG_CONSOLE_LEVEL
+| log.verbose | Whether to enable logger verbosity or not | false | boolean | KAFKA_WS_LOG_VERBOSE
+| log.file.enable | Whether to enable logging in file or not | false | boolean | KAFKA_WS_LOG_FILE_ENABLE
+| log.file.level | Whether to enable file logger verbosity or not | info | string | KAFKA_WS_LOG_FILE_LEVEL
+| log.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOG_FILE_FILENAME
 
 ## **Ticket**
 Ticket management
