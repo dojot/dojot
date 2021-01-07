@@ -8,9 +8,10 @@ const logger = new Logger('influxdb-retriever:express/routes/v1/Device');
  * Routes to Devices
  *
  * @param {string} mountPoint be used as a route prefix
- * @param {Promise<{result: object, totalItems: number}| error>>}
- *                               A promise that returns a result e a totalItems inside that result
- *
+ * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByField
+ *                               A promise that returns a result and a totalItems inside that result
+ * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByMeasurement
+ *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
 /**

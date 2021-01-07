@@ -78,14 +78,14 @@ class DataQuery {
       } = DataQuery.commonQueryParams(page, filters);
 
       const orderExp = DataQuery.commonQueryOrderExpression(order);
+      const limitExp = DataQuery.commonLimitExpression(limit, offset);
 
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
       |> range(start: ${start} , stop: ${stop})
       |> filter(fn: (r) => r._measurement == ${fluxString(measurement)})
-      |> drop(columns: ["_start", "_stop", "_measurement"])
       |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
       ${fluxExpression(orderExp)}
-      |> limit(n: ${limit} , offset: ${offset})`;
+      ${fluxExpression(limitExp)}`;
 
       logger.debug(`queryByMeasurement: fluxQuery=${fluxQuery}`);
 
@@ -125,7 +125,7 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByMeasurement: totalItems=${result.length} result=${JSON.stringify(result, null, 2)}`);
+            logger.debug(`queryByMeasurement: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
             return resolve({ result, totalItems: result.length });
           },
         });
@@ -171,13 +171,13 @@ class DataQuery {
       } = DataQuery.commonQueryParams(page, filters);
 
       const orderExp = DataQuery.commonQueryOrderExpression(order);
+      const limitExp = DataQuery.commonLimitExpression(limit, offset);
 
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
         |> range(start: ${start} , stop: ${stop})
         |> filter(fn: (r) => r._measurement == ${fluxString(measurement)} and r._field == ${fluxString(`dojot.${field}`)})
-        |> drop(columns: ["_start", "_stop", "_measurement"])
         ${fluxExpression(orderExp)}
-        |> limit(n: ${limit} , offset: ${offset})`;
+        ${fluxExpression(limitExp)}`;
 
       logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
 
@@ -200,7 +200,7 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByField: totalItems=${result.length} result=${JSON.stringify(result, null, 2)}`);
+            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
             return resolve({ result, totalItems: result.length });
           },
         });
@@ -239,11 +239,11 @@ class DataQuery {
    */
   static commonQueryParams(page, filters) {
     const limit = page.limit ? fluxInteger(page.limit) : 256;
-    const offset = page.page && page.page >= 1 ? fluxInteger(page.page - 1) : 0;
+    const pageNumber = page.page && page.page >= 1 ? fluxInteger(page.page) : 1;
     const start = filters.dateFrom ? fluxDateTime(filters.dateFrom) : 0;
     const stop = filters.dateTo ? fluxDateTime(filters.dateTo) : fluxExpression('now()');
     return {
-      start, stop, limit, offset,
+      start, stop, limit, offset: (pageNumber - 1) * limit,
     };
   }
 
@@ -260,6 +260,17 @@ class DataQuery {
       orderExp = '|> sort(columns: ["_time"], desc: true)';
     }
     return orderExp;
+  }
+
+  /**
+   * Handles query limit that is common
+   *
+   * @param {number} limit
+   * @param {number} offset
+   * @returns
+   */
+  static commonLimitExpression(limit, offset) {
+    return `|> limit(n: ${limit} , offset: ${offset})`;
   }
 }
 

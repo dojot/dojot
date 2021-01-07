@@ -1,0 +1,46 @@
+Dojot Load Test
+This software is copyright (c) 2020 by CPQD <www.cpqd.com.br>.
+
+It is licensed under Apache License, Version 2.0.
+
+It uses libraries, which are available under the following licenses:
+
+* Apache License, Version 2.0
+     - cryptography (source code available at https://github.com/pyca/cryptography)
+     - msgpack-python (source code available at https://github.com/msgpack/msgpack-python)
+     - pyOpenSSL (source code available at https://github.com/pyca/pyopenssl)
+     - requests (source code available at https://github.com/psf/requests)
+
+* MIT
+     - cffi (source code available at https://foss.heptapod.net/pypy/cffi/)
+     - gevent (source code available at https://github.com/gevent/gevent)
+     - geventhttpclient-wheels (source code available at https://github.com/gwik/geventhttpclient)
+     - greenlet (source code available at https://github.com/python-greenlet/greenlet)
+     - locustio (source code available at https://github.com/locustio/locust)
+     - redis (source code available at https://github.com/andymccurdy/redis-py)
+     - six (source code available at https://github.com/benjaminp/six)
+     - urllib3 (source code available at https://github.com/urllib3/urllib3)
+
+* BSD (3-Clause)
+     - Flask (source code available at https://github.com/pallets/flask)
+     - Jinja2  (source code available at https://github.com/pallets/jinja)
+     - MarkupSafe (source code available at https://github.com/pallets/markupsafe)
+     - Werkzeug (source code available at https://github.com/pallets/werkzeug)
+     - click (source code available at https://github.com/pallets/click)
+     - cryptography (source code available at https://github.com/pyca/cryptography)
+     - itsdangerous (source code available at https://github.com/pallets/itsdangerous)
+     - pycparser (source code available at https://github.com/eliben/pycparser)
+     - pyzmq (source code available at https://github.com/zeromq/pyzmq)
+
+* BSD-Like
+     - idna (source code available at https://github.com/kjd/idna)
+
+* MPL 2.0
+     - certifi (source code available at https://github.com/certifi/python-certifi)
+
+* Eclipse Public License v1.0
+     - paho-mqtt (source code available at https://github.com/eclipse/paho.mqtt.python)
+
+* LGPL
+     - chardet (source code available at https://github.com/chardet/chardet)
+     - pyzmq (source code available at https://github.com/zeromq/pyzmq)

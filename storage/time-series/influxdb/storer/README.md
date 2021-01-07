@@ -196,9 +196,7 @@ convention.
 | --- | ------- | ------------- | ------------ | --------------------
 | influx.default.bucket | Bucket name for all created buckets | devices | string  | STORER_INFLUX_DEFAULT_BUCKET
 | influx.default.organization | Set up the name of the initial organization | admin | string  | STORER_INFLUX_DEFAULT_ORGANIZATION
-| influx.default.password | Set a password for the default user | dojot@password | string  | STORER_INFLUX_DEFAULT_PASSWORD
 | influx.default.token | Configure a token (this token will be allowed to write/read in all organizations) | dojot@token_default | string  | STORER_INFLUX_DEFAULT_TOKEN
-| influx.default.user | Set up a username | dojot | string  | STORER_INFLUX_DEFAULT_USER
 | influx.heathcheck.ms | Defines how often the communication with InfluxDB is verified in milliseconds.   | 30000 | integer  | STORER_INFLUX_HEATHCHECK_MS
 | influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). | 168 | integer | STORER_INFLUX_RETENTION_HRS
 | influx.url | Address of the *InfluxDB* service  | http://influxdb:8086 | url | STORER_INFLUX_URL
