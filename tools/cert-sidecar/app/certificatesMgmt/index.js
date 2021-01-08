@@ -17,10 +17,12 @@ const {
 
 class CertificatesMgmt {
   /**
-   * @constructor
-   * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
-   *          with register service 'x509IdentityMgmt'} serviceState
-   *          Manages the services' states, providing health check and shutdown utilities.
+   *  @constructor
+   * @param {opensslWrapper} opensslWrapper
+   * @param {x509IdentityMgmt} x509IdentityMgmt
+    * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
+    *          with register service 'x509IdentityMgmt'} serviceState
+    *          Manages the services' states, providing health check and shutdown utilities.
   */
   constructor(opensslWrapper, x509IdentityMgmt, serviceState) {
     this.serviceState = serviceState;
