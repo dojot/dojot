@@ -121,6 +121,7 @@ describe('X509Utils', () => {
   });
 
   test('getDER: ok', () => {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const crl = fs.readFileSync(`${__dirname}/crl.pem`, { encoding: 'utf8', flag: 'r' });
     const crlDER = openssl.getOpenSSL().getDER(crl);
     expect(crlDER).toBe('MIIC9DCB3QIBATANBgkqhkiG9w0BAQsFADB6MSMwIQYKCZImiZPyLGQBAQwTYy0wNTMyZTdhNTI1NWExZDMzNzEZMBcGA1UEAwwQWDUwOSBJZGVudGl0eSBDQTEbMBkGA1UECwwSQ2VydGlmaWNhdGUgSXNzdWVyMRswGQYDVQQKDBJkb2pvdCBJb1QgUGxhdGZvcm0XDTIwMTAyNjAwMDQxOFoXDTIwMTAyNzAwMDQxOFqgLzAtMB8GA1UdIwQYMBaAFM8XtKpRsn9ssZA64WADmUXtQoOJMAoGA1UdFAQDAgEEMA0GCSqGSIb3DQEBCwUAA4ICAQCrTCAcqsl/pfkeqjM6vluJORaiH0R5hiNYCfgXFtBho6V4e0jDqjun5Jb4+Sd8FYlLxkorev0vBEzNCxu/r4ZsZ3RA09HdiNU7piMnyaOmUoGhPhczk0rGGO7/3uE5lV8aZLyGXMxGorq7jqD++o3XD9WVaMZrivq5aYek+CMQosEc0gOZpL0LSLyGvp1Uexartj/Ro3EVpwy8GWtlGNXJe5hyQVHm9c0OoWva9oEcIObYJK/vj0DdhWnIC9BdzOIAj/GzpQhlNQ9iVs25M2Rfr/ukVaAQaKhoqpvfb3/DnAeP24BK3/I+8S0u8Szwbu5hH9AqLGVp+faMEXAm1S6hAz+LIAFu718MZ4qxvLMPqxJ97ABJh3+m7skld7hnJ5sgRVvjfbAlzwQg34BhESquLSlD3TtrCHvLn/QGZ2ApsspVAWEv5WoUXuymjeFoFrHnacREon6EKO/n2S7LYdg2ejyKDD3V0s04CcM+OVN97/Shhp/lANHHpRiBQp0d3gLEk5LfgJ9LaM0wM+h4xMQseOhLb0EfQJkywXb8ObMcYrE7nllwdSUqdUhcc3y6B2xmpCIdT7AH/R5JUQuje7H9xz2SXqRAwK4DlgUPsrw89kmiXJzM/SIpPPvT/0Bhl0qxopxfEJ0FKD94ZqP0BpV3Pp1WY8wIBhcIGZDCVV0QVQ==');

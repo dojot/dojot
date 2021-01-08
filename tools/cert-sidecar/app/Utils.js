@@ -53,6 +53,7 @@ const cronJob = (cb, cronTime, runOnInit = false) => {
 const createFile = async (path, content) => {
   logger.debug(`createFile: Creating a file=${path}`);
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fs.writeFile(path, content);
     logger.info(`createFile: ${path} is created!`);
   } catch (e) {
@@ -74,6 +75,7 @@ const createDir = async (path) => {
     // check if dir exist
     await fs.access(path).catch(async () => {
       // if dir doest exist create it
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       await fs.mkdir(path, { recursive: true });
     });
   } catch (e) {
@@ -92,6 +94,7 @@ const createDir = async (path) => {
 const deleteDir = async (path) => {
   logger.debug(`deleteDir: Deleting a dir=${path}`);
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fs.rmdir(path, { recursive: true });
     logger.info(`deleteDir: ${path} is deleted!`);
   } catch (e) {
@@ -110,6 +113,7 @@ const deleteDir = async (path) => {
 const deleteFile = async (path) => {
   logger.debug(`deleteFile: Deleting a file=${path}`);
   try {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fs.unlink(path);
     logger.info(`deleteFile: ${path} is deleted!`);
   } catch (e) {

@@ -16,6 +16,7 @@ try {
   setInterval(() => {
     https.request(options, (response) => {
       response.on('data', (chunk) => {
+        // eslint-disable-next-line security-node/detect-crlf
         console.log(`Response from server: ${chunk}`);
       });
     })
@@ -26,6 +27,7 @@ try {
       .end();
   }, 5000);
 } catch (e) {
+  // eslint-disable-next-line security-node/detect-crlf
   console.log(e);
   process.kill(process.pid, 'SIGTERM');
 }
