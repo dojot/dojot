@@ -203,11 +203,6 @@ log() {
     fi
 }
 
-# Remove ad EJBCA Enterprise message
-if [ -f "${BASE_DIR}/bin/internal/after-deployed.message" ] ; then
-    rm "${BASE_DIR}/bin/internal/after-deployed.message"
-fi
-
 main "$@";
 
 IFS=${origIFS}
