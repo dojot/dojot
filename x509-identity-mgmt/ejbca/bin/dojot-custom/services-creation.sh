@@ -28,7 +28,7 @@ function createServices() {
         "${CA_RENEWER_SERVICE_INTERVAL_UNIT}" \
         "${CA_RENEWER_SERVICE_TIME_BEFORE_EXP}" \
         "${CA_RENEWER_SERVICE_TIME_BEFORE_EXP_UNIT}" \
-        "${DEVICES_CA_ID};${SERVICES_CA_ID}"
+        "${DEVICES_CA_ID};${INTERNAL_CA_ID}"
 }
 
 function createCRLUpdaterService() {
@@ -51,6 +51,9 @@ function createCRLUpdaterService() {
         properties="${properties} active=true"
 
         ejbca_cmd service create --service "${serviceName}" --properties "${properties}"
+
+        echo
+        log "INFO" "The service '${serviceName}' was created!"
     fi
 }
 
@@ -84,5 +87,8 @@ function createCAsRenewerService() {
         properties="${properties} actionClassPath=org.ejbca.core.model.services.actions.NoAction"
 
         ejbca_cmd service create --service "${serviceName}" --properties "${properties}"
+
+        echo
+        log "INFO" "The service '${serviceName}' was created!"
     fi
 }

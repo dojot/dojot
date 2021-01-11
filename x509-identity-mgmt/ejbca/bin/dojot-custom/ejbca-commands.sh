@@ -29,7 +29,7 @@ function ejbca_cmd() {
         "-Duser.home=${EJBCA_CLI_USER_HOME}" \
     )
 
-    # Redirect stderr to stdout to make output easier to consume by third party tools
+    # Redirect stderr to stdout to make output easier to consume by other tools
     java "${javaOpts[@]}" -jar "${EJBCA_CLI_JAR}" "$@" 2>&1
 }
 
@@ -55,6 +55,6 @@ function ejbca_cmd_debug() {
     echo "EJBCA-CLI: JVM Remote Debug at ${CONTAINER_IP}:${EJBCA_CLI_DEBUG_PORT}"
     echo "${javaOpts[@]}"
 
-    # Redirect stderr to stdout to make output easier to consume by third party tools
+    # Redirect stderr to stdout to make output easier to consume by other tools
     java "${javaOpts[@]}" -jar "${EJBCA_CLI_JAR}" "$@" 2>&1
 }

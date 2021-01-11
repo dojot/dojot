@@ -36,7 +36,7 @@ function createSuperAdmin() {
         ejbca_cmd ra addendentity \
             --username "${ADMIN_USERNAME}" \
             --dn "CN=${ADMIN_COMMONNAME},O=${DISTNAME_O},OU=${DISTNAME_OU},UID=${endEntityUid}" \
-            --caname "${SERVICES_CA}" \
+            --caname "${INTERNAL_CA}" \
             --type 1 \
             --token P12 \
             --password "${superAdminEnrollmentCode}" \
