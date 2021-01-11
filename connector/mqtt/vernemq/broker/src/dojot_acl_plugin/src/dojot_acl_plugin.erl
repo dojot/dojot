@@ -11,9 +11,18 @@
          auth_on_subscribe/3]).
 
 auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName, Password, CleanSession) ->
-    ok.
+    
+    if 
+        UserName == not_authorized -> 
+            error;
+        true -> 
+            ok
+    end.
+
+    
 
 auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, Payload, IsRetain) ->
+    
     Result  = dojot_acl:check_valid_topic(UserName, Topic),
 
     case Result of
