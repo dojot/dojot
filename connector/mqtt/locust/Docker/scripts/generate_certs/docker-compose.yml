@@ -1,0 +1,28 @@
+version: "3"
+services:
+  generate-certs:
+    build:
+      context: ../../../
+      dockerfile: ./Docker/scripts/generate_certs/Dockerfile
+    volumes:
+      # If you are developing using this container, activate these volumes:
+      # - ../../../src:/usr/src/app/src
+      # - ../../../tests:/usr/src/app/tests
+      # - ../../../.pylintrc:/usr/src/app/.pylintrc
+      # - ../../../requirements:/usr/src/app/requirements
+      # Whether you are developing or running a test, this volume should be active to properly load
+      # the certificates:
+      - ../../../cert:/usr/src/app/cert
+    environment:
+      DOJOT_URL: "http://127.0.0.1:8000"
+      DOJOT_MQTT_HOST: "127.0.0.1"
+      DOJOT_MQTT_PORT: "1883"
+      DOJOT_ENV: "n"
+
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+
+networks:
+  default:
+    external:
+      name: docker_default

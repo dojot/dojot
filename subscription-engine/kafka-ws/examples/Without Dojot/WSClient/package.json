@@ -1,0 +1,16 @@
+{
+  "name": "sample-ws-client",
+  "version": "1.0.0",
+  "description": "Example of ws-client",
+  "main": "Client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "@mprevide",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "superagent": "^5.3.1",
+    "ws": "^7.3.0"
+  }
+}

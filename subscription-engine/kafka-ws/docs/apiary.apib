@@ -1,0 +1,136 @@
+FORMAT: 1A
+
+
+# Kafka WS
+
+The Kafka WS service provides support for pure WebSocket connections to retrieve data directly
+from Kafka.
+
+# Group Ticket
+
+A ticket allows the user to subscribe to a dojot topic. To obtain it is necessary to have a JWT
+access token that is issued by the platform's Authentication/Authorization service.
+
+## Getting a ticket [/kafka-ws/v1/ticket]
+
+### A single-use Ticket [GET]
+
+Gets a single-use ticket. It can only be used once and has a very short validity
+period, it must be used to establish a websocket connection.
+
++ Request
+
+    + Headers
+
+            Authorization: Bearer [Encoded JWT]
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "ticket": "ab1ee9ea52dec599bdc93259fae4539b7239a668ccf478cf52deba8c1cbef62f"
+            }
+
+
+# Group WebSocket
+
+The **Kafka WS service** allows the user to retrieve conditional and/or partial data from a topic
+in a Kafka cluster. It works with pure websocket connections, so you can create clients in any
+language you want, as long as the client supports **RFC 6455** websockets.
+
+For more details about grammar, selectors and conditions from this endpoint, check the
+Kafka WS documentation under the `subscription-engine/kafka-ws` directory in our
+[official repository](https://github.com/dojot/dojot/).
+
+__NOTE THAT__ although it is specified as a GET endpoint, this is not an HTTP endpoint, but a
+WebSocket one. To correctly use this endpoint, you must have some kind of WebSocket client. Check
+the examples under the `subscription-engine/kafka-ws` directory in our
+[official repository](https://github.com/dojot/dojot/) for ready to use Node.JS clients.
+
+## Retrieving conditional and/or partial messages from topic: [/kafka-ws/v1/topics/{topic}?ticket={ticket}&fields={selector}&where={conditions}]
+
+
++ Parameters
+    + topic:topic.example (required, string) - The `topic` parameter is the Kafka topic that you want to receive data from.
+    + ticket (required, string) - Previously generated single-use ticket
+    + selector:sensor/status,temperature (optional, string) - The `fields` parameter tells Kafka WS to retrieve only determined parameters from the messages.
+    + conditions: sensor.status=in:failed,stopped; (optional, string) - The `where` parameter tells Kafka WS to retrieve only messages in which the parameters meet the
+conditions.
+
+### Retrieve Kafka data [GET]
++ Request
+  + Headers
+
+            Upgrade: WebSocket
+            Connection: Upgrade
+
++ Response 200
+  + Headers
+
+            Upgrade: WebSocket
+            Connection: Upgrade
+
+  + body
+
+            {"sensor":{"status":"failed"},"temperature":35}
+
++ Response 426 (text/plain)
+
+         Invalid request - non-WebSocket connection received in WS endpoint
+
++ Response 4000
+  **Websocket error**
+
+  + body
+
+            INVALID_SYNTAX: there is a syntatic problem with `where`
+
++ Response 4001
+  **Websocket error**
+
+  + body
+
+            INVALID_OPERATOR: an invalid operator has been passed to a condition
+
++ Response 4002
+  **Websocket error**
+
+  + body
+
+            INVALID_ESCAPE_VALUE: an unsupported escape character has been passed to a condition
+
++ Response 4003
+  **Websocket error**
+
+  + body
+
+            INVALID_OPERATOR_ARITY: the number of values in a condition is invalid for the operator
+
++ Response 4004
+  **Websocket error**
+
+  + body
+
+            INVALID_VALUE: a value with an invalid type was passed to a condition
+
++ Response 4403
+  **Websocket error**
+
+  + body
+
+            FORBIDDEN_TOPIC: the tenant sent in the token jwt cannot access the kafka topic passed
+
++ Response 4408
+  **Websocket error**
+
+  + body
+
+            EXPIRED_CONNECTION: connection lifetime is over
+
++ Response 4999
+  **Websocket error**
+
+  + body
+
+            INTERNAL: there is an error in the server

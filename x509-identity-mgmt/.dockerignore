@@ -1,0 +1,19 @@
+js/node_modules
+js/tests
+js/tls
+js/temp
+js/.vscode
+js/.eslintrc.json
+js/jest.*
+
+npm-debug.log
+Dockerfile*
+docker-compose*
+.dockerignore
+.gitignore
+README.md
+.vscode
+.eslintrc.json
+
+# Examples directory
+examples

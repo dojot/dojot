@@ -1,0 +1,12 @@
+# nodejs
+node_modules
+
+# Docker
+.dockerignore
+Dockerfile
+
+# tests
+test
+
+# doc
+doc

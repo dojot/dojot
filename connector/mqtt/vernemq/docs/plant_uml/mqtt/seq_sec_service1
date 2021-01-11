@@ -1,0 +1,39 @@
+@startuml
+
+collections VerneMQ
+group  Register with CA
+        VerneMQ -> EJBCA: Request to create entity for VerneMQ instance
+end
+group  Public Certificates
+    note over VerneMQ, EJBCA
+        Requested at the init of VerneMQ and checking 
+        every CHECK_EXPIRATION_TIME and if certificates
+        expire in the next CHECKEND_EXPIRATION_SEC seconds
+    end note
+    group Retrieve Public Certificate
+        note over VerneMQ, EJBCA #dcded5
+          VerneMQ has a key pair (private/public key)
+          and create a Certificate Signing 
+          Request (CSR) to send to CA
+        end note
+        
+        VerneMQ -> EJBCA: Send CSR e Request Public Certificate 
+        EJBCA -->  VerneMQ: Reponse with Public Certificate
+    end
+    
+    group Retrieve Root Certificate
+        VerneMQ -> EJBCA: Request Root Certificate 
+        EJBCA -->  VerneMQ: Reponse with Root Certificate 
+    end
+end
+
+group Certificate Revocation List
+    note over VerneMQ, EJBCA
+        Updates the CRL certificate every 
+        time by setting in CRL_UPDATE_TIME
+    end note
+    VerneMQ -> EJBCA: Request CRL
+    EJBCA -->  VerneMQ: Reponse with CRL
+end
+
+@enduml

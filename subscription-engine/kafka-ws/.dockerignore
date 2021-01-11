@@ -1,0 +1,26 @@
+# NodeJS
+node_modules
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Test
+test
+coverage
+
+# Documentation
+docs
+README.md
+
+# IDEs
+.vscode
+.vscode-test
+.idea/*
+.devcontainer
+
+# Examples directory
+examples
+
+# ESLint
+.eslint*

@@ -1,0 +1,68 @@
+name: Kafka2Ftp (connector/kafka2ftp)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'connector/kafka2ftp/**'
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'connector/kafka2ftp/**'
+
+jobs:
+  unit-tests:
+    name: (connector/kafka2ftp) Unit Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: npm install, build, lint and test
+      run: |
+        cd connector/kafka2ftp
+        npm ci
+        npm run build --if-present
+        npm run lint
+        npm run check-licenses
+        npm test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: connector/kafka2ftp/coverage/lcov.info # create when run npm test
+        flags: kafka2ftp # Flags allow you to isolate coverage reports for different tests
+        name: kafka2ftp # Custom defined name for the upload
+
+  docker-hub:
+    needs: unit-tests
+    name: (connector/kafka2ftp) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # # If this is a PR, it won't run
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.11
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/kafka2ftp
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: connector/kafka2ftp
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
