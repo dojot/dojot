@@ -14,6 +14,9 @@
     },
     "xmldom@0.1.27": {
       "reason": "It allows to choose between LGPL-2.0 or MIT"
+    },
+    "tslib@1.14.1": {
+      "reason": "0BSD is public-domain-equivalent license, so it should be compatible with Apache-2.0"
     }
   }
 }

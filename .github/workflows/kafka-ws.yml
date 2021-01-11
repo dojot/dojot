@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [10.x]
+        node-version: [12.x]
     steps:
 
     - name: checkout
@@ -36,6 +36,7 @@ jobs:
         npm run build --if-present
         npm run parser:compile
         npm run lint
+        npm run check-licenses
         npm test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

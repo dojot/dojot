@@ -1,4 +1,4 @@
-FROM node:10.16.3-alpine AS base
+FROM node:12.18-alpine AS base
 
 WORKDIR /opt/kafka-ws
 
@@ -26,7 +26,7 @@ COPY ./app ./app
 
 RUN npm run parser:compile
 
-FROM node:10.16.3-alpine
+FROM node:12.18-alpine
 
 WORKDIR /opt/kafka-ws
 
@@ -45,4 +45,4 @@ CMD ["./bin/entryPoint.sh", "npm", "run", "kafka-ws"]
 
 HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=2 \
     CMD HC=$(wget -q -O - "http://localhost:${KAFKA_WS_PORT:-8080}/healthcheck") \
-        && echo $HC && echo $HC | grep -q '"status":"ok"'
+    && echo $HC && echo $HC | grep -q '"status":"ok"'

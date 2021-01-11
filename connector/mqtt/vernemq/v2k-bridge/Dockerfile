@@ -1,6 +1,6 @@
 #
 # ---- Base Image ----
-FROM node:10.16.3-alpine AS base
+FROM node:12.18-alpine AS base
 
 WORKDIR /opt/v2k_bridge
 
@@ -28,7 +28,7 @@ COPY ./app ./app
 
 #
 # --- Production Image
-FROM node:10.16.3-alpine
+FROM node:12.18-alpine
 
 WORKDIR /opt/v2k_bridge
 
