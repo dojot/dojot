@@ -11,8 +11,7 @@ ARG VERNEMQ_REPO=https://github.com/vernemq/vernemq.git
 ENV DOCKER_VERNEMQ_KUBERNETES_LABEL_SELECTOR="app=vernemq" \
     DOCKER_VERNEMQ_LOG__CONSOLE=console
 
-RUN apk --no-cache --update --available upgrade && \
-    apk add --no-cache git autoconf build-base bsd-compat-headers cmake openssl-dev bash && \
+RUN apk add --no-cache git autoconf build-base bsd-compat-headers cmake openssl-dev bash && \
     git clone -b $VERNEMQ_GIT_REF $VERNEMQ_REPO .
 
 COPY bin/build.sh build.sh
@@ -32,8 +31,7 @@ RUN cd /build/plugins/dojot_disconnect_plugin && \
 # DOJOT - VERNE FINAL IMAGE
 FROM alpine:3.9 as vernemq-build
 
-RUN apk --no-cache --update --available upgrade && \
-    apk add --no-cache ncurses-libs openssl libstdc++ jq curl bash tini && \
+RUN apk add --no-cache ncurses-libs openssl libstdc++ jq curl bash tini && \
     addgroup --gid 10000 vernemq && \
     adduser --uid 10000 -H -D -G vernemq -h /vernemq vernemq && \
     install -d -o vernemq -g vernemq /vernemq
