@@ -1,5 +1,5 @@
 # vernemq build
-FROM erlang:21-alpine AS build-env
+FROM erlang:21.3-alpine AS build-env
 
 WORKDIR /vernemq-build
 
