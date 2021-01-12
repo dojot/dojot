@@ -60,6 +60,7 @@ The access to EJBCA's functionalities is done through the certificate that it is
 | EJBCA_CLIENT_USERNAME | This value is used to create an End Entity in the EJBCA, as well as to name the file [PKCS#12](https://en.wikipedia.org/wiki/PKCS_12) used by the client application to communicate with the EJBCA server via SOAP. <br>**Default**: ejbcaclient |
 | EJBCA_CLIENT_COMMONNAME | Value to be added in the SubjectDN (Common Name) field of client application certificate. <br>**Default**: EJBCA Client Application |
 | EJBCA_TLS_CLIENT_DIR | Directory where the PKCS#12 file will be generated so that the client application can establish communication with the EJBCA server. <br>**Default**: /opt/tls |
+| EJBCA_SERVER_CERT_REGEN | If for some reason it is necessary to regenerate the certificate of the EJBCA Web Server, this flag is used for that. <br>**Default**: false |
 
 
 ## Configuration for Profiles
@@ -68,14 +69,14 @@ The access to EJBCA's functionalities is done through the certificate that it is
 |----------|-------------|
 | **Certificate Profiles** | |
 | EJBCA_DEVICES_CA_CERT_PROFILE | Name of the certificate profile of the root CA used to sign certificates for IoT devices. <br>**Default**: X509IdentitiesCA |
-| EJBCA_SERVICES_CA_CERT_PROFILE | Name of the certificate profile of the root CA used to sign certificates for dojot services. <br>**Default**: ServicesCA |
+| EJBCA_INTERNAL_CA_CERT_PROFILE | Name of the certificate profile of the root CA used to sign certificates for dojot services. <br>**Default**: InternalCA |
 | EJBCA_APP_SERVER_CERT_PROFILE | Name of the profile used to generate the EJBCA server certificate. Required to establish communication over TLS between the *dojot x.509 Identities* service and the *EJBCA*. <br>**Default**: ApplicationServerEJBCA |
 | EJBCA_DEVICES_CERT_PROFILE | Name of the profile used to generate certificates for IoT devices. <br>**Default**: X509Identity |
-| EJBCA_SERVICES_CERT_PROFILE | Name of the profile used to generate certificates for the other services on the dojot platform. <br>**Default**: Service |
+| EJBCA_INTERNAL_CERT_PROFILE | Name of the profile used to generate certificates for the other services on the dojot platform. <br>**Default**: Service |
 | **End Entities Profiles** | |
 | EJBCA_APP_SERVER_ENTITY_PROFILE | Name of the profile of the End Entity that represents the EJBCA server. <br>**Default**: ApplicationServerEJBCA |
 | EJBCA_DEVICES_ENTITY_PROFILE | Name of the profile of the End Entity that represents the IoT devices. <br>**Default**: X509Identity |
-| EJBCA_SERVICES_ENTITY_PROFILE | Name of the profile of the End Entity that represents the other services of the dojot platform. <br>**Default**: Service |
+| EJBCA_INTERNAL_ENTITY_PROFILE | Name of the profile of the End Entity that represents the other services of the dojot platform. <br>**Default**: Service |
 
 
 ## Configuration for CAs
@@ -86,7 +87,7 @@ The access to EJBCA's functionalities is done through the certificate that it is
 | EJBCA_DISTNAME_O | Value to be added in the SubjectDN (Organization) field of CA certificates. <br>**Default**: dojot IoT Platform |
 | EJBCA_DISTNAME_OU | Value to be added in the SubjectDN (Organization Unit) field of CA certificates. <br>**Default**: Certificate Issuer |
 | EJBCA_DEVICES_CA | Name of the CA that signs certificates for IoT devices. This value is also added in the SubjectDN (Common Name) field of this CA's certificate <br>**Default**: X509 Identity CA |
-| EJBCA_SERVICES_CA | Name of the CA that signs certificates for dojot platform services. This value is also added in the SubjectDN (Common Name) field of this CA's certificate <br>**Default**: Services CA |
+| EJBCA_INTERNAL_CA | Name of the CA that signs certificates for dojot platform services. This value is also added in the SubjectDN (Common Name) field of this CA's certificate <br>**Default**: Internal CA |
 
 
 ## Configuration for CRL Period
@@ -100,11 +101,11 @@ For the value of these variables see [Temporal Definition](#how-to-define-relati
 | EJBCA_CRL_ISSUE_INTERVAL_DEVICES_CA | A fixed interval when CRLs are issued. If set to for example 1h, a new CRL will be issued every hour, even though the old one is still valid for another 23 hours, corresponding to a CRL Overlap Time of 23h. The default value here is 0, which means that a new CRL will be issued when the old one is about to expire. <br>**Default**: 0m |
 | EJBCA_CRL_OVERLAP_TIME_DEVICES_CA | The new CRL is generated this amount of time before the old CRL expires. The default value is 10 minutes, meaning that if the CRL Expire period is 24 hours, a new CRL will be issued after 23h50m. <br>**Default**: 10m |
 | EJBCA_DELTA_CRL_PERIOD_DEVICES_CA | The validity period for generated delta CRLs if delta CRLs are issued. Delta CRLs are only issued if this period is larger than 0. <br>**Default**: 1h |
-| **Services CA** |  |
-| EJBCA_CRL_EXPIRE_PERIOD_SERVICES_CA | The validity period for generated CRLs. If set to for example 24h, the next update for a generated CRL will be the issue time + 24 hours <br>**Default**: 1d |
-| EJBCA_CRL_ISSUE_INTERVAL_SERVICES_CA | A fixed interval when CRLs are issued. If set to for example 1h, a new CRL will be issued every hour, even though the old one is still valid for another 23 hours, corresponding to a CRL Overlap Time of 23h. The default value here is 0, which means that a new CRL will be issued when the old one is about to expire. <br>**Default**: 0m |
-| EJBCA_CRL_OVERLAP_TIME_SERVICES_CA | The new CRL is generated this amount of time before the old CRL expires. The default value is 10 minutes, meaning that if the CRL Expire period is 24 hours, a new CRL will be issued after 23h50m. <br>**Default**: 10m |
-| EJBCA_DELTA_CRL_PERIOD_SERVICES_CA | The validity period for generated delta CRLs if delta CRLs are issued. Delta CRLs are only issued if this period is larger than 0. <br>**Default**: 1h |
+| **Internal CA** |  |
+| EJBCA_CRL_EXPIRE_PERIOD_INTERNAL_CA | The validity period for generated CRLs. If set to for example 24h, the next update for a generated CRL will be the issue time + 24 hours <br>**Default**: 1d |
+| EJBCA_CRL_ISSUE_INTERVAL_INTERNAL_CA | A fixed interval when CRLs are issued. If set to for example 1h, a new CRL will be issued every hour, even though the old one is still valid for another 23 hours, corresponding to a CRL Overlap Time of 23h. The default value here is 0, which means that a new CRL will be issued when the old one is about to expire. <br>**Default**: 0m |
+| EJBCA_CRL_OVERLAP_TIME_INTERNAL_CA | The new CRL is generated this amount of time before the old CRL expires. The default value is 10 minutes, meaning that if the CRL Expire period is 24 hours, a new CRL will be issued after 23h50m. <br>**Default**: 10m |
+| EJBCA_DELTA_CRL_PERIOD_INTERNAL_CA | The validity period for generated delta CRLs if delta CRLs are issued. Delta CRLs are only issued if this period is larger than 0. <br>**Default**: 1h |
 
 
 ## Configuration for EJBCA Services
