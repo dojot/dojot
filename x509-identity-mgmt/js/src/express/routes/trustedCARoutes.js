@@ -68,7 +68,7 @@ module.exports = ({
     path: ['/trusted-cas/:caFingerprint'],
     params: [{
       name: 'caFingerprint',
-      trigger: sanitizeParams.fingerprint,
+      trigger: sanitizeParams.fingerprintHandler,
     }],
     handlers: [
       {

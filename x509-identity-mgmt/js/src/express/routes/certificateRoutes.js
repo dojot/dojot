@@ -50,7 +50,7 @@ module.exports = ({ mountPoint, schemaValidator }) => {
               result = await service.generateCertificate({ csr: req.body.csr, belongsTo });
             } else if (req.body.certificateChain) {
               const certificateChain = req.body.certificateChain.match(sanitizeParams.certRegExp);
-              const caFingerprint = req.body.caFingerprint || '';
+              const caFingerprint = sanitizeParams.sanitizeFingerprint(req.body.caFingerprint || '');
               result = await service.registerCertificate({
                 caFingerprint, certificateChain, belongsTo,
               });
@@ -68,7 +68,7 @@ module.exports = ({ mountPoint, schemaValidator }) => {
     path: ['/certificates/:fingerprint'],
     params: [{
       name: 'fingerprint',
-      trigger: sanitizeParams.fingerprint,
+      trigger: sanitizeParams.fingerprintHandler,
     }],
     handlers: [
       {
