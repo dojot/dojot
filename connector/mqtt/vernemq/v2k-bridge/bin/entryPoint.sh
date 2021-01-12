@@ -15,7 +15,6 @@ fi
 export V2K_APP_BASEDIR=${V2K_APP_BASEDIR:-"/opt/v2k_bridge"}
 export V2K_APP_CONNECTION_RETRY_COUNT=${V2K_APP_CONNECTION_RETRY_COUNT:-"3"}
 export V2K_APP_CONNECTION_RETRY_TIMEOUT=${V2K_APP_CONNECTION_RETRY_TIMEOUT:-"3"}
-export V2K_APP_EJBCA_ADDRESS=${V2K_APP_EJBCA_ADDRESS:-"x509-identity-mgmt:3000"}
 export V2K_APP_HOSTNAME=${V2K_APP_HOSTNAME:-$HOSTNAME}
 export V2K_APP_HOSTNAME=${V2K_APP_HOSTNAME:-"v2k-bridge"}
 
@@ -54,11 +53,5 @@ if [ "$has_responded" == false ]; then
     exit 1
 fi
 echo -e "Connection established with **${address_splited[0]}** on port **${address_splited[1]}**\n"
-
-#
-# Ejbca - to authentcate user
-echo "Trying to authenticate with CA.."
-${V2K_APP_BASEDIR}/bin/scripts_tls/ejbca_client.sh
-echo "Authenticated!"
 
 exec "$@"
