@@ -11,6 +11,9 @@
          auth_on_subscribe/3]).
 
 auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName, Password, CleanSession) ->
+    error_logger:info_msg("username: ~p ~n", [SubscriberId]),
+    error_logger:info_msg("id: ~p ~n", [UserName]),
+    error_logger:info_msg("password: ~p ~n", [Password]),
     ok.
 
 auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, Payload, IsRetain) ->

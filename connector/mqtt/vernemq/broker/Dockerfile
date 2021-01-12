@@ -1,5 +1,5 @@
 # vernemq build
-FROM erlang:21-alpine AS build-env
+FROM erlang:21.3-alpine AS build-env
 
 WORKDIR /vernemq-build
 
@@ -13,6 +13,9 @@ ENV DOCKER_VERNEMQ_KUBERNETES_LABEL_SELECTOR="app=vernemq" \
 
 RUN apk add --no-cache git autoconf build-base bsd-compat-headers cmake openssl-dev bash && \
     git clone -b $VERNEMQ_GIT_REF $VERNEMQ_REPO .
+
+RUN ls apps/vmq_server/src/vmq_ssl.erl
+COPY ./vmq_ssl.erl apps/vmq_server/src
 
 COPY bin/build.sh build.sh
 
