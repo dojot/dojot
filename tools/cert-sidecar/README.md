@@ -80,7 +80,7 @@ General configurations
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
 | app.sidecar.to      | Suffix to be used to identify logs | app | string | CERT_SC_APP_SIDECAR_TO
-| app.delete.certificates  | Enables deleting certificate files if you are unable to connect and retrieve a new one after many attempts | true | boolean | CERT_SC_APP_DELETE_CERTIFICATES
+| app.delete.certificates  | Enables deleting certificate files if you are unable to connect and retrieve a new one after many attempts | false | boolean | CERT_SC_APP_DELETE_CERTIFICATES
 | app.shutdown  | Enables the service to gracefully shut down if after many attempts it is not possible to obtain new certificates | true | boolean | CERT_SC_APP_SHUTDOWN
 | log.console.level   | Console logger level | info | info, debug, error, warn | CERT_SC_LOG_CONSOLE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | CERT_SC_LOG_VERBOSE
@@ -96,7 +96,7 @@ Certificates configurations
 | certs.common.name   | The CN (common name). If the *HOSTNAME* environment variable is passed, this value will be ignored. | ${HOSTNAME:-generic-commonName} | string | CERT_SC_CERTS_COMMON_NAME
 | certs.hostnames     | The Subject Alternative Name field | ["localhost"] | array of hostname/ip | CERT_SC_CERTS_HOSTNAMES
 | certs.expiration.checkend.sec | The time window configured in seconds that defines whether the certificate is considered expired. If the time to expire is less than or equal to that time, it is considered expired. | 43200 | integer | CERT_SC_CERTS_EXPIRATION_CHECKEND
-| certs.crl | Enables the use of CRL (obtaining and creating the file)  | true | boolean | CERT_SC_CERTS_CRL
+| certs.crl | Enables the use of CRL (obtaining and creating the file)  | false | boolean | CERT_SC_CERTS_CRL
 | certs.files.basepath | Path to create files  | /certs | path | CERT_SC_CERTS_FILES_BASEPATH
 | certs.files.ca |  CA root certificate filename | ca.pem | filename  | CERT_SC_CERTS_FILES_CA
 | certs.files.cert | Public certificate filename | cert.pem | filename  | CERT_SC_CERTS_FILES_CERT

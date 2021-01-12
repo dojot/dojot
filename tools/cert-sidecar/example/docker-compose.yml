@@ -1,32 +1,11 @@
 version: '3.8'
 services:
 
-  # automatically restarting unhealty containers
-  # apply the label autoheal=true to container to have it watched
-  autoheal:
-    restart: always
-    image: willfarrell/autoheal
-    environment:
-      - AUTOHEAL_INTERVAL=10
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    logging:
-      driver: json-file
-      options:
-        max-size: 100m
-
   server:
     build:
       context: ./../
       dockerfile: ./example/server/Dockerfile
-    labels: # allow docker-autoheal to restart if unhealthy
-      autoheal: "true"
     restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://server-cert-sidecar:8889/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - x509-identity-mgmt
       - server-cert-sidecar
@@ -67,13 +46,6 @@ services:
       context: ./../
       dockerfile: ./example/client/Dockerfile
     restart: always
-    labels: # allow docker-autoheal to restart if unhealthy
-      autoheal: "true"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://client-cert-sidecar:8889/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     depends_on:
       - x509-identity-mgmt
       - client-cert-sidecar
@@ -142,7 +114,7 @@ services:
           max-size: 100m
 
   x509-identity-mgmt:
-    image: dojot/x509-identity-mgmt:v0.5.0
+    image: dojot/x509-identity-mgmt:v0.5.1-rc.2
     ports:
       - 3000:3000
     depends_on:

@@ -17,15 +17,3 @@ To run this the docker-compose example, type:
 ```sh
 docker-compose up
 ```
-
-## Kubernetes
-
-This example was tested with Kubeadm 1.17 and Docker CE 19.03.4.
-
-To run this the kubernetes example, type:
-
-```sh
-kubectl apply  -f k8s
-```
-
-__NOTE THAT__ When using the kubernetes example, it may be necessary to build the docker images for customer and service.
