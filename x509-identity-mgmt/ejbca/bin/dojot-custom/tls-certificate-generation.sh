@@ -1,31 +1,17 @@
 #!/bin/bash
 
-##################################################################
-#                                                                #
-# Copyright (c) 2020 Dojot IoT Platform                          #
-#                                                                #
-# This software is free software; you can redistribute it and/or #
-# modify it under the terms of the GNU Lesser General Public     #
-# License as published by the Free Software Foundation; either   #
-# version 2.1 of the License, or any later version.              #
-#                                                                #
-# See terms of license at gnu.org.                               #
-#                                                                #
-##################################################################
-
 function generateCertServerTLS() {
+
+    # Generates a random password for the KeyStore of the end entity
+    local keyStorePassword
+    keyStorePassword="$(dd if=/dev/urandom count=1 bs=18 2>/dev/null | base64 -w 0)"
 
     local existingEndEntity
     existingEndEntity=$(ejbca_cmd ra findendentity --username "${HOST_NAME}" 2>&1 | grep "Username: ${HOST_NAME}")
-
     if [ "x${existingEndEntity}" == "x" ] ; then
 
         echo
         log "INFO" "Issuing TLS certificate for EJBCA Application Server."
-
-        # Generates a random password for the KeyStore of the end entity
-        local keyStorePassword
-        keyStorePassword="$(dd if=/dev/urandom count=1 bs=18 2>/dev/null | base64 -w 0)"
 
         local endEntityUid
         endEntityUid="c-0$(dd if=/dev/urandom count=1 bs=8 2>/dev/null | hexdump -e '/1 "%02x"')"
@@ -35,7 +21,7 @@ function generateCertServerTLS() {
         ejbca_cmd ra addendentity \
             --username "${HOST_NAME}" \
             --dn "\"CN=${HOST_NAME},O=${DISTNAME_O},OU=${DISTNAME_OU},UID=${endEntityUid}\"" \
-            --caname "${SERVICES_CA}" \
+            --caname "${INTERNAL_CA}" \
             --type 1 \
             --token JKS \
             --password "${keyStorePassword}" \
@@ -43,56 +29,77 @@ function generateCertServerTLS() {
             --certprofile "${APP_SERVER_CERT_PROFILE}" \
             --eeprofile "${APP_SERVER_ENTITY_PROFILE}"
 
-        ejbca_cmd ra setendentitystatus \
-            --username "${HOST_NAME}" \
-            -S 10
+        # After the entity is created, we must issue its certificate
+        issueServerCertificate "${keyStorePassword}"
 
-        ejbca_cmd ra setclearpwd \
-            --username "${HOST_NAME}" \
-            --password "${keyStorePassword}"
+    else
+        echo
+        log "WARN" "TLS certificate for EJBCA Application Server already been issued."
 
-        ejbca_cmd batch \
-            --username "${HOST_NAME}" \
-            -dir "${TEMP_DIR}/"
-
-        if [ ! -f "${TEMP_DIR}/${HOST_NAME}.jks" ] ; then
-            echo
-            log "WARN" "Unable to issue TLS certificate for EJBCA Application Server."
-        else
-            local tlsHostDir="${BASE_DIR}/secrets/persistent/tls/${HOST_NAME}"
-            local keyStoreJks="${tlsHostDir}/server.jks"
-            local keyStoreStorepasswd="${tlsHostDir}/server.storepasswd"
-
-            if [ ! -d "${tlsHostDir}" ] ; then
-                mkdir -p     "$(realpath "$BASE_DIR"/secrets/persistent)/tls/${HOST_NAME}"
-                chgrp -R 0   "$(realpath "$BASE_DIR"/secrets/persistent)"
-                chmod -R g=u "$(realpath "$BASE_DIR"/secrets/persistent)"
-            fi
-
-            mv "${TEMP_DIR}/${HOST_NAME}.jks" "${keyStoreJks}"
-            echo "${keyStorePassword}" > "${keyStoreStorepasswd}"
-
-            echo
-            optimized_java_keytool -exportcert -keystore "${keyStoreJks}" -storepass "${keyStorePassword}" \
-                -alias "${HOST_NAME}" -file "${TEMP_DIR}/keystore.der" \
-                | log "INFO"
-
-            keyStoreCertSha256=$(sha256sum "${TEMP_DIR}/keystore.der" | awk '{print $1}')
-
-            if [ -f "${TEMP_DIR}/keystore.der" ] ; then
-                rm "${TEMP_DIR}/keystore.der" ;
-            fi
-
-            echo
-            log "INFO" "Generated TLS certificate with fingerprint ${keyStoreCertSha256}."
+        if [ "${SERVER_CERT_REGEN}" == "true" ] ; then
+            issueServerCertificate "${keyStorePassword}"
         fi
     fi
 }
 
+function issueServerCertificate() {
+
+    echo
+    log "INFO" "Issuing certificate to the EJBCA Application Server..."
+
+    local keyStorePassword=$1
+
+    ejbca_cmd ra setendentitystatus \
+        --username "${HOST_NAME}" \
+        -S 10
+
+    ejbca_cmd ra setclearpwd \
+        --username "${HOST_NAME}" \
+        --password "${keyStorePassword}"
+
+    ejbca_cmd batch \
+        --username "${HOST_NAME}" \
+        -dir "${TEMP_DIR}/"
+
+    if [ ! -f "${TEMP_DIR}/${HOST_NAME}.jks" ] ; then
+        echo
+        log "ERROR" "Unable to issue TLS certificate for EJBCA Application Server."
+        exit 1;
+    fi
+
+    local tlsHostDir="${BASE_DIR}/secrets/persistent/tls/${HOST_NAME}"
+    local keyStoreJks="${tlsHostDir}/server.jks"
+    local keyStoreStorepasswd="${tlsHostDir}/server.storepasswd"
+
+    if [ ! -d "${tlsHostDir}" ] ; then
+        mkdir -p     "$(realpath "$BASE_DIR"/secrets/persistent)/tls/${HOST_NAME}"
+        chgrp -R 0   "$(realpath "$BASE_DIR"/secrets/persistent)"
+        chmod -R g=u "$(realpath "$BASE_DIR"/secrets/persistent)"
+    fi
+
+    mv "${TEMP_DIR}/${HOST_NAME}.jks" "${keyStoreJks}"
+    echo "${keyStorePassword}" > "${keyStoreStorepasswd}"
+
+    echo
+    # A test is performed to ensure that the certificate was generated correctly
+    optimized_java_keytool -exportcert -keystore "${keyStoreJks}" -storepass "${keyStorePassword}" \
+        -alias "${HOST_NAME}" -file "${TEMP_DIR}/keystore.der" \
+        | log "INFO"
+
+    keyStoreCertSha256=$(sha256sum "${TEMP_DIR}/keystore.der" | awk '{print $1}')
+
+    if [ -f "${TEMP_DIR}/keystore.der" ] ; then
+        rm "${TEMP_DIR}/keystore.der" ;
+    fi
+
+    echo
+    log "INFO" "Generated TLS certificate with fingerprint ${keyStoreCertSha256}."
+}
+
 function generateCertClientTLS() {
 
-    local enrollmentCode
-    enrollmentCode="$(dd if="${SECURE_RANDOM_SOURCE}" count=1 bs=18 2>/dev/null | base64 -w 0)"
+    local keyStorePassword
+    keyStorePassword="$(dd if="${SECURE_RANDOM_SOURCE}" count=1 bs=18 2>/dev/null | base64 -w 0)"
 
     local existingClient
     existingClient=$(ejbca_cmd ra findendentity --username "${EJBCA_CLIENT_USERNAME}" 2>&1 | grep "Username: ${EJBCA_CLIENT_USERNAME}" || true)
@@ -108,12 +115,12 @@ function generateCertClientTLS() {
         ejbca_cmd ra addendentity \
             --username "${EJBCA_CLIENT_USERNAME}" \
             --dn "\"CN=${EJBCA_CLIENT_COMMONNAME},O=${DISTNAME_O},OU=${DISTNAME_OU},UID=${endEntityUid}\"" \
-            --caname "${SERVICES_CA}" \
+            --caname "${INTERNAL_CA}" \
             --type 1 \
             --token P12 \
-            --password "${enrollmentCode}" \
-            --certprofile "${SERVICES_CERT_PROFILE}" \
-            --eeprofile "${SERVICES_ENTITY_PROFILE}" \
+            --password "${keyStorePassword}" \
+            --certprofile "${INTERNAL_CERT_PROFILE}" \
+            --eeprofile "${INTERNAL_ENTITY_PROFILE}" \
             || log "ERROR" "Failed to add '${EJBCA_CLIENT_USERNAME}' EndEntity."
 
         # configure the access permissions of the EJBCA Client
@@ -140,7 +147,7 @@ function generateCertClientTLS() {
 
         ejbca_cmd ra setclearpwd \
             --username "${EJBCA_CLIENT_USERNAME}" \
-            --password "${enrollmentCode}"
+            --password "${keyStorePassword}"
 
         # Issue the encrypted certificate in a PKCS#12 file
         ejbca_cmd batch \
@@ -148,11 +155,11 @@ function generateCertClientTLS() {
             -dir "${EJBCA_TLS_CLIENT_DIR}/"
 
         # records the password to decrypt the .p12 file
-        cat <<< "${enrollmentCode}" > "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.secret"
+        cat <<< "${keyStorePassword}" > "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.secret"
 
         # Save a CA certificate (PEM-format) to file
         ejbca_cmd ca getcacert \
-            --caname "${SERVICES_CA}" \
+            --caname "${INTERNAL_CA}" \
             -f "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem"
 
         log "INFO" "TLS certificate for EJBCA Client Application setup completed!"
@@ -163,7 +170,7 @@ function generateCertClientTLS() {
 
 function setupClientTLSRoleMember() {
     echo
-    log "INFO" "Setup EJBCA Client Application Role (${EJBCA_CLIENT_ROLE}) and Member (${SERVICES_CA};${EJBCA_CLIENT_ROLE_MEMBER_WITH};${EJBCA_CLIENT_COMMONNAME})."
+    log "INFO" "Setup EJBCA Client Application Role (${EJBCA_CLIENT_ROLE}) and Member (${INTERNAL_CA};${EJBCA_CLIENT_ROLE_MEMBER_WITH};${EJBCA_CLIENT_COMMONNAME})."
 
     local role
     role=$(ejbca_cmd roles listroles | grep -o "${EJBCA_CLIENT_ROLE}")
@@ -174,7 +181,7 @@ function setupClientTLSRoleMember() {
         ejbca_cmd roles addrolemember \
             --namespace "" \
             --role "${EJBCA_CLIENT_ROLE}" \
-            --caname "${SERVICES_CA}" \
+            --caname "${INTERNAL_CA}" \
             --with "${EJBCA_CLIENT_ROLE_MEMBER_WITH}" \
             --value "${EJBCA_CLIENT_COMMONNAME}" \
             --description "${EJBCA_CLIENT_COMMONNAME} RoleMember." \
