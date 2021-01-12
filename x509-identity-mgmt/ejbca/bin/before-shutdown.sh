@@ -9,8 +9,18 @@ if [ -f ${baseDir}/bin/internal/functions-ejbca ] ; then source ${baseDir}/bin/i
 ejbca_health_check_set_not_ready "true"
 
 
+
+
+
+##################################################################
+# The intellectual property of this script is originally         #
+# attributed to the EJBCA community (PrimeKey Solutions AB).     #
+# We (dojot) have maintained the original behavior of the        #
+# script and have included an additional custom snippet for      #
+# the linux container configuration control when running more    #
+# than one EJBCA container in parallel.                          #
+##################################################################
+
 # Removes the lock file if the container is interrupted in the
 # middle of initialization...
-# At this point the variable $LOCK_FILE is not accessible,
-# so we have to pass the hardcoded file path...
 rm -f "/mnt/persistent/.lock"
