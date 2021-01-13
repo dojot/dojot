@@ -195,7 +195,7 @@ convention.
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
 | influx.default.bucket | Bucket name for all created buckets and must exist in the organization configured in `influx.default.organization`. | devices | string  | STORER_INFLUX_DEFAULT_BUCKET
-| influx.default.organization | Set up the name of the initial organization, must be configured before starting this service and you must have the bucket configured at `influx.default.bucket`. | admin | string  | STORER_INFLUX_DEFAULT_ORGANIZATION
+| influx.default.organization | Set up the name of the initial organization, must be configured before starting this service and must have the bucket configured at `influx.default.bucket`. | admin | string  | STORER_INFLUX_DEFAULT_ORGANIZATION
 | influx.default.token | Configure a token (this token should be allowed to write/read in all organizations), must be configured before starting this service. | dojot@token_default | string  | STORER_INFLUX_DEFAULT_TOKEN
 | influx.heathcheck.ms | Defines how often the communication with InfluxDB is verified in milliseconds.   | 30000 | integer  | STORER_INFLUX_HEATHCHECK_MS
 | influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). Settings used only for organizations created by this service and does not change retention in existing buckets. | 168 | integer | STORER_INFLUX_RETENTION_HRS
