@@ -33,6 +33,16 @@ MOCK_CONFIG = {
     }
 }
 
+MOCK_CONNECTED_METRICS = {
+    1: 'mocked_1',
+    2: 'mocked_2',
+}
+
+MOCK_DISCONNECTED_METRICS = {
+    1: 'mocked_1',
+    2: 'mocked_2',
+}
+
 
 @patch('src.mqtt_locust.mqtt_client.mqtt')
 @patch('src.mqtt_locust.mqtt_client.Utils')
@@ -348,6 +358,7 @@ class MQTTClientLocustOnPublish(unittest.TestCase):
 @patch('src.mqtt_locust.mqtt_client.mqtt')
 @patch('src.mqtt_locust.mqtt_client.Utils')
 @patch.dict('src.mqtt_locust.mqtt_client.CONFIG', MOCK_CONFIG)
+@patch.dict('src.mqtt_locust.mqtt_client.CONNECTED_METRICS', MOCK_CONNECTED_METRICS)
 class MQTTClientLocustOnConnect(unittest.TestCase):
     """
     MQTTClient locust_on_connect() unit tests.
@@ -359,9 +370,11 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
         mock_paho.MQTT_ERR_SUCCESS = 1
         client = MQTTClient("123", "987", False, False)
         client.subscribe = MagicMock()
+        mock_utils.get_metric_connected_index_by_time.return_value = 1
+        
         client.locust_on_connect(client.mqttc, {}, {}, 1)
         client.subscribe.assert_called_once()
-        mock_utils.fire_locust_success.assert_called_once()
+        mock_utils.fire_locust_success.assert_called()
 
     def test_locust_on_connect_failure(self, mock_utils, mock_paho):
         """
@@ -377,6 +390,7 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
 @patch('src.mqtt_locust.mqtt_client.mqtt')
 @patch('src.mqtt_locust.mqtt_client.Utils')
 @patch.dict('src.mqtt_locust.mqtt_client.CONFIG', MOCK_CONFIG)
+@patch.dict('src.mqtt_locust.mqtt_client.DISCONNECTED_METRICS', MOCK_DISCONNECTED_METRICS)
 class MQTTClientLocustOnDisconnect(unittest.TestCase):
     """
     MQTTClient locust_on_disconnect() unit tests.
@@ -386,18 +400,22 @@ class MQTTClientLocustOnDisconnect(unittest.TestCase):
         Should fire locust failure on disconnect callback
         """
         mock_paho.MQTT_ERR_SUCCESS = 1
+        mock_utils.get_metric_disconnected_index_by_time.return_value = 1
+
         client = MQTTClient("123", "987", False, False)
         client.locust_on_disconnect(client.mqttc, {}, 1010)
 
         self.assertFalse(client.is_connected)
-        mock_utils.fire_locust_failure.assert_called_once()
+        mock_utils.fire_locust_failure.assert_called()
         mock_paho.Client().reconnect.assert_called_once()
 
-    def test_locust_on_disconnect_fail(self, _mock_utils, mock_paho):
+    def test_locust_on_disconnect_fail(self, mock_utils, mock_paho):
         """
         Should fire locust failure on disconnect callback
         """
         mock_paho.MQTT_ERR_SUCCESS = 1
+        mock_utils.get_metric_disconnected_index_by_time.return_value = 1
+
         client = MQTTClient("123", "987", False, False)
         client.locust_on_disconnect(client.mqttc, {}, 1)
 

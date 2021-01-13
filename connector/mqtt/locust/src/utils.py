@@ -203,3 +203,55 @@ class Utils():
         logger.setLevel(Utils.log_level(os.environ.get("LOG_LEVEL", "info")))
 
         return logger
+
+    @staticmethod
+    def get_metric_connected_index_by_time(time: float) -> int:
+        """
+        Return the index, depending on time to get the message type
+        Params:
+            time: time in ms to get the index.
+        """
+        if time < 200:
+            return 1
+        elif 200 <= time < 400:
+            return 2
+        elif 400 <= time < 600:
+            return 3
+        elif 600 <= time < 800:
+            return 4
+        elif 800 <= time < 1000:
+            return 5
+        elif 1000 <= time < 1200:
+            return 6
+        elif 1200 <= time < 1400:
+            return 7
+        elif 1400 <= time < 1600:
+            return 8
+        elif 1600 <= time < 1800:
+            return 9
+        elif 1800 <= time < 2000:
+            return 10
+    
+        return 11
+
+    @staticmethod
+    def get_metric_disconnected_index_by_time(time: float) -> int:
+        """
+        Return the index, of disconnect message
+        Params:
+            time: time in min to get the index.
+        """
+        if time < 5:
+            return 1
+        elif 5 <= time < 10:
+            return 2
+        elif 10 <= time < 15:
+            return 3
+        elif 15 <= time < 20:
+            return 4
+        elif 20 <= time < 25:
+            return 5
+        elif 25 <= time < 30:
+            return 6
+        
+        return 7

@@ -223,5 +223,28 @@ class TestUtils(unittest.TestCase):
         mock_stream_handler.reset_mock()
         mock_get_logger.reset_mock()
 
+    def test_get_metric_connected_index_by_time(self):
+        self.assertEqual(Utils.get_metric_connected_index_by_time(100),1)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(301),2)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(550),3)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(701),4)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(810),5)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(1005),6)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(1201),7)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(1403),8)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(1603),9)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(1801),10)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(2503),11)
+        self.assertEqual(Utils.get_metric_connected_index_by_time(40043),11)
+
+    def test_get_metric_disconnected_index_by_time(self):
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(1),1)
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(8),2)
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(14),3)
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(19),4)
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(21),5)
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(29),6)
+        self.assertEqual(Utils.get_metric_disconnected_index_by_time(100),7)
+
 if __name__ == "__main__":
     unittest.main()

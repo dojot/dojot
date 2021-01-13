@@ -20,6 +20,30 @@ MESSAGE_TYPE_RECV_MESSAGE = 'recv_message'
 MESSAGE_TYPE_RENEW = 'renew'
 MESSAGE_TYPE_REVOKE = 'revoke'
 
+REQUEST_METRICS_TYPE = 'metric'
+CONNECTED_METRICS = {
+    1: 'connect [ 0, 200 [ ms',
+    2: 'connect [ 200, 400 [ ms',
+    3: 'connect [ 400, 600 [ ms',
+    4: 'connect [ 600, 800 [ ms',
+    5: 'connect [ 0.8, 1 [ seg',
+    6: 'connect [ 1, 1.2 [ seg',
+    7: 'connect [ 1.2, 1.4 [ seg',
+    8: 'connect [ 1.4, 1.6 [ seg',
+    9: 'connect [ 1.6, 1.8 [ seg',
+    10: 'connect [ 1.8, 2 [ seg',
+    11: 'connect [ 2, +inf [ seg'
+}
+
+DISCONNECTED_METRICS = {
+    1: 'disconnect [ 0, 5  [ min',
+    2: 'disconnect [ 5, 10 [ min',
+    3: 'disconnect [ 10, 15 [ min',
+    4: 'disconnect [ 15, 20 [ min',
+    5: 'disconnect [ 20, 35 [ min',
+    6: 'disconnect [ 25, 30 [ min',
+    7: 'disconnect [ 30, +inf [ min',
+}
 
 class LocustError(Exception):
     """
@@ -104,6 +128,9 @@ class MQTTClient:
         # Used to count the time between connection and revocation/renovation
         self.start_time = 0
 
+        # Used for metrics
+        self.start_time_to_connect = 0
+
         self.create_certificate()
         self.configure_mqtt()
 
@@ -158,6 +185,7 @@ class MQTTClient:
         """
 
         try:
+            self.start_time_to_connect = Utils.seconds_to_milliseconds(time.time())
             self.mqttc.connect_async(host=CONFIG['mqtt']['host'], port=CONFIG['mqtt']['port'],
                                      keepalive=CONFIG['mqtt']['con_timeout'])
             self.mqttc.loop_start()
@@ -256,6 +284,7 @@ class MQTTClient:
                 self.is_revoked = False
                 self.is_renewed = False
             else:
+                self.start_time_to_connect = Utils.seconds_to_milliseconds(time.time())
                 self.mqttc.reconnect()
 
 
@@ -334,6 +363,13 @@ class MQTTClient:
                 response_length=0
             )
             self.start_time = Utils.seconds_to_milliseconds(time.time())
+            connected_time = self.start_time - self.start_time_to_connect
+            Utils.fire_locust_success(
+                request_type=REQUEST_METRICS_TYPE,
+                name=CONNECTED_METRICS[Utils.get_metric_connected_index_by_time(connected_time)],
+                response_time=connected_time,
+                response_length=0
+            )
         else:
             error = Utils.error_message(result_code)
             Utils.fire_locust_failure(
@@ -355,6 +391,14 @@ class MQTTClient:
                 response_time=0,
                 exception=DisconnectError(Utils.error_message(result_code))
             )
+        # metrics
+        disconnected_time = Utils.seconds_to_milliseconds(time.time()) - self.start_time
+        Utils.fire_locust_success(
+                request_type=REQUEST_METRICS_TYPE,
+                name=DISCONNECTED_METRICS[Utils.get_metric_disconnected_index_by_time((disconnected_time / 60000))],
+                response_time=disconnected_time,
+                exception=0
+        )
 
         self.reconnect()
 
