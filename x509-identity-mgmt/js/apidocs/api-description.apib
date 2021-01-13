@@ -19,6 +19,10 @@ The SubjectDN only needs to contain the CN field, limited to 255 characters, bei
 
 The CSR must include a public key that is either an RSA key with a length of at least 2048 bits or an ECC key from NIST recommended curves: P-256, P-384 or P-521.
 
+If the CSR does not have a valid structure or if any of the above conditions are
+not met, a response status 400 (Bad Request) will be returned, containing a
+message detailing the cause of the error.
+
 + csr (string) - The CSR in PEM Format
 
 + Request (application/json)
@@ -64,6 +68,13 @@ The CSR must include a public key that is either an RSA key with a length of at 
 
             The PEM format consists of a header and a footer, the Certificate is encoded in *Base64* in the middle.
             Note that each line has a maximum of 64 bytes. As the file is in JSON payload, it is necessary to represent the line breaks with the `\r\n` markers.
+
++ Response 400 (application/json)
+
+    + Attributes (object)
+        - message: A message describing the cause of the error (string)
+
+            A message describing the cause of the error
 
 ### List X.509 Certificates [GET]
 
@@ -194,7 +205,13 @@ Gets a certificate.
 
 ### Delete X.509 Certificate [DELETE]
 
-Deletes a x.509 certificate.
+Deletes a x.509 certificate and returns a status 204 (No Content) with no body
+indicating that the operation was successful.
+
+If there is no certificate registered in the database with the informed fingerprint,
+a response status 404 (Not Found) will be returned, which means that either the
+certificate has already been removed in a previous request or the informed
+fingerprint is invalid.
 
 + Parameters
 
@@ -207,6 +224,9 @@ Deletes a x.509 certificate.
             Authorization: Bearer [JWT]
 
 + Response 204
+
++ Response 404
+
 
 ## Endpoint for the root CA [/ca]
 
