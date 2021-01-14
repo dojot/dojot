@@ -123,7 +123,7 @@ X509 identity mgmt configurations
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
 | x509.url            | Address of the *x509 identity mgmt* service   | http://x509-identity-mgmt:3000 | url | CERT_SC_X509_URL
-| x509.healthchecker.ms | Specific how often it is to check if it is possible to communicate with the *x509 identity mgmt* in milliseconds. | 60000 | integer | CERT_SC_X509_HEALTHCHECKER
+| x509.healthchecker.ms | Specifies how often it is to check if it is possible to communicate with the *x509 identity mgmt* in milliseconds. | 60000 | integer | CERT_SC_X509_HEALTHCHECKER
 | x509.path.sign | Resource to sign the csr, create a public certificate.  | /internal/api/v1/throw-away | string | CERT_SC_X509_PATH_SIGN
 | x509.path.crl | Resource to retrieve the latest CRL released by the root CA. | /internal/api/v1/throw-away/ca/crl | string | CERT_SC_X509_PATH_CRL
 | x509.path.ca | Resource to retrieve the root CA of the dojot platform | /internal/api/v1/throw-away/ca | string | CERT_SC_X509_PATH_CA
