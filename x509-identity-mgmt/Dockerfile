@@ -9,9 +9,12 @@ RUN mkdir -p /opt/tls \
     && chmod 700 /opt/tls
 
 # Install Node.js
-RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
-    && yum install -y nodejs-12.20.0 \
-    && yum install -y gcc-c++ make \
+RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+
+RUN yum install -y \
+            nodejs-12.20.1 \
+            gcc-c++-4.8.5 \
+            make-3.82 \
     && yum clean packages
 
 # A wildcard is used to ensure both package.json AND
