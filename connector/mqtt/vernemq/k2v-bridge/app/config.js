@@ -29,12 +29,17 @@ const mqtt = {
 };
 
 const kafka = {
-  'client.id': process.env.K2V_KAFKA_CLIENT_ID,
-  'group.id': process.env.K2V_KAFKA_GROUP_ID,
-  'max.in.flight.requests.per.connection':
+  'kafka.consumer': {
+    'client.id': process.env.K2V_KAFKA_CLIENT_ID,
+    'group.id': process.env.K2V_KAFKA_GROUP_ID,
+    'metadata.broker.list': process.env.K2V_KAFKA_METADATA_BROKER_LIST,
+    'socket.keepalive.enable': (toBoolean(process.env.K2V_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
+    'max.in.flight.requests.per.connection':
     parseInt(process.env.K2V_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 10),
-  'metadata.broker.list': process.env.K2V_KAFKA_METADATA_BROKER_LIST,
-  'socket.keepalive.enable': (toBoolean(process.env.K2V_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
+  },
+  'kafka.topic': {
+    'topic.auto.offset.reset': 'beginning'
+  }
 };
 
 const sdk = {

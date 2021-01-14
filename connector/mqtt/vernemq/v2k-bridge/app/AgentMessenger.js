@@ -17,7 +17,7 @@ class AgentMessenger {
    */
   constructor(config) {
     this.initialized = false;
-    this.producer = new Producer({ ...appConfig.sdk, kafka: appConfig.kafka });
+    this.producer = new Producer({ ...appConfig.sdk, ...appConfig.kafka });
     this.mqttClient = new MQTTClient(this, config || appConfig.mqtt);
     this.logger = new Logger('AgentMessenger');
   }

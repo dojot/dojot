@@ -18,7 +18,7 @@ class AgentMessenger {
    */
   constructor(mqttClient) {
     this.mqttClient = mqttClient;
-    this.consumer = new Consumer({ ...config.sdk, kafka: config.kafka });
+    this.consumer = new Consumer({ ...config.sdk, ...config.kafka });
     this.logger = new Logger('AgentMessenger');
   }
 
