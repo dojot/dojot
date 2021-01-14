@@ -1,7 +1,7 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
 const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
-const { kafka: { consumer: consumerConfig } } = require('../Config');
+const { kafka: kafkaConfig } = require('../Config');
 
 const logger = new Logger('kafka-ws:kafka-consumer');
 
@@ -14,7 +14,7 @@ class KafkaConsumer {
   */
   constructor() {
     logger.debug('constructor: Instance KafkaConsumer');
-    this.consumer = new Consumer(consumerConfig);
+    this.consumer = new Consumer(kafkaConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
   }

@@ -34,12 +34,12 @@ module.exports = {
     database: parseInt(process.env.REDIS_DATABASE, 10) || 1,
   },
   kafka: {
-    consumer: {
-      kafka: {
-        'group.id': process.env.KAFKA_GROUP_ID || 'kafka-ws',
-        'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
-        'auto.offset.reset': 'largest',
-      },
+    'kafka.consumer': {
+      'group.id': process.env.KAFKA_GROUP_ID || 'kafka-ws',
+      'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+    },
+    'kafka.topic': {
+      'auto.offset.reset': 'largest',
     },
   },
   server: {

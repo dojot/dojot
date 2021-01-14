@@ -40,20 +40,25 @@ const sdk = {
 };
 
 const kafka = {
-  acks: parseInt(process.env.V2K_KAFKA_ACKS, 10),
-  'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 10),
-  'client.id': process.env.V2K_KAFKA_CLIENT_ID,
-  'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC,
-  dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB)),
-  'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE)),
-  'max.in.flight.requests.per.connection':
+  'kafka.producer': {
+    acks: parseInt(process.env.V2K_KAFKA_ACKS, 10),
+    'client.id': process.env.V2K_KAFKA_CLIENT_ID,
+    'compression.codec': process.env.V2K_KAFKA_COMPRESSION_CODEC,
+    dr_cb: (toBoolean(process.env.V2K_KAFKA_DR_CB)),
+    'enable.idempotence': (toBoolean(process.env.V2K_KAFKA_ENABLE_IDEMPOTENCE)),
+    'max.in.flight.requests.per.connection':
     parseInt(process.env.V2K_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 10),
-  'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST,
-  retries: parseInt(process.env.V2K_KAFKA_RETRIES, 10),
-  'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 10),
-  'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS),
-  'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 10),
-  'socket.keepalive.enable': (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
+    'metadata.broker.list': process.env.V2K_KAFKA_METADATA_BROKER_LIST,
+    retries: parseInt(process.env.V2K_KAFKA_RETRIES, 10),
+    'queue.buffering.max.kbytes': parseInt(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_KBYTES, 10),
+    'queue.buffering.max.ms': parseFloat(process.env.V2K_KAFKA_QUEUE_BUFFERING_MAX_MS),
+    'retry.backoff.ms': parseInt(process.env.V2K_KAFKA_RETRY_BACKOFF_MS, 10),
+    'batch.num.messages': parseInt(process.env.V2K_KAFKA_BATCH_NUM_MESSAGES, 10),
+    'socket.keepalive.enable': (toBoolean(process.env.V2K_KAFKA_SOCKET_KEEPALIVE_ENABLE)),
+  },
+  'kafka.topic': {
+    'auto.offset.reset': 'latest',
+  },
 };
 
 module.exports = {
