@@ -58,7 +58,7 @@ const kafka = {
   },
   'kafka.topic': {
     'auto.offset.reset': 'latest',
-  }
+  },
 };
 
 module.exports = {

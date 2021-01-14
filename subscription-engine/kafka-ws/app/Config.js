@@ -34,13 +34,13 @@ module.exports = {
     database: parseInt(process.env.REDIS_DATABASE, 10) || 1,
   },
   kafka: {
-      'kafka.consumer': {
-        'group.id': process.env.KAFKA_GROUP_ID || 'kafka-ws',
-        'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092', 
-      },
-      'kafka.topic': {
-        'auto.offset.reset': 'largest',
-      }
+    'kafka.consumer': {
+      'group.id': process.env.KAFKA_GROUP_ID || 'kafka-ws',
+      'metadata.broker.list': process.env.KAFKA_HOSTS || 'kafka:9092',
+    },
+    'kafka.topic': {
+      'auto.offset.reset': 'largest',
+    },
   },
   server: {
     host: process.env.KAFKA_WS_HOST || '0.0.0.0',

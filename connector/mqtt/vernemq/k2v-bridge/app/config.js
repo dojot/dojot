@@ -38,8 +38,8 @@ const kafka = {
     parseInt(process.env.K2V_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 10),
   },
   'kafka.topic': {
-    'topic.auto.offset.reset': 'beginning'
-  }
+    'topic.auto.offset.reset': 'beginning',
+  },
 };
 
 const sdk = {
