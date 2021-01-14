@@ -2,17 +2,6 @@
 
 ##################################################################
 #                                                                #
-# Copyright (c) 2020 Dojot IoT Platform                          #
-#                                                                #
-# This software is free software; you can redistribute it and/or #
-# modify it under the terms of the GNU Lesser General Public     #
-# License as published by the Free Software Foundation; either   #
-# version 2.1 of the License, or any later version.              #
-#                                                                #
-# See terms of license at gnu.org.                               #
-#                                                                #
-# ---------------------------------------------------------------#
-#                                                                #
 # This file defines the variables used in the configuration of   #
 # the customized EJBCA for the Dojot platform. this file is used #
 # in conjunction with the other shell scripts and therefore it   #
@@ -43,21 +32,21 @@ readonly PROFILES_DIR="/opt/primekey/profiles"
 #
 # Certificate profiles
 readonly DEVICES_CA_CERT_PROFILE=${EJBCA_DEVICES_CA_CERT_PROFILE:-"X509IdentitiesCA"}
-readonly SERVICES_CA_CERT_PROFILE=${EJBCA_SERVICES_CA_CERT_PROFILE:-"ServicesCA"}
+readonly INTERNAL_CA_CERT_PROFILE=${EJBCA_INTERNAL_CA_CERT_PROFILE:-"InternalCA"}
 readonly APP_SERVER_CERT_PROFILE=${EJBCA_APP_SERVER_CERT_PROFILE:-"ApplicationServerEJBCA"}
 readonly DEVICES_CERT_PROFILE=${EJBCA_DEVICES_CERT_PROFILE:-"X509Identity"}
-readonly SERVICES_CERT_PROFILE=${EJBCA_SERVICES_CERT_PROFILE:-"Service"}
+readonly INTERNAL_CERT_PROFILE=${EJBCA_INTERNAL_CERT_PROFILE:-"Internal"}
 # End-Entity profiles
 readonly APP_SERVER_ENTITY_PROFILE=${EJBCA_APP_SERVER_ENTITY_PROFILE:-"ApplicationServerEJBCA"}
 readonly DEVICES_ENTITY_PROFILE=${EJBCA_DEVICES_ENTITY_PROFILE:-"X509Identity"}
-readonly SERVICES_ENTITY_PROFILE=${EJBCA_SERVICES_ENTITY_PROFILE:-"Service"}
+readonly INTERNAL_ENTITY_PROFILE=${EJBCA_INTERNAL_ENTITY_PROFILE:-"Internal"}
 #
 # The profile ID is only retrieved from the xml file name
 readonly DEVICES_CERT_PROFILE_ID="$(find "${PROFILES_DIR}" -name "certprofile_${DEVICES_CERT_PROFILE}-[0-9]*\.xml" \
  | sed -r "s/.*certprofile_${DEVICES_CERT_PROFILE}-([0-9]+)\.xml$/\1/g" )"
 
- readonly SERVICES_CERT_PROFILE_ID="$(find "${PROFILES_DIR}" -name "certprofile_${SERVICES_CERT_PROFILE}-[0-9]*\.xml" \
- | sed -r "s/.*certprofile_${SERVICES_CERT_PROFILE}-([0-9]+)\.xml$/\1/g" )"
+ readonly INTERNAL_CERT_PROFILE_ID="$(find "${PROFILES_DIR}" -name "certprofile_${INTERNAL_CERT_PROFILE}-[0-9]*\.xml" \
+ | sed -r "s/.*certprofile_${INTERNAL_CERT_PROFILE}-([0-9]+)\.xml$/\1/g" )"
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -66,7 +55,7 @@ readonly PKI_VALIDITY=${EJBCA_PKI_VALIDITY:-"30y"} # about 30 years
 readonly DISTNAME_O=${EJBCA_DISTNAME_O:-"dojot IoT Platform"}
 readonly DISTNAME_OU=${EJBCA_DISTNAME_OU:-"Certificate Issuer"}
 readonly DEVICES_CA=${EJBCA_DEVICES_CA:-"X509 Identity CA"}
-readonly SERVICES_CA=${EJBCA_SERVICES_CA:-"Services CA"}
+readonly INTERNAL_CA=${EJBCA_INTERNAL_CA:-"Internal CA"}
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -96,11 +85,11 @@ readonly CRL_ISSUE_INTERVAL_DEVICES_CA=$(convToMillis "${EJBCA_CRL_ISSUE_INTERVA
 readonly CRL_OVERLAP_TIME_DEVICES_CA=$(convToMillis "${EJBCA_CRL_OVERLAP_TIME_DEVICES_CA:-10m}")
 readonly DELTA_CRL_PERIOD_DEVICES_CA=$(convToMillis "${EJBCA_DELTA_CRL_PERIOD_DEVICES_CA:-1h}")
 #
-# "Services CA"
-readonly CRL_EXPIRE_PERIOD_SERVICES_CA=$(convToMillis "${EJBCA_CRL_EXPIRE_PERIOD_SERVICES_CA:-1d}")
-readonly CRL_ISSUE_INTERVAL_SERVICES_CA=$(convToMillis "${EJBCA_CRL_ISSUE_INTERVAL_SERVICES_CA:-0m}")
-readonly CRL_OVERLAP_TIME_SERVICES_CA=$(convToMillis "${EJBCA_CRL_OVERLAP_TIME_SERVICES_CA:-10m}")
-readonly DELTA_CRL_PERIOD_SERVICES_CA=$(convToMillis "${EJBCA_DELTA_CRL_PERIOD_SERVICES_CA:-1h}")
+# "Internal CA"
+readonly CRL_EXPIRE_PERIOD_INTERNAL_CA=$(convToMillis "${EJBCA_CRL_EXPIRE_PERIOD_INTERNAL_CA:-1d}")
+readonly CRL_ISSUE_INTERVAL_INTERNAL_CA=$(convToMillis "${EJBCA_CRL_ISSUE_INTERVAL_INTERNAL_CA:-0m}")
+readonly CRL_OVERLAP_TIME_INTERNAL_CA=$(convToMillis "${EJBCA_CRL_OVERLAP_TIME_INTERNAL_CA:-10m}")
+readonly DELTA_CRL_PERIOD_INTERNAL_CA=$(convToMillis "${EJBCA_DELTA_CRL_PERIOD_INTERNAL_CA:-1h}")
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -133,7 +122,10 @@ readonly HOST_NAME="$(hostname --fqdn)"
 #
 # The container IP is defined by the docker in the file /etc/hosts
 readonly CONTAINER_IP="$(grep -m1 "${HOST_NAME}" /etc/hosts | cut -f1)"
-
+#
+# If for some reason it is necessary to regenerate the certificate of the
+# EJBCA Web Server, this flag is used for that.
+readonly SERVER_CERT_REGEN=${EJBCA_SERVER_CERT_REGEN:-"false"}
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 # -------------------------- TLS APP CLIENT- ------------------------
@@ -166,7 +158,7 @@ readonly ADMIN_COMMONNAME=${EJBCA_ADMIN_COMMONNAME:-"Super Admin"}
 readonly ADMIN_ROLE="Super Administrator Role"
 readonly ROLE_MEMBER_WITH="CertificateAuthenticationToken:WITH_COMMONNAME"
 #
-readonly ENROLLMENT_INFO_DIR=${EJBCA_ENROLLMENT_INFO_DIR:-"${SHARED_VOLUME}/private"}
+readonly ENROLLMENT_INFO_DIR=${EJBCA_ENROLLMENT_INFO_DIR:-"${SHARED_VOLUME}/enrollment"}
 readonly ENROLLMENT_INFO="enrollment-info.txt"
 
 
