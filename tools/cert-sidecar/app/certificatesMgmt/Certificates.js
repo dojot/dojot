@@ -11,8 +11,9 @@ const {
 
 
 /**
- * This class is responsible for all macro operations
- * like create  and files file with key, certificate, ca certificate, crl.
+ * This class is responsible for communicating with x509IdentityMgmt
+ * and creating files with a key, certificate, ca certificate, crl and
+ * delete when it makes sense.
  */
 class Certificates {
 /**
