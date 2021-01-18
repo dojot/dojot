@@ -98,7 +98,7 @@ class Certificates {
         await deleteFile(this.pathCert);
         await deleteFile(this.pathKey);
 
-        this.logger.info('deleteAllFiles: All files was deleted');
+        this.logger.info('deleteAllFiles: All files were deleted');
       } catch (e) {
         this.logger.error(`deleteAllFiles: Cannot delete files inside ${configCerts['files.basepath']}...`);
         throw e;

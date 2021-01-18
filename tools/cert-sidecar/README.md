@@ -70,8 +70,7 @@ You can also check the [ConfigManager environment variables documentation](https
 
 In short, all the parameters in the next sections are mapped to environment variables that begin
 with `CERT_`. You can either use environment variables or configuration files to change their values.
-You can also create new parameters via environment variables by following the fore mentioned
-convention.
+You can also create new parameters via environment variables by following the forementioned convention.
 
 #### General
 
@@ -80,8 +79,8 @@ General configurations
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
 | app.sidecar.to      | Suffix to be used to identify logs | app | string | CERT_SC_APP_SIDECAR_TO
-| app.delete.certificates  | Enables deleting certificate files if you are unable to connect and retrieve a new one after many attempts | false | boolean | CERT_SC_APP_DELETE_CERTIFICATES
-| app.shutdown  | Enables the service to gracefully shut down if after many attempts it is not possible to obtain new certificates | true | boolean | CERT_SC_APP_SHUTDOWN
+| app.delete.certificates  | Enables deleting certificate files if you are unable to connect and retrieve a new one after a given number of attempts | false | boolean | CERT_SC_APP_DELETE_CERTIFICATES
+| app.shutdown  | Enables the service to gracefully shut down if after a given number of attempts it is not possible to obtain new certificates | true | boolean | CERT_SC_APP_SHUTDOWN
 | log.console.level   | Console logger level | info | info, debug, error, warn | CERT_SC_LOG_CONSOLE_LEVEL
 | log.verbose | Whether to enable logger verbosity or not | false | boolean | CERT_SC_LOG_VERBOSE
 | log.file            | Enables logging on file (location: /var/log/cert-sidecar-logs-%DATE%.log) | false | boolean  | CERT_SC_LOG_FILE
