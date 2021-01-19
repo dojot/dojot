@@ -1,0 +1,95 @@
+{
+  "name": "certificates-sidecar",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The Cert-Sidecar is a service utility for managing x509-identity-mgmt certificates for use with TLS connections.",
+  "engines": {
+    "node": ">=12.18",
+    "npm": ">=6.14"
+  },
+  "main": "index.js",
+  "scripts": {
+    "cert-sidecar": "node index.js",
+    "dev": "nodemon index.js --ignore ./config  --ignore ./certs --ignore ./openssl -V",
+    "test": "jest",
+    "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
+    "check-licenses": "apache2-license-checker"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot"
+  },
+  "keywords": [
+    "dojot",
+    "x509",
+    "tls",
+    "certificates",
+    "sidecar"
+  ],
+  "files": [
+    "package-lock.json",
+    "app/**/*.js",
+    "test/",
+    "!test/coverage/"
+  ],
+  "author": "@mprevide",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "dependencies": {
+    "@dojot/microservice-sdk": "0.1.9",
+    "axios": "^0.19.2",
+    "axios-retry": "^3.1.9",
+    "cron": "^1.8.2",
+    "lodash.camelcase": "^4.3.0",
+    "moment": "^2.29.0",
+    "openssl-nodejs": "^1.0.5",
+    "pem": "^1.14.4",
+    "superagent": "^6.1.0"
+  },
+  "jest": {
+    "verbose": true,
+    "testRegex": [
+      "test/unit/*",
+      "test/integration/*"
+    ],
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!index.js"
+    ],
+    "moduleDirectories": [
+      "node_modules",
+      "lib"
+    ],
+    "collectCoverage": true,
+    "clearMocks": true,
+    "testPathIgnorePatterns": [
+      "test/coverage"
+    ],
+    "coverageDirectory": "test/coverage",
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
+  },
+  "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-security-node": "^1.0.14",
+    "jest": "^26.6.3",
+    "nodemon": "^2.0.4"
+  }
+}
