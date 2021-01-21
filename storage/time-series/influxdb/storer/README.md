@@ -127,7 +127,7 @@ Whereas that:
 In this section the idea is to explain what this service does with each message it consumes.
 
 - `*.dojot.tenancy`
-  - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**).
+  - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**) with a default *bucket*.
   - `DELETE`: This message will trigger the deletion of an existing *Organization* (**tenant**).
 
 - `*.device-data`: This message will trigger a data insertion. Its `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values being serialized to a string.
