@@ -11,13 +11,17 @@
          auth_on_subscribe/3]).
 
 auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName, Password, CleanSession) ->
-    error_logger:info_msg("username: ~p ~n", [SubscriberId]),
-    error_logger:info_msg("id: ~p ~n", [UserName]),
-    error_logger:info_msg("password: ~p ~n", [Password]),
+    
+    { LocalUserName, FingerPrint } = UserName,
+    error_logger:info_msg("Client ID: ~p ~n", [SubscriberId]),
+    error_logger:info_msg("Username: ~p ~n", [LocalUserName]),
+    error_logger:info_msg("FingerPrint: ~p ~n", [FingerPrint]),
     ok.
 
 auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, Payload, IsRetain) ->
-    Result  = dojot_acl:check_valid_topic(UserName, Topic),
+    
+    { LocalUserName, _FingerPrint } = UserName,
+    Result  = dojot_acl:check_valid_topic(LocalUserName, Topic),
 
     case Result of
         % the topic match with config
@@ -39,7 +43,8 @@ auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, P
 
 auth_on_subscribe(UserName, ClientId, [{_Topic, _QoS}|_] = Topics) ->
 
-    Result  = dojot_acl:check_config_topic(UserName, Topics),
+    { LocalUserName, _FingerPrint } = UserName,
+    Result  = dojot_acl:check_config_topic(LocalUserName, Topics),
 
     case Result of
         % the topic match with config

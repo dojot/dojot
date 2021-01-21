@@ -23,11 +23,13 @@ socket_to_common_name(Socket) ->
         {error, no_peercert} ->
             undefined;
         {ok, Cert} ->
-            % OTPCert = public_key:pkix_decode_cert(Cert, otp),
-            % TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
-            % Subject = TBSCert#'OTPTBSCertificate'.subject,
-            % extract_cn(Subject)
-            crypto:hash(sha256, Cert)
+            OTPCert = public_key:pkix_decode_cert(Cert, otp),
+            TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
+            Subject = TBSCert#'OTPTBSCertificate'.subject,
+            { extract_cn(Subject), crypto:hash(sha256, Cert) }
+
+        % change the strategy
+            
     end.
 
 cert_to_common_name(Cert) ->
@@ -35,29 +37,30 @@ cert_to_common_name(Cert) ->
         undefined ->
             undefined;
         _ ->
-            % OTPCert = public_key:pkix_decode_cert(Cert, otp),
-            % TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
-            % Subject = TBSCert#'OTPTBSCertificate'.subject,
-            crypto:hash(sha256, Cert)
-            % extract_cn(Subject)
+            OTPCert = public_key:pkix_decode_cert(Cert, otp),
+            TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
+            Subject = TBSCert#'OTPTBSCertificate'.subject,
+            { extract_cn(Subject), crypto:hash(sha256, Cert) }
+        
+        % change the strategy
     end.
 
-% -spec extract_cn({'rdnSequence', list()}) -> undefined | binary().
-% extract_cn({rdnSequence, List}) ->
-%     extract_cn2(List).
+-spec extract_cn({'rdnSequence', list()}) -> undefined | binary().
+extract_cn({rdnSequence, List}) ->
+    extract_cn2(List).
 
-% -spec extract_cn2(list()) -> undefined | list().
-% extract_cn2([[#'AttributeTypeAndValue'{
-%                  type=?'id-at-commonName',
-%                  value={utf8String, CN}}]|_]) ->
-%     list_to_binary(unicode:characters_to_list(CN));
-% extract_cn2([[#'AttributeTypeAndValue'{
-%                  type=?'id-at-commonName',
-%                  value={printableString, CN}}]|_]) ->
-%     list_to_binary(unicode:characters_to_list(CN));
-% extract_cn2([_|Rest]) ->
-%     extract_cn2(Rest);
-% extract_cn2([]) -> undefined.
+-spec extract_cn2(list()) -> undefined | list().
+extract_cn2([[#'AttributeTypeAndValue'{
+                 type=?'id-at-commonName',
+                 value={utf8String, CN}}]|_]) ->
+    list_to_binary(unicode:characters_to_list(CN));
+extract_cn2([[#'AttributeTypeAndValue'{
+                 type=?'id-at-commonName',
+                 value={printableString, CN}}]|_]) ->
+    list_to_binary(unicode:characters_to_list(CN));
+extract_cn2([_|Rest]) ->
+    extract_cn2(Rest);
+extract_cn2([]) -> undefined.
 
 opts(Opts) ->
     [{cacertfile, proplists:get_value(cafile, Opts)},

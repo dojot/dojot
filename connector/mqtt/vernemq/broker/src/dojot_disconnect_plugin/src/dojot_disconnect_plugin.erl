@@ -11,7 +11,8 @@
 
 on_register(_, SubscriberId, UserName) ->
 
-    case utils:is_dojot_user(UserName) of
+    { LocalUserName, _FingerPrint } = UserName,
+    case utils:is_dojot_user(LocalUserName) of
         is_user ->
             ok = utils:set_connection_timeout(SubscriberId),
             ok;
