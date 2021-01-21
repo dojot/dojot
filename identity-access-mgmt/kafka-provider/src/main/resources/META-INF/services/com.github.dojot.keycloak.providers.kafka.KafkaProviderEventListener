@@ -1,0 +1,6 @@
+# -------------------------------------------------
+# In this file are recorded the implementations of
+# EventListeners triggered by Keycloak and that are
+# of interest to this Kafka-Provider module.
+# -------------------------------------------------
+com.github.dojot.keycloak.providers.kafka.impl.RealmEventListener

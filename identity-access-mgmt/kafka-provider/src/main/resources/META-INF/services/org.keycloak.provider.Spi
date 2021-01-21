@@ -1,0 +1,5 @@
+# ------------------------------------------------
+# In this file, SPI implementations capable of
+# providing communication with Kafka are declared
+# ------------------------------------------------
+com.github.dojot.keycloak.providers.kafka.KafkaSpi
