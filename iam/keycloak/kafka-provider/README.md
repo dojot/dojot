@@ -27,7 +27,7 @@ is necessary to implement an SPI and deploy it to Wildfly so that Keycloak knows
 how to load it.
 
 In summary, this README is intended to explain how the _Kafka Provider_ is
-compiled and packaged according th the modular structure of Wildfly. After being
+compiled and packaged according to the modular structure of Wildfly. After being
 packaged correctly, you need to move it into the Wildfly _modules_ directory and
 finally, use the [Wildfly CLI](https://docs.jboss.org/author/display/WFLY/Command%20Line%20Interface.html)
 to register the Provider so that Keycloak can load it as one of its modules.
