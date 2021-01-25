@@ -138,7 +138,7 @@ class TrustedCAService {
   }
 
   /**
-   * Removes a external trusted root CA certificate from the database.
+   * Removes an external trusted root CA certificate from the database.
    *
    * @param {object} caCertRecord Record that represents the certificate in
    *                       the database and that must be removed.

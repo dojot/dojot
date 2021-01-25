@@ -74,7 +74,7 @@ mongoClient.connect();
 // using server.close(), use httpTerminator.terminate()
 const httpTerminator = createHttpTerminator({ server });
 
-// The EJBCA healthchack is done at intervals directly in the Event Loop
+// The EJBCA health-check is done at intervals directly in the Event Loop
 stateManager.addHealthChecker('ejbca',
   ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
   config.ejbca.healthcheck.delayms);
