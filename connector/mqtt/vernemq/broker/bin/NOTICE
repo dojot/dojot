@@ -1,0 +1,11 @@
+##################################################################
+# ----------------------- LICENSE NOTICE ----------------------- #
+#                                                                #
+# To meet the needs of dojot IoT Platform, it is built a         # 
+# customized VerneMQ image. The Dockerfile and scripts used to   # 
+# build this image were based on code from                       # 
+# https://github.com/sportebois/docker-vernemq and               #
+# https://github.com/vernemq/docker-vernemq/ which are           # 
+# licensed under the Apache 2.0 license.                         #
+#                                                                #
+##################################################################

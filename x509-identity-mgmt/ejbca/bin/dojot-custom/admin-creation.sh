@@ -1,18 +1,5 @@
 #!/bin/bash
 
-##################################################################
-#                                                                #
-# Copyright (c) 2020 Dojot IoT Platform                          #
-#                                                                #
-# This software is free software; you can redistribute it and/or #
-# modify it under the terms of the GNU Lesser General Public     #
-# License as published by the Free Software Foundation; either   #
-# version 2.1 of the License, or any later version.              #
-#                                                                #
-# See terms of license at gnu.org.                               #
-#                                                                #
-##################################################################
-
 function createAdminEntity() {
     if [ "${EJBCA_ADMIN_USER}" == "true" ] ; then
         createSuperAdmin
@@ -36,7 +23,7 @@ function createSuperAdmin() {
         ejbca_cmd ra addendentity \
             --username "${ADMIN_USERNAME}" \
             --dn "CN=${ADMIN_COMMONNAME},O=${DISTNAME_O},OU=${DISTNAME_OU},UID=${endEntityUid}" \
-            --caname "${SERVICES_CA}" \
+            --caname "${INTERNAL_CA}" \
             --type 1 \
             --token P12 \
             --password "${superAdminEnrollmentCode}" \

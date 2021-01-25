@@ -1,0 +1,19 @@
+@startuml
+
+group Retrieve Public Certificate
+    CertSidecar -> x509IdentityMgmt: Send CSR and Request Public Certificate
+    x509IdentityMgmt -->  CertSidecar: Response with Public Certificate
+end
+
+group Retrieve CA Root Certificate
+    CertSidecar -> x509IdentityMgmt: Request CA Root Certificate
+    x509IdentityMgmt -->  CertSidecar: Response with CA Root Certificate
+end
+
+
+group Certificate Revocation List
+    CertSidecar -> x509IdentityMgmt: Request CRL
+    x509IdentityMgmt -->  CertSidecar: Response with CRL
+end
+
+@enduml
