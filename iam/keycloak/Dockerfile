@@ -23,11 +23,9 @@ COPY --from=base \
     $JBOSS_HOME/bin
 
 # Run the configuration script to make the Keycloak load the
-# "kafka-provider" module that was copied into wildfly
-RUN $JBOSS_HOME/bin/jboss-cli.sh --file=$JBOSS_HOME/bin/kafka-provider.cli
-
-# After configuring the module, its no longer need
-# the script taking up space in the docker image
-# and this also doesn't nedd the script's change history
-RUN rm $JBOSS_HOME/bin/kafka-provider.cli \
-    $JBOSS_HOME/standalone/configuration/standalone_xml_history/current/*
+# "kafka-provider" module that was copied into wildfly, AND
+# After configuring the module, its no longer need the script
+# taking up space in the docker image and this also doesn't
+# nedd the script's change history
+RUN $JBOSS_HOME/bin/jboss-cli.sh --file=$JBOSS_HOME/bin/kafka-provider.cli; \
+    rm $JBOSS_HOME/bin/kafka-provider.cli $JBOSS_HOME/standalone/configuration/standalone_xml_history/current/*
