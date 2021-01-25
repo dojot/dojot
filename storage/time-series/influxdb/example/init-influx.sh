@@ -13,28 +13,17 @@ DEFAULT_BUCKET=${DEFAULT_BUCKET:-"devices"}
 DEFAULT_RETENTION=${DEFAULT_RETENTION:-"0"}
 # Valid units are nanoseconds (ns), microseconds (us or µs), milliseconds (ms), seconds (s), minutes (m), hours (h), days (d),  weeks (w) and 0 is infinite retention
 
-apt-get install curl jq -y
+influx setup \
+    --force \
+    --host "$HOST"  \
+    --username "$DEFAULT_USER" \
+    --password "$DEFAULT_PASSWORD" \
+    --org "$DEFAULT_ORGANIZATION" \
+    --bucket "$DEFAULT_BUCKET" \
+    --token  "$DEFAULT_TOKEN" \
+    --retention "$DEFAULT_RETENTION"
 
-allowedOnBoard=$(curl  -sS -X GET \
---url "${HOST}"/api/v2/setup | jq '.allowed')
-
-if [[ "$allowedOnBoard" == "true" ]]; then
-
-    influx setup \
-        --force \
-        --host "$HOST"  \
-        --username "$DEFAULT_USER" \
-        --password "$DEFAULT_PASSWORD" \
-        --org "$DEFAULT_ORGANIZATION" \
-        --bucket "$DEFAULT_BUCKET" \
-        --token  "$DEFAULT_TOKEN" \
-        --retention "$DEFAULT_RETENTION"
-
-    echo "Successfully initialized InfluxDB..."
-
-else
-    echo "Already onboarding"
-fi
+echo "Successfully initialized InfluxDB..."
 
 
 exit 0
