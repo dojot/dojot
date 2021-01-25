@@ -9,8 +9,12 @@ module.exports = ({ levelDebug }) => {
    * @param {Array} decorators decorators with the logic to be applied on the original methods.
    */
   function decorate(target, methods, decorators) {
-    // The list must be inverted so that decorators are executed
-    // in the correct  order when the decorated method is called
+    // For the order of execution of the decorators to follow the same order
+    // in which they were declared in the list, it is necessary to apply the
+    // decoration starting with the last decorator of the list and thus until
+    // the first...
+    // Instead of going through the list from the end to the beginning, we can
+    // invert it and then iterate through it with the "forEach()" method.
     decorators.reverse();
 
     methods.forEach((methodName) => {
