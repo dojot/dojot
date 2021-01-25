@@ -184,5 +184,5 @@ The factory also implements the `postInit()` method tha gives access to an
 instance of `org.keycloak.provider.ProviderEventManager`, which is where we must
 register our event listeners to trigger our _Kafka Provider_ and let it do the
 work it has to do.
-Any `RuntimeException` thrown by our _Service Provider_ causes the rollback of
-the entire operation.
+> __Note that__ any `RuntimeException` thrown by our _Service Provider_ causes the rollback of
+the entire operation/transaction.
