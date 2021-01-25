@@ -35,7 +35,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'required',
@@ -80,7 +80,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'not',
@@ -127,7 +127,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'not',
@@ -173,7 +173,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -199,7 +199,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -228,7 +228,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -257,7 +257,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -297,7 +297,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [{
               dataPath: '.certificateChain',
               keyword: 'maxLength',
@@ -321,7 +321,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [{
               dataPath: '.csr',
               keyword: 'maxLength',
@@ -348,7 +348,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.certificateChain',
@@ -372,7 +372,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.csr',
@@ -399,7 +399,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.belongsTo.device',
@@ -426,7 +426,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
             schemaErrors: [{
               keyword: 'required',
               dataPath: '',
@@ -453,7 +453,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
             schemaErrors: [
               {
                 keyword: 'not',
@@ -528,7 +528,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -568,7 +568,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
             schemaErrors: [{
               keyword: 'type',
               dataPath: '.belongsTo.device',
@@ -594,7 +594,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -636,7 +636,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.belongsTo.device',

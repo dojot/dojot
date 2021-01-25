@@ -31,7 +31,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
             schemaErrors: [
               {
                 keyword: 'required',
@@ -61,7 +61,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
             schemaErrors: [
               {
                 keyword: 'type',
@@ -99,7 +99,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
             schemaErrors: [
               {
                 dataPath: '.caPem',
@@ -129,7 +129,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
             schemaErrors: [
               {
                 keyword: 'pattern',
@@ -158,7 +158,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/upd-trust-ca',
+            schemaId: 'http://www.dojot.com.br/schemas/upd-trust-ca',
             schemaErrors: [
               {
                 keyword: 'required',
@@ -187,7 +187,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schema$id: 'http://www.dojot.com.br/schemas/upd-trust-ca',
+            schemaId: 'http://www.dojot.com.br/schemas/upd-trust-ca',
             schemaErrors: [
               {
                 keyword: 'type',

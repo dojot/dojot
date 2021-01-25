@@ -18,13 +18,13 @@ function createObject(schemas, errorTemplate) {
 
   /**
  * Format error responses
- * @param  {String} schema$id - ID of the schema used to validate json
+ * @param  {String} schemaId - ID of the schema used to validate json
  * @param  {Object} schemaErrors - array of json-schema errors, describing each validation failure
  * @return {String} formatted api response
  */
-  function errorResponse(schema$id, schemaErrors) {
+  function errorResponse(schemaId, schemaErrors) {
     const errorMsg = 'Input data schema validation failure.';
-    return BadRequest(errorMsg, { schema$id, schemaErrors });
+    return BadRequest(errorMsg, { schemaId, schemaErrors });
   }
 
   /**
