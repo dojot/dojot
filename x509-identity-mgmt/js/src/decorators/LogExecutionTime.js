@@ -9,8 +9,8 @@ class LogExecutionTime {
   }) {
     const start = new Date();
     const result = method.apply(target, args);
-    const end = new Date() - start;
-    this.logger.debug(`${target.constructor.name}.${methodName} - Execution time: ${end}ms`);
+    const elapsed = new Date() - start;
+    this.logger.debug(`${target.constructor.name}.${methodName} - Execution time: ${elapsed}ms`);
     return result;
   }
 }
