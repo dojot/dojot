@@ -89,14 +89,18 @@ services:
 
   influxdb-setup:
     image: quay.io/influxdb/influxdb:v2.0.2
-    restart:  on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
     volumes:
       - influxdb-volume:/root/.influxdbv2/
       - ./init-influx.sh:/init-influx.sh:Z
     entrypoint:
       - /init-influx.sh
     depends_on:
-      - influxdb
+      influxdb:
+        condition: service_healthy
 
   influxdb:
     image: quay.io/influxdb/influxdb:v2.0.2

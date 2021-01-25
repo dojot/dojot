@@ -127,7 +127,7 @@ Whereas that:
 In this section the idea is to explain what this service does with each message it consumes.
 
 - `*.dojot.tenancy`
-  - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**).
+  - `CREATE`: This message will trigger the creation of a new *Organization* (**tenant**) with a default *bucket*.
   - `DELETE`: This message will trigger the deletion of an existing *Organization* (**tenant**).
 
 - `*.device-data`: This message will trigger a data insertion. Its `attrs` will be saved in a *measurement* (**deviceid**), in the default *bucket* and in an *Organization* (**tenant**). Each `key` from `attrs` will be a *field* beginning with 'dojot.' with their respective values being serialized to a string.
@@ -137,7 +137,7 @@ In this section the idea is to explain what this service does with each message 
   - `remove`: This message will trigger the deletion of a *measurement* (**deviceid**) in an *Organization* (**tenant**).
 
 
-__NOTE THAT__ When service starts a default Organization with a default bucket, a default user with a default password and a default token must have already been created, optionally with a retention. You need to configure all of these values, see more at [general configurations](#general-configurations).
+__NOTE THAT__ When service starts a default Organization with a default bucket, a default user with a default password and a default token must have **already been created**, optionally with a retention. You need to configure all of these values, see more at [general configurations](#general-configurations).
 
 ## Dependencies
 
@@ -194,11 +194,11 @@ convention.
 
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
-| influx.default.bucket | Bucket name for all created buckets | devices | string  | STORER_INFLUX_DEFAULT_BUCKET
-| influx.default.organization | Set up the name of the initial organization | admin | string  | STORER_INFLUX_DEFAULT_ORGANIZATION
-| influx.default.token | Configure a token (this token will be allowed to write/read in all organizations) | dojot@token_default | string  | STORER_INFLUX_DEFAULT_TOKEN
+| influx.default.bucket | Bucket name for all created buckets and must exist in the organization configured in `influx.default.organization`. | devices | string  | STORER_INFLUX_DEFAULT_BUCKET
+| influx.default.organization | Set up the name of the initial organization, must be configured before starting this service and must have the bucket configured at `influx.default.bucket`. | admin | string  | STORER_INFLUX_DEFAULT_ORGANIZATION
+| influx.default.token | Configure a token (this token should be allowed to write/read in all organizations), must be configured before starting this service. | dojot@token_default | string  | STORER_INFLUX_DEFAULT_TOKEN
 | influx.heathcheck.ms | Defines how often the communication with InfluxDB is verified in milliseconds.   | 30000 | integer  | STORER_INFLUX_HEATHCHECK_MS
-| influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). | 168 | integer | STORER_INFLUX_RETENTION_HRS
+| influx.retention.hrs | Data retention time (expiration) in hours (0 is infinite retention). Settings used only for organizations created by this service and does not change retention in existing buckets. | 168 | integer | STORER_INFLUX_RETENTION_HRS
 | influx.url | Address of the *InfluxDB* service  | http://influxdb:8086 | url | STORER_INFLUX_URL
 
 ##### InfluxDB Write Options
