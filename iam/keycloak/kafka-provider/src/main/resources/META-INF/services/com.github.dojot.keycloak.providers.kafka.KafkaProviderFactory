@@ -1,0 +1,6 @@
+# -------------------------------------------------
+# In this file the Provider Factory implementations
+# that create instances of providers capable of
+# interacting with Kafka are declared.
+# -------------------------------------------------
+com.github.dojot.keycloak.providers.kafka.impl.KafkaProviderFactoryImpl
