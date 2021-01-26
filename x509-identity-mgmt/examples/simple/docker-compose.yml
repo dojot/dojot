@@ -16,10 +16,10 @@ services:
       EJBCA_EXTERNAL_ACCESS: "true"
       EJBCA_ADMIN_USER: "true"
       NODE_ENV: production
-      MONGO_URI: "mongodb://mongo-db:27017/x509-identity-mgmt"
-      MONGO_USER: root
-      MONGO_PASS: pass
-      MONGO_AUTH_DB: admin
+      X509IDMGMT_MONGO_CONN_URI: "mongodb://mongo-db:27017/x509-identity-mgmt"
+      X509IDMGMT_MONGO_CONN_OPTIONS_USER: root
+      X509IDMGMT_MONGO_CONN_OPTIONS_PASS: pass
+      X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE: admin
     ports:
       - "3000:3000"
       - "8080:8080"

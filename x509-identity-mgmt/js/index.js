@@ -1,31 +1,103 @@
-const http = require('http');
+// if (process.env.X509IDMGMT_LOGGER_CONSOLE_LEVEL === 'debug') {
+// ServiceStateManager (lightship) is using 'Roarr' to implement logging.
+// process.env.ROARR_LOG = true;
+// }
 
-const { Logger } = require('@dojot/microservice-sdk');
+const { createHttpTerminator } = require('http-terminator');
 
-const cfg = require('./src/config');
+const { unflatten } = require('flat');
 
-const app = require('./src/app');
+const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
 
-const db = require('./src/db');
+const DIContainer = require('./src/DIContainer');
 
-const ejbca = require('./src/core/ejbca-facade');
+const userConfigFile = process.env.X509IDMGMT_USER_CONFIG_FILE || 'production.conf';
+ConfigManager.loadSettings('X509IDMGMT', userConfigFile);
 
-const terminus = require('./src/terminus');
+const config = unflatten(ConfigManager.getConfig('x509idmgmt'));
 
-const server = http.createServer(app);
+Logger.setTransport('console', {
+  level: config.logger.console.level.toLowerCase(),
+});
+if (config.logger.file.enable) {
+  Logger.setTransport('file', {
+    level: config.logger.file.level.toLowerCase(),
+    filename: config.logger.file.name,
+    dirname: config.logger.file.dir,
+    maxFiles: config.logger.file.max,
+    maxSize: config.logger.file.size,
+  });
+}
+Logger.setVerbose(config.logger.verbose);
 
-const logger = new Logger();
+const container = DIContainer(config);
+const logger = container.resolve('logger');
+const stateManager = container.resolve('stateManager');
+const ejbcaHealthCheck = container.resolve('ejbcaHealthCheck');
+const mongoClient = container.resolve('mongoClient');
+const server = container.resolve('server');
+const framework = container.resolve('framework');
 
-/* The server must be available even if there is not yet a connection to the database,
- * this is because it must be possible to consult the health check of the application
- * and it must cover the state of the connection to the database. */
-server.listen(cfg.server.port, () => {
-  logger.info('Server ready to accept connections');
+// Emitted each time there is a request. Note that there may be multiple
+// requests per connection (in the case of keep-alive connections).
+server.on('request', framework);
+logger.debug('Express Framework registered as listener for requests to the web server!');
+
+// Emitted when the server has been bound after calling server.listen().
+server.on('listening', () => {
+  logger.info('Server ready to accept connections!');
   logger.info(server.address());
+  stateManager.signalReady('server');
 });
 
-/* Starts the process of connecting to the database */
-db.connect();
+// Emitted when the server closes. If connections exist,
+// this event is not emitted until all connections are ended.
+server.on('close', () => {
+  stateManager.signalNotReady('server');
+});
 
-/* adds health checks and graceful shutdown to the application */
-terminus.setup(server, db, ejbca);
+// Emitted when an error occurs. Unlike net.Socket, the 'close' event will not
+// be emitted directly following this event unless server.close() is manually called.
+server.on('error', (e) => {
+  logger.error('Server experienced an error:', e);
+});
+
+// Begin accepting connections on the specified port and hostname.
+// If the hostname is omitted, the server will accept connections
+// directed to any IPv4 address (i.e. "0.0.0.0").
+server.listen(config.server.port);
+
+// Starts the process of connecting to the database
+mongoClient.connect();
+
+// create an instance of http-terminator and instead of
+// using server.close(), use httpTerminator.terminate()
+const httpTerminator = createHttpTerminator({ server });
+
+// The EJBCA health-check is done at intervals directly in the Event Loop
+stateManager.addHealthChecker('ejbca',
+  ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
+  config.ejbca.healthcheck.delayms);
+
+// register handlers to gracefully shutdown the components...
+stateManager.registerShutdownHandler(async () => {
+  logger.debug('Stopping the server from accepting new connections...');
+  await httpTerminator.terminate();
+  logger.debug('The server no longer accepts connections!');
+  return Promise.resolve(true);
+});
+
+stateManager.registerShutdownHandler(() => {
+  logger.debug('Closing the connection to MongoDB...');
+  return new Promise((resolve, reject) => {
+    mongoClient.close((err) => {
+      if (err) {
+        logger.error('Error closing connection to MongoDB', err);
+        reject(err);
+      } else {
+        logger.debug('MongoDB connection closed!');
+        resolve();
+      }
+    });
+  });
+});

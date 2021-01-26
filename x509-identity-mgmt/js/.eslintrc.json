@@ -6,6 +6,7 @@
   },
   "extends": [
     "airbnb-base",
+    "plugin:security/recommended",
     "plugin:jest/recommended"
   ],
   "globals": {
@@ -32,6 +33,7 @@
     "no-multiple-empty-lines": ["error", { "max": 2, "maxBOF": 1, "maxEOF": 0 }]
   },
   "plugins": [
+    "security",
     "jest"
   ]
 }

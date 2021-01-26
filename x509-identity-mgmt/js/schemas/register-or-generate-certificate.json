@@ -7,7 +7,10 @@
   "default": {},
   "additionalProperties": false,
   "properties": {
-    "certificatePem": {
+    "caFingerprint": {
+      "$ref": "http://www.dojot.com.br/schemas/defs#/definitions/fingerprint"
+    },
+    "certificateChain": {
       "$ref": "http://www.dojot.com.br/schemas/defs#/definitions/cert-pem"
     },
     "csr": {
@@ -20,7 +23,7 @@
   "oneOf": [
     {
       "required": [
-        "certificatePem"
+        "certificateChain"
       ]
     },
     {
@@ -30,7 +33,7 @@
     }
   ],
   "dependencies": {
-    "certificatePem": {
+    "certificateChain": {
       "not": {
         "required": [
           "csr"
@@ -40,7 +43,7 @@
     "csr": {
       "not": {
         "required": [
-          "certificatePem"
+          "certificateChain"
         ]
       }
     }
