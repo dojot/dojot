@@ -1,8 +1,5 @@
 FROM primekey/ejbca-ce:6.15.2.6
 
-ENV NODE_APP_PORT "3000"
-ENV HEALTHCHECK_URL "http://localhost:${NODE_APP_PORT}/healthcheck"
-
 # User 'root'
 USER 0
 
@@ -12,9 +9,12 @@ RUN mkdir -p /opt/tls \
     && chmod 700 /opt/tls
 
 # Install Node.js
-RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash - \
-    && yum install -y nodejs \
-    && yum install -y gcc-c++ make \
+RUN curl -sL https://rpm.nodesource.com/setup_12.x | bash -
+
+RUN yum install -y \
+            nodejs-12.20.1 \
+            gcc-c++-4.8.5 \
+            make-3.82 \
     && yum clean packages
 
 # A wildcard is used to ensure both package.json AND
@@ -53,4 +53,4 @@ USER 10001
 CMD ["/opt/entrypoint.sh"]
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=2 \
-    CMD HC=$(curl -sS $HEALTHCHECK_URL) && echo $HC && grep -q '"status":"ok"' <<< "$HC"
+    CMD curl -s "http://localhost:9000/health" | grep -q "SERVER_IS_READY"

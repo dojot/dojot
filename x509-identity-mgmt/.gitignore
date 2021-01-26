@@ -2,5 +2,6 @@ js/node_modules
 js/coverage
 js/tls
 js/temp
+js/config
 .vscode
 *.orig
