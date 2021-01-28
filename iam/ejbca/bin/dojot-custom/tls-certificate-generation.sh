@@ -163,12 +163,12 @@ function generateCertClientTLS() {
             --caname "${INTERNAL_CA}" \
             -f "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem"
 
-        chown "${EJBCA_TLS_CLIENT_ID}:0" \
+        chmod 600 \
               "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.p12" \
               "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem" \
               "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.secret"
 
-        chmod 600 \
+        chown "${EJBCA_TLS_CLIENT_ID}:0" \
               "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.p12" \
               "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem" \
               "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.secret"
