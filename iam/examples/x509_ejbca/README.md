@@ -58,7 +58,7 @@ Password: +ihKMor2H24GikhRFNZFPCLP
 ***************************************************
 ```
 
-The important thing about this output is the values in front of *Username*
+The important thing about this output is these values in front of *Username*
 (**admin**) and *Password* (**+ihKMor2H24GikhRFNZFPCLP**). In your case, this
 values will be different.
 
