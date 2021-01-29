@@ -41,6 +41,8 @@ In the end, we can say that **Cert-Sidecar** creates four files in the *PEM* for
 
 __ATTENTION__ When the service is unable to retrieve a CRL or update certificates if they have been revoked or expired, after several defined attempts using the Exponential Backoff strategy the service will terminate and delete all files. And at each configured time, the service checks if it can connect with *x509-identity-mgmt* and if it does not, the service changes to unhealthy. For more information about that, check the [__Service State Manager__ ](https://github.com/dojot/dojot-microservice-sdk-js/blob/master/lib/serviceStateManager/README.md) module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
 
+__ATTENTION__  It is important to note that in services that use node.js and its tls library, the certificates, including the crl, are not changed after the service starts even if the files are exchanged. Therefore, it is necessary to have some solution in the deployment, such as the maximum useful life of a container or pod.
+
 There is a examples of how to use  **Cert-Sidecar** with kubernetes and docker-compose within the directory [examples](./examples).
 
 ## Dependencies
