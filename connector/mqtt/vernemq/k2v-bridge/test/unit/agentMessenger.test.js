@@ -33,6 +33,10 @@ jest.mock('@dojot/microservice-sdk', () => ({
   Logger: jest.fn(() => mockConfig.Logger),
 }));
 
+jest.mock('../../app/utils', () => ({
+  killApplication: jest.fn(),
+}));
+
 describe('Test AgentMessenger', () => {
   beforeEach(() => {
     jest.clearAllMocks();

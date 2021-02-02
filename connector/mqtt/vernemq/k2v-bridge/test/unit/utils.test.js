@@ -2,10 +2,9 @@
  * Unit test for utils file
  */
 
-const mockProcess = require('jest-mock-process');
 const utils = require('../../app/utils');
 
-describe('Tetsing project utils', () => {
+describe('Testing project utils', () => {
   it('should generate the configuration topic', () => {
     expect(utils.generateDojotActuationTopic('test', 'test', '/test')).toEqual('test:test/test');
     expect(utils.generateDojotActuationTopic('test', 1)).toEqual('test:1undefined');
@@ -29,28 +28,6 @@ describe('Tetsing project utils', () => {
       expect(utils.toBoolean('0')).toBe(false);
       expect(utils.toBoolean('1')).toBe(false);
       expect(utils.toBoolean(1)).toBe(false);
-    });
-  });
-
-  describe('kill Application', () => {
-    const mockExit = mockProcess.mockProcessExit();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    afterAll(() => {
-      mockExit.mockRestore();
-    });
-
-    it('should exit the application with given code', () => {
-      utils.killApplication();
-      utils.killApplication(2);
-      utils.killApplication(2);
-      utils.killApplication(100);
-      expect(mockExit).toHaveBeenNthCalledWith(1, 1);
-      expect(mockExit).toHaveBeenNthCalledWith(2, 2);
-      expect(mockExit).toHaveBeenNthCalledWith(4, 100);
     });
   });
 });
