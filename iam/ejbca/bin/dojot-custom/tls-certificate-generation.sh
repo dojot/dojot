@@ -1,17 +1,16 @@
 #!/bin/bash
 
 function generateCertServerTLS() {
-
     # Generates a random password for the KeyStore of the end entity
     local keyStorePassword
     keyStorePassword="$(dd if=/dev/urandom count=1 bs=18 2>/dev/null | base64 -w 0)"
 
     local existingEndEntity
-    existingEndEntity=$(ejbca_cmd ra findendentity --username "${HOST_NAME}" 2>&1 | grep "Username: ${HOST_NAME}")
-    if [ "x${existingEndEntity}" == "x" ] ; then
+    existingEndEntity=$(ejbca_cmd ra findendentity --username "${HOST_NAME}" 2>&1 | grep "Username: ${HOST_NAME}"  || true)
+    if [ "x${existingEndEntity}" == "x" ]; then
 
         echo
-        log "INFO" "Issuing TLS certificate for EJBCA Application Server."
+        log "INFO" "Creating an End-Entity for EJBCA Application Server..."
 
         local endEntityUid
         endEntityUid="c-0$(dd if=/dev/urandom count=1 bs=8 2>/dev/null | hexdump -e '/1 "%02x"')"
@@ -25,7 +24,7 @@ function generateCertServerTLS() {
             --type 1 \
             --token JKS \
             --password "${keyStorePassword}" \
-            --altname "iPAddress=127.0.0.1" \
+            --altname "iPAddress=127.0.0.1, dNSName=localhost, dNSName=${HOST_NAME}" \
             --certprofile "${APP_SERVER_CERT_PROFILE}" \
             --eeprofile "${APP_SERVER_ENTITY_PROFILE}"
 
@@ -34,9 +33,11 @@ function generateCertServerTLS() {
 
     else
         echo
-        log "WARN" "TLS certificate for EJBCA Application Server already been issued."
+        log "WARN" "TLS certificate for EJBCA Application Server already been issued! (End Entity: ${HOST_NAME})"
 
         if [ "${SERVER_CERT_REGEN}" == "true" ] ; then
+            log "WARN" "Issuing a NEW certificate for EJBCA Application Server..."
+
             issueServerCertificate "${keyStorePassword}"
         fi
     fi
@@ -161,6 +162,16 @@ function generateCertClientTLS() {
         ejbca_cmd ca getcacert \
             --caname "${INTERNAL_CA}" \
             -f "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem"
+
+        chmod 600 \
+              "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.p12" \
+              "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem" \
+              "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.secret"
+
+        chown "${EJBCA_TLS_CLIENT_ID}:0" \
+              "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.p12" \
+              "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}-trustedca.pem" \
+              "${EJBCA_TLS_CLIENT_DIR}/${EJBCA_CLIENT_USERNAME}.secret"
 
         log "INFO" "TLS certificate for EJBCA Client Application setup completed!"
     else
