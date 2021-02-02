@@ -137,6 +137,9 @@ readonly EJBCA_CLIENT_ROLE_MEMBER_WITH="CertificateAuthenticationToken:WITH_COMM
 #
 # The same directory used by the Node.js application
 readonly EJBCA_TLS_CLIENT_DIR=${EJBCA_TLS_CLIENT_DIR:-"/opt/tls"}
+#
+# The same linux "user_id" used by the Node.js application
+readonly EJBCA_TLS_CLIENT_ID=${EJBCA_TLS_CLIENT_ID:-"10001"}
 
 
 # *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
