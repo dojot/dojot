@@ -1,0 +1,50 @@
+name: Kong - API Gateway (api-gateway/kong/)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in '/api-gateway/kong/**'
+on:
+  create:
+  push:
+    paths:
+      - 'api-gateway/kong/**'
+
+jobs:
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: Running tests
+      run: |
+        cd api-gateway/kong/plugins/pepkong
+        docker build -t pepkong -f tests/unit_tests/Dockerfile ../..
+        docker container run pepkong
+
+  docker-hub:
+    needs: unit-tests
+    name: Build  and Publish image with plugins to DockerHUb
+    runs-on: ubuntu-latest
+    # If this is a PR or commit with msg ci skip, it won't run
+    if: contains(github.ref, 'refs/pull/') == false || contains(github.event.head_commit.message, 'ci skip') == false
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@3.02
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/kong
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: api-gateway/kong/
+        buildoptions: ' --label commit_sha_dojot=${{ github.sha }} '  # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
