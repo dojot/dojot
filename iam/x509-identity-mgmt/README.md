@@ -61,7 +61,7 @@ simplified way, the device must have installed the certificate issued to it and
 the certificate of the CA that signed it. The details are part of the
 [TLS protocol](https://tools.ietf.org/html/rfc5246).
 
-It is important that you see the [README](./ejbca/README.md) of the EJBCA Server
+It is important that you see the [README](./../ejbca/README.md) of the EJBCA Server
 custom settings for the dojot platform.
 
 
@@ -71,15 +71,12 @@ The component is written in javascript and runs on the Node.js interpreter.
 It makes use of the [EJBCA server](https://www.ejbca.org/) for issuing
 certificates, which in turn needs to be connected to a
 [Postgres](https://www.postgresql.org/) database to store its settings
-centrally. Both applications run within the same
-[Docker](https://www.docker.com/) container and together form the
-**x509-identity-mgmt** component.
+centrally. Both applications run within the [Docker](https://www.docker.com/)
+container and together form the **x509-identity-mgmt** service.
 The component stores the certificates and their association with the devices
 into [MongoDB](https://www.mongodb.com/).<br>
 It is located behind the [API Gateway](https://github.com/dojot/kong) of the
 dojot platform.
-
-![Component architecture](./examples/component-architecture.png?raw=true)
 
 
 ## Usage

@@ -28,13 +28,15 @@ function main() {
             echo
             log "INFO" "Lock obtained successfully. Starting the configuration process..."
 
+            # The batch certificate issuance settings must
+            # be recreated every time the container boots
+            batchIssuanceConfig
+
             local caFound
             caFound=$(ejbca_cmd ca listcas 2>&1 | grep "CA Name: ${DEVICES_CA}")
 
             # If the CA is not found, we must run a new CA Setup...
             if [ "x${caFound}" == "x" ]; then
-
-                batchIssuanceConfig
 
                 importProfiles
 
