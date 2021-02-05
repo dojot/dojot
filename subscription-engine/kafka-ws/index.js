@@ -7,7 +7,6 @@ const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const application = require('./app/App');
 const websocketTarball = require('./app/WebsocketTarball');
-const terminus = require('./app/Terminus');
 const StateManager = require('./app/StateManager');
 
 // Loading the configurations with the configManager
@@ -73,9 +72,6 @@ server.listen(config.server.port, config.server.host, async () => {
 server.on('close', () => {
   StateManager.signalNotReady(stateService);
 });
-
-/* adds health checks and graceful shutdown to the application */
-terminus.setup(server);
 
 const unhandledRejections = new Map();
 
