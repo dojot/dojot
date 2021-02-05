@@ -5,18 +5,15 @@ const util = require('util');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
-const application = require('./app/App');
-const websocketTarball = require('./app/WebsocketTarball');
-const StateManager = require('./app/StateManager');
-
-// Loading the configurations with the configManager
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
-
 const userConfigFile = process.env.KAFKA_WS_APP_USER_CONFIG_FILE || 'production.conf';
-
 ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
+
+const application = require('./app/App');
+const websocketTarball = require('./app/WebsocketTarball');
+const StateManager = require('./app/StateManager');
 
 Logger.setTransport('console', { level: config.log['console.level'] });
 
