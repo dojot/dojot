@@ -31,18 +31,17 @@
     "!test/unit/coverage/"
   ],
   "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.21.1",
     "jest": "^25.5.4",
     "nodemon": "^2.0.4",
     "redis-mock": "^0.49.0",
-    "supertest": "^4.0.2",
-    "@bbc/apache2-license-checker": "^1.1.4"
+    "supertest": "^4.0.2"
   },
   "dependencies": {
     "@dojot/microservice-sdk": "0.1.9",
-    "@godaddy/terminus": "^4.4.1",
     "compression": "^1.7.4",
     "crypto-js": "^4.0.0",
     "express": "^4.17.1",
@@ -72,7 +71,6 @@
       "app/**/*.js",
       "!index.js",
       "!app/App.js",
-      "!app/Terminus.js",
       "!app/Errors/*",
       "!app/WhereProcessing/Parser.js"
     ],
