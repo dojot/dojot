@@ -4,11 +4,9 @@ const https = require('https');
 const util = require('util');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
-// Loading the configurations with the configManager
+
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
-
 const userConfigFile = process.env.KAFKA_WS_APP_USER_CONFIG_FILE || 'production.conf';
-
 ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
