@@ -1,6 +1,6 @@
 const http = require('http');
 
-async function check(url, timeout) {
+async function check(url, timeout, logger) {
   return new Promise((resolve) => {
     const req = http.get(url, { timeout }, (res) => {
       let data = '';
@@ -18,23 +18,25 @@ async function check(url, timeout) {
           resolve(false);
         }
       });
-    }).on('error', () => {
+    }).on('error', (ex) => {
+      logger.debug('EjbcaHealthCheck - Connection error', ex);
       resolve(false);
     }).on('timeout', () => {
-      req.abort();
+      req.destroy(new Error('EjbcaHealthCheck - Connection timeout'));
       resolve(false);
     });
   });
 }
 
 class EjbcaHealthCheck {
-  constructor({ url, delay }) {
+  constructor({ url, delay, logger }) {
     Object.defineProperty(this, 'url', { value: url });
     Object.defineProperty(this, 'delay', { value: delay });
+    Object.defineProperty(this, 'logger', { value: logger });
   }
 
   async run(signalReady, signalNotReady) {
-    const result = await check(this.url, this.delay);
+    const result = await check(this.url, this.delay, this.logger);
     if (result) {
       signalReady();
     } else {

@@ -8,7 +8,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils,
     dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration, logger, errorTemplate,
+    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider,
   }) {
     Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
     Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
@@ -23,6 +23,7 @@ class CertificateService {
     Object.defineProperty(this, 'logger', { value: logger });
     Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
     Object.defineProperty(this, 'error', { value: errorTemplate });
+    Object.defineProperty(this, 'deviceMgrProvider', { value: deviceMgrProvider });
   }
 
   /**
@@ -39,10 +40,15 @@ class CertificateService {
       this.pkiUtils.checkPublicKey(csr.subjectPublicKeyInfo);
     }
 
-    const subjectDN = this.dnUtils.from(csr.subject, true)
-      .verify()
-      .cnamePrefix(this.tenant)
-      .stringify();
+    const distinguishedNames = this.dnUtils.from(csr.subject, true).verify();
+
+    // ensure that the current tenant owns the device
+    await this.ensureOwner(distinguishedNames.CN);
+    if (belongsTo.device) {
+      await this.ensureOwner(belongsTo.device);
+    }
+
+    const subjectDN = distinguishedNames.cnamePrefix(this.tenant).stringify();
 
     const certificatePem = await this.ejbcaFacade.generateCertificate(
       subjectDN, this.certValidity, csrPem,
@@ -75,6 +81,11 @@ class CertificateService {
     * @returns the fingerprint of the registered certificate.
     */
   async registerCertificate({ caFingerprint, certificateChain, belongsTo }) {
+    // ensure that the current tenant owns the device
+    if (belongsTo && belongsTo.device) {
+      await this.ensureOwner(belongsTo.device);
+    }
+
     let rootCAPem = null;
     let rootCAFingerprint = caFingerprint;
 
@@ -175,6 +186,11 @@ class CertificateService {
   async changeOwnership(filterFields, belongsTo) {
     Object.assign(filterFields, { tenant: this.tenant });
 
+    // ensure that the current tenant owns the device
+    if (belongsTo && belongsTo.device) {
+      await this.ensureOwner(belongsTo.device);
+    }
+
     const result = await this.CertificateModel.findOneAndUpdate(
       filterFields, { belongsTo, modifiedAt: new Date() },
     ).maxTimeMS(this.queryMaxTimeMS).exec();
@@ -216,22 +232,29 @@ class CertificateService {
    *
    * @param {array} queryFields Certificate fields that must be returned in each record
    * @param {object} filterFields Filter fields to find the correct certificates in the database
-   * @param {number} limit Limit of records that must be returned
-   * @param {number} offset Offset in relation to the first record found by the query
+   * @param {number} limit (optional) Limit of records that must be returned
+   * @param {number} offset (optional) Offset in relation to the first record found by the query
    *
    * @returns a set of certificates that meet the search criteria
    */
   async listCertificates(queryFields, filterFields, limit, offset) {
     Object.assign(filterFields, { tenant: this.tenant });
 
+    const query = this.CertificateModel.find(filterFields)
+      .select(queryFields.join(' '))
+      .maxTimeMS(this.queryMaxTimeMS)
+      .lean();
+
+    if (limit) {
+      query.limit(limit);
+    }
+    if (offset) {
+      query.skip(offset);
+    }
+
     /* Executes the query and converts the results to JSON */
     const [results, itemCount] = await Promise.all([
-      this.CertificateModel.find(filterFields)
-        .select(queryFields.join(' '))
-        .limit(limit).skip(offset)
-        .maxTimeMS(this.queryMaxTimeMS)
-        .lean()
-        .exec(),
+      query.exec(),
       this.CertificateModel.countDocuments(filterFields),
     ]);
 
@@ -302,6 +325,20 @@ class CertificateService {
     const count = await this.CertificateModel.countDocuments(filterFields);
     if (count) {
       throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
+    }
+  }
+
+  /**
+   * Ensure that the current tenant owns the device.
+   *
+   * @param {string} deviceId Device identifier
+   *
+   * @throws an exception if no relationship is found between the device identifier and the tenant.
+   */
+  async ensureOwner(deviceId) {
+    const isOwner = await this.deviceMgrProvider.checkOwner(this.tenant, deviceId);
+    if (!isOwner) {
+      throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
     }
   }
 }
