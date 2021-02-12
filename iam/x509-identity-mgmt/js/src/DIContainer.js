@@ -438,13 +438,13 @@ function createObject(config) {
             'kafka.consumer': {
               'client.id': _.client.id,
               'group.id': _.group.id,
-              'max.in.flight.requests.per.connection': _.max.inflight.req.per.conn,
+              'max.in.flight.requests.per.connection': _.max.in.flight.req.per.conn,
               'metadata.broker.list': _.metadata.broker.list,
               'socket.keepalive.enable': _.socket.keepalive.enable,
             },
             'kafka.topic': {
-              acks: _.topic.acks,
-              'auto.offset.reset': _.topic.auto.offset.reset,
+              acks: config.kafka.topic.acks,
+              'auto.offset.reset': config.kafka.topic.auto.offset.reset,
             },
           },
         };
