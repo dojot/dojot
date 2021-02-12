@@ -22,7 +22,16 @@ async function check(url, timeout, logger) {
       logger.debug('EjbcaHealthCheck - Connection error', ex);
       resolve(false);
     }).on('timeout', () => {
-      req.destroy(new Error('EjbcaHealthCheck - Connection timeout'));
+      // Emitted when the underlying socket times out from inactivity.
+      // This only notifies that the socket has been idle, the request
+      // must be aborted manually...
+
+      // Deprecated since: v14.1.0, v13.14.0
+      req.abort();
+      // when we evolve the version of Node.js to 14.x LTS,
+      // we should use .destroy() instead of .abort():
+      // req.destroy(new Error('EjbcaHealthCheck - Connection timeout'));
+
       resolve(false);
     });
   });

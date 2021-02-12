@@ -33,7 +33,7 @@ class CertificateService {
    *
    * @returns an object containing the certificate in PEM format and its fingerprint.
    */
-  async generateCertificate({ csr: csrPem, belongsTo }) {
+  async generateCertificate({ csr: csrPem, belongsTo = {} }) {
     const csr = this.pkiUtils.parseCSR(csrPem);
 
     if (this.checkPublicKey) {
@@ -80,9 +80,9 @@ class CertificateService {
     *
     * @returns the fingerprint of the registered certificate.
     */
-  async registerCertificate({ caFingerprint, certificateChain, belongsTo }) {
+  async registerCertificate({ caFingerprint, certificateChain, belongsTo = {} }) {
     // ensure that the current tenant owns the device
-    if (belongsTo && belongsTo.device) {
+    if (belongsTo.device) {
       await this.ensureOwner(belongsTo.device);
     }
 
@@ -183,11 +183,11 @@ class CertificateService {
    *
    * @throws an exception if no record is found with the entered filters.
    */
-  async changeOwnership(filterFields, belongsTo) {
+  async changeOwnership(filterFields, belongsTo = {}) {
     Object.assign(filterFields, { tenant: this.tenant });
 
     // ensure that the current tenant owns the device
-    if (belongsTo && belongsTo.device) {
+    if (belongsTo.device) {
       await this.ensureOwner(belongsTo.device);
     }
 
@@ -237,7 +237,7 @@ class CertificateService {
    *
    * @returns a set of certificates that meet the search criteria
    */
-  async listCertificates(queryFields, filterFields, limit, offset) {
+  async listCertificates(queryFields, filterFields, limit = 0, offset = 0) {
     Object.assign(filterFields, { tenant: this.tenant });
 
     const query = this.CertificateModel.find(filterFields)
@@ -245,10 +245,10 @@ class CertificateService {
       .maxTimeMS(this.queryMaxTimeMS)
       .lean();
 
-    if (limit) {
+    if (limit > 0) {
       query.limit(limit);
     }
-    if (offset) {
+    if (offset > 0) {
       query.skip(offset);
     }
 

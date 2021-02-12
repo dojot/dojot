@@ -405,9 +405,9 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F]{10}$',
+                pattern: '^[0-9a-fA-F-]{6,36}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F]{10}$"',
+              message: 'should match pattern "^[0-9a-fA-F-]{6,36}$"',
             }],
           },
         });
@@ -642,9 +642,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F]{10}$',
+                pattern: '^[0-9a-fA-F-]{6,36}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F]{10}$"',
+              message: 'should match pattern "^[0-9a-fA-F-]{6,36}$"',
             }],
           },
         });

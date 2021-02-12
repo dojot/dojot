@@ -102,7 +102,13 @@ class DeviceMgrProvider {
         // Emitted when the underlying socket times out from inactivity.
         // This only notifies that the socket has been idle, the request
         // must be aborted manually...
-        request.destroy(new Error('Call DeviceManager microservice - Connection timeout'));
+
+        // Deprecated since: v14.1.0, v13.14.0
+        request.abort();
+        // when we evolve the version of Node.js to 14.x LTS,
+        // we should use .destroy() instead of .abort():
+        // request.destroy(new Error('Call DeviceManager microservice - Connection timeout'));
+        reject(new Error('Call DeviceManager microservice - Connection timeout'));
       });
       request.on('error', (ex) => {
         this.logger.error('Call DeviceManager microservice - Connection error', ex);

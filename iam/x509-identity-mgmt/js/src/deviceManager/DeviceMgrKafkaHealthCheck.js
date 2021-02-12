@@ -1,14 +1,16 @@
 /**
  * Device Manager KafkaConsumer Health Check
  */
-class DeviceMgrHealthCheck {
+class DeviceMgrKafkaHealthCheck {
   /**
    * The dependencies are injected through the constructor
    */
   constructor({
     deviceMgrKafkaConsumer,
+    logger,
   }) {
     Object.defineProperty(this, 'kafkaConsumer', { value: deviceMgrKafkaConsumer });
+    Object.defineProperty(this, 'logger', { value: logger });
   }
 
   /**
@@ -32,4 +34,4 @@ class DeviceMgrHealthCheck {
   }
 }
 
-module.exports = DeviceMgrHealthCheck;
+module.exports = DeviceMgrKafkaHealthCheck;

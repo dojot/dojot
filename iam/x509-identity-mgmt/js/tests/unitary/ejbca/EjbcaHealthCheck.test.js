@@ -4,6 +4,8 @@ const http = require('http');
 
 const EventEmitter = require('events');
 
+const { Logger } = require('@dojot/microservice-sdk');
+
 const EjbcaHealthCheck = require('../../../src/ejbca/EjbcaHealthCheck');
 
 describe("Unit tests of script 'EjbcaHealthCheck.js'", () => {
@@ -19,6 +21,7 @@ describe("Unit tests of script 'EjbcaHealthCheck.js'", () => {
     ejbcaHealthCheck = new EjbcaHealthCheck({
       url: global.config.ejbca.healthcheck.url,
       delay: global.config.ejbca.healthcheck.delayms,
+      logger: new Logger('EjbcaHealthCheck.test.js'),
     });
   });
 
