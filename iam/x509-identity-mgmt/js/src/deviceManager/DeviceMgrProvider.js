@@ -55,7 +55,7 @@ class DeviceMgrProvider {
   }
 
   /**
-   * Get the device from the original storage location.
+   * Gets the device from the original storage location.
    *
    * @param {string} tenant
    * @param {string} deviceId

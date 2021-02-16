@@ -39,8 +39,8 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
       - [Certificate Control Settings](#certificate-control-settings)
       - [MongoDBClient/mongoose Settings](#mongodbclientmongoose-settings)
       - [Logger Settings](#logger-settings)
-      - [Kafka Integration settings](#kafka-integration-settings)
-      - [_Device Manager_ Integration settings](#device-manager-integration-settings)
+      - [Kafka Integration Settings](#kafka-integration-settings)
+      - [_Device Manager_ Integration Settings](#device-manager-integration-settings)
     - [How to run](#how-to-run)
   - [Documentation](#documentation)
   - [Issues and help](#issues-and-help)
@@ -1100,7 +1100,7 @@ fore mentioned convention.
 | logger.file.size | string | `10m` | | X509IDMGMT_LOGGER_FILE_SIZE | Maximum size of the file after which it will rotate. This can be a number of bytes, or units of kb, mb, and gb. If using the units, add 'k', 'm', or 'g' as the suffix. The units need to directly follow the number. |
 
 
-#### Kafka Integration settings
+#### Kafka Integration Settings
 
 | Key | type | Default Value | Valid Values | Environment variable | Purpose |
 |-----|------|---------------|--------------|----------------------|---------|
@@ -1119,7 +1119,7 @@ fore mentioned convention.
 | kafka.consumer.subscription.backoff.delta.ms | integer | `1000` (1 second) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_DELTA_MS | Default value (in milliseconds) for the delta backoff time implemented by the subscription mechanism. |
 
 
-#### _Device Manager_ Integration settings
+#### _Device Manager_ Integration Settings
 
 | Key | type | Default Value | Valid Values | Environment variable | Purpose |
 |-----|------|---------------|--------------|----------------------|---------|

@@ -329,7 +329,7 @@ class CertificateService {
   }
 
   /**
-   * Ensure that the current tenant owns the device.
+   * Ensures that the current tenant owns the device.
    *
    * @param {string} deviceId Device identifier
    *
