@@ -1,12 +1,12 @@
 name: x509-identity-mgmt
 
-# Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in 'x509-identity-mgmt/**' is submitted
+# Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in 'iam/x509-identity-mgmt/**' is submitted
 on:
   create:
   push:
   pull_request:
     paths:
-      - "x509-identity-mgmt/**"
+      - "iam/x509-identity-mgmt/**"
 jobs:
   unit-tests:
     name: (x509-identity-mgmt) Unit Tests #  Path to help identify each job in the status checks
@@ -26,21 +26,22 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          cd x509-identity-mgmt/js
+          cd iam/x509-identity-mgmt/js
           npm ci
           npm run build --if-present
           npm run lint
+          npm run check-licenses
           npm test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
-          file: x509-identity-mgmt/js/coverage/lcov.info # Created when 'npm test' is executed
+          file: iam/x509-identity-mgmt/js/coverage/lcov.info # Created when 'npm test' is executed
           flags: x509IdentityMgmt # Flags allow you to isolate coverage reports for different tests
           name: x509-identity-mgmt # Custom name for the upload
 
   docker-hub:
     needs: unit-tests
-    name: (x509-identity-mgmt) Build and Publish image to DockerHUb # Path to help identify each job in the status checks
+    name: (x509-identity-mgmt) Build and Publish image to DockerHub # Path to help identify each job in the status checks
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false # If this is a PR, it won't run
     steps:
@@ -60,7 +61,7 @@ jobs:
           name: ${{ steps.get_owner.outputs.owner }}/x509-identity-mgmt
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          workdir: x509-identity-mgmt
+          workdir: iam/x509-identity-mgmt
           buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # Label with the built image's commit
           tag_names: true # Whether tag will be based in the branch name or in the tag name
 
@@ -85,8 +86,8 @@ jobs:
 
       - name: Generate docs
         env:
-          FOLDER_TO_GH_PAGES: x509-identity-mgmt
-          PATH_APIB: ./x509-identity-mgmt/js/apidocs/api-description.apib
+          FOLDER_TO_GH_PAGES: iam/x509-identity-mgmt
+          PATH_APIB: ./iam/x509-identity-mgmt/js/apidocs/api-description.apib
           VERSION_NAME: ${{ steps.version_doc.outputs.version }}
         run: |
           sh .github/workflows/scripts/doc_aglio_api.sh
