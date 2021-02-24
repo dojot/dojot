@@ -1,6 +1,10 @@
+# build files
 .DS_Store
 node_modules
 coverage
+js/node_modules
+js/coverage
+js/config/*.json
 
 # local env files
 .env

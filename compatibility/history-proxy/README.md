@@ -1,8 +1,6 @@
-# GUI Proxy [![CodeFactor](https://www.codefactor.io/repository/github/cfrancisco/forwards-history-proxy/badge)](https://www.codefactor.io/repository/github/cfrancisco/forwards-history-proxy) [![codecov](https://codecov.io/gh/cfrancisco/forwards-history-proxy/branch/development/graph/badge.svg)](https://codecov.io/gh/cfrancisco/forwards-history-proxy) [![License badge](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+# History Proxy
 
-
-The GUI Proxy allows the Dojot GUI v1 to be compliant with InfluxDb, which is used in newer versions of Dojot. To archive this 
-
+The History Proxy imitates the legacy History service, allowing old applications to be compliant with InfluxDb, which is used in newer versions of Dojot. 
 
 ## Use cases
 The service was tested (i.e., yielded the same results and patterns) in the following scenarios:
@@ -20,18 +18,21 @@ The service was tested (i.e., yielded the same results and patterns) in the foll
 
 ## Environment variables
 
-The environment variables are used in configuration parameters 
+The configuration used in service could be received from 2 ways: The environment variables and the configuration file. It's possible select the configuration file via the HISTORYPROXY_CONFIG_FILE variable. Its default value is production.conf. 
 
-| Environment variable     | Description                         |
-| ------------------------ | ----------------                    |
-| HISTORY_URL              | URL to access the History service   |
-| RETRIEVER_URL            | URL to access the Retriever service |
-| PORT                     | Port for starting the service       |
+Before running the History Proxy service within your environment, make sure you configure the environment variables to match your needs.
+
+
+| Environment variable           | Description                         |
+| ------------------------       | ----------------                    |
+| HISTORYPROXY_HISTORY_URL       | URL to access the History service   |
+| HISTORYPROXY_RETRIEVER_URL     | URL to access the Retriever service |
+| HISTORYPROXY_PORT              | Port for starting the service       |
  
 ## Configuration
 
 ```shell
-yarn install
+npm install
 ```
 ## Available Scripts
 
@@ -40,13 +41,13 @@ In the project directory, you can run:
 ## To run
 
 ```shell
-yarn start
+npm start
 ```
 
 ## To test
 
 ```shell
-yarn test
+npm test
 ```
 
 
@@ -54,20 +55,12 @@ yarn test
 
 The following command creates a docker image to be a proxy for InfluxDB, mocking the History responses.
 
-```
-It has three optional arguments:
- DOJOT_VERSION: Set the GUI version
- HISTORY_URL: URL to access the History service
- RETRIEVER_URL: URL to access the Retriever service
- PORT: Service's port
-```
-
 ```shell
-docker build -f Dockerfile -t [tag name] --build-arg DOJOT_VERSION=[version] --build-arg RETRIEVER_URL=[retriever url] --build-arg HISTORY_URL=[history url] --build-arg PORT=[port] .
+docker build -f Dockerfile -t [username]/history-proxy:[tag] .
 ```
 
 To run the created image:
 
 ```shell
-docker run -d [-n name] <tag name>
+docker run -d [-n name] history-proxy:[tag]
 ```

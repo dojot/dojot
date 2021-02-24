@@ -1,7 +1,8 @@
 const { Logger } = require('@dojot/microservice-sdk');
+
 const createError = require('http-errors');
 
-const logger = new Logger('gui-proxy');
+const logger = new Logger('history-proxy:express/handle/handle-response');
 
 const parseOneAttr = (deviceId, attr, data) => data.map((element) => {
   const newEl = { device_id: deviceId };
@@ -40,7 +41,7 @@ const handle = (r) => {
   // should be sent whenever the data is empty, even if the
   // attribute exists.
 
-  if (rawResponse.data.length === 0) {
+  if (rawResponse.length === 0) {
     return Promise.reject(createError(404, 'Attr not found', { response: { status: 404, statusText: 'Attr not found', data: { error: 'No data for the given attribute could be found' } } }));
   }
 
@@ -48,9 +49,9 @@ const handle = (r) => {
   let respData = {};
 
   if (r.isAllAttrs) {
-    respData = parseAllAttr(deviceId, rawResponse.data);
+    respData = parseAllAttr(deviceId, rawResponse);
   } else {
-    respDataAux = parseOneAttr(deviceId, attr, rawResponse.data);
+    respDataAux = parseOneAttr(deviceId, attr, rawResponse);
     if (r.isMultipleAttr) {
       respData[r.attr] = respDataAux;
     } else {

@@ -5,9 +5,15 @@
     "jest": true
   },
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "plugin:security/recommended",
+    "plugin:jest/recommended"
   ],
   "rules": {
     "import/no-unresolved": "off"
-  }
+  },
+  "plugins": [
+    "security",
+    "jest"
+  ]
 }

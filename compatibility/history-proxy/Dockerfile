@@ -1,24 +1,42 @@
-FROM node:12.18.2 as basis
+FROM node:12.20.1-alpine AS base
 
-#Set the Dojot version
-ARG DOJOT_VERSION='undefined'
-ENV DOJOT_VERSION $DOJOT_VERSION
+WORKDIR /usr/local/app
 
-#Set the PORT
-ARG PORT='3000'
-ENV PORT $PORT
+RUN apk --no-cache add \
+  bash \
+  g++ \
+  ca-certificates \
+  lz4-dev \
+  musl-dev \
+  cyrus-sasl-dev \
+  openssl-dev \
+  make \
+  python3
 
-#Set the URL to access Retriever
-ARG RETRIEVER_URL=''
-ENV RETRIEVER_URL $RETRIEVER_URL
+RUN apk add --no-cache --virtual \
+  .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
 
-#Set the URL to access History
-ARG HISTORY_URL=''
-ENV HISTORY_URL $HISTORY_URL
+COPY js/package*.json ./
+RUN npm install --production
 
-COPY package.json .
-COPY src ./src
+COPY js ./
 
-RUN npm install
+################################################################################
 
-CMD ["node", "src/index.js"]
+FROM node:12.20.1-alpine
+
+WORKDIR /opt/history-proxy
+
+RUN apk --no-cache add \
+  libsasl \
+  lz4-libs \
+  openssl \
+  tini \
+  curl
+
+COPY --from=base /usr/local/app  /opt/history-proxy
+
+
+ENTRYPOINT ["/sbin/tini", "--"]
+
+CMD ["npm", "run", "start"]

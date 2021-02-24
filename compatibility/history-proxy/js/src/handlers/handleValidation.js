@@ -1,6 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
-const logger = new Logger('gui-proxy');
+const logger = new Logger('history-proxy:express/handle/handle-validation');
 
 const handle = (r) => {
   const newR = { ...r };
@@ -18,7 +18,7 @@ const handle = (r) => {
     newR.dateFrom = '1970-01-01T00:00:00.000Z';
   }
   if (r.limit === undefined || r.limit === null || r.limit === 0) {
-    newR.limit = 256; // 2999
+    newR.limit = 256;
   }
 
   logger.info('Params were sent correctly.');
