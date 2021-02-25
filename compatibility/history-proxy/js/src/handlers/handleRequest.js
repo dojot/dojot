@@ -6,8 +6,6 @@ const https = require('https');
 
 require('express-async-errors');
 
-const axios = require('axios');
-
 const { unflatten } = require('flat');
 
 const config = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
@@ -59,7 +57,6 @@ const callInflux = async (options) => {
             const data = JSON.parse(rawData);
             resolve(data);
           } else {
-            // Device not found, resolve with null
             resolve(null);
           }
         } catch (ex) {
