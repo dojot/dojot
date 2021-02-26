@@ -17,7 +17,6 @@ const config = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
 
 const { framework } = require('./src/routes');
 
-
 Logger.setTransport('console', {
   level: config.logger.console.level.toLowerCase(),
 });

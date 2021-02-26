@@ -1,5 +1,26 @@
-const { createDataToBePassed } = require('../src/proxy');
-const validationHandler = require('../src/handlers/handleValidation');
+const mockConfig = {
+  'server': { 'retriever': { 'protocol': 'http' } },
+};
+
+const mockSdk = {
+  ConfigManager: {
+    loadSettings: jest.fn(),
+    getConfig: jest.fn(() => mockConfig),
+    transformObjectKeys: jest.fn((obj) => obj),
+  },
+  Logger: jest.fn(() => ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  })),
+};
+jest.mock('@dojot/microservice-sdk', () => mockSdk);
+
+
+const { createDataToBePassed } = require('../../src/proxy');
+
+const validationHandler = require('../../src/handlers/handleValidation');
 
 const CASE_ONE = 'caseOne';
 const CASE_TWO = 'caseTwo';
@@ -8,7 +29,7 @@ const CASE_FOUR = 'caseFour';
 const CASE_FIVE = 'caseFive';
 const CASE_SIX = 'caseSix';
 
-const EXPECTED_DEFAULT = {
+const default_expected = {
   deviceId: 'a1b1c1',
   attr: 'temperature',
   dateFrom: '1970-01-01T00:00:00.000Z',
@@ -34,7 +55,7 @@ const cases = {
     },
     expected:
     {
-      ...EXPECTED_DEFAULT,
+      ...default_expected,
     },
   },
   caseTwo: {
@@ -50,7 +71,7 @@ const cases = {
     },
     expected:
     {
-      ...EXPECTED_DEFAULT,
+      ...default_expected,
       limit: 100,
       order: 'desc',
     },
@@ -69,7 +90,7 @@ const cases = {
     },
     expected:
     {
-      ...EXPECTED_DEFAULT,
+      ...default_expected,
       limit: 200,
       order: 'desc',
       dateFrom: '2021-01-01T09:00:00.000Z',
@@ -90,7 +111,7 @@ const cases = {
     },
     expected:
     {
-      ...EXPECTED_DEFAULT,
+      ...default_expected,
       limit: 50,
       order: 'asc',
       dateTo: '2021-02-02T12:00:00.000Z'.split('.')[0],
@@ -104,12 +125,13 @@ const cases = {
         deviceId: 'a1b1c1',
       },
       query: {
+        firstN: 0,
         attr: ['temperature', 'temp2'],
       },
     },
     expected:
     {
-      ...EXPECTED_DEFAULT,
+      ...default_expected,
       isMultipleAttr: true,
     },
   },
@@ -120,18 +142,19 @@ const cases = {
         deviceId: 'a1b1c1',
       },
       query: {
-        attr: undefined,
       },
     },
     expected:
     {
-      ...EXPECTED_DEFAULT,
+      ...default_expected,
+      attr: undefined,
       isAllAttrs: true,
     },
   },
 };
 
 describe('Testing incoming params and outcoming params', () => {
+
   it('pass only one attribute', async () => {
     const paramList = cases[CASE_ONE].request;
     const data = createDataToBePassed(paramList);
@@ -173,11 +196,12 @@ describe('Testing incoming params and outcoming params', () => {
     expect({ ...result, dateTo }).toEqual(cases[CASE_FIVE].expected);
   });
 
-  it('checkinc all attrs (no send attributes)', async () => {
+  it('checking all attrs (no send attributes)', async () => {
     const paramList = cases[CASE_SIX].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_SIX].expected);
   });
+
 });

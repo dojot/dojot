@@ -1,6 +1,9 @@
 const responseHandler = require('./handlers/handleResponse');
+
 const influxHandler = require('./handlers/handleRequest');
+
 const validationHandler = require('./handlers/handleValidation');
+
 
 const createDataToBePassed = (req) => {
   const request = {

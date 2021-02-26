@@ -1,8 +1,6 @@
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
-const http = require('http');
-
-const https = require('https');
+const { callInflux } = require('./utils');
 
 require('express-async-errors');
 
@@ -12,12 +10,8 @@ const config = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
 
 const logger = new Logger('history-proxy:express/handle/handle-request');
 
-const httpAgent = (config.server.retriever.protocol.startsWith('https')) ? https : http;
-
-
 
 const handle = async (r) => {
-
   let url = `/tss/v1/devices/${r.deviceId}/attrs/${r.attr}/data`;
   if (r.isAllAttrs) {
     url = `/tss/v1/devices/${r.deviceId}/data`;
@@ -38,38 +32,9 @@ const handle = async (r) => {
     headers: { Authorization: r.headers }
   };
   logger.debug(`Requesting data to Influx with options: ${JSON.stringify(options)}`);
-
   const resp = await callInflux(options);
-
   return { ...r, rawResponse: resp.data };
 };
 
-const callInflux = async (options) => {
-  return new Promise((resolve, reject) => {
-    const request = httpAgent.get(options, (response) => {
-      let rawData = '';
-      response.on('data', (chunk) => {
-        rawData += chunk;
-      });
-      response.on('end', () => {
-        try {
-          if (response.statusCode === 200) {
-            const data = JSON.parse(rawData);
-            resolve(data);
-          } else {
-            resolve(null);
-          }
-        } catch (ex) {
-          logger.error('Connection error', ex);
-          reject(ex);
-        }
-      });
-      request.on('error', (ex) => {
-        logger.error('Connection error', ex);
-        reject(ex);
-      });
-    });
-  });
-}
 
 module.exports = { handle };
