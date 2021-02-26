@@ -1,6 +1,17 @@
 const awilix = require('awilix');
 
-const { Logger, ServiceStateManager, WebUtils } = require('@dojot/microservice-sdk');
+const url = require('url');
+
+const http = require('http');
+
+const https = require('https');
+
+const {
+  ServiceStateManager,
+  Logger,
+  Kafka,
+  WebUtils,
+} = require('@dojot/microservice-sdk');
 
 const pkiUtils = require('./core/pkiUtils');
 
@@ -8,17 +19,23 @@ const dnUtils = require('./core/dnUtils');
 
 const schemaValidator = require('./core/schemaValidator');
 
+const tokenGen = require('./core/tokenGen');
+
 const mongoClient = require('./db/mongoClient');
 
 const CertificateModel = require('./db/CertificateModel');
 
 const TrustedCAModel = require('./db/TrustedCAModel');
 
+const DeviceModel = require('./db/DeviceModel');
+
 const EjbcaSoapClient = require('./ejbca/EjbcaSoapClient');
 
 const EjbcaFacade = require('./ejbca/EjbcaFacade');
 
 const EjbcaHealthCheck = require('./ejbca/EjbcaHealthCheck');
+
+const readinessInterceptor = require('./express/interceptors/readinessInterceptor');
 
 const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
 
@@ -51,6 +68,11 @@ const regTrustCaSchema = require('../schemas/register-trusted-ca-certificate.jso
 const updTrustCaSchema = require('../schemas/update-trusted-ca-certificate.json');
 const regOrGenCertSchema = require('../schemas/register-or-generate-certificate.json');
 const chOwnCertSchema = require('../schemas/change-owner-certificate.json');
+
+const DeviceMgrEventEngine = require('./deviceManager/DeviceMgrEventEngine');
+const DeviceMgrEventRunnable = require('./deviceManager/DeviceMgrEventRunnable');
+const DeviceMgrProvider = require('./deviceManager/DeviceMgrProvider');
+const DeviceMgrKafkaHealthCheck = require('./deviceManager/DeviceMgrKafkaHealthCheck');
 
 const {
   asFunction, asValue, asClass, Lifetime, InjectionMode,
@@ -96,6 +118,7 @@ function createObject(config) {
       stateManager.registerService('server');
       stateManager.registerService('mongodb');
       stateManager.registerService('ejbca');
+      stateManager.registerService('deviceMgrKafka');
       return stateManager;
     }, {
       lifetime: Lifetime.SINGLETON,
@@ -140,6 +163,10 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
+    tokenGen: asFunction(tokenGen, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
     // +---------+
     // | MongoDB |
     // +---------+
@@ -163,6 +190,10 @@ function createObject(config) {
     }),
 
     trustedCAModel: asFunction(fromDecoratedClass(TrustedCAModel), {
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    deviceModel: asFunction(fromDecoratedClass(DeviceModel), {
       lifetime: Lifetime.SCOPED,
     }),
 
@@ -208,6 +239,7 @@ function createObject(config) {
       injector: () => ({
         interceptors: [
           // The order of the interceptors matters
+          DIContainer.resolve('readinessInterceptor'),
           DIContainer.resolve('responseCompressInterceptor'),
           DIContainer.resolve('requestIdInterceptor'),
           DIContainer.resolve('beaconInterceptor'),
@@ -247,6 +279,11 @@ function createObject(config) {
     // +--------------------+
     // | Route Interceptors |
     // +--------------------+
+
+    readinessInterceptor: asFunction(readinessInterceptor, {
+      injector: () => ({ path: '/' }),
+      lifetime: Lifetime.SINGLETON,
+    }),
 
     responseCompressInterceptor: asFunction(responseCompressInterceptor, {
       injector: () => ({ config: undefined, path: '/' }),
@@ -383,6 +420,74 @@ function createObject(config) {
       lifetime: Lifetime.SCOPED,
     }),
 
+    // +------------------------------+
+    // | DeviceManager Kafka Consumer |
+    // +------------------------------+
+    deviceMgrKafkaConsumer: asClass(Kafka.Consumer, {
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => {
+        const _ = config.kafka.consumer;
+        return {
+          config: {
+            'queued.max.messages.bytes': _.queued.max.msg.bytes,
+            'in.processing.max.messages': _.inprocess.max.msg,
+            'subscription.backoff.min.ms': _.subscription.backoff.min.ms,
+            'subscription.backoff.max.ms': _.subscription.backoff.max.ms,
+            'subscription.backoff.delta.ms': _.subscription.backoff.delta.ms,
+            'commit.interval.ms': _.commit.interval.ms,
+            'kafka.consumer': {
+              'client.id': _.client.id,
+              'group.id': _.group.id,
+              'max.in.flight.requests.per.connection': _.max.in.flight.req.per.conn,
+              'metadata.broker.list': _.metadata.broker.list,
+              'socket.keepalive.enable': _.socket.keepalive.enable,
+            },
+            'kafka.topic': {
+              acks: config.kafka.topic.acks,
+              'auto.offset.reset': config.kafka.topic.auto.offset.reset,
+            },
+          },
+        };
+      },
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    deviceMgrKafkaHealthCheck: asClass(DeviceMgrKafkaHealthCheck, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    deviceMgrEventEngine: asFunction(fromDecoratedClass(DeviceMgrEventEngine), {
+      injector: () => {
+        const topicSuffix = config.devicemgr.kafka.consumer.topic.suffix
+          .replace(/\./g, '\\.');
+
+        // eslint-disable-next-line security/detect-non-literal-regexp
+        const topics = new RegExp(`^.+\\.${topicSuffix}`);
+
+        return {
+          DIContainer,
+          deviceMgrKafkaTopics: topics,
+        };
+      },
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    deviceMgrEventRunnable: asFunction(fromDecoratedClass(DeviceMgrEventRunnable), {
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    deviceMgrProvider: asFunction(fromDecoratedClass(DeviceMgrProvider), {
+      injector: () => {
+        const deviceMgrUrl = url.parse(config.devicemgr.device.url);
+        const httpAgent = (deviceMgrUrl.protocol.startsWith('https')) ? https : http;
+        return {
+          httpAgent,
+          deviceMgrUrl,
+          deviceMgrTimeout: config.devicemgr.device.timeout.ms,
+        };
+      },
+      lifetime: Lifetime.SCOPED,
+    }),
   };
 
   // It registers all modules in the container so that they are instantiated only
