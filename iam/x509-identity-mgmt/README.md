@@ -39,6 +39,8 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
       - [Certificate Control Settings](#certificate-control-settings)
       - [MongoDBClient/mongoose Settings](#mongodbclientmongoose-settings)
       - [Logger Settings](#logger-settings)
+      - [Kafka Integration Settings](#kafka-integration-settings)
+      - [_Device Manager_ Integration Settings](#device-manager-integration-settings)
     - [How to run](#how-to-run)
   - [Documentation](#documentation)
   - [Issues and help](#issues-and-help)
@@ -1096,6 +1098,35 @@ fore mentioned convention.
 | logger.file.name | string | `dojot.x509-identity-mgmt-%DATE%.log` | | X509IDMGMT_LOGGER_FILE_NAME | Log file name pattern. |
 | logger.file.max | string | `7d` | | X509IDMGMT_LOGGER_FILE_MAX | Maximum number of logs to keep. If not set, no logs will be removed. This can be a number of files or number of days. If using days, add 'd' as the suffix. |
 | logger.file.size | string | `10m` | | X509IDMGMT_LOGGER_FILE_SIZE | Maximum size of the file after which it will rotate. This can be a number of bytes, or units of kb, mb, and gb. If using the units, add 'k', 'm', or 'g' as the suffix. The units need to directly follow the number. |
+
+
+#### Kafka Integration Settings
+
+| Key | type | Default Value | Valid Values | Environment variable | Purpose |
+|-----|------|---------------|--------------|----------------------|---------|
+| kafka.topic.acks | integer | `-1` | `all`, `-1`, `0`, `1` | X509IDMGMT_KAFKA_TOPIC_ACKS | The number of acknowledgments the producer requires the leader to have received before considering a request complete. See more [here](https://kafka.apache.org/documentation/#producerconfigs_acks). |
+| kafka.topic.auto.offset.reset | string | `latest` | `latest`, `earliest`, `none` | X509IDMGMT_KAFKA_TOPIC_AUTO_OFFSET_RESET | What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset). |
+| kafka.consumer.client.id | string | `x509-identity-mgmt` | - | X509IDMGMT_KAFKA_CONSUMER_CLIENT_ID | An id string to pass to the server when making requests. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_client.id). |
+| kafka.consumer.group.id | string | `x509-identity-mgmt-group` | - | X509IDMGMT_KAFKA_CONSUMER_GROUP_ID | A unique string that identifies the consumer group this consumer belongs to. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_group.id). |
+| kafka.consumer.max.in.flight.req.per.conn | integer | `1000000` | `[1,...]` | X509IDMGMT_KAFKA_CONSUMER_MAX_IN_FLIGHT_REQ_PER_CONN | The maximum number of unacknowledged requests the client will send on a single connection before blocking. See more [here](https://kafka.apache.org/documentation/#producerconfigs_max.in.flight.requests.per.connection). |
+| kafka.consumer.metadata.broker.list | string | `127.0.0.1:9092` | - | X509IDMGMT_KAFKA_CONSUMER_METADATA_BROKER_LIST | A comma-separated list containing the kafka's `host:port`. |
+| kafka.consumer.socket.keepalive.enable | boolean | `false` | `true` or `false` | X509IDMGMT_KAFKA_CONSUMER_SOCKET_KEEPALIVE_ENABLE | Flag indicating whether the consumer socket should be kept active. |
+| kafka.consumer.commit.interval.ms | integer | `5000` | positive integer | X509IDMGMT_KAFKA_CONSUMER_COMMIT_INTERVAL_MS | The frequency in milliseconds with which to save the position of the processor. See more [here](https://kafka.apache.org/documentation/#streamsconfigs_commit.interval.ms). |
+| kafka.consumer.inprocess.max.msg | integer | `1` | - | X509IDMGMT_KAFKA_CONSUMER_INPROCESS_MAX_MSG | maximum number of messages in processing. |
+| kafka.consumer.queued.max.msg.bytes | integer | `10485760` | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_QUEUED_MAX_MSG_BYTES | The largest record batch size allowed by Kafka. See more [here](https://kafka.apache.org/documentation/#topicconfigs_max.message.bytes). |
+| kafka.consumer.subscription.backoff.min.ms | integer | `1000` (1 second) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_MIN_MS | Default value (in milliseconds) for the initial backoff time implemented by the subscription mechanism. |
+| kafka.consumer.subscription.backoff.max.ms | integer | `60000` (60 seconds) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_MAX_MS | Default value (in milliseconds) for the maximum backoff time implemented by the subscription mechanism. |
+| kafka.consumer.subscription.backoff.delta.ms | integer | `1000` (1 second) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_DELTA_MS | Default value (in milliseconds) for the delta backoff time implemented by the subscription mechanism. |
+
+
+#### _Device Manager_ Integration Settings
+
+| Key | type | Default Value | Valid Values | Environment variable | Purpose |
+|-----|------|---------------|--------------|----------------------|---------|
+| devicemgr.device.url | string | `http://127.0.0.1:5000/device` | valid URL address | X509IDMGMT_DEVICEMGR_DEVICE_URL | URL address of the _Device Manager_ service to obtain information about the devices. |
+| devicemgr.device.timeout.ms | integer | `10000` (10 seconds) | `[0,...]` | X509IDMGMT_DEVICEMGR_DEVICE_TIMEOUT_MS | _Device Manager_ response timeout |
+| devicemgr.kafka.consumer.topic.suffix | string | `dojot.device-manager.device` | - | X509IDMGMT_DEVICEMGR_KAFKA_CONSUMER_TOPIC_SUFFIX | Suffix of the same topics that _Device Manager_ publishes data according to its events. |
+| devicemgr.healthcheck.ms | integer | `10000` (10 seconds) | `[0,...]` | X509IDMGMT_DEVICEMGR_HEALTHCHECK_MS | Time interval in which the Kafka consumer who consumes _Device Manager_ events is checked to see if he is healthy |
 
 
 ### How to run
