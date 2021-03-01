@@ -1,0 +1,23 @@
+{
+    \"metadata\": {
+        \"msgid\": \"example-msg-id\",
+        \"ts\": 1234567890,
+        \"service\": \"x509-identity-mgmt\",
+        \"tenant\": \"admin\",
+        \"contentType\": \"application/vnd.dojot.x509-identities+json\"
+    },
+    \"data\": {
+        \"eventType\": \"create\",
+        \"eventData\": {
+            \"fingerprint\": \"AB:CD:EF:01:02:03:04:05:06:07:08:08\",
+            \"certificatePem\": \"dojot example\",
+            \"createdAt\": 1234567890,
+            \"issuedByDojotPki\": true,
+            \"belongsTo\": {
+                \"device\": \"132456\",
+                \"application\": \"dojot example\"
+            },
+            \"autoRegistered\": false
+        }
+    }
+}

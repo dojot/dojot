@@ -1,0 +1,64 @@
+{
+  "name": "dojot-acl",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Service who consume from kafka and publish to redis",
+  "main": "index.js",
+  "scripts": {
+    "dojot-acl": "node index.js",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
+    "check-licenses": "apache2-license-checker",
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https:github.com/dojot"
+  },
+  "keywords": [
+    "dojot",
+    "kafka",
+    "redis",
+    "vernemq",
+    "acl"
+  ],
+  "author": "@jonaphael",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "dependencies": {
+    "@dojot/microservice-sdk": "^0.1.9",
+    "lodash": "^4.17.21",
+    "redis": "^3.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.21.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "fs": "^0.0.1-security",
+    "jest": "^26.6.3",
+    "openssl-nodejs": "^1.0.5"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!index.js",
+      "!app/App.js"
+    ],
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testMatch": [
+      "**/test/**/**.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ]
+  }
+}
