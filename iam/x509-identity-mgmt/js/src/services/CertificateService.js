@@ -321,7 +321,7 @@ class CertificateService {
    * database with the same fingerprint informed by parameter.
    */
   async checkExistingCertificate(fingerprint) {
-    const filterFields = { fingerprint, tenant: this.tenant };
+    const filterFields = { fingerprint };
     const count = await this.CertificateModel.countDocuments(filterFields);
     if (count) {
       throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
