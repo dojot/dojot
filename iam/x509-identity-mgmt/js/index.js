@@ -60,8 +60,11 @@ server.on('close', () => {
 
 // Emitted when an error occurs. Unlike net.Socket, the 'close' event will not
 // be emitted directly following this event unless server.close() is manually called.
-server.on('error', (e) => {
-  logger.error('Server experienced an error:', e);
+server.on('error', (err) => {
+  logger.error('Server experienced an error:', err);
+  if (err.code === 'EADDRINUSE') {
+    throw err;
+  }
 });
 
 // Begin accepting connections on the specified port and hostname.
