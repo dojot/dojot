@@ -37,6 +37,8 @@ const ejbcaHealthCheck = container.resolve('ejbcaHealthCheck');
 const mongoClient = container.resolve('mongoClient');
 const server = container.resolve('server');
 const framework = container.resolve('framework');
+const deviceMgrEventEngine = container.resolve('deviceMgrEventEngine');
+const deviceMgrKafkaHealthCheck = container.resolve('deviceMgrKafkaHealthCheck');
 
 // Emitted each time there is a request. Note that there may be multiple
 // requests per connection (in the case of keep-alive connections).
@@ -70,14 +72,22 @@ server.listen(config.server.port);
 // Starts the process of connecting to the database
 mongoClient.connect();
 
-// create an instance of http-terminator and instead of
-// using server.close(), use httpTerminator.terminate()
-const httpTerminator = createHttpTerminator({ server });
+// initializes the DeviceMgrEventEngine
+deviceMgrEventEngine.start();
 
 // The EJBCA health-check is done at intervals directly in the Event Loop
 stateManager.addHealthChecker('ejbca',
   ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
   config.ejbca.healthcheck.delayms);
+
+// The DeviceManager (Kafka Consumer) health-check is done at intervals directly in the Event Loop
+stateManager.addHealthChecker('deviceMgrKafka',
+  deviceMgrKafkaHealthCheck.readiness.bind(deviceMgrKafkaHealthCheck),
+  config.devicemgr.healthcheck.ms);
+
+// create an instance of http-terminator and instead of
+// using server.close(), use httpTerminator.terminate()
+const httpTerminator = createHttpTerminator({ server });
 
 // register handlers to gracefully shutdown the components...
 stateManager.registerShutdownHandler(async () => {
@@ -100,4 +110,11 @@ stateManager.registerShutdownHandler(() => {
       }
     });
   });
+});
+
+stateManager.registerShutdownHandler(async () => {
+  logger.debug('Stopping the DeviceMgrEventEngine...');
+  await deviceMgrEventEngine.stop();
+  logger.debug('the DeviceMgrEventEngine has been stopped!');
+  return Promise.resolve(true);
 });

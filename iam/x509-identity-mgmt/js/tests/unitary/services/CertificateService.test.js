@@ -85,6 +85,13 @@ function trustedCAServiceMock() {
   return trustedCAService;
 }
 
+function deviceMgrProviderMock() {
+  const deviceMgrProvider = {
+    checkOwner: jest.fn().mockResolvedValue(true),
+  };
+  return deviceMgrProvider;
+}
+
 beforeAll(() => {
   const certificateModel = certificateModelMock();
 
@@ -96,7 +103,10 @@ beforeAll(() => {
 
   const trustedCAService = trustedCAServiceMock();
 
+  const deviceMgrProvider = deviceMgrProviderMock();
+
   containerCradleTemplate = {
+    deviceMgrProvider,
     certificateModel,
     trustedCAService,
     ejbcaFacade,
@@ -135,11 +145,13 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       const certificateService = new CertificateService(containerCradle);
 
       await expect(certificateService.generateCertificate({
-        csr: util.p256CSR, belongsTo: {},
+        csr: util.p256CSR,
       })).resolves.toEqual({
         certificateFingerprint: util.p256CertFingerprint,
         certificatePem: util.p256Cert,
       });
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
 
       expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(1);
@@ -162,7 +174,7 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       const certificateService = new CertificateService(containerCradle);
 
       await expect(certificateService.generateCertificate({
-        csr: util.p256CSR, belongsTo: {},
+        csr: util.p256CSR,
       })).resolves.toEqual({
         certificateFingerprint: util.p256CertFingerprint,
         certificatePem: util.p256Cert,
@@ -170,6 +182,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       // without checking public key
       expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
 
       expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(1);
@@ -184,6 +198,68 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('should generate a certificate (with device association)', async () => {
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.generateCertificate({
+        csr: util.p256CSR, belongsTo: { device: 'abc123' },
+      })).resolves.toEqual({
+        certificateFingerprint: util.p256CertFingerprint,
+        certificatePem: util.p256Cert,
+      });
+
+      // the first call validates the device ID in the CSR's CN
+      // the second validates the device association payload
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(2);
+
+      expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.verify).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.cnamePrefix).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ejbcaFacade.generateCertificate).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an exception for not finding the device for the informed tenant', async () => {
+      // This mock simulates that the informed device has no relation to the tenant
+      // the first call validates the device ID in the CSR's CN
+      // the second does not validate the device association payload
+      containerCradle.deviceMgrProvider.checkOwner = jest.fn()
+        .mockResolvedValueOnce(true)
+        .mockResolvedValue(false);
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.generateCertificate({
+        csr: util.p256CSR, belongsTo: { device: 'abc123' },
+      })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(2);
+
+      expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.verify).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.cnamePrefix).toHaveBeenCalledTimes(0);
+      expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ejbcaFacade.generateCertificate).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -215,11 +291,11 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: util.certChainRootCAFingerprint,
         certificateChain: util.certChain,
-        belongsTo: {},
       })).resolves.toEqual({
         certificateFingerprint: util.certChainHostFingerprint,
       });
 
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(0);
       expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(5);
       expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(2);
       expect(containerCradle.pkiUtils.checkRemainingDays).toHaveBeenCalledTimes(1);
@@ -245,7 +321,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: util.certChainRootCAFingerprint,
         certificateChain: [hostCert, intermediateCA],
-        belongsTo: {},
       })).resolves.toEqual({
         certificateFingerprint: util.certChainHostFingerprint,
       });
@@ -275,7 +350,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       await expect(certificateService.registerCertificate({
         certificateChain: util.certChain,
-        belongsTo: {},
       })).resolves.toEqual({
         certificateFingerprint: util.certChainHostFingerprint,
       });
@@ -300,7 +374,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: util.certChainRootCAFingerprint,
         certificateChain: util.certChain,
-        belongsTo: {},
       })).rejects.toThrow();
     });
 
@@ -312,7 +385,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       await expect(certificateService.registerCertificate({
         certificateChain: [util.certChain[util.certChain.length - 1]],
-        belongsTo: {},
       })).rejects.toThrow();
     });
 
@@ -328,7 +400,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: 'ABC', // informed fingerprint does not match the one calculated using the CA certificate
         certificateChain: util.certChain,
-        belongsTo: {},
       })).rejects.toThrow();
     });
 
@@ -347,8 +418,38 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       await expect(certificateService.registerCertificate({
         certificateChain: util.certChain,
-        belongsTo: {},
       })).rejects.toThrow();
+    });
+
+    it('should throw an exception for not finding the device for the informed tenant', async () => {
+      // This mock simulates that the informed device has no relation to the tenant
+      containerCradle.deviceMgrProvider.checkOwner = jest.fn().mockResolvedValue(false);
+
+      containerCradle.pkiUtils.isRootCA = jest.fn().mockResolvedValue(true);
+
+      containerCradle.pkiUtils.getFingerprint = jest.fn()
+        .mockImplementationOnce(() => util.certChainHostFingerprint)
+        .mockImplementationOnce(() => util.certChainRootCAFingerprint);
+
+      containerCradle.trustedCAService.getPEM = jest.fn(
+        () => util.certChain[util.certChain.length - 1],
+      );
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.registerCertificate({
+        caFingerprint: util.certChainRootCAFingerprint,
+        certificateChain: util.certChain,
+        belongsTo: { device: 'abc123' },
+      })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.checkRemainingDays).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.assertLeaf).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.isRootCA).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -366,7 +467,7 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.changeOwnership({}, {})).resolves.toBeUndefined();
+      await expect(certificateService.changeOwnership({})).resolves.toBeUndefined();
 
       expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
@@ -379,11 +480,26 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.changeOwnership({}, {})).rejects.toThrow();
+      await expect(certificateService.changeOwnership({})).rejects.toThrow();
 
       expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an exception for not finding the device for the informed tenant', async () => {
+      // This mock simulates that the informed device has no relation to the tenant
+      containerCradle.deviceMgrProvider.checkOwner = jest.fn().mockResolvedValue(false);
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, { device: 'abc123' })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -444,7 +560,38 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.listCertificates([], {}, 1, 0))
+      await expect(certificateService.listCertificates([], {}))
+        .resolves.toEqual({ itemCount, results });
+
+      expect(containerCradle.certificateModel.model.find).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.select).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.limit).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.skip).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.lean).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('obtaining certificate list (with limit and offset)', () => {
+    let containerCradle = null;
+
+    beforeEach(() => {
+      containerCradle = { ...containerCradleTemplate };
+      containerCradle.certificateModel = certificateModelMock();
+    });
+
+    it('should get a list of certificates from the database', async () => {
+      const itemCount = 1;
+      const results = {};
+
+      containerCradle.certificateModel.model.exec = jest.fn(() => results);
+      containerCradle.certificateModel.model.countDocuments = jest.fn(() => itemCount);
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.listCertificates([], {}, 1, 1))
         .resolves.toEqual({ itemCount, results });
 
       expect(containerCradle.certificateModel.model.find).toHaveBeenCalledTimes(1);
