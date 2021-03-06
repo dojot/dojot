@@ -13,13 +13,13 @@ const {
   WebUtils,
 } = require('@dojot/microservice-sdk');
 
+const { getRootPackageName } = require('@dojot/microservice-sdk/lib/logging/Utils');
+
 const pkiUtils = require('./core/pkiUtils');
 
 const dnUtils = require('./core/dnUtils');
 
 const schemaValidator = require('./core/schemaValidator');
-
-const tokenGen = require('./core/tokenGen');
 
 const mongoClient = require('./db/mongoClient');
 
@@ -35,11 +35,7 @@ const EjbcaFacade = require('./ejbca/EjbcaFacade');
 
 const EjbcaHealthCheck = require('./ejbca/EjbcaHealthCheck');
 
-const readinessInterceptor = require('./express/interceptors/readinessInterceptor');
-
 const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
-
-const tokenParsingInterceptor = require('./express/interceptors/tokenParsingInterceptor');
 
 const throwAwayRoutes = require('./express/routes/throwAwayRoutes');
 
@@ -74,17 +70,24 @@ const DeviceMgrEventRunnable = require('./deviceManager/DeviceMgrEventRunnable')
 const DeviceMgrProvider = require('./deviceManager/DeviceMgrProvider');
 const DeviceMgrKafkaHealthCheck = require('./deviceManager/DeviceMgrKafkaHealthCheck');
 
+const NotificationEngine = require('./notifications/NotificationEngine');
+const OwnershipNotifier = require('./notifications/OwnershipNotifier');
+const TrustedCANotifier = require('./notifications/TrustedCANofitier');
+const NotificationKafkaHealthCheck = require('./notifications/NotificationKafkaHealthCheck');
+
 const {
   asFunction, asValue, asClass, Lifetime, InjectionMode,
 } = awilix;
 
 const {
+  readinessInterceptor,
   responseCompressInterceptor,
   requestIdInterceptor,
   beaconInterceptor,
   requestLogInterceptor,
   paginateInterceptor,
   jsonBodyParsingInterceptor,
+  tokenParsingInterceptor,
   staticFileInterceptor,
 } = WebUtils.framework.interceptors;
 
@@ -119,6 +122,7 @@ function createObject(config) {
       stateManager.registerService('mongodb');
       stateManager.registerService('ejbca');
       stateManager.registerService('deviceMgrKafka');
+      stateManager.registerService('notificationKafka');
       return stateManager;
     }, {
       lifetime: Lifetime.SINGLETON,
@@ -163,7 +167,7 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    tokenGen: asFunction(tokenGen, {
+    tokenGen: asFunction(WebUtils.createTokenGen, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -281,7 +285,10 @@ function createObject(config) {
     // +--------------------+
 
     readinessInterceptor: asFunction(readinessInterceptor, {
-      injector: () => ({ path: '/' }),
+      injector: () => ({
+        environment: process.env.NODE_ENV,
+        path: '/',
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -326,7 +333,10 @@ function createObject(config) {
     }),
 
     tokenParsingInterceptor: asFunction(tokenParsingInterceptor, {
-      injector: () => ({ path: '/' }),
+      injector: () => ({
+        ignoredPaths: ['/throw-away'],
+        path: '/',
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -486,6 +496,66 @@ function createObject(config) {
           deviceMgrTimeout: config.devicemgr.device.timeout.ms,
         };
       },
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    // +-----------------------------+
+    // | Notification Kafka Producer |
+    // +-----------------------------+
+    notificationKafkaProducer: asClass(Kafka.Producer, {
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => {
+        const _ = config.kafka.producer;
+        return {
+          config: {
+            'producer.connect.timeout.ms': _.connect.timeout.ms,
+            'producer.disconnect.timeout.ms': _.disconnect.timeout.ms,
+            'producer.flush.timeout.ms': _.flush.timeout.ms,
+            'producer.pool.interval.ms': _.pool.interval.ms,
+            'kafka.producer': {
+              acks: _.acks,
+              'client.id': _.client.id,
+              'compression.codec': _.compression.codec,
+              dr_cb: _.dr.cb,
+              'enable.idempotence': _.enable.idempotence,
+              'max.in.flight.requests.per.connection': _.max.in.flight.req.per.conn,
+              'metadata.broker.list': _.metadata.broker.list,
+              retries: _.retries,
+              'queue.buffering.max.kbytes': _.queue.buffering.max.kbytes,
+              'queue.buffering.max.ms': _.queue.buffering.max.ms,
+              'retry.backoff.ms': _.retry.backoff.ms,
+              'batch.num.messages': _.batch.num.msg,
+              'socket.keepalive.enable': _.socket.keepalive.enable,
+            },
+          },
+        };
+      },
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    notificationKafkaHealthCheck: asClass(NotificationKafkaHealthCheck, {
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    notificationEngine: asFunction(fromDecoratedClass(NotificationEngine), {
+      injector: () => ({
+        service: getRootPackageName(),
+        contentType: 'application/vnd.dojot.x509-identities+json',
+      }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    ownershipNotifier: asFunction(fromDecoratedClass(OwnershipNotifier), {
+      injector: () => ({
+        kafkaTopicSuffix: config.notifications.kafka.producer.ownership.topic.suffix,
+      }),
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    trustedCANotifier: asFunction(fromDecoratedClass(TrustedCANotifier), {
+      injector: () => ({
+        kafkaTopicSuffix: config.notifications.kafka.producer.trustedca.topic.suffix,
+      }),
       lifetime: Lifetime.SCOPED,
     }),
   };

@@ -8,7 +8,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils,
     dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider,
+    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier,
   }) {
     Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
     Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
@@ -24,6 +24,7 @@ class CertificateService {
     Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
     Object.defineProperty(this, 'error', { value: errorTemplate });
     Object.defineProperty(this, 'deviceMgrProvider', { value: deviceMgrProvider });
+    Object.defineProperty(this, 'ownershipNotifier', { value: ownershipNotifier });
   }
 
   /**
@@ -68,7 +69,10 @@ class CertificateService {
       },
       tenant: this.tenant,
     });
-    await model.save();
+    const certRecord = await model.save();
+
+    // Notifies the creation of ownership if the certificate belongs to an owner
+    await this.ownershipNotifier.creation(certRecord, certRecord.belongsTo);
 
     return { certificateFingerprint, certificatePem };
   }
@@ -170,7 +174,10 @@ class CertificateService {
       belongsTo,
       tenant: this.tenant,
     });
-    await model.save();
+    const certRecord = await model.save();
+
+    // Notifies the creation of ownership if the certificate belongs to an owner
+    await this.ownershipNotifier.creation(certRecord, certRecord.belongsTo);
 
     return { certificateFingerprint: certFingerprint };
   }
@@ -191,12 +198,38 @@ class CertificateService {
       await this.ensureOwner(belongsTo.device);
     }
 
-    const result = await this.CertificateModel.findOneAndUpdate(
+    // By default, findOneAndUpdate() returns the document as it was before update was applied.
+    const certRecord = await this.CertificateModel.findOneAndUpdate(
       filterFields, { belongsTo, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).exec();
+    ).maxTimeMS(this.queryMaxTimeMS).lean().exec();
 
-    if (!result) {
+    if (!certRecord) {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+    }
+
+    // -------------------------------------------------------------
+    // Checks what type of ownership notification needs to be issued
+    // -------------------------------------------------------------
+    const previousBelongsTo = certRecord.belongsTo;
+
+    if ((!previousBelongsTo.device && !previousBelongsTo.application)
+        && (belongsTo.device || belongsTo.application)) {
+      // If the certificate did not belong to any owner, but now
+      // it does, then we must notify the 'creation' of ownership
+      await this.ownershipNotifier.creation(certRecord, belongsTo);
+      // -----------------------------------------------------------
+    } else if ((previousBelongsTo.device || previousBelongsTo.application)
+        && (belongsTo.device || belongsTo.application)) {
+      // If the certificate belonged to one owner, but now belongs
+      // to another owner, then we must notify a 'change' of ownership
+      await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo);
+      // -----------------------------------------------------------
+    } else if ((previousBelongsTo.device || previousBelongsTo.application)
+        && (!belongsTo.device && !belongsTo.application)) {
+      // If the certificate belonged to an owner, but now it does not belong
+      // to anyone else, then we must notify a 'removal' of ownership
+      await this.ownershipNotifier.removal(certRecord, previousBelongsTo);
+      // -----------------------------------------------------------
     }
   }
 
@@ -286,6 +319,9 @@ class CertificateService {
 
       await this.ejbcaFacade.revokeCertificate(issuerDN, certificateSN);
     }
+
+    // Notifies the removal of ownership if the certificate belonged to an owner before
+    await this.ownershipNotifier.removal(certRecord, certRecord.belongsTo);
   }
 
   /**
@@ -294,10 +330,11 @@ class CertificateService {
    * This is used by internal services that need a certificate to establish a
    * mutual TLS with other parties.
    * @param {object} Object with a CSR that will serve as the basis for generating the certificate.
+   * @param {object} belongsTo Data of whom the certificate should be associated
    *
    * @returns an object containing the certificate in PEM format and its fingerprint.
    */
-  async throwAwayCertificate({ csr: csrPem }) {
+  async throwAwayCertificate({ csr: csrPem, belongsTo = {} }) {
     const csr = this.pkiUtils.parseCSR(csrPem);
 
     const subjectDN = this.dnUtils.from(csr.subject).stringify();
@@ -307,6 +344,16 @@ class CertificateService {
     );
 
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
+
+    const dummyCertRecord = {
+      fingerprint: certificateFingerprint,
+      pem: certificatePem,
+      issuedByDojotPki: true,
+      autoRegistered: false,
+    };
+
+    // Notifies the creation of ownership if the certificate belongs to an owner
+    await this.ownershipNotifier.creation(dummyCertRecord, belongsTo);
 
     return { certificateFingerprint, certificatePem };
   }

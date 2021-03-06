@@ -1,4 +1,4 @@
-FROM node:12.20.1-alpine AS base
+FROM node:12.21.0-alpine AS base
 
 WORKDIR /usr/local/app
 
@@ -34,7 +34,7 @@ COPY js ./
 
 ################################################################################
 
-FROM node:12.20.1-alpine
+FROM node:12.21.0-alpine
 
 WORKDIR /opt/x509-identity-mgmt
 

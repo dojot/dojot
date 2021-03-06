@@ -1,0 +1,39 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable":"node",
+      "runtimeVersion": "12.21.0",
+      "runtimeArgs": ["--unhandled-rejections=strict"],
+      "program": "${workspaceFolder}/index.js",
+      "env": {
+        //"NODE_DEBUG": "tls,https,http,request",
+        //"X509IDMGMT_MONGO_CONN_OPTIONS_USER": "root",
+        //"X509IDMGMT_MONGO_CONN_OPTIONS_PASS": "pass",
+        //"X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE": "admin",
+        "NODE_ENV": "development",
+        "X509IDMGMT_SERVER_PORT": "3333",
+        "X509IDMGMT_SERVER_HEALTHCHECK_PORT": "9797",
+        "X509IDMGMT_EJBCA_PKCS12": "./tls/ejbcaclient.p12",
+        "X509IDMGMT_EJBCA_PKCS12SECRET": "./tls/ejbcaclient.secret",
+        "X509IDMGMT_EJBCA_TRUSTEDCA": "./tls/ejbcaclient-trustedca.pem",
+        "X509IDMGMT_LOGGER_CONSOLE_LEVEL": "debug",
+        "X509IDMGMT_LOGGER_FILE_ENABLE": "false",
+        "X509IDMGMT_LOGGER_FILE_LEVEL": "debug",
+        "X509IDMGMT_DEVICEMGR_DEVICE_URL": "http://127.0.0.1:5757/device",
+        "X509IDMGMT_KAFKA_CONSUMER_METADATA_BROKER_LIST": "kafka:9092" // needs to include an alias in the '/etc/hosts' file
+      },
+      "console": "internalConsole",
+      "outputCapture": "std"
+    }
+  ]
+}
