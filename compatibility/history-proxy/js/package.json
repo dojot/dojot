@@ -59,7 +59,6 @@
     "axios": "^0.21.1",
     "express": "^4.17.1",
     "express-async-errors": "^3.1.1",
-    "express-http-proxy": "^1.6.2",
     "flat": "^5.0.2",
     "http-errors": "^1.8.0",
     "http-proxy-middleware": "^1.0.6",
