@@ -6,11 +6,10 @@ class TrustedCAService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    trustedCAModel, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils,
+    trustedCAModel, certificateModel, tenant, pkiUtils, dnUtils,
     rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
     errorTemplate, trustedCANotifier,
   }) {
-    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
     Object.defineProperty(this, 'tenant', { value: tenant });
     Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
     Object.defineProperty(this, 'dnUtils', { value: dnUtils });

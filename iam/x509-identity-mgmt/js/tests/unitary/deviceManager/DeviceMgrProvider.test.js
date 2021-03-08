@@ -6,11 +6,11 @@ const http = require('http');
 
 const EventEmitter = require('events');
 
-const { Logger } = require('@dojot/microservice-sdk');
+const { Logger, WebUtils } = require('@dojot/microservice-sdk');
 
 const DeviceMgrProvider = require('../../../src/deviceManager/DeviceMgrProvider');
 
-const createTokenGen = require('../../../src/core/tokenGen');
+const { createTokenGen } = WebUtils;
 
 function deviceModelMock() {
   const deviceModel = {

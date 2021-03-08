@@ -1,7 +1,7 @@
 const { Logger, WebUtils } = require('@dojot/microservice-sdk');
 const supertest = require('supertest');
 
-const util = require('../util.test');
+const util = require('../../../util.test');
 
 const generatedCert = {
   certificateFingerprint: util.p256CertFingerprint,
@@ -121,12 +121,26 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
     () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
       .send({
         belongsTo: {
-          application: 'kafka-consumer',
+          device: 'abc123',
         },
       })
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
+      }));
+
+  it('should deny the change of ownership in the case of owner = application',
+    () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
+      .send({
+        belongsTo: {
+          application: 'kafka-consumer',
+        },
+      })
+      .expect(403)
+      .then((res) => {
+        expect(res.body).toEqual({
+          error: 'Operations on certificates for applications are not authorized through this endpoint.',
+        });
       }));
 
   it('should delete certificate',

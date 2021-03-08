@@ -1,7 +1,7 @@
 const { Logger, WebUtils } = require('@dojot/microservice-sdk');
 const supertest = require('supertest');
 
-const util = require('../util.test');
+const util = require('../../../util.test');
 
 const generatedCert = {
   certificateFingerprint: util.p256CertFingerprint,
