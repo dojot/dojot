@@ -6,6 +6,10 @@ function belongsToWhom(owner) {
   let ownerIdentifier = null;
   const belongsTo = {};
 
+  if (!owner) {
+    return null;
+  }
+
   // checks who the certificate belongs to...
   if (typeof owner.device === 'string') {
     // the certificate belongs to a device!
@@ -24,6 +28,10 @@ function belongsToWhom(owner) {
 function belongedToWhom(previousOwner) {
   let previousOwnerIdentifier = null;
   const previousBelongsTo = {};
+
+  if (!previousOwner) {
+    return null;
+  }
 
   // checks who the certificate belonged to before...
   if (typeof previousOwner.device === 'string') {

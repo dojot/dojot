@@ -13,8 +13,6 @@ const {
   WebUtils,
 } = require('@dojot/microservice-sdk');
 
-const { getRootPackageName } = require('@dojot/microservice-sdk/lib/logging/Utils');
-
 const pkiUtils = require('./core/pkiUtils');
 
 const dnUtils = require('./core/dnUtils');
@@ -539,7 +537,7 @@ function createObject(config) {
 
     notificationEngine: asFunction(fromDecoratedClass(NotificationEngine), {
       injector: () => ({
-        service: getRootPackageName(),
+        service: config.kafka.producer.client.id,
         contentType: 'application/vnd.dojot.x509-identities+json',
       }),
       lifetime: Lifetime.SINGLETON,

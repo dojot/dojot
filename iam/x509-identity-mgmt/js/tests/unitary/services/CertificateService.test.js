@@ -659,6 +659,20 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(0);
     });
 
+    it('should throw an exception because there is more than one type of owner for the certificate', async () => {
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, { application: 'kafka-consumer', device: 'abc123' })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(0);
+    });
+
     it('should throw an exception for not finding the device for the informed tenant', async () => {
       // This mock simulates that the informed device has no relation to the tenant
       containerCradle.deviceMgrProvider.checkOwner = jest.fn().mockResolvedValue(false);

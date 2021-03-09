@@ -45,9 +45,9 @@ class CertificateService {
 
     // ensure that the current tenant owns the device
     await this.ensureOwner(distinguishedNames.CN);
-    if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
-    }
+
+    // Checks on the certificate owner
+    await this.checkBelongsTo(belongsTo);
 
     const subjectDN = distinguishedNames.cnamePrefix(this.tenant).stringify();
 
@@ -85,10 +85,8 @@ class CertificateService {
     * @returns the fingerprint of the registered certificate.
     */
   async registerCertificate({ caFingerprint, certificateChain, belongsTo = {} }) {
-    // ensure that the current tenant owns the device
-    if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
-    }
+    // Checks on the certificate owner
+    await this.checkBelongsTo(belongsTo);
 
     let rootCAPem = null;
     let rootCAFingerprint = caFingerprint;
@@ -193,10 +191,8 @@ class CertificateService {
   async changeOwnership(filterFields, belongsTo = {}) {
     Object.assign(filterFields, { tenant: this.tenant });
 
-    // ensure that the current tenant owns the device
-    if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
-    }
+    // Checks on the certificate owner
+    await this.checkBelongsTo(belongsTo);
 
     // By default, findOneAndUpdate() returns the document as it was before update was applied.
     const certRecord = await this.CertificateModel.findOneAndUpdate(
@@ -372,6 +368,23 @@ class CertificateService {
     const count = await this.CertificateModel.countDocuments(filterFields);
     if (count) {
       throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
+    }
+  }
+
+  /**
+   * Checks on the certificate owner.
+   *
+   * @param {object} belongsTo to identify who owns the certificate.
+   */
+  async checkBelongsTo(belongsTo) {
+    // ensure that the certificate belongs to only one type of owner
+    if (belongsTo.device && belongsTo.application) {
+      throw this.error.BadRequest('The certificate must belong to only one type of owner.');
+    }
+
+    // ensure that the current tenant owns the device
+    if (belongsTo.device) {
+      await this.ensureOwner(belongsTo.device);
     }
   }
 
