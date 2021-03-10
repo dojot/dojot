@@ -31,6 +31,7 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
     - [How to register an external certificate (issued by a trusted CA)](#how-to-register-an-external-certificate-issued-by-a-trusted-ca)
     - [How to remove an external certificate](#how-to-remove-an-external-certificate)
     - [How to associate a device with a certificate](#how-to-associate-a-device-with-a-certificate)
+    - [How to unassociate a device with a certificate](#how-to-unassociate-a-device-with-a-certificate)
   - [Running the service](#running-the-service)
     - [Configurations](#configurations)
       - [HTTP Server settings](#http-server-settings)
@@ -42,6 +43,8 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
       - [Kafka Integration Settings](#kafka-integration-settings)
       - [_Device Manager_ Integration Settings](#device-manager-integration-settings)
     - [How to run](#how-to-run)
+  - [Debugging the service](#debugging-the-service)
+  - [Testing the service](#testing-the-service)
   - [Documentation](#documentation)
   - [Issues and help](#issues-and-help)
 
@@ -947,6 +950,16 @@ HTTP/1.1 204 No Content
 
 ### How to associate a device with a certificate
 
+First of all, it is worth mentioning that the fastest way to associate a device
+with a certificate is in the same operation in which the certificate is
+_generated_ (from the sending of a CSR) or _registered as trusted_ (from the
+sending of a PEM certificate external). In this case, it is enough to inform the
+attribute `belongsTo.device` inside the payload in the request body.
+
+However, there is the case where the certificate is registered even before a
+device is registered on the platform. therefore, the association is made in a
+step subsequent to the registration of the certificate.
+
 To associate a device represented on the platform with a certificate, simply
 enter the device identifier for the certificate endpoint, as follows:
 
@@ -988,6 +1001,49 @@ The answer would be a simple confirmation:
 HTTP/1.1 204 No Content
 ~~~
 
+This approach serves both to associate a device with a certificate and to change
+the device associated with the certificate.
+
+__Note that__ we can also call this operation _Certificate Ownership Creation_
+or _Certificate Ownership Change_ in the case where the certificate already had
+a previous owner.
+
+### How to unassociate a device with a certificate
+
+To undo a device's association with a certificate, simply pass the `null` value
+as the device's identifier, as follows:
+
+~~~HTTP
+PATCH <base-url>/v1/certificates/<certificateFingerprint>
+Authorization: Bearer JWT
+Content-type: application/json
+
+{
+  "belongsTo" : {
+    "device" : null
+  }
+}
+~~~
+
+An alternative to this mode is to use the `DELETE` HTTP method on the
+`<base-url>/v1/certificates/<certificateFingerprint>/belongsto` endpoint,
+thus, it is not necessary to inform a body for the request, as follows:
+
+~~~HTTP
+DELETE <base-url>/v1/certificates/<certificateFingerprint>/belongsto
+Authorization: Bearer JWT
+~~~
+
+__Caution:__ Pay close attention to the endpoint `.../belongsto` suffix so as
+not to remove the _certificate record_ instead of the _association_!
+
+Both approaches will have the same result, that is, the device will no longer be
+associated with the certificate. The difference is that using the `DELETE`
+method will remove the `belongsTo.device` sub attribute from the certificate
+record, while the `PATCH` method will keep the sub attribute with a `null`
+value. In practice, the _service_ behaves in the same way for both approaches.
+
+__Note that__ we can also call this operation _Certificate Ownership Removal_.
 
 ## Running the service
 
@@ -1152,6 +1208,90 @@ docker push <username>/x509-identity-mgmt:<tag>
 __NOTE THAT__  you can use the official image provided by dojot in its
 [DockerHub page](https://hub.docker.com/r/dojot/x509-identity-mgmt).
 
+## Debugging the service
+
+To debug the service in a development environment, we prefer to use the VS Code,
+and for that there is the [.vscode/launch.json](./js/.vscode/launch.json) file
+that can be studied and there you will have tips on what you need to be present
+in your local environment to perform the service outside the container.
+
+See also the [configuration](./js/config/default.conf) file used by the service,
+look for URLs there and you will have a good tip of what needs to be
+externalized from the _docker-compose_ environment for the service to have
+access.
+
+Basically, you must attend to the _version_ of Node.js and have installed the
+_build-essential_ library (in the case of Linux distributions based on Debian).
+It is likely that in order to compile the `node-rdkafka` _node_module_ it will
+be necessary to install the _gzip compression_ library. In this case, the most
+advisable is to study the dependencies declared in the [Dockerfile](./Dockerfile)
+file to have an idea of what is needed.
+
+For the _x509-identity-mgmt_ service to be able to access the other services on
+the dojot platform, it is necessary to map the service container _ports_ to
+ports on your _localhost_ (based on a _docker-compose_ deployment).
+See the [.vscode/launch.json](./js/.vscode/launch.json) file for dependent
+services.
+
+In order for the service (running locally) to be able to connect to Kafka
+(inside the docker-compose), in addition to externalizing the Kafka container
+port to your localhost, it is also necessary to edit the `/etc/hosts` file on
+your Linux:
+~~~shell
+$ sudo vi /etc/hosts
+~~~
+
+And include the following entry:
+
+~~~
+127.0.0.1 kafka
+~~~
+
+This way, your local DNS will know how to correctly resolve the domain for the
+_kafka_ service (remember that it is necessary to externalize the Kafka
+container port to your localhost).
+
+In order for the service (running locally) to connect to the EJBCA container,
+it is necessary to obtain the access files generated by the EJBCA, for this you
+will have to copy the files from the _docker volume_ to your local development
+directory:
+
+~~~shell
+$ EJBCA_CONTAINER_ID=$(docker ps --quiet --filter "label=com.docker.compose.service=x509-ejbca")
+
+$ docker cp ${EJBCA_CONTAINER_ID}:/opt/tls .
+~~~
+
+Assuming that your current directory is the _root_ of the project, that is, the
+same directory as the `package.json` file, The `./tls` subdirectory will be
+created and the files needed to connect to the EJBCA container will be inside.
+Remembering that for this to work, it is necessary to use dojot's
+`docker-compose` deployment.
+
+
+## Testing the service
+
+To perform unit tests, just open a terminal in the project's root directory
+(the same directory as the `package.json` file) and execute the following
+command:
+
+~~~shell
+$ npm test
+~~~
+
+Unit tests will be performed and a test coverage report will be generated in
+the `./coverage` directory.
+To view the test coverage report, simply open the
+`./coverage/lcov-report/index.html` file in a browser.
+
+To debug the unit tests, run the command:
+
+~~~shell
+$ npm run debugtest
+~~~
+
+From there, you can use the VS Code to attach to the running process and debug
+the test cases. Learn more at [Jest Troubleshooting](https://jestjs.io/docs/troubleshooting#debugging-in-vs-code).
 
 ## Documentation
 

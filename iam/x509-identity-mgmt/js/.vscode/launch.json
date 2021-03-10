@@ -17,9 +17,12 @@
       "program": "${workspaceFolder}/index.js",
       "env": {
         //"NODE_DEBUG": "tls,https,http,request",
+        //"X509IDMGMT_MONGO_CONN_URI": "mongodb://127.0.0.1:27017/x509-identity-mgmt",
         //"X509IDMGMT_MONGO_CONN_OPTIONS_USER": "root",
         //"X509IDMGMT_MONGO_CONN_OPTIONS_PASS": "pass",
         //"X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE": "admin",
+        //"X509IDMGMT_EJBCA_WSDL": "https://127.0.0.1:8443/ejbca/ejbcaws/ejbcaws?wsdl",
+        //"X509IDMGMT_EJBCA_HEALTHCHECK_URL": "http://127.0.0.1:8080/ejbca/publicweb/healthcheck/ejbcahealth",
         "NODE_ENV": "development",
         "X509IDMGMT_SERVER_PORT": "3333",
         "X509IDMGMT_SERVER_HEALTHCHECK_PORT": "9797",
