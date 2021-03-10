@@ -157,5 +157,36 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
     ],
   };
 
-  return [certsRoute, certsFingerprintRoute];
+  const certsBelongsToRoute = {
+    mountPoint,
+    name: 'certificate-belongsto-route',
+    path: ['/certificates/:fingerprint/belongsto'],
+    params: [{
+      name: 'fingerprint',
+      trigger: sanitizeParams.fingerprintHandler,
+    }],
+    handlers: [
+      {
+        /* Delete the ownership of a certificate. */
+        method: 'delete',
+        middleware: [
+          async (req, res) => {
+            const model = req.scope.resolve(CERT_MODEL);
+            const service = req.scope.resolve(CERT_SERVICE);
+
+            const { fingerprint } = req.params;
+            const filterFields = model.parseConditionFields({ fingerprint });
+
+            // to remove the certificate owner, just pass
+            // the 'belongsTo' parameter as an empty object
+            await service.changeOwnership(filterFields, {});
+
+            res.sendStatus(HttpStatus.NO_CONTENT);
+          },
+        ],
+      },
+    ],
+  };
+
+  return [certsRoute, certsFingerprintRoute, certsBelongsToRoute];
 };

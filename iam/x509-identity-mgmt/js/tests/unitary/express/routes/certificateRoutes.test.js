@@ -149,4 +149,11 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .then((res) => {
         expect(res.body).toEqual({});
       }));
+
+  it('should delete the ownership of a certificate',
+    () => request.delete(`/api/v1/certificates/${certQueryFingerprint}/belongsto`)
+      .expect(204)
+      .then((res) => {
+        expect(res.body).toEqual({});
+      }));
 });
