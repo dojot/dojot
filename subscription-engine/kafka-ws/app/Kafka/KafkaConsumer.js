@@ -22,6 +22,8 @@ class KafkaConsumer {
     this.consumer = new Consumer(consumerConfig);
     // only one callback by topic
     this.registeredCallbacks = new Map();
+
+    this.kafkaAvailable = false;
   }
 
   /**
@@ -39,6 +41,13 @@ class KafkaConsumer {
   }
 
   /**
+   * Get kafka Status for internal uses
+   */
+  getKafkaStatus() {
+    return this.kafkaAvailable;
+  }
+
+  /**
    * HealthChecker to be passed to the ServiceStateManager
    *
    * @param {*} signalReady
@@ -48,10 +57,13 @@ class KafkaConsumer {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
         signalReady();
+        this.kafkaAvailable = true;
       } else {
         signalNotReady();
+        this.kafkaAvailable = false;
       }
     }).catch((err) => {
+      this.kafkaAvailable = false;
       signalNotReady();
       logger.warn(`Error ${err}`);
     });
@@ -60,10 +72,15 @@ class KafkaConsumer {
   /**
    *  Shutdown handler to be passed to the ServiceStateManager.
    */
-  shutdownProcess() {
-    return this.consumer.finish().then(() => {
-      logger.warn('Kafka Consumer finished!');
+  async shutdownProcess() {
+    logger.info('Finishing kafka consumer ....');
+    await new Promise((resolve) => {
+      this.consumer.finish().then(() => {
+        resolve('Kafka Consumer finished!');
+      });
     });
+
+    await new Promise((resolve) => setImmediate(resolve));
   }
 
   /**

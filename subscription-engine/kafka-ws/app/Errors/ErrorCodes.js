@@ -26,6 +26,7 @@ const ErrorCodes = {
    * ws.close function (and to the logger.error too), this way we can centralize these messages and
    * codes in one place, thus avoiding different messages for the same error in more than one place.
    */
+  SERVER_UNAVAILABLE: 4503,
 };
 
 module.exports = { ErrorCodes };
