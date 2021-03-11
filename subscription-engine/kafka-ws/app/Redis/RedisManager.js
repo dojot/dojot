@@ -1,3 +1,4 @@
+const util = require('util');
 const redis = require('redis');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
@@ -6,6 +7,7 @@ const StateManager = require('../StateManager');
 const logger = new Logger('kafka-ws:redis-manager');
 
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
+
 
 /**
  * Class to manage a generic purpose connection to Redis
@@ -18,8 +20,9 @@ class RedisManager {
     logger.info('Creating the RedisManager singleton...');
 
     this.config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).redis;
+    // redis strategy
+    this.config.retry_strategy = this.redisManagerStrategy.bind(this);
 
-    // TODO: Implement "retry_strategy"
     this.redisClient = redis.createClient(this.config);
     logger.info('RedisManager singleton creation complete!');
 
@@ -40,6 +43,18 @@ class RedisManager {
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
     return Object.seal(this);
+  }
+
+  redisManagerStrategy(options) {
+    // reconnect after
+    logger.debug(`Retry strategy options ${util.inspect(options, false, 5, true)}`);
+
+    if (options.attempt === this.config['max.attemps']) {
+      StateManager.shutdown();
+    }
+
+    // return timeout to reconnect after
+    return this.config['strategy.connect.timeout'];
   }
 
   /**

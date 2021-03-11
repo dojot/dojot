@@ -83,6 +83,18 @@ describe('Testing KafkaWSConsumers - works fine', () => {
     Consumer.mockClear();
   });
 
+  it('should test kafka status', async () => {
+    expect(kafkaWSConsumers.getKafkaStatus()).toBeFalsy();
+
+    Consumer().getStatus
+      .mockImplementationOnce(() => Promise.resolve({ connected: true }));
+
+    const ready = () => jest.fn();
+    const notReady = () => jest.fn();
+    await kafkaWSConsumers.checkHealth(ready, notReady);
+    expect(kafkaWSConsumers.getKafkaStatus()).toBeTruthy();
+  });
+
   it('should finish - graceful shutdown', () => {
     kafkaWSConsumers.shutdownProcess();
     expect(mockMicroServiceSdk.Kafka.Consumer().finish).toHaveBeenCalledTimes(1);
