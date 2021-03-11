@@ -8,7 +8,6 @@ const logger = new Logger('kafka-ws:redis-manager');
 
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 
-
 /**
  * Class to manage a generic purpose connection to Redis
  */
