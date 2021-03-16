@@ -48,7 +48,6 @@ if (config.server.tls) {
 }
 
 // register shutdown
-// StateManager.registerShutdownHandler(websocketTarball.onClose);
 const httpTerminator = createHttpTerminator({ server });
 
 StateManager.registerShutdownHandler(async () => {
