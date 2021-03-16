@@ -2,6 +2,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const util = require('util');
+const { createHttpTerminator } = require('http-terminator');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
@@ -47,7 +48,15 @@ if (config.server.tls) {
 }
 
 // register shutdown
-StateManager.registerShutdownHandler(websocketTarball.onClose);
+// StateManager.registerShutdownHandler(websocketTarball.onClose);
+const httpTerminator = createHttpTerminator({ server });
+
+StateManager.registerShutdownHandler(async () => {
+  logger.debug('Stopping the server from accepting new connections...');
+  await httpTerminator.terminate();
+  logger.debug('The server no longer accepts connections!');
+  return Promise.resolve(true);
+});
 
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
