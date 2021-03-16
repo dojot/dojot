@@ -334,9 +334,9 @@ Redis database management configuration
 redis.host| Redis host | kafka-ws-redis | string | KAFKA_WS_REDIS_HOST
 redis.port | Redis port | 6379 | integer | KAFKA_WS_REDIS_PORT
 redis.db | Redis database | 1 | integer | KAFKA_WS_REDIS_DB
-redis.connect_timeout | Redis Connection timeout | 3600000 | integer | KAFKA_WS_CONNECT__TIMEOUT
-redis.max.attemps | Redis max attemps connections | 100 | integer | KAFKA_WS_MAX_ATTEMPS
-redis.strategy.connect.timeout | Redis strategy connection timeout | 5000 | integer | KAFKA_WS_STRATEGY.CONNECT.TIMEOUT
+redis.connect_timeout | Redis Connection timeout | 3600000 | integer | KAFKA_WS_REDIS_CONNECT__TIMEOUT
+redis.reconnect.max.attempts | Redis max attemps connections | 100 | integer | KAFKA_WS_REDIS_RECONNECT_MAX_ATTEMPS
+redis.reconnect.after | Redis strategy connection timeout (ms) | 5000 | integer | KAFKA_WS_REDIS.RECONNECT.AFTER
 
 ## **Kafka Consumer**
 Configurations for the kafka Consumer

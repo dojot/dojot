@@ -4,8 +4,8 @@ const mockConfig = {
     port: 6379,
     database: 1,
     connect_timeout: 3600000,
-    'max.attemps': 2,
-    'strategy.connect.timeout': 500,
+    'reconnect.max.attemps': 2,
+    'reconnect.after': 500,
   },
   log: {
     verbose: false,
@@ -66,11 +66,11 @@ describe('isNumber', () => {
 describe('should test redis strategy', () => {
   it('Init Shutdown redis successfully', async () => {
     const opions = { attempt: 1 };
-    RedisManger.redisManagerStrategy(opions);
+    RedisManger.retryStrategy(opions);
     expect(StateManager.shutdown).toHaveBeenCalledTimes(0);
 
-    opions.attempt = mockConfig.redis['max.attemps'];
-    RedisManger.redisManagerStrategy(opions);
+    opions.attempt = mockConfig.redis['reconnect.max.attemps'];
+    RedisManger.retryStrategy(opions);
     expect(StateManager.shutdown).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,5 +1,6 @@
 const redis = require('redis');
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const StateManager = require('../StateManager');
 
 const logger = new Logger('kafka-ws:redis-expire-mgmt');
 
@@ -30,6 +31,8 @@ class RedisExpireMgmt {
       pub: redis.createClient(this.config),
       sub: redis.createClient(this.config),
     };
+
+    StateManager.registerShutdownHandler(() => this.end());
   }
 
   /**
@@ -178,10 +181,10 @@ class RedisExpireMgmt {
   /**
    * End connection with redis
    */
-  end() {
+  async end() {
     this.clients.sub.unsubscribe();
-    this.clients.pub.quit();
-    this.clients.sub.quit();
+    await this.clients.pub.quit();
+    await this.clients.sub.quit();
   }
 }
 

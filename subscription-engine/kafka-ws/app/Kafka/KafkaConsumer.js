@@ -23,7 +23,7 @@ class KafkaConsumer {
     // only one callback by topic
     this.registeredCallbacks = new Map();
 
-    this.kafkaAvailable = false;
+    this.isKafkaAvailable = false;
   }
 
   /**
@@ -44,7 +44,7 @@ class KafkaConsumer {
    * Get kafka Status for internal uses
    */
   getKafkaStatus() {
-    return this.kafkaAvailable;
+    return this.isKafkaAvailable;
   }
 
   /**
@@ -57,13 +57,13 @@ class KafkaConsumer {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
         signalReady();
-        this.kafkaAvailable = true;
+        this.isKafkaAvailable = true;
       } else {
         signalNotReady();
-        this.kafkaAvailable = false;
+        this.isKafkaAvailable = false;
       }
     }).catch((err) => {
-      this.kafkaAvailable = false;
+      this.isKafkaAvailable = false;
       signalNotReady();
       logger.warn(`Error ${err}`);
     });
