@@ -183,8 +183,12 @@ class RedisExpireMgmt {
    */
   async end() {
     this.clients.sub.unsubscribe();
-    await this.clients.pub.quit();
-    await this.clients.sub.quit();
+    this.clients.pub.quit(() => {
+      logger.warn(`RedisExpireMgmt pub client successfully successfully disconnected.`);
+    });
+    this.clients.sub.quit(() => {
+      logger.warn(`RedisExpireMgmt sub client successfully successfully disconnected.`);
+    });
   }
 }
 
