@@ -5,9 +5,9 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Debug Service",
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
       "skipFiles": [
         "<node_internals>/**"
       ],
@@ -17,26 +17,24 @@
       "program": "${workspaceFolder}/index.js",
       "env": {
         //"NODE_DEBUG": "tls,https,http,request",
-        //"X509IDMGMT_MONGO_CONN_URI": "mongodb://127.0.0.1:27017/x509-identity-mgmt",
-        //"X509IDMGMT_MONGO_CONN_OPTIONS_USER": "root",
-        //"X509IDMGMT_MONGO_CONN_OPTIONS_PASS": "pass",
-        //"X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE": "admin",
-        //"X509IDMGMT_EJBCA_WSDL": "https://127.0.0.1:8443/ejbca/ejbcaws/ejbcaws?wsdl",
-        //"X509IDMGMT_EJBCA_HEALTHCHECK_URL": "http://127.0.0.1:8080/ejbca/publicweb/healthcheck/ejbcahealth",
         "NODE_ENV": "development",
-        "X509IDMGMT_SERVER_PORT": "3333",
-        "X509IDMGMT_SERVER_HEALTHCHECK_PORT": "9797",
-        "X509IDMGMT_EJBCA_PKCS12": "./tls/ejbcaclient.p12",
-        "X509IDMGMT_EJBCA_PKCS12SECRET": "./tls/ejbcaclient.secret",
-        "X509IDMGMT_EJBCA_TRUSTEDCA": "./tls/ejbcaclient-trustedca.pem",
-        "X509IDMGMT_LOGGER_CONSOLE_LEVEL": "debug",
-        "X509IDMGMT_LOGGER_FILE_ENABLE": "false",
-        "X509IDMGMT_LOGGER_FILE_LEVEL": "debug",
-        "X509IDMGMT_DEVICEMGR_DEVICE_URL": "http://127.0.0.1:5757/device",
-        "X509IDMGMT_KAFKA_CONSUMER_METADATA_BROKER_LIST": "kafka:9092" // needs to include an alias in the '/etc/hosts' file
+        "X509IDMGMT_USER_CONFIG_FILE": "development.conf",
       },
       "console": "internalConsole",
       "outputCapture": "std"
+    },
+    {
+      "name": "Debug Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "--runInBand"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "port": 9229
     }
   ]
 }

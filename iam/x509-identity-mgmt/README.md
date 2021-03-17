@@ -1213,12 +1213,15 @@ __NOTE THAT__  you can use the official image provided by dojot in its
 To debug the service in a development environment, we prefer to use the VS Code,
 and for that there is the [.vscode/launch.json](./js/.vscode/launch.json) file
 that can be studied and there you will have tips on what you need to be present
-in your local environment to perform the service outside the container.
+in your local environment to run the service outside the container.
 
-See also the [configuration](./js/config/default.conf) file used by the service,
+See also the [default.conf](./js/config/default.conf) file used by the service,
 look for URLs there and you will have a good tip of what needs to be
 externalized from the _docker-compose_ environment for the service to have
-access.
+access. The [development.conf](./js/config/development.conf) file takes
+precedence over the [default.conf](./js/config/default.conf) file when we run
+the _service_ in _debug mode_ using VS Code but it is completely discarded in a
+_production_ environment.
 
 Basically, you must attend to the _version_ of Node.js and have installed the
 _build-essential_ library (in the case of Linux distributions based on Debian).
@@ -1227,10 +1230,21 @@ be necessary to install the _gzip compression_ library. In this case, the most
 advisable is to study the dependencies declared in the [Dockerfile](./Dockerfile)
 file to have an idea of what is needed.
 
+You may need the following dependencies installed on your Linux:
+~~~shell
+$ # in the case of Linux distributions based on Debian:
+$ sudo apt-get install -y \
+               build-essential \
+               node-gyp \
+               make \
+               ca-certificates \
+               gzip
+~~~
+
 For the _x509-identity-mgmt_ service to be able to access the other services on
 the dojot platform, it is necessary to map the service container _ports_ to
 ports on your _localhost_ (based on a _docker-compose_ deployment).
-See the [.vscode/launch.json](./js/.vscode/launch.json) file for dependent
+See the [development.conf](./js/config/development.conf) file for dependent
 services.
 
 In order for the service (running locally) to be able to connect to Kafka

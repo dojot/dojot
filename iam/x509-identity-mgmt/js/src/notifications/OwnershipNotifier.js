@@ -25,29 +25,6 @@ function belongsToWhom(owner) {
   return { ownerIdentifier, belongsTo };
 }
 
-function belongedToWhom(previousOwner) {
-  let previousOwnerIdentifier = null;
-  const previousBelongsTo = {};
-
-  if (!previousOwner) {
-    return null;
-  }
-
-  // checks who the certificate belonged to before...
-  if (typeof previousOwner.device === 'string') {
-  // the certificate belonged to a device!
-    previousBelongsTo.device = previousOwner.device;
-    previousOwnerIdentifier = previousBelongsTo.device;
-  } else if (typeof previousOwner.application === 'string') {
-  // the certificate belonged to an application!
-    previousBelongsTo.application = previousOwner.application;
-    previousOwnerIdentifier = previousBelongsTo.application;
-  } else {
-    return null;
-  }
-  return { previousOwnerIdentifier, previousBelongsTo };
-}
-
 /**
  * Responsible for notifying events related to the ownership of a certificate
  */
@@ -121,13 +98,16 @@ class OwnershipNotifier {
     const eventType = UPDATE_EVENT;
 
     // checks who the certificate belonged to before...
-    const previousToWhom = belongedToWhom(previousOwner);
+    const previousToWhom = belongsToWhom(previousOwner);
     if (!previousToWhom) {
       this.logger.warn(`No '${eventType}' notification will be issued. `
         + `The certificate '${certRecord.fingerprint}' did not belong to anyone.`);
       return;
     }
-    const { previousOwnerIdentifier, previousBelongsTo } = previousToWhom;
+    const {
+      ownerIdentifier: previousOwnerIdentifier,
+      belongsTo: previousBelongsTo,
+    } = previousToWhom;
 
     // checks who the certificate belongs to now...
     const toWhom = belongsToWhom(currentOwner);
@@ -179,13 +159,16 @@ class OwnershipNotifier {
     const eventType = DELETE_EVENT;
 
     // checks who the certificate belonged to before...
-    const previousToWhom = belongedToWhom(previousOwner);
+    const previousToWhom = belongsToWhom(previousOwner);
     if (!previousToWhom) {
       this.logger.warn(`No '${eventType}' notification will be issued. `
         + `The certificate '${certRecord.fingerprint}' did not belong to anyone.`);
       return;
     }
-    const { previousOwnerIdentifier, previousBelongsTo } = previousToWhom;
+    const {
+      ownerIdentifier: previousOwnerIdentifier,
+      belongsTo: previousBelongsTo,
+    } = previousToWhom;
 
     // Data to be published on Kafka
     const eventData = {

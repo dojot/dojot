@@ -1,3 +1,51 @@
+
+/**
+ * Checks if there is a difference between two objects 'BelongsTo'.
+ *
+ * @param {Object} belongsTo1
+ * @param {Object} belongsTo2
+ */
+function isDiff(belongsTo1, belongsTo2) {
+  // Compare if the attributes have exactly the same value and
+  // if the result is false, we know that there is a difference
+  return !(Object.is(belongsTo1.device, belongsTo2.device)
+    && Object.is(belongsTo1.application, belongsTo2.application));
+}
+
+/**
+ * Determines the type of notification to be produced based on the analysis
+ * of how the previous 'BelongsTo' differs from the new one.
+ * @param {Object} previousBelongsTo
+ * @param {Object} belongsTo
+ * @returns a constant indicating which type of notification should be produced.
+ */
+function determineNotificationType(previousBelongsTo, belongsTo) {
+  // ---------------------------------------------------------------
+  // Checks what type of ownership notification needs to be produced
+  // ---------------------------------------------------------------
+  let notificationType = null;
+  if ((!previousBelongsTo.device && !previousBelongsTo.application)
+      && (belongsTo.device || belongsTo.application)) {
+    // If the certificate did not belong to any owner, but now
+    // it does, then we must notify the 'creation' of ownership
+    notificationType = 'creation';
+  // -------------------------------------------------------------
+  } else if ((previousBelongsTo.device || previousBelongsTo.application)
+      && (belongsTo.device || belongsTo.application)) {
+    // If the certificate belonged to one owner, but now belongs
+    // to another owner, then we must notify a 'change' of ownership
+    notificationType = 'change';
+  // -------------------------------------------------------------
+  } else if ((previousBelongsTo.device || previousBelongsTo.application)
+      && (!belongsTo.device && !belongsTo.application)) {
+    // If the certificate belonged to an owner, but now it does not belong
+    // to anyone else, then we must notify a 'removal' of ownership
+    notificationType = 'removal';
+  // -------------------------------------------------------------
+  }
+  return notificationType;
+}
+
 /**
  * Service to handle certificates
  */
@@ -203,29 +251,17 @@ class CertificateService {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
 
-    // -------------------------------------------------------------
-    // Checks what type of ownership notification needs to be issued
-    // -------------------------------------------------------------
     const previousBelongsTo = certRecord.belongsTo;
-
-    if ((!previousBelongsTo.device && !previousBelongsTo.application)
-        && (belongsTo.device || belongsTo.application)) {
-      // If the certificate did not belong to any owner, but now
-      // it does, then we must notify the 'creation' of ownership
-      await this.ownershipNotifier.creation(certRecord, belongsTo);
-      // -----------------------------------------------------------
-    } else if ((previousBelongsTo.device || previousBelongsTo.application)
-        && (belongsTo.device || belongsTo.application)) {
-      // If the certificate belonged to one owner, but now belongs
-      // to another owner, then we must notify a 'change' of ownership
-      await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo);
-      // -----------------------------------------------------------
-    } else if ((previousBelongsTo.device || previousBelongsTo.application)
-        && (!belongsTo.device && !belongsTo.application)) {
-      // If the certificate belonged to an owner, but now it does not belong
-      // to anyone else, then we must notify a 'removal' of ownership
-      await this.ownershipNotifier.removal(certRecord, previousBelongsTo);
-      // -----------------------------------------------------------
+    if (isDiff(previousBelongsTo, belongsTo)) {
+      // eslint-disable-next-line default-case
+      switch (determineNotificationType(previousBelongsTo, belongsTo)) {
+        case 'creation':
+          await this.ownershipNotifier.creation(certRecord, belongsTo); break;
+        case 'change':
+          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo); break;
+        case 'removal':
+          await this.ownershipNotifier.removal(certRecord, previousBelongsTo); break;
+      }
     }
   }
 

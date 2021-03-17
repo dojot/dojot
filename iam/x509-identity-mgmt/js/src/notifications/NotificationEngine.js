@@ -45,7 +45,7 @@ class NotificationEngine {
   generateMetadata(tenant) {
     return {
       msgid: uuidv4(),
-      ts: Date.now(),
+      timestamp: Date.now(),
       service: this.service,
       tenant,
       contentType: this.contentType,
