@@ -1,11 +1,13 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
-const proxyMiddleware = require('./../proxy');
+const proxy = require('../proxy');
 
 const logger = new Logger('history-proxy:express/routes');
 
-
-const mockingHistoryRoute = {
+/**
+ * Creates the middleware to handle History route
+ */
+const historyRoute = {
   mountPoint: '/history',
   name: 'mocking-history-route',
   path: ['/device/:deviceId/history'],
@@ -14,9 +16,8 @@ const mockingHistoryRoute = {
       method: 'get',
       middleware: [
         async (req, res) => {
-          logger.debug(`route.get: req.params=${JSON.stringify(req.params)}`);
-          logger.debug(`route.get: req.query=${JSON.stringify(req.query)}`);
-          return proxyMiddleware.handleHistoryRequest(req)
+          logger.debug(`route.get: req.params=${JSON.stringify(req.params)} req.query=${JSON.stringify(req.query)}`);
+          return proxy.handleHistoryRequest(req)
             .then((r) => {
               logger.debug(`Sending response: ${JSON.stringify(r.respData)}`);
               res.status(200).send(r.respData);
@@ -37,4 +38,4 @@ const mockingHistoryRoute = {
   ],
 };
 
-module.exports = { mockingHistoryRoute };
+module.exports = { historyRoute };

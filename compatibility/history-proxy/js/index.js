@@ -64,8 +64,12 @@ server.on('close', () => {
   stateManager.signalNotReady('server');
 });
 server.on('error', (e) => {
-  logger.error('Server experienced an error:', e);
+  logger.error('Server experienced an error:', err);
+  if (err.code === 'EADDRINUSE') {
+    throw err;
+  }
 });
+
 
 // Begin accepting connections on the specified port and hostname.
 // If the hostname is omitted, the server will accept connections

@@ -4,6 +4,13 @@ const createError = require('http-errors');
 
 const logger = new Logger('history-proxy:express/handle/handle-response');
 
+/**
+  * Parsing data when was requested only one attribute
+  * 
+  * @param {string} deviceId
+  * @param {string} attribute_label
+  * @param {json} data
+  */
 const parseOneAttr = (deviceId, attr, data) => data.map((element) => {
   const newEl = { device_id: deviceId };
   newEl.ts = element.ts;
@@ -13,6 +20,12 @@ const parseOneAttr = (deviceId, attr, data) => data.map((element) => {
   return newEl;
 });
 
+/**
+  * Parsing data when was requested all device attributes
+  * 
+  * @param {string} deviceId
+  * @param {json} data
+  */
 const parseAllAttr = (deviceId, data) => {
   const objRtn = {};
   data.forEach((element) => {
@@ -33,6 +46,13 @@ const parseAllAttr = (deviceId, data) => {
   return objRtn;
 };
 
+/**
+  * Parsing the data received from Influx
+  *
+  * @param {object} pipelineData
+  * 
+  * @return {object} pipelineData
+  */
 const handle = (r) => {
   const { rawResponse, deviceId, attr } = r;
   logger.debug(`Received data: ${JSON.stringify(rawResponse)}`);

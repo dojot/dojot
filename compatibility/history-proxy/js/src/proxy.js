@@ -1,12 +1,15 @@
-const responseHandler = require('./handlers/handleResponse');
+const handleResponse = require('./handlers/handleResponse');
 
-const influxHandler = require('./handlers/handleRequest');
+const handleRequest = require('./handlers/handleRequest');
 
-const validationHandler = require('./handlers/handleValidation');
+const handleValidation = require('./handlers/handleValidation');
 
-
+/**
+* Create the Data to be passed in pipeline following the
+* chain of responsibility pattern
+*/
 const createDataToBePassed = (req) => {
-  const request = {
+  const pipelineData = {
     deviceId: req.params.deviceId,
     attr: req.query.attr,
     dateTo: req.query.dateTo,
@@ -20,24 +23,30 @@ const createDataToBePassed = (req) => {
   };
 
   if (req.query.lastN) {
-    request.limit = req.query.lastN;
-    request.order = 'desc';
+    pipelineData.limit = req.query.lastN;
+    pipelineData.order = 'desc';
   }
   if (req.query.firstN) {
-    request.limit = req.query.firstN;
-    request.order = 'asc';
+    pipelineData.limit = req.query.firstN;
+    pipelineData.order = 'asc';
   }
-  return request;
+  return pipelineData;
 };
 
+/**
+ * Handle the History requests
+ *
+ * @param {object} req
+ * @return {object} Promise
+ */
 const handleHistoryRequest = (req) => {
-  const request = createDataToBePassed(req);
+  const pipelineData = createDataToBePassed(req);
 
   // using "chain of responsability" pattern.
-  return validationHandler
-    .handle(request)
-    .then(influxHandler.handle)
-    .then(responseHandler.handle);
+  return handleValidation
+    .handle(pipelineData)
+    .then(handleRequest.handle)
+    .then(handleResponse.handle);
   // errors will be caught by the main thread.
 };
 

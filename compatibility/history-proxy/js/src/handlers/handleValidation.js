@@ -2,6 +2,13 @@ const { Logger } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('history-proxy:express/handle/handle-validation');
 
+/**
+ * Validates parameters passed to the History endpoint.
+ *
+ * @param {object} pipelineData
+ *
+ * @return {object} Promise
+ */
 const handle = (r) => {
   const newR = { ...r };
   if (r.attr === undefined) {

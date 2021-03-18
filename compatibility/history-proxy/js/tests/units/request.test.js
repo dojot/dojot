@@ -1,4 +1,6 @@
 const supertest = require('supertest');
+const { WebUtils } = require('@dojot/microservice-sdk');
+const tokenGen = WebUtils.createTokenGen();
 
 
 // mocking influx response
@@ -50,7 +52,7 @@ const fakeInfluxResponse =
 
 jest.mock('./../../src/handlers/utils', () => {
   return {
-    callInflux: jest.fn((options) => {
+    fetchFromInflux: jest.fn((options) => {
       const attr = options.path.split('/')[6];
       let data = fakeInfluxResponse[attr];
       if (!attr)
@@ -62,14 +64,10 @@ jest.mock('./../../src/handlers/utils', () => {
   }
 });
 
-const { framework } = require('../../src/routes');
+const { framework } = require('../../src/framework');
 
 const request = supertest(framework);
 
-
-const AUTH_TOKEN = 'Bearer eyJ0eXAiOiJC1QiLCJhbGciOiJIS1NiJ9.eyJpc3MiOiJDWmwzVnRucWpWMmFIdGtXU29iMGJWU1lveGRGNFFCMCIsImlhdCI6MTYwODUxNzg1NCwiZXhwIjoxNjA3NTE4Mjc0LCJwcm9maWxlIjoiYWRtaW4iLCJnc21cHMiOlsxXSwidXNlcmlkIRCJqdGkiOiI1ZjY3YWZhN2Q2M2YyOWFlM2I3Y2VmYzUwODBlMmRlYiIsInNlcnZpY2UiOiJhZG1pbiIsInVzZXJuYW1lIjoicWRtaW4ifQ.hdljpZ7cIsRTI5x-43uWWzKprjWcFF9CCg1dCxLK9QA';
-
-//jest.mock('axios');
 
 const caseOne = {
   request: {
@@ -161,9 +159,11 @@ describe('Unit testing to validate routes', () => {
       pms.append("attr", attr);
     });
 
+    const jwt = await tokenGen.generate('test');
+
     return request
       .get(`/history/device/${deviceId}/history?${pms.toString()}`)
-      .set('Authorization', AUTH_TOKEN)
+      .set('Authorization', 'Bearer ' + jwt)
       .set('Accept', 'application/json');
   };
 

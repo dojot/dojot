@@ -38,13 +38,13 @@ npm install
 
 In the project directory, you can run:
 
-## To run
+### To run
 
 ```shell
 npm start
 ```
 
-## To test
+### To test
 
 ```shell
 npm test

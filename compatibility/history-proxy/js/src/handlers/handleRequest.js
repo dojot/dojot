@@ -1,8 +1,6 @@
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
-const { callInflux } = require('./utils');
-
-require('express-async-errors');
+const { fetchFromInflux } = require('./utils');
 
 const { unflatten } = require('flat');
 
@@ -10,7 +8,15 @@ const config = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
 
 const logger = new Logger('history-proxy:express/handle/handle-request');
 
-
+/**
+ * Creates parameters for fetching operation and requests
+ * it to inFlux.   
+ *
+ * @param {object} pipelineData
+ * @param {object} deviceId
+ *
+ * @return {object} pipelineData + influx's response
+ */
 const handle = async (r) => {
   let url = `/tss/v1/devices/${r.deviceId}/attrs/${r.attr}/data`;
   if (r.isAllAttrs) {
@@ -29,10 +35,11 @@ const handle = async (r) => {
     host: config.server.retriever.hostname,
     port: config.server.retriever.port,
     path: `${url}?${pms.toString()}`,
-    headers: { Authorization: r.headers }
+    headers: { Authorization: r.headers },
+    timeout: 30000,
   };
   logger.debug(`Requesting data to Influx with options: ${JSON.stringify(options)}`);
-  const resp = await callInflux(options);
+  const resp = await fetchFromInflux(options);
   return { ...r, rawResponse: resp.data };
 };
 

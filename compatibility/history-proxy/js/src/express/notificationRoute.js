@@ -4,10 +4,9 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const { unflatten } = require('flat');
 
-
 const { server: { history } } = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
 
-// proxy middleware options
+// Proxy options
 const options = {
   target: history.protocol + "//" +
     history.hostname + ":" +
@@ -18,6 +17,9 @@ const options = {
   },
 };
 
+/**
+ * Creates a proxy to handle Notification route
+ */
 const notificationRoute = {
   mountPoint: '/history',
   name: 'notification-route',

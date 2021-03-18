@@ -14,8 +14,12 @@ const httpAgent = (config.server.retriever.protocol.startsWith('https')) ? https
 const logger = new Logger('history-proxy:express/handle/handle-request');
 
 
-
-const callInflux = async (options) => {
+/**
+  * Get device's data from Influx service
+  *
+  * @param {string} options
+  */
+const fetchFromInflux = async (options) => {
   return new Promise((resolve, reject) => {
     const request = httpAgent.get(options, (response) => {
       let rawData = '';
@@ -35,13 +39,19 @@ const callInflux = async (options) => {
           reject(ex);
         }
       });
-      request.on('error', (ex) => {
-        logger.error('Connection error', ex);
-        reject(ex);
-      });
+    });
+    request.on('timeout', () => {
+      request.abort();
+      // when migrate to Node 14.X we should change to the line below
+      // request.destroy(new Error('Connection timeout'));
+      reject(new Error('Connection timeout'));
+    });
+    request.on('error', (ex) => {
+      logger.error('Connection error', ex);
+      reject(ex);
     });
   });
 }
 
-module.exports = { callInflux };
+module.exports = { fetchFromInflux };
 

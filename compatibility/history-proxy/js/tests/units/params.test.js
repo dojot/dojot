@@ -1,5 +1,5 @@
 const mockConfig = {
-  'server': { 'retriever': { 'protocol': 'http' } },
+  'server': { 'retriever': { 'protocol': 'https' } },
 };
 
 const mockSdk = {
@@ -159,7 +159,7 @@ describe('Testing incoming params and outcoming params', () => {
     const paramList = cases[CASE_ONE].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
-    const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
+    const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_ONE].expected);
   });
 
@@ -167,7 +167,7 @@ describe('Testing incoming params and outcoming params', () => {
     const paramList = cases[CASE_TWO].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
-    const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
+    const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_TWO].expected);
   });
 
@@ -175,7 +175,7 @@ describe('Testing incoming params and outcoming params', () => {
     const paramList = cases[CASE_THREE].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
-    const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
+    const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
 
     expect({ ...result, dateTo }).toEqual(cases[CASE_THREE].expected);
   });
@@ -184,7 +184,7 @@ describe('Testing incoming params and outcoming params', () => {
     const paramList = cases[CASE_FOUR].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
-    const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
+    const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_FOUR].expected);
   });
 
@@ -192,7 +192,7 @@ describe('Testing incoming params and outcoming params', () => {
     const paramList = cases[CASE_FIVE].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
-    const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
+    const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_FIVE].expected);
   });
 
@@ -200,7 +200,7 @@ describe('Testing incoming params and outcoming params', () => {
     const paramList = cases[CASE_SIX].request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
-    const dateTo = result.dateTo.split('.')[0]; // removing ms to checking
+    const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_SIX].expected);
   });
 
