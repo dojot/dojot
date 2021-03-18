@@ -1,0 +1,75 @@
+{
+    "name": "@dojot/x509-identity-mgmt",
+    "version": "1.1.0",
+    "description": "API for issuing and managing x.509 certificates. Once these certificates are associated with IoT devices or third party applications, they become the identity of these elements to the dojot platform.",
+    "main": "index.js",
+    "scripts": {
+        "lint": "eslint src/**",
+        "start": "cross-env NODE_ENV=production node index",
+        "dev": "cross-env NODE_ENV=development node --trace-sync-io --unhandled-rejections=strict index",
+        "debugdev": "cross-env NODE_ENV=development NODE_DEBUG=tls,https,http,request X509IDMGMT_LOGGER_CONSOLE_LEVEL=debug X509IDMGMT_SERVER_PORT=3737 X509IDMGMT_SERVER_HEALTHCHECK_PORT=9797 X509IDMGMT_EJBCA_PKCS12=./tls/ejbcaclient.p12 X509IDMGMT_EJBCA_PKCS12SECRET=./tls/ejbcaclient.secret X509IDMGMT_EJBCA_TRUSTEDCA=./tls/ejbcaclient-trustedca.pem X509IDMGMT_MONGO_CONN_OPTIONS_USER=root X509IDMGMT_MONGO_CONN_OPTIONS_PASS=pass X509IDMGMT_MONGO_CONN_OPTIONS_AUTHSOURCE=admin  node --inspect-brk --trace-sync-io --unhandled-rejections=strict index",
+        "test": "cross-env NODE_ENV=test jest --verbose",
+        "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
+        "check-licenses": "apache2-license-checker"
+    },
+    "author": {
+        "name": "Thiago de Paula Ferreira",
+        "email": "thiagodepaulaferreira@gmail.com",
+        "url": "https://github.com/thiagodpf"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/dojot/dojot.git"
+    },
+    "homepage": "https://github.com/dojot",
+    "keywords": [
+        "x.509",
+        "EJBCA",
+        "dojot"
+    ],
+    "license": "Apache-2.0",
+    "licenses": [
+        {
+            "type": "Apache-2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0"
+        }
+    ],
+    "dependencies": {
+        "@dojot/microservice-sdk": "^0.1.9",
+        "ajv": "^6.12.0",
+        "asn1js": "^2.0.26",
+        "awilix": "^4.2.6",
+        "compression": "^1.7.4",
+        "express": "^4.17.1",
+        "express-async-errors": "^3.1.1",
+        "express-paginate": "^1.0.0",
+        "express-request-id": "^1.4.1",
+        "express-ws": "^4.0.0",
+        "flat": "^5.0.2",
+        "http-errors": "^1.7.3",
+        "http-status-codes": "^1.4.0",
+        "http-terminator": "^2.0.3",
+        "jsonwebtoken": "^8.5.1",
+        "jwt-decode": "^2.2.0",
+        "mongo-querystring": "^4.1.1",
+        "mongoose": "^5.9.12",
+        "morgan": "^1.10.0",
+        "on-finished": "^2.3.0",
+        "pkijs": "^2.1.88",
+        "serve-index": "^1.9.1",
+        "soap": "^0.35.0",
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "@bbc/apache2-license-checker": "^1.1.4",
+        "cross-env": "^7.0.2",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.1.0",
+        "eslint-plugin-import": "^2.20.2",
+        "eslint-plugin-jest": "^23.8.2",
+        "eslint-plugin-security": "^1.4.0",
+        "faker": "^4.1.0",
+        "jest": "^25.2.7",
+        "supertest": "^4.0.2"
+    }
+}
