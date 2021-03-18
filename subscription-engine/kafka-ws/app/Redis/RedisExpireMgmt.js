@@ -32,7 +32,7 @@ class RedisExpireMgmt {
       sub: redis.createClient(this.config),
     };
 
-    StateManager.registerShutdownHandler(() => this.end());
+    StateManager.registerShutdownHandler(this.end.bind(this));
   }
 
   /**
@@ -183,12 +183,22 @@ class RedisExpireMgmt {
    */
   async end() {
     this.clients.sub.unsubscribe();
-    this.clients.pub.quit(() => {
-      logger.warn('RedisExpireMgmt pub client successfully successfully disconnected.');
+
+    const pubClientQuitPromisse = new Promise((resolve) => {
+      this.clients.pub.quit(() => {
+        logger.warn('RedisExpireMgmt pub client successfully successfully disconnected.');
+        resolve();
+      });
     });
-    this.clients.sub.quit(() => {
-      logger.warn('RedisExpireMgmt sub client successfully successfully disconnected.');
+
+    const subClientQuitPromisse = new Promise((resolve) => {
+      this.clients.sub.quit(() => {
+        logger.warn('RedisExpireMgmt sub client successfully successfully disconnected.');
+        resolve();
+      });
     });
+
+    await Promise.all([pubClientQuitPromisse, subClientQuitPromisse]);
   }
 }
 
