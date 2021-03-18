@@ -10,6 +10,25 @@
     "plugin:jest/recommended"
   ],
   "rules": {
+    "trailing-comma": [
+      true,
+      {
+        "singleline": "never",
+        "multiline": {
+          "objects": "never",
+          "arrays": "always",
+          "functions": "never",
+          "typeLiterals": "ignore"
+        }
+      }
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 2,
+        "maxEOF": 0
+      }
+    ],
     "import/no-unresolved": "off"
   },
   "plugins": [

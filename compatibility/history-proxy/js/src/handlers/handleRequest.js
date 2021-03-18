@@ -10,7 +10,7 @@ const logger = new Logger('history-proxy:express/handle/handle-request');
 
 /**
  * Creates parameters for fetching operation and requests
- * it to inFlux.   
+ * it to inFlux.
  *
  * @param {object} pipelineData
  * @param {object} deviceId
@@ -40,6 +40,7 @@ const handle = async (r) => {
   };
   logger.debug(`Requesting data to Influx with options: ${JSON.stringify(options)}`);
   const resp = await fetchFromInflux(options);
+
   return { ...r, rawResponse: resp.data };
 };
 

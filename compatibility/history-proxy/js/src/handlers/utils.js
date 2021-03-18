@@ -1,4 +1,3 @@
-
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
 const http = require('http');
@@ -51,7 +50,7 @@ const fetchFromInflux = async (options) => {
       reject(ex);
     });
   });
-}
+};
 
 module.exports = { fetchFromInflux };
 

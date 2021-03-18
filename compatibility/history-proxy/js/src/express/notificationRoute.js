@@ -8,9 +8,7 @@ const { server: { history } } = unflatten(ConfigManager.getConfig('HISTORYPROXY'
 
 // Proxy options
 const options = {
-  target: history.protocol + "//" +
-    history.hostname + ":" +
-    history.port,
+  target: `${history.protocol}//${history.hostname}:${history.port}`,
   changeOrigin: true,
   pathRewrite: {
     '^/history/notifications/history': '/notifications/history', // rewrite path

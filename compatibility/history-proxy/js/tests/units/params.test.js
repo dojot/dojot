@@ -29,7 +29,7 @@ const CASE_FOUR = 'caseFour';
 const CASE_FIVE = 'caseFive';
 const CASE_SIX = 'caseSix';
 
-const default_expected = {
+const expectedValue = {
   deviceId: 'a1b1c1',
   attr: 'temperature',
   dateFrom: '1970-01-01T00:00:00.000Z',
@@ -55,7 +55,7 @@ const cases = {
     },
     expected:
     {
-      ...default_expected,
+      ...expectedValue,
     },
   },
   caseTwo: {
@@ -71,7 +71,7 @@ const cases = {
     },
     expected:
     {
-      ...default_expected,
+      ...expectedValue,
       limit: 100,
       order: 'desc',
     },
@@ -90,7 +90,7 @@ const cases = {
     },
     expected:
     {
-      ...default_expected,
+      ...expectedValue,
       limit: 200,
       order: 'desc',
       dateFrom: '2021-01-01T09:00:00.000Z',
@@ -111,7 +111,7 @@ const cases = {
     },
     expected:
     {
-      ...default_expected,
+      ...expectedValue,
       limit: 50,
       order: 'asc',
       dateTo: '2021-02-02T12:00:00.000Z'.split('.')[0],
@@ -131,7 +131,7 @@ const cases = {
     },
     expected:
     {
-      ...default_expected,
+      ...expectedValue,
       isMultipleAttr: true,
     },
   },
@@ -146,7 +146,7 @@ const cases = {
     },
     expected:
     {
-      ...default_expected,
+      ...expectedValue,
       attr: undefined,
       isAllAttrs: true,
     },
@@ -203,5 +203,4 @@ describe('Testing incoming params and outcoming params', () => {
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
     expect({ ...result, dateTo }).toEqual(cases[CASE_SIX].expected);
   });
-
 });

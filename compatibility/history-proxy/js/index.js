@@ -2,7 +2,7 @@ const {
   ConfigManager,
   Logger,
   ServiceStateManager,
-  WebUtils
+  WebUtils,
 } = require('@dojot/microservice-sdk');
 
 const { unflatten } = require('flat');
@@ -15,7 +15,7 @@ ConfigManager.loadSettings('HISTORYPROXY', configFile);
 
 const config = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
 
-const { framework } = require('./src/routes');
+const { framework } = require('./src/framework');
 
 Logger.setTransport('console', {
   level: config.logger.console.level.toLowerCase(),
@@ -33,7 +33,6 @@ Logger.setVerbose(config.logger.verbose);
 
 const logger = new Logger('history-proxy:index');
 
-
 const stateManager = new ServiceStateManager({
   lightship: {
     port: config.server.healthcheck.port,
@@ -46,7 +45,6 @@ const stateManager = new ServiceStateManager({
 const server = WebUtils.createServer({ config: config.server, logger });
 
 stateManager.registerService('server');
-
 
 // Emitted each time there is a request. Note that there may be multiple
 // requests per connection (in the case of keep-alive connections).
@@ -63,19 +61,17 @@ server.on('listening', () => {
 server.on('close', () => {
   stateManager.signalNotReady('server');
 });
-server.on('error', (e) => {
+server.on('error', (err) => {
   logger.error('Server experienced an error:', err);
   if (err.code === 'EADDRINUSE') {
     throw err;
   }
 });
 
-
 // Begin accepting connections on the specified port and hostname.
 // If the hostname is omitted, the server will accept connections
 // directed to any IPv4 address (i.e. "0.0.0.0").
 server.listen(config.server.port, config.server.host);
-
 
 // create an instance of http-terminator and instead of
 // using server.close(), use httpTerminator.terminate()

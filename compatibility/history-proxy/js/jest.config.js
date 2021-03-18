@@ -30,7 +30,7 @@ module.exports = {
       "branches": 80,
       "functions": 80,
       "lines": 80,
-      "statements": 80
+      "statements": 80,
     },
   },
   // A set of global variables that need to be available in all test environments

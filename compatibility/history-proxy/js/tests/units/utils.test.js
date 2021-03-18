@@ -4,9 +4,7 @@ const http = require('http');
 
 const EventEmitter = require('events');
 
-const { fetchFromInflux } = require('./../../src/handlers/utils');
-
-const { framework } = require('../../src/framework');
+const { fetchFromInflux } = require('../../src/handlers/utils');
 
 
 describe('Unit tests for methods in Utils', () => {
@@ -25,7 +23,6 @@ describe('Unit tests for methods in Utils', () => {
 
 
   it('should returns correctly from fetchFromInflux method', async () => {
-
     const dataMock = '{"data":"example"}';
     http.get.mockImplementation((options, callback) => {
       callback(response);
@@ -42,7 +39,6 @@ describe('Unit tests for methods in Utils', () => {
 
 
   it('should returns 404 from fetchFromInflux method', async () => {
-
     http.get.mockImplementation((options, callback) => {
       callback(response);
       response.statusCode = 404;
@@ -58,7 +54,6 @@ describe('Unit tests for methods in Utils', () => {
 
 
   it('should throw an exception because it is unable to parse the response', async () => {
-
     http.get.mockImplementation((options, callback) => {
       callback(response);
       response.statusCode = 200;
@@ -73,7 +68,6 @@ describe('Unit tests for methods in Utils', () => {
 
 
   it('should throw an exception in request context', async () => {
-
     http.get.mockImplementation((options, callback) => {
       callback(response);
       response.statusCode = 200;
@@ -93,7 +87,6 @@ describe('Unit tests for methods in Utils', () => {
 
 
   it('should active the request timeout', async () => {
-
     const requestAlt = {
       on: (event, handler) => {
         if (event === 'timeout') {

@@ -1,11 +1,11 @@
 const supertest = require('supertest');
+
 const { WebUtils } = require('@dojot/microservice-sdk');
+
 const tokenGen = WebUtils.createTokenGen();
 
-
 // mocking influx response
-const fakeInfluxResponse =
-{
+const fakeInfluxResponse = {
   "temperature": {
     data: [
       {
@@ -24,7 +24,7 @@ const fakeInfluxResponse =
   },
   "unknown_attribute": {
     data: [
-    ]
+    ],
   },
   "all_attributes": {
     data: [
@@ -55,12 +55,13 @@ jest.mock('./../../src/handlers/utils', () => {
     fetchFromInflux: jest.fn((options) => {
       const attr = options.path.split('/')[6];
       let data = fakeInfluxResponse[attr];
-      if (!attr)
-        data = fakeInfluxResponse['all_attributes'];
-      return new Promise((resolve, reject) => {
+      if (!attr) {
+        data = fakeInfluxResponse.all_attributes;
+      }
+      return new Promise((resolve,) => {
         resolve(data);
       });
-    })
+    }),
   }
 });
 
@@ -147,15 +148,12 @@ const caseFour = {
   }
 };
 
-
 describe('Unit testing to validate routes', () => {
-
   const fetchData = async (deviceId, currentCase) => {
     const paramList = currentCase.request;
-
     const pms = new URLSearchParams();
     pms.append("lastN", paramList.lastN);
-    paramList.attr.forEach(attr => {
+    paramList.attr.forEach((attr) => {
       pms.append("attr", attr);
     });
 
@@ -163,7 +161,7 @@ describe('Unit testing to validate routes', () => {
 
     return request
       .get(`/history/device/${deviceId}/history?${pms.toString()}`)
-      .set('Authorization', 'Bearer ' + jwt)
+      .set('Authorization', `Bearer ${jwt}`)
       .set('Accept', 'application/json');
   };
 
@@ -179,11 +177,8 @@ describe('Unit testing to validate routes', () => {
     const response = await fetchData(deviceId, caseTwo);
     expect(response.statusCode).toEqual(404);
     expect(response.body).toEqual(caseTwo.expected);
-
     done();
   });
-
-
 
   it('checking if the correct data manipulation', async (done) => {
     const deviceId = 'a1b1c1';
@@ -192,15 +187,12 @@ describe('Unit testing to validate routes', () => {
     done();
   });
 
-
-
   it('requesting all atributes', async (done) => {
     const deviceId = 'a1b1c1';
     const response = await fetchData(deviceId, caseThree);
     expect(response.body).toEqual(caseThree.expected);
     done();
   });
-
 
   it('sending multiple atributes', async (done) => {
     const deviceId = 'a1b1c1';
