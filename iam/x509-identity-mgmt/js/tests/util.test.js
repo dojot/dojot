@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 const faker = require('faker');
 
 const pemCertHeader = '-----BEGIN CERTIFICATE-----';
