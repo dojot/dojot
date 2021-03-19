@@ -6,10 +6,10 @@ class TrustedCAService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    trustedCAModel, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils,
-    rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit, errorTemplate,
+    trustedCAModel, certificateModel, tenant, pkiUtils, dnUtils,
+    rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
+    errorTemplate, trustedCANotifier,
   }) {
-    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
     Object.defineProperty(this, 'tenant', { value: tenant });
     Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
     Object.defineProperty(this, 'dnUtils', { value: dnUtils });
@@ -25,6 +25,7 @@ class TrustedCAService {
     Object.defineProperty(this, 'caCertLimit', { value: caCertLimit });
 
     Object.defineProperty(this, 'error', { value: errorTemplate });
+    Object.defineProperty(this, 'trustedCANotifier', { value: trustedCANotifier });
   }
 
   /**
@@ -112,7 +113,10 @@ class TrustedCAService {
       allowAutoRegistration,
       tenant: this.tenant,
     });
-    await model.save();
+    const caCertRecord = await model.save();
+
+    // Notifies the creation of a record for a trusted CA
+    await this.trustedCANotifier.creation(caCertRecord);
 
     return { caFingerprint };
   }
@@ -164,6 +168,9 @@ class TrustedCAService {
     await this.TrustedCAModel.findByIdAndDelete(caCertRecord._id)
       .maxTimeMS(this.queryMaxTimeMS)
       .exec();
+
+    // Notifies the removal of a record to a trusted CA
+    await this.trustedCANotifier.removal(caCertRecord);
   }
 
   /**
