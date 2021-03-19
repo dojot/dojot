@@ -61,7 +61,7 @@ class DeviceMgrProvider {
    * @param {string} deviceId
    */
   async getDevice(tenant, deviceId) {
-    const token = await this.tokenGen.generate(tenant);
+    const token = await this.tokenGen.generate({ tenant });
 
     const options = {
       protocol: this.deviceMgrUrl.protocol,

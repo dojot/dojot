@@ -1,3 +1,51 @@
+
+/**
+ * Checks if there is a difference between two objects 'BelongsTo'.
+ *
+ * @param {Object} belongsTo1
+ * @param {Object} belongsTo2
+ */
+function isDiff(belongsTo1, belongsTo2) {
+  // Compare if the attributes have exactly the same value and
+  // if the result is false, we know that there is a difference
+  return !(Object.is(belongsTo1.device, belongsTo2.device)
+    && Object.is(belongsTo1.application, belongsTo2.application));
+}
+
+/**
+ * Determines the type of notification to be produced based on the analysis
+ * of how the previous 'BelongsTo' differs from the new one.
+ * @param {Object} previousBelongsTo
+ * @param {Object} belongsTo
+ * @returns a constant indicating which type of notification should be produced.
+ */
+function determineNotificationType(previousBelongsTo, belongsTo) {
+  // ---------------------------------------------------------------
+  // Checks what type of ownership notification needs to be produced
+  // ---------------------------------------------------------------
+  let notificationType = null;
+  if ((!previousBelongsTo.device && !previousBelongsTo.application)
+      && (belongsTo.device || belongsTo.application)) {
+    // If the certificate did not belong to any owner, but now
+    // it does, then we must notify the 'creation' of ownership
+    notificationType = 'creation';
+  // -------------------------------------------------------------
+  } else if ((previousBelongsTo.device || previousBelongsTo.application)
+      && (belongsTo.device || belongsTo.application)) {
+    // If the certificate belonged to one owner, but now belongs
+    // to another owner, then we must notify a 'change' of ownership
+    notificationType = 'change';
+  // -------------------------------------------------------------
+  } else if ((previousBelongsTo.device || previousBelongsTo.application)
+      && (!belongsTo.device && !belongsTo.application)) {
+    // If the certificate belonged to an owner, but now it does not belong
+    // to anyone else, then we must notify a 'removal' of ownership
+    notificationType = 'removal';
+  // -------------------------------------------------------------
+  }
+  return notificationType;
+}
+
 /**
  * Service to handle certificates
  */
@@ -8,7 +56,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils,
     dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider,
+    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier,
   }) {
     Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
     Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
@@ -24,6 +72,7 @@ class CertificateService {
     Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
     Object.defineProperty(this, 'error', { value: errorTemplate });
     Object.defineProperty(this, 'deviceMgrProvider', { value: deviceMgrProvider });
+    Object.defineProperty(this, 'ownershipNotifier', { value: ownershipNotifier });
   }
 
   /**
@@ -44,9 +93,9 @@ class CertificateService {
 
     // ensure that the current tenant owns the device
     await this.ensureOwner(distinguishedNames.CN);
-    if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
-    }
+
+    // Checks on the certificate owner
+    await this.checkBelongsTo(belongsTo);
 
     const subjectDN = distinguishedNames.cnamePrefix(this.tenant).stringify();
 
@@ -68,7 +117,10 @@ class CertificateService {
       },
       tenant: this.tenant,
     });
-    await model.save();
+    const certRecord = await model.save();
+
+    // Notifies the creation of ownership if the certificate belongs to an owner
+    await this.ownershipNotifier.creation(certRecord, certRecord.belongsTo);
 
     return { certificateFingerprint, certificatePem };
   }
@@ -81,10 +133,8 @@ class CertificateService {
     * @returns the fingerprint of the registered certificate.
     */
   async registerCertificate({ caFingerprint, certificateChain, belongsTo = {} }) {
-    // ensure that the current tenant owns the device
-    if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
-    }
+    // Checks on the certificate owner
+    await this.checkBelongsTo(belongsTo);
 
     let rootCAPem = null;
     let rootCAFingerprint = caFingerprint;
@@ -170,7 +220,10 @@ class CertificateService {
       belongsTo,
       tenant: this.tenant,
     });
-    await model.save();
+    const certRecord = await model.save();
+
+    // Notifies the creation of ownership if the certificate belongs to an owner
+    await this.ownershipNotifier.creation(certRecord, certRecord.belongsTo);
 
     return { certificateFingerprint: certFingerprint };
   }
@@ -186,17 +239,29 @@ class CertificateService {
   async changeOwnership(filterFields, belongsTo = {}) {
     Object.assign(filterFields, { tenant: this.tenant });
 
-    // ensure that the current tenant owns the device
-    if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
+    // Checks on the certificate owner
+    await this.checkBelongsTo(belongsTo);
+
+    // By default, findOneAndUpdate() returns the document as it was before update was applied.
+    const certRecord = await this.CertificateModel.findOneAndUpdate(
+      filterFields, { belongsTo, modifiedAt: new Date() },
+    ).maxTimeMS(this.queryMaxTimeMS).lean().exec();
+
+    if (!certRecord) {
+      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
     }
 
-    const result = await this.CertificateModel.findOneAndUpdate(
-      filterFields, { belongsTo, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).exec();
-
-    if (!result) {
-      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+    const previousBelongsTo = certRecord.belongsTo;
+    if (isDiff(previousBelongsTo, belongsTo)) {
+      // eslint-disable-next-line default-case
+      switch (determineNotificationType(previousBelongsTo, belongsTo)) {
+        case 'creation':
+          await this.ownershipNotifier.creation(certRecord, belongsTo); break;
+        case 'change':
+          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo); break;
+        case 'removal':
+          await this.ownershipNotifier.removal(certRecord, previousBelongsTo); break;
+      }
     }
   }
 
@@ -286,6 +351,9 @@ class CertificateService {
 
       await this.ejbcaFacade.revokeCertificate(issuerDN, certificateSN);
     }
+
+    // Notifies the removal of ownership if the certificate belonged to an owner before
+    await this.ownershipNotifier.removal(certRecord, certRecord.belongsTo);
   }
 
   /**
@@ -294,10 +362,11 @@ class CertificateService {
    * This is used by internal services that need a certificate to establish a
    * mutual TLS with other parties.
    * @param {object} Object with a CSR that will serve as the basis for generating the certificate.
+   * @param {object} belongsTo Data of whom the certificate should be associated
    *
    * @returns an object containing the certificate in PEM format and its fingerprint.
    */
-  async throwAwayCertificate({ csr: csrPem }) {
+  async throwAwayCertificate({ csr: csrPem, belongsTo = {} }) {
     const csr = this.pkiUtils.parseCSR(csrPem);
 
     const subjectDN = this.dnUtils.from(csr.subject).stringify();
@@ -307,6 +376,16 @@ class CertificateService {
     );
 
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
+
+    const dummyCertRecord = {
+      fingerprint: certificateFingerprint,
+      pem: certificatePem,
+      issuedByDojotPki: true,
+      autoRegistered: false,
+    };
+
+    // Notifies the creation of ownership if the certificate belongs to an owner
+    await this.ownershipNotifier.creation(dummyCertRecord, belongsTo);
 
     return { certificateFingerprint, certificatePem };
   }
@@ -321,10 +400,27 @@ class CertificateService {
    * database with the same fingerprint informed by parameter.
    */
   async checkExistingCertificate(fingerprint) {
-    const filterFields = { fingerprint, tenant: this.tenant };
+    const filterFields = { fingerprint };
     const count = await this.CertificateModel.countDocuments(filterFields);
     if (count) {
       throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
+    }
+  }
+
+  /**
+   * Checks on the certificate owner.
+   *
+   * @param {object} belongsTo to identify who owns the certificate.
+   */
+  async checkBelongsTo(belongsTo) {
+    // ensure that the certificate belongs to only one type of owner
+    if (belongsTo.device && belongsTo.application) {
+      throw this.error.BadRequest('The certificate must belong to only one type of owner.');
+    }
+
+    // ensure that the current tenant owns the device
+    if (belongsTo.device) {
+      await this.ensureOwner(belongsTo.device);
     }
   }
 
