@@ -79,13 +79,12 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             const trustedCaService = req.scope.resolve(TRUSTED_CA_SERVICE);
 
             const { caPem } = await caService.getRootCertificate();
-
             const trustedBundle = await trustedCaService.getCertificateBundle();
 
+            // The bundle will always contain the platform's internal CA certificate first
             const bundle = [caPem, ...trustedBundle];
 
             res.bundle = bundle;
-
             next();
           },
           (req, res) => {
