@@ -28,6 +28,8 @@ function modelMock() {
   modelRef.skip = jest.fn(() => modelRef);
   modelRef.maxTimeMS = jest.fn(() => modelRef);
   modelRef.lean = jest.fn(() => modelRef);
+  modelRef.aggregate = jest.fn(() => modelRef);
+  modelRef.group = jest.fn(() => modelRef);
   modelRef.exec = jest.fn();
   modelRef.countDocuments = jest.fn();
 
@@ -258,6 +260,24 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model.select).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.lean).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
+    });
+
+    it('should obtain a trusted CA certificate bundle', async () => {
+      // returns the found document (mock)
+      const returnAggregation = [{
+        _id: util.caFingerprint,
+        caPem: util.caCert,
+      }];
+      containerCradle.trustedCAModel.model.exec = jest.fn(() => (returnAggregation));
+
+      const trustedCAService = new TrustedCAService(containerCradle);
+
+      await expect(trustedCAService.getCertificateBundle())
+        .resolves.toEqual([util.caCert]);
+
+      expect(containerCradle.trustedCAModel.model.aggregate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.trustedCAModel.model.group).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
     });
 

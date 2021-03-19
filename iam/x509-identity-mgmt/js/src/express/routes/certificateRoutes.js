@@ -66,14 +66,17 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             if (req.body.csr) {
               // The payload indicates that the request expects a certificate
               // signed by the platform's internal CA to be issued...
+              const csr = sanitizeParams.sanitizeLineBreaks(req.body.csr);
               result = await service.generateCertificate({
-                csr: req.body.csr, belongsTo,
+                csr, belongsTo,
               });
               // ------------------------------------------------------------
             } else if (req.body.certificateChain) {
               // The payload indicates that the request expects to register
               // a certificate signed by a trusted (external) CA...
-              const certificateChain = req.body.certificateChain.match(sanitizeParams.certRegExp);
+              const certificateChain = req.body.certificateChain
+                .match(sanitizeParams.certRegExp)
+                .map((el) => sanitizeParams.sanitizeLineBreaks(el));
               const caFingerprint = sanitizeParams.sanitizeFingerprint(req.body.caFingerprint || '');
 
               result = await service.registerCertificate({
