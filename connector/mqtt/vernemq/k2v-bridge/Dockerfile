@@ -42,11 +42,8 @@ WORKDIR /opt/k2v_bridge
 
 RUN apk --no-cache add \
       bash \
-      curl \
-      jq \
       libsasl \
       lz4-libs \
-      openssl \
       tini
 
 COPY --from=base /opt/k2v_bridge /opt/k2v_bridge

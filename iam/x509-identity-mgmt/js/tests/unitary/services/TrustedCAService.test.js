@@ -73,12 +73,12 @@ function dnUtilsMock() {
   return dnUtils;
 }
 
-function ejbcaFacadeMock() {
-  const ejbcaFacade = {
-    generateCertificate: jest.fn(),
-    revokeCertificate: jest.fn(),
+function trustedCANotifierMock() {
+  const trustedCANotifier = {
+    creation: jest.fn().mockResolvedValue(undefined),
+    removal: jest.fn().mockResolvedValue(undefined),
   };
-  return ejbcaFacade;
+  return trustedCANotifier;
 }
 
 beforeAll(() => {
@@ -86,7 +86,7 @@ beforeAll(() => {
 
   const trustedCAModel = modelMock();
 
-  const ejbcaFacade = ejbcaFacadeMock();
+  const trustedCANotifier = trustedCANotifierMock();
 
   const pkiUtils = pkiUtilsMock();
 
@@ -95,7 +95,7 @@ beforeAll(() => {
   containerCradleTemplate = {
     certificateModel,
     trustedCAModel,
-    ejbcaFacade,
+    trustedCANotifier,
     pkiUtils,
     dnUtils,
     tenant: 'admin',
@@ -145,6 +145,8 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.instance.save).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.countDocuments).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.trustedCANotifier.creation).toHaveBeenCalledTimes(1);
     });
 
     it('should register a trusted CA certificate (checking the limit by tenant)', async () => {
@@ -171,6 +173,8 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.instance.save).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.countDocuments).toHaveBeenCalledTimes(2);
+
+      expect(containerCradle.trustedCANotifier.creation).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an exception because the number of registered CAs has been exceeded', async () => {
@@ -197,6 +201,8 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model).toHaveBeenCalledTimes(0);
       expect(containerCradle.trustedCAModel.model.instance.save).toHaveBeenCalledTimes(0);
       expect(containerCradle.trustedCAModel.model.countDocuments).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.trustedCANotifier.creation).toHaveBeenCalledTimes(0);
     });
 
     it('should throw an exception because the certificate already exists', async () => {
@@ -225,6 +231,8 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model).toHaveBeenCalledTimes(0);
       expect(containerCradle.trustedCAModel.model.instance.save).toHaveBeenCalledTimes(0);
       expect(containerCradle.trustedCAModel.model.countDocuments).toHaveBeenCalledTimes(2);
+
+      expect(containerCradle.trustedCANotifier.creation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -352,6 +360,8 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model.findByIdAndDelete).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.trustedCANotifier.removal).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an exception because there are certificates that have not been self-registered', async () => {
@@ -371,6 +381,8 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
       expect(containerCradle.trustedCAModel.model.findByIdAndDelete).toHaveBeenCalledTimes(0);
       expect(containerCradle.trustedCAModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
       expect(containerCradle.trustedCAModel.model.exec).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.trustedCANotifier.removal).toHaveBeenCalledTimes(0);
     });
   });
 

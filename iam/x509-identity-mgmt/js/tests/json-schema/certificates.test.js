@@ -275,6 +275,9 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
                 params: {
                   allowedValues: [
                     'kafka-consumer',
+                    'vernemq',
+                    'v2k',
+                    'k2v',
                   ],
                 },
                 message: 'should be equal to one of the allowed values',
@@ -494,6 +497,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 params: {
                   allowedValues: [
                     'kafka-consumer',
+                    'vernemq',
+                    'v2k',
+                    'k2v',
                   ],
                 },
                 message: 'should be equal to one of the allowed values',
@@ -612,6 +618,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 params: {
                   allowedValues: [
                     'kafka-consumer',
+                    'vernemq',
+                    'v2k',
+                    'k2v',
                   ],
                 },
                 message: 'should be equal to one of the allowed values',

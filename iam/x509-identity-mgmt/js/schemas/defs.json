@@ -56,7 +56,10 @@
           "description": "Identifies the type of application that owns the certificate.",
           "maxLength": 64,
           "enum": [
-            "kafka-consumer"
+            "kafka-consumer",
+            "vernemq",
+            "v2k",
+            "k2v"
           ]
         }
       },
