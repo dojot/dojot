@@ -8,7 +8,9 @@ let containerCradleTemplate = null;
 
 function certificateModelMock() {
   const modelInstance = {
-    save: jest.fn(),
+    save: jest.fn(() => ({
+      belongsTo: {},
+    })),
   };
 
   const certificateModel = {
@@ -85,6 +87,22 @@ function trustedCAServiceMock() {
   return trustedCAService;
 }
 
+function deviceMgrProviderMock() {
+  const deviceMgrProvider = {
+    checkOwner: jest.fn().mockResolvedValue(true),
+  };
+  return deviceMgrProvider;
+}
+
+function ownershipNotifierMock() {
+  const ownershipNotifier = {
+    creation: jest.fn().mockResolvedValue(undefined),
+    change: jest.fn().mockResolvedValue(undefined),
+    removal: jest.fn().mockResolvedValue(undefined),
+  };
+  return ownershipNotifier;
+}
+
 beforeAll(() => {
   const certificateModel = certificateModelMock();
 
@@ -96,10 +114,16 @@ beforeAll(() => {
 
   const trustedCAService = trustedCAServiceMock();
 
+  const deviceMgrProvider = deviceMgrProviderMock();
+
+  const ownershipNotifier = ownershipNotifierMock();
+
   containerCradleTemplate = {
+    deviceMgrProvider,
     certificateModel,
     trustedCAService,
     ejbcaFacade,
+    ownershipNotifier,
     pkiUtils,
     dnUtils,
     tenant: 'admin',
@@ -129,17 +153,21 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       containerCradle.pkiUtils = pkiUtilsMock();
       containerCradle.pkiUtils.getFingerprint = jest.fn(() => util.p256CertFingerprint);
+
+      containerCradle.deviceMgrProvider = deviceMgrProviderMock();
     });
 
     it('should generate a certificate (with public key verification)', async () => {
       const certificateService = new CertificateService(containerCradle);
 
       await expect(certificateService.generateCertificate({
-        csr: util.p256CSR, belongsTo: {},
+        csr: util.p256CSR,
       })).resolves.toEqual({
         certificateFingerprint: util.p256CertFingerprint,
         certificatePem: util.p256Cert,
       });
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
 
       expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(1);
@@ -155,6 +183,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
     });
 
     it('should generate a certificate (without public key verification)', async () => {
@@ -162,7 +192,7 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       const certificateService = new CertificateService(containerCradle);
 
       await expect(certificateService.generateCertificate({
-        csr: util.p256CSR, belongsTo: {},
+        csr: util.p256CSR,
       })).resolves.toEqual({
         certificateFingerprint: util.p256CertFingerprint,
         certificatePem: util.p256Cert,
@@ -170,6 +200,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       // without checking public key
       expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
 
       expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(1);
@@ -184,6 +216,74 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should generate a certificate (with device association)', async () => {
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.generateCertificate({
+        csr: util.p256CSR, belongsTo: { device: 'abc123' },
+      })).resolves.toEqual({
+        certificateFingerprint: util.p256CertFingerprint,
+        certificatePem: util.p256Cert,
+      });
+
+      // the first call validates the device ID in the CSR's CN
+      // the second validates the device association payload
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(2);
+
+      expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.verify).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.cnamePrefix).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ejbcaFacade.generateCertificate).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw an exception for not finding the device for the informed tenant', async () => {
+      // This mock simulates that the informed device has no relation to the tenant
+      // the first call validates the device ID in the CSR's CN
+      // the second does not validate the device association payload
+      containerCradle.deviceMgrProvider.checkOwner = jest.fn()
+        .mockResolvedValueOnce(true)
+        .mockResolvedValue(false);
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.generateCertificate({
+        csr: util.p256CSR, belongsTo: { device: 'abc123' },
+      })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(2);
+
+      expect(containerCradle.pkiUtils.parseCSR).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.checkPublicKey).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.verify).toHaveBeenCalledTimes(1);
+      expect(containerCradle.dnUtils.from.dn.cnamePrefix).toHaveBeenCalledTimes(0);
+      expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ejbcaFacade.generateCertificate).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.certificateModel.model).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.instance.save).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -197,6 +297,7 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       containerCradle.trustedCAService = trustedCAServiceMock();
 
       containerCradle.certificateModel.model.countDocuments = jest.fn(() => 0);
+      containerCradle.deviceMgrProvider = deviceMgrProviderMock();
     });
 
     it('should register an external certificate', async () => {
@@ -215,17 +316,19 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: util.certChainRootCAFingerprint,
         certificateChain: util.certChain,
-        belongsTo: {},
       })).resolves.toEqual({
         certificateFingerprint: util.certChainHostFingerprint,
       });
 
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(0);
       expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(5);
       expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(2);
       expect(containerCradle.pkiUtils.checkRemainingDays).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.assertLeaf).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.isRootCA).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
     });
 
     it('should register an external certificate by the fingerprint of the root CA', async () => {
@@ -245,7 +348,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: util.certChainRootCAFingerprint,
         certificateChain: [hostCert, intermediateCA],
-        belongsTo: {},
       })).resolves.toEqual({
         certificateFingerprint: util.certChainHostFingerprint,
       });
@@ -256,6 +358,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       expect(containerCradle.pkiUtils.assertLeaf).toHaveBeenCalledTimes(1);
       expect(containerCradle.pkiUtils.isRootCA).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
     });
 
     it('should register the external certificate and also your CA', async () => {
@@ -275,7 +379,6 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       await expect(certificateService.registerCertificate({
         certificateChain: util.certChain,
-        belongsTo: {},
       })).resolves.toEqual({
         certificateFingerprint: util.certChainHostFingerprint,
       });
@@ -287,6 +390,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       expect(containerCradle.pkiUtils.isRootCA).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
       expect(containerCradle.trustedCAService.registerCertificate).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an exception because the fingerprint already exists', async () => {
@@ -300,8 +405,9 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: util.certChainRootCAFingerprint,
         certificateChain: util.certChain,
-        belongsTo: {},
       })).rejects.toThrow();
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
     });
 
     it('should throw an exception because the root CA fingerprint was not provided', async () => {
@@ -312,8 +418,9 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       await expect(certificateService.registerCertificate({
         certificateChain: [util.certChain[util.certChain.length - 1]],
-        belongsTo: {},
       })).rejects.toThrow();
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
     });
 
     it('should throw an error because the CA fingerprint is different from the one calculated on the certificate', async () => {
@@ -328,8 +435,9 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       await expect(certificateService.registerCertificate({
         caFingerprint: 'ABC', // informed fingerprint does not match the one calculated using the CA certificate
         certificateChain: util.certChain,
-        belongsTo: {},
       })).rejects.toThrow();
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
     });
 
     it('should throw an exception because the root CA certificate has not been previously registered', async () => {
@@ -347,8 +455,42 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       await expect(certificateService.registerCertificate({
         certificateChain: util.certChain,
-        belongsTo: {},
       })).rejects.toThrow();
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw an exception for not finding the device for the informed tenant', async () => {
+      // This mock simulates that the informed device has no relation to the tenant
+      containerCradle.deviceMgrProvider.checkOwner = jest.fn().mockResolvedValue(false);
+
+      containerCradle.pkiUtils.isRootCA = jest.fn().mockResolvedValue(true);
+
+      containerCradle.pkiUtils.getFingerprint = jest.fn()
+        .mockImplementationOnce(() => util.certChainHostFingerprint)
+        .mockImplementationOnce(() => util.certChainRootCAFingerprint);
+
+      containerCradle.trustedCAService.getPEM = jest.fn(
+        () => util.certChain[util.certChain.length - 1],
+      );
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.registerCertificate({
+        caFingerprint: util.certChainRootCAFingerprint,
+        certificateChain: util.certChain,
+        belongsTo: { device: 'abc123' },
+      })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
+      expect(containerCradle.pkiUtils.parseCert).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.getFingerprint).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.checkRemainingDays).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.assertLeaf).toHaveBeenCalledTimes(0);
+      expect(containerCradle.pkiUtils.isRootCA).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -360,17 +502,146 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       containerCradle.certificateModel = certificateModelMock();
     });
 
-    it('should change the ownership associated with the certificate', async () => {
+    it("should change the ownership associated with the certificate ('null' belongsTo, nothing changes)", async () => {
+      const oldBelongsTo = {};
+      const newBelongsTo = {};
+
       // returns the found document (mock)
-      containerCradle.certificateModel.model.exec = jest.fn(() => ({}));
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.changeOwnership({}, {})).resolves.toBeUndefined();
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
 
       expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(0);
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(0);
+      expect(containerCradle.ownershipNotifier.removal).toHaveBeenCalledTimes(0);
+    });
+
+    it('should change the ownership associated with the certificate (owner = device)', async () => {
+      const oldBelongsTo = { device: 'abc123' };
+      const newBelongsTo = { device: '123abc' };
+
+      // returns the found document (mock)
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(1);
+    });
+
+    it('should change the ownership associated with the certificate (owner = application)', async () => {
+      const oldBelongsTo = { application: 'v2k' };
+      const newBelongsTo = { application: 'k2v' };
+
+      // returns the found document (mock)
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(1);
+    });
+
+    it('should change (create) the ownership associated with the certificate (owner = device)', async () => {
+      const oldBelongsTo = { device: null };
+      const newBelongsTo = { device: '123abc' };
+
+      // returns the found document (mock)
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should change (create) the ownership associated with the certificate (owner = application)', async () => {
+      const oldBelongsTo = { application: null };
+      const newBelongsTo = { application: 'k2v' };
+
+      // returns the found document (mock)
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should change (remove) the ownership associated with the certificate (owner = device)', async () => {
+      const oldBelongsTo = { device: '123abc' };
+      const newBelongsTo = { device: null };
+
+      // returns the found document (mock)
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.removal).toHaveBeenCalledTimes(1);
+    });
+
+    it('should change (remove) the ownership associated with the certificate (owner = application)', async () => {
+      const oldBelongsTo = { application: 'k2v' };
+      const newBelongsTo = { application: null };
+
+      // returns the found document (mock)
+      containerCradle.certificateModel.model.exec = jest.fn(() => ({
+        belongsTo: oldBelongsTo,
+      }));
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, newBelongsTo)).resolves.toBeUndefined();
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.removal).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an exception because the certificate to be changed was not found', async () => {
@@ -379,11 +650,44 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.changeOwnership({}, {})).rejects.toThrow();
+      await expect(certificateService.changeOwnership({})).rejects.toThrow();
 
       expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
       expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw an exception because there is more than one type of owner for the certificate', async () => {
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, { application: 'kafka-consumer', device: 'abc123' })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(0);
+    });
+
+    it('should throw an exception for not finding the device for the informed tenant', async () => {
+      // This mock simulates that the informed device has no relation to the tenant
+      containerCradle.deviceMgrProvider.checkOwner = jest.fn().mockResolvedValue(false);
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.changeOwnership({}, { device: 'abc123' })).rejects.toThrow();
+
+      expect(containerCradle.deviceMgrProvider.checkOwner).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.certificateModel.model.findOneAndUpdate).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ownershipNotifier.change).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -444,7 +748,38 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.listCertificates([], {}, 1, 0))
+      await expect(certificateService.listCertificates([], {}))
+        .resolves.toEqual({ itemCount, results });
+
+      expect(containerCradle.certificateModel.model.find).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.select).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.limit).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.skip).toHaveBeenCalledTimes(0);
+      expect(containerCradle.certificateModel.model.maxTimeMS).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.lean).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.exec).toHaveBeenCalledTimes(1);
+      expect(containerCradle.certificateModel.model.countDocuments).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('obtaining certificate list (with limit and offset)', () => {
+    let containerCradle = null;
+
+    beforeEach(() => {
+      containerCradle = { ...containerCradleTemplate };
+      containerCradle.certificateModel = certificateModelMock();
+    });
+
+    it('should get a list of certificates from the database', async () => {
+      const itemCount = 1;
+      const results = {};
+
+      containerCradle.certificateModel.model.exec = jest.fn(() => results);
+      containerCradle.certificateModel.model.countDocuments = jest.fn(() => itemCount);
+
+      const certificateService = new CertificateService(containerCradle);
+
+      await expect(certificateService.listCertificates([], {}, 1, 1))
         .resolves.toEqual({ itemCount, results });
 
       expect(containerCradle.certificateModel.model.find).toHaveBeenCalledTimes(1);
@@ -486,6 +821,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(1);
       expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(1);
       expect(containerCradle.ejbcaFacade.revokeCertificate).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.removal).toHaveBeenCalledTimes(1);
     });
 
     it('should remove the certificate from the database (issued by external CA)', async () => {
@@ -505,6 +842,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(0);
       expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(0);
       expect(containerCradle.ejbcaFacade.revokeCertificate).toHaveBeenCalledTimes(0);
+
+      expect(containerCradle.ownershipNotifier.removal).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -537,6 +876,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       expect(containerCradle.dnUtils.from).toHaveBeenCalledTimes(1);
       expect(containerCradle.dnUtils.from.dn.stringify).toHaveBeenCalledTimes(1);
       expect(containerCradle.ejbcaFacade.generateCertificate).toHaveBeenCalledTimes(1);
+
+      expect(containerCradle.ownershipNotifier.creation).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -31,6 +31,7 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
     - [How to register an external certificate (issued by a trusted CA)](#how-to-register-an-external-certificate-issued-by-a-trusted-ca)
     - [How to remove an external certificate](#how-to-remove-an-external-certificate)
     - [How to associate a device with a certificate](#how-to-associate-a-device-with-a-certificate)
+    - [How to unassociate a device with a certificate](#how-to-unassociate-a-device-with-a-certificate)
   - [Running the service](#running-the-service)
     - [Configurations](#configurations)
       - [HTTP Server settings](#http-server-settings)
@@ -39,7 +40,11 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
       - [Certificate Control Settings](#certificate-control-settings)
       - [MongoDBClient/mongoose Settings](#mongodbclientmongoose-settings)
       - [Logger Settings](#logger-settings)
+      - [Kafka Integration Settings](#kafka-integration-settings)
+      - [_Device Manager_ Integration Settings](#device-manager-integration-settings)
     - [How to run](#how-to-run)
+  - [Debugging the service](#debugging-the-service)
+  - [Testing the service](#testing-the-service)
   - [Documentation](#documentation)
   - [Issues and help](#issues-and-help)
 
@@ -945,6 +950,16 @@ HTTP/1.1 204 No Content
 
 ### How to associate a device with a certificate
 
+First of all, it is worth mentioning that the fastest way to associate a device
+with a certificate is in the same operation in which the certificate is
+_generated_ (from the sending of a CSR) or _registered as trusted_ (from the
+sending of a PEM certificate external). In this case, it is enough to inform the
+attribute `belongsTo.device` inside the payload in the request body.
+
+However, there is the case where the certificate is registered even before a
+device is registered on the platform. therefore, the association is made in a
+step subsequent to the registration of the certificate.
+
 To associate a device represented on the platform with a certificate, simply
 enter the device identifier for the certificate endpoint, as follows:
 
@@ -986,6 +1001,49 @@ The answer would be a simple confirmation:
 HTTP/1.1 204 No Content
 ~~~
 
+This approach serves both to associate a device with a certificate and to change
+the device associated with the certificate.
+
+__Note that__ we can also call this operation _Certificate Ownership Creation_
+or _Certificate Ownership Change_ in the case where the certificate already had
+a previous owner.
+
+### How to unassociate a device with a certificate
+
+To undo a device's association with a certificate, simply pass the `null` value
+as the device's identifier, as follows:
+
+~~~HTTP
+PATCH <base-url>/v1/certificates/<certificateFingerprint>
+Authorization: Bearer JWT
+Content-type: application/json
+
+{
+  "belongsTo" : {
+    "device" : null
+  }
+}
+~~~
+
+An alternative to this mode is to use the `DELETE` HTTP method on the
+`<base-url>/v1/certificates/<certificateFingerprint>/belongsto` endpoint,
+thus, it is not necessary to inform a body for the request, as follows:
+
+~~~HTTP
+DELETE <base-url>/v1/certificates/<certificateFingerprint>/belongsto
+Authorization: Bearer JWT
+~~~
+
+__Caution:__ Pay close attention to the endpoint `.../belongsto` suffix so as
+not to remove the _certificate record_ instead of the _association_!
+
+Both approaches will have the same result, that is, the device will no longer be
+associated with the certificate. The difference is that using the `DELETE`
+method will remove the `belongsTo.device` sub attribute from the certificate
+record, while the `PATCH` method will keep the sub attribute with a `null`
+value. In practice, the _service_ behaves in the same way for both approaches.
+
+__Note that__ we can also call this operation _Certificate Ownership Removal_.
 
 ## Running the service
 
@@ -1098,6 +1156,35 @@ fore mentioned convention.
 | logger.file.size | string | `10m` | | X509IDMGMT_LOGGER_FILE_SIZE | Maximum size of the file after which it will rotate. This can be a number of bytes, or units of kb, mb, and gb. If using the units, add 'k', 'm', or 'g' as the suffix. The units need to directly follow the number. |
 
 
+#### Kafka Integration Settings
+
+| Key | type | Default Value | Valid Values | Environment variable | Purpose |
+|-----|------|---------------|--------------|----------------------|---------|
+| kafka.topic.acks | integer | `-1` | `all`, `-1`, `0`, `1` | X509IDMGMT_KAFKA_TOPIC_ACKS | The number of acknowledgments the producer requires the leader to have received before considering a request complete. See more [here](https://kafka.apache.org/documentation/#producerconfigs_acks). |
+| kafka.topic.auto.offset.reset | string | `latest` | `latest`, `earliest`, `none` | X509IDMGMT_KAFKA_TOPIC_AUTO_OFFSET_RESET | What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset). |
+| kafka.consumer.client.id | string | `x509-identity-mgmt` | - | X509IDMGMT_KAFKA_CONSUMER_CLIENT_ID | An id string to pass to the server when making requests. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_client.id). |
+| kafka.consumer.group.id | string | `x509-identity-mgmt-group` | - | X509IDMGMT_KAFKA_CONSUMER_GROUP_ID | A unique string that identifies the consumer group this consumer belongs to. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_group.id). |
+| kafka.consumer.max.in.flight.req.per.conn | integer | `1000000` | `[1,...]` | X509IDMGMT_KAFKA_CONSUMER_MAX_IN_FLIGHT_REQ_PER_CONN | The maximum number of unacknowledged requests the client will send on a single connection before blocking. See more [here](https://kafka.apache.org/documentation/#producerconfigs_max.in.flight.requests.per.connection). |
+| kafka.consumer.metadata.broker.list | string | `127.0.0.1:9092` | - | X509IDMGMT_KAFKA_CONSUMER_METADATA_BROKER_LIST | A comma-separated list containing the kafka's `host:port`. |
+| kafka.consumer.socket.keepalive.enable | boolean | `false` | `true` or `false` | X509IDMGMT_KAFKA_CONSUMER_SOCKET_KEEPALIVE_ENABLE | Flag indicating whether the consumer socket should be kept active. |
+| kafka.consumer.commit.interval.ms | integer | `5000` | positive integer | X509IDMGMT_KAFKA_CONSUMER_COMMIT_INTERVAL_MS | The frequency in milliseconds with which to save the position of the processor. See more [here](https://kafka.apache.org/documentation/#streamsconfigs_commit.interval.ms). |
+| kafka.consumer.inprocess.max.msg | integer | `1` | - | X509IDMGMT_KAFKA_CONSUMER_INPROCESS_MAX_MSG | maximum number of messages in processing. |
+| kafka.consumer.queued.max.msg.bytes | integer | `10485760` | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_QUEUED_MAX_MSG_BYTES | The largest record batch size allowed by Kafka. See more [here](https://kafka.apache.org/documentation/#topicconfigs_max.message.bytes). |
+| kafka.consumer.subscription.backoff.min.ms | integer | `1000` (1 second) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_MIN_MS | Default value (in milliseconds) for the initial backoff time implemented by the subscription mechanism. |
+| kafka.consumer.subscription.backoff.max.ms | integer | `60000` (60 seconds) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_MAX_MS | Default value (in milliseconds) for the maximum backoff time implemented by the subscription mechanism. |
+| kafka.consumer.subscription.backoff.delta.ms | integer | `1000` (1 second) | `[0,...]` | X509IDMGMT_KAFKA_CONSUMER_SUBSCRIPTION_BACKOFF_DELTA_MS | Default value (in milliseconds) for the delta backoff time implemented by the subscription mechanism. |
+
+
+#### _Device Manager_ Integration Settings
+
+| Key | type | Default Value | Valid Values | Environment variable | Purpose |
+|-----|------|---------------|--------------|----------------------|---------|
+| devicemgr.device.url | string | `http://127.0.0.1:5000/device` | valid URL address | X509IDMGMT_DEVICEMGR_DEVICE_URL | URL address of the _Device Manager_ service to obtain information about the devices. |
+| devicemgr.device.timeout.ms | integer | `10000` (10 seconds) | `[0,...]` | X509IDMGMT_DEVICEMGR_DEVICE_TIMEOUT_MS | _Device Manager_ response timeout |
+| devicemgr.kafka.consumer.topic.suffix | string | `dojot.device-manager.device` | - | X509IDMGMT_DEVICEMGR_KAFKA_CONSUMER_TOPIC_SUFFIX | Suffix of the same topics that _Device Manager_ publishes data according to its events. |
+| devicemgr.healthcheck.ms | integer | `10000` (10 seconds) | `[0,...]` | X509IDMGMT_DEVICEMGR_HEALTHCHECK_MS | Time interval in which the Kafka consumer who consumes _Device Manager_ events is checked to see if he is healthy |
+
+
 ### How to run
 
 Beforehand, you need an already running dojot instance in your machine. Check
@@ -1121,6 +1208,104 @@ docker push <username>/x509-identity-mgmt:<tag>
 __NOTE THAT__  you can use the official image provided by dojot in its
 [DockerHub page](https://hub.docker.com/r/dojot/x509-identity-mgmt).
 
+## Debugging the service
+
+To debug the service in a development environment, we prefer to use the VS Code,
+and for that there is the [.vscode/launch.json](./js/.vscode/launch.json) file
+that can be studied and there you will have tips on what you need to be present
+in your local environment to run the service outside the container.
+
+See also the [default.conf](./js/config/default.conf) file used by the service,
+look for URLs there and you will have a good tip of what needs to be
+externalized from the _docker-compose_ environment for the service to have
+access. The [development.conf](./js/config/development.conf) file takes
+precedence over the [default.conf](./js/config/default.conf) file when we run
+the _service_ in _debug mode_ using VS Code but it is completely discarded in a
+_production_ environment.
+
+Basically, you must attend to the _version_ of Node.js and have installed the
+_build-essential_ library (in the case of Linux distributions based on Debian).
+It is likely that in order to compile the `node-rdkafka` _node_module_ it will
+be necessary to install the _gzip compression_ library. In this case, the most
+advisable is to study the dependencies declared in the [Dockerfile](./Dockerfile)
+file to have an idea of what is needed.
+
+You may need the following dependencies installed on your Linux:
+~~~shell
+$ # in the case of Linux distributions based on Debian:
+$ sudo apt-get install -y \
+               build-essential \
+               node-gyp \
+               make \
+               ca-certificates \
+               gzip
+~~~
+
+For the _x509-identity-mgmt_ service to be able to access the other services on
+the dojot platform, it is necessary to map the service container _ports_ to
+ports on your _localhost_ (based on a _docker-compose_ deployment).
+See the [development.conf](./js/config/development.conf) file for dependent
+services.
+
+In order for the service (running locally) to be able to connect to Kafka
+(inside the docker-compose), in addition to externalizing the Kafka container
+port to your localhost, it is also necessary to edit the `/etc/hosts` file on
+your Linux:
+~~~shell
+$ sudo vi /etc/hosts
+~~~
+
+And include the following entry:
+
+~~~
+127.0.0.1 kafka
+~~~
+
+This way, your local DNS will know how to correctly resolve the domain for the
+_kafka_ service (remember that it is necessary to externalize the Kafka
+container port to your localhost).
+
+In order for the service (running locally) to connect to the EJBCA container,
+it is necessary to obtain the access files generated by the EJBCA, for this you
+will have to copy the files from the _docker volume_ to your local development
+directory:
+
+~~~shell
+$ EJBCA_CONTAINER_ID=$(docker ps --quiet --filter "label=com.docker.compose.service=x509-ejbca")
+
+$ docker cp ${EJBCA_CONTAINER_ID}:/opt/tls .
+~~~
+
+Assuming that your current directory is the _root_ of the project, that is, the
+same directory as the `package.json` file, The `./tls` subdirectory will be
+created and the files needed to connect to the EJBCA container will be inside.
+Remembering that for this to work, it is necessary to use dojot's
+`docker-compose` deployment.
+
+
+## Testing the service
+
+To perform unit tests, just open a terminal in the project's root directory
+(the same directory as the `package.json` file) and execute the following
+command:
+
+~~~shell
+$ npm test
+~~~
+
+Unit tests will be performed and a test coverage report will be generated in
+the `./coverage` directory.
+To view the test coverage report, simply open the
+`./coverage/lcov-report/index.html` file in a browser.
+
+To debug the unit tests, run the command:
+
+~~~shell
+$ npm run debugtest
+~~~
+
+From there, you can use the VS Code to attach to the running process and debug
+the test cases. Learn more at [Jest Troubleshooting](https://jestjs.io/docs/troubleshooting#debugging-in-vs-code).
 
 ## Documentation
 

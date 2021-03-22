@@ -1,4 +1,4 @@
-FROM node:12.20.1-alpine AS base
+FROM node:12.21-alpine AS base
 
 WORKDIR /usr/local/app
 
@@ -34,14 +34,15 @@ COPY js ./
 
 ################################################################################
 
-FROM node:12.20.1-alpine
+FROM node:12.21-alpine
 
 WORKDIR /opt/x509-identity-mgmt
 
 # 'node-rdkafka' shared libraries: 'liblz4.so', 'libsasl2.so'
 RUN apk --no-cache add \
       lz4-libs \
-      libsasl
+      libsasl \
+      tini
 
 # Uses the same UID as the one used by the EJBCA container
 #   -u UID          User id
@@ -58,9 +59,6 @@ COPY --chown=10001:0 --from=base /usr/local/app /opt/x509-identity-mgmt/
 
 VOLUME ["/opt/tls/"]
 
-# Unhandled Promise Rejections is a newer feature that came up in Node.js 12.
-# Not handling promise rejections is an accepted practice in browsers, but in
-# servers it could be problematic because it can cause memory leaks.
-# To avoid this, we must use the flag 'unhandled-rejections' in 'strict' mode
-# so that the application ends immediately with an uncaught exception.
-CMD ["node","--unhandled-rejections=strict", "index.js"]
+ENTRYPOINT ["/sbin/tini", "--"]
+
+CMD ["npm", "run", "app"]

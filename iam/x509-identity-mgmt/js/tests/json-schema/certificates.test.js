@@ -275,6 +275,9 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
                 params: {
                   allowedValues: [
                     'kafka-consumer',
+                    'vernemq',
+                    'v2k',
+                    'k2v',
                   ],
                 },
                 message: 'should be equal to one of the allowed values',
@@ -405,9 +408,9 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F]{10}$',
+                pattern: '^[0-9a-fA-F-]{6,36}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F]{10}$"',
+              message: 'should match pattern "^[0-9a-fA-F-]{6,36}$"',
             }],
           },
         });
@@ -494,6 +497,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 params: {
                   allowedValues: [
                     'kafka-consumer',
+                    'vernemq',
+                    'v2k',
+                    'k2v',
                   ],
                 },
                 message: 'should be equal to one of the allowed values',
@@ -612,6 +618,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 params: {
                   allowedValues: [
                     'kafka-consumer',
+                    'vernemq',
+                    'v2k',
+                    'k2v',
                   ],
                 },
                 message: 'should be equal to one of the allowed values',
@@ -642,9 +651,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F]{10}$',
+                pattern: '^[0-9a-fA-F-]{6,36}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F]{10}$"',
+              message: 'should match pattern "^[0-9a-fA-F-]{6,36}$"',
             }],
           },
         });

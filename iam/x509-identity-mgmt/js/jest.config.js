@@ -26,6 +26,7 @@ module.exports = {
   collectCoverageFrom: [
     'src/**',
     '!src/DIContainer.js',
+    '!src/core/RelativeDistinguishedNames.json',
   ],
 
   // The directory where Jest should output its coverage files
