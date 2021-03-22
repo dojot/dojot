@@ -41,17 +41,6 @@ ENV DOCKER_VERNEMQ_KUBERNETES_LABEL_SELECTOR="app=vernemq" \
     DOCKER_VERNEMQ_LOG__CONSOLE=console \
     PATH="/vernemq/bin:$PATH"
 
-# Install supercronic package
-ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.1.9/supercronic-linux-amd64 \
-    SUPERCRONIC=supercronic-linux-amd64 \
-    SUPERCRONIC_SHA1SUM=5ddf8ea26b56d4a7ff6faecdd8966610d5cb9d85
-
-RUN curl -fsSLO "$SUPERCRONIC_URL" && \
-    echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
-    chmod +x "$SUPERCRONIC" && \
-    mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
-    ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
-
 WORKDIR /vernemq
 
 COPY --chown=10000:10000 bin/vernemq.sh /usr/sbin/start_vernemq
@@ -61,13 +50,6 @@ COPY --chown=10000:10000 --from=build-env /vernemq-build/release /vernemq
 COPY --from=build-env /build/plugins/dojot_acl_plugin/_build /vernemq/dojot_acl_plugin
 COPY --from=build-env /build/plugins/dojot_disconnect_plugin/_build /vernemq/dojot_disconnect_plugin
 
-# Copy tls scripts
-COPY bin/vmq_dojot/scripts_tls/ /vernemq/scripts_tls
-COPY bin/vmq_dojot/vmq_dojot.sh /vernemq/vmq_dojot.sh
-
-RUN chmod a+rwx  /vernemq/vmq_dojot.sh && \
-    chmod a+rwx -R  /vernemq/scripts_tls
-
 # Copy entrypoint script
 COPY bin/command.sh /
 
@@ -76,9 +58,6 @@ RUN ln -s /vernemq/etc /etc/vernemq && \
     ln -s /vernemq/data /var/lib/vernemq && \
     ln -s /vernemq/log /var/log/vernemq
 
-# Create directory to store x509 certificate and private key
-RUN mkdir -p /vernemq/cert/ && \
-    chmod a+rwx -R  /vernemq/cert/
 
 # Ports
 # 1883  MQTT
@@ -90,7 +69,7 @@ RUN mkdir -p /vernemq/cert/ && \
 # 9100 9101 9102 9103 9104 9105 9106 9107 9108 9109  Specific Distributed Erlang Port Range
 
 EXPOSE 1883 8883 8080 44053 4369 8888 \
-       9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
+    9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
 
 
 VOLUME ["/vernemq/log", "/vernemq/data", "/vernemq/etc"]
