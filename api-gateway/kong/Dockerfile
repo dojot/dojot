@@ -28,6 +28,8 @@ RUN git checkout ${GIT_PLUGIN_JWT_KEYCLOAK_COMMIT_OR_VERSION}
 # Installing the plugin
 RUN luarocks make && luarocks pack kong-plugin-jwt-keycloak
 
+USER kong
+
 # Create final image
 FROM kong:2.3-alpine
 
