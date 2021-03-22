@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const MongoQS = require('mongo-querystring');
 
+const CommonModel = require('./CommonModel');
+
 const { Schema } = mongoose;
 
 const trustedCASchema = new Schema({
@@ -50,35 +52,11 @@ const mongoQS = Object.freeze(new MongoQS({
   }),
 }));
 
-class TrustedCAModel {
+class TrustedCAModel extends CommonModel {
   constructor({ mongoClient }) {
-    Object.defineProperty(this, 'mongoClient', { value: mongoClient });
-    Object.defineProperty(this, 'model', { value: mongooseModel });
-    Object.defineProperty(this, 'mongoQS', { value: mongoQS });
-  }
-
-  parseConditionFields(candidates) {
-    const conditionFields = { ...candidates };
-    Object.entries(conditionFields).forEach(
-      ([key, value]) => {
-        // value must be a string
-        if (typeof value !== 'string') {
-          if (typeof value.toString !== 'function') {
-            throw new Error('The value of the Condition Field must be a string or convertible to a string.');
-          }
-          Reflect.set(conditionFields, key, value.toString());
-        }
-      },
-    );
-    return this.mongoQS.parse(conditionFields);
-  }
-
-  parseProjectionFields(commaSeparatedFields) {
-    return this.mongoClient.parseProjectionFields(commaSeparatedFields, projectableFields);
-  }
-
-  sanitizeFields(cert) {
-    return this.mongoClient.sanitizeFields(cert, projectableFields);
+    super({
+      mongoClient, mongooseModel, mongoQS, projectableFields,
+    });
   }
 }
 

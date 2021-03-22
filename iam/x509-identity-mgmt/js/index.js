@@ -31,14 +31,20 @@ if (config.logger.file.enable) {
 Logger.setVerbose(config.logger.verbose);
 
 const container = DIContainer(config);
+
 const logger = container.resolve('logger');
 const stateManager = container.resolve('stateManager');
-const ejbcaHealthCheck = container.resolve('ejbcaHealthCheck');
 const mongoClient = container.resolve('mongoClient');
+
 const server = container.resolve('server');
 const framework = container.resolve('framework');
+
 const deviceMgrEventEngine = container.resolve('deviceMgrEventEngine');
+const notificationEngine = container.resolve('notificationEngine');
+
+const ejbcaHealthCheck = container.resolve('ejbcaHealthCheck');
 const deviceMgrKafkaHealthCheck = container.resolve('deviceMgrKafkaHealthCheck');
+const notificationKafkaHealthCheck = container.resolve('notificationKafkaHealthCheck');
 
 // Emitted each time there is a request. Note that there may be multiple
 // requests per connection (in the case of keep-alive connections).
@@ -60,8 +66,11 @@ server.on('close', () => {
 
 // Emitted when an error occurs. Unlike net.Socket, the 'close' event will not
 // be emitted directly following this event unless server.close() is manually called.
-server.on('error', (e) => {
-  logger.error('Server experienced an error:', e);
+server.on('error', (err) => {
+  logger.error('Server experienced an error:', err);
+  if (err.code === 'EADDRINUSE') {
+    throw err;
+  }
 });
 
 // Begin accepting connections on the specified port and hostname.
@@ -75,6 +84,9 @@ mongoClient.connect();
 // initializes the DeviceMgrEventEngine
 deviceMgrEventEngine.start();
 
+// initializes the NotificationEngine
+notificationEngine.start();
+
 // The EJBCA health-check is done at intervals directly in the Event Loop
 stateManager.addHealthChecker('ejbca',
   ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
@@ -83,7 +95,12 @@ stateManager.addHealthChecker('ejbca',
 // The DeviceManager (Kafka Consumer) health-check is done at intervals directly in the Event Loop
 stateManager.addHealthChecker('deviceMgrKafka',
   deviceMgrKafkaHealthCheck.readiness.bind(deviceMgrKafkaHealthCheck),
-  config.devicemgr.healthcheck.ms);
+  config.kafka.consumer.healthcheck.ms);
+
+// The Notifications (Kafka Producer) health-check is done at intervals directly in the Event Loop
+stateManager.addHealthChecker('notificationKafka',
+  notificationKafkaHealthCheck.readiness.bind(notificationKafkaHealthCheck),
+  config.kafka.producer.healthcheck.ms);
 
 // create an instance of http-terminator and instead of
 // using server.close(), use httpTerminator.terminate()
@@ -116,5 +133,12 @@ stateManager.registerShutdownHandler(async () => {
   logger.debug('Stopping the DeviceMgrEventEngine...');
   await deviceMgrEventEngine.stop();
   logger.debug('the DeviceMgrEventEngine has been stopped!');
+  return Promise.resolve(true);
+});
+
+stateManager.registerShutdownHandler(async () => {
+  logger.debug('Stopping the NotificationEngine...');
+  await notificationEngine.stop();
+  logger.debug('the NotificationEngine has been stopped!');
   return Promise.resolve(true);
 });
