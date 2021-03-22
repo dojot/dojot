@@ -16,7 +16,7 @@ As prerequisites this uses curl and jq .
 On Debian-based Linux distributions, you can install these prerequisites by running:
 
 ```sh
-sudo apt install git curl jq openssl
+sudo apt install git curl jq
 ```
 
 ## Obtaining Access Token
