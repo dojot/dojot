@@ -3,7 +3,8 @@
 
 This example is intended to deploy an example using Kong with the `pep-kong` and `jwt-keycloak` plugins and a secure endpoint using a JWT provided by Keycloak.
 
-__ATTENTION__ It's highly recommended to communicate with Keycloak over HTTPS, visit the session Setting up TLS(SSL) in Keycloak Docker image page for more details.
+__ATTENTION__ It's highly recommended to communicate with Keycloak over HTTPS.
+
 
 To run this example, type:
 
