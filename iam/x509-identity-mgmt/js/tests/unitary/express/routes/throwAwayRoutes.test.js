@@ -32,6 +32,11 @@ const framework = WebUtils.framework.createExpress({
                 getRootCRL: jest.fn(() => crlQueryResult),
               };
             }
+            if (dep === 'trustedCAService') {
+              return {
+                getCertificateBundle: jest.fn(() => [util.caCert2]),
+              };
+            }
             // dep === 'certificateService'
             return {
               throwAwayCertificate: jest.fn(() => generatedCert),
@@ -56,7 +61,7 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
         expect(res.body).toEqual(generatedCert);
       }));
 
-  it('this should return an error because the CSR was not provided',
+  it('should return an error because the CSR was not provided',
     () => request.post('/internal/api/v1/throw-away')
       .send({
         certificateChain: util.certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2'),
@@ -80,5 +85,29 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(crlQueryResult);
+      }));
+
+  it('should get the Trusted CAs bundle ("Accept: application/json")',
+    () => request.get('/internal/api/v1/throw-away/ca/bundle')
+      .set('Accept', 'application/json')
+      .expect(200)
+      .then((res) => {
+        expect(res.body).toEqual([util.caCert, util.caCert2]);
+      }));
+
+  it('should get the Trusted CAs bundle ("Accept: application/x-pem-file")',
+    () => request.get('/internal/api/v1/throw-away/ca/bundle')
+      .set('Accept', 'application/x-pem-file')
+      .expect(200)
+      .then((res) => {
+        expect(res.text).toEqual([util.caCert, util.caCert2].join('\n'));
+      }));
+
+  it('should NOT get the Trusted CAs bundle ("Accept: text/plain")',
+    () => request.get('/internal/api/v1/throw-away/ca/bundle')
+      .set('Accept', 'text/plain')
+      .expect(406)
+      .then((res) => {
+        expect(res.text).toEqual('Not Acceptable');
       }));
 });

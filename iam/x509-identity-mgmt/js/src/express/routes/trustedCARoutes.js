@@ -27,7 +27,7 @@ module.exports = ({
               throw BadRequest('Only one CA certificate is expected per request.');
             }
 
-            const [caPem] = pemArr;
+            const [caPem] = pemArr.map((el) => sanitizeParams.sanitizeLineBreaks(el));
             const allowAutoRegistration = req.body.allowAutoRegistration || false;
 
             const caService = req.scope.resolve(CA_SERVICE);
