@@ -25,7 +25,7 @@ WORKDIR /tmp/kong-plugin-jwt-keycloak
 # Getting code from the commit or version
 RUN git checkout ${GIT_PLUGIN_JWT_KEYCLOAK_COMMIT_OR_VERSION}
 
-# Installing the plugin
+# Building the plugin
 RUN luarocks make && luarocks pack kong-plugin-jwt-keycloak
 
 USER kong
