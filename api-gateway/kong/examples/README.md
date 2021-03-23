@@ -16,7 +16,7 @@ As prerequisites this uses curl and jq .
 On Debian-based Linux distributions, you can install these prerequisites by running:
 
 ```sh
-sudo apt install git curl jq
+sudo apt install curl jq
 ```
 
 ## Obtaining Access Token
@@ -120,8 +120,8 @@ Clients in the right sidebar:
   - Enable the `Standard Flow Enabled` option if it is not enabled
   - Disable the `Implicit Flow Enabled` option if it is enabled
   - Enable the `Direct Access Grants Enabled` option if it is not enabled
-  - Enable the `Service Accounts Enabled` option if it is not enabled (Check if it is necessary)
-  - Enable the option `Authorization Enabled` if it is not enabled (Check if it is necessary)
+  - Enable the `Service Accounts Enabled` option if it is not enabled
+  - Enable the option `Authorization Enabled` if it is not enabled
   - Set `Valid Redirect URIs` to` http://localhost:8000/* `
 
 #### Configuring authorization
@@ -134,12 +134,12 @@ Clients in the right sidebar:
     - Create a policy for role `admin`
       - In `Create Policy` select`role`
         - Set to name `Should be admin
-        - Set the `admin` value in`Realm Roles` and select it as `Required` (Check if it is necessary)
+        - Set the `admin` value in`Realm Roles` and select it as `Required` 
         - Set `Logic` to` Positive
     - Create a policy for role `user`
       - In `Create Policy` select`role`
         - Set to name `Should be user
-        - Set the `user` value in`Realm Roles` and select it as `Required` (Check if it is necessary)
+        - Set the `user` value in`Realm Roles` and select it as `Required`
         - Set `Logic` to`Positive`
 
 In the following steps It will configure a resource called `server-api-example-sec` in which a user with the role `admin` can create, edit and delete, while a user with the role user can only view:
@@ -149,7 +149,7 @@ In the following steps It will configure a resource called `server-api-example-s
     - Set `name` to`server-api-example-sec`*
     - Set some significant value to identify in `Display name`, in this case something like`Server Api Example with security`
     - In `scopes` set the values`create`, `delete`,`update` and `view`
-    - Enable `User-Managed Access Enabled` (Check if it is necessary)
+    - Enable `User-Managed Access Enabled`
     - Click save
 - Within `Authorization` select the`Permissions` tab
   - In `Create Permission` select`Scope-based`
@@ -173,7 +173,7 @@ Client cli settings depends on ‘kong client settings’
   - Set `Access Type` to`public`
   - Disable the `Standard Flow Enabled` option if it is enabled
   - Disable the `Implicit Flow Enabled` option if it is enabled
-  - Enable the `Direct Access Grants Enabled` option if it is not enabled (is it necessary?)
+  - Enable the `Direct Access Grants Enabled` option if it is not enabled
   - Go to the `Scope` tab
     - Enable `Full Scope Allowed` or select the`scope` `user`
 
@@ -185,7 +185,7 @@ Client gui settings depends on ‘kong client settings’
   - Set `Access Type` to`public`
   - Enable the `Standard Flow Enabled` option if it is enabled
   - Disable the `Implicit Flow Enabled` option if it is enabled
-  - Enable the `Direct Access Grants Enabled` option if it is not enabled (is it necessary?)
+  - Enable the `Direct Access Grants Enabled` option if it is not enabled
   - Set `Valid Redirect URIs` to `http://localhost:8000/*`
   - Go to the `Scope tab
     - Enable `Full Scope Allowed` or select the`scope` `user`
