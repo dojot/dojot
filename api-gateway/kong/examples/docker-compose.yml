@@ -138,9 +138,6 @@ services:
       JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.impersonation=disabled -Dkeycloak.profile.feature.upload_scripts=enabled"
       KEYCLOAK_USER: admin  #KEYCLOAK_USER_FILE
       KEYCLOAK_PASSWORD: admin #KEYCLOAK_PASSWORD_FILE
-      KAFKA_SERVERS: kafka:9092
-      KAFKA_CLIENT_ID: keycloak
-      KAFKA_TOPIC: dojot-management.dojot.tenancy
       DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_PORT: 5432
