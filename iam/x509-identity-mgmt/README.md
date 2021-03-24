@@ -42,6 +42,7 @@ entities, that is, *IoT devices* that communicate with the dojot IoT platform.
       - [Logger Settings](#logger-settings)
       - [Kafka Integration Settings](#kafka-integration-settings)
       - [_Device Manager_ Integration Settings](#device-manager-integration-settings)
+      - [Certificate Service Settings](#certificate-service-settings)
     - [How to run](#how-to-run)
   - [Debugging the service](#debugging-the-service)
   - [Testing the service](#testing-the-service)
@@ -123,7 +124,7 @@ Explaining this command in detail:
 | -sha256                                    | This specifies the message digest to sign the request. |
 | -keyout private.key                        | This gives the filename to write the newly created private key to. |
 | -out request.csr                           | This specifies the output filename to write the CSR to |
-| -subj "/CN=`{device-id here}`" | Sets subject name for new request. <br> **Important note**: Only the CN (CommonName) is required. The value of this field must match the *device identifier*. The dojot platform is responsible for adding the correct *tenant*. In this way, the *Certificate-Device* relationship is made. |
+| -subj "/CN=`{device-id here}`" | Sets subject name for new request. Only the CN (CommonName) is required. This field can contain any value. In the past, this field was used to link the `tenant:device-id` to the certificate, but this behavior has been disabled to support external certificates. |
 
 For more details, just consult the tool manual:
 
@@ -1118,7 +1119,8 @@ fore mentioned convention.
 | certificate.subject.mandatoryattrs | string[] | `["CN"]` | | X509IDMGMT_CERTIFICATE_SUBJECT_MANDATORYATTRS | Mandatory fields that must be present in the CSR |
 | certificate.subject.constantattrs.o | string | `dojot IoT Platform` | | X509IDMGMT_CERTIFICATE_SUBJECT_CONSTANTATTRS_O | In particular, the SubjectDN *Organization* field has a constant value and cannot be changed by a CSR. |
 | certificate.validity | integer | `365` | positive values | X509IDMGMT_CERTIFICATE_VALIDITY | certificate validity (in days). |
-| certificate.checkpublickey | boolean | `true` | `true` or `false` | X509IDMGMT_CERTIFICATE_CHECKPUBLICKEY | Flag indicating whether the CSR public key validation should be performed or not. |
+| certificate.check.publickey | boolean | `true` | `true` or `false` | X509IDMGMT_CERTIFICATE_CHECK_PUBLICKEY | Flag indicating whether the CSR public key validation should be performed or not. |
+| certificate.check.subjectdn | boolean | `false` | `true` or `false` | X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN | Flag indicating whether the CSR SubjectDN field validation should be performed or not. |
 | certificate.external.minimumvaliditydays | integer | `1` | positive values | X509IDMGMT_CERTIFICATE_EXTERNAL_MINIMUMVALIDITYDAYS | Minimum validity (in days) that the external certificate must still have before it can be registered. |
 | certificate.external.ca.minimumvaliditydays | integer | `1` | positive values | X509IDMGMT_CERTIFICATE_EXTERNAL_CA_MINIMUMVALIDITYDAYS | Minimum validity (in days) that the external CA certificate must still have before it can be registered. |
 | certificate.external.ca.limit | integer | `-1` | | X509IDMGMT_CERTIFICATE_EXTERNAL_CA_LIMIT | Limit of certificates from external CAs that can be registered by tenant. Any negative value indicates that there will be no limit on the number of CA certificates that can be registered by tenants. |
@@ -1183,6 +1185,13 @@ fore mentioned convention.
 | devicemgr.device.timeout.ms | integer | `10000` (10 seconds) | `[0,...]` | X509IDMGMT_DEVICEMGR_DEVICE_TIMEOUT_MS | _Device Manager_ response timeout |
 | devicemgr.kafka.consumer.topic.suffix | string | `dojot.device-manager.device` | - | X509IDMGMT_DEVICEMGR_KAFKA_CONSUMER_TOPIC_SUFFIX | Suffix of the same topics that _Device Manager_ publishes data according to its events. |
 | devicemgr.healthcheck.ms | integer | `10000` (10 seconds) | `[0,...]` | X509IDMGMT_DEVICEMGR_HEALTHCHECK_MS | Time interval in which the Kafka consumer who consumes _Device Manager_ events is checked to see if he is healthy |
+
+
+#### Certificate Service Settings
+
+| Key | type | Default Value | Valid Values | Environment variable | Purpose |
+|-----|------|---------------|--------------|----------------------|---------|
+| certservice.check.device.exists | boolean | `true` | `true` or `false` | X509IDMGMT_CERTSERVICE_CHECK_DEVICE_EXISTS | Flag indicating whether the device's existence check should be performed or not. |
 
 
 ### How to run

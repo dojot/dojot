@@ -93,8 +93,7 @@ class TrustedCAService {
       },
     }).exec();
 
-    const bundle = result.map((el) => el.caPem);
-    return bundle;
+    return result.map((el) => el.caPem);
   }
 
   /**

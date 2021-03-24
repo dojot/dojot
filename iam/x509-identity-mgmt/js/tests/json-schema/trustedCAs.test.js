@@ -31,7 +31,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-trusted-ca-certificate.json',
             schemaErrors: [
               {
                 keyword: 'required',
@@ -61,12 +61,12 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-trusted-ca-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.caPem',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem/type',
                 params: {
                   type: 'string',
                 },
@@ -99,7 +99,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-trusted-ca-certificate.json',
             schemaErrors: [
               {
                 dataPath: '.caPem',
@@ -108,7 +108,7 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
                 params: {
                   limit: 65536,
                 },
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/maxLength',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem/maxLength',
 
               },
             ],
@@ -129,12 +129,12 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-trust-ca',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-trusted-ca-certificate.json',
             schemaErrors: [
               {
                 keyword: 'pattern',
                 dataPath: '.caPem',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/pattern',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem/pattern',
                 params: {
                   pattern: '^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$',
                 },
@@ -158,7 +158,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/upd-trust-ca',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/update-trusted-ca-certificate.json',
             schemaErrors: [
               {
                 keyword: 'required',
@@ -187,7 +187,7 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/upd-trust-ca',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/update-trusted-ca-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',

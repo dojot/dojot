@@ -54,8 +54,8 @@ class CertificateService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils,
-    dnUtils, certValidity, checkPublicKey, queryMaxTimeMS, certMinimumValidityDays,
+    trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils, certValidity,
+    checkPublicKey, checkSubjectDN, checkDeviceExists, queryMaxTimeMS, certMinimumValidityDays,
     caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier,
   }) {
     Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
@@ -65,6 +65,8 @@ class CertificateService {
     Object.defineProperty(this, 'dnUtils', { value: dnUtils });
     Object.defineProperty(this, 'certValidity', { value: certValidity });
     Object.defineProperty(this, 'checkPublicKey', { value: checkPublicKey });
+    Object.defineProperty(this, 'checkSubjectDN', { value: checkSubjectDN });
+    Object.defineProperty(this, 'checkDeviceExists', { value: checkDeviceExists });
     Object.defineProperty(this, 'queryMaxTimeMS', { value: queryMaxTimeMS });
     Object.defineProperty(this, 'certMinimumValidityDays', { value: certMinimumValidityDays });
     Object.defineProperty(this, 'caCertAutoRegistration', { value: caCertAutoRegistration });
@@ -89,15 +91,26 @@ class CertificateService {
       this.pkiUtils.checkPublicKey(csr.subjectPublicKeyInfo);
     }
 
-    const distinguishedNames = this.dnUtils.from(csr.subject, true).verify();
+    // extracts the SubjectDN fields from the CSR
+    const distinguishedNames = this.dnUtils.from(csr.subject, true);
 
-    // ensure that the current tenant owns the device
-    await this.ensureOwner(distinguishedNames.CN);
+    if (this.checkSubjectDN) {
+      // Performs checks on the Subject DN
+      distinguishedNames.verify();
+
+      // Since the device ID is expected to be reported via 'Common Name',
+      // it ensures that the device exists for the current tenant
+      await this.ensureDeviceExists(distinguishedNames.CN);
+
+      // Adds the tenant as a prefix to the SubjectDN 'Common Name' field
+      distinguishedNames.cnamePrefix(this.tenant);
+    }
+
+    // Converts SubjectDN fields to a string
+    const subjectDN = distinguishedNames.stringify();
 
     // Checks on the certificate owner
     await this.checkBelongsTo(belongsTo);
-
-    const subjectDN = distinguishedNames.cnamePrefix(this.tenant).stringify();
 
     const certificatePem = await this.ejbcaFacade.generateCertificate(
       subjectDN, this.certValidity, csrPem,
@@ -256,11 +269,14 @@ class CertificateService {
       // eslint-disable-next-line default-case
       switch (determineNotificationType(previousBelongsTo, belongsTo)) {
         case 'creation':
-          await this.ownershipNotifier.creation(certRecord, belongsTo); break;
+          await this.ownershipNotifier.creation(certRecord, belongsTo);
+          break;
         case 'change':
-          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo); break;
+          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo);
+          break;
         case 'removal':
-          await this.ownershipNotifier.removal(certRecord, previousBelongsTo); break;
+          await this.ownershipNotifier.removal(certRecord, previousBelongsTo);
+          break;
       }
     }
   }
@@ -418,23 +434,26 @@ class CertificateService {
       throw this.error.BadRequest('The certificate must belong to only one type of owner.');
     }
 
-    // ensure that the current tenant owns the device
+    // If the certificate belongs to a device, it ensures
+    // that the device exists for the current tenant
     if (belongsTo.device) {
-      await this.ensureOwner(belongsTo.device);
+      await this.ensureDeviceExists(belongsTo.device);
     }
   }
 
   /**
-   * Ensures that the current tenant owns the device.
+   * Ensures that the device exists and belongs to the current tenant.
    *
    * @param {string} deviceId Device identifier
    *
    * @throws an exception if no relationship is found between the device identifier and the tenant.
    */
-  async ensureOwner(deviceId) {
-    const isOwner = await this.deviceMgrProvider.checkOwner(this.tenant, deviceId);
-    if (!isOwner) {
-      throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
+  async ensureDeviceExists(deviceId) {
+    if (this.checkDeviceExists) {
+      const isOwner = await this.deviceMgrProvider.checkDeviceExists(this.tenant, deviceId);
+      if (!isOwner) {
+        throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
+      }
     }
   }
 }
