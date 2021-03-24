@@ -107,6 +107,21 @@ class MQTTClient {
   }
 
   /**
+   *
+   * @function connectOrDisconnectClient
+   * @param {boolean} connect - indicate wheter to connect or disconnect the client
+   */
+  connectOrDisconnectClient(connect) {
+    if (connect) {
+      if (!this.isConnected) {
+        this.mqttClient.reconnect();
+      }
+      return;
+    }
+    this.mqttClient.end(true);
+  }
+
+  /**
    * Called whenever a reconnect call has been made.
    *
    * @function onReconnect

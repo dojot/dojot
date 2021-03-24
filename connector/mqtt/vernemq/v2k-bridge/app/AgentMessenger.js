@@ -22,6 +22,7 @@ class AgentMessenger {
       'kafka.topic': this.config.topic,
     });
     this.logger = new Logger('v2k:agent-messenger');
+    this.mqttClient = null;
   }
 
   /**
@@ -37,6 +38,8 @@ class AgentMessenger {
     this.logger.info('Initializing Kafka Producer...');
     this.producer.connect().then(() => {
       this.logger.info('... Kafka Producer was initialized');
+
+      this.mqttClient = mqttClient;
       mqttClient.init();
     }).catch((error) => {
       this.logger.error('An error occurred while initializing the Agent Messenger. Bailing out!');
@@ -98,6 +101,7 @@ class AgentMessenger {
     return new Promise((resolve) => {
       this.producer.getStatus()
         .then((status) => {
+          this.mqttClient.connectOrDisconnectClient(status.connected);
           if (status.connected) {
             signalReady();
           } else {
@@ -106,6 +110,7 @@ class AgentMessenger {
           return resolve();
         })
         .catch(() => {
+          this.mqttClient.connectOrDisconnectClient(false);
           signalNotReady();
           return resolve();
         });

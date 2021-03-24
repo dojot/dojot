@@ -18,6 +18,8 @@
     "app": "node index.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
     "check-licenses": "apache2-license-checker"
   },
   "keywords": [
@@ -35,7 +37,7 @@
     }
   ],
   "dependencies": {
-    "@dojot/microservice-sdk": "0.1.9",
+    "@dojot/microservice-sdk": "^0.1.11",
     "async": "^3.1.1",
     "lodash.camelcase": "^4.3.0",
     "md5": "^2.2.1",
