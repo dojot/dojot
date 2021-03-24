@@ -269,11 +269,14 @@ class CertificateService {
       // eslint-disable-next-line default-case
       switch (determineNotificationType(previousBelongsTo, belongsTo)) {
         case 'creation':
-          await this.ownershipNotifier.creation(certRecord, belongsTo); break;
+          await this.ownershipNotifier.creation(certRecord, belongsTo);
+          break;
         case 'change':
-          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo); break;
+          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo);
+          break;
         case 'removal':
-          await this.ownershipNotifier.removal(certRecord, previousBelongsTo); break;
+          await this.ownershipNotifier.removal(certRecord, previousBelongsTo);
+          break;
       }
     }
   }
