@@ -114,6 +114,13 @@ class KafkaTopicsConsumerCallbacksMgmt {
     }
     return null;
   }
+
+  /**
+   * Get kafka Status for internal uses
+   */
+  getKafkaStatus() {
+    return this.kafka.getKafkaStatus();
+  }
 }
 
 module.exports = KafkaTopicsConsumerCallbacksMgmt;

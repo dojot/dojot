@@ -24,14 +24,14 @@ class DeviceMgrProvider {
   }
 
   /**
-   * Checks whether there is a relationship between the informed tenant and the device.
+   * Checks that the device exists for the tenant (if the device belongs to the tenant).
    *
    * @param {string} tenant
    * @param {string} deviceId
    *
-   * @return {boolean} True if the tenant owns the device, otherwise, false.
+   * @return {boolean} True if the device exists and belongs to the tenant, otherwise, false.
    */
-  async checkOwner(tenant, deviceId) {
+  async checkDeviceExists(tenant, deviceId) {
     const cacheHit = await this.deviceModel.contains(tenant, deviceId);
     if (cacheHit) {
       return true;
@@ -50,7 +50,7 @@ class DeviceMgrProvider {
       return true;
     }
 
-    // Device does not belong to the tenant
+    // device does not exist or does not belong to the tenant.
     return false;
   }
 

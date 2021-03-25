@@ -118,6 +118,10 @@ class Tarball {
     // TODO: create a class to handle info about the connection and
     // set things like expirate, kafkatopic, etc
 
+    if (!this.kafkaTopicsCallbacksMgmt.getKafkaStatus()) {
+      ws.close(ErrorCodes.SERVER_UNAVAILABLE, 'Server unavailable at this moment');
+    }
+
     // get the topic of pathname
     const kafkaTopic = topic;
 
