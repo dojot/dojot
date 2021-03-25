@@ -39,7 +39,7 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 luarocks make
 ```
 
-# Changing default resource server
+## Changing default resource server
 
 To invoke Keycloak authorization service is necessary define a resource server (client), the default value is `kong`,
 but is possible to change it through `CLIENT_ID` environment variable.
@@ -66,7 +66,7 @@ curl -X POST http://localhost:8001/services/{service}/plugins \
 | enabled    | no      | `true`  | Whether this plugin will be applied.                   |
 | config.resource_server  | yes  | `kong`  | Resource server name.                         |
 | config.resource    | yes    | `Default Resource`| Resource name. |
-| config.scope  | yes   | `POST=>create`, `GET=>view`, `PATCH=>update`, `PUT=>update`, `DELTE=>delete`       | Map HTTPS verbs to scopes.  |
+| config.scope       | yes   | `POST=>create`, `GET=>view`, `PATCH=>update`, `PUT=>update`, `DELTE=>delete`       | Map HTTPS verbs to scopes.  |
 
 ### Running tests
 

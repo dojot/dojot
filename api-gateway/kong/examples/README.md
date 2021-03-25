@@ -1,4 +1,3 @@
-
 # Example
 
 This example is intended to deploy an example using Kong with the `pep-kong` and `jwt-keycloak` plugins and a secure endpoint using a JWT provided by Keycloak.
@@ -83,7 +82,7 @@ When starting the keycloak, a Realm called **admin** is imported with the config
 
 ### Roles settings
 
-In Roles on the right sidebar:
+In Roles on the left sidebar:
 
 - Create a new Role with the name 'user'
 
@@ -93,12 +92,12 @@ In Roles on the right sidebar:
 
 ### User settings depends on ‘Role settings’
 
-Users in the right sidebar:
+Users in the left sidebar:
 
 - I created a new user with username `admin` that will have *role*  `admin`
   - Enable the `Email Verified` option (for local testing only)
   - Go to the `Credentials` tab
-    - Define a password and confirm it in `Password` and`Password Confirmation`, in the example the password `user` is used (Only for local testing)
+    - Define a password and confirm it in `Password` and`Password Confirmation`, in the example the password `admin` is used (Only for local testing)
     - Disable the `Temporary` option (for local testing only)
   - Go to the `Role Mappings` tab
     - In `Available Roles` select `admin` and `Add selected`, so that `admin` will be listed in `Associated Roles`.
@@ -106,14 +105,14 @@ Users in the right sidebar:
 - I created a new user with username `user` that will have *role* `user`
   - Enable the `Email Verified` option (for local testing only)
   - Go to the `Credentials` tab
-    - Define a password and confirm it in `Password` and`Password Confirmation`, in the example the password `admin` is used (Only for local testing)
+    - Define a password and confirm it in `Password` and`Password Confirmation`, in the example the password `user` is used (Only for local testing)
     - Enable the `Temporary` option (for local testing only)
   - Go to the `Role Mappings` tab
     - In `Available Roles` select`user` and `Add selected`, so that`user` will be listed in `Associated Roles`.
 
 ### Kong client settings depends on ‘roles settings’
 
-Clients in the right sidebar:
+Clients in the left sidebar:
 
 - Create a new `client` with the *Client ID* as`kong`
   - Enable the `Enable` option if it is not enabled
@@ -131,12 +130,12 @@ Clients in the right sidebar:
 - Go to the `Authorization` tab
   - Within `Authorization` select the`Authorization Scopes` tab
     - Create the following scopes: `create`,`delete`, `update` and`view`.
-      - Note: **`create`  is for HTTP**POST**,  `delete` is for HTTP**DELETE**,    `update`is for HTTP **PUT** or **PATCH** e `view` is for HTTP **GET**.
+      - Note: **`create`  is for HTTP**POST**,  `delete` is for HTTP **DELETE**,    `update`is for HTTP **PUT** or **PATCH** and `view` is for HTTP **GET**.
   - Within `Authorization` select the`Polices` tab
     - Create a policy for role `admin`
       - In `Create Policy` select`role`
-        - Set to name `Should be admin
-        - Set the `admin` value in`Realm Roles` and select it as `Required` 
+        - Set to name `Should be admin`
+        - Set the `admin` value in`Realm Roles` and select it as `Required`
         - Set `Logic` to` Positive
     - Create a policy for role `user`
       - In `Create Policy` select`role`
