@@ -43,7 +43,7 @@ In the end, we can say that **Cert-Sidecar** creates four files in the *PEM* for
 
 __ATTENTION__ When the service is unable to retrieve a CRL or update certificates if they have been revoked or expired (if these settings are active), after several defined attempts using the Exponential Backoff strategy the service will terminate and delete all files (if deletions are enabled). And at each configured time, the service checks if it can connect with *x509-identity-mgmt* and if it does not, the service changes to unhealthy. For more information about that, check the [__Service State Manager__ ](https://github.com/dojot/dojot-microservice-sdk-js/blob/master/lib/serviceStateManager/README.md) module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
 
-__ATTENTION__  It's important to note that in services that use Node.js and [TLS module](https://nodejs.org/api/tls.html#tls_tls_ssl), the certificates, including the crl, are not changed automatically after the service starts even if the files are updated. The [`server.setSecureContext()`](https://nodejs.org/api/tls.html#tls_server_setsecurecontext_options) method can be used for this purpose, available from version 11 of Node.js. 
+__ATTENTION__  It's important to note that in services that use Node.js and [TLS module](https://nodejs.org/api/tls.html#tls_tls_ssl), the certificates, including the crl, are not changed automatically after the service starts even if the files are updated. The [`server.setSecureContext()`](https://nodejs.org/api/tls.html#tls_server_setsecurecontext_options) method can be used for this purpose, available from version 11 of Node.js.
 
 There is a examples of how to use  **Cert-Sidecar** with kubernetes and docker-compose within the directory [examples](./examples).
 
@@ -119,7 +119,7 @@ Cron configurations
 | cron.expiration.time |  Cron patterns for checking expiration. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */1 * * *` | string | CERT_SC_CRON_EXPIRATION_TIME
 | cron.revoke | Enables the use of *cron* for checking if the  Public Certificate is revoked. This needs `certs.crl` to be true. Note: *x509 identity mgmt*  is not yet supported for revoking internal certificates | false | boolean | CERT_SC_CRON_REVOKE
 | cron.revoke.time |  Cron patterns for checking revoking. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */3 * * *` | string | CERT_SC_CRON_REVOKE_TIME
-| cron.cabundle | Enables the use of *cron* for update the CA certificates Bundle (TrustStore) | true | boolean | CERT_SC_CRON_CABUNDLE
+| cron.cabundle | Enables the use of *cron* for update the CA certificates Bundle (TrustStore) | false | boolean | CERT_SC_CRON_CABUNDLE
 | cron.cabundle.time |  Cron patterns for update the CA certificates Bundle. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */1 * * *` | string | CERT_SC_CRON_CABUNDLE_TIME
 
 
