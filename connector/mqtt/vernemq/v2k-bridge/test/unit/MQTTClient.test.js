@@ -167,6 +167,23 @@ describe('MQTTClient', () => {
       expect(mockAsyncQueue.drain).toHaveBeenCalled();
       expect(mqttClient.isConnected).toBeTruthy();
     });
+
+    it('should test connect or disconnect the MQTT Client', () => {
+      mqttClient.init();
+
+      // We need to clear the mocks before proceeding
+      jest.clearAllMocks();
+      mqttClient.isConnected = true;
+
+      mqttClient.connectOrDisconnectClient(false);
+      expect(mqttClient.mqttClient.end).toHaveBeenCalledWith(true);
+
+      mqttClient.connectOrDisconnectClient(true);
+
+      mqttClient.isConnected = false;
+      mqttClient.connectOrDisconnectClient(true);
+      expect(mqttClient.mqttClient.reconnect).toHaveBeenCalled();
+    });
   });
 
   describe('Internal functions', () => {
