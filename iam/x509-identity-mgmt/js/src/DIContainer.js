@@ -383,7 +383,9 @@ function createObject(config) {
     certificateService: asFunction(fromDecoratedClass(CertificateService), {
       injector: () => ({
         certValidity: config.certificate.validity,
-        checkPublicKey: config.certificate.checkpublickey,
+        checkPublicKey: config.certificate.check.publickey,
+        checkSubjectDN: config.certificate.check.subjectdn,
+        checkDeviceExists: config.certservice.check.device.exists,
         queryMaxTimeMS: config.mongo.query.maxtimems,
         certMinimumValidityDays: config.certificate.external.minimumvaliditydays,
         caCertAutoRegistration: config.certificate.external.ca.autoregistration,
