@@ -19,12 +19,14 @@ class CronsCertsMgmt {
    * @param {Promise<void|error>} retrieveCRL
    * @param {Promise<void|error>} certsWillExpire
    * @param {Promise<void|error>} certHasRevoked
+   * @param {Promise<void|error>} retrieveCaBundle
    * @param {Promise<void|error>} errorHandle=null
    */
   constructor(
     retrieveCRL,
     certsWillExpire,
     certHasRevoked,
+    retrieveCaBundle,
     errorHandle = null,
   ) {
     this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:CronsCertsMgmt`);
@@ -32,6 +34,7 @@ class CronsCertsMgmt {
     this.retrieveCRL = retrieveCRL;
     this.certHasRevoked = certHasRevoked;
     this.certsWillExpire = certsWillExpire;
+    this.retrieveCaBundle = retrieveCaBundle;
     this.errorHandle = errorHandle;
   }
 
@@ -58,6 +61,12 @@ class CronsCertsMgmt {
       this.cronCertHasRevoked();
     } else {
       this.logger.info('initCrons: Cron for Check has Revoke is disabled');
+    }
+
+    if (configCron.cabundle) {
+      this.cronUpdateCaBundle();
+    } else {
+      this.logger.info('initCrons: Cron for update the CA bundle is disabled');
     }
 
     this.logger.info('initCrons: crons initialized');
@@ -122,6 +131,26 @@ class CronsCertsMgmt {
       configCron['crl.time'],
     );
     this.logger.info('cronRetrieveCRL: ...ending create  cron to retrieve CRL.');
+  }
+
+  /**
+   * Create a cron to update the CA Bundle based in 'cron.cabundle.time'
+   */
+  cronUpdateCaBundle() {
+    this.logger.info('cronUpdateCaBundle: Creating cron to update the CA bundle...');
+    cronJob(
+      async () => {
+        await this.retrieveCaBundle()
+          .catch(async (e) => {
+            this.logger.error('cronUpdateCaBundle:', e);
+            if (this.errorHandle) {
+              await this.errorHandle();
+            }
+          });
+      },
+      configCron['cabundle.time'],
+    );
+    this.logger.info('cronUpdateCaBundle: ...ending create cron to update the CA bundle.');
   }
 }
 

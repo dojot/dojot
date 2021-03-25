@@ -171,6 +171,38 @@ describe('x509Req.getRequests().getRequests().', () => {
     }
   });
 
+  test('getCACertBundle: ok', async () => {
+    mockAxiosGet.mockResolvedValueOnce({
+      status: 200,
+      data: 'ca bundle',
+    });
+    const bundle = await x509Req.getRequests().getCACertBundle();
+
+    expect(mockAxiosGet).toHaveBeenCalled();
+    expect(bundle).toBe('ca bundle');
+  });
+
+  test('getCACertBundle: error 400', async () => {
+    mockAxiosGet.mockResolvedValueOnce({
+      status: 400,
+    });
+    const bundle = await x509Req.getRequests().getCACertBundle();
+
+    expect(mockAxiosGet).toHaveBeenCalled();
+    expect(bundle).toBe(null);
+  });
+
+  test('getCACertBundle: reject', async () => {
+    expect.assertions(2);
+    mockAxiosGet.mockRejectedValueOnce(new Error());
+    try {
+      await x509Req.getRequests().getCACertBundle();
+    } catch (e) {
+      expect(mockAxiosGet).toHaveBeenCalled();
+      expect(e.message).toBe('Cannot retrieve CA certificate bundle');
+    }
+  });
+
   test('createInfluxHealthChecker - heath', async () => {
     x509Req.createHealthChecker();
 
