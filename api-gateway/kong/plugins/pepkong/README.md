@@ -20,7 +20,7 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 - [Testing](#testing)
   - [Running tests](#running-tests)
 
- ## Tested and working for
+## Tested and working for
 
 | Kong Version |   Tests passing    |
 | ------------ | :----------------: |
@@ -39,9 +39,9 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 luarocks make
 ```
 
-## Changing default resource server
+## Change the default `client` that has authorization settings
 
-To invoke Keycloak authorization service is necessary define a resource server (client), the default value is `kong`,
+To invoke Keycloak authorization service is necessary define a **client** that has authorization settings, the default value is `kong`,
 but is possible to change it through `CLIENT_ID` environment variable.
 
 ## Usage
