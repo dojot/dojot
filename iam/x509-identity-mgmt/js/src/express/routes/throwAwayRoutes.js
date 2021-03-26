@@ -11,6 +11,7 @@ const CA_SERVICE = 'internalCAService';
 const TRUSTED_CA_SERVICE = 'trustedCAService';
 
 const accepts = [ContentType.pem, ContentType.json];
+const contentDispositionHeader = 'Content-Disposition';
 
 module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
   const { validateRegOrGenCert } = schemaValidator;
@@ -43,7 +44,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
           },
           contentNegotiation(accepts, {
             'application/x-pem-file': (res) => {
-              res.set('Content-Disposition', 'attachment; filename="cert.pem"');
+              res.set(contentDispositionHeader, 'attachment; filename="cert.pem"');
               res.status(HttpStatus.CREATED).send(
                 Buffer.from(res.result.certificatePem),
               );
@@ -74,7 +75,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
           },
           contentNegotiation(accepts, {
             'application/x-pem-file': (res) => {
-              res.set('Content-Disposition', 'attachment; filename="ca.pem"');
+              res.set(contentDispositionHeader, 'attachment; filename="ca.pem"');
               res.status(HttpStatus.OK).send(
                 Buffer.from(res.result.caPem),
               );
@@ -112,7 +113,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
           },
           contentNegotiation(accepts, {
             'application/x-pem-file': (res) => {
-              res.set('Content-Disposition', 'attachment; filename="cabundle.pem"');
+              res.set(contentDispositionHeader, 'attachment; filename="cabundle.pem"');
               res.status(HttpStatus.OK).send(
                 Buffer.from(res.bundle.join('\n')),
               );
@@ -143,7 +144,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
           },
           contentNegotiation(accepts, {
             'application/x-pem-file': (res) => {
-              res.set('Content-Disposition', 'attachment; filename="crl.pem"');
+              res.set(contentDispositionHeader, 'attachment; filename="crl.pem"');
               res.status(HttpStatus.OK).send(
                 Buffer.from(res.result.crl),
               );
