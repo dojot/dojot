@@ -10,6 +10,8 @@ const mockConfig = {
     'expiration.time': '0 1 * * *',
     revoke: false,
     'revoke.time': '0 */3 * * *',
+    cabundle: true,
+    'cabundle.time': '0 * */1 * * *',
   },
   certs: {
     hostnames: ['localhost'],
@@ -19,6 +21,7 @@ const mockConfig = {
     'files.basepath': 'certs',
     'files.crl': 'crl.pem',
     'files.ca': 'ca.pem',
+    'files.cabundle': 'cabundle.pem',
     'files.cert': 'cert.pem',
     'files.key': 'key.pem',
   },
@@ -48,11 +51,14 @@ const mockUtil = {
 
 const mockCreateCertificateByCSR = jest.fn();
 const mockGetCACertificate = jest.fn();
+const mockGetCACertBundle = jest.fn();
 const mockGetCRL = jest.fn();
+
 const mockX509IdentityMgmt = {
   getRequests: jest.fn().mockImplementation(() => ({
     createCertificateByCSR: mockCreateCertificateByCSR,
     getCACertificate: mockGetCACertificate,
+    getCACertBundle: mockGetCACertBundle,
     getCRL: mockGetCRL,
   })),
 };
@@ -122,6 +128,7 @@ describe('CertificatesMgmt', () => {
     mockGetCRL.mockResolvedValueOnce('CRL');
     mockGetFingerprint.mockReturnValueOnce('Fingerprint');
     mockGetCACertificate.mockResolvedValueOnce('CA');
+    mockGetCACertBundle.mockResolvedValueOnce('CA Bundle');
     mockGeneratePrivateKey.mockResolvedValueOnce('PrivateKey');
     mockGenerateCsr.mockReturnValueOnce('CSR');
     mockCreateCertificateByCSR.mockResolvedValueOnce('Cert');
@@ -142,6 +149,10 @@ describe('CertificatesMgmt', () => {
 
     // retrieveCaCert
     expect(mockGetCACertificate)
+      .toHaveBeenCalled();
+
+    // retrieveCaBundle
+    expect(mockGetCACertBundle)
       .toHaveBeenCalled();
 
     expect(mockUtil.createFile).toHaveBeenCalledWith('certs/ca.pem', 'CA');
@@ -175,6 +186,18 @@ describe('CertificatesMgmt', () => {
     mockGetCACertificate.mockRejectedValueOnce(new Error(msgError));
     try {
       await certificatesMgmt.getCertificates().retrieveCaCert();
+    } catch (e) {
+      expect(mockUtil.createFile).not.toHaveBeenCalled();
+      expect(e.message).toBe(msgError);
+    }
+  });
+
+  test('retrieveCABundle: Some error', async () => {
+    expect.assertions(2);
+    const msgError = 'Cannot get CA bundle';
+    mockGetCACertBundle.mockRejectedValueOnce(new Error(msgError));
+    try {
+      await certificatesMgmt.getCertificates().retrieveCaBundle();
     } catch (e) {
       expect(mockUtil.createFile).not.toHaveBeenCalled();
       expect(e.message).toBe(msgError);

@@ -6,6 +6,13 @@ const {
   app: configApp,
 } = ConfigManager.getConfig('CERT_SC');
 
+const axiosCfg = {
+  headers: {
+    Accept: 'application/x-pem-file',
+  },
+  responseType: 'text',
+};
+
 /**
  * This class call X509IdentityMgmt api to sign a csr,
  * retrieve ca certificate and crl
@@ -20,6 +27,7 @@ class Requests {
    * @param {*} paths.sign
    * @param {*} paths.crl
    * @param {*} paths.ca
+   * @param {*} paths.caBundle
    */
   constructor(url,
     timeout,
@@ -55,12 +63,10 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.post(
-        this.paths.sign,
-        { csr },
-      );
+      } = await this.axiosX509.post(this.paths.sign, { csr }, axiosCfg);
+
       if (status === 201) {
-        return data.certificatePem;
+        return data;
       }
 
       this.logger.warn('Cannot create a certificate from CSR.  '
@@ -87,11 +93,10 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(
-        this.paths.crl,
-      );
+      } = await this.axiosX509.get(this.paths.crl, axiosCfg);
+
       if (status === 200) {
-        return data.crl;
+        return data;
       }
 
       this.logger.warn('getCRL: Cannot retrieve CRL.  '
@@ -111,18 +116,16 @@ class Requests {
    * @returns {String|null} PEM encoded Certificate
    */
   async getCACertificate() {
-    this.logger.debug('createCert: Getting the CA certificate...');
+    this.logger.debug('getCACert: Getting the CA certificate...');
     try {
       const {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(
-        this.paths.ca,
-      );
+      } = await this.axiosX509.get(this.paths.ca, axiosCfg);
 
       if (status === 200) {
-        return data.caPem;
+        return data;
       }
 
       this.logger.warn('getCACert: Cannot retrieve CA certificate.  '
@@ -131,6 +134,37 @@ class Requests {
     } catch (error) {
       this.logger.error('getCACert:', error);
       throw new Error('Cannot retrieve CA certificate');
+    }
+  }
+
+  /**
+   * Obtains a CA's certificate bundle trusted by the platform.
+   * The first certificate in the bundle is that of the platform's CA,
+   * the rest are external CAs that have been registered as trusted.
+   *
+   * @throws Will throw an error if cannot retrieve  CA certificate
+   *
+   * @returns {String|null} PEM encoded Certificate
+   */
+  async getCACertBundle() {
+    this.logger.debug("getCABundle: Getting the trusted CA's certificate bundle...");
+    try {
+      const {
+        status,
+        statusText,
+        data,
+      } = await this.axiosX509.get(this.paths.caBundle, axiosCfg);
+
+      if (status === 200) {
+        return data;
+      }
+
+      this.logger.warn("getCABundle: Cannot retrieve the trusted CA's certificate bundle. "
+        + `The API returns: code=${status}; message=${statusText}`);
+      return null;
+    } catch (error) {
+      this.logger.error('getCABundle:', error);
+      throw new Error('Cannot retrieve CA certificate bundle');
     }
   }
 }
