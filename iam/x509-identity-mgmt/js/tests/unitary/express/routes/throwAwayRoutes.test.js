@@ -53,16 +53,27 @@ const framework = WebUtils.framework.createExpress({
 const request = supertest(framework);
 
 describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
-  it('should post a CSR and receive a certificate',
+  it('should post a CSR and receive a certificate ("Accept: application/json")',
     () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
       .send({ csr: util.p256CSR })
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
       }));
 
+  it('should post a CSR and receive a certificate ("Accept: application/x-pem-file")',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/x-pem-file')
+      .send({ csr: util.p256CSR })
+      .expect(201)
+      .then((res) => {
+        expect(res.text).toEqual(generatedCert.certificatePem);
+      }));
+
   it('should return an error because the CSR was not provided',
     () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
       .send({
         certificateChain: util.certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2'),
       })
@@ -73,18 +84,37 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
         });
       }));
 
-  it('should get the internal Root CA',
+  it('should get the internal Root CA ("Accept: application/json")',
     () => request.get('/internal/api/v1/throw-away/ca')
+      .set('Accept', 'application/json')
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(caQueryResult);
       }));
 
-  it('should get the latest CRL issued by the internal Root CA',
+  it('should get the internal Root CA ("Accept: application/x-pem-file")',
+    () => request.get('/internal/api/v1/throw-away/ca')
+      .set('Accept', 'application/x-pem-file')
+      .expect(200)
+      .then((res) => {
+        expect(res.text).toEqual(caQueryResult.caPem);
+      }));
+
+
+  it('should get the latest CRL issued by the internal Root CA ("Accept: application/json")',
     () => request.get('/internal/api/v1/throw-away/ca/crl')
+      .set('Accept', 'application/json')
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(crlQueryResult);
+      }));
+
+  it('should get the latest CRL issued by the internal Root CA ("Accept: application/x-pem-file")',
+    () => request.get('/internal/api/v1/throw-away/ca/crl')
+      .set('Accept', 'application/x-pem-file')
+      .expect(200)
+      .then((res) => {
+        expect(res.text).toEqual(crlQueryResult.crl);
       }));
 
   it('should get the Trusted CAs bundle ("Accept: application/json")',
