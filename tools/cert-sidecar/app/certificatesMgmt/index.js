@@ -29,6 +29,7 @@ class CertificatesMgmt {
     const filenameInCertFolder = (filename) => (createFilename(filename, configCerts['files.basepath']));
     const paths = {
       ca: filenameInCertFolder(configCerts['files.ca']),
+      caBundle: filenameInCertFolder(configCerts['files.cabundle']),
       crl: filenameInCertFolder(configCerts['files.crl']),
       cert: filenameInCertFolder(configCerts['files.cert']),
       key: filenameInCertFolder(configCerts['files.key']),
@@ -63,6 +64,10 @@ class CertificatesMgmt {
       this.logger.debug('Init: Calling retrieveCaCert...');
       await this.certificates.retrieveCaCert();
       this.logger.debug('Init: ...retrieveCaCert called.');
+
+      this.logger.debug('Init: Calling retrieveCaBundle...');
+      await this.certificates.retrieveCaBundle();
+      this.logger.debug('Init: ...retrieveCaBundle called.');
 
       this.logger.debug('Init: Calling retrieveCRL...');
       // checks if crl is enabled
