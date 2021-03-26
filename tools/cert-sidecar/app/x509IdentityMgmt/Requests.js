@@ -6,6 +6,13 @@ const {
   app: configApp,
 } = ConfigManager.getConfig('CERT_SC');
 
+const axiosCfg = {
+  headers: {
+    Accept: 'application/x-pem-file',
+  },
+  responseType: 'text',
+};
+
 /**
  * This class call X509IdentityMgmt api to sign a csr,
  * retrieve ca certificate and crl
@@ -56,12 +63,10 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.post(
-        this.paths.sign,
-        { csr },
-      );
+      } = await this.axiosX509.post(this.paths.sign, { csr }, axiosCfg);
+
       if (status === 201) {
-        return data.certificatePem;
+        return data;
       }
 
       this.logger.warn('Cannot create a certificate from CSR.  '
@@ -88,11 +93,10 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(
-        this.paths.crl,
-      );
+      } = await this.axiosX509.get(this.paths.crl, axiosCfg);
+
       if (status === 200) {
-        return data.crl;
+        return data;
       }
 
       this.logger.warn('getCRL: Cannot retrieve CRL.  '
@@ -118,12 +122,10 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(
-        this.paths.ca,
-      );
+      } = await this.axiosX509.get(this.paths.ca, axiosCfg);
 
       if (status === 200) {
-        return data.caPem;
+        return data;
       }
 
       this.logger.warn('getCACert: Cannot retrieve CA certificate.  '
@@ -151,12 +153,7 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(this.paths.caBundle, {
-        headers: {
-          Accept: 'application/x-pem-file',
-        },
-        responseType: 'text',
-      });
+      } = await this.axiosX509.get(this.paths.caBundle, axiosCfg);
 
       if (status === 200) {
         return data;
