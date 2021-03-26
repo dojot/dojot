@@ -1,5 +1,7 @@
 const HttpStatus = require('http-status-codes');
 
+const { ContentType, contentNegotiation } = require('./contentNegotiation');
+
 const sanitizeParams = require('./sanitizeParams');
 
 const CERT_SERVICE = 'certificateService';
@@ -7,6 +9,16 @@ const CERT_SERVICE = 'certificateService';
 const CA_SERVICE = 'internalCAService';
 
 const TRUSTED_CA_SERVICE = 'trustedCAService';
+
+const accepts = [ContentType.pem, ContentType.json];
+const contentDispositionHeader = 'Content-Disposition';
+
+function servePem(res, status, filename, content) {
+  res.set(contentDispositionHeader, `attachment; filename="${filename}"`);
+  res.status(status).send(
+    Buffer.from(content),
+  );
+}
 
 module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
   const { validateRegOrGenCert } = schemaValidator;
@@ -23,21 +35,26 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
         method: 'post',
         middleware: [
           validateRegOrGenCert(),
-          async (req, res) => {
-            let result = null;
+          async (req, res, next) => {
             if (req.body.csr) {
               const csr = sanitizeParams.sanitizeLineBreaks(req.body.csr);
               const belongsTo = req.body.belongsTo || {};
 
               const certService = req.scope.resolve(CERT_SERVICE);
-              result = await certService.throwAwayCertificate({
+              res.result = await certService.throwAwayCertificate({
                 csr, belongsTo,
               });
+              next();
             } else {
               throw BadRequest('It is necessary to inform the CSR for the certificate to be issued.');
             }
-            res.status(HttpStatus.CREATED).json(result);
           },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.CREATED, 'cert.pem', res.result.certificatePem),
+            'application/json': (res) => {
+              res.status(HttpStatus.CREATED).json(res.result);
+            },
+          }),
         ],
       },
     ],
@@ -53,11 +70,17 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res) => {
+          async (req, res, next) => {
             const caService = req.scope.resolve(CA_SERVICE);
-            const result = await caService.getRootCertificate();
-            res.status(HttpStatus.OK).json(result);
+            res.result = await caService.getRootCertificate();
+            next();
           },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'ca.pem', res.result.caPem),
+            'application/json': (res) => {
+              res.status(HttpStatus.OK).json(res.result);
+            },
+          }),
         ],
       },
     ],
@@ -82,29 +105,15 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             const trustedBundle = await trustedCaService.getCertificateBundle();
 
             // The bundle will always contain the platform's internal CA certificate first
-            const bundle = [caPem, ...trustedBundle];
-
-            res.bundle = bundle;
+            res.bundle = [caPem, ...trustedBundle];
             next();
           },
-          (req, res) => {
-            // the order of this list is significant; should be server preferred order
-            switch (req.accepts(['application/x-pem-file', 'application/json'])) {
-              case 'application/x-pem-file':
-                res.set('Content-Type', 'application/x-pem-file; charset=utf-8');
-                res.set('Content-Disposition', 'attachment; filename="trustedca_bundle.pem"');
-                res.status(HttpStatus.OK).send(
-                  Buffer.from(res.bundle.join('\n')),
-                );
-                break;
-              case 'application/json':
-                res.set('Content-Type', 'application/json; charset=utf-8');
-                res.status(HttpStatus.OK).json(res.bundle);
-                break;
-              default:
-                res.sendStatus(HttpStatus.NOT_ACCEPTABLE);
-            }
-          },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'cabundle.pem', res.bundle.join('\n')),
+            'application/json': (res) => {
+              res.status(HttpStatus.OK).json(res.bundle);
+            },
+          }),
         ],
       },
     ],
@@ -120,11 +129,17 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res) => {
+          async (req, res, next) => {
             const caService = req.scope.resolve(CA_SERVICE);
-            const result = await caService.getRootCRL(req.query.update === 'true');
-            res.status(HttpStatus.OK).json(result);
+            res.result = await caService.getRootCRL(req.query.update === 'true');
+            next();
           },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'crl.pem', res.result.crl),
+            'application/json': (res) => {
+              res.status(HttpStatus.OK).json(res.result);
+            },
+          }),
         ],
       },
     ],
