@@ -13,6 +13,13 @@ const TRUSTED_CA_SERVICE = 'trustedCAService';
 const accepts = [ContentType.pem, ContentType.json];
 const contentDispositionHeader = 'Content-Disposition';
 
+function servePem(res, status, filename, content) {
+  res.set(contentDispositionHeader, `attachment; filename="${filename}"`);
+  res.status(status).send(
+    Buffer.from(content),
+  );
+}
+
 module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
   const { validateRegOrGenCert } = schemaValidator;
   const { BadRequest } = errorTemplate;
@@ -43,12 +50,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             }
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => {
-              res.set(contentDispositionHeader, 'attachment; filename="cert.pem"');
-              res.status(HttpStatus.CREATED).send(
-                Buffer.from(res.result.certificatePem),
-              );
-            },
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.CREATED, 'cert.pem', res.result.certificatePem),
             'application/json': (res) => {
               res.status(HttpStatus.CREATED).json(res.result);
             },
@@ -74,12 +76,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             next();
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => {
-              res.set(contentDispositionHeader, 'attachment; filename="ca.pem"');
-              res.status(HttpStatus.OK).send(
-                Buffer.from(res.result.caPem),
-              );
-            },
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'ca.pem', res.result.caPem),
             'application/json': (res) => {
               res.status(HttpStatus.OK).json(res.result);
             },
@@ -112,12 +109,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             next();
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => {
-              res.set(contentDispositionHeader, 'attachment; filename="cabundle.pem"');
-              res.status(HttpStatus.OK).send(
-                Buffer.from(res.bundle.join('\n')),
-              );
-            },
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'cabundle.pem', res.bundle.join('\n')),
             'application/json': (res) => {
               res.status(HttpStatus.OK).json(res.bundle);
             },
@@ -143,12 +135,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             next();
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => {
-              res.set(contentDispositionHeader, 'attachment; filename="crl.pem"');
-              res.status(HttpStatus.OK).send(
-                Buffer.from(res.result.crl),
-              );
-            },
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'crl.pem', res.result.crl),
             'application/json': (res) => {
               res.status(HttpStatus.OK).json(res.result);
             },
