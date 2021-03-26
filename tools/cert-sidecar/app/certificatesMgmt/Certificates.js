@@ -23,6 +23,7 @@ class Certificates {
  * @param {Object} paths
  * @param {String} paths.crl Path to crl
  * @param {String} paths.ca  Path to ca
+ * @param {String} paths.caBundle  Path to ca bundle
  * @param {String} paths.cert  Path to certificate
  * @param {String} paths.key Path to privatekey
  */
@@ -67,6 +68,11 @@ class Certificates {
      */
     this.pathCA = paths.ca;
     /**
+     *  Path to ca bundle
+     * @type {String}
+     */
+    this.pathCABundle = paths.caBundle;
+    /**
      *  Path to certificate
      * @type {String}
      */
@@ -82,7 +88,7 @@ class Certificates {
   }
 
   /**
-   * Delete the files of the certificates of crl, ca, cert and key
+   * Delete the files of the certificates of crl, ca, ca_bundle, cert and key
    */
   async deleteAllFiles() {
     // Checks whether file deletion is active
@@ -95,6 +101,7 @@ class Certificates {
         }
 
         await deleteFile(this.pathCA);
+        await deleteFile(this.pathCABundle);
         await deleteFile(this.pathCert);
         await deleteFile(this.pathKey);
 
@@ -272,6 +279,22 @@ class Certificates {
       throw e;
     }
     this.logger.info('retrieveCaCert: ... ending retrieve a CA Certificate...');
+  }
+
+  /**
+   * Retrieve CA certificate bundle and create a new file in 'certs.files.cabundle'
+   */
+  async retrieveCaBundle() {
+    this.logger.info('retrieveCaBundle: Retrieving  a CA Certificate Bundle...');
+    try {
+      const caBundle = await this.x509IdentityMgmt.getRequests().getCACertBundle();
+      this.caBundle = caBundle;
+      await createFile(this.pathCABundle, this.caBundle);
+    } catch (e) {
+      this.logger.error('retrieveCaBundle:', e);
+      throw e;
+    }
+    this.logger.info('retrieveCaBundle: ... ending retrieve a CA Certificate Bundle...');
   }
 }
 
