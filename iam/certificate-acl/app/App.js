@@ -1,5 +1,8 @@
 const util = require('util');
-const { Logger, ConfigManager } = require('@dojot/microservice-sdk');
+const {
+  ConfigManager: { getConfig },
+  Logger,
+} = require('@dojot/microservice-sdk');
 
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 
@@ -9,15 +12,15 @@ const StateManager = require('./StateManager');
 // redis instance
 const redisClient = RedisManager.getClient();
 
-const logger = new Logger('dojot-acl:app');
+const logger = new Logger('certificate-acl:app');
 
 // configuration
-const DOJOT_ACL_CONFIG_LABEL = 'DOJOT_ACL';
-const config = ConfigManager.getConfig(DOJOT_ACL_CONFIG_LABEL);
+const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
+const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
 
-const DOJOT_ACL_CREATE_EVENT_TYPE = 'create';
-const DOJOT_ACL_DELETE_EVENT_TYPE = 'delete';
-const DOJOT_ACL_UPDATE_EVENT_TYPE = 'update.delta';
+const CERTIFICATE_ACL_CREATE_EVENT_TYPE = 'create';
+const CERTIFICATE_ACL_DELETE_EVENT_TYPE = 'delete';
+const CERTIFICATE_ACL_UPDATE_EVENT_TYPE = 'update.delta';
 
 const incommingMessagesCallback = (data) => {
   const { value: payload } = data;
@@ -26,34 +29,31 @@ const incommingMessagesCallback = (data) => {
     const jsonReceived = JSON.parse(payload.toString());
     logger.debug(`Message received! ${util.inspect(jsonReceived, false, 5, true)}`);
 
-    const keyFingerPrint = jsonReceived.data.eventData.fingerprint;
+    const keyFingerprint = jsonReceived.data.eventData.fingerprint;
     const { tenant } = jsonReceived.metadata;
     let valueUsername = jsonReceived.data.eventData.belongsTo.device;
 
     const { eventType } = jsonReceived.data;
 
     if (tenant) {
-      valueUsername = [
-        jsonReceived.metadata.tenant,
-        jsonReceived.data.eventData.belongsTo.device,
-      ].join(':');
+      valueUsername = `${tenant}:${valueUsername}`;
     }
 
-    if (!keyFingerPrint) {
-      logger.info(`Invalid fingerprint received ${keyFingerPrint}, ignoring.....`);
+    if (!keyFingerprint) {
+      logger.info(`Invalid fingerprint received ${keyFingerprint}, ignoring.....`);
       return;
     }
 
-    switch (eventType.trim().toLowerCase()) {
-      case DOJOT_ACL_CREATE_EVENT_TYPE:
-      case DOJOT_ACL_UPDATE_EVENT_TYPE:
-        logger.info(`Saving to redis the key pair ${keyFingerPrint} - ${valueUsername}`);
-        redisClient.set(keyFingerPrint, valueUsername);
+    switch (eventType) {
+      case CERTIFICATE_ACL_CREATE_EVENT_TYPE:
+      case CERTIFICATE_ACL_UPDATE_EVENT_TYPE:
+        logger.info(`Saving to redis the key pair ${keyFingerprint} - ${valueUsername}`);
+        redisClient.set(keyFingerprint, valueUsername);
         break;
 
-      case DOJOT_ACL_DELETE_EVENT_TYPE:
-        logger.info(`Deleting in redis the key ${keyFingerPrint}`);
-        redisClient.del(keyFingerPrint);
+      case CERTIFICATE_ACL_DELETE_EVENT_TYPE:
+        logger.info(`Deleting in redis the key ${keyFingerprint}`);
+        redisClient.del(keyFingerprint);
         break;
 
       default:
@@ -61,7 +61,7 @@ const incommingMessagesCallback = (data) => {
         break;
     }
   } catch (error) {
-    logger.warn(`invalid data received, descarting... ${error}`);
+    logger.warn(`invalid data received, descarding... ${error}`);
   }
 };
 

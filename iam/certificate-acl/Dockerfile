@@ -1,6 +1,6 @@
-FROM node:12.18.4-alpine AS build
+FROM node:12.21.0-alpine AS build
 
-WORKDIR /opt/dojot-acl
+WORKDIR /opt/certificate-acl
 
 RUN apk --no-cache add \
     bash \
@@ -10,7 +10,12 @@ RUN apk --no-cache add \
     cyrus-sasl-dev \
     make
 
-RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-headers py-setuptools bash
+RUN apk add --no-cache --virtual .build-deps gcc \
+zlib-dev \
+libc-dev \
+bsd-compat-headers \
+py-setuptools \
+bash
 
 COPY package.json .
 COPY package-lock.json .
@@ -22,9 +27,9 @@ COPY ./app ./app
 COPY config ./config
 
 
-FROM node:12.18.4-alpine
+FROM node:12.21.0-alpine
 
-WORKDIR /opt/dojot-acl
+WORKDIR /opt/certificate-acl
 
 RUN apk --no-cache add \
     bash \
@@ -33,11 +38,11 @@ RUN apk --no-cache add \
     lz4-libs \
     tini
 
-COPY --from=build /opt/dojot-acl /opt/dojot-acl
+COPY --from=build /opt/certificate-acl /opt/certificate-acl
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD ["npm", "run", "dojot-acl"]
+CMD ["npm", "run", "certificate-acl"]
 
 HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=3 \
       CMD curl -s "http://localhost:9000/health" | grep -q "SERVER_IS_READY"

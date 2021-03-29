@@ -1,21 +1,21 @@
-name: Dojot ACL (connector/dojot_acl)
+name: Certificate ACL (iam/certificate-acl)
 
 # Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in
-# 'connector/dojot_acl/**' is submitted
+# 'iam/certificat-acl/**' is submitted
 on:
   create:
   push:
   pull_request:
     paths:
-      - 'connector/dojot_acl/**'
+      - 'iam/certificate-acl/**'
 
 jobs:
   unit-tests:
     # Path to help identify each job in the status checks
-    name: (connector/dojot_acl) Unit Tests
+    name: (iam/certificate-acl) Unit Tests
     # If the commit message contains 'ci skip', it is not necessary to run this job
     if: contains(github.event.head_commit.message, 'ci skip') == false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         node-version: [12.x]
@@ -31,25 +31,26 @@ jobs:
 
     - name: npm install, build, lint and test
       run: |
-        cd connector/dojot_acl
+        cd iam/certificate-acl
         npm ci
         npm run build --if-present
         npm run lint
         npm test
+        npm run check-licenses
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         # Created when 'npm test' was executed
-        file: connector/dojot_acl/coverage/lcov.info
+        file: iam/certificate-acl/coverage/lcov.info
         # Flags allow you to isolate coverage reports for different tests
-        flags: dojotACL
+        flags: certificateACL
         # Custom name for the upload
-        name: dojot-acl
+        name: certificate-acl
 
   docker-hub:
     needs: unit-tests
     # Path to help identify each job in the status checks
-    name: (connector/dojot_acl) Build and Publish image to DockerHUb
+    name: (iam/certificate-acl) Build and Publish image to DockerHUb
     runs-on: ubuntu-latest
     # If this is a PR, it won't run
     if: contains(github.ref, 'refs/pull/') == false
@@ -75,39 +76,3 @@ jobs:
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
         # Whether tag will be based in the branch name or in the tag name
         tag_names: true
-
-  gh-pages:
-    needs: docker-hub
-    name: (connector/dojot_acl) Generate documentation and Publish in gh-pages # path to help identify in Status checks each job
-    runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v1
-
-    - name: Version Doc
-      id: version_doc
-      env:
-        GITHUB_REF: ${{ github.ref }}
-        GITHUB_SHA: ${{ github.sha }}
-      run: |
-        export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
-        echo Documentation Version $TAG_VERSION
-        echo ::set-output name=version::$TAG_VERSION
-    - name: Generate docs
-      env:
-        FOLDER_TO_GH_PAGES: connector/dojot_acl/
-        PATH_APIB: ./connector/dojot_acl/docs/apiary.apib
-        VERSION_NAME: ${{ steps.version_doc.outputs.version }}
-      run: |
-        sh .github/workflows/scripts/doc_aglio_api.sh
-    - name: Publish Documentation
-      uses: peaceiris/actions-gh-pages@v2
-      env:
-        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN_PAT }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: ./build-docs #fix when use .github/workflows/scripts/doc_aglio_api.sh
-      with:
-        keepFiles: true
-        emptyCommits: false

@@ -1,3 +1,2 @@
 # Ignores the Nearley compiled parser
-app/WhereProcessing/Parser.js
 node_modules

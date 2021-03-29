@@ -1,18 +1,21 @@
-const { ConfigManager, Logger, Kafka: { Consumer } } = require('@dojot/microservice-sdk');
+const {
+  ConfigManager: { getConfig },
+  Logger, Kafka: { Consumer },
+} = require('@dojot/microservice-sdk');
 
-const logger = new Logger('dojot-acl:kafka-consumer');
+const logger = new Logger('certificate-acl:kafka-consumer');
 
-const DOJOT_ACL_CONFIG_LABEL = 'DOJOT_ACL';
+const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
 
 /**
- * Consume kafka messages from kafka topics
+ * Consumes messages from predefined topics
  */
 class kafkaConsumer {
   /**
-     * Instance KafkaConsumer
-     */
+   * Create an Kafka Consumer
+   */
   constructor() {
-    this.config = ConfigManager.getConfig(DOJOT_ACL_CONFIG_LABEL);
+    this.config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
 
     this.consumerConfig = {
       'kafka.consumer': { ...this.config.consumer },
@@ -24,8 +27,8 @@ class kafkaConsumer {
   }
 
   /**
-     * Initialize the kafka consumer
-     */
+   * Initialize the kafka consumer
+   */
   async init() {
     try {
       logger.info('init: kafka starting...');
@@ -38,11 +41,11 @@ class kafkaConsumer {
   }
 
   /**
-     * Register callback for a topic
-     *
-     * @param {string} kafkaTopic
-     * @param {function} callback
-     */
+   * Register callback for a topic
+   *
+   * @param {string} kafkaTopic
+   * @param {function} callback
+   */
   registerCallback(kafkaTopic, callback) {
     if (!this.registeredCallbacks.has(kafkaTopic)) {
       logger.debug(`registerCallback: Register Callback for topic ${kafkaTopic}`);
@@ -56,10 +59,12 @@ class kafkaConsumer {
   }
 
   /**
-     * Unregister Callback for a given topic
-     *
-     * @param {string} kafkaTopic
-     */
+   * @function unregisterAllCallback
+   *
+   * Unregister Callback for a given topic
+   *
+   * @param {string} kafkaTopic
+   */
   unregisterCallback(kafkaTopic) {
     if (this.registeredCallbacks.has(kafkaTopic)) {
       logger.debug(`unregisterCallbacks: Unregister Callback for topic ${kafkaTopic}`);
@@ -72,8 +77,10 @@ class kafkaConsumer {
   }
 
   /**
-     * Unregister all callbacks
-     */
+   * @function unregisterAllCallbacks
+   *
+   * Unregister all callbacks
+   */
   unregisterAllCallbacks() {
     logger.debug('unregisterCallbacks: Unregister All Callbacks');
 
@@ -82,11 +89,11 @@ class kafkaConsumer {
   }
 
   /**
-     * HealthChecker to be passed to the ServiceStateManager
-     *
-     * @param {*} signalReady
-     * @param {*} signalNotReady
-     */
+   * HealthChecker to be passed to the ServiceStateManager
+   *
+   * @param {function} signalReady
+   * @param {function} signalNotReady
+   */
   checkHealth(signalReady, signalNotReady) {
     this.consumer.getStatus().then((data) => {
       if (data.connected) {
@@ -101,8 +108,10 @@ class kafkaConsumer {
   }
 
   /**
-     * Shutdown handler to be passed to the ServiceStateManager
-     */
+   * @function shutdownProcess
+   *
+   * Shutdown handler to be passed to the ServiceStateManager
+   */
   shutdownProcess() {
     return this.consumer.finish().then(() => {
       logger.warn('Kafka Consumer finished!');
