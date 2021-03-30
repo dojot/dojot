@@ -106,8 +106,7 @@ Certificates configurations
 | certs.files.cert | Public certificate filename | cert.pem | filename  | CERT_SC_CERTS_FILES_CERT
 | certs.files.crl | CRL filename  | crl.pem | filename | CERT_SC_CERTS_FILES_CRL
 | certs.files.key | Private keys filename | key.pem | filename | CERT_SC_CERTS_FILES_KEY
-| certs.belongsto.application | Application to which the generated certificate must belong. | `''` | `'vernemq'`, `'v2k'`, `'k2v'` | CERT_SC_CERTS_BELONGSTO_APPLICATION
-
+| certs.belongsto.application | Application to which the generated certificate must belong. The values are [enumerated](https://github.com/dojot/dojot/blob/development/iam/x509-identity-mgmt/js/schemas/defs.json) by the `x509-identity-mgmt` service | `''` | `'vernemq'`, `'v2k'`, `'k2v'` | CERT_SC_CERTS_BELONGSTO_APPLICATION
 
 #### Cron
 
