@@ -114,13 +114,13 @@ Cron configurations
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
 | cron.crl | Enables the use of *cron* for updating CRL. | true | boolean | CERT_SC_CRON_CRL
-| cron.crl.time | Cron patterns for updating CRL. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */2 * * *` | string | CERT_SC_CRON_CRL_TIME
+| cron.crl.time | Cron patterns for updating CRL. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */2 * * *` | string | CERT_SC_CRON_CRL_TIME
 | cron.expiration | Enables the use of *cron* for checking expiration for Public Certificate and Public CA certificate.  | true | boolean | CERT_SC_CRON_EXPIRATION
-| cron.expiration.time |  Cron patterns for checking expiration. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */1 * * *` | string | CERT_SC_CRON_EXPIRATION_TIME
+| cron.expiration.time |  Cron patterns for checking expiration. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */1 * * *` | string | CERT_SC_CRON_EXPIRATION_TIME
 | cron.revoke | Enables the use of *cron* for checking if the  Public Certificate is revoked. This needs `certs.crl` to be true. Note: *x509 identity mgmt*  is not yet supported for revoking internal certificates | false | boolean | CERT_SC_CRON_REVOKE
-| cron.revoke.time |  Cron patterns for checking revoking. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */3 * * *` | string | CERT_SC_CRON_REVOKE_TIME
+| cron.revoke.time |  Cron patterns for checking revoking. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */3 * * *` | string | CERT_SC_CRON_REVOKE_TIME
 | cron.cabundle | Enables the use of *cron* for update the CA certificates Bundle (TrustStore) | false | boolean | CERT_SC_CRON_CABUNDLE
-| cron.cabundle.time |  Cron patterns for update the CA certificates Bundle. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 * */1 * * *` | string | CERT_SC_CRON_CABUNDLE_TIME
+| cron.cabundle.time |  Cron patterns for update the CA certificates Bundle. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */1 * * *` | string | CERT_SC_CRON_CABUNDLE_TIME
 
 
 #### x509 identity mgmt
