@@ -48,10 +48,6 @@ class RedisManager {
     // reconnect after
     logger.debug(`Retry strategy options ${util.inspect(options, false, 5, true)}`);
 
-    if (options.attempt === this.config['reconnect.max.attemps']) {
-      StateManager.shutdown();
-    }
-
     // return timeout to reconnect after
     return this.config['strategy.connect.after'];
   }
