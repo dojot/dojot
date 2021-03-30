@@ -255,7 +255,10 @@ class Certificates {
           configCerts['common.name'],
           configCerts.hostnames,
         );
-      const cert = await this.x509IdentityMgmt.getRequests().createCertificateByCSR(csr);
+      const belongsTo = {
+        application: configCerts['belongsto.application'],
+      };
+      const cert = await this.x509IdentityMgmt.getRequests().createCertificateByCSR(csr, belongsTo);
       this.cert = cert;
       await createFile(this.pathCert, this.cert);
     } catch (e) {

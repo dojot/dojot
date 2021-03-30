@@ -51,19 +51,21 @@ class Requests {
    * Creates a X.509 certificate using a Certificate Signing Request (CSR).
    *
    * @param {String} csr PEM encoded CSR
+   * @param {Object} belongsTo Application in which the generated certificate
+   *                           must belong (be associated).
    *
    * @throws Will throw an error if cannot create a certificate from a CSR
    *
    * @returns {String|null}  PEM encoded  certificate
    */
-  async createCertificateByCSR(csr) {
+  async createCertificateByCSR(csr, belongsTo) {
     this.logger.debug('createCert: Creating a certificate from a CSR...');
     try {
       const {
         status,
         statusText,
         data,
-      } = await this.axiosX509.post(this.paths.sign, { csr }, axiosCfg);
+      } = await this.axiosX509.post(this.paths.sign, { csr, belongsTo }, axiosCfg);
 
       if (status === 201) {
         return data;
