@@ -244,7 +244,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         });
       }));
 
-  it("should 'belongsTo.application' be an enumerated string",
+  it("should 'belongsTo.application' be string",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -267,20 +267,6 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
                   type: 'string,null',
                 },
                 message: 'should be string,null',
-              },
-              {
-                keyword: 'enum',
-                dataPath: '.belongsTo.application',
-                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/application/enum',
-                params: {
-                  allowedValues: [
-                    'kafka-consumer',
-                    'vernemq',
-                    'v2k',
-                    'k2v',
-                  ],
-                },
-                message: 'should be equal to one of the allowed values',
               },
             ],
           },
@@ -491,20 +477,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                 message: 'should be string,null',
               },
               {
-                keyword: 'enum',
-                dataPath: '.belongsTo.application',
-                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/application/enum',
-                params: {
-                  allowedValues: [
-                    'kafka-consumer',
-                    'vernemq',
-                    'v2k',
-                    'k2v',
-                  ],
-                },
-                message: 'should be equal to one of the allowed values',
-              },
-              {
                 keyword: 'oneOf',
                 dataPath: '.belongsTo',
                 schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/oneOf',
@@ -610,20 +582,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
                   type: 'string,null',
                 },
                 message: 'should be string,null',
-              },
-              {
-                keyword: 'enum',
-                dataPath: '.belongsTo.application',
-                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/application/enum',
-                params: {
-                  allowedValues: [
-                    'kafka-consumer',
-                    'vernemq',
-                    'v2k',
-                    'k2v',
-                  ],
-                },
-                message: 'should be equal to one of the allowed values',
               },
             ],
           },

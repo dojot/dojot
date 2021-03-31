@@ -44,7 +44,7 @@
           ],
           "title": "Device ID",
           "description": "Identifies the device that the x.509 certificate is attached to.",
-          "maxLength": 10,
+          "maxLength": 36,
           "pattern": "^[0-9a-fA-F-]{6,36}$"
         },
         "application": {
@@ -55,12 +55,7 @@
           "title": "Application Identifier",
           "description": "Identifies the type of application that owns the certificate.",
           "maxLength": 64,
-          "enum": [
-            "kafka-consumer",
-            "vernemq",
-            "v2k",
-            "k2v"
-          ]
+          "pattern": "^[0-9a-zA-Z-]{1,64}$"
         }
       },
       "oneOf": [
