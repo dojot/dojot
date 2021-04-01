@@ -357,7 +357,10 @@ function createObject(config) {
     // +--------+
 
     throwAwayRoutes: asFunction(throwAwayRoutes, {
-      injector: () => ({ mountPoint: '/internal/api/v1' }),
+      injector: () => ({
+        mountPoint: '/internal/api/v1',
+        validApplications: config.certificate.belongsto.application || [],
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
