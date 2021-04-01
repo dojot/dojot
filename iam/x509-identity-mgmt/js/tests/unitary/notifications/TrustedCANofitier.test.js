@@ -37,7 +37,6 @@ describe("Unit tests of script 'TrustedCANofitier.js'", () => {
 
   it('should create a TrustedCANofitier whose topic does not contain the tenant', () => {
     const trustedCANofitierWithoutTenant = new TrustedCANofitier({
-      tenant: null,
       kafkaTopicSuffix: global.config.notifications.kafka.producer.trustedca.topic.suffix,
       notificationEngine: notificationEngineMock(),
       logger: new Logger('TrustedCANofitier.test.js'),

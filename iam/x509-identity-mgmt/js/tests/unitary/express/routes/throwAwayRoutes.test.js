@@ -71,6 +71,20 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
         expect(res.text).toEqual(generatedCert.certificatePem);
       }));
 
+  it('should post a CSR and receive a certificate (belongsTo = application)',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
+      .send({
+        csr: util.p256CSR,
+        belongsTo: {
+          application: `${global.config.certificate.belongsto.application[0]}`,
+        },
+      })
+      .expect(201)
+      .then((res) => {
+        expect(res.body).toEqual(generatedCert);
+      }));
+
   it('should return an error because the CSR was not provided',
     () => request.post('/internal/api/v1/throw-away')
       .set('Accept', 'application/json')
@@ -81,6 +95,38 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
       .then((res) => {
         expect(res.body).toEqual({
           error: 'It is necessary to inform the CSR for the certificate to be issued.',
+        });
+      }));
+
+  it('should deny the issuance of a certificate in the case of owner = device',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
+      .send({
+        csr: util.p256CSR,
+        belongsTo: {
+          device: 'abc123',
+        },
+      })
+      .expect(403)
+      .then((res) => {
+        expect(res.body).toEqual({
+          error: 'Operations on certificates for devices are not authorized through this endpoint.',
+        });
+      }));
+
+  it('should deny the issuance of a certificate because of the invalid name of the application',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
+      .send({
+        csr: util.p256CSR,
+        belongsTo: {
+          application: 'invalid-app',
+        },
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual({
+          error: 'Application name is not valid.',
         });
       }));
 
