@@ -1,0 +1,74 @@
+{
+  "name": "certificate-acl",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Service who consume from kafka and publish to redis, it has the function of maintaining an access control list (ACL) on Redis",
+  "main": "index.js",
+  "scripts": {
+    "certificate-acl": "node --unhandled-rejections=strict index.js",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
+    "check-licenses": "apache2-license-checker",
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https:github.com/dojot"
+  },
+  "keywords": [
+    "dojot",
+    "kafka",
+    "redis",
+    "acl"
+  ],
+  "author": "@jonaphael",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "dependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "@dojot/microservice-sdk": "^0.1.11",
+    "lodash.camelcase": "^4.3.0",
+    "redis": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "eslint": "^7.21.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "jest": "^26.6.3"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageDirectory": "./coverage/",
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!index.js",
+      "!app/App.js"
+    ],
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "clearMocks": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "testMatch": [
+      "**/test/**/**.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "./node_modules"
+    ],
+    "verbose": true
+  }
+}
