@@ -82,7 +82,7 @@ General configurations
 
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
-| app.sidecar.to      | Suffix to be used to identify logs | app | string | CERT_SC_APP_SIDECAR_TO
+| app.sidecar.to      | Name of the application in which the sidecar will be associated. **Note:** The `x509-identity-mgmt` service must be configured to recognize the _application name_ as valid. | app | string | CERT_SC_APP_SIDECAR_TO
 | app.delete.certificates  | Enables deleting certificate files if you are unable to connect and retrieve a new one after a given number of attempts | false | boolean | CERT_SC_APP_DELETE_CERTIFICATES
 | app.shutdown  | Enables the service to gracefully shut down if after a given number of attempts it is not possible to obtain new certificates | true | boolean | CERT_SC_APP_SHUTDOWN
 | log.console.level   | Console logger level | info | info, debug, error, warn | CERT_SC_LOG_CONSOLE_LEVEL
@@ -106,7 +106,6 @@ Certificates configurations
 | certs.files.cert | Public certificate filename | cert.pem | filename  | CERT_SC_CERTS_FILES_CERT
 | certs.files.crl | CRL filename  | crl.pem | filename | CERT_SC_CERTS_FILES_CRL
 | certs.files.key | Private keys filename | key.pem | filename | CERT_SC_CERTS_FILES_KEY
-| certs.belongsto.application | Application to which the generated certificate must belong. The values are [enumerated](https://github.com/dojot/dojot/blob/development/iam/x509-identity-mgmt/js/schemas/defs.json) by the `x509-identity-mgmt` service | `''` | `'vernemq'`, `'v2k'`, `'k2v'` | CERT_SC_CERTS_BELONGSTO_APPLICATION
 
 #### Cron
 

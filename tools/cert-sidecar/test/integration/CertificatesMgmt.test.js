@@ -16,7 +16,6 @@ const mockConfig = {
   certs: {
     hostnames: ['localhost'],
     'common.name': 'generic-commonName',
-    'belongsto.application': 'vernemq',
     'expiration.checkend.sec': 43200,
     crl: true,
     'files.basepath': 'certs',
@@ -145,7 +144,7 @@ describe('CertificatesMgmt', () => {
     expect(mockGenerateCsr).toHaveBeenCalledWith('PrivateKey',
       mockConfig.certs['common.name'], mockConfig.certs.hostnames);
     expect(mockCreateCertificateByCSR)
-      .toHaveBeenCalledWith('CSR', { application: 'vernemq' });
+      .toHaveBeenCalledWith('CSR', { application: mockConfig.app['sidecar.to'] });
     expect(mockUtil.createFile).toHaveBeenCalledWith('certs/cert.pem', 'Cert');
 
     // retrieveCaCert
