@@ -9,7 +9,7 @@ const { notificationRoute } = require('./express/notificationRoute');
 const logger = new Logger('history-proxy:express');
 
 /**
-* Creates Express wrapper   
+* Creates Express wrapper
 */
 const framework = WebUtils.framework.createExpress(
   {

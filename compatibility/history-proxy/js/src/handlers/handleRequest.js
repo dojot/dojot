@@ -1,8 +1,8 @@
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
-const { fetchFromInflux } = require('./utils');
-
 const { unflatten } = require('flat');
+
+const { fetchFromInflux } = require('./utils');
 
 const config = unflatten(ConfigManager.getConfig('HISTORYPROXY'));
 

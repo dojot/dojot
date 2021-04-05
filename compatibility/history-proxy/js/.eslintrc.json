@@ -10,22 +10,21 @@
     "plugin:jest/recommended"
   ],
   "rules": {
-    "trailing-comma": [
-      true,
+    "comma-dangle": [
+      0,
       {
-        "singleline": "never",
-        "multiline": {
-          "objects": "never",
-          "arrays": "always",
-          "functions": "never",
-          "typeLiterals": "ignore"
-        }
+        "arrays": "always",
+        "objects": "never",
+        "imports": "never",
+        "exports": "never",
+        "functions": "never"
       }
     ],
     "no-multiple-empty-lines": [
       "error",
       {
         "max": 2,
+        "maxBOF": 1,
         "maxEOF": 0
       }
     ],
