@@ -6,7 +6,7 @@ const DELETE_EVENT = 'trustedca.delete';
  */
 class TrustedCANotifier {
   constructor({
-    tenant, kafkaTopicSuffix, notificationEngine, logger,
+    tenant = '', kafkaTopicSuffix, notificationEngine, logger,
   }) {
     Object.defineProperty(this, 'tenant', { value: tenant });
     Object.defineProperty(this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });

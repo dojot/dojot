@@ -58,8 +58,11 @@ global.paginateInterceptor = paginateInterceptor({
   maxLimit: global.config.framework.paginate.maxlimit,
 });
 
+const validApplications = global.config.certificate.belongsto.application;
 
-global.throwAwayRoutes = throwAwayRoutes({ mountPoint: '/internal/api/v1', schemaValidator, errorTemplate });
+global.throwAwayRoutes = throwAwayRoutes({
+  mountPoint: '/internal/api/v1', schemaValidator, errorTemplate, validApplications,
+});
 global.internalCARoutes = internalCARoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });
 global.trustedCARoutes = trustedCARoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });
 global.certificateRoutes = certificateRoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });

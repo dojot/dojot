@@ -20,9 +20,31 @@ function servePem(res, status, filename, content) {
   );
 }
 
-module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
+module.exports = ({
+  mountPoint, schemaValidator, errorTemplate, validApplications,
+}) => {
   const { validateRegOrGenCert } = schemaValidator;
-  const { BadRequest } = errorTemplate;
+  const { BadRequest, Forbidden } = errorTemplate;
+
+  function denyCertForDeviceMiddleware(req, res, next) {
+    const belongsTo = req.body.belongsTo || {};
+    if (Object.prototype.hasOwnProperty.call(belongsTo, 'device')) {
+      // Issuing certificates to devices through this endpoint is not allowed,
+      // as the tenant is not controlled here. This endpoint has the purpose
+      // of issuing certificates for platform 'applications'.
+      return next(Forbidden('Operations on certificates for devices are not authorized through this endpoint.'));
+    }
+    return next();
+  }
+
+  function belongsToAppMiddleware(req, res, next) {
+    const belongsTo = req.body.belongsTo || {};
+    if (Object.prototype.hasOwnProperty.call(belongsTo, 'application')
+      && !validApplications.includes(belongsTo.application)) {
+      return next(BadRequest('Application name is not valid.'));
+    }
+    return next();
+  }
 
   const throwAwayRoute = {
     mountPoint,
@@ -35,6 +57,8 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
         method: 'post',
         middleware: [
           validateRegOrGenCert(),
+          denyCertForDeviceMiddleware,
+          belongsToAppMiddleware,
           async (req, res, next) => {
             if (req.body.csr) {
               const csr = sanitizeParams.sanitizeLineBreaks(req.body.csr);

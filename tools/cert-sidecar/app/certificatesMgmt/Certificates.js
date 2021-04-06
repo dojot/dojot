@@ -256,7 +256,7 @@ class Certificates {
           configCerts.hostnames,
         );
       const belongsTo = {
-        application: configCerts['belongsto.application'],
+        application: configApp['sidecar.to'],
       };
       const cert = await this.x509IdentityMgmt.getRequests().createCertificateByCSR(csr, belongsTo);
       this.cert = cert;
