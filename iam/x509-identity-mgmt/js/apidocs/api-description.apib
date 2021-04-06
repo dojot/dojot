@@ -358,6 +358,25 @@ enter the device identifier for the certificate endpoint.
 + Response 204
 
 
+## Endpoint for ownership of a certificate [/certificates/{fingerprint}/belongsto]
+
+### Delete the ownership of a certificate [DELETE]
+
+To remove the owner of a particular certificate, simply inform your fingerprint.
+
++ Parameters
+
+    + fingerprint (string) - Fingerprint (as SHA256) of the certificate, where each byte (represented by hexadecimal pair of characters) are separated by a colon.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
++ Response 204
+
+
 ## Endpoint for the root CA [/ca]
 
 ### Get Root CA [GET]

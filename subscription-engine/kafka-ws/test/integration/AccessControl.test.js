@@ -51,6 +51,7 @@ const mockConfig = {
   morgan: {
     'log.format': ['m', 'o', 'r', 'g', 'a', 'n'],
   },
+  redis: {},
   server: {
     host: '0.0.0.0',
     port: 8080,

@@ -3,6 +3,8 @@ const mockConfig = {
     host: 'redis',
     port: 6379,
     database: 1,
+    connect_timeout: 3600000,
+    'strategy.reconnect.after': 500,
   },
   log: {
     verbose: false,
@@ -30,6 +32,7 @@ const mockMicroServiceSdk = {
     signalNotReady: jest.fn(),
     addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
     registerShutdownHandler: jest.fn(),
+    shutdown: jest.fn(),
   })),
 };
 
@@ -43,7 +46,6 @@ const mockRedis = {
 jest.mock('redis', () => mockRedis);
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
-jest.mock('../../app/StateManager');
 
 const RedisManger = require('../../app/Redis/RedisManager');
 

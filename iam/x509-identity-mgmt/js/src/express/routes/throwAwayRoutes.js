@@ -1,12 +1,50 @@
 const HttpStatus = require('http-status-codes');
 
+const { ContentType, contentNegotiation } = require('./contentNegotiation');
+
+const sanitizeParams = require('./sanitizeParams');
+
 const CERT_SERVICE = 'certificateService';
 
 const CA_SERVICE = 'internalCAService';
 
-module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
+const TRUSTED_CA_SERVICE = 'trustedCAService';
+
+const accepts = [ContentType.pem, ContentType.json];
+const contentDispositionHeader = 'Content-Disposition';
+
+function servePem(res, status, filename, content) {
+  res.set(contentDispositionHeader, `attachment; filename="${filename}"`);
+  res.status(status).send(
+    Buffer.from(content),
+  );
+}
+
+module.exports = ({
+  mountPoint, schemaValidator, errorTemplate, validApplications,
+}) => {
   const { validateRegOrGenCert } = schemaValidator;
-  const { BadRequest } = errorTemplate;
+  const { BadRequest, Forbidden } = errorTemplate;
+
+  function denyCertForDeviceMiddleware(req, res, next) {
+    const belongsTo = req.body.belongsTo || {};
+    if (Object.prototype.hasOwnProperty.call(belongsTo, 'device')) {
+      // Issuing certificates to devices through this endpoint is not allowed,
+      // as the tenant is not controlled here. This endpoint has the purpose
+      // of issuing certificates for platform 'applications'.
+      return next(Forbidden('Operations on certificates for devices are not authorized through this endpoint.'));
+    }
+    return next();
+  }
+
+  function belongsToAppMiddleware(req, res, next) {
+    const belongsTo = req.body.belongsTo || {};
+    if (Object.prototype.hasOwnProperty.call(belongsTo, 'application')
+      && !validApplications.includes(belongsTo.application)) {
+      return next(BadRequest('Application name is not valid.'));
+    }
+    return next();
+  }
 
   const throwAwayRoute = {
     mountPoint,
@@ -19,16 +57,28 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
         method: 'post',
         middleware: [
           validateRegOrGenCert(),
-          async (req, res) => {
-            let result = null;
+          denyCertForDeviceMiddleware,
+          belongsToAppMiddleware,
+          async (req, res, next) => {
             if (req.body.csr) {
+              const csr = sanitizeParams.sanitizeLineBreaks(req.body.csr);
+              const belongsTo = req.body.belongsTo || {};
+
               const certService = req.scope.resolve(CERT_SERVICE);
-              result = await certService.throwAwayCertificate(req.body);
+              res.result = await certService.throwAwayCertificate({
+                csr, belongsTo,
+              });
+              next();
             } else {
               throw BadRequest('It is necessary to inform the CSR for the certificate to be issued.');
             }
-            res.status(HttpStatus.CREATED).json(result);
           },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.CREATED, 'cert.pem', res.result.certificatePem),
+            'application/json': (res) => {
+              res.status(HttpStatus.CREATED).json(res.result);
+            },
+          }),
         ],
       },
     ],
@@ -44,11 +94,50 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res) => {
+          async (req, res, next) => {
             const caService = req.scope.resolve(CA_SERVICE);
-            const result = await caService.getRootCertificate();
-            res.status(HttpStatus.OK).json(result);
+            res.result = await caService.getRootCertificate();
+            next();
           },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'ca.pem', res.result.caPem),
+            'application/json': (res) => {
+              res.status(HttpStatus.OK).json(res.result);
+            },
+          }),
+        ],
+      },
+    ],
+  };
+
+  const throwAwayTrustedCAsRoute = {
+    mountPoint,
+    name: 'throw-away-trustedcas-route',
+    path: ['/throw-away/ca/bundle'],
+    handlers: [
+      {
+        /* retrieves the certificate from the dojot Root CA and all the
+         * other trusted CAs without needing the JWT token.
+         * Used only by services behind the API gateway */
+        method: 'get',
+        middleware: [
+          async (req, res, next) => {
+            const caService = req.scope.resolve(CA_SERVICE);
+            const trustedCaService = req.scope.resolve(TRUSTED_CA_SERVICE);
+
+            const { caPem } = await caService.getRootCertificate();
+            const trustedBundle = await trustedCaService.getCertificateBundle();
+
+            // The bundle will always contain the platform's internal CA certificate first
+            res.bundle = [caPem, ...trustedBundle];
+            next();
+          },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'cabundle.pem', res.bundle.join('\n')),
+            'application/json': (res) => {
+              res.status(HttpStatus.OK).json(res.bundle);
+            },
+          }),
         ],
       },
     ],
@@ -64,15 +153,21 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res) => {
+          async (req, res, next) => {
             const caService = req.scope.resolve(CA_SERVICE);
-            const result = await caService.getRootCRL(req.query.update === 'true');
-            res.status(HttpStatus.OK).json(result);
+            res.result = await caService.getRootCRL(req.query.update === 'true');
+            next();
           },
+          contentNegotiation(accepts, {
+            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'crl.pem', res.result.crl),
+            'application/json': (res) => {
+              res.status(HttpStatus.OK).json(res.result);
+            },
+          }),
         ],
       },
     ],
   };
 
-  return [throwAwayRoute, throwAwayCaRoute, throwAwayCaCrlRoute];
+  return [throwAwayRoute, throwAwayCaRoute, throwAwayTrustedCAsRoute, throwAwayCaCrlRoute];
 };

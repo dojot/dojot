@@ -35,7 +35,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'required',
@@ -80,7 +80,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'not',
@@ -127,26 +127,26 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'not',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/device/not',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/dependencies/device/not',
                 params: {},
                 message: 'should NOT be valid',
               },
               {
                 keyword: 'not',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/application/not',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/dependencies/application/not',
                 params: {},
                 message: 'should NOT be valid',
               },
               {
                 keyword: 'oneOf',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/oneOf',
                 params: {
                   passingSchemas: [
                     0,
@@ -173,12 +173,12 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.certificateChain',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem/type',
                 params: {
                   type: 'string',
                 },
@@ -199,12 +199,12 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.csr',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/csr/type',
                 params: {
                   type: 'string',
                 },
@@ -228,12 +228,12 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.belongsTo.device',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/type',
                 params: {
                   type: 'string,null',
                 },
@@ -244,7 +244,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         });
       }));
 
-  it("should 'belongsTo.application' be an enumerated string",
+  it("should 'belongsTo.application' be string",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -257,27 +257,16 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.belongsTo.application',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/application/type',
                 params: {
                   type: 'string,null',
                 },
                 message: 'should be string,null',
-              },
-              {
-                keyword: 'enum',
-                dataPath: '.belongsTo.application',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
-                params: {
-                  allowedValues: [
-                    'kafka-consumer',
-                  ],
-                },
-                message: 'should be equal to one of the allowed values',
               },
             ],
           },
@@ -297,7 +286,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [{
               dataPath: '.certificateChain',
               keyword: 'maxLength',
@@ -305,7 +294,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
               params: {
                 limit: 65536,
               },
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/maxLength',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem/maxLength',
             }],
           },
         });
@@ -321,7 +310,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [{
               dataPath: '.csr',
               keyword: 'maxLength',
@@ -329,7 +318,7 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
               params: {
                 limit: 65536,
               },
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/maxLength',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/csr/maxLength',
             }],
           },
         });
@@ -348,11 +337,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.certificateChain',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/cert-pem/pattern',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem/pattern',
               params: {
                 pattern: '^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$',
               },
@@ -372,11 +361,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.csr',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/csr/pattern',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/csr/pattern',
               params: {
                 pattern: '^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)?$',
               },
@@ -399,11 +388,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/reg-or-gen-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.belongsTo.device',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/pattern',
               params: {
                 pattern: '^[0-9a-fA-F-]{6,36}$',
               },
@@ -426,7 +415,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json',
             schemaErrors: [{
               keyword: 'required',
               dataPath: '',
@@ -453,26 +442,26 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json',
             schemaErrors: [
               {
                 keyword: 'not',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/device/not',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/dependencies/device/not',
                 params: {},
                 message: 'should NOT be valid',
               },
               {
                 keyword: 'not',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/dependencies/application/not',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/dependencies/application/not',
                 params: {},
                 message: 'should NOT be valid',
               },
               {
                 keyword: 'type',
                 dataPath: '.belongsTo.device',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/type',
                 params: {
                   type: 'string,null',
                 },
@@ -481,27 +470,16 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
               {
                 keyword: 'type',
                 dataPath: '.belongsTo.application',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/application/type',
                 params: {
                   type: 'string,null',
                 },
                 message: 'should be string,null',
               },
               {
-                keyword: 'enum',
-                dataPath: '.belongsTo.application',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
-                params: {
-                  allowedValues: [
-                    'kafka-consumer',
-                  ],
-                },
-                message: 'should be equal to one of the allowed values',
-              },
-              {
                 keyword: 'oneOf',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/oneOf',
                 params: {
                   passingSchemas: [
                     0,
@@ -528,12 +506,12 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/type',
                 params: {
                   type: 'object',
                 },
@@ -542,7 +520,7 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
               {
                 keyword: 'oneOf',
                 dataPath: '.belongsTo',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/oneOf',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/oneOf',
                 params: {
                   passingSchemas: [
                     0,
@@ -568,11 +546,11 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json',
             schemaErrors: [{
               keyword: 'type',
               dataPath: '.belongsTo.device',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/type',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/type',
               params: {
                 type: 'string,null',
               },
@@ -594,27 +572,16 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json',
             schemaErrors: [
               {
                 keyword: 'type',
                 dataPath: '.belongsTo.application',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/type',
+                schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/application/type',
                 params: {
                   type: 'string,null',
                 },
                 message: 'should be string,null',
-              },
-              {
-                keyword: 'enum',
-                dataPath: '.belongsTo.application',
-                schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/application/enum',
-                params: {
-                  allowedValues: [
-                    'kafka-consumer',
-                  ],
-                },
-                message: 'should be equal to one of the allowed values',
               },
             ],
           },
@@ -636,11 +603,11 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
         expect(res.body).toEqual({
           error: 'Input data schema validation failure.',
           detail: {
-            schemaId: 'http://www.dojot.com.br/schemas/ch-owner-cert',
+            schemaId: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json',
             schemaErrors: [{
               keyword: 'pattern',
               dataPath: '.belongsTo.device',
-              schemaPath: 'http://www.dojot.com.br/schemas/defs#/definitions/belongsTo/properties/device/pattern',
+              schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/pattern',
               params: {
                 pattern: '^[0-9a-fA-F-]{6,36}$',
               },

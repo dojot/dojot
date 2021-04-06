@@ -36,12 +36,10 @@ WORKDIR /opt/v2k_bridge
 
 RUN apk --no-cache add \
       bash \
-      curl \
-      jq \
       libsasl \
       lz4-libs \
-      openssl \
       tini
+
 
 COPY --from=base /opt/v2k_bridge /opt/v2k_bridge
 
