@@ -56,7 +56,8 @@ jest.mock('./../../src/handlers/utils', () => {
       const attr = options.path.split('/')[6];
       let data;
       if (Object.prototype.hasOwnProperty.call(fakeInfluxResponse, attr)) {
-        data = fakeInfluxResponse[attr];
+        const { [attr]: dataValue } = fakeInfluxResponse;
+        data = dataValue;
       }
 
       if (!attr) {

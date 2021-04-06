@@ -36,10 +36,21 @@ const parseAllAttr = (deviceId, data) => {
       newEl.value = value;
       newEl.attr = label;
       newEl.metadata = {};
-      if (objRtn[label]) {
-        objRtn[label].push(newEl);
+
+      // To avoid security issues in dynamic object-injection
+      if (Object.prototype.hasOwnProperty.call(objRtn, label)) {
+        const { [label]: valueLabel } = objRtn;
+        Object.defineProperty(objRtn, label, {
+          value: [...valueLabel, newEl],
+          writable: true,
+          enumerable: true
+        });
       } else {
-        objRtn[label] = [newEl];
+        Object.defineProperty(objRtn, label, {
+          value: [newEl],
+          writable: true,
+          enumerable: true
+        });
       }
     });
   });
