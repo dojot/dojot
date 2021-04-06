@@ -63,7 +63,6 @@ describe('Unit tests for methods in Utils', () => {
     });
 
     await expect(fetchFromInflux({})).rejects.toThrow();
-
   });
 
 

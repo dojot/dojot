@@ -4,57 +4,61 @@ const { WebUtils } = require('@dojot/microservice-sdk');
 
 const tokenGen = WebUtils.createTokenGen();
 
-// mocking influx response
-const fakeInfluxResponse = {
-  "temperature": {
-    data: [
-      {
-        ts: '2021-02-13T15:12:10.579Z',
-        label: 'temperature',
-        value: '10',
-      },
-      {
-        ts: '2021-02-13T15:13:09.579Z',
-        label: 'temperature',
-        value: '9',
-      },
-    ],
-    paging: {
-    },
-  },
-  "unknown_attribute": {
-    data: [
-    ],
-  },
-  "all_attributes": {
-    data: [
-      {
-        ts: '2021-02-13T15:12:10.579Z',
-        attrs: [
-          {
-            label: 'temperature',
-            value: '10',
-          }],
-      },
-      {
-        ts: '2021-02-13T15:13:09.579Z',
-        attrs: [
-          {
-            label: 'temperature',
-            value: '9',
-          }],
-      },
-    ],
-    paging: {
-    },
-  },
-};
-
 jest.mock('./../../src/handlers/utils', () => {
+  // mocking influx response
+  const fakeInfluxResponse = {
+    "temperature": {
+      data: [
+        {
+          ts: '2021-02-13T15:12:10.579Z',
+          label: 'temperature',
+          value: '10',
+        },
+        {
+          ts: '2021-02-13T15:13:09.579Z',
+          label: 'temperature',
+          value: '9',
+        },
+      ],
+      paging: {
+      },
+    },
+    "unknown_attribute": {
+      data: [
+      ],
+    },
+    "all_attributes": {
+      data: [
+        {
+          ts: '2021-02-13T15:12:10.579Z',
+          attrs: [
+            {
+              label: 'temperature',
+              value: '10',
+            }],
+        },
+        {
+          ts: '2021-02-13T15:13:09.579Z',
+          attrs: [
+            {
+              label: 'temperature',
+              value: '9',
+            }],
+        },
+      ],
+      paging: {
+      },
+    },
+  };
+
   return {
     fetchFromInflux: jest.fn((options) => {
       const attr = options.path.split('/')[6];
-      let data = fakeInfluxResponse[attr];
+      let data;
+      if (Object.prototype.hasOwnProperty.call(fakeInfluxResponse, attr)) {
+        data = fakeInfluxResponse[attr];
+      }
+
       if (!attr) {
         data = fakeInfluxResponse.all_attributes;
       }
@@ -62,7 +66,7 @@ jest.mock('./../../src/handlers/utils', () => {
         resolve(data);
       });
     }),
-  }
+  };
 });
 
 const { framework } = require('../../src/framework');
@@ -121,7 +125,6 @@ const caseThree = {
 };
 
 
-
 const caseFour = {
   request: {
     attr: ['temperature', 'atribute2'],
@@ -165,40 +168,35 @@ describe('Unit testing to validate routes', () => {
       .set('Accept', 'application/json');
   };
 
-  it('checking if header was been passed', async (done) => {
+  it('checking if header was been passed', async () => {
     const deviceId = 'a1b1c1';
     const response = await fetchData(deviceId, caseOne);
     expect(response.statusCode).toEqual(200);
-    done();
   });
 
-  it('checking response: 404 msg not found data ', async (done) => {
+  it('checking response: 404 msg not found data', async () => {
     const deviceId = 'a1b1c1';
     const response = await fetchData(deviceId, caseTwo);
     expect(response.statusCode).toEqual(404);
     expect(response.body).toEqual(caseTwo.expected);
-    done();
   });
 
-  it('checking if the correct data manipulation', async (done) => {
+  it('checking if the correct data manipulation', async () => {
     const deviceId = 'a1b1c1';
     const response = await fetchData(deviceId, caseOne);
     expect(response.body).toEqual(caseOne.expected);
-    done();
   });
 
-  it('requesting all atributes', async (done) => {
+  it('requesting all atributes', async () => {
     const deviceId = 'a1b1c1';
     const response = await fetchData(deviceId, caseThree);
     expect(response.body).toEqual(caseThree.expected);
-    done();
   });
 
-  it('sending multiple atributes', async (done) => {
+  it('sending multiple atributes', async () => {
     const deviceId = 'a1b1c1';
     const response = await fetchData(deviceId, caseFour);
     expect(response.body).toEqual(caseFour.expected);
-    done();
   });
 
   afterAll(async () => {

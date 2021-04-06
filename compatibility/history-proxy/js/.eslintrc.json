@@ -10,6 +10,7 @@
     "plugin:jest/recommended"
   ],
   "rules": {
+    "security/detect-object-injection": 0,
     "comma-dangle": [
       0,
       {

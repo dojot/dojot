@@ -22,13 +22,6 @@ const { createDataToBePassed } = require('../../src/proxy');
 
 const validationHandler = require('../../src/handlers/handleValidation');
 
-const CASE_ONE = 'caseOne';
-const CASE_TWO = 'caseTwo';
-const CASE_THREE = 'caseThree';
-const CASE_FOUR = 'caseFour';
-const CASE_FIVE = 'caseFive';
-const CASE_SIX = 'caseSix';
-
 const expectedValue = {
   deviceId: 'a1b1c1',
   attr: 'temperature',
@@ -154,53 +147,52 @@ const cases = {
 };
 
 describe('Testing incoming params and outcoming params', () => {
-
   it('pass only one attribute', async () => {
-    const paramList = cases[CASE_ONE].request;
+    const paramList = cases.caseOne.request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
-    expect({ ...result, dateTo }).toEqual(cases[CASE_ONE].expected);
+    expect({ ...result, dateTo }).toEqual(cases.caseOne.expected);
   });
 
   it('pass attribute and lastN', async () => {
-    const paramList = cases[CASE_TWO].request;
+    const paramList = cases.caseTwo.request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
-    expect({ ...result, dateTo }).toEqual(cases[CASE_TWO].expected);
+    expect({ ...result, dateTo }).toEqual(cases.caseTwo.expected);
   });
 
   it('passing dateTo and lastN', async () => {
-    const paramList = cases[CASE_THREE].request;
+    const paramList = cases.caseThree.request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
 
-    expect({ ...result, dateTo }).toEqual(cases[CASE_THREE].expected);
+    expect({ ...result, dateTo }).toEqual(cases.caseThree.expected);
   });
 
   it('passing dateTo, dateFrom and firstN', async () => {
-    const paramList = cases[CASE_FOUR].request;
+    const paramList = cases.caseFour.request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
-    expect({ ...result, dateTo }).toEqual(cases[CASE_FOUR].expected);
+    expect({ ...result, dateTo }).toEqual(cases.caseFour.expected);
   });
 
   it('passing 2 attributes', async () => {
-    const paramList = cases[CASE_FIVE].request;
+    const paramList = cases.caseFive.request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
-    expect({ ...result, dateTo }).toEqual(cases[CASE_FIVE].expected);
+    expect({ ...result, dateTo }).toEqual(cases.caseFive.expected);
   });
 
   it('checking all attrs (no send attributes)', async () => {
-    const paramList = cases[CASE_SIX].request;
+    const paramList = cases.caseSix.request;
     const data = createDataToBePassed(paramList);
     const result = await validationHandler.handle(data);
     const dateTo = result.dateTo.split('.')[0]; // removing ms for checking
-    expect({ ...result, dateTo }).toEqual(cases[CASE_SIX].expected);
+    expect({ ...result, dateTo }).toEqual(cases.caseSix.expected);
   });
 });
