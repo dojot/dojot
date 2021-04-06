@@ -15,7 +15,6 @@ RUN apk add --no-cache git autoconf build-base bsd-compat-headers cmake openssl-
     git clone -b $VERNEMQ_GIT_REF $VERNEMQ_REPO .
 
 # Adding the new ssl_file with the changes
-RUN ls apps/vmq_server/src/vmq_ssl.erl
 COPY ./vmq_ssl.erl apps/vmq_server/src
 
 COPY bin/build.sh build.sh

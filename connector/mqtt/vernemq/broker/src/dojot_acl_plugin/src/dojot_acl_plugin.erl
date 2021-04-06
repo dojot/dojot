@@ -13,7 +13,7 @@
 auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName, Password, CleanSession) ->
     
     if 
-        UserName == not_authorized -> 
+        UserName == undefined -> 
             error;
         true -> 
             ok

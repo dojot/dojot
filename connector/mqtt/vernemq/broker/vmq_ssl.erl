@@ -18,36 +18,30 @@
          cert_to_common_name/1,
          opts/1]).
 
-check_fingerprint_username(Username,UsernameRedis) ->
-    if
-        Username == UsernameRedis ->
-            Username;
-        true ->
-            not_authorized
-    end.
+-define(REDIS_HOST, os:getenv("REDIS_HOST", "vernemq-redis")).
+-define(REDIS_PORT, erlang:list_to_integer(os:getenv("REDIS_PORT", "6379"), 10)).
+-define(REDIS_DB, erlang:list_to_integer(os:getenv("REDIS_DB", "0"), 10)).
 
 socket_to_common_name(Socket) ->
     case ssl:peercert(Socket) of
         {error, no_peercert} ->
             undefined;
         {ok, Cert} ->
-            OTPCert = public_key:pkix_decode_cert(Cert, otp),
-            TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
-            Subject = TBSCert#'OTPTBSCertificate'.subject,
+            Fingerprint = crypto:hash(sha256, Cert),
             
-            FingerPrint = crypto:hash(sha256, Cert),
-            % the fingerprint at this point is with formatted but with the ":" as the last character
-            FingerPrintFormatted = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= FingerPrint ]),
-            ValidFingerPrint = [string:strip(FingerPrintFormatted, right, $:)],
+            % the fingerprint at this point is with formatted but with the ":" as it's last character
+            FormattedFingerprint = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= Fingerprint ]),
 
-            Username = extract_cn(Subject), 
-            {ok, Client} = eredis:start_link("vernemq-redis", 6379,0),            
-            {ok, ValueReturn} = eredis:q(Client, ["GET", ValidFingerPrint]),
+            % remove the last ":" character
+            ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
+
+            % TODO create an module that wrapper the redis Client (suggestion use a gen_server as behavior)
+            {ok, Client} = eredis:start_link(?REDIS_HOST, ?REDIS_PORT, ?REDIS_DB),            
+            {ok, ReturnedValue} = eredis:q(Client, ["GET", ValidFingerprint]),
             eredis:stop(Client),
-           
-            OkReturn = check_fingerprint_username(Username, ValueReturn),
-            OkReturn
 
+            % return the value retrieved from redis.
+            ReturnedValue
     end. 
 
 cert_to_common_name(Cert) ->
@@ -55,31 +49,22 @@ cert_to_common_name(Cert) ->
         undefined ->
             undefined;
         _ ->
-            OTPCert = public_key:pkix_decode_cert(Cert, otp),
-            TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
-            Subject = TBSCert#'OTPTBSCertificate'.subject,
+            Fingerprint = crypto:hash(sha256, Cert),
             
-            % error_logger:info_msg("Client ID1: ~p ~n", [crypto:hash(sha256, Cert)]),
-            error_logger:info_msg("SHOULD CALL REDIS HERE"),
-            extract_cn(Subject)
+            % the fingerprint at this point is with formatted but with the ":" as it's last character
+            FormattedFingerprint = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= Fingerprint ]),
+
+            % remove the last ":" character
+            ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
+
+            % TODO create an module that wrapper the redis Client (suggestion use a gen_server as behavior)
+            {ok, Client} = eredis:start_link(?REDIS_HOST, ?REDIS_PORT, ?REDIS_DB),            
+            {ok, ReturnedValue} = eredis:q(Client, ["GET", ValidFingerprint]),
+            eredis:stop(Client),
+
+            % return the value retrieved from redis.
+            ReturnedValue
     end.
-
--spec extract_cn({'rdnSequence', list()}) -> undefined | binary().
-extract_cn({rdnSequence, List}) ->
-    extract_cn2(List).
-
--spec extract_cn2(list()) -> undefined | list().
-extract_cn2([[#'AttributeTypeAndValue'{
-                 type=?'id-at-commonName',
-                 value={utf8String, CN}}]|_]) ->
-    list_to_binary(unicode:characters_to_list(CN));
-extract_cn2([[#'AttributeTypeAndValue'{
-                 type=?'id-at-commonName',
-                 value={printableString, CN}}]|_]) ->
-    list_to_binary(unicode:characters_to_list(CN));
-extract_cn2([_|Rest]) ->
-    extract_cn2(Rest);
-extract_cn2([]) -> undefined.
 
 opts(Opts) ->
     [{cacertfile, proplists:get_value(cafile, Opts)},
