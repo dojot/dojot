@@ -29,17 +29,16 @@ const incommingMessagesCallback = async (data, ack) => {
 
   try {
     const jsonReceived = JSON.parse(payload.toString());
-    // logger.debug(`Message received! ${inspect(jsonReceived, false, 2, true)}`);
 
     const keyFingerprint = jsonReceived.data.eventData.fingerprint;
     const { tenant } = jsonReceived.metadata;
-    let valueUsername = jsonReceived.data.eventData.belongsTo.device
+    let ownerIdentifier = jsonReceived.data.eventData.belongsTo.device
       || jsonReceived.data.eventData.belongsTo.application;
 
     const { eventType } = jsonReceived.data;
 
     if (tenant) {
-      valueUsername = `${tenant}:${valueUsername}`;
+      ownerIdentifier = `${tenant}:${ownerIdentifier}`;
     }
 
     if (!keyFingerprint) {
@@ -50,8 +49,8 @@ const incommingMessagesCallback = async (data, ack) => {
     switch (eventType) {
       case CERTIFICATE_ACL_CREATE_EVENT_TYPE:
       case CERTIFICATE_ACL_UPDATE_EVENT_TYPE:
-        logger.info(`Saving to redis the key pair ${keyFingerprint} - ${valueUsername}`);
-        redisAsyncSet(keyFingerprint, valueUsername).then((value) => {
+        logger.info(`Saving to redis the key pair ${keyFingerprint} - ${ownerIdentifier}`);
+        redisAsyncSet(keyFingerprint, ownerIdentifier).then((value) => {
           logger.debug(`Data sucesffully saved to redis! ${value}`);
           ack();
         }).catch((err) => {
@@ -65,9 +64,8 @@ const incommingMessagesCallback = async (data, ack) => {
           logger.debug(`Data sucesffully saved to redis! ${value}`);
           ack();
         }).catch((err) => {
-          logger.warn(`Error saving data in redis! ${err}`);
+          logger.warn(`Error deliting data in redis! ${err}`);
         });
-        ack();
         break;
 
       default:
@@ -90,11 +88,12 @@ const init = () => {
 
     const topics = new RegExp(`^.*${topicSuffix}`);
     kafkaConsumer.registerCallback(topics, incommingMessagesCallback);
-  }).catch((err) => {
-    logger.error(`Error initializing the kafka consumer exiting!... ${err}`);
 
     // TODO
     // query x.509-identity-mgmt and guarantee that the Redis is synced with it.
+
+  }).catch((err) => { 
+    logger.error(`Error initializing the kafka consumer exiting!... ${err}`);
     StateManager.shutdown();
   });
 };

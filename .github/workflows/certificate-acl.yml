@@ -71,7 +71,7 @@ jobs:
         name: ${{ steps.get_owner.outputs.owner }}/dojot-acl
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        workdir: connector/dojot_acl
+        workdir: iam/certificate-acl
         # Label with the built image's commit
         buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
         # Whether tag will be based in the branch name or in the tag name

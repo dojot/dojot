@@ -2,7 +2,7 @@
   "name": "certificate-acl",
   "version": "1.0.0",
   "private": true,
-  "description": "Service who consume from kafka and publish to redis, it has the function of maintaining an access control list (ACL) on Redis",
+  "description": "Service that consumes kafka data and publish them to redis, it has the function of maintaining an access control list (ACL) on Redis",
   "main": "index.js",
   "scripts": {
     "certificate-acl": "node --unhandled-rejections=strict index.js",
