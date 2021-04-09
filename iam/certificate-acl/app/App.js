@@ -91,8 +91,7 @@ const init = () => {
 
     // TODO
     // query x.509-identity-mgmt and guarantee that the Redis is synced with it.
-
-  }).catch((err) => { 
+  }).catch((err) => {
     logger.error(`Error initializing the kafka consumer exiting!... ${err}`);
     StateManager.shutdown();
   });
