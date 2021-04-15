@@ -1,0 +1,68 @@
+name: History Proxy (compatibility/history-proxy)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'compatibility/history-proxy/**'
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'compatibility/history-proxy/**'
+
+jobs:
+  unit-tests:
+    name: (compatibility/history-proxy) Unit Tests #  path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything because needs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: npm install, build, lint, check-licenses and test
+      run: |
+        cd compatibility/history-proxy/js
+        npm ci
+        npm run build --if-present
+        npm run lint
+        npm run check-licenses
+        npm run test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        directory: compatibility/history-proxy
+        flags: historyProxy # Flags allow you to isolate coverage reports for different tests
+        name: history-proxy # Custom defined name for the upload
+
+  docker-hub:
+    needs: unit-tests
+    name: (compatibility/history-proxy) Build and Publish image to DockerHub #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.16
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/history-proxy
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: compatibility/history-proxy/
+        buildoptions: ' --label commit_sha_dojot=${{ github.sha }} ' # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name

@@ -1,0 +1,37 @@
+{
+  "env": {
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "extends": [
+    "airbnb-base",
+    "plugin:security/recommended",
+    "plugin:jest/recommended"
+  ],
+  "rules": {
+    "comma-dangle": [
+      0,
+      {
+        "arrays": "always",
+        "objects": "never",
+        "imports": "never",
+        "exports": "never",
+        "functions": "never"
+      }
+    ],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 2,
+        "maxBOF": 1,
+        "maxEOF": 0
+      }
+    ],
+    "import/no-unresolved": "off"
+  },
+  "plugins": [
+    "security",
+    "jest"
+  ]
+}
