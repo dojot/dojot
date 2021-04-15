@@ -144,12 +144,12 @@ Clients in the left sidebar:
         - Set the `user` value in`Realm Roles` and select it as `Required`
         - Set `Logic` to`Positive`
 
-In the following steps It will configure a resource called `server-api-example-sec` in which a user with the role `admin` can create, edit and delete, while a user with the role user can only view:
+In the following steps It will configure a resource called `server-api-example-sec` in which a user with the role `admin` can create, edit and delete, while a user with the role user can only view (NOTE: The resource name must be the same as passed to `config.resource`  when  add plugin `pepkong` to a service.):
 
 - Within `Authorization` select the`Resources` tab
   - Create a new resource for the example "server-api-example-sec"
-    - Set `name` to`server-api-example-sec`*
-    - Set some significant value to identify in `Display name`, in this case something like`Server Api Example with security`
+    - Set `name` to `server-api-example-sec`*
+    - Set some significant value to identify in `Display name`, in this case something like `Server Api Example with security`
     - In `scopes` set the values`create`, `delete`,`update` and `view`
     - Enable `User-Managed Access Enabled`
     - Click save
