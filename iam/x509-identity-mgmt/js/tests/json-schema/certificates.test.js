@@ -394,9 +394,9 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F-]{6,36}$',
+                pattern: '^[0-9a-fA-F-]{5,36}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F-]{6,36}$"',
+              message: 'should match pattern "^[0-9a-fA-F-]{5,36}$"',
             }],
           },
         });
@@ -609,9 +609,9 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
               dataPath: '.belongsTo.device',
               schemaPath: 'https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo/properties/device/pattern',
               params: {
-                pattern: '^[0-9a-fA-F-]{6,36}$',
+                pattern: '^[0-9a-fA-F-]{5,36}$',
               },
-              message: 'should match pattern "^[0-9a-fA-F-]{6,36}$"',
+              message: 'should match pattern "^[0-9a-fA-F-]{5,36}$"',
             }],
           },
         });

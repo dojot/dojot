@@ -14,6 +14,9 @@ ENV DOCKER_VERNEMQ_KUBERNETES_LABEL_SELECTOR="app=vernemq" \
 RUN apk add --no-cache git autoconf build-base bsd-compat-headers cmake openssl-dev bash && \
     git clone -b $VERNEMQ_GIT_REF $VERNEMQ_REPO .
 
+# Adding the new ssl_file with the changes
+COPY ./vmq_ssl.erl apps/vmq_server/src
+
 COPY bin/build.sh build.sh
 
 RUN ./build.sh $TARGET
@@ -53,7 +56,6 @@ COPY --from=build-env /build/plugins/dojot_disconnect_plugin/_build /vernemq/doj
 # Copy entrypoint script
 COPY bin/command.sh /
 
-
 RUN ln -s /vernemq/etc /etc/vernemq && \
     ln -s /vernemq/data /var/lib/vernemq && \
     ln -s /vernemq/log /var/log/vernemq
@@ -70,7 +72,6 @@ RUN ln -s /vernemq/etc /etc/vernemq && \
 
 EXPOSE 1883 8883 8080 44053 4369 8888 \
     9100 9101 9102 9103 9104 9105 9106 9107 9108 9109
-
 
 VOLUME ["/vernemq/log", "/vernemq/data", "/vernemq/etc"]
 
