@@ -103,12 +103,11 @@ jobs:
         VERSION_NAME: ${{ steps.version_doc.outputs.version }}
       run: |
         sh .github/workflows/scripts/doc_aglio_api.sh
+        
     - name: Publish Documentation
-      uses: peaceiris/actions-gh-pages@v2
-      env:
-        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN_PAT }}
-        PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: ./build-docs #fix when use .github/workflows/scripts/doc_aglio_api.sh
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        keepFiles: true
-        emptyCommits: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./build-docs #fix when use .github/workflows/scripts/doc_aglio_api.sh
+          keep_files: true
