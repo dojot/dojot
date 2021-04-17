@@ -1,6 +1,0 @@
-# -------------------------------------------------
-# In this file are recorded the implementations of
-# EventListeners triggered by Keycloak and that are
-# of interest to this dojot-provider module.
-# -------------------------------------------------
-com.github.dojot.keycloak.providers.impl.RealmEventListener
