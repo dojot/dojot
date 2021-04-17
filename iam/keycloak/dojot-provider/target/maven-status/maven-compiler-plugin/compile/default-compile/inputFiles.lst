@@ -1,0 +1,8 @@
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/impl/DojotProviderImpl.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/DojotProviderFactory.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/DojotProvider.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/impl/RealmEventListener.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/impl/DojotProviderFactoryImpl.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/impl/RealmCustomizer.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/providers/EventListener.java
+/l/disk0/thiagof/dev/dojot/dojot/iam/keycloak/dojot-provider/src/main/java/com/github/dojot/keycloak/spi/DojotSpi.java

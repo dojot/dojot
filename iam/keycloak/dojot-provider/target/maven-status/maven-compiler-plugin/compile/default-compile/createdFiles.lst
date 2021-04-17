@@ -1,0 +1,9 @@
+com/github/dojot/keycloak/providers/DojotProviderFactory.class
+com/github/dojot/keycloak/spi/DojotSpi.class
+com/github/dojot/keycloak/providers/EventListener.class
+com/github/dojot/keycloak/providers/impl/RealmCustomizer.class
+com/github/dojot/keycloak/providers/impl/DojotProviderFactoryImpl.class
+com/github/dojot/keycloak/providers/impl/DojotProviderImpl$Event.class
+com/github/dojot/keycloak/providers/impl/RealmEventListener.class
+com/github/dojot/keycloak/providers/impl/DojotProviderImpl.class
+com/github/dojot/keycloak/providers/DojotProvider.class

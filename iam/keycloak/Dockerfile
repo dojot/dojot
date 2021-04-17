@@ -1,31 +1,44 @@
 FROM maven:3.6.3-openjdk-11 AS base
 
-ENV KEYCLOAK_VERSION=12.0.2
+ENV KEYCLOAK_VERSION=12.0.4
 ENV KAFKA_VERSION=2.7.0
 
-WORKDIR /opt/dojot/kafka-provider
-COPY kafka-provider .
+WORKDIR /opt/dojot/dojot-provider
+
+# Resolve the dependencies before copying the source code
+# and thereby take advantage of the docker image cache
+COPY dojot-provider/pom.xml .
 RUN mvn "-Dmaven.compiler.release=11" \
         "-Dkeycloak.version=$KEYCLOAK_VERSION" \
         "-Dkafka.version=$KAFKA_VERSION" \
         clean package
 
-FROM jboss/keycloak:12.0.2
+# Copy the source code and compile
+COPY dojot-provider .
+RUN mvn "-Dmaven.compiler.release=11" \
+        "-Dkeycloak.version=$KEYCLOAK_VERSION" \
+        "-Dkafka.version=$KAFKA_VERSION" \
+        clean package
 
-# Copies the "kafka-provider" into the wildfly module structure
+FROM jboss/keycloak:12.0.4
+
+# Copies the "dojot-provider" into the wildfly module structure
 COPY --from=base \
-    /opt/dojot/kafka-provider/target/jboss-modules \
+    /opt/dojot/dojot-provider/target/jboss-modules \
     $JBOSS_HOME/modules/system/layers/keycloak/
 
-# Copies the "kafka-provider" module configuration script
+# Copies the "dojot-provider" module configuration script
 COPY --from=base \
-    /opt/dojot/kafka-provider/src/main/resources/kafka-provider.cli \
+    /opt/dojot/dojot-provider/src/main/resources/dojot-provider.cli \
     $JBOSS_HOME/bin
 
+# Volume for dojot configuration files
+VOLUME ["/opt/dojot/"]
+
 # Run the configuration script to make the Keycloak load the
-# "kafka-provider" module that was copied into wildfly, AND
+# "dojot-provider" module that was copied into wildfly, AND
 # After configuring the module, its no longer need the script
 # taking up space in the docker image and this also doesn't
-# nedd the script's change history
-RUN $JBOSS_HOME/bin/jboss-cli.sh --file=$JBOSS_HOME/bin/kafka-provider.cli; \
-    rm $JBOSS_HOME/bin/kafka-provider.cli $JBOSS_HOME/standalone/configuration/standalone_xml_history/current/*
+# need the script's change history
+RUN $JBOSS_HOME/bin/jboss-cli.sh --file=$JBOSS_HOME/bin/dojot-provider.cli; \
+    rm $JBOSS_HOME/bin/dojot-provider.cli $JBOSS_HOME/standalone/configuration/standalone_xml_history/current/*

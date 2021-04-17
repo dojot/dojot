@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.5" name="org.apache.kafka.kafka-clients" slot="dojot">
+  <resources>
+    <resource-root path="kafka-clients-2.7.0.jar" />
+    <resource-root path="lz4-java-1.7.1.jar" />
+    <resource-root path="org.osgi.core-4.3.0.jar" />
+    <resource-root path="snappy-java-1.1.7.7.jar" />
+    <resource-root path="zstd-jni-1.4.5-6.jar" />
+  </resources>
+  <dependencies>
+    <module name="javax.api" />
+    <module name="org.slf4j" />
+    <module name="com.fasterxml.jackson.core.jackson-core" />
+    <module name="com.fasterxml.jackson.core.jackson-databind" />
+    <module name="com.fasterxml.jackson.core.jackson-annotations" />
+  </dependencies>
+</module>

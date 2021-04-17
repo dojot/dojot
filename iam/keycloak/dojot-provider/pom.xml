@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.dojot.keycloak.providers</groupId>
+    <artifactId>dojot-provider</artifactId>
+    <version>1.0.0</version>
+
+    <name>Dojot Provider</name>
+    <description>Implementation of provider for communication with dojot.</description>
+
+    <url>https://github.com/dojot</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/dojot/dojot.git</connection>
+        <developerConnection>scm:git:git@github.com:dojot/dojot.git</developerConnection>
+        <url>https://github.com/dojot/dojot/tree/development/</url>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/dojot/dojot/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>thiagodpf</id>
+            <name>Thiago de Paula Ferreira</name>
+            <email>thiagodepaulaferreira@gmail.com</email>
+            <organization>dojot</organization>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>-3</timezone>
+        </developer>
+    </developers>
+
+    <contributors>
+    </contributors>
+
+    <properties>
+        <maven.compiler.release>11</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <keycloak.version>12.0.4</keycloak.version>
+        <kafka.version>2.7.0</kafka.version>
+        <jboss.logging.version>3.4.1.Final</jboss.logging.version>
+        <smartics.maven.plugin.version>2.1.5</smartics.maven.plugin.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jboss</id>
+            <name>Maven Central Repository</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://repo1.maven.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>Maven Plugin Repository</name>
+            <url>https://repo1.maven.org/maven2/</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-core</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-server-spi</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-server-spi-private</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-services</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.logging</groupId>
+            <artifactId>jboss-logging</artifactId>
+            <version>${jboss.logging.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+            </plugin>
+            <plugin>
+                <groupId>de.smartics.maven.plugin</groupId>
+                <artifactId>smartics-jboss-modules-maven-plugin</artifactId>
+                <version>${smartics.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>create-modules-archive</id>
+                        <goals>
+                            <goal>create-modules-archive</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>false</attach>
+                    <targetNamespace>urn:jboss:module:1.5</targetNamespace>
+                    <defaultSlot>dojot</defaultSlot>
+                    <modules>
+                        <dir>src/etc/jboss-modules</dir>
+                    </modules>
+                    <dependencyExcludes>
+                        <exclude>
+                            <groupId>org.keycloak</groupId>
+                        </exclude>
+
+                        <!-- Wildfly already had this module as a base (version: 3.4.1.Final) -->
+                        <exclude>
+                            <groupId>org.jboss.logging</groupId>
+                        </exclude>
+
+                        <!-- Wildfly already had this module as a base (version: 2.10.5.0) -->
+                        <exclude>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-databind</artifactId>
+                        </exclude>
+
+                        <!-- Wildfly already had this module as a base (version: 1.7.30) -->
+                        <exclude>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-api</artifactId>
+                        </exclude>
+
+                    </dependencyExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
