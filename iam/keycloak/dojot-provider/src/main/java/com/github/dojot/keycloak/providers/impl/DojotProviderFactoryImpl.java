@@ -100,7 +100,20 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
 
     @Override
     public DojotProvider create(KeycloakSession keycloakSession) {
-        return new DojotProviderImpl(kafkaTopic, kafkaProducerProps, validRealmName, customRealmRep);
+        try {
+            // Since Realm customization modifies the values of the "customRealmRep" object,
+            // it is necessary to clone it so that the original values are not overwritten
+            // and so it can be used again in a future operation. In this way, only the
+            // clone object is modified and discarded at the end of the operation.
+            byte[] jsonBytes = JsonSerialization.writeValueAsBytes(customRealmRep);
+            PartialImportRepresentation customRealmRepClone = JsonSerialization.readValue(jsonBytes, PartialImportRepresentation.class);
+
+            return new DojotProviderImpl(kafkaTopic, kafkaProducerProps, validRealmName, customRealmRepClone);
+        } catch (IOException ex) {
+            String err = "Error creating DojotProvider. Json file " + customRealmRepFileName + " is invalid";
+            LOG.error(err, ex);
+            throw new RuntimeException(err);
+        }
     }
 
     @Override

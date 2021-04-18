@@ -132,6 +132,16 @@ With the CLI in embedded mode, we will execute the following commands:
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.KAFKA_TOPIC})
 ```
 
+__Note that__ the default timeout for a transaction is `300` seconds (5 minutes). To increase this
+timeout (thinking about a need to debug the code), just run the following command:
+
+```bash
+# Transaction timeout in WildFly/JBoss can be configured in the transactions subsystem or at EJB level.
+# When the transaction is configured in the transactions subsystem it will be the default transaction timeout for all JTA transactions.
+# The value of default-timeout can be configured through the coordinator-environment element as follows:
+[standalone@embedded /] /subsystem=transactions:write-attribute(name=default-timeout,value=3600)
+```
+
 Finally, just exit the CLI and put the Keycloak to work. If you want to include
 these settings in a [script file](https://www.keycloak.org/docs/latest/server_installation/#cli-scripting)
 and run them all at once, do the following.

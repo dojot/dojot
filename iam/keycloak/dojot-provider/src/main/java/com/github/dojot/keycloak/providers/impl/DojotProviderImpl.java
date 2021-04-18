@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.dojot.keycloak.error.DojotProviderException;
+import com.github.dojot.keycloak.partialimport.DojotPartialImportManager;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -38,7 +39,7 @@ public class DojotProviderImpl implements DojotProvider {
     private final PartialImportRepresentation customRealmRep;
 
     public DojotProviderImpl(String kafkaTopic, Properties kafkaProducerProps, Pattern validRealmName, PartialImportRepresentation customRealmRep) {
-        LOG.info("Creating dojot KafkaProvider instance...");
+        LOG.info("Creating Dojot Provider instance...");
 
         this.kafkaTopic = kafkaTopic;
         this.objectMapper = new ObjectMapper();
@@ -67,7 +68,7 @@ public class DojotProviderImpl implements DojotProvider {
         // Returns the ContextClassLoader for the current thread
         currentThread.setContextClassLoader(ctxCL);
 
-        LOG.info("dojot KafkaProvider instance created!");
+        LOG.info("Dojot Provider instance created!");
     }
 
     @Override
@@ -85,8 +86,8 @@ public class DojotProviderImpl implements DojotProvider {
     @Override
     public void customizeRealm(RealmModel realm, KeycloakSession session) {
         try {
-            RealmCustomizer realmCustomizer = new RealmCustomizer(session);
-            realmCustomizer.customize(realm, customRealmRep);
+            DojotPartialImportManager dojotPartialImportManager = new DojotPartialImportManager(session, realm);
+            dojotPartialImportManager.doImport(customRealmRep);
         } catch (ErrorResponseException ex) {
             LOG.error(ex.getMessage(), ex);
             throw new RuntimeException(ex);
@@ -106,7 +107,7 @@ public class DojotProviderImpl implements DojotProvider {
     @Override
     public void close() {
         kafkaProducer.close();
-        LOG.info("dojot KafkaProvider instance closed!");
+        LOG.info("Dojot Provider instance closed!");
     }
 
     private void produce(ObjectNode payload) {

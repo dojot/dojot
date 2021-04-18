@@ -26,10 +26,10 @@ services:
       ROOT_LOGLEVEL: INFO
       # PROXY_ADDRESS_FORWARDING: "true" # When running Keycloak behind a proxy, you will need to enable proxy address forwarding
       # KEYCLOAK_STATISTICS: all
-      # DEBUG: "true"
+      DEBUG: "true"
       DEBUG_PORT: "*:8787"
       # alternative debug: suspends the JVM until a debugger is attached
-      JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
+      # JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
     ports:
       - "8080:8080"
       - "8443:8443"
