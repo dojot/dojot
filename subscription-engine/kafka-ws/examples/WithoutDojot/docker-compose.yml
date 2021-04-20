@@ -55,9 +55,6 @@ services:
     build:
       context: ./../../
       dockerfile: ./Dockerfile
-    depends_on:
-      - kafka
-      - redis
     environment:
       NODE_ENV: development # To detail error messages
       KAFKA_WS_CONSUMER_METADATA_BROKER_LIST: kafka:9092
