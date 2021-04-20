@@ -20,12 +20,16 @@ class RedisExpireMgmt {
     this.expirationMap = new Map();
 
     // TODO:  ADD TLS and  PASSWORD options for Redis
-    // TODO: Implement "retry_strategy"
     // const fs = require('fs');
     // const tls_options = {
     //   ca: [ fs.readFileSync(resolve(__dirname, "./server.crt")) ]
     //   ...
     // };
+    this.nameServicePub = 'redis-expire-pub';
+    this.nameServiceSub = 'redis-expire-sub';
+
+    // redis strategy
+    this.config.retry_strategy = this.retryStrategy.bind(this);
 
     this.clients = {
       pub: redis.createClient(this.config),
@@ -35,31 +39,53 @@ class RedisExpireMgmt {
     StateManager.registerShutdownHandler(this.end.bind(this));
   }
 
+  retryStrategy(options) {
+    // reconnect after
+    logger.debug(`Retry strategy options ${JSON.stringify(options)}`);
+
+    // return timeout to reconnect after
+    return this.config['strategy.connect.after'];
+  }
+
   /**
    * Initializes Publisher
    */
   initPublisher() {
-    // TODO: improve handle errors
     this.clients.pub.on('error', (error) => {
-      logger.error(`pub: onError: ${error}`);
+      logger.error(`sub: onError: ${error}`);
+      if (error.code === 'CONNECTION_BROKEN') {
+        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
+        StateManager.shutdown().then(() => {
+          logger.warn('The service was gracefully shutdown');
+        }).catch(() => {
+          logger.error('The service was unable to be shutdown gracefully');
+        });
+      }
     });
     this.clients.pub.on('end', (error) => {
       logger.info(`pub: onEnd: ${error}`);
+      StateManager.signalNotReady(this.nameServicePub);
     });
     this.clients.pub.on('warning', (error) => {
       logger.warn(`pub: onWarning: ${error}`);
     });
-
-    // Activate "notify-keyspace-events" for expired type events
-    this.clients.pub.send_command('config', ['set', 'notify-keyspace-events', 'Ex']);
 
     this.clients.pub.on('connect', (error) => {
       if (error) {
         logger.error(`pub: Error on connect: ${error}`);
       } else {
         logger.info('pub: Connect');
+        StateManager.signalReady(this.nameServicePub);
+        this.activeEventsExpired();
       }
     });
+  }
+
+  /**
+   * Activate "notify-keyspace-events" for expired type events
+   */
+  activeEventsExpired() {
+    this.clients.pub.send_command('config', ['set', 'notify-keyspace-events', 'Ex']);
   }
 
   /**
@@ -67,35 +93,51 @@ class RedisExpireMgmt {
    * @returns Returns a Promise that, when resolved, will have been subscribed
    *          to the Redis event channel.
    */
-  initSubscribe() {
-    // TODO: improve handle errors
+  async initSubscribe() {
     this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
+      if (error.code === 'CONNECTION_BROKEN') {
+        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
+        StateManager.shutdown().then(() => {
+          logger.warn('The service was gracefully shutdown');
+        }).catch(() => {
+          logger.error('The service was unable to be shutdown gracefully');
+        });
+      }
     });
     this.clients.sub.on('end', (error) => {
       logger.info(`sub: onEnd: ${error}`);
+      StateManager.signalNotReady(this.nameServiceSub);
     });
     this.clients.sub.on('warning', (error) => {
       logger.warn(`sub: onWarning: ${error}`);
     });
 
-    this.clients.sub.on('connect', (error) => {
+    this.clients.sub.on('connect', async (error) => {
       if (error) {
         logger.error(`sub: Error on connect: ${error}`);
       } else {
+        StateManager.signalReady(this.nameServiceSub);
+        await this.subscribe();
         logger.info('sub: Connect');
       }
     });
 
+    this.clients.sub.on('message', (channel, idConnection) => this.onMessage(channel, idConnection));
+  }
+
+  /**
+   * Subscribe to the "notify-keyspace-events" channel used for expired type events in a db
+   * @returns
+   */
+  subscribe() {
     return new Promise((resolve, reject) => {
-      // Subscribe to the "notify-keyspace-events" channel used for expired type events in a db
       this.clients.sub.subscribe(`__keyevent@${this.config.db}__:expired`, (error) => {
         if (error) {
           logger.error(`Error on connect: ${error}`);
           return reject(error);
         }
         logger.info(`Subscribed to __keyevent@${this.config.db}__:expired event channel`);
-        this.clients.sub.on('message', (chan, idConnection) => this.onMessage(chan, idConnection));
         return resolve();
       });
     });
@@ -105,12 +147,12 @@ class RedisExpireMgmt {
    * It is called when the on message event happens in the sub
    *
    * @private
-   * @param {*} chan
+   * @param {*} channel
    * @param {*} idConnection
    */
-  onMessage(chan, idConnection) {
+  onMessage(channel, idConnection) {
     if (this.expirationMap.has(idConnection)) {
-      logger.debug(`onMessage: ${idConnection} ${chan}`);
+      logger.debug(`onMessage: ${idConnection} ${channel}`);
       this.expirationMap.get(idConnection)();
     } else {
       logger.warn(`onMessage: ${idConnection} doesn't exist`);
@@ -184,21 +226,27 @@ class RedisExpireMgmt {
   async end() {
     this.clients.sub.unsubscribe();
 
-    const pubClientQuitPromisse = new Promise((resolve) => {
+    const pubClientQuitPromise = new Promise((resolve) => {
       this.clients.pub.quit(() => {
-        logger.warn('RedisExpireMgmt pub client successfully successfully disconnected.');
+        logger.warn('RedisExpireMgmt pub client successfully disconnected.');
         resolve();
       });
     });
 
-    const subClientQuitPromisse = new Promise((resolve) => {
+    const subClientUnsubscribePromise = new Promise((resolve) => {
+      this.clients.sub.unsubscribe(() => {
+        logger.warn('RedisExpireMgmt sub client successfully unsubscribe.');
+        resolve();
+      });
+    });
+
+    const subClientQuitPromise = new Promise((resolve) => {
       this.clients.sub.quit(() => {
-        logger.warn('RedisExpireMgmt sub client successfully successfully disconnected.');
+        logger.warn('RedisExpireMgmt sub client successfully disconnected.');
         resolve();
       });
     });
-
-    await Promise.all([pubClientQuitPromisse, subClientQuitPromisse]);
+    await Promise.all([pubClientQuitPromise, subClientUnsubscribePromise, subClientQuitPromise]);
   }
 }
 

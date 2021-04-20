@@ -41,7 +41,7 @@ class RedisManager {
       logger.error('Redis has an error:', error);
       if (error.code === 'CONNECTION_BROKEN') {
         logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
-        stateService.shutdown().then(() => {
+        StateManager.shutdown().then(() => {
           logger.warn('The service was gracefully shutdown');
         }).catch(() => {
           logger.error('The service was unable to be shutdown gracefully');
