@@ -28,3 +28,6 @@ app/WhereProcessing/Parser.js
 
 # Dependency directories for example
 examples/WSClient/node_modules/
+
+# Ignore generate configs
+config/*.json
