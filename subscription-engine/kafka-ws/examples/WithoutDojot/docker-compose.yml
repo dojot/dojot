@@ -6,13 +6,23 @@ services:
     restart: always
     ports:
       - 6379:6379 #For tests running externally
+    volumes:
+      - redis-volume:/data
     # TODO: add tls example
-    # volumes:
     #   - ./redis.conf:/usr/local/etc/redis/redis.conf
     logging:
       driver: json-file
       options:
         max-size: 100m
+
+  redis-commander:
+    hostname: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
 
   zookeeper:
     image: dojot/zookeeper:3.4
@@ -66,7 +76,7 @@ services:
       KAFKA_WS_SERVER_PORT: 5000
       KAFKA_WS_SERVER_HOST: 0.0.0.0
       KAFKA_WS_SERVER_JWT_EXP_TIME: "true"
-      KAFKA_WS_SERVER_MAX_LIFE_TIME: 120
+      KAFKA_WS_SERVER_CONNECTION_MAX_LIFE_TIME: 120
       KAFKA_WS_REDIS_HOST: "redis"
       # tls example
       # KAFKA_WS_SERVER_TLS: "true"
@@ -86,7 +96,7 @@ services:
     # to dev
     # volumes:
     # # need to run before 'npm run parser:compile' and # remove temporarily the `--only=prod` flag in npm install on the Dockerfile to use nodemon (npm run dev)
-    #  - ../app/:/opt/kafka-ws/app/:Z
+    #  - ../../app/:/opt/kafka-ws/app/:Z
     # command: ["npm", "run", "dev"]
 
   ws-client-sample-0:
@@ -136,3 +146,6 @@ services:
     # tls example
     # volumes:
     #   - ./certs/client/:/certs/:Z
+
+volumes:
+  redis-volume:
