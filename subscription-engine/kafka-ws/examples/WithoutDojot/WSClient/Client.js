@@ -4,7 +4,7 @@ const fs = require('fs');
 const WebSocket = require('ws');
 const superagent = require('superagent');
 const jwt = require('jsonwebtoken');
-const { promisify } = require('util'); 
+const { promisify } = require('util');
 
 const jwtSignAsync = promisify(jwt.sign).bind(jwt);
 
