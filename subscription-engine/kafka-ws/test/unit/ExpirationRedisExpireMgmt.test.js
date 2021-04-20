@@ -35,6 +35,13 @@ const RedisExpireMgmt = require('../../app/Redis/RedisExpireMgmt');
 /* eslint-disable-next-line */
 jest.mock('redis', () => require('redis-mock'));
 
+class ErrorTest extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
 let redisExpireMgmt = null;
 let callbackTestXXX = null;
 describe('Testing RedisExpireMgmt everything ok', () => {
@@ -137,7 +144,7 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
     redisExpireMgmt.clients.pub.on('error', () => {
       done();
     });
-    redisExpireMgmt.clients.pub.emit('error');
+    redisExpireMgmt.clients.pub.emit('error', new ErrorTest('MSG', 'code'));
     redisExpireMgmt.clients.pub.connected = false;
   });
 
@@ -146,7 +153,7 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
       done();
     });
 
-    redisExpireMgmt.clients.sub.emit('error');
+    redisExpireMgmt.clients.sub.emit('error', new ErrorTest('MSG', 'code'));
     redisExpireMgmt.clients.sub.connected = false;
   });
 
