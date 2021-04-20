@@ -52,7 +52,7 @@ class RedisExpireMgmt {
    */
   initPublisher() {
     this.clients.pub.on('error', (error) => {
-      logger.error(`sub: onError: ${error}`);
+      logger.error(`pub: onError: ${error}`);
       if (error.code === 'CONNECTION_BROKEN') {
         logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
         StateManager.shutdown().then(() => {
