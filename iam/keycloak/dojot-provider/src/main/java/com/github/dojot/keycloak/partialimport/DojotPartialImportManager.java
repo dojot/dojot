@@ -3,7 +3,6 @@ package com.github.dojot.keycloak.partialimport;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.partialimport.ClientsPartialImport;
 import org.keycloak.partialimport.ErrorResponseException;
 import org.keycloak.partialimport.PartialImport;
 import org.keycloak.partialimport.PartialImportResult;
@@ -32,7 +31,7 @@ public class DojotPartialImportManager {
 
         // Do not change the order of these!!!
         partialImports.add(new DojotRealmRolesPartialImport());
-        partialImports.add(new ClientsPartialImport());
+        partialImports.add(new DojotClientsPartialImport());
         partialImports.add(new DojotClientRolesPartialImport());
         partialImports.add(new DojotGroupsPartialImport());
         partialImports.add(new DojotUsersPartialImport());

@@ -174,6 +174,7 @@ batch
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.KAFKA_TOPIC})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.VALID_REALM_NAME_REGEX})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.CUSTOM_REALM_REP_FILE})
+/subsystem=transactions:write-attribute(name=default-timeout,value=300)
 run-batch
 stop-embedded-server
 ```
