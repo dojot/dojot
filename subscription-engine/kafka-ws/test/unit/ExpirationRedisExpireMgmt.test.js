@@ -6,6 +6,7 @@ const mockConfig = {
   },
 };
 
+const mockLogWarn = jest.fn();
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -15,7 +16,7 @@ const mockMicroServiceSdk = {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
-    warn: jest.fn(),
+    warn: mockLogWarn,
   })),
   ServiceStateManager: jest.fn(() => ({
     registerService: jest.fn(),
@@ -23,6 +24,7 @@ const mockMicroServiceSdk = {
     signalNotReady: jest.fn(),
     addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
     registerShutdownHandler: jest.fn(),
+    shutdown: jest.fn().mockResolvedValue(),
   })),
 };
 
@@ -148,12 +150,29 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
     redisExpireMgmt.clients.pub.connected = false;
   });
 
-  it('Should emmit a error sub  ', (done) => {
+  it('Should emmit a error pub - excessive connection attempts ', (done) => {
+    redisExpireMgmt.clients.pub.on('error', () => {
+      expect(mockLogWarn).toHaveBeenCalledWith('The service will be shutdown for exceeding attempts to reconnect with Redis');
+      done();
+    });
+    redisExpireMgmt.clients.pub.emit('error', new ErrorTest('MSG', 'CONNECTION_BROKEN'));
+    redisExpireMgmt.clients.pub.connected = false;
+  });
+
+  it('Should emmit a error pub  ', (done) => {
     redisExpireMgmt.clients.sub.on('error', () => {
       done();
     });
-
     redisExpireMgmt.clients.sub.emit('error', new ErrorTest('MSG', 'code'));
+    redisExpireMgmt.clients.sub.connected = false;
+  });
+
+  it('Should emmit a error sub - excessive connection attempts ', (done) => {
+    redisExpireMgmt.clients.sub.on('error', () => {
+      expect(mockLogWarn).toHaveBeenCalledWith('The service will be shutdown for exceeding attempts to reconnect with Redis');
+      done();
+    });
+    redisExpireMgmt.clients.sub.emit('error', new ErrorTest('MSG', 'CONNECTION_BROKEN'));
     redisExpireMgmt.clients.sub.connected = false;
   });
 
