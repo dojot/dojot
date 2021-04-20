@@ -22,7 +22,7 @@ const b64decode = (data) => {
 const tenantByToken = (rawToken) => {
   const tokenData = JSON.parse(b64decode(rawToken.split('.')[1]));
   const { iss } = tokenData;
-  return iss.match(/(realms\/)(\w+)/)[2];
+  return iss.substring(iss.lastIndexOf('/') + 1);
 };
 
 try {
