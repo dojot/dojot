@@ -85,7 +85,8 @@ services:
     #  - ./certs/server/:/certs/:Z
     # to dev
     # volumes:
-    #  - ../app/:/opt/kafka-ws/app/:Z # need to run before 'npm run parser:compile'
+    # # need to run before 'npm run parser:compile' and # remove temporarily the `--only=prod` flag in npm install on the Dockerfile to use nodemon (npm run dev)
+    #  - ../app/:/opt/kafka-ws/app/:Z
     # command: ["npm", "run", "dev"]
 
   ws-client-sample-0:
