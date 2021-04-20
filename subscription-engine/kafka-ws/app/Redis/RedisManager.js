@@ -37,7 +37,17 @@ class RedisManager {
      * When the client disconnects to redis the 'end' event is fired, there we can consider
      * the service is unhealthy
      */
-    this.redisClient.on('error', (error) => logger.warn(`${error}`));
+    this.redisClient.on('error', (error) => {
+      logger.error('Redis has an error:', error);
+      if (error.code === 'CONNECTION_BROKEN') {
+        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
+        stateService.shutdown().then(() => {
+          logger.warn('The service was gracefully shutdown');
+        }).catch(() => {
+          logger.error('The service was unable to be shutdown gracefully');
+        });
+      }
+    });
     this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
