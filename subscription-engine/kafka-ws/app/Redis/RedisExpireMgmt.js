@@ -62,8 +62,8 @@ class RedisExpireMgmt {
         });
       }
     });
-    this.clients.pub.on('end', (error) => {
-      logger.info(`pub: onEnd: ${error}`);
+    this.clients.pub.on('end', () => {
+      logger.info('pub: onEnd');
       StateManager.signalNotReady(this.nameServicePub);
     });
     this.clients.pub.on('warning', (error) => {
@@ -105,8 +105,8 @@ class RedisExpireMgmt {
         });
       }
     });
-    this.clients.sub.on('end', (error) => {
-      logger.info(`sub: onEnd: ${error}`);
+    this.clients.sub.on('end', () => {
+      logger.info('sub: onEnd');
       StateManager.signalNotReady(this.nameServiceSub);
     });
     this.clients.sub.on('warning', (error) => {
