@@ -111,7 +111,7 @@ Grammar:
 - `expression → condition:+`
 - `condition → selector=(operator:):?values;`
 - `selector → parameter | parameter.selector`
-- `operator → `[see here](##applying-conditions-where)
+- `operator →`[see here](##applying-conditions-where)
 - `values → value | value,values`
 
 Where:
@@ -189,11 +189,13 @@ an empty object. Check the examples for a better understanding.
 Examples:
 
 Let's filter the following object:
+
 ```js
 { attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
 ```
 
 Filters and its results:
+
 ```js
 f('attrs,metadata') => { attrs: { temperature: 20, rain: 10.5 }, metadata: { tenant: 'admin' } }
 f('metadata/tenant') => { metadata: { tenant: 'admin' } }
@@ -304,6 +306,7 @@ In short, all the parameters in the next sections are mapped to environment vari
 with `KAFKA_WS`. You can either use environment variables or configuration files to change their values.
 
 ## **App**
+
 Configuration used in this service
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -319,6 +322,7 @@ Configuration used in this service
 | log.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOG_FILE_FILENAME
 
 ## **Ticket**
+
 Ticket management
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -327,6 +331,7 @@ ticket.secret|Secret used to sign single-use tickets and prevent forgery | Rando
 ticket.expiration.sec| Duration time (in seconds) of the single-use ticket. | 60 | integer | KAFKA_WS_TICKET_DURATION_SECRET
 
 ## **Redis**
+
 Redis database management configuration
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -334,10 +339,11 @@ Redis database management configuration
 redis.host| Redis host | kafka-ws-redis | string | KAFKA_WS_REDIS_HOST
 redis.port | Redis port | 6379 | integer | KAFKA_WS_REDIS_PORT
 redis.db | Redis database | 1 | integer | KAFKA_WS_REDIS_DB
-redis.connect_timeout | Redis Connection timeout | 3600000 | integer | KAFKA_WS_REDIS_CONNECT__TIMEOUT
+redis.connect_timeout | Redis Connection timeout in milliseconds (It is recommended to be the same time as `server.connection.max.life.time`) | 7200000 | integer (ms) | KAFKA_WS_REDIS_CONNECT__TIMEOUT
 redis.strategy.connect.after | Redis strategy connection timeout (ms) | 5000 | integer | KAFKA_WS_REDIS.RECONNECT.AFTER
 
 ## **Kafka Consumer**
+
 Configurations for the kafka Consumer
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -347,6 +353,7 @@ consumer.metadata.broker.list | Kafka hosts (with port) must be separated by a c
 consumer.auto.offset.reset | The kafka Consumer auto offset reset value when not committed positions is out of range | largest | string | KAFKA_WS_CONSUMER_AUTO_OFFSET_RESET
 
 ## **Server**
+
 Configurations for the server running in the service
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -358,12 +365,12 @@ server.ca | Kafka WS ca file location | /opt/kafka-ws/certs/ca-cert.pem| path | 
 server.key | KAFKA WS key file location | /opt/kafka-ws/certs/server-key.pem | path | KAFKA_WS_SERVER_KEY
 server.cert | Kafka WS certificate file location | /opt/kafka-ws/certs/server-cert.pem | path | KAFKA_WS_SERVER_CERT
 server.jwt.exp.time | Enables use of expiration time from the informed JWT when requesting a single-use ticket. | boolean | KAFKA_WS_SERVER_JWT_EXP_TIME
-server.connection.max.life.time| Maximum lifetime of a connection (-1 to disable) | 7200 | integer | KAFKA_WS_SERVER_CONNECTION_MAX_LIFE_TIME
+server.connection.max.life.time| Maximum lifetime of a connection in seconds (-1 to disable) - It is recommended to be the same time as `redis.connect_timeout` | 7200 | integer (sec) | KAFKA_WS_SERVER_CONNECTION_MAX_LIFE_TIME
 server.request.cert | Whether the service should request for a client certificate or not | false | boolean | KAFKA_WS_SERVER_REQUEST_CERT
 server.reject.unauthorized | Kafka reject unauthorized | true | boolean | KAFKA_WS_SERVER_REJECT_UNAUTHORIZED
 
 ----
-> **_NOTE:_**  Enabling server.tls you must set server.ca, server.key and server.cert also. 
+> **_NOTE:_**  Enabling server.tls you must set server.ca, server.key and server.cert also.
 ----
 
 __NOTE THAT__ a websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_SERVER_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_SERVER_MAX_LIFE_TIME. If KAFKA_WS_SERVER_JWT_EXP_TIME is set to false and KAFKA_WS_SERVER_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
@@ -371,7 +378,6 @@ __NOTE THAT__ a websocket connection is closed by the server when certain condit
 __NOTE THAT__ it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) when requesting a *single-use ticket* can access the kafka topic, generally topics start with `tenant.*`
 
 __NOTE THAT__ if you pass a TICKET_SECRET, give preference to large random values. Also note that in a cluster environment all instances must share the same secret.
-
 
 ## **Parser compilation**
 
@@ -394,8 +400,10 @@ If you are developing, you can use `nodemon` too:
 ```shell
 npm run dev
 ```
+
 __NOTE THAT__ in order to use WebSocket with Nginx, Kong, API gateway or similar, look for timeout
 settings. Examples:
+
 - Nginx: `proxy_connect_timeout`, `proxy_send_timeout` and
 `proxy_connect_timeout`
 - Kong: connect_timeout, write_timeout and read_timeout.
