@@ -36,6 +36,9 @@ class RedisExpireMgmt {
       sub: redis.createClient(this.config),
     };
 
+    this.initSubscribe();
+    this.initPublisher();
+
     StateManager.registerShutdownHandler(this.end.bind(this));
   }
 
@@ -51,6 +54,8 @@ class RedisExpireMgmt {
    * Initializes Publisher
    */
   initPublisher() {
+    logger.debug('initPublisher: ');
+
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
       if (error.code === 'CONNECTION_BROKEN') {
@@ -70,12 +75,21 @@ class RedisExpireMgmt {
       logger.warn(`pub: onWarning: ${error}`);
     });
 
+    this.clients.pub.on('reconnecting', () => {
+      logger.warn('pub: reconnecting');
+      StateManager.signalNotReady(this.nameServicePub);
+    });
+
+    this.clients.pub.on('ready', () => {
+      logger.debug('pub: ready.');
+      StateManager.signalReady(this.nameServicePub);
+    });
+
     this.clients.pub.on('connect', (error) => {
       if (error) {
         logger.error(`pub: Error on connect: ${error}`);
       } else {
         logger.info('pub: Connect');
-        StateManager.signalReady(this.nameServicePub);
         this.activeEventsExpired();
       }
     });
@@ -90,10 +104,10 @@ class RedisExpireMgmt {
 
   /**
    * Initializes Subscribe
-   * @returns Returns a Promise that, when resolved, will have been subscribed
-   *          to the Redis event channel.
    */
-  async initSubscribe() {
+  initSubscribe() {
+    logger.debug('initSubscribe: ');
+
     this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
       if (error.code === 'CONNECTION_BROKEN') {
@@ -105,6 +119,7 @@ class RedisExpireMgmt {
         });
       }
     });
+
     this.clients.sub.on('end', () => {
       logger.info('sub: onEnd');
       StateManager.signalNotReady(this.nameServiceSub);
@@ -113,11 +128,20 @@ class RedisExpireMgmt {
       logger.warn(`sub: onWarning: ${error}`);
     });
 
+    this.clients.sub.on('reconnecting', () => {
+      logger.warn('sub: reconnecting');
+      StateManager.signalNotReady(this.nameServiceSub);
+    });
+
+    this.clients.sub.on('ready', () => {
+      logger.debug('sub: ready.');
+      StateManager.signalReady(this.nameServiceSub);
+    });
+
     this.clients.sub.on('connect', async (error) => {
       if (error) {
         logger.error(`sub: Error on connect: ${error}`);
       } else {
-        StateManager.signalReady(this.nameServiceSub);
         await this.subscribe();
         logger.info('sub: Connect');
       }
@@ -224,26 +248,39 @@ class RedisExpireMgmt {
    * End connection with redis
    */
   async end() {
-    this.clients.sub.unsubscribe();
-
-    const pubClientQuitPromise = new Promise((resolve) => {
-      this.clients.pub.quit(() => {
-        logger.warn('RedisExpireMgmt pub client successfully disconnected.');
-        resolve();
+    const pubClientQuitPromise = new Promise((resolve, reject) => {
+      this.clients.pub.quit((err) => {
+        if (!err) {
+          logger.info('RedisExpireMgmt pub client successfully disconnected.');
+          resolve();
+        } else {
+          logger.warn('RedisExpireMgmt pub client can\'t successfully disconnected.');
+          reject();
+        }
       });
     });
 
-    const subClientUnsubscribePromise = new Promise((resolve) => {
-      this.clients.sub.unsubscribe(() => {
-        logger.warn('RedisExpireMgmt sub client successfully unsubscribe.');
-        resolve();
+    const subClientUnsubscribePromise = new Promise((resolve, reject) => {
+      this.clients.sub.unsubscribe((err) => {
+        if (!err) {
+          logger.info('RedisExpireMgmt sub client successfully unsubscribe.');
+          resolve();
+        } else {
+          logger.warn('RedisExpireMgmt sub client can\'t successfully unsubscribe.');
+          reject();
+        }
       });
     });
 
-    const subClientQuitPromise = new Promise((resolve) => {
-      this.clients.sub.quit(() => {
-        logger.warn('RedisExpireMgmt sub client successfully disconnected.');
-        resolve();
+    const subClientQuitPromise = new Promise((resolve, reject) => {
+      this.clients.sub.quit((err) => {
+        if (!err) {
+          logger.info('RedisExpireMgmt sub client successfully disconnected.');
+          resolve();
+        } else {
+          logger.warn('RedisExpireMgmt sub client can\'t successfully disconnected.');
+          reject();
+        }
       });
     });
     await Promise.all([pubClientQuitPromise, subClientUnsubscribePromise, subClientQuitPromise]);
