@@ -229,24 +229,6 @@ class RedisExpireMgmt {
   }
 
   /**
-   * Get remaining Time To Live of a connection
-   * @param {string} idConnection unique id for a connection
-   * @returns Returns a Promise that, when resolved, will have the TTL value.
-   */
-  checkRemainTime(idConnection) {
-    return new Promise((resolve, reject) => {
-      this.clients.pub.ttl(idConnection, (error, time) => {
-        if (error) {
-          logger.error(`checkRemainTime: idConnection=${idConnection} error=${error}`);
-          return reject(error);
-        }
-        logger.debug(`checkRemainTime:  idConnection=${idConnection} time=${time}`);
-        return resolve(time);
-      });
-    });
-  }
-
-  /**
    * End connection with redis
    */
   async end() {
