@@ -42,7 +42,7 @@ class RedisManager {
 
     this.redisClient.on('ready', () => {
       logger.debug('ready.');
-      StateManager.signalReady(this.nameServicePub);
+      StateManager.signalReady(stateService);
     });
 
     /**
