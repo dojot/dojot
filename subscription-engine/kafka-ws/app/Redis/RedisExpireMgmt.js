@@ -83,6 +83,7 @@ class RedisExpireMgmt {
     this.clients.pub.on('ready', () => {
       logger.debug('pub: ready.');
       StateManager.signalReady(this.nameServicePub);
+      // TODO #2088
     });
 
     this.clients.pub.on('connect', (error) => {
@@ -123,6 +124,7 @@ class RedisExpireMgmt {
     this.clients.sub.on('end', () => {
       logger.info('sub: onEnd');
       StateManager.signalNotReady(this.nameServiceSub);
+      // TODO #2088
     });
     this.clients.sub.on('warning', (error) => {
       logger.warn(`sub: onWarning: ${error}`);
