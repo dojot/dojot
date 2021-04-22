@@ -68,6 +68,7 @@ class RedisManager {
     this.redisClient.on('end', () => {
       logger.info('end');
       StateManager.signalNotReady(stateService);
+      // TODO #2088
     });
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
