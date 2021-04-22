@@ -26,8 +26,25 @@ class RedisManager {
     logger.info('RedisManager singleton creation complete!');
 
     const stateService = 'redis';
-    this.redisClient.on('connect', () => StateManager.signalReady(stateService));
-    this.redisClient.on('reconnecting', () => StateManager.signalNotReady(stateService));
+    StateManager.signalReady(stateService);
+
+    this.redisClient.on('connect', () => {
+      logger.info('connect');
+    });
+    this.redisClient.on('reconnecting', () => {
+      logger.warn('reconnecting');
+      StateManager.signalNotReady(stateService);
+    });
+
+    this.redisClient.on('warning', (error) => {
+      logger.warn(`warning: ${error}`);
+    });
+
+    this.redisClient.on('ready', () => {
+      logger.debug('ready.');
+      StateManager.signalReady(this.nameServicePub);
+    });
+
     /**
      * The 'error' event must be mapped, otherwise the application hangs on an uncaughtException
      * and some unexpected behaviors happens.
@@ -48,7 +65,10 @@ class RedisManager {
         });
       }
     });
-    this.redisClient.on('end', () => StateManager.signalNotReady(stateService));
+    this.redisClient.on('end', () => {
+      logger.info('end');
+      StateManager.signalNotReady(stateService);
+    });
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
     return Object.seal(this);
@@ -72,10 +92,15 @@ class RedisManager {
    */
   async shutdownProcess() {
     logger.warn('Disconnecting from Redis...');
-    await new Promise((resolve) => {
-      this.redisClient.quit(() => {
-        logger.warn('successfully disconnected from Redis!');
-        resolve();
+    await new Promise((resolve, reject) => {
+      this.redisClient.quit((err) => {
+        if (!err) {
+          logger.info('Successfully disconnected.');
+          resolve();
+        } else {
+          logger.warn('Client can\'t successfully disconnected.');
+          reject();
+        }
       });
     });
 
