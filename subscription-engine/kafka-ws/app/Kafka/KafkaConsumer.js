@@ -63,11 +63,13 @@ class KafkaConsumer {
         signalNotReady();
         this.isKafkaAvailable = false;
         logger.warn('Kafka is not health');
+        // TODO:  If kafka is not ok, block new connections
       }
     }).catch((err) => {
       this.isKafkaAvailable = false;
       signalNotReady();
       logger.warn(`Error ${err}`);
+      // TODO:  If kafka is not ok, block new connections
     });
   }
 
