@@ -92,8 +92,6 @@ class Tarball {
     logger.info('Initializing the Kafka and Redis Components of the Websocket Tarball...');
     try {
       await this.kafkaTopicsCallbacksMgmt.init();
-      this.redisExpirationMgmt.initPublisher();
-      await this.redisExpirationMgmt.initSubscribe();
     } catch (error) {
       logger.error(`Websocket Tarball init: Caught ${error.stack}`);
       throw error;
