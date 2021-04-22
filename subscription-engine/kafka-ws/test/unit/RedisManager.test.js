@@ -91,7 +91,6 @@ describe('RedisManger', () => {
       .toHaveBeenCalled();
   });
 
-
   it('Shutdown redis successfully', async () => {
     mockQuit
       .mockImplementationOnce((callback) => callback(null));
