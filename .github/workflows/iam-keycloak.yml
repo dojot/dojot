@@ -10,7 +10,7 @@ on:
 jobs:
   docker-hub:
     # Path to help identify each job in the status checks
-    name: (keycloak) Build and Publish image to DockerHub
+    name: (iam/keycloak) Build and Publish image to DockerHub
     runs-on: ubuntu-latest
     # If this is a PR, it won't run
     if: contains(github.ref, 'refs/pull/') == false
@@ -33,5 +33,5 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         workdir: iam/keycloak
         # Label with the built image's commit
-        buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
+        buildoptions: ' --label commit_sha_dojot=${{ github.sha }} '
         # Whether tag will be based in the branch name or in the tag name
