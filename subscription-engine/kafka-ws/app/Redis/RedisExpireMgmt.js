@@ -36,7 +36,7 @@ class RedisExpireMgmt {
       sub: redis.createClient(this.config),
     };
 
-    this.initSubscribe();
+    this.initSubscriber();
     this.initPublisher();
 
     StateManager.registerShutdownHandler(this.end.bind(this));
@@ -106,7 +106,7 @@ class RedisExpireMgmt {
   /**
    * Initializes Subscribe
    */
-  initSubscribe() {
+  initSubscriber() {
     logger.debug('initSubscribe: ');
 
     this.clients.sub.on('error', (error) => {
