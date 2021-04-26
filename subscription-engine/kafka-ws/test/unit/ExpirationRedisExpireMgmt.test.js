@@ -65,7 +65,7 @@ describe('Testing RedisExpireMgmt everything ok', () => {
 
   it('Should Connect sub  ', (done) => {
     redisExpireMgmt.clients.sub = redismock.createClient();
-    redisExpireMgmt.initSubscribe();
+    redisExpireMgmt.initSubscriber();
     redisExpireMgmt.clients.sub.on('connect', () => {
       done();
     });
@@ -130,7 +130,7 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
 
   it('Should Connect sub  ', (done) => {
     redisExpireMgmt.clients.sub = redismock.createClient();
-    redisExpireMgmt.initSubscribe();
+    redisExpireMgmt.initSubscriber();
     redisExpireMgmt.clients.sub.on('connect', () => {
       done();
     });
