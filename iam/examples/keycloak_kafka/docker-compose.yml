@@ -11,11 +11,11 @@ services:
       JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.impersonation=disabled"
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
-      KAFKA_SERVERS: kafka:9092
-      KAFKA_CLIENT_ID: keycloak
-      KAFKA_TOPIC: dojot-management.dojot.tenancy
-      VALID_REALM_NAME_REGEX: "^[a-zA-Z0-9]{1,30}$$"
-      CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
+      DOJOT_KAFKA_SERVERS: kafka:9092
+      DOJOT_KAFKA_CLIENT_ID: keycloak
+      DOJOT_KAFKA_TOPIC: dojot-management.dojot.tenancy
+      DOJOT_VALID_REALM_NAME_REGEX: "^[a-zA-Z0-9]{1,30}$$"
+      DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
       DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_PORT: 5432

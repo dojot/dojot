@@ -132,19 +132,19 @@ With the CLI in embedded mode, we will execute the following commands:
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
 
 # This command tells our Service Provider where to connect to Kafka.
-[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.KAFKA_SERVERS})
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS})
 
 # This command tells Kafka which is the 'Client ID' of our Service Provider.
-[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.KAFKA_CLIENT_ID})
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID})
 
 # This command tells our Service Provider which topic in Kafka should be used to publish data.
-[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.KAFKA_TOPIC})
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC})
 
 # This command tells our Service Provider the regular expression to be applied in the Realm name to comply with the rules of the dojot platform.
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.VALID_REALM_NAME_REGEX})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX})
 
 # This command tells our Service Provider the full path of the json file to be used for the customization of a new Realm, according to the needs of the dojot platform.
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.CUSTOM_REALM_REP_FILE})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE})
 ```
 
 > __Note that__ the default timeout for a transaction is `300` seconds (5 minutes). To increase this timeout (thinking about a need to debug the code), just run the following command:
@@ -169,11 +169,11 @@ batch
 /subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
 /subsystem=keycloak-server/spi=dojot:add()
 /subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.KAFKA_SERVERS})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.KAFKA_CLIENT_ID})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.KAFKA_TOPIC})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.VALID_REALM_NAME_REGEX})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.CUSTOM_REALM_REP_FILE})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE})
 /subsystem=transactions:write-attribute(name=default-timeout,value=300)
 run-batch
 stop-embedded-server
@@ -196,11 +196,11 @@ $JBOSS_HOME/bin/standalone.sh --server-config=standalone-ha.xml
 
 | Environment variable | Default value | Description |
 | -------------------- | ------------- | ----------- |
-| KAFKA_SERVERS        | `kafka:9092`  | Connection address with Kafka. |
-| KAFKA_CLIENT_ID      | `keycloak`    | Client identifier to connect with Kafka. |
-| KAFKA_TOPIC          | `dojot-management.dojot.tenancy` | Kafka topic in which messages regarding the creation and removal of tenants (Realms) will be published. |
-| VALID_REALM_NAME_REGEX | `^[a-zA-Z0-9]{1,30}$` | Regular expression to be applied in the name of the newly created tenant to force it to be compatible with the rules of the dojot platform. |
-| CUSTOM_REALM_REP_FILE | `/opt/dojot/customRealmRepresentation.json` | Full path of the json file used as a basis for customizing the tenant according to the rules of the dojot platform. |
+| DOJOT_KAFKA_SERVERS        | `kafka:9092`  | Connection address with Kafka. |
+| DOJOT_KAFKA_CLIENT_ID      | `keycloak`    | Client identifier to connect with Kafka. |
+| DOJOT_KAFKA_TOPIC          | `dojot-management.dojot.tenancy` | Kafka topic in which messages regarding the creation and removal of tenants (Realms) will be published. |
+| DOJOT_VALID_REALM_NAME_REGEX | `^[a-zA-Z0-9]{1,30}$` | Regular expression to be applied in the name of the newly created tenant to force it to be compatible with the rules of the dojot platform. |
+| DOJOT_CUSTOM_REALM_REP_FILE | `/opt/dojot/customRealmRepresentation.json` | Full path of the json file used as a basis for customizing the tenant according to the rules of the dojot platform. |
 
 
 _Note that_ the json file must follow the structure (Schema) defined in the

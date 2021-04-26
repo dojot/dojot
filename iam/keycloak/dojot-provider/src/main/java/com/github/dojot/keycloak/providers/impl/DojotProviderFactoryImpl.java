@@ -108,7 +108,13 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             byte[] jsonBytes = JsonSerialization.writeValueAsBytes(customRealmRep);
             PartialImportRepresentation customRealmRepClone = JsonSerialization.readValue(jsonBytes, PartialImportRepresentation.class);
 
-            return new DojotProviderImpl(kafkaTopic, kafkaProducerProps, validRealmName, customRealmRepClone);
+            DojotProviderContext context = new DojotProviderContext();
+            context.setKeycloakSession(keycloakSession);
+            context.setKafkaTopic(kafkaTopic);
+            context.setKafkaProducerProps(kafkaProducerProps);
+            context.setValidRealmName(validRealmName);
+            context.setCustomRealmRep(customRealmRepClone);
+            return new DojotProviderImpl(context);
         } catch (IOException ex) {
             String err = "Error creating DojotProvider. Json file " + customRealmRepFileName + " is invalid";
             LOG.error(err, ex);

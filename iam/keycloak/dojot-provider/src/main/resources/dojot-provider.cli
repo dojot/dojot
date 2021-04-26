@@ -4,11 +4,11 @@ batch
 /subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
 /subsystem=keycloak-server/spi=dojot:add()
 /subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.KAFKA_SERVERS})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.KAFKA_CLIENT_ID})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.KAFKA_TOPIC})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.VALID_REALM_NAME_REGEX})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.CUSTOM_REALM_REP_FILE})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE})
 /subsystem=transactions:write-attribute(name=default-timeout,value=300)
 run-batch
 
