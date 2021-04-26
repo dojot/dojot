@@ -2,6 +2,7 @@
   "id" : "admin",
   "realm" : "admin",
   "notBefore" : 0,
+  "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken" : false,
   "refreshTokenMaxReuse" : 48,
   "accessTokenLifespan" : 300,
