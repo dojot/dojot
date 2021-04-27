@@ -1,6 +1,7 @@
 const redis = require('redis');
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const StateManager = require('../StateManager');
+const { createRedisHealthChecker } = require('./Utils');
 
 const logger = new Logger('kafka-ws:redis-expire-mgmt');
 
@@ -40,6 +41,9 @@ class RedisExpireMgmt {
     this.initPublisher();
 
     StateManager.registerShutdownHandler(this.end.bind(this));
+
+    createRedisHealthChecker(this.clients.pub, this.nameServicePub, StateManager, logger);
+    createRedisHealthChecker(this.clients.sub, this.nameServiceSub, StateManager, logger);
   }
 
   retryStrategy(options) {
@@ -67,10 +71,13 @@ class RedisExpireMgmt {
         });
       }
     });
+
     this.clients.pub.on('end', () => {
       logger.info('pub: onEnd');
       StateManager.signalNotReady(this.nameServicePub);
+      // TODO #2088
     });
+
     this.clients.pub.on('warning', (error) => {
       logger.warn(`pub: onWarning: ${error}`);
     });
@@ -82,8 +89,6 @@ class RedisExpireMgmt {
 
     this.clients.pub.on('ready', () => {
       logger.debug('pub: ready.');
-      StateManager.signalReady(this.nameServicePub);
-      // TODO #2088
     });
 
     this.clients.pub.on('connect', (error) => {
@@ -92,6 +97,7 @@ class RedisExpireMgmt {
       } else {
         logger.info('pub: Connect');
         this.activeEventsExpired();
+        StateManager.signalReady(this.nameServicePub);
       }
     });
   }
@@ -121,11 +127,6 @@ class RedisExpireMgmt {
       }
     });
 
-    this.clients.sub.on('end', () => {
-      logger.info('sub: onEnd');
-      StateManager.signalNotReady(this.nameServiceSub);
-      // TODO #2088
-    });
     this.clients.sub.on('warning', (error) => {
       logger.warn(`sub: onWarning: ${error}`);
     });
@@ -135,18 +136,24 @@ class RedisExpireMgmt {
       StateManager.signalNotReady(this.nameServiceSub);
     });
 
-    this.clients.sub.on('ready', () => {
-      logger.debug('sub: ready.');
-      StateManager.signalReady(this.nameServiceSub);
-    });
-
     this.clients.sub.on('connect', async (error) => {
       if (error) {
         logger.error(`sub: Error on connect: ${error}`);
       } else {
         await this.subscribe();
+        StateManager.signalReady(this.nameServiceSub);
         logger.info('sub: Connect');
       }
+    });
+
+    this.clients.sub.on('ready', () => {
+      logger.debug('sub: ready.');
+    });
+
+    this.clients.sub.on('end', () => {
+      logger.info('sub: onEnd');
+      StateManager.signalNotReady(this.nameServiceSub);
+      // TODO #2088
     });
 
     this.clients.sub.on('message', (channel, idConnection) => this.onMessage(channel, idConnection));

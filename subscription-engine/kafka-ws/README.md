@@ -304,6 +304,7 @@ In short, all the parameters in the next sections are mapped to environment vari
 with `KAFKA_WS`. You can either use environment variables or configuration files to change their values.
 
 ## **App**
+
 Configuration used in this service
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -319,6 +320,7 @@ Configuration used in this service
 | log.file.filename | File name to log into | kafka-ws-logs-%DATE%.log | string | KAFKA_WS_LOG_FILE_FILENAME
 
 ## **Ticket**
+
 Ticket management
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -327,6 +329,7 @@ ticket.secret|Secret used to sign single-use tickets and prevent forgery | Rando
 ticket.expiration.sec| Duration time (in seconds) of the single-use ticket. | 60 | integer | KAFKA_WS_TICKET_DURATION_SECRET
 
 ## **Redis**
+
 Redis database management configuration
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -335,9 +338,12 @@ redis.host| Redis host | kafka-ws-redis | string | KAFKA_WS_REDIS_HOST
 redis.port | Redis port | 6379 | integer | KAFKA_WS_REDIS_PORT
 redis.db | Redis database | 1 | integer | KAFKA_WS_REDIS_DB
 redis.connect_timeout | Redis Connection timeout | 3600000 | integer | KAFKA_WS_REDIS_CONNECT__TIMEOUT
-redis.strategy.connect.after | Redis strategy connection timeout (ms) | 5000 | integer | KAFKA_WS_REDIS.RECONNECT.AFTER
+redis.strategy.connect.after | Redis strategy connection timeout (ms) | 5000 | integer | KAFKA_WS_REDIS_RECONNECT_AFTER
+redis.healthcheck.ms | Specifies how often it is to check if it is possible to communicate with the redis in milliseconds. | 30000 | integer | KAFKA_WS_REDIS_HEALTHCHECK_MS
+redis.healthcheck.timeout.ms | the timeout to wait if the service can verify if it is health, if the timeout occurs the service is considered unhealthy. (ms) | 30000 | integer | KAFKA_WS_REDIS_HEALTHCHECK_TIMEOUT_MS
 
 ## **Kafka Consumer**
+
 Configurations for the kafka Consumer
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -347,6 +353,7 @@ consumer.metadata.broker.list | Kafka hosts (with port) must be separated by a c
 consumer.auto.offset.reset | The kafka Consumer auto offset reset value when not committed positions is out of range | largest | string | KAFKA_WS_CONSUMER_AUTO_OFFSET_RESET
 
 ## **Server**
+
 Configurations for the server running in the service
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
@@ -363,7 +370,7 @@ server.request.cert | Whether the service should request for a client certificat
 server.reject.unauthorized | Kafka reject unauthorized | true | boolean | KAFKA_WS_SERVER_REJECT_UNAUTHORIZED
 
 ----
-> **_NOTE:_**  Enabling server.tls you must set server.ca, server.key and server.cert also. 
+> **_NOTE:_**  Enabling server.tls you must set server.ca, server.key and server.cert also.
 ----
 
 __NOTE THAT__ a websocket connection is closed by the server when certain conditions are met. If KAFKA_WS_SERVER_JWT_EXP_TIME is set to true, the server will consider this value for closing the connection if it is greater than the KAFKA_WS_SERVER_MAX_LIFE_TIME. If KAFKA_WS_SERVER_JWT_EXP_TIME is set to false and KAFKA_WS_SERVER_MAX_LIFE_TIME is set to -1, the server will never close a connection by its duration.
