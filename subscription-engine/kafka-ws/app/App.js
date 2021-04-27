@@ -10,6 +10,7 @@ const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const accessControlRouter = require('./routes/AccessControlRouter');
 const ticketRouter = require('./routes/TicketRouter');
 const topicsRouter = require('./routes/TopicsRouter');
+const StateManager = require('./StateManager');
 
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
@@ -23,6 +24,23 @@ function configure(server) {
   /* Lets it define WebSocket endpoints like any other type of route
    * and applies regular Express middleware. */
   expressWS(app, server);
+
+  /**
+ * Interceptor to allow requests only when the application is ready
+ */
+  app.use(
+    (req, res, next) => {
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('The application is not ready, but the request will be handled in a development environment', StateManager.isReady());
+        next();
+      } else if (StateManager.isReady()) {
+        next();
+      } else {
+        logger.error('The application is not in a ready state, the request cannot be handled');
+        next(new createError.ServiceUnavailable());
+      }
+    },
+  );
 
   /* Generate UUID for request and add it to X-Request-Id header.
    * In case request contains X-Request-Id header, uses its value instead. */
