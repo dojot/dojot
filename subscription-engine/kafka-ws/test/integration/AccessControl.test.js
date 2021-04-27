@@ -75,7 +75,7 @@ const mockConfig = {
     'reject.unauthorized:boolean': true,
   },
 };
-
+const mockAddHealthChecker = jest.fn();
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -91,7 +91,8 @@ const mockMicroServiceSdk = {
     registerService: jest.fn(),
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
-    addHealthChecker: jest.fn((service, callback) => callback()),
+    isReady: jest.fn(() => (true)),
+    addHealthChecker: mockAddHealthChecker,
     registerShutdownHandler: jest.fn(),
   })),
 };
