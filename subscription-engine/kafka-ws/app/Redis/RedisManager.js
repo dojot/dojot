@@ -3,6 +3,7 @@ const redis = require('redis');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const StateManager = require('../StateManager');
+const { createRedisHealthChecker } = require('./Utils');
 
 const logger = new Logger('kafka-ws:redis-manager');
 
@@ -25,15 +26,21 @@ class RedisManager {
     this.redisClient = redis.createClient(this.config);
     logger.info('RedisManager singleton creation complete!');
 
-    const stateService = 'redis';
-    StateManager.signalReady(stateService);
+    const serviceName = 'redis';
+    StateManager.signalReady(serviceName);
 
-    this.redisClient.on('connect', () => {
-      logger.info('connect');
+    this.redisClient.on('connect', (error) => {
+      if (error) {
+        logger.error(`Error on connect: ${error}`);
+      } else {
+        logger.info('connect');
+        StateManager.signalReady(serviceName);
+      }
     });
+
     this.redisClient.on('reconnecting', () => {
       logger.warn('reconnecting');
-      StateManager.signalNotReady(stateService);
+      StateManager.signalNotReady(serviceName);
     });
 
     this.redisClient.on('warning', (error) => {
@@ -42,7 +49,6 @@ class RedisManager {
 
     this.redisClient.on('ready', () => {
       logger.debug('ready.');
-      StateManager.signalReady(stateService);
     });
 
     /**
@@ -67,10 +73,12 @@ class RedisManager {
     });
     this.redisClient.on('end', () => {
       logger.info('end');
-      StateManager.signalNotReady(stateService);
+      StateManager.signalNotReady(serviceName);
       // TODO #2088
     });
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
+
+    createRedisHealthChecker(this.redisClient, serviceName, StateManager, logger);
 
     return Object.seal(this);
   }
