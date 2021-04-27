@@ -17,6 +17,8 @@ const createRedisHealthChecker = (client, serviceName, stateManager, logger) => 
     try {
       logger.debug(`Checking if ${serviceName} is health...`);
       await new Promise((resolve, reject) => {
+        // if it is unable to receive any pong and error below,
+        // this timeout ensures that the service will be unhealthy
         const timeoutTrigger = setTimeout(() => {
           signalNotReady();
           logger.warn(`${serviceName} is not health because time exceeded to receive pong.`);
