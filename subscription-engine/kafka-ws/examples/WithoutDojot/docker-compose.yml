@@ -61,14 +61,14 @@ services:
       options:
         max-size: 100m
 
-  kafka-ws-example:
+  kafka-ws:
     build:
       context: ./../../
       dockerfile: ./Dockerfile
     environment:
-      NODE_ENV: development # To detail error messages
+      # NODE_ENV: development # To detail error messages and ignores if the service is ready to receive requests
       KAFKA_WS_CONSUMER_METADATA_BROKER_LIST: kafka:9092
-      KAFKA_WS_CONSUMER_GROUP_ID: kafka-ws-example
+      KAFKA_WS_CONSUMER_GROUP_ID: kafka-ws
       KAFKA_WS_LOG_CONSOLE_LEVEL: debug
       KAFKA_WS_LOG_VERBOSE: "true"
       KAFKA_WS_LOG_FILE_ENABLE: "true"
@@ -104,7 +104,7 @@ services:
       context: ./WSClient/
       dockerfile: ./Dockerfile
     environment:
-      WS_HOST: "kafka-ws-example"
+      WS_HOST: "kafka-ws"
       WS_PORT: 5000
       # tls example
       # WS_TLS: "true"
@@ -112,7 +112,7 @@ services:
       # WS_TLS_KEY_FILE: /certs/client-key.pem
       # WS_TLS_CERT_FILE: /certs/client-cert.pem
     depends_on:
-      - kafka-ws-example
+      - kafka-ws
     restart: always
     command: ["node", "Client.js","0"]
     logging:
@@ -128,7 +128,7 @@ services:
       context: ./WSClient/
       dockerfile: ./Dockerfile
     environment:
-      WS_HOST: "kafka-ws-example"
+      WS_HOST: "kafka-ws"
       WS_PORT: 5000
       # tls example
       # WS_TLS: "true"
@@ -136,7 +136,7 @@ services:
       # WS_TLS_KEY_FILE: /certs/client-key.pem
       # WS_TLS_CERT_FILE: /certs/client-cert.pem
     depends_on:
-      - kafka-ws-example
+      - kafka-ws
     restart: always
     command: ["node", "Client.js","1"]
     logging:
