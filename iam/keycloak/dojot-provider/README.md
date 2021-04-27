@@ -7,7 +7,7 @@ In this way the other _dojot_ microservices can be notified about the things
 that happen in the Keycloak, for example, when a _tenant_ (known as _Realm_ in
 the Keycloak) is created or removed.
 
-To create a custom [Service Provider](https://www.keycloak.org/docs/latest/server_development/#_providers),
+To create a custom [Service Provider](https://www.keycloak.org/docs/12.0/server_development/index.html#_providers),
 you need to understand how Keycloak works and how to capture the events it
 triggers.
 
@@ -82,7 +82,7 @@ cp -a ./target/jboss-modules/. $JBOSS_HOME/modules/system/layers/keycloak/
 ```
 
 Now we need to
-[configure Keycloak](https://www.keycloak.org/docs/latest/server_installation/#_config_spi_providers)
+[configure Keycloak](https://www.keycloak.org/docs/12.0/server_installation/#_config_spi_providers)
 to recognize our _service provider_ as one of its modules, that is, to
 [load it](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/ServiceLoader.html)
 as an SPI.
@@ -91,7 +91,7 @@ We could perform the configuration by editing the correct file manually, but the
 ideal is to do this through the CLI of Wildlfy, so first of all we will access
 it.
 
-To start the [WildFly CLI](https://www.keycloak.org/docs/latest/server_installation/#_start_cli),
+To start the [WildFly CLI](https://www.keycloak.org/docs/12.0/server_installation/#_start_cli),
 you need to run `jboss-cli`:
 
 ```bash
@@ -107,7 +107,7 @@ This will bring you to a prompt like this:
 ```
 
 To register our _service provider_, Wildfly does not need to be running, so we
-will use the CLI in [embedded mode](https://www.keycloak.org/docs/latest/server_installation/#cli-embedded-mode):
+will use the CLI in [embedded mode](https://www.keycloak.org/docs/12.0/server_installation/#cli-embedded-mode):
 
 > Note: Ignore comment lines as they are not accepted by the Wildfly CLI.
 
@@ -158,7 +158,7 @@ With the CLI in embedded mode, we will execute the following commands:
 ```
 
 Finally, just exit the CLI and put the Keycloak to work. If you want to include
-these settings in a [script file](https://www.keycloak.org/docs/latest/server_installation/#cli-scripting)
+these settings in a [script file](https://www.keycloak.org/docs/12.0/server_installation/#cli-scripting)
 and run them all at once, do the following.
 
 Create a file called `dojot-provider.cli` with the following content:
