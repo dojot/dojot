@@ -7,7 +7,7 @@ In this way the other _dojot_ microservices can be notified about the things
 that happen in the Keycloak, for example, when a _tenant_ (known as _Realm_ in
 the Keycloak) is created or removed.
 
-To create a custom [Service Provider](https://www.keycloak.org/docs/12.0/server_development/index.html#_providers),
+To create a custom [Service Provider](https://www.keycloak.org/docs/12.0/server_development/#_providers),
 you need to understand how Keycloak works and how to capture the events it
 triggers.
 
