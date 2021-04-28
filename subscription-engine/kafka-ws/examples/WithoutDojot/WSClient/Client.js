@@ -141,4 +141,13 @@ async function main(args) {
   startWebsocket(wsURI);
 }
 
-main(process.argv.slice(2));
+// Initializing the service...
+(async () => {
+  try {
+    console.info('Initializing...');
+    await main(process.argv.slice(2));
+  } catch (err) {
+    console.error('Service will be closed', err);
+    process.kill(process.pid, 'SIGTERM');
+  }
+})();

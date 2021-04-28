@@ -12,9 +12,9 @@ ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
+const StateManager = require('./app/StateManager');
 const application = require('./app/App');
 const websocketTarball = require('./app/WebsocketTarball');
-const StateManager = require('./app/StateManager');
 
 Logger.setTransport('console', { level: config.log['console.level'] });
 

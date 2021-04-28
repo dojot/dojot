@@ -1,6 +1,12 @@
 jest.mock('redis', () => ({
   createClient() {
     const redisDB = {};
+    class ErrorRedis extends Error {
+      constructor(message, code) {
+        super(message);
+        this.code = code;
+      }
+    }
     const redisClient = {
       setex(key, expires, value, cb) {
         redisDB[key] = value;
@@ -21,7 +27,11 @@ jest.mock('redis', () => ({
         };
       },
       on(label, cb) {
-        cb();
+        if (label === 'error') {
+          cb(new ErrorRedis('msg', 'code'));
+        } else {
+          cb();
+        }
       },
     };
     return redisClient;
@@ -65,7 +75,7 @@ const mockConfig = {
     'reject.unauthorized:boolean': true,
   },
 };
-
+const mockAddHealthChecker = jest.fn();
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -81,7 +91,8 @@ const mockMicroServiceSdk = {
     registerService: jest.fn(),
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
-    addHealthChecker: jest.fn((service, callback) => callback()),
+    isReady: jest.fn(() => (true)),
+    addHealthChecker: mockAddHealthChecker,
     registerShutdownHandler: jest.fn(),
   })),
 };

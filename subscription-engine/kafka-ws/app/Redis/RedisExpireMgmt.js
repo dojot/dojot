@@ -1,6 +1,7 @@
 const redis = require('redis');
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const StateManager = require('../StateManager');
+const { createRedisHealthChecker } = require('./Utils');
 
 const logger = new Logger('kafka-ws:redis-expire-mgmt');
 
@@ -20,82 +21,156 @@ class RedisExpireMgmt {
     this.expirationMap = new Map();
 
     // TODO:  ADD TLS and  PASSWORD options for Redis
-    // TODO: Implement "retry_strategy"
     // const fs = require('fs');
     // const tls_options = {
     //   ca: [ fs.readFileSync(resolve(__dirname, "./server.crt")) ]
     //   ...
     // };
+    this.nameServicePub = 'redis-expire-pub';
+    this.nameServiceSub = 'redis-expire-sub';
+
+    // redis strategy
+    this.config.retry_strategy = this.retryStrategy.bind(this);
 
     this.clients = {
       pub: redis.createClient(this.config),
       sub: redis.createClient(this.config),
     };
 
+    this.initSubscriber();
+    this.initPublisher();
+
     StateManager.registerShutdownHandler(this.end.bind(this));
+
+    createRedisHealthChecker(this.clients.pub, this.nameServicePub, StateManager, logger);
+    createRedisHealthChecker(this.clients.sub, this.nameServiceSub, StateManager, logger);
+  }
+
+  retryStrategy(options) {
+    // reconnect after
+    logger.debug(`Retry strategy options ${JSON.stringify(options)}`);
+
+    // return timeout to reconnect after
+    return this.config['strategy.connect.after'];
   }
 
   /**
    * Initializes Publisher
    */
   initPublisher() {
-    // TODO: improve handle errors
+    logger.debug('initPublisher: ');
+
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
+      if (error.code === 'CONNECTION_BROKEN') {
+        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
+        StateManager.shutdown().then(() => {
+          logger.warn('The service was gracefully shutdown');
+        }).catch(() => {
+          logger.error('The service was unable to be shutdown gracefully');
+        });
+      }
     });
-    this.clients.pub.on('end', (error) => {
-      logger.info(`pub: onEnd: ${error}`);
+
+    this.clients.pub.on('end', () => {
+      logger.info('pub: onEnd');
+      StateManager.signalNotReady(this.nameServicePub);
+      // TODO #2088
     });
+
     this.clients.pub.on('warning', (error) => {
       logger.warn(`pub: onWarning: ${error}`);
     });
 
-    // Activate "notify-keyspace-events" for expired type events
-    this.clients.pub.send_command('config', ['set', 'notify-keyspace-events', 'Ex']);
+    this.clients.pub.on('reconnecting', () => {
+      logger.warn('pub: reconnecting');
+      StateManager.signalNotReady(this.nameServicePub);
+    });
+
+    this.clients.pub.on('ready', () => {
+      logger.debug('pub: ready.');
+    });
 
     this.clients.pub.on('connect', (error) => {
       if (error) {
         logger.error(`pub: Error on connect: ${error}`);
       } else {
         logger.info('pub: Connect');
+        this.activeEventsExpired();
+        StateManager.signalReady(this.nameServicePub);
       }
     });
   }
 
   /**
-   * Initializes Subscribe
-   * @returns Returns a Promise that, when resolved, will have been subscribed
-   *          to the Redis event channel.
+   * Activate "notify-keyspace-events" for expired type events
    */
-  initSubscribe() {
-    // TODO: improve handle errors
+  activeEventsExpired() {
+    this.clients.pub.send_command('config', ['set', 'notify-keyspace-events', 'Ex']);
+  }
+
+  /**
+   * Initializes Subscribe
+   */
+  initSubscriber() {
+    logger.debug('initSubscribe: ');
+
     this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
+      if (error.code === 'CONNECTION_BROKEN') {
+        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
+        StateManager.shutdown().then(() => {
+          logger.warn('The service was gracefully shutdown');
+        }).catch(() => {
+          logger.error('The service was unable to be shutdown gracefully');
+        });
+      }
     });
-    this.clients.sub.on('end', (error) => {
-      logger.info(`sub: onEnd: ${error}`);
-    });
+
     this.clients.sub.on('warning', (error) => {
       logger.warn(`sub: onWarning: ${error}`);
     });
 
-    this.clients.sub.on('connect', (error) => {
+    this.clients.sub.on('reconnecting', () => {
+      logger.warn('sub: reconnecting');
+      StateManager.signalNotReady(this.nameServiceSub);
+    });
+
+    this.clients.sub.on('connect', async (error) => {
       if (error) {
         logger.error(`sub: Error on connect: ${error}`);
       } else {
+        await this.subscribe();
+        StateManager.signalReady(this.nameServiceSub);
         logger.info('sub: Connect');
       }
     });
 
+    this.clients.sub.on('ready', () => {
+      logger.debug('sub: ready.');
+    });
+
+    this.clients.sub.on('end', () => {
+      logger.info('sub: onEnd');
+      StateManager.signalNotReady(this.nameServiceSub);
+      // TODO #2088
+    });
+
+    this.clients.sub.on('message', (channel, idConnection) => this.onMessage(channel, idConnection));
+  }
+
+  /**
+   * Subscribe to the "notify-keyspace-events" channel used for expired type events in a db
+   * @returns
+   */
+  subscribe() {
     return new Promise((resolve, reject) => {
-      // Subscribe to the "notify-keyspace-events" channel used for expired type events in a db
       this.clients.sub.subscribe(`__keyevent@${this.config.db}__:expired`, (error) => {
         if (error) {
           logger.error(`Error on connect: ${error}`);
           return reject(error);
         }
         logger.info(`Subscribed to __keyevent@${this.config.db}__:expired event channel`);
-        this.clients.sub.on('message', (chan, idConnection) => this.onMessage(chan, idConnection));
         return resolve();
       });
     });
@@ -105,12 +180,12 @@ class RedisExpireMgmt {
    * It is called when the on message event happens in the sub
    *
    * @private
-   * @param {*} chan
+   * @param {*} channel
    * @param {*} idConnection
    */
-  onMessage(chan, idConnection) {
+  onMessage(channel, idConnection) {
     if (this.expirationMap.has(idConnection)) {
-      logger.debug(`onMessage: ${idConnection} ${chan}`);
+      logger.debug(`onMessage: ${idConnection} ${channel}`);
       this.expirationMap.get(idConnection)();
     } else {
       logger.warn(`onMessage: ${idConnection} doesn't exist`);
@@ -161,44 +236,45 @@ class RedisExpireMgmt {
   }
 
   /**
-   * Get remaining Time To Live of a connection
-   * @param {string} idConnection unique id for a connection
-   * @returns Returns a Promise that, when resolved, will have the TTL value.
-   */
-  checkRemainTime(idConnection) {
-    return new Promise((resolve, reject) => {
-      this.clients.pub.ttl(idConnection, (error, time) => {
-        if (error) {
-          logger.error(`checkRemainTime: idConnection=${idConnection} error=${error}`);
-          return reject(error);
-        }
-        logger.debug(`checkRemainTime:  idConnection=${idConnection} time=${time}`);
-        return resolve(time);
-      });
-    });
-  }
-
-  /**
    * End connection with redis
    */
   async end() {
-    this.clients.sub.unsubscribe();
-
-    const pubClientQuitPromisse = new Promise((resolve) => {
-      this.clients.pub.quit(() => {
-        logger.warn('RedisExpireMgmt pub client successfully successfully disconnected.');
-        resolve();
+    const pubClientQuitPromise = new Promise((resolve, reject) => {
+      this.clients.pub.quit((err) => {
+        if (!err) {
+          logger.info('RedisExpireMgmt pub client successfully disconnected.');
+          resolve();
+        } else {
+          logger.warn('RedisExpireMgmt pub client can\'t successfully disconnected.');
+          reject();
+        }
       });
     });
 
-    const subClientQuitPromisse = new Promise((resolve) => {
-      this.clients.sub.quit(() => {
-        logger.warn('RedisExpireMgmt sub client successfully successfully disconnected.');
-        resolve();
+    const subClientUnsubscribePromise = new Promise((resolve, reject) => {
+      this.clients.sub.unsubscribe((err) => {
+        if (!err) {
+          logger.info('RedisExpireMgmt sub client successfully unsubscribe.');
+          resolve();
+        } else {
+          logger.warn('RedisExpireMgmt sub client can\'t successfully unsubscribe.');
+          reject();
+        }
       });
     });
 
-    await Promise.all([pubClientQuitPromisse, subClientQuitPromisse]);
+    const subClientQuitPromise = new Promise((resolve, reject) => {
+      this.clients.sub.quit((err) => {
+        if (!err) {
+          logger.info('RedisExpireMgmt sub client successfully disconnected.');
+          resolve();
+        } else {
+          logger.warn('RedisExpireMgmt sub client can\'t successfully disconnected.');
+          reject();
+        }
+      });
+    });
+    await Promise.all([pubClientQuitPromise, subClientUnsubscribePromise, subClientQuitPromise]);
   }
 }
 

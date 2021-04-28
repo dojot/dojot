@@ -10,6 +10,8 @@ class StateManager {
     this.serviceStateManager.registerService('kafka');
     this.serviceStateManager.registerService('http');
     this.serviceStateManager.registerService('redis');
+    this.serviceStateManager.registerService('redis-expire-pub');
+    this.serviceStateManager.registerService('redis-expire-sub');
   }
 }
 
