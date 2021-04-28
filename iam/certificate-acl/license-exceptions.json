@@ -13,7 +13,7 @@
         "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
       },
       "caniuse-lite@1.0.30001192": {
-        "reaseon": "CC BY 4.0 is compatible with Apache-2.0 ?"
+        "reason": "CC BY 4.0 is used without any changes and credit was given"
       }
     }
   }

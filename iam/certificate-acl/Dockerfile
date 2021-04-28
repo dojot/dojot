@@ -20,7 +20,7 @@ RUN apk add --no-cache --virtual .build-deps gcc \
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm install
+RUN npm install --only=prod
 
 COPY ./index.js ./index.js
 COPY ./app ./app
@@ -36,14 +36,10 @@ RUN apk --no-cache add \
     redis \
     libsasl \
     lz4-libs \
-    tini 
+    tini
 
 COPY --from=build /opt/certificate-acl /opt/certificate-acl
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["npm", "run", "certificate-acl"]
-
-HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=3 \
-      CMD HC=$(wget -q -O - "http://localhost:9000/health") \
-        && echo $HC && echo $HC | grep -q 'SERVER_IS_READY' 

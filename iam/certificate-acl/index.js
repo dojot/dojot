@@ -24,12 +24,23 @@ Logger.setVerbose(config.log.verbose);
 Logger.setTransport('console', { level: config.log['console.level'] });
 const logger = new Logger('app');
 
-logger.info(`Configurarion: \n${util.inspect(config, false, 5, true)}`);
+logger.info(`Configuration: \n${util.inspect(config, false, 5, true)}`);
 if (config.log['file.enable']) {
   const fileLoggerConfig = { level: config.log['file.level'], filename: config.log['file.filename'] };
   Logger.setTransport('file', fileLoggerConfig);
 }
 
-const application = require('./app/App');
+const Application = require('./app/App');
 
-application.init();
+// Initializing the service...
+(async () => {
+  try {
+    logger.info('Starting application!');
+    const app = new Application();
+    await app.init();
+    logger.info('Application is running!');
+  } catch (err) {
+    logger.error('Service will be closed ', err);
+    process.kill(process.pid, 'SIGTERM');
+  }
+})();

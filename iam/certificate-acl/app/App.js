@@ -1,18 +1,11 @@
-const { promisify } = require('util');
+const util = require('util');
 const {
   ConfigManager: { getConfig },
   Logger,
 } = require('@dojot/microservice-sdk');
-
 const KafkaConsumer = require('./kafka/KafkaConsumer');
-
 const RedisManager = require('./redis/RedisManager');
 const StateManager = require('./StateManager');
-
-// redis instance
-const redisClient = RedisManager.getClient();
-const redisAsyncSet = promisify(redisClient.set).bind(redisClient);
-const redisAsyncDel = promisify(redisClient.del).bind(redisClient);
 
 const logger = new Logger('certificate-acl:app');
 
@@ -24,77 +17,120 @@ const CERTIFICATE_ACL_CREATE_EVENT_TYPE = 'ownership.create';
 const CERTIFICATE_ACL_DELETE_EVENT_TYPE = 'ownership.delete';
 const CERTIFICATE_ACL_UPDATE_EVENT_TYPE = 'ownership.update';
 
-const incommingMessagesCallback = async (data, ack) => {
-  const { value: payload } = data;
+class Application {
+  /**
+   * Instantiates the application
+   */
+  constructor() {
+    // instantiate Kafka Consumer
+    this.kafkaConsumer = new KafkaConsumer();
 
-  try {
-    const jsonReceived = JSON.parse(payload.toString());
-
-    const keyFingerprint = jsonReceived.data.eventData.fingerprint;
-    const { tenant } = jsonReceived.metadata;
-    let ownerIdentifier = jsonReceived.data.eventData.belongsTo.device
-      || jsonReceived.data.eventData.belongsTo.application;
-
-    const { eventType } = jsonReceived.data;
-
-    if (tenant) {
-      ownerIdentifier = `${tenant}:${ownerIdentifier}`;
-    }
-
-    if (!keyFingerprint) {
-      logger.info(`Invalid fingerprint received ${keyFingerprint}, ignoring.....`);
-      return;
-    }
-
-    switch (eventType) {
-      case CERTIFICATE_ACL_CREATE_EVENT_TYPE:
-      case CERTIFICATE_ACL_UPDATE_EVENT_TYPE:
-        logger.info(`Saving to redis the key pair ${keyFingerprint} - ${ownerIdentifier}`);
-        redisAsyncSet(keyFingerprint, ownerIdentifier).then((value) => {
-          logger.debug(`Data sucesffully saved to redis! ${value}`);
-          ack();
-        }).catch((err) => {
-          logger.warn(`Error saving data in redis! ${err}`);
-        });
-        break;
-
-      case CERTIFICATE_ACL_DELETE_EVENT_TYPE:
-        logger.info(`Deleting in redis the key ${keyFingerprint}`);
-        redisAsyncDel(keyFingerprint).then((value) => {
-          logger.debug(`Data sucesffully saved to redis! ${value}`);
-          ack();
-        }).catch((err) => {
-          logger.warn(`Error deliting data in redis! ${err}`);
-        });
-        break;
-
-      default:
-        logger.warn(`Invalid event type ${eventType} .... ingnoring payload.`);
-        break;
-    }
-  } catch (error) {
-    logger.warn(`invalid data received, descarding... ${error}`);
+    // instantiate Redis Manager
+    this.redisManager = new RedisManager();
+    this.redisManager.on('healthy', () => this.kafkaConsumer.resume());
+    this.redisManager.on('unhealthy', () => this.kafkaConsumer.suspend());
   }
-};
 
-const init = () => {
-  logger.info('Initializing app');
+  /**
+   * Processing callback to be passed to the Kafka Consumer.
+   *
+   * @param {*} data
+   * @param {*} ack
+   *
+   * @private
+   */
+  async processData(data, ack) {
+    const terminate = (error) => {
+      // if you get here, it's because the message cannot be processed anyway
+      // so, it's better to terminate the service
+      logger.error(error);
+      StateManager.shutdown();
+    };
 
-  const kafkaConsumer = new KafkaConsumer();
-  kafkaConsumer.init().then(() => {
-    logger.info('Kafka Consumer initialized sucessfully!');
+    try {
+      const jsonData = JSON.parse(data.value);
+      logger.debug(`Processing event: ${util.inspect(jsonData, { depth: 3 })}`);
 
-    const topicSuffix = config.app['consumer.topic.suffix'].replace(/\./g, '\\.');
+      const {
+        metadata: { tenant } = {},
+        data: {
+          eventType,
+          eventData: {
+            fingerprint,
+            belongsTo: { device, application } = {},
+          } = {},
+        } = {},
+      } = jsonData;
+      const owner = ((tenant) ? `${tenant}:${device}` : application);
 
-    const topics = new RegExp(`^.*${topicSuffix}`);
-    kafkaConsumer.registerCallback(topics, incommingMessagesCallback);
+      switch (eventType) {
+        case CERTIFICATE_ACL_CREATE_EVENT_TYPE:
+        case CERTIFICATE_ACL_UPDATE_EVENT_TYPE:
+          if (!fingerprint || (!(tenant && device) && !application)) {
+            terminate(
+              `Missing mandatory attributes in processing event: ${eventType}`,
+            );
+            return;
+          }
+          // if returns here, will make sync because of an 'await' in the
+          // kafka-consumer ...
+          // Maybe would be interesting
+          this.redisManager.setAsync(fingerprint, owner).then(() => {
+            logger.debug(`Added to Redis: ${fingerprint} -> ${owner}`);
+            ack();
+          }).catch((error) => terminate(
+            `Failed to add to Redis ${fingerprint} -> ${owner} (${error}).`,
+          ));
+          break;
+        case CERTIFICATE_ACL_DELETE_EVENT_TYPE:
+          if (!fingerprint) {
+            terminate(
+              `Missing mandatory attributes in processing event: ${eventType}`,
+            );
+            return;
+          }
+          // if returns here, will make sync because of an 'await' in the
+          // kafka-consumer ..
+          this.redisManager.delAsync(fingerprint).then(() => {
+            logger.debug(`Removed from Redis: ${fingerprint}`);
+            ack();
+          }).catch((error) => terminate(
+            `Failed to remove from Redis ${fingerprint} -> ${owner} (${error}).`,
+          ));
+          break;
+        default:
+          logger.warn(`Unexpected eventType: ${eventType} (discarded)`);
+          ack();
+      }
+    } catch (error) {
+      // if you get here, it's because the message cannot be processed anyway
+      // so, it's better to terminate the service
+      // another approach would be discard this message, calling ack()
+      terminate(
+        `Failed to process message ${util.inspect(data)}. `
+        + `Error: ${error}`,
+      );
+    }
+  }
 
-    // TODO
-    // query x.509-identity-mgmt and guarantee that the Redis is synced with it.
-  }).catch((err) => {
-    logger.error(`Error initializing the kafka consumer exiting!... ${err}`);
-    StateManager.shutdown();
-  });
-};
+  /**
+   * Initializes the application.
+   * Starts consuming from Kafka.
+   *
+   * @returns
+   */
+  init() {
+    return this.kafkaConsumer.init().then(() => {
+      // register processing callback
+      this.kafkaConsumer.registerCallback(
+        new RegExp(config.app['consumer.topic']),
+        this.processData.bind(this),
+      );
+    }).catch((error) => {
+      logger.error(`Failed to initialize the application. Error: ${error}`);
+      StateManager.shutdown();
+    });
+  }
+}
 
-module.exports = { init };
+module.exports = Application;

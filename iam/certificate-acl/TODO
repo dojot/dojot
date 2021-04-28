@@ -1,0 +1,22 @@
+In the current solution, this services writes in Redis and the VerneMQ
+reads from it. We can get in trouble if Redis becomes inconsistent. So,
+it would be better to change the solution to use Redis as a cache.
+
+The proposal is the following:
+
+1) ACL service consumes events from Kafka and populates Redis
+
+    fingerprint -> tenant:deviceID | application
+
+2) VerneMQ calls an internal REST endpoint provided by ACL service
+    GET /internal/certificates-acl/entries/:fingerprint
+
+    {
+        value: tenant:deviceID | application
+    }
+
+3) For the GET call, ACL service checks if an entry exists into REDIS.
+   If it exists, it will return immediately, otherwise, it will query the
+   x509-identity-mgmt. If the fingerprint is associated with a device or
+   an application a new entry will be added to REDIS to keep it consistent.
+

@@ -1,5 +1,6 @@
+const events = require('events');
 const redis = require('redis');
-const { inspect } = require('util');
+const { promisify } = require('util');
 
 const {
   ConfigManager: { getConfig },
@@ -11,89 +12,123 @@ const logger = new Logger('certificate-acl:redis-manager');
 
 const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
 
+const EVENTS = [
+  // emitted when the manager is healthy (connected with redis)
+  'healthy',
+  // emitted when the manager is unhealthy (not connected with redis)
+  'unhealthy',
+];
+
 /**
- * class to manage a generic purpose connection to redis
+ * Class to manage a generic purpose connection to redis
  */
 class RedisManager {
   /**
-   * Creates an Redis Manager
-   *
-   * @param none
+   * Creates a Redis Manager
    *
    * @constructor
    * @returns Redis Manager Object
    */
   constructor() {
-    logger.info('Creating the redis manager singleton....');
-
+    // config
     this.config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL).redis;
-    this.config.restry_strategy = this.retryStrategy.bind(this);
+    this.config.retry_strategy = this.reconnectAfter.bind(this);
 
+    // redis client
     this.redisClient = redis.createClient(this.config);
-    logger.info('RedisManager singleton creation complete!');
 
-    this.stateService = 'redis';
+    // health check
+    this.eventEmitter = new events.EventEmitter();
 
-    // TODO
-    // on event where redis is unhealthy, must pause the kafka
-    //  consumer and on redis heathy it must resume
-    this.redisClient.on('connect', () => StateManager.signalReady(this.stateService));
-    this.redisClient.on('reconnecting', () => StateManager.signalNotReady(this.stateService));
-
-    this.redisClient.on('error', (error) => logger.warn(`${error}`));
-    this.redisClient.on('end', () => StateManager.signalNotReady(this.stateService));
-    StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
-
-    return Object.seal(this);
-  }
-
-  /**
-   * @function shutdownProcess
-   *
-   * Shutdown handler to be passed to the ServiceStateManager
-   *
-   * @private
-   */
-  async shutdownProcess() {
-    logger.info('Disconnecting from redis');
-    await new Promise((resolve) => {
-      this.redisClient.quit(() => {
-        resolve('Sucessfully disconnected from Redis!');
-      });
+    this.redisClient.on('connect', () => {
+      StateManager.signalReady('redis');
+      logger.info('Redis Manager is healthy (Connected).');
+      this.eventEmitter.emit('healthy');
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    this.redisClient.on('reconnecting', () => {
+      StateManager.signalNotReady('redis');
+      logger.info('Redis Manager is unhealthy (Reconnecting).');
+      this.eventEmitter.emit('unhealthy');
+    });
+
+    this.redisClient.on('error',
+      (error) => {
+        logger.warn(`${error}`);
+        // connection timeout, retry won't work anymore
+        if (error.code === 'CONNECTION_BROKEN') {
+          logger.error('Exhausted all attempts to connect to Redis.');
+          StateManager.shutdown();
+        }
+      });
+
+    this.redisClient.on('end', () => {
+      StateManager.signalNotReady('redis');
+      logger.info('Redis Manager is unhealthy (Connection Closed).');
+      this.eventEmitter.emit('unhealthy');
+    });
+
+    // graceful shutdown
+    StateManager.registerShutdownHandler(
+      this.shutdown.bind(this),
+    );
+
+    // redis async functions
+    this.setAsync = promisify(this.redisClient.set)
+      .bind(this.redisClient);
+    this.delAsync = promisify(this.redisClient.del)
+      .bind(this.redisClient);
+    this.quitAsync = promisify(this.redisClient.quit)
+      .bind(this.redisClient);
+
+    Object.seal(this);
+
+    logger.info('Redis manager created!');
+    logger.info(`Redis manager configuration: ${JSON.stringify(this.config)}`);
   }
 
   /**
-   * The retry connection stategy for redis clients
-   *
-   * @function retryStrategy
+   * Shutdowns the manager.
+   * Function to be passed to the ServiceStateManager.
    *
    * @private
-   *
-   * @param {Object} options
-   *
-   * @returns
    */
-  retryStrategy(options) {
-    // reconnect after
-    logger.debug(`Retry strategy options ${inspect(options, false, 5, true)}`);
-
-    // return timeout to reconnect after
-    return this.config['strategy.connect.after'];
+  shutdown() {
+    return this.quitAsync().then(() => {
+      logger.warn('Redis client finished!');
+    });
   }
 
   /**
-   * Get the redis client
+   * Computes the time to wait for the next reconnection attempt.
+   * Function to be passed to redis client.
    *
-   * @function getClient
+   * @returns the number of milliseconds to wait before reconnecting
    *
-   * @returns
+   * @private
    */
-  getClient() {
-    return this.redisClient;
+  reconnectAfter() {
+    return this.config['reconnect.after.ms'];
+  }
+
+  /**
+   * Adds a listener at the end of the listeners array for the specified
+   * event. No checks are made to see if the listener has already been
+   * added. Multiple calls passing the same combination of event and
+   * listener will result in the listener being added multiple times.
+   *
+   * @param {*} event one of the following:
+   *  - 'healthy' emitted when the redis manager is healthy
+   *  - 'unhealthy' emitted when the redis manager is unhealthy
+   * @param {*} callback
+   */
+  on(event, callback) {
+    if (EVENTS.includes(event)) {
+      this.eventEmitter.addListener(event, callback);
+    } else {
+      throw new Error(`Failed: Invalid event ${event}`);
+    }
   }
 }
 
-module.exports = new RedisManager();
+module.exports = RedisManager;

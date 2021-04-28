@@ -2,7 +2,7 @@
   "name": "certificate-acl",
   "version": "1.0.0",
   "private": true,
-  "description": "Service that consumes kafka data and publish them to redis, it has the function of maintaining an access control list (ACL) on Redis",
+  "description": "It consumes association events between certificates and devices from Apache Kafka and builds based on this data an Access Control List (ACL) on Redis",
   "main": "index.js",
   "scripts": {
     "certificate-acl": "node --unhandled-rejections=strict index.js",
@@ -16,12 +16,17 @@
     "url": "https:github.com/dojot"
   },
   "keywords": [
+    "acl",
+    "certificate",
+    "device",
     "dojot",
     "kafka",
-    "redis",
-    "acl"
+    "redis"
   ],
   "author": "@jonaphael",
+  "contributors": [
+    "Rafael Augusto Scaraficci"
+  ],
   "license": "Apache-2.0",
   "licenses": [
     {
@@ -30,12 +35,12 @@
     }
   ],
   "dependencies": {
-    "@bbc/apache2-license-checker": "^1.1.4",
     "@dojot/microservice-sdk": "^0.1.11",
     "lodash.camelcase": "^4.3.0",
     "redis": "^3.0.2"
   },
   "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
     "@types/jest": "^26.0.15",
     "eslint": "^7.21.0",
     "eslint-config-airbnb-base": "^14.2.1",
@@ -47,8 +52,7 @@
     "coverageDirectory": "./coverage/",
     "collectCoverageFrom": [
       "app/**/*.js",
-      "!index.js",
-      "!app/App.js"
+      "!index.js"
     ],
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [

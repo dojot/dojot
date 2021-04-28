@@ -1,7 +1,9 @@
 const {
   ConfigManager: { getConfig },
-  Logger, Kafka: { Consumer },
+  Logger,
+  Kafka: { Consumer },
 } = require('@dojot/microservice-sdk');
+
 const StateManager = require('../StateManager');
 
 const logger = new Logger('certificate-acl:kafka-consumer');
@@ -13,79 +15,156 @@ const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
  */
 class kafkaConsumer {
   /**
-   * Create an Kafka Consumer
+   * Creates a Kafka Consumer
    */
   constructor() {
-    this.config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
+    const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
+    this.consumer = new Consumer({
+      ...config.kafka,
+      'kafka.consumer': { ...config.consumer },
+      'kafka.topic': { ...config.topic },
+    });
 
-    this.consumerConfig = {
-      ...this.config.kafka,
-      'kafka.consumer': { ...this.config.consumer },
-      'kafka.topic': { ...this.config.topic },
-    };
+    // true whether consumption is suspended; otherwise, false
+    this.suspended = false;
 
-    this.consumer = new Consumer(this.consumerConfig);
+    // <topic> -> {id: <callbackId>, cb: <callback> }
     this.registeredCallbacks = new Map();
 
-    // healthchecker and shutdown
-    const healthCheckerInterval = this.config.healthcheck['kafka.interval.ms'];
-    StateManager.addHealthChecker('kafka', this.checkHealth.bind(this), healthCheckerInterval);
-    StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
+    // health-check and shutdown
+    this.healthy = false;
+    StateManager.addHealthChecker('kafka',
+      this.checkHealth.bind(this), config.healthcheck['kafka.interval.ms']);
+    StateManager.registerShutdownHandler(this.shutdown.bind(this));
+    Object.seal(this);
+
+    logger.info('Kafka Consumer created!');
+    logger.info(`Kafka Consumer configuration: ${JSON.stringify(config.kafka)}`);
   }
 
   /**
-   * Initialize the kafka consumer
+   * Initializes the kafka consumer
    */
   async init() {
-    logger.info('init: kafka starting...');
     return this.consumer.init();
   }
 
   /**
-   * Register callback for a topic
+   * Registers a single processing callback for a given topic
    *
-   * @param {string} kafkaTopic
-   * @param {function} callback
+   * @param {string} kafkaTopic an explicit topic or a regex for a topic
+   * @param {function} callback function to process topic's messages
    */
   registerCallback(kafkaTopic, callback) {
     if (!this.registeredCallbacks.has(kafkaTopic)) {
-      logger.debug(`registerCallback: Register Callback for topic ${kafkaTopic}`);
-      const callbackId = this.consumer.registerCallback(kafkaTopic, callback);
-      this.registeredCallbacks.set(kafkaTopic, callbackId);
+      logger.debug(`Registering processing callback for topic ${kafkaTopic}`);
+      const cbId = this.suspended ? null
+        : this.consumer.registerCallback(kafkaTopic, callback);
+      this.registeredCallbacks.set(kafkaTopic, { id: cbId, cb: callback });
     } else {
-      throw new Error(`registerCallback: Callback for topic ${kafkaTopic} already exist`);
+      throw new Error(`Failed: Callback for topic ${kafkaTopic} already exist`);
     }
-
-    logger.debug(`registerCallback: All Registered Callbacks ${[...this.registeredCallbacks]}`);
   }
 
   /**
-   * HealthChecker to be passed to the ServiceStateManager
+   * It suspends all registered processing callbacks
    *
-   * @param {function} signalReady
-   * @param {function} signalNotReady
+   * The processing of the messages will be interrupted until
+   * resumeCallbacks() is called.
+   *
+   * Once the service keeps connected with Kafka, the messages won't
+   * be consumed by another instance in the same consumer group. So,
+   * if the problem is not ephemeral, it is better to disconnect from
+   * the Kafka to allow other instances of the same consumer group to
+   * consume the messages.
+   *
+   * TODO: move to sdk
    */
-  checkHealth(signalReady, signalNotReady) {
-    this.consumer.getStatus().then((data) => {
-      if (data.connected) {
-        signalReady();
-      } else {
-        signalNotReady();
+  suspend() {
+    // Callbacks have already been suspended.
+    // Nothing to be done
+    if (this.suspended) return;
+
+    logger.info('Suspending all processing callbacks.');
+    this.suspended = true;
+    this.registeredCallbacks.forEach((value, key) => {
+      if (value.id) {
+        this.consumer.unregisterCallback(value.id);
+        logger.info(`Suspended processing callback for topic: ${key}.`);
+        // eslint-disable-next-line no-param-reassign
+        value.id = null;
       }
-    }).catch((err) => {
-      signalNotReady();
-      logger.warn(`Error ${err}`);
     });
   }
 
   /**
-   * @function shutdownProcess
+   * It resumes all registered processing callbacks
    *
-   * Shutdown handler to be passed to the ServiceStateManager
+   * The processing of the messages will be resumed.
+   *
+   * TODO: move to sdk
    */
-  shutdownProcess() {
+  resume() {
+    // Callbacks haven't been suspended
+    // Nothing to be done
+    if (!this.suspended) return;
+
+    logger.info('Resuming all processing callbacks ...');
+    this.registeredCallbacks.forEach((value, key) => {
+      if (value.id === null) {
+        // eslint-disable-next-line no-param-reassign
+        value.id = this.consumer.registerCallback(key, value.cb);
+        logger.info(`Resumed processing callback for topic: ${key}.`);
+      }
+    });
+    this.suspended = false;
+  }
+
+  /**
+   * Health-check function to be passed to the ServiceStateManager
+   *
+   * It monitors the connection with the Kafka Server.
+   *
+   * Note: This strategy is very naive and can produce false-positive
+   * responses. A better approach would be checking if messages are being
+   * consumed and committed successfully and only use this one when messages
+   * are not being received.
+   *
+   * TODO: Create a robust health check strategy for Kafka clients.
+   * @param {function} signalReady
+   * @param {function} signalNotReady
+   */
+  checkHealth(signalReady, signalNotReady) {
+    return this.consumer.getStatus().then((data) => {
+      if (data.connected && !this.healthy) {
+        this.healthy = true;
+        signalReady();
+        logger.info('Kafka Consumer is healthy (Connected).');
+      } else if (!data.connected) {
+        if (this.healthy) {
+          this.healthy = false;
+          signalNotReady();
+        }
+        logger.warn('Kafka Consumer is unhealthy (Reconnecting?).');
+      }
+    }).catch((err) => {
+      if (this.healthy) {
+        this.healthy = false;
+        signalNotReady();
+        logger.warn('Kafka Consumer is unhealthy (Unknown).');
+      }
+      logger.warn(`Failed health check. Error:${err}.`);
+    });
+  }
+
+  /**
+   * Shutdown function to be passed to the ServiceStateManager
+   *
+   * It tries to terminate the kafka consumer gracefully.
+   */
+  shutdown() {
     return this.consumer.finish().then(() => {
-      logger.warn('Kafka Consumer finished!');
+      logger.warn('Kafka consumer finished!');
     });
   }
 }

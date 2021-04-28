@@ -1,7 +1,7 @@
 name: Certificate ACL (iam/certificate-acl)
 
 # Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in
-# 'iam/certificat-acl/**' is submitted
+# 'iam/certificate-acl/**' is submitted
 on:
   create:
   push:
@@ -41,7 +41,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         # Created when 'npm test' was executed
-        file: iam/certificate-acl/coverage/lcov.info
+        directory: iam/certificate-acl/coverage
         # Flags allow you to isolate coverage reports for different tests
         flags: certificateACL
         # Custom name for the upload

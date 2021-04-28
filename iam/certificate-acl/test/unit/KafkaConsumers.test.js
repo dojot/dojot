@@ -1,132 +1,265 @@
 const mockConfig = {
+  kafka: {},
   consumer: {
     'group.id': 'kafka_test',
     'metadata.broker.list': 'kafka:9092',
   },
   topic: {
-    'auto.offset.reset': 'largest',
+    'auto.offset.reset': 'earliest',
   },
   healthcheck: {
-    'kafka.interval.ms': 10,
+    'kafka.interval.ms': 5000,
   },
 };
 
-const mockMicroServiceSdk = {
-  ConfigManager: {
-    getConfig: jest.fn(() => mockConfig),
-    transformObjectKeys: jest.fn((obj) => obj),
-  },
-  Kafka: {
-    Consumer: jest.fn(() => ({
-      getStatus: jest.fn(() => Promise.resolve()),
-      finish: jest.fn(() => Promise.resolve()),
-    })),
-    Producer: jest.fn(),
-  },
-  ServiceStateManager: jest.fn(() => ({
-    registerService: jest.fn(),
-    signalReady: jest.fn(),
-    signalNotReady: jest.fn(),
-    addHealthChecker: jest.fn((service, callback) => callback()),
-    registerShutdownHandler: jest.fn(),
-  })),
-  Logger: jest.fn(() => ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  })),
-};
+jest.mock('@dojot/microservice-sdk');
+const sdkMock = require('@dojot/microservice-sdk');
 
-jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
-jest.mock('redis');
+sdkMock.ConfigManager.getConfig = jest.fn(() => mockConfig);
 
-const { Kafka: { Consumer } } = require('@dojot/microservice-sdk');
-const KafkaWSConsumers = require('../../app/kafka/KafkaConsumer');
+jest.mock('../../app/StateManager');
+const stateManagerMock = require('../../app/StateManager');
+// registerShutdownHandler - defined inside a constructor
+stateManagerMock.registerShutdownHandler = jest.fn();
 
-let kafkaWSConsumers = null;
-describe('Testing KafkaWSConsumers - works fine', () => {
-  beforeAll(() => {
-    Consumer.mockReturnValue({
-      init: jest.fn()
-        .mockImplementationOnce(() => Promise.resolve()),
-      registerCallback: jest.fn()
-        .mockReturnValueOnce('idCallback1'),
-      getStatus: jest.fn()
-        .mockImplementationOnce(() => Promise.resolve({ connected: true })),
-      finish: jest.fn()
-        .mockImplementationOnce(() => Promise.resolve()),
-    });
-    kafkaWSConsumers = new KafkaWSConsumers();
-  });
-  beforeEach(() => {
-    jest.clearAllMocks();
+const KafkaConsumer = require('../../app/kafka/KafkaConsumer');
+
+describe('KafkaConsumer Initialization', () => {
+  it('Constructor', () => {
+    const kconsumer = new KafkaConsumer();
+
+    expect(kconsumer.suspended).toBeFalsy();
+    expect(kconsumer.healthy).toBeFalsy();
+    expect(kconsumer.consumer).toBeDefined();
+    expect(kconsumer.registeredCallbacks).toBeDefined();
+    expect(stateManagerMock.addHealthChecker).toBeCalled();
+    expect(stateManagerMock.registerShutdownHandler).toBeCalled();
   });
 
-  it('Should test health check function', () => {
-    Consumer().getStatus
-      .mockImplementationOnce(() => Promise.resolve({ connected: false }))
-      .mockImplementationOnce(() => Promise.reject())
-      .mockImplementationOnce(() => Promise.reject());
-
-    const ready = jest.fn();
-    const notReady = jest.fn();
-    kafkaWSConsumers.checkHealth(ready, notReady);
-    expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(1);
-
-    // else branch
-    kafkaWSConsumers.checkHealth(ready, notReady);
-    expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(2);
-
-    // reject status
-    kafkaWSConsumers.checkHealth(ready, notReady);
-    expect(mockMicroServiceSdk.Kafka.Consumer().getStatus).toHaveBeenCalledTimes(3);
-
-    Consumer.mockClear();
-  });
-
-  it('should finish - graceful shutdown', () => {
-    kafkaWSConsumers.shutdownProcess();
-    expect(mockMicroServiceSdk.Kafka.Consumer().finish).toHaveBeenCalledTimes(1);
-  });
-
-  it('Should init correctly ', async () => {
-    let someError = false;
-    try {
-      await kafkaWSConsumers.init();
-    } catch (e) {
-      someError = true;
-    }
-    expect(someError).toBe(false);
-  });
-
-  it('Should register a callback ', () => {
-    kafkaWSConsumers.registerCallback('topic1', () => { });
-    expect(kafkaWSConsumers.registeredCallbacks.get('topic1')).toStrictEqual('idCallback1');
-  });
-
-  it('Shouldnt register a callback already exist ', () => {
-    let someError = false;
-    try {
-      kafkaWSConsumers.registerCallback('topic1', () => { });
-    } catch (e) {
-      someError = true;
-    }
-    expect(someError).toBe(true);
+  it('Init', () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.init();
+    expect(kconsumer.consumer.init).toBeCalled();
   });
 });
 
-describe('Should not init correctly', () => {
-  beforeAll(() => {
-    Consumer.mockReturnValue({
-      init: jest.fn()
-        .mockImplementationOnce(() => Promise.reject(new Error('Error'))),
-      getStatus: jest.fn()
-        .mockImplementationOnce(() => Promise.reject(new Error('Error'))),
-    });
-    kafkaWSConsumers = new KafkaWSConsumers();
+describe('Register Callbacks', () => {
+  it('Register when Kafka Consumer is suspended', () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.suspended = true;
+
+    const cb = jest.fn();
+    const topic = 'topic.test';
+    kconsumer.registerCallback(topic, cb);
+
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: null,
+        cb,
+      },
+    );
   });
+
+  it('Register when Kafka Consumer is not suspended', () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.suspended = false;
+    const cb = jest.fn();
+    const topic = 'topic.test';
+    const cbId = 'ckId.test';
+    kconsumer.consumer.registerCallback = jest.fn().mockReturnValueOnce(cbId);
+
+    kconsumer.registerCallback(topic, cb);
+
+    expect(kconsumer.consumer.registerCallback)
+      .toBeCalledWith(topic, cb);
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: cbId,
+        cb,
+      },
+    );
+  });
+
+  it('Register callback twice', () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.suspended = false;
+    const cb = jest.fn();
+    const topic = 'topic.test';
+    const cbId = 'ckId.test';
+    kconsumer.consumer.registerCallback = jest.fn().mockReturnValueOnce(cbId);
+
+    kconsumer.registerCallback(topic, cb);
+    expect(() => kconsumer.registerCallback(topic, cb)).toThrow();
+
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: cbId,
+        cb,
+      },
+    );
+  });
+});
+
+describe('Suspend and Resume Processing Callbacks', () => {
+  let kconsumer = null;
+  const cb = jest.fn();
+  const topic = 'topic.test';
+  const cbId = 'ckId.test';
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    kconsumer = new KafkaConsumer();
+    kconsumer.consumer.registerCallback = jest.fn().mockReturnValue(cbId);
+    kconsumer.suspend = false;
+    kconsumer.registerCallback(topic, cb);
+  });
+
+  it('Suspend when Kafka Consumer is not suspended', () => {
+    kconsumer.suspend();
+
+    expect(kconsumer.consumer.unregisterCallback)
+      .toHaveBeenCalledWith(cbId);
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: null,
+        cb,
+      },
+    );
+    expect(kconsumer.suspended).toBeTruthy();
+  });
+
+  it('Suspend when Kafka Consumer is already suspended', () => {
+    kconsumer.suspend();
+    kconsumer.suspend();
+
+    expect(kconsumer.consumer.unregisterCallback)
+      .toHaveBeenCalledTimes(1);
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: null,
+        cb,
+      },
+    );
+    expect(kconsumer.suspended).toBeTruthy();
+  });
+
+  it('Resume when Kafka Consumer is suspended', () => {
+    kconsumer.suspend();
+    kconsumer.resume();
+
+    expect(kconsumer.consumer.unregisterCallback)
+      .toHaveBeenCalledTimes(1);
+    expect(kconsumer.consumer.registerCallback)
+      .toHaveBeenCalledWith(topic, cb);
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: cbId,
+        cb,
+      },
+    );
+    expect(kconsumer.suspended).toBeFalsy();
+  });
+
+  it('Resume when Kafka Consumer is not suspended', () => {
+    kconsumer.resume();
+
+    expect(kconsumer.consumer.unregisterCallback)
+      .not.toHaveBeenCalled();
+    expect(kconsumer.registeredCallbacks.size).toBe(1);
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
+      {
+        id: cbId,
+        cb,
+      },
+    );
+    expect(kconsumer.suspended).toBeFalsy();
+  });
+});
+
+describe('Health-Check', () => {
+  it('Unhealthy to Healthy', async () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.healthy = false;
+    kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: true }));
+
+    const signalReady = jest.fn();
+    const signalNotReady = jest.fn();
+
+    await kconsumer.checkHealth(signalReady, signalNotReady);
+    expect(signalReady).toHaveBeenCalled();
+    expect(signalNotReady).not.toHaveBeenCalled();
+    expect(kconsumer.healthy).toBeTruthy();
+  });
+
+  it('Healthy to Unhealthy', async () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.healthy = true;
+    kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: false }));
+
+    const signalReady = jest.fn();
+    const signalNotReady = jest.fn();
+
+    await kconsumer.checkHealth(signalReady, signalNotReady);
+    expect(signalReady).not.toHaveBeenCalled();
+    expect(signalNotReady).toHaveBeenCalled();
+    expect(kconsumer.healthy).toBeFalsy();
+  });
+
+  it('Continues Healthy', async () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.healthy = true;
+    kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: true }));
+
+    const signalReady = jest.fn();
+    const signalNotReady = jest.fn();
+
+    await kconsumer.checkHealth(signalReady, signalNotReady);
+    expect(signalReady).not.toHaveBeenCalled();
+    expect(signalNotReady).not.toHaveBeenCalled();
+    expect(kconsumer.healthy).toBeTruthy();
+  });
+
+  it('Continues Unhealthy', async () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.healthy = false;
+    kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: false }));
+
+    const signalReady = jest.fn();
+    const signalNotReady = jest.fn();
+
+    await kconsumer.checkHealth(signalReady, signalNotReady);
+    expect(signalReady).not.toHaveBeenCalled();
+    expect(signalNotReady).not.toHaveBeenCalled();
+    expect(kconsumer.healthy).toBeFalsy();
+  });
+
+  it('Failed to Get Status', async () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.healthy = true;
+    kconsumer.consumer.getStatus = jest.fn(() => Promise.reject(new Error('Error test message')));
+
+    const signalReady = jest.fn();
+    const signalNotReady = jest.fn();
+
+    await kconsumer.checkHealth(signalReady, signalNotReady);
+    expect(signalReady).not.toHaveBeenCalled();
+    expect(signalNotReady).toHaveBeenCalled();
+    expect(kconsumer.healthy).toBeFalsy();
+  });
+});
+
+describe('Graceful Shutdown', () => {
+  it('Finish Kafka Consumer', async () => {
+    const kconsumer = new KafkaConsumer();
+    kconsumer.consumer.finish = jest.fn(() => Promise.resolve());
+
+    await kconsumer.shutdown();
+
+    expect(kconsumer.consumer.finish).toBeCalled();
   });
 });
