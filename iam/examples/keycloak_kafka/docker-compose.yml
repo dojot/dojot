@@ -28,8 +28,8 @@ services:
       # KEYCLOAK_STATISTICS: all
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
-      # alternative debug: suspends the JVM until a debugger is attached
-      # JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
+      # alternative debug: suspends the JVM until a debugger is attached (necessary to disable the DEBUG variable)
+      #JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
     ports:
       - "8080:8080"
       - "8443:8443"

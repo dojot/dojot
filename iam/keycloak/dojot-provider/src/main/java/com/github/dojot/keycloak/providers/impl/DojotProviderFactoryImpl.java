@@ -39,16 +39,31 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
     private String customRealmRepFileName;
     private PartialImportRepresentation customRealmRep;
 
+    private DojotProviderContext.SMTPServerConfig smtpServerConfig;
+
     @Override
     public void init(Config.Scope scope) {
         LOG.info("Init DojotProviderFactory...");
         DojotProviderFactory.super.init(scope);
 
+        initRealmValidationConfig(scope);
+        initKafkaProducerConfig(scope);
+        initSMTPServerConfig(scope);
+        initCustomRealmConfig(scope);
+    }
+
+    private void initRealmValidationConfig(Config.Scope scope) {
+        String validRealmNameRegex = scope.get("validRealmNameRegex");
+        if (validRealmNameRegex == null) {
+            throw new NullPointerException("Dojot SPI 'validRealmNameRegex' attribute must not be null!");
+        }
+        validRealmName = Pattern.compile(validRealmNameRegex);
+    }
+
+    private void initKafkaProducerConfig(Config.Scope scope) {
         String kafkaServers = scope.get("servers");
         String kafkaClientId = scope.get("clientId");
         kafkaTopic = scope.get("topic");
-        String validRealmNameRegex = scope.get("validRealmNameRegex");
-        customRealmRepFileName = scope.get("customRealmRepresentationFile");
 
         if (kafkaServers == null) {
             throw new NullPointerException("Dojot SPI 'servers' attribute must not be null!");
@@ -59,12 +74,6 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         if (kafkaTopic == null) {
             throw new NullPointerException("Dojot SPI 'topic' attribute must not be null!");
         }
-        if (validRealmNameRegex == null) {
-            throw new NullPointerException("Dojot SPI 'validRealmNameRegex' attribute must not be null!");
-        }
-        if (customRealmRepFileName == null) {
-            throw new NullPointerException("Dojot SPI 'customRealmRepresentationFile' attribute must not be null!");
-        }
 
         kafkaProducerProps = new Properties();
         kafkaProducerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServers);
@@ -72,9 +81,31 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         kafkaProducerProps.put(ProducerConfig.ACKS_CONFIG, "all");
         kafkaProducerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProducerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+    }
 
-        validRealmName = Pattern.compile(validRealmNameRegex);
+    private void initSMTPServerConfig(Config.Scope scope) {
+        // SMTP Server Configurations
+        String smtpHost = scope.get("smtpHost");
+        if (smtpHost == null || smtpHost.isBlank()) {
+            LOG.info("Connection to SMTP Server: DISABLED");
+        } else {
+            smtpServerConfig = new DojotProviderContext.SMTPServerConfig()
+                    .host(smtpHost)
+                    .port(scope.get("smtpPort"))
+                    .enableSSL(scope.get("smtpSSL"))
+                    .enableStartTLS(scope.get("smtpStartTLS"))
+                    .from(scope.get("smtpFrom"))
+                    .fromDisplayName(scope.get("smtpFromDisplayName"))
+                    .auth(scope.get("smtpAuthUsername"), scope.get("smtpAuthPassword"));
+            LOG.info("Connection to SMTP Server: ENABLED");
+        }
+    }
 
+    private void initCustomRealmConfig(Config.Scope scope) {
+        customRealmRepFileName = scope.get("customRealmRepresentationFile");
+        if (customRealmRepFileName == null) {
+            throw new NullPointerException("Dojot SPI 'customRealmRepresentationFile' attribute must not be null!");
+        }
         File customRealmJson = new File(customRealmRepFileName);
         try {
             FileInputStream inputStream = new FileInputStream(customRealmJson);
@@ -114,6 +145,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             context.setKafkaProducerProps(kafkaProducerProps);
             context.setValidRealmName(validRealmName);
             context.setCustomRealmRep(customRealmRepClone);
+            context.setSmtpServerConfig(smtpServerConfig);
             return new DojotProviderImpl(context);
         } catch (IOException ex) {
             String err = "Error creating DojotProvider. Json file " + customRealmRepFileName + " is invalid";
@@ -141,6 +173,17 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         map.put("Kafka topic", kafkaTopic);
         map.put("Valid realm name Regex", validRealmName.toString());
         map.put("Custom Realm Representation File", customRealmRepFileName);
+
+        if (smtpServerConfig != null) {
+            for (Map.Entry<String, String> entry : smtpServerConfig.map().entrySet()) {
+                if ("password".equals(entry.getKey())) {
+                    map.put("smtp." + entry.getKey(), "**********");
+                } else {
+                    map.put("smtp." + entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
         return map;
     }
 }

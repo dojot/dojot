@@ -45,6 +45,12 @@ public class DojotProviderImpl implements DojotProvider {
         try {
             DojotPartialImportManager dojotPartialImportManager = new DojotPartialImportManager(session, realm);
             dojotPartialImportManager.doImport(context.getCustomRealmRep());
+
+            // configure SMTP Server
+            DojotProviderContext.SMTPServerConfig smtpServerConfig = context.getSmtpServerConfig();
+            if (smtpServerConfig != null) {
+                realm.setSmtpConfig(smtpServerConfig.map());
+            }
         } catch (ErrorResponseException ex) {
             LOG.error(ex.getMessage(), ex);
             throw new RuntimeException(ex);
