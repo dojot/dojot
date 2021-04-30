@@ -45,6 +45,27 @@ const createRedisHealthChecker = (client, serviceName, stateManager, logger) => 
     healthChecker, configRedis['healthcheck.ms']);
 };
 
+/**
+ * Handles the error when receiving the error event on redis
+ *
+ * @param {Error} error
+ * @param {instance of @dojot/microservice-sdk.ServiceStateManager
+ *                                                  with serviceName registered  *} stateManager
+ * @param {instance of @dojot/microservice-sdk.Logger} logger
+ */
+const redisHandleOnError = (error, stateManager, logger) => {
+  logger.error('Redis has an error:', error);
+  if (error.code === 'CONNECTION_BROKEN') {
+    logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
+    stateManager.shutdown().then(() => {
+      logger.warn('The service was gracefully shutdown');
+    }).catch(() => {
+      logger.error('The service was unable to be shutdown gracefully');
+    });
+  }
+};
+
 module.exports = {
   createRedisHealthChecker,
+  redisHandleOnError,
 };
