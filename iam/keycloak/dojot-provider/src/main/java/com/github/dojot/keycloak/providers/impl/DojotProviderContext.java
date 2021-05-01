@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 public class DojotProviderContext {
 
     private KeycloakSession keycloakSession;
+    private String rootUrl;
     private String kafkaTopic;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
@@ -22,6 +23,14 @@ public class DojotProviderContext {
 
     public KeycloakSession getKeycloakSession() {
         return keycloakSession;
+    }
+
+    public void setRootUrl(String rootUrl) {
+        this.rootUrl = rootUrl;
+    }
+
+    public String getRootUrl() {
+        return rootUrl;
     }
 
     public void setKeycloakSession(KeycloakSession keycloakSession) {

@@ -1,5 +1,6 @@
 package com.github.dojot.keycloak.partialimport;
 
+import com.github.dojot.keycloak.providers.impl.DojotProviderContext;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -22,33 +23,36 @@ public class DojotPartialImportManager {
     private static final Logger LOG = Logger.getLogger(DojotPartialImportManager.class);
 
     private final KeycloakSession session;
+    private final PartialImportRepresentation representation;
     private final RealmModel realm;
     private final List<PartialImport> partialImports = new ArrayList<>();
 
-    public DojotPartialImportManager(KeycloakSession session, RealmModel realm) {
-        this.session = session;
+    public DojotPartialImportManager(DojotProviderContext context, RealmModel realm) {
+        this.session = context.getKeycloakSession();
+        this.representation = context.getCustomRealmRep();
         this.realm = realm;
+        String rootUrl = context.getRootUrl();
 
         // Do not change the order of these!!!
         partialImports.add(new DojotRealmRolesPartialImport());
-        partialImports.add(new DojotClientsPartialImport());
+        partialImports.add(new DojotClientsPartialImport(rootUrl));
         partialImports.add(new DojotClientRolesPartialImport());
         partialImports.add(new DojotGroupsPartialImport());
         partialImports.add(new DojotUsersPartialImport());
     }
 
-    public void doImport(PartialImportRepresentation rep) throws ErrorResponseException {
+    public void doImport() throws ErrorResponseException {
         LOG.info("Importing customizations to make Realm operational with the dojot platform...");
 
         PartialImportResults results = new PartialImportResults();
 
         for (PartialImport partialImport : partialImports) {
-            partialImport.prepare(rep, realm, session);
+            partialImport.prepare(representation, realm, session);
         }
 
         for (PartialImport partialImport : partialImports) {
             partialImport.removeOverwrites(realm, session);
-            results.addAllResults(partialImport.doImport(rep, realm, session));
+            results.addAllResults(partialImport.doImport(representation, realm, session));
         }
 
         for (PartialImportResult result : results.getResults()) {

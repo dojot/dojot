@@ -28,7 +28,7 @@ public class RealmEventListener implements EventListener {
                 KeycloakSession session = creationEvent.getKeycloakSession();
                 DojotProvider provider = session.getProvider(DojotProvider.class);
                 provider.validateRealm(realm);
-                provider.customizeRealm(realm, session);
+                provider.customizeRealm(realm);
                 provider.publishRealmCreated(realm);
             }
         }

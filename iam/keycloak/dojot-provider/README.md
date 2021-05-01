@@ -122,29 +122,61 @@ will use the CLI in [embedded mode](https://www.keycloak.org/docs/12.0/server_in
 With the CLI in embedded mode, we will execute the following commands:
 
 ```bash
-# This command tells Keycloak that our Service Provider must be loaded as a Wildfly Module.
+# This command tells Keycloak that our Service Provider must be loaded as a Wildfly Module
 [standalone@embedded /] /subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
 
-# This command adds a new SPI config to the Keycloak.
+# This command adds a new SPI config to the Keycloak
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot:add()
 
-# This command tells Keycloak that the SPI config is enabled.
+# This command tells Keycloak that the SPI config is enabled
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
 
-# This command tells our Service Provider where to connect to Kafka.
-[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS})
+# This command tells our service provider what is the root URL of the clients configured for dojot
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
 
-# This command tells Kafka which is the 'Client ID' of our Service Provider.
-[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID})
+# This command tells our Service Provider where to connect to Kafka
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:})
 
-# This command tells our Service Provider which topic in Kafka should be used to publish data.
-[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC})
+# This command tells Kafka which is the 'Client ID' of our Service Provider
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID:})
 
-# This command tells our Service Provider the regular expression to be applied in the Realm name to comply with the rules of the dojot platform.
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX})
+# This command tells our Service Provider which topic in Kafka should be used to publish data
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:})
 
-# This command tells our Service Provider the full path of the json file to be used for the customization of a new Realm, according to the needs of the dojot platform.
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE})
+# This command tells our Service Provider the regular expression to be applied in the Realm name to comply with the rules of the dojot platform
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX:})
+
+# This command tells our Service Provider the full path of the json file to be used for the customization of a new Realm, according to the needs of the dojot platform
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE:})
+```
+
+If we want to set up a single SMTP server for all Realms, just run the following
+commands:
+
+```bash
+# This command tells Keycloak the SMTP server host
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpHost,value=${env.DOJOT_SMTP_HOST:})
+
+# This command tells Keycloak the SMTP server port (SSL and TLS can have different ports)
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpPort,value=${env.DOJOT_SMTP_PORT:})
+
+# This command tells Keycloak that the SMTP server uses SSL
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpSSL,value=${env.DOJOT_SMTP_SSL:})
+
+# This command tells Keycloak that the SMTP server uses TLS
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpStartTLS,value=${env.DOJOT_SMTP_START_TLS:})
+
+# This command tells the SMTP server who is the sender of the e-mails
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpFrom,value=${env.DOJOT_SMTP_FROM:})
+
+# This is the display name used by the sender of the emails
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpFromDisplayName,value=${env.DOJOT_SMTP_FROM_DISPLAY_NAME:})
+
+# This command tells the Keycloak which username to use to connect to the SMTP server
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpAuthUsername,value=${env.DOJOT_SMTP_USERNAME:})
+
+# This command tells the Keycloak which password to use to connect to the SMTP server
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpAuthPassword,value=${env.DOJOT_SMTP_PASSWORD:})
 ```
 
 > __Note that__ the default timeout for a transaction is `300` seconds (5 minutes). To increase this timeout (thinking about a need to debug the code), just run the following command:
@@ -168,12 +200,20 @@ embed-server --server-config=standalone-ha.xml --std-out=echo
 batch
 /subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
 /subsystem=keycloak-server/spi=dojot:add()
-/subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX})
-/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpHost,value=${env.DOJOT_SMTP_HOST:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpPort,value=${env.DOJOT_SMTP_PORT:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpSSL,value=${env.DOJOT_SMTP_SSL:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpStartTLS,value=${env.DOJOT_SMTP_START_TLS:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpFrom,value=${env.DOJOT_SMTP_FROM:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpFromDisplayName,value=${env.DOJOT_SMTP_FROM_DISPLAY_NAME:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpAuthUsername,value=${env.DOJOT_SMTP_USERNAME:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpAuthPassword,value=${env.DOJOT_SMTP_PASSWORD:})
 /subsystem=transactions:write-attribute(name=default-timeout,value=300)
 run-batch
 stop-embedded-server
@@ -194,14 +234,14 @@ $JBOSS_HOME/bin/standalone.sh --server-config=standalone-ha.xml
 
 ## Configuration
 
-| Environment variable | Default value | Description |
-| -------------------- | ------------- | ----------- |
-| DOJOT_KAFKA_SERVERS        | `kafka:9092`  | Connection address with Kafka. |
-| DOJOT_KAFKA_CLIENT_ID      | `keycloak`    | Client identifier to connect with Kafka. |
-| DOJOT_KAFKA_TOPIC          | `dojot-management.dojot.tenancy` | Kafka topic in which messages regarding the creation and removal of tenants (Realms) will be published. |
+| Environment variable | Reference values | Description |
+| -------------------- | ---------------- | ----------- |
+| DOJOT_ROOT_URL       | `http://localhost:8080`  | Root URL for accessing the dojot platform. |
+| DOJOT_KAFKA_SERVERS  | `kafka:9092`     | Connection address with Kafka. |
+| DOJOT_KAFKA_CLIENT_ID | `keycloak`      | Client identifier to connect with Kafka. |
+| DOJOT_KAFKA_TOPIC    | `dojot-management.dojot.tenancy` | Kafka topic in which messages regarding the creation and removal of tenants (Realms) will be published. |
 | DOJOT_VALID_REALM_NAME_REGEX | `^[a-zA-Z0-9]{1,30}$` | Regular expression to be applied in the name of the newly created tenant to force it to be compatible with the rules of the dojot platform. |
 | DOJOT_CUSTOM_REALM_REP_FILE | `/opt/dojot/customRealmRepresentation.json` | Full path of the json file used as a basis for customizing the tenant according to the rules of the dojot platform. |
-
 
 _Note that_ the json file must follow the structure (Schema) defined in the
 [REST API](https://www.keycloak.org/docs-api/12.0/rest-api/index.html#_partialimportrepresentation)
@@ -209,6 +249,22 @@ of the keycloak.
 The file can be included in the keycloak container `VOLUME ["/opt/dojot/"]`.
 Check the [example](../../examples/keycloak_kafka/) directory for more details.
 
+
+## SMTP server configuration
+
+| Environment variable | Reference values | Description |
+| -------------------- | ---------------- | ----------- |
+| DOJOT_SMTP_HOST      | `smtp.gmail.com` | GMail SMTP server host example. |
+| DOJOT_SMTP_PORT      | `587`            | TLS-specific GMail SMTP server port |
+| DOJOT_SMTP_SSL       | `false`          | Currently SSL is no longer recommended, but there are cases where it is still used. |
+| DOJOT_SMTP_START_TLS | `true`           | For security, connections to the SMTP server are made with TLS enabled. |
+| DOJOT_SMTP_FROM      | `noreply@dojot.iot` | Default sender email address. |
+| DOJOT_SMTP_FROM_DISPLAY_NAME | `IoT Dojot platform` | Default sender display name. |
+| DOJOT_SMTP_USERNAME  | `smtp@dojot.iot` | Username to connect to the SMTP server. |
+| DOJOT_SMTP_PASSWORD  | `smtp.secret`    | Password to connect to the SMTP server.<br /> In case of 2-factor authentication, it will be necessary to generate an application password to be used exclusively by Keycloak.<br /> **It is recommended** that this password be kept in a _Vault_ previously configured in the Keycloak and only the _identifying key_ is informed in this variable. Otherwise, it will be stored in the database in an insecure manner (in plain text). |
+
+_Note that_ the reference values are used only in examples and do not
+necessarily reflect the values of a real deployment.
 
 ## Coding and Debugging
 

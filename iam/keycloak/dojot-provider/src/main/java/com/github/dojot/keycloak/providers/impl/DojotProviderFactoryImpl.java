@@ -32,20 +32,19 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
 
     private static final Logger LOG = Logger.getLogger(DojotProviderFactoryImpl.class);
 
+    private String rootUrl;
     private String kafkaTopic;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
-
     private String customRealmRepFileName;
     private PartialImportRepresentation customRealmRep;
-
     private DojotProviderContext.SMTPServerConfig smtpServerConfig;
 
     @Override
     public void init(Config.Scope scope) {
         LOG.info("Init DojotProviderFactory...");
         DojotProviderFactory.super.init(scope);
-
+        rootUrl = scope.get("rootUrl");
         initRealmValidationConfig(scope);
         initKafkaProducerConfig(scope);
         initSMTPServerConfig(scope);
@@ -141,6 +140,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
 
             DojotProviderContext context = new DojotProviderContext();
             context.setKeycloakSession(keycloakSession);
+            context.setRootUrl(rootUrl);
             context.setKafkaTopic(kafkaTopic);
             context.setKafkaProducerProps(kafkaProducerProps);
             context.setValidRealmName(validRealmName);

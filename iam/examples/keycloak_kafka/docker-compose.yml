@@ -8,14 +8,23 @@ services:
       - postgres
     restart: always
     environment:
-      JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.impersonation=disabled"
+      JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.impersonation=disabled -Dkeycloak.profile.feature.upload_scripts=enabled"
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      DOJOT_ROOT_URL: "http://localhost:8080"
       DOJOT_KAFKA_SERVERS: kafka:9092
       DOJOT_KAFKA_CLIENT_ID: keycloak
       DOJOT_KAFKA_TOPIC: dojot-management.dojot.tenancy
       DOJOT_VALID_REALM_NAME_REGEX: "^[a-zA-Z0-9]{1,30}$$"
       DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
+      # DOJOT_SMTP_HOST: smtp.gmail.com
+      # DOJOT_SMTP_PORT: "587"
+      # DOJOT_SMTP_SSL: "false"
+      # DOJOT_SMTP_START_TLS: "true"
+      # DOJOT_SMTP_FROM: noreply@dojot.iot
+      # DOJOT_SMTP_FROM_DISPLAY_NAME: IoT Dojot platform
+      # DOJOT_SMTP_USERNAME: smtp@dojot.iot
+      # DOJOT_SMTP_PASSWORD: smtp.secret
       DB_VENDOR: postgres
       DB_ADDR: postgres
       DB_PORT: 5432
@@ -29,7 +38,7 @@ services:
       DEBUG: "true"
       DEBUG_PORT: "*:8787"
       # alternative debug: suspends the JVM until a debugger is attached (necessary to disable the DEBUG variable)
-      #JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
+      # JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
     ports:
       - "8080:8080"
       - "8443:8443"

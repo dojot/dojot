@@ -20,9 +20,8 @@ public interface DojotProvider extends Provider {
      * Customize the Realm according to dojot rules
      *
      * @param realm   Realm created
-     * @param session KeycloakSession
      */
-    void customizeRealm(RealmModel realm, KeycloakSession session);
+    void customizeRealm(RealmModel realm);
 
     /**
      * Publishes the Realm post creation event on Kafka

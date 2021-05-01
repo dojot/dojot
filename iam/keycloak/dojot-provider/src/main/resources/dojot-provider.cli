@@ -4,6 +4,7 @@ batch
 /subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
 /subsystem=keycloak-server/spi=dojot:add()
 /subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:})

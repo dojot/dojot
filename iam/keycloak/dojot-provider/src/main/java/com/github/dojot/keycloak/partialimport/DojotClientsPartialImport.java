@@ -4,7 +4,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.partialimport.ClientsPartialImport;
+import org.keycloak.partialimport.ErrorResponseException;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.PartialImportRepresentation;
 import org.keycloak.representations.idm.authorization.PolicyRepresentation;
 import org.keycloak.representations.idm.authorization.ResourceRepresentation;
 import org.keycloak.representations.idm.authorization.ResourceServerRepresentation;
@@ -18,6 +20,30 @@ import java.util.List;
  * Based on the original Keycloak class: org.keycloak.partialimport.ClientsPartialImport
  */
 public class DojotClientsPartialImport extends ClientsPartialImport {
+
+    private String rootUrl;
+
+    public DojotClientsPartialImport(String rootUrl) {
+        super();
+        this.rootUrl = rootUrl;
+    }
+
+    @Override
+    public void prepare(PartialImportRepresentation partialImportRep, RealmModel realm, KeycloakSession session)
+            throws ErrorResponseException {
+        super.prepare(partialImportRep, realm, session);
+
+        List<ClientRepresentation> repList = getRepList(partialImportRep);
+        if (repList == null || repList.isEmpty()) {
+            return;
+        }
+
+        for (ClientRepresentation client : repList) {
+            if (rootUrl != null) {
+                client.setRootUrl(rootUrl);
+            }
+        }
+    }
 
     @Override
     public void create(RealmModel realm, KeycloakSession session, ClientRepresentation clientRep) {

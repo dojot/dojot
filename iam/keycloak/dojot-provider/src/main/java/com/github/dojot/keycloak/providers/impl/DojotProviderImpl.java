@@ -6,7 +6,6 @@ import com.github.dojot.keycloak.kafka.Event;
 import com.github.dojot.keycloak.partialimport.DojotPartialImportManager;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import org.jboss.logging.Logger;
-import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.partialimport.ErrorResponseException;
 
@@ -41,10 +40,10 @@ public class DojotProviderImpl implements DojotProvider {
     }
 
     @Override
-    public void customizeRealm(RealmModel realm, KeycloakSession session) {
+    public void customizeRealm(RealmModel realm) {
         try {
-            DojotPartialImportManager dojotPartialImportManager = new DojotPartialImportManager(session, realm);
-            dojotPartialImportManager.doImport(context.getCustomRealmRep());
+            DojotPartialImportManager dojotPartialImportManager = new DojotPartialImportManager(context, realm);
+            dojotPartialImportManager.doImport();
 
             // configure SMTP Server
             DojotProviderContext.SMTPServerConfig smtpServerConfig = context.getSmtpServerConfig();
