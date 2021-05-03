@@ -43,8 +43,8 @@ class Application {
     const terminate = (error) => {
       // if you get here, it's because the message cannot be processed anyway
       // so, it's better to terminate the service
-      logger.error(error);
-      StateManager.shutdown();
+      logger.error('Service will be closed: ', error);
+      process.kill(process.pid, 'SIGTERM');
     };
 
     try {
@@ -74,7 +74,7 @@ class Application {
           }
           // if returns here, will make sync because of an 'await' in the
           // kafka-consumer ...
-          // Maybe would be interesting
+          // Maybe would be interesting to have a nack callback too
           this.redisManager.setAsync(fingerprint, owner).then(() => {
             logger.debug(`Added to Redis: ${fingerprint} -> ${owner}`);
             ack();
@@ -126,9 +126,6 @@ class Application {
         new RegExp(config.app['consumer.topic']),
         this.processData.bind(this),
       );
-    }).catch((error) => {
-      logger.error(`Failed to initialize the application. Error: ${error}`);
-      StateManager.shutdown();
     });
   }
 }

@@ -22,7 +22,7 @@ const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
  */
 Logger.setVerbose(config.log.verbose);
 Logger.setTransport('console', { level: config.log['console.level'] });
-const logger = new Logger('app');
+const logger = new Logger('certificate-acl:index');
 
 logger.info(`Configuration: \n${util.inspect(config, false, 5, true)}`);
 if (config.log['file.enable']) {
@@ -40,7 +40,7 @@ const Application = require('./app/App');
     await app.init();
     logger.info('Application is running!');
   } catch (err) {
-    logger.error('Service will be closed ', err);
+    logger.error('Service will be closed: ', err);
     process.kill(process.pid, 'SIGTERM');
   }
 })();
