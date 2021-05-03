@@ -159,6 +159,9 @@ services:
     healthcheck:
       test: "curl -f http://localhost:8080/auth || exit 1"
       start_period: 20s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     logging:
       driver: json-file
       options:
