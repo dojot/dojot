@@ -11,7 +11,7 @@ To run this example, type:
 docker-compose up
 ```
 
-# Using the example
+## Using the example
 
 As prerequisites this uses curl and jq .
 
@@ -21,7 +21,7 @@ On Debian-based Linux distributions, you can install these prerequisites by runn
 sudo apt install curl jq
 ```
 
-## Obtaining Access Token
+### Obtaining Access Token
 
 As `user`:
 
@@ -43,13 +43,13 @@ JWT=$(curl --location --request POST http://localhost:8000/auth/realms/admin/pro
 --data-urlencode 'grant_type=password' 2>/dev/null | jq -r '.access_token')
 ```
 
-## Checking if it was defined in the JWT variable
+#### Checking if it was defined in the JWT variable
 
 ```sh
 echo $JWT
 ```
 
-## Accessing resource/endpoint
+### Accessing resource/endpoint
 
 ```sh
 curl -X GET "http://localhost:8000/secure" -H  "Authorization: Bearer ${JWT}"
@@ -63,25 +63,25 @@ curl -X DELETE "http://localhost:8000/secure" -H  "Authorization: Bearer ${JWT}"
 curl -X GET "http://localhost:8000/insecure"
 ```
 
-# Kong
+## Kong
 
-## Kong settings
+### Kong settings
 
 In the `kong/kong.config.sh` file are created configurations of routes, services and associations with the kong plugins (pep-kong and jwt-keycloak) for each registered service
 
-## Konga (Kong GUI)
+### Konga (Kong GUI)
 
 To access the Konga (Kong interface) use http://localhost:1337.
 
-# Keycloak
+## Keycloak
 
 To access the Admin Keycloak interface use http://localhost:8000/auth and use the login `admin` and password `admin`.
 
-## Keycloak settings
+### Keycloak settings
 
 When starting the keycloak, a Realm called **admin** is imported with the configurations listed below:
 
-### Roles settings
+#### Roles settings
 
 In Roles on the left sidebar:
 
@@ -91,7 +91,7 @@ In Roles on the left sidebar:
   - Enable the `Composite Roles` option
   - In `Available Roles` select `user` and `Add selected`, so that `user` will be listed in `Associated Roles`.
 
-### User settings depends on ‘Role settings’
+#### User settings depends on ‘Role settings’
 
 Users in the left sidebar:
 
@@ -111,7 +111,7 @@ Users in the left sidebar:
   - Go to the `Role Mappings` tab
     - In `Available Roles` select`user` and `Add selected`, so that`user` will be listed in `Associated Roles`.
 
-### Kong client settings depends on ‘roles settings’
+#### Kong client settings depends on ‘roles settings’
 
 Clients in the left sidebar:
 
@@ -124,14 +124,14 @@ Clients in the left sidebar:
   - Enable the `Direct Access Grants Enabled` option if it is not enabled
   - Enable the `Service Accounts Enabled` option if it is not enabled
   - Enable the option `Authorization Enabled` if it is not enabled
-  - Set `Valid Redirect URIs` to` http://localhost:8000/* `
+  - Set `Valid Redirect URIs` to` /* `
 
-#### Configuring authorization
+##### Configuring authorization
 
 - Go to the `Authorization` tab
   - Within `Authorization` select the`Authorization Scopes` tab
     - Create the following scopes: `create`,`delete`, `update` and`view`.
-      - Note: **`create`  is for HTTP**POST**,  `delete` is for HTTP **DELETE**,    `update`is for HTTP **PUT** or **PATCH** and `view` is for HTTP **GET**.
+      - Note: `create`  is for HTTP **POST**,  `delete` is for HTTP **DELETE**,    `update`is for HTTP **PUT** or **PATCH** and `view` is for HTTP **GET**.
   - Within `Authorization` select the`Polices` tab
     - Create a policy for role `admin`
       - In `Create Policy` select`role`
@@ -188,9 +188,15 @@ Client gui settings depends on ‘kong client settings’
   - Enable the `Standard Flow Enabled` option if it is enabled
   - Disable the `Implicit Flow Enabled` option if it is enabled
   - Enable the `Direct Access Grants Enabled` option if it is not enabled
-  - Set `Valid Redirect URIs` to `http://localhost:8000/*`
+  - Set `Valid Redirect URIs` to `/*`
   - Go to the `Scope tab
     - Enable `Full Scope Allowed` or select the`scope` `user`
+
+#### Token Settings
+
+In `Realm Setting` on the left sidebar and on the `Tokens` tab:
+
+- In `Default Signature Algorithm` is defined `RS256`. (Just to match the default settings of the `jwt-keycloak` plugin.)
 
 ## Checking settings
 
