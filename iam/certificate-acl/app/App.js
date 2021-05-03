@@ -5,7 +5,6 @@ const {
 } = require('@dojot/microservice-sdk');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
-const StateManager = require('./StateManager');
 
 const logger = new Logger('certificate-acl:app');
 

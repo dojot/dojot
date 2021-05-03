@@ -33,6 +33,9 @@ const mockStateManager = require('../../app/StateManager');
 mockStateManager.registerShutdownHandler = jest.fn();
 mockStateManager.shutdown = jest.fn();
 
+const mockKill = jest.fn();
+process.kill = mockKill;
+
 jest.mock('../../app/kafka/KafkaConsumer');
 
 jest.mock('../../app/redis/RedisManager');
@@ -52,15 +55,17 @@ describe('Application Initialization', () => {
   });
 
   it('Initialized Unsuccessfully', async () => {
+    expect.assertions(4);
     const app = new Application();
     app.kafkaConsumer.init = jest.fn(() => Promise.reject());
-    await app.init();
-
-    expect(app.kafkaConsumer).toBeDefined();
-    expect(app.redisManager).toBeDefined();
-    expect(app.kafkaConsumer.init).toBeCalled();
-    expect(app.kafkaConsumer.registerCallback).not.toBeCalled();
-    expect(mockStateManager.shutdown).toBeCalled();
+    try {
+      await app.init();
+    } catch (error) {
+      expect(app.kafkaConsumer).toBeDefined();
+      expect(app.redisManager).toBeDefined();
+      expect(app.kafkaConsumer.init).toBeCalled();
+      expect(app.kafkaConsumer.registerCallback).not.toBeCalled();
+    }
   });
 });
 
@@ -267,8 +272,7 @@ describe('Processing Data', () => {
 
     expect(app.redisManager.setAsync).toBeCalled();
     expect(ack).not.toBeCalled();
-    // called async, would be necessary an nack
-    // expect(mockStateManager.shutdown).toBeCalled();
+    // process.kill is called asynchronous
   });
 
   it('Missing data - create', async () => {
@@ -291,7 +295,7 @@ describe('Processing Data', () => {
 
     expect(app.redisManager.setAsync).not.toBeCalled();
     expect(ack).not.toBeCalled();
-    expect(mockStateManager.shutdown).toBeCalled();
+    expect(mockKill).toBeCalled();
   });
 
   it('Missing data - delete', async () => {
@@ -308,7 +312,7 @@ describe('Processing Data', () => {
 
     expect(app.redisManager.delAsync).not.toBeCalled();
     expect(ack).not.toBeCalled();
-    expect(mockStateManager.shutdown).toBeCalled();
+    expect(mockKill).toBeCalled();
   });
 
   it('Event is not a JSON', async () => {
@@ -320,6 +324,6 @@ describe('Processing Data', () => {
 
     expect(app.redisManager.delAsync).not.toBeCalled();
     expect(ack).not.toBeCalled();
-    expect(mockStateManager.shutdown).toBeCalled();
+    expect(mockKill).toBeCalled();
   });
 });
