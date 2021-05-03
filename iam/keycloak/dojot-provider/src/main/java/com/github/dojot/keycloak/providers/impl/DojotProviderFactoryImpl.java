@@ -173,6 +173,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         map.put("Kafka topic", kafkaTopic);
         map.put("Valid realm name Regex", validRealmName.toString());
         map.put("Custom Realm Representation File", customRealmRepFileName);
+        map.put("Root URL", rootUrl);
 
         if (smtpServerConfig != null) {
             for (Map.Entry<String, String> entry : smtpServerConfig.map().entrySet()) {
