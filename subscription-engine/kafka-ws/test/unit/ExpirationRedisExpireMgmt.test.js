@@ -6,6 +6,7 @@ const mockConfig = {
   },
 };
 
+const mockLogWarn = jest.fn();
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -15,7 +16,7 @@ const mockMicroServiceSdk = {
     debug: jest.fn(),
     error: jest.fn(),
     info: jest.fn(),
-    warn: jest.fn(),
+    warn: mockLogWarn,
   })),
   ServiceStateManager: jest.fn(() => ({
     registerService: jest.fn(),
@@ -23,6 +24,7 @@ const mockMicroServiceSdk = {
     signalNotReady: jest.fn(),
     addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
     registerShutdownHandler: jest.fn(),
+    shutdown: jest.fn().mockResolvedValue(),
   })),
 };
 
@@ -34,6 +36,13 @@ const RedisExpireMgmt = require('../../app/Redis/RedisExpireMgmt');
 
 /* eslint-disable-next-line */
 jest.mock('redis', () => require('redis-mock'));
+
+class ErrorTest extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
 
 let redisExpireMgmt = null;
 let callbackTestXXX = null;
@@ -56,7 +65,7 @@ describe('Testing RedisExpireMgmt everything ok', () => {
 
   it('Should Connect sub  ', (done) => {
     redisExpireMgmt.clients.sub = redismock.createClient();
-    redisExpireMgmt.initSubscribe();
+    redisExpireMgmt.initSubscriber();
     redisExpireMgmt.clients.sub.on('connect', () => {
       done();
     });
@@ -121,7 +130,7 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
 
   it('Should Connect sub  ', (done) => {
     redisExpireMgmt.clients.sub = redismock.createClient();
-    redisExpireMgmt.initSubscribe();
+    redisExpireMgmt.initSubscriber();
     redisExpireMgmt.clients.sub.on('connect', () => {
       done();
     });
@@ -137,16 +146,33 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
     redisExpireMgmt.clients.pub.on('error', () => {
       done();
     });
-    redisExpireMgmt.clients.pub.emit('error');
+    redisExpireMgmt.clients.pub.emit('error', new ErrorTest('MSG', 'code'));
     redisExpireMgmt.clients.pub.connected = false;
   });
 
-  it('Should emmit a error sub  ', (done) => {
+  it('Should emmit a error pub - excessive connection attempts ', (done) => {
+    redisExpireMgmt.clients.pub.on('error', () => {
+      expect(mockLogWarn).toHaveBeenCalledWith('The service will be shutdown for exceeding attempts to reconnect with Redis');
+      done();
+    });
+    redisExpireMgmt.clients.pub.emit('error', new ErrorTest('MSG', 'CONNECTION_BROKEN'));
+    redisExpireMgmt.clients.pub.connected = false;
+  });
+
+  it('Should emmit a error pub  ', (done) => {
     redisExpireMgmt.clients.sub.on('error', () => {
       done();
     });
+    redisExpireMgmt.clients.sub.emit('error', new ErrorTest('MSG', 'code'));
+    redisExpireMgmt.clients.sub.connected = false;
+  });
 
-    redisExpireMgmt.clients.sub.emit('error');
+  it('Should emmit a error sub - excessive connection attempts ', (done) => {
+    redisExpireMgmt.clients.sub.on('error', () => {
+      expect(mockLogWarn).toHaveBeenCalledWith('The service will be shutdown for exceeding attempts to reconnect with Redis');
+      done();
+    });
+    redisExpireMgmt.clients.sub.emit('error', new ErrorTest('MSG', 'CONNECTION_BROKEN'));
     redisExpireMgmt.clients.sub.connected = false;
   });
 

@@ -58,9 +58,11 @@ class KafkaConsumer {
       if (data.connected) {
         signalReady();
         this.isKafkaAvailable = true;
+        logger.debug('Kafka is health');
       } else {
         signalNotReady();
         this.isKafkaAvailable = false;
+        logger.warn('Kafka is not health');
       }
     }).catch((err) => {
       this.isKafkaAvailable = false;
