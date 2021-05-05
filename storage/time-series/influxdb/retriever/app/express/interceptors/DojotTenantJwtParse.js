@@ -25,8 +25,8 @@ module.exports = () => ({
           err.message = e.message;
           return next(err);
         }
-        if (payload.service) {
-          req.tenant = payload.service;
+        if (payload.iss) {
+          req.tenant = payload.iss.substring(payload.iss.lastIndexOf('/') + 1);
           return next();
         }
       }
