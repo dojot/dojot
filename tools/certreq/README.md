@@ -41,6 +41,7 @@ The following example explores all the parameters that can be entered for the sc
     -h localhost \
     -p 8000 \
     -i '123,456,789' \
+    -r 'admin' \
     -u 'admin' \
     -s 'admin'
 ~~~
@@ -54,6 +55,7 @@ key | value
 -h  | Hostname (or IP) of the dojot platform.<br>**Default**: 127.0.0.1
 -p  | Port on which the dojot platform responds to the certificate issuing API.<br>**Default**: 8000
 -i  | Entity identifier. It must have the same device ID registered on the dojot platform. If not informed, a certificate will be generated _for each device_ that the user has access to.
+-r  | Tenant  to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
 -u  | Username to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
 -s  | User password (secret)  to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
 -t  | the name of the file containing the access token to access the _x509-identity-mgmt_ API for issuing certificates.<br>If the file containing the access token exists, then that token will be used in place of the username and password. In this way, it is possible to use the same active session to execute the script several times.<br>**Default**: token.jwt

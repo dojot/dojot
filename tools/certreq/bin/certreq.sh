@@ -17,6 +17,7 @@ fi
 # default values (can be changed by parameters)
 HOST="127.0.0.1"
 PORT="8000"
+TENANT="admin"
 USERNAME="admin"
 PASSWD="admin"
 DEVICE_IDS=''
@@ -60,10 +61,12 @@ function main() {
 function getToken() {
   printf '\xE2\x8F\xB3 Obtaining access token...'
 
-  JWT=$(curl -sS -X POST "${HOST}:${PORT}/auth" \
-    -H 'Content-Type:application/json' \
-    -d "{ \"username\": \"${USERNAME}\", \"passwd\": \"${PASSWD}\" }" 2>/dev/null \
-    | jq -j '.jwt')
+  JWT=$(curl -sS -X POST "${HOST}:${PORT}/auth/realms/${TENANT}/protocol/openid-connect/token" \
+        --data-urlencode "username=${USERNAME}" \
+        --data-urlencode "password=${PASSWD}" \
+        --data-urlencode "client_id=admin-cli" \
+        --data-urlencode "grant_type=password" 2>/dev/null \
+    | jq -j '.access_token')
 
   if [ -z "${JWT}" ]; then
     printf '\r\xE2\x9D\x8C Failed to get access token!\n'
@@ -155,6 +158,7 @@ function parseArgs() {
     case "$1" in
       -h ) HOST="${2}"; shift;;
       -p ) PORT="${2}"; shift;;
+      -r ) TENANT="${2}"; shift;;
       -i ) DEVICE_IDS="$2"; shift;;
       -u ) USERNAME="${2}"; shift;;
       -s ) PASSWD="${2}"; shift;;
@@ -187,6 +191,7 @@ function parseArgs() {
 
   readonly HOST
   readonly PORT
+  readonly TENANT
   readonly USERNAME
   readonly PASSWD
   readonly TOKEN_FILE
