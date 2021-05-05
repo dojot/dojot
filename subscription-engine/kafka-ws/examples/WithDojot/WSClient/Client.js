@@ -4,13 +4,15 @@ const fs = require('fs');
 const WebSocket = require('ws');
 const superagent = require('superagent');
 const { promisify } = require('util');
+const querystring = require('querystring');
 
 const parseBoolean = (mode) => ((mode || false) && (mode.toString().toLowerCase().trim() === 'true' || Number(mode) > 0));
 
 // Parsing environment variables
-const dojotAddress = process.env.KAFKAWS_DOJOT_ADDRESS || 'localhost:3000';
+const dojotAddress = process.env.KAFKAWS_DOJOT_ADDRESS || 'localhost:8000';
 const dojotUser = process.env.KAFKAWS_DOJOT_USER || 'admin';
 const dojotPassword = process.env.KAFKAWS_DOJOT_PASSWORD || 'admin';
+const dojotTenant = process.env.KAFKAWS_DOJOT_TENANT || 'admin';
 
 const tls = parseBoolean(process.env.KAFKAWS_TLS_ENABLE || false);
 const caFile = process.env.KAFKAWS_TLS_CA_FILE || './certs/ca.crt';
@@ -23,18 +25,22 @@ const filterWhere = process.env.KAFKAWS_APP_FILTER_WHERE;
 const ca = (tls) ? [fs.readFileSync(caFile)] : null;
 
 async function generateAccessToken() {
-  const payload = JSON.stringify({ username: dojotUser, passwd: dojotPassword });
-  const authAddress = `${dojotAddress}/auth`;
+  const authAddress = `${dojotAddress}/auth/realms/${dojotTenant}/protocol/openid-connect/token`;
+  const payload = querystring.stringify({
+    grant_type: 'password',
+    client_id: 'cli',
+    username: dojotUser,
+    password: dojotPassword,
+  });
 
   console.info('Requesting a JWT to Dojot...');
   return new Promise((resolve, reject) => {
     superagent
       .post(authAddress)
-      .set('Content-Type', 'application/json')
       .send(payload)
       .then((res) => {
         console.info('Successfully received JWT from Dojot');
-        resolve(res.body.jwt);
+        resolve(res.body.access_token);
       })
       .catch((error) => {
         console.error(error.stack || error);
@@ -129,4 +135,13 @@ async function main() {
   startWebsocket(wsURI);
 }
 
-main();
+// Initializing the service...
+(async () => {
+  try {
+    console.info('Initializing...');
+    await main();
+  } catch (err) {
+    console.error('Service will be closed', err);
+    process.kill(process.pid, 'SIGTERM');
+  }
+})();
