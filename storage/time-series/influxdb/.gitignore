@@ -12,11 +12,11 @@ coverage
 # Dependency directories
 node_modules/
 
-# Local history
-.history
-
 # Optional npm cache directory
 .npm
+
+# Local history
+.history
 
 # Optional eslint cache
 .eslintcache
