@@ -14,8 +14,9 @@ echo "Loopback start"
 
 readonly DOJOT_USERNAME=${DOJOT_USERNAME:-"admin"}
 readonly DOJOT_PASSWORD=${DOJOT_PASSWORD:-"admin"}
+readonly DOJOT_TENANT=${DOJOT_TENANT:-"admin"}
 
-readonly AUTH_ADDRESS=${AUTH_ADDRESS:-"http://auth:5000"}
+readonly KEYCLOAK_ADDRESS=${KEYCLOAK_ADDRESS:-"http://keycloak:8080"}
 readonly DATA_BROKER_ADDRESS=${DATA_BROKER_ADDRESS:-"http://data-broker:80"}
 readonly KAFKA_BROKER_LIST=${KAFKA_BROKER_LIST:-"kafka-server:9092"}
 
@@ -23,10 +24,8 @@ readonly LOOPBACK_CONSUMER_GROUP=${LOOPBACK_CONSUMER_GROUP:-"loopback-group"}
 readonly DEVICE_DATA_TOPIC=${DEVICE_DATA_TOPIC:-"device-data"}
 readonly DEVICE_MANAGER_TOPIC=${DEVICE_MANAGER_TOPIC:-"dojot.device-manager.device"}
 
-# auth
-readonly AUTH_DATA="{\"username\": \"${DOJOT_USERNAME}\", \"passwd\":\"${DOJOT_PASSWORD}\"}"
-readonly JSON_CONTENT_TYPE="Content-Type:application/json"
-readonly TOKEN=$(curl --silent -X POST ${AUTH_ADDRESS} -H "${JSON_CONTENT_TYPE}" -d "${AUTH_DATA}" | jq '.jwt' -r)
+readonly AUTH_DATA=" --data-urlencode \"username=${DOJOT_USERNAME}\" --data-urlencode \"password=${DOJOT_PASSWORD}\" --data-urlencode \"client_id=admin-cli\" --data-urlencode \"grant_type=password\""
+readonly TOKEN=$(curl --silent -X POST ${KEYCLOAK_ADDRESS}  "${AUTH_DATA}" | jq '.access_token' -r)
 
 if [ ! -z "$TOKEN" ]
 then

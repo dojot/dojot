@@ -10,10 +10,11 @@ to be dojot-compliant.
 
 Key                     | Purpose                               | Default Value               | Valid Values     |
 ----------------------- | ------------------------------------- | --------------------------- | ---------------- |
-AUTH_ADDRESS            | Address of the Auth service           | http://auth:5000            | hostname/IP:port |
+KEYCLOAK_ADDRESS            | Address of the Auth service           | http://keycloak:8080            | hostname/IP:port |
 DATA_BROKER_ADDRESS     | Address of the Data Broker service    | http://data-broker:80       | hostname/IP:port |
 DEVICE_DATA_TOPIC       | Topic to be consumed                  | device-data                 | string           |
 DEVICE_MANAGER_TOPIC    | Topic to produce to                   | dojot.device-manager.device | string           |
+DOJOT_TENANT          | dojot's  tenant                 | admin                       | string           |
 DOJOT_PASSWORD          | dojot's user password                 | admin                       | string           |
 DOJOT_USERNAME          | dojot's user name                     | admin                       | string           |
 KAFKA_BROKER_LIST       | Comma-separated list of Kafka brokers | kafka-server:9092           | hostname/IP:port |
