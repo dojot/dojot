@@ -15,8 +15,7 @@ const mockSdk = {
   },
   Logger: jest.fn(() => ({
     debug: jest.fn(),
-    // error: jest.fn(),
-    error: (a, b, c, d) => console.log(a, b, c, d),
+    error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
   })),
