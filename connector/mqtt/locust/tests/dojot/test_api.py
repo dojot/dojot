@@ -13,6 +13,9 @@ from src.dojot.api import APICallError, DojotAPI
 
 
 MOCK_CONFIG = {
+    'app': {
+        'tenant': 'admin'
+    },
     'dojot': {
         'user': 'admin',
         'passwd': 'admin',
@@ -32,6 +35,7 @@ class TestDojotAPIGetJwt(unittest.TestCase):
     """
     DojotAPI get_jwt() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -44,14 +48,13 @@ class TestDojotAPIGetJwt(unittest.TestCase):
         Should successfully get a JWT from Dojot.
         """
         args = {
-            "url": "{0}/auth".format(MOCK_CONFIG['dojot']['url']),
-            "data": json.dumps({
+            "url": "{0}/auth/realms/{1}/protocol/openid-connect/token".format(MOCK_CONFIG['dojot']['url'], MOCK_CONFIG['app']['tenant']),
+            "data": {
                 "username": MOCK_CONFIG['dojot']['user'],
-                "passwd": MOCK_CONFIG['dojot']['passwd'],
-            }),
-            "headers": {
-                "Content-Type": "application/json"
-            },
+                "password": MOCK_CONFIG['dojot']['passwd'],
+                "client_id": "admin-cli",
+                "grant_type": "password",
+            }
         }
         DojotAPI.call_api.return_value = {"jwt": "testJWT"}
 
@@ -68,6 +71,7 @@ class TestDojotAPICreateDevices(unittest.TestCase):
     """
     DojotAPI create_devices() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         self.divide_loads = DojotAPI.divide_loads
@@ -106,7 +110,8 @@ class TestDojotAPICreateDevices(unittest.TestCase):
 
         DojotAPI.divide_loads.assert_called_once_with(1, 1)
         self.assertEqual(DojotAPI.divide_loads.return_value, [1])
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(
+            mock_requests.post, self.args, False)
 
     def test_successfully_create_two_devices_two_batches(self, mock_requests):
         """
@@ -137,6 +142,7 @@ class TestDojotAPICreateTemplate(unittest.TestCase):
     """
     DojotAPI create_template() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -182,6 +188,7 @@ class TestDojotAPICreateDevice(unittest.TestCase):
     """
     DojotAPI create_device() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -212,7 +219,8 @@ class TestDojotAPICreateDevice(unittest.TestCase):
             }),
         }
 
-        device_id = DojotAPI.create_device(self.jwt, self.template_id, self.label)
+        device_id = DojotAPI.create_device(
+            self.jwt, self.template_id, self.label)
 
         DojotAPI.call_api.assert_called_once_with(mock_requests.post, args)
         self.assertEqual(device_id, 1)
@@ -224,6 +232,7 @@ class TestDojotAPIDeleteDevices(unittest.TestCase):
     """
     DojotAPI delete_devices() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -256,6 +265,7 @@ class TestDojotAPIDeleteTemplates(unittest.TestCase):
     """
     DojotAPI delete_templates() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -288,6 +298,7 @@ class TestDojotAPIGetDevices(unittest.TestCase):
     """
     DojotAPI get_devices() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -329,12 +340,14 @@ class TestDojotAPIGetDevices(unittest.TestCase):
         DojotAPI.call_api.assert_called_with(mock_requests.get, ANY)
         self.assertEqual(devices, [])
 
+
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIGenerateCertificate(unittest.TestCase):
     """
     DojotAPI generate_certificate() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -364,7 +377,8 @@ class TestDojotAPIGenerateCertificate(unittest.TestCase):
         """
         DojotAPI.generate_certificate(self.jwt, self.csr)
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args)
+        DojotAPI.call_api.assert_called_once_with(
+            mock_requests.post, self.args)
 
     def test_generate_certificate_exception(self, mock_requests):
         """
@@ -378,7 +392,8 @@ class TestDojotAPIGenerateCertificate(unittest.TestCase):
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.post, self.args)
+        DojotAPI.call_api.assert_called_once_with(
+            mock_requests.post, self.args)
 
 
 @patch('src.dojot.api.requests', autospec=True)
@@ -387,6 +402,7 @@ class TestDojotAPIRevokeCertificate(unittest.TestCase):
     """
     DojotAPI revoke_certificate() tests.
     """
+
     def setUp(self):
         self.call_api = DojotAPI.call_api
         DojotAPI.call_api = MagicMock()
@@ -413,7 +429,8 @@ class TestDojotAPIRevokeCertificate(unittest.TestCase):
 
         DojotAPI.revoke_certificate(self.jwt, self.crt['fingerprint'])
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(
+            mock_requests.delete, self.args, False)
 
     def test_revoke_certificate_exception(self, mock_requests):
         """
@@ -427,12 +444,15 @@ class TestDojotAPIRevokeCertificate(unittest.TestCase):
         self.assertIsNotNone(context.exception)
         self.assertIsInstance(context.exception, APICallError)
 
-        DojotAPI.call_api.assert_called_once_with(mock_requests.delete, self.args, False)
+        DojotAPI.call_api.assert_called_once_with(
+            mock_requests.delete, self.args, False)
+
 
 class TestDojotAPIDivideLoads(unittest.TestCase):
     """
     DojotAPI divide_loads() tests.
     """
+
     def test_successfully_divide_loads_even(self):
         """
         Should successfully divide the load - even case (all loads are the same).
@@ -465,12 +485,14 @@ class TestDojotAPICallApi(unittest.TestCase):
     """
     Tests for call_api().
     """
+
     def test_should_get_response(self, mock_requests, mock_gevent):
         """
         Should successfully receive a response from a POST call.
         """
         mock_requests.post = MagicMock()
-        mock_requests.post.return_value.json = PropertyMock(return_value={"return": "testReturn"})
+        mock_requests.post.return_value.json = PropertyMock(
+            return_value={"return": "testReturn"})
 
         args = {
             "url": "testURL",
@@ -490,7 +512,8 @@ class TestDojotAPICallApi(unittest.TestCase):
         Should successfully make a POST call but do not return a JSON.
         """
         mock_requests.post = MagicMock()
-        mock_requests.post.return_value.json = PropertyMock(return_value={"return": "testReturn"})
+        mock_requests.post.return_value.json = PropertyMock(
+            return_value={"return": "testReturn"})
 
         args = {
             "url": "testURL",
@@ -510,7 +533,8 @@ class TestDojotAPICallApi(unittest.TestCase):
         Should not receive a response from a POST call - exceptions rose.
         """
         mock_requests.post = MagicMock()
-        mock_requests.post.return_value.raise_for_status = MagicMock(side_effect=Exception())
+        mock_requests.post.return_value.raise_for_status = MagicMock(
+            side_effect=Exception())
 
         args = {
             "url": "testURL",
@@ -571,7 +595,8 @@ class TestDojotAPICallApi(unittest.TestCase):
         mock_requests.post.return_value.raise_for_status = MagicMock(
             side_effect=[Exception(), None]
         )
-        mock_requests.post.return_value.json = PropertyMock(return_value={"return": "testReturn"})
+        mock_requests.post.return_value.json = PropertyMock(
+            return_value={"return": "testReturn"})
 
         args = {
             "url": "testURL",

@@ -53,7 +53,7 @@ CONFIG = {
         'env':      (str(os.environ.get("DOJOT_ENV", "n")).lower() == "y"),
         'api': {
             'retries':      int(os.environ.get("DOJOT_API_RETRIES", 3)),
-            'time':         float(os.environ.get("DOJOT_API_RETRY_TIME", 5000.0))  / 1000.0,
+            'time':         float(os.environ.get("DOJOT_API_RETRY_TIME", 5000.0)) / 1000.0,
             'page_size':    int(os.environ.get("DOJOT_DEVICES_PAGE_SIZE", 20))
         }
     },

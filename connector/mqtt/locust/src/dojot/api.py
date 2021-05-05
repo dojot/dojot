@@ -32,20 +32,19 @@ class DojotAPI():
         LOGGER.debug("Retrieving JWT...")
 
         args = {
-            "url": "{0}/auth".format(CONFIG['dojot']['url']),
-            "data": json.dumps({
+            "url": "{0}/auth/realms/{1}/protocol/openid-connect/token".format(CONFIG['dojot']['url'], CONFIG['app']['tenant']),
+            "data": {
                 "username": CONFIG['dojot']['user'],
-                "passwd": CONFIG['dojot']['passwd'],
-            }),
-            "headers": {
-                "Content-Type": "application/json"
-            },
+                "password": CONFIG['dojot']['passwd'],
+                "client_id": "admin-cli",
+                "grant_type": "password",
+            }
         }
 
         res = DojotAPI.call_api(requests.post, args)
 
         LOGGER.debug(".. retrieved JWT")
-        return res["jwt"]
+        return res["access_token"]
 
     @staticmethod
     def create_devices(jwt: str, template_id: str, total: int, batch: int) -> None:
@@ -75,7 +74,8 @@ class DojotAPI():
                 "attrs": {},
                 "label": "CargoContainer_{0}".format(i)
             })
-            args["url"] = "{0}/device?count={1}&verbose=false".format(CONFIG['dojot']['url'], load)
+            args["url"] = "{0}/device?count={1}&verbose=false".format(
+                CONFIG['dojot']['url'], load)
 
             DojotAPI.call_api(requests.post, args, False)
 
@@ -263,7 +263,7 @@ class DojotAPI():
             status: status to be set, defaults to 10
         """
         args = {
-            "url": CONFIG['dojot']['url'] + "/x509/v1/certificates/"+ fingerprint,
+            "url": CONFIG['dojot']['url'] + "/x509/v1/certificates/" + fingerprint,
             "headers": {
                 "content-type": "application/json",
                 "Accept": "application/json",
@@ -272,7 +272,6 @@ class DojotAPI():
         }
 
         DojotAPI.call_api(requests.delete, args, False)
-
 
     @staticmethod
     def divide_loads(total: int, batch: int) -> List:
@@ -297,7 +296,7 @@ class DojotAPI():
 
     @staticmethod
     def call_api(func: Callable[..., requests.Response], args: dict, return_json: bool = True) ->\
-        Dict:
+            Dict:
         """
         Calls the Dojot API using `func` and `args`.
 
@@ -316,7 +315,8 @@ class DojotAPI():
             except Exception as exception:
                 LOGGER.debug(str(exception))
                 if res is not None and res.status_code == 429:
-                    LOGGER.error("reached maximum number of requisitions to Dojot")
+                    LOGGER.error(
+                        "reached maximum number of requisitions to Dojot")
                     sys.exit(1)
                 else:
                     LOGGER.error(str(exception))
@@ -328,4 +328,5 @@ class DojotAPI():
                     return res.json()
                 return
 
-        raise APICallError("exceeded the number of retries to {0}".format(args['url']))
+        raise APICallError(
+            "exceeded the number of retries to {0}".format(args['url']))
