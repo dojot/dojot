@@ -36,7 +36,8 @@ RUN apk --no-cache add \
     redis \
     libsasl \
     lz4-libs \
-    tini
+    tini \
+    curl
 
 COPY --from=base /opt/kafka-ws /opt/kafka-ws
 
