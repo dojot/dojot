@@ -56,7 +56,7 @@ class TestDojotAPIGetJwt(unittest.TestCase):
                 "grant_type": "password",
             }
         }
-        DojotAPI.call_api.return_value = {"jwt": "testJWT"}
+        DojotAPI.call_api.return_value = {"access_token": "testJWT"}
 
         jwt = DojotAPI.get_jwt()
 
