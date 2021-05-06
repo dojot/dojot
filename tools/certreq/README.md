@@ -55,7 +55,7 @@ key | value
 -h  | Hostname (or IP) of the dojot platform.<br>**Default**: 127.0.0.1
 -p  | Port on which the dojot platform responds to the certificate issuing API.<br>**Default**: 8000
 -i  | Entity identifier. It must have the same device ID registered on the dojot platform. If not informed, a certificate will be generated _for each device_ that the user has access to.
--r  | Tenant  to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
+-t  | Tenant  to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
 -u  | Username to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
 -s  | User password (secret)  to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin
 
