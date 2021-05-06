@@ -42,7 +42,7 @@ createRealm() {
     -H "Authorization: Bearer ${JWT}" \
     -d "{\"realm\": \"${KEYCLOAK_CREATE_REALM}\", \"enabled\": true}"
 
- echo "...finished realm ${KEYCLOAK_CREATE_REALM} create."
+  echo "...finished realm ${KEYCLOAK_CREATE_REALM} create."
 }
 
 getToken
