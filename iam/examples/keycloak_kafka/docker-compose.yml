@@ -51,6 +51,24 @@ services:
         max-size: 20m
         max-file: '5'
 
+  keycloak-init:
+    image: dojot/docker5gmedia-appropriate-curl-jq
+    entrypoint: /opt/keycloak.config.sh
+    restart: on-failure
+    environment:
+      KEYCLOAK_MASTER_USER: admin
+      KEYCLOAK_MASTER_PASSWORD: admin
+      KEYCLOAK_CREATE_REALM: admin
+    depends_on:
+      - keycloak
+    volumes:
+      - ./keycloak.config.sh:/opt/keycloak.config.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
   postgres:
     image: dojot/postgres:9.5.21-alpine
     restart: always
