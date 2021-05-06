@@ -36,8 +36,7 @@ RUN apk --no-cache add \
     redis \
     libsasl \
     lz4-libs \
-    tini \
-    curl
+    tini
 
 COPY --from=base /opt/kafka-ws /opt/kafka-ws
 
@@ -46,4 +45,4 @@ ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["./bin/entryPoint.sh", "npm", "run", "kafka-ws"]
 
 HEALTHCHECK --start-period=30s --interval=30s --timeout=10s --retries=3 \
-    CMD curl -f http://localhost:9000/health || exit 1
+    CMD wget http://localhost:9000/health -q -O - > /dev/null 2>&1
