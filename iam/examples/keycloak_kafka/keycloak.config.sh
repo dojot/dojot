@@ -35,10 +35,14 @@ getToken() {
 }
 
 createRealm() {
+  echo "Creating realm ${KEYCLOAK_CREATE_REALM}..."
+
   curl -X POST "${KEYCLOAK_HOST}/admin/realms" \
     -H "Content-Type:application/json" \
     -H "Authorization: Bearer ${JWT}" \
     -d "{\"realm\": \"${KEYCLOAK_CREATE_REALM}\", \"enabled\": true}"
+
+ echo "...finished realm ${KEYCLOAK_CREATE_REALM} create."
 }
 
 getToken
