@@ -22,7 +22,6 @@ USERNAME="admin"
 PASSWD="admin"
 DEVICE_IDS=''
 JWT=''
-TOKEN_FILE=''
 
 readonly KEY_PAIR_FILE='private.key'
 readonly CSR_FILE='request.csr'
@@ -72,7 +71,6 @@ function getToken() {
     printf '\r\xE2\x9D\x8C Failed to get access token!\n'
     exit 1
   else
-    echo "${JWT}" > "${TOKEN_FILE}"
     printf '\r\xE2\x9C\x94 Obtained access token!    \n'
   fi
 }
@@ -158,11 +156,10 @@ function parseArgs() {
     case "$1" in
       -h ) HOST="${2}"; shift;;
       -p ) PORT="${2}"; shift;;
-      -r ) TENANT="${2}"; shift;;
+      -t ) TENANT="${2}"; shift;;
       -i ) DEVICE_IDS="$2"; shift;;
       -u ) USERNAME="${2}"; shift;;
       -s ) PASSWD="${2}"; shift;;
-      -t ) TOKEN_FILE="${2}"; shift;;
       * )  args+=("$1")  # if no match, add it to the positional args
     esac
     shift # move to next key-value pair
@@ -176,25 +173,11 @@ function parseArgs() {
     DEVICE_IDS=$(echo -e "${DEVICE_IDS//,/'\n'}")
   fi
 
-  # If the name of the file containing the access token is not entered
-  # by parameter, then a default name is defined...
-  if [ -z "${TOKEN_FILE}" ] ; then
-    TOKEN_FILE='token.jwt'
-  fi
-
-  # If the file containing the access token exists, then the token is loaded
-  # into the variable. This way, it is not necessary to use the username and
-  # password to generate a new token.
-  if [ -f "${TOKEN_FILE}" ]; then
-    JWT=$(cat "${TOKEN_FILE}")
-  fi
-
   readonly HOST
   readonly PORT
   readonly TENANT
   readonly USERNAME
   readonly PASSWD
-  readonly TOKEN_FILE
 }
 
 function precondition() {
