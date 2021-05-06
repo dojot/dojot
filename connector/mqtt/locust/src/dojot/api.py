@@ -36,7 +36,7 @@ class DojotAPI():
             "data": {
                 "username": CONFIG['dojot']['user'],
                 "password": CONFIG['dojot']['passwd'],
-                "client_id": "admin-cli",
+                "client_id": "cli",
                 "grant_type": "password",
             }
         }
