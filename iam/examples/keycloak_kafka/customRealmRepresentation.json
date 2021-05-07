@@ -450,16 +450,18 @@
       "totp": false,
       "emailVerified": false,
       "credentials": [
-        {
-          "id": "73289c6b-aacd-4282-9123-6803f7c55ad6",
-          "type": "password",
-          "createdDate": 1620418259545,
-          "secretData": "{\"value\":\"MszATebyDGRsOIarRYhJ8rTD7gLmPJCooxaoWDazk9SQVc575/2UUBO8fkS2PwBg191oKu8VE3bTSoOTcRXmnA==\",\"salt\":\"fGwPLG3Zw6NamiwXScEw3Q==\",\"additionalParameters\":{}}",
-          "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
-        }
+          {
+              "id": "efd243dd-516f-4202-b17b-90fd4af97e67",
+              "type": "password",
+              "createdDate": 1620413952548,
+              "secretData": "{\"value\":\"29KT/CUVUC+pH7KMHHz3ACHmspA9Q+4GlNZoaSnoFLDeq9jcZgjamEWimi6VQr1OG0+qE99Mt5nZAf8/6fs8QQ==\",\"salt\":\"hF78LXNSOMuZ6U+igI+YOA==\",\"additionalParameters\":{}}",
+              "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+          }
       ],
       "disableableCredentialTypes": [],
-      "requiredActions": [],
+      "requiredActions": [
+          "UPDATE_PASSWORD"
+      ],
       "realmRoles": [
         "admin",
         "uma_authorization",
