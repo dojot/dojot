@@ -468,19 +468,19 @@
         "offline_access"
       ],
       "clientRoles": {
-        "realm-management": [
-          "manage-clients",
-          "manage-users",
-          "manage-authorization",
-          "create-client",
-          "view-clients",
-          "view-users",
-          "view-authorization"
-        ],
-        "account": [
-          "manage-account",
-          "view-profile"
-        ]
+            "realm-management": [
+                "manage-clients",
+                "manage-users",
+                "manage-authorization",
+                "create-client",
+                "view-clients",
+                "view-users",
+                "view-authorization"
+            ],
+            "account": [
+                "manage-account",
+                "view-profile"
+            ]
       },
       "notBefore": 0,
       "groups": []
