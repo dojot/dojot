@@ -27,6 +27,12 @@ COPY --from=base \
     /opt/dojot/dojot-provider/target/jboss-modules \
     $JBOSS_HOME/modules/system/layers/keycloak/
 
+# Password blacklists are simple text files where every line is a blacklisted
+# password delimited by \n. Blacklist files are discovered and registered at
+# keycloak startup
+COPY dojot-password-blacklist.txt \
+    $JBOSS_HOME/standalone/data/password-blacklists/
+
 # Copies the "dojot-provider" module configuration script
 COPY --from=base \
     /opt/dojot/dojot-provider/src/main/resources/dojot-provider.cli \

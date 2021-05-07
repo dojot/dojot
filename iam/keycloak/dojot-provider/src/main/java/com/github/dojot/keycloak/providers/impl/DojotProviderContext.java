@@ -1,7 +1,7 @@
 package com.github.dojot.keycloak.providers.impl;
 
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.representations.idm.PartialImportRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ public class DojotProviderContext {
     private String kafkaTopic;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
-    private PartialImportRepresentation customRealmRep;
+    private RealmRepresentation customRealmRepresentation;
     private SMTPServerConfig smtpServerConfig;
 
     public KeycloakSession getKeycloakSession() {
@@ -61,12 +61,12 @@ public class DojotProviderContext {
         this.validRealmName = validRealmName;
     }
 
-    public PartialImportRepresentation getCustomRealmRep() {
-        return customRealmRep;
+    public RealmRepresentation getCustomRealmRepresentation() {
+        return customRealmRepresentation;
     }
 
-    public void setCustomRealmRep(PartialImportRepresentation customRealmRep) {
-        this.customRealmRep = customRealmRep;
+    public void setCustomRealmRepresentation(RealmRepresentation customRealmRepresentation) {
+        this.customRealmRepresentation = customRealmRepresentation;
     }
 
     public SMTPServerConfig getSmtpServerConfig() {

@@ -1,13 +1,12 @@
 package com.github.dojot.keycloak.providers.impl;
 
+import com.github.dojot.keycloak.custom.DojotRealmManager;
 import com.github.dojot.keycloak.error.DojotProviderException;
 import com.github.dojot.keycloak.kafka.DojotkafkaProducer;
 import com.github.dojot.keycloak.kafka.Event;
-import com.github.dojot.keycloak.partialimport.DojotPartialImportManager;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.models.RealmModel;
-import org.keycloak.partialimport.ErrorResponseException;
 
 import javax.ws.rs.core.Response;
 import java.util.regex.Matcher;
@@ -41,18 +40,13 @@ public class DojotProviderImpl implements DojotProvider {
 
     @Override
     public void customizeRealm(RealmModel realm) {
-        try {
-            DojotPartialImportManager dojotPartialImportManager = new DojotPartialImportManager(context, realm);
-            dojotPartialImportManager.doImport();
+        DojotRealmManager dojotRealmManager = new DojotRealmManager(context, realm);
+        dojotRealmManager.doImport();
 
-            // configure SMTP Server
-            DojotProviderContext.SMTPServerConfig smtpServerConfig = context.getSmtpServerConfig();
-            if (smtpServerConfig != null) {
-                realm.setSmtpConfig(smtpServerConfig.map());
-            }
-        } catch (ErrorResponseException ex) {
-            LOG.error(ex.getMessage(), ex);
-            throw new RuntimeException(ex);
+        // configure SMTP Server
+        DojotProviderContext.SMTPServerConfig smtpServerConfig = context.getSmtpServerConfig();
+        if (smtpServerConfig != null) {
+            realm.setSmtpConfig(smtpServerConfig.map());
         }
     }
 

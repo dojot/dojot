@@ -9,16 +9,17 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
-import org.keycloak.representations.idm.PartialImportRepresentation;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.util.JsonSerialization;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Scanner;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -37,7 +38,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
     private String customRealmRepFileName;
-    private PartialImportRepresentation customRealmRep;
+    private RealmRepresentation customRealmRep;
     private DojotProviderContext.SMTPServerConfig smtpServerConfig;
 
     @Override
@@ -107,8 +108,25 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         }
         File customRealmJson = new File(customRealmRepFileName);
         try {
-            FileInputStream inputStream = new FileInputStream(customRealmJson);
-            customRealmRep = JsonSerialization.readValue(inputStream, PartialImportRepresentation.class);
+            // Regex to remove attributes that represent unique identifiers.
+            // This will force Keycloak to generate new identifiers
+            Pattern p = Pattern.compile("^[ \\t]*\"(_?id|containerId)\".*$");
+
+            // Loads the json file into a string buffer
+            StringBuilder builder = new StringBuilder((int) customRealmJson.length());
+            Scanner reader = new Scanner(customRealmJson);
+            while (reader.hasNextLine()) {
+                String line = reader.nextLine();
+                Matcher m = p.matcher(line);
+                if (!m.matches()) {
+                    builder.append(line).append("\n");
+                }
+            }
+            reader.close();
+            String data = builder.toString();
+
+            // Retrieves the java object from its json representation
+            customRealmRep = JsonSerialization.readValue(data, RealmRepresentation.class);
         } catch (FileNotFoundException ex) {
             String err = "Error loading dojot custom realm representation. Json file " + customRealmJson + " doesn't exists";
             LOG.error(err, ex);
@@ -136,7 +154,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             // and so it can be used again in a future operation. In this way, only the
             // clone object is modified and discarded at the end of the operation.
             byte[] jsonBytes = JsonSerialization.writeValueAsBytes(customRealmRep);
-            PartialImportRepresentation customRealmRepClone = JsonSerialization.readValue(jsonBytes, PartialImportRepresentation.class);
+            RealmRepresentation customRealmRepClone = JsonSerialization.readValue(jsonBytes, RealmRepresentation.class);
 
             DojotProviderContext context = new DojotProviderContext();
             context.setKeycloakSession(keycloakSession);
@@ -144,7 +162,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             context.setKafkaTopic(kafkaTopic);
             context.setKafkaProducerProps(kafkaProducerProps);
             context.setValidRealmName(validRealmName);
-            context.setCustomRealmRep(customRealmRepClone);
+            context.setCustomRealmRepresentation(customRealmRepClone);
             context.setSmtpServerConfig(smtpServerConfig);
             return new DojotProviderImpl(context);
         } catch (IOException ex) {
