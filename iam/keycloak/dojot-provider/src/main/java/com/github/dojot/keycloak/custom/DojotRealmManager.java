@@ -16,6 +16,7 @@ import org.keycloak.representations.idm.AuthenticatorConfigRepresentation;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ClientScopeRepresentation;
 import org.keycloak.representations.idm.ComponentExportRepresentation;
+import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.RequiredActionProviderRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
@@ -42,13 +43,15 @@ public class DojotRealmManager extends RealmManager {
     private final RealmRepresentation realmRepresentation;
     private final RealmModel realmModel;
     private final String dojotRootUrl;
+    private final String adminPassword;
 
     public DojotRealmManager(DojotProviderContext context, RealmModel realmModel) {
         super(context.getKeycloakSession());
-        this.session = context.getKeycloakSession();
-        this.realmRepresentation = context.getCustomRealmRepresentation();
-        this.realmModel = realmModel;
+        session = context.getKeycloakSession();
+        realmRepresentation = context.getCustomRealmRepresentation();
         dojotRootUrl = context.getRootUrl();
+        adminPassword = context.getAdminPassword();
+        this.realmModel = realmModel;
     }
 
     public void doImport() {
@@ -274,6 +277,16 @@ public class DojotRealmManager extends RealmManager {
                 LOG.info(existsMessage(user));
                 it.remove();
                 continue;
+            }
+
+            // Defines a new default password for the user to be imported,
+            // overwriting the original password...
+            if (adminPassword != null
+                    && "admin".equals(user.getUsername())
+                    && user.getCredentials() != null) {
+                for (CredentialRepresentation cred : user.getCredentials()) {
+                    cred.setValue(adminPassword);
+                }
             }
         }
     }

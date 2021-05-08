@@ -34,6 +34,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
     private static final Logger LOG = Logger.getLogger(DojotProviderFactoryImpl.class);
 
     private String rootUrl;
+    private String adminPassword;
     private String kafkaTopic;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
@@ -46,6 +47,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         LOG.info("Init DojotProviderFactory...");
         DojotProviderFactory.super.init(scope);
         rootUrl = scope.get("rootUrl");
+        adminPassword = scope.get("adminPassword");
         initRealmValidationConfig(scope);
         initKafkaProducerConfig(scope);
         initSMTPServerConfig(scope);
@@ -159,6 +161,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             DojotProviderContext context = new DojotProviderContext();
             context.setKeycloakSession(keycloakSession);
             context.setRootUrl(rootUrl);
+            context.setAdminPassword(adminPassword);
             context.setKafkaTopic(kafkaTopic);
             context.setKafkaProducerProps(kafkaProducerProps);
             context.setValidRealmName(validRealmName);
@@ -192,6 +195,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         map.put("Valid realm name Regex", validRealmName.toString());
         map.put("Custom Realm Representation File", customRealmRepFileName);
         map.put("Root URL", rootUrl);
+        map.put("Default Realm Admin User Password", (adminPassword != null) ? "ENABLED" : "DISABLED");
 
         if (smtpServerConfig != null) {
             for (Map.Entry<String, String> entry : smtpServerConfig.map().entrySet()) {

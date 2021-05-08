@@ -15,6 +15,7 @@ public class DojotProviderContext {
 
     private KeycloakSession keycloakSession;
     private String rootUrl;
+    private String adminPassword;
     private String kafkaTopic;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
@@ -31,6 +32,14 @@ public class DojotProviderContext {
 
     public String getRootUrl() {
         return rootUrl;
+    }
+
+    public String getAdminPassword() {
+        return adminPassword;
+    }
+
+    public void setAdminPassword(String adminPassword) {
+        this.adminPassword = adminPassword;
     }
 
     public void setKeycloakSession(KeycloakSession keycloakSession) {

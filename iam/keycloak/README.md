@@ -8,7 +8,14 @@ In addition to generating access tokens for the platform's APIs, the Keycloak
 has also been customized to run a specific [provider](https://www.keycloak.org/docs/12.0/server_development/index.html#_providers)
 for the dojot. This is called [Dojot Provider](./dojot-provider) and has the
 role of managing the creation of tenants (Keycloak Realms), applying
-validations, customizations and publishing events on Kafka to notify the other platform's microservices.
+validations, customizations and publishing events on Kafka to notify the other
+platform's microservices.
+
+The dojot platform uses a _strong password policy_ and validates user passwords
+against a [list](./dojot-password-blacklist.txt) of passwords that are not
+allowed, but you can define your own list of passwords that are not allowed.
+[Here](https://www.keycloak.org/docs-api/12.0/javadocs/org/keycloak/policy/BlacklistPasswordPolicyProviderFactory.html)
+you can find out more details about this Keycloak functionality.
 
 ## Configuration
 

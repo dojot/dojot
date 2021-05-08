@@ -5,6 +5,7 @@ batch
 /subsystem=keycloak-server/spi=dojot:add()
 /subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.adminPassword,value=${env.DOJOT_ADMIN_PASSWORD:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:kafka:9092})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID:keycloak})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:dojot-management.dojot.tenancy})

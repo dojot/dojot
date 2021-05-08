@@ -134,6 +134,9 @@ With the CLI in embedded mode, we will execute the following commands:
 # This command tells our service provider what is the root URL of the clients configured for dojot
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
 
+# This command tells our service provider what is the default realm admin user password configured for dojot
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.adminPassword,value=${env.DOJOT_ADMIN_PASSWORD:})
+
 # This command tells our Service Provider where to connect to Kafka
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:})
 
@@ -201,6 +204,7 @@ batch
 /subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
 /subsystem=keycloak-server/spi=dojot:add()
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.adminPassword,value=${env.DOJOT_ADMIN_PASSWORD:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:})
@@ -242,10 +246,13 @@ $JBOSS_HOME/bin/standalone.sh --server-config=standalone-ha.xml
 | DOJOT_KAFKA_TOPIC    | `dojot-management.dojot.tenancy` | Kafka topic in which messages regarding the creation and removal of tenants (Realms) will be published. |
 | DOJOT_VALID_REALM_NAME_REGEX | `^[a-zA-Z0-9]{1,30}$` | Regular expression to be applied in the name of the newly created tenant to force it to be compatible with the rules of the dojot platform. |
 | DOJOT_CUSTOM_REALM_REP_FILE | `/opt/dojot/customRealmRepresentation.json` | Full path of the json file used as a basis for customizing the tenant according to the rules of the dojot platform. |
+| DOJOT_ADMIN_PASSWORD | `aA1!bB2@cC3#`   | Default password for the `admin` user created automatically (by dojot-provider) when creating a new Realm. This password must follow the _strong password policies_ defined in the Realm customization json file. |
 
 _Note that_ the json file must follow the structure (Schema) defined in the
-[REST API](https://www.keycloak.org/docs-api/12.0/rest-api/index.html#_partialimportrepresentation)
-of the keycloak.
+[REST API](https://www.keycloak.org/docs-api/12.0/rest-api/index.html#_realmrepresentation)
+of the keycloak. This file can be obtained by exporting a Realm. For more
+details, see the [official documentation](https://www.keycloak.org/docs/12.0/server_admin/#_export_import).
+
 The file can be included in the keycloak container `VOLUME ["/opt/dojot/"]`.
 Check the [example](../../examples/keycloak_kafka/) directory for more details.
 
