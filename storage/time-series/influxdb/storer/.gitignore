@@ -12,6 +12,9 @@ coverage
 # Dependency directories
 node_modules/
 
+# Local history
+.history
+
 # Optional npm cache directory
 .npm
 
