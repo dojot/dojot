@@ -12,9 +12,9 @@ ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
 
+const StateManager = require('./app/StateManager');
 const application = require('./app/App');
 const websocketTarball = require('./app/WebsocketTarball');
-const StateManager = require('./app/StateManager');
 
 Logger.setTransport('console', { level: config.log['console.level'] });
 
@@ -28,7 +28,7 @@ Logger.setVerbose(config.log.verbose);
 const logger = new Logger('app');
 const stateService = 'http';
 
-logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
+logger.debug(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
 let server = null;
 

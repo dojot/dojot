@@ -10,7 +10,7 @@
   "main": "index.js",
   "scripts": {
     "kafka-ws": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "nodemon index.js --ignore ./config -V",
     "test": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --coverage",
     "test:watch": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && jest --watch --coverage",
     "debugtest": "nearleyc app/WhereProcessing/Grammar.ne -o app/WhereProcessing/Parser.js && node --inspect-brk node_modules/.bin/jest --runInBand --coverage=false",
