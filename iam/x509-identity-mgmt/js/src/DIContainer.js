@@ -87,7 +87,7 @@ const {
   requestLogInterceptor,
   paginateInterceptor,
   jsonBodyParsingInterceptor,
-  tokenParsingInterceptor,
+  tokenKeycloakParsingInterceptor,
   staticFileInterceptor,
 } = WebUtils.framework.interceptors;
 
@@ -167,7 +167,7 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    tokenGen: asFunction(WebUtils.createTokenGen, {
+    tokenGen: asFunction(WebUtils.createTokenKeycloakGen, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -250,7 +250,7 @@ function createObject(config) {
           DIContainer.resolve('requestLogInterceptor'),
           DIContainer.resolve('paginateInterceptor'),
           DIContainer.resolve('jsonBodyParsingInterceptor'),
-          DIContainer.resolve('tokenParsingInterceptor'),
+          DIContainer.resolve('tokenKeycloakParsingInterceptor'),
           DIContainer.resolve('staticFileInterceptor'),
           DIContainer.resolve('scopedDIInterceptor'),
         ],
@@ -333,7 +333,7 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    tokenParsingInterceptor: asFunction(tokenParsingInterceptor, {
+    tokenKeycloakParsingInterceptor: asFunction(tokenKeycloakParsingInterceptor, {
       injector: () => ({
         ignoredPaths: ['/internal/api/'],
         path: '/',
