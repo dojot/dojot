@@ -23,17 +23,32 @@ function stateManagerMock() {
 }
 
 function diContainerMock() {
-  const runnable = {
+  const deviceMgrEventRunnable = {
     run: jest.fn().mockResolvedValue(undefined),
   };
-  const scope = {
-    register: jest.fn(),
-    resolve: jest.fn(() => runnable),
+
+  const deviceMgrEventRunnableResolver = {
+    resolve: () => deviceMgrEventRunnable,
   };
+
+  const scope = {
+    cradle: { deviceMgrEventRunnable: deviceMgrEventRunnableResolver },
+    register: jest.fn((entries) => {
+      scope.cradle = { ...scope.cradle, ...entries };
+    }),
+    resolve: jest.fn((entry) => {
+      const resolver = Reflect.get(scope.cradle, entry);
+      if (resolver) {
+        return resolver.resolve();
+      }
+      return null;
+    }),
+  };
+
   const diContainer = {
     createScope: jest.fn(() => scope),
     scope,
-    runnable,
+    runnable: deviceMgrEventRunnable,
   };
   return diContainer;
 }
@@ -88,6 +103,8 @@ describe("Unit tests of script 'DeviceMgrEventEngine.js'", () => {
     expect(deviceMgrEventEngine.container.scope.register).toHaveBeenCalledTimes(1);
     expect(deviceMgrEventEngine.container.scope.resolve).toHaveBeenCalledTimes(1);
     expect(deviceMgrEventEngine.container.runnable.run).toHaveBeenCalledTimes(1);
+
+    expect(deviceMgrEventEngine.container.scope.resolve('logger')).toBeInstanceOf(Logger);
   });
 
   it('should throw an exception when processing the DeviceMgrEventEngine', async () => {
