@@ -22,8 +22,10 @@ const regOrGenCertSchema = require('./schemas/register-or-generate-certificate.j
 const chOwnCertSchema = require('./schemas/change-owner-certificate.json');
 
 const throwAwayRoutes = require('./src/express/routes/throwAwayRoutes');
-const internalCARoutes = require('./src/express/routes/internalCARoutes');
+const internalCertificateRoutes = require('./src/express/routes/internal/certificateRoutes');
+
 const certificateRoutes = require('./src/express/routes/certificateRoutes');
+const caRoutes = require('./src/express/routes/caRoutes');
 const trustedCARoutes = require('./src/express/routes/trustedCARoutes');
 
 
@@ -63,6 +65,8 @@ const validApplications = global.config.certificate.belongsto.application;
 global.throwAwayRoutes = throwAwayRoutes({
   mountPoint: '/internal/api/v1', schemaValidator, errorTemplate, validApplications,
 });
-global.internalCARoutes = internalCARoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });
+global.internalCertificateRoutes = internalCertificateRoutes({ mountPoint: '/internal/api/v1' });
+
+global.caRoutes = caRoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });
 global.trustedCARoutes = trustedCARoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });
 global.certificateRoutes = certificateRoutes({ mountPoint: '/api/v1', schemaValidator, errorTemplate });

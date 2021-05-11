@@ -26,7 +26,7 @@ const framework = WebUtils.framework.createExpress({
       middleware: (req, res, next) => {
         req.scope = {
           resolve: jest.fn((dep) => {
-            if (dep === 'internalCAService') {
+            if (dep === 'caService') {
               return {
                 getRootCertificate: jest.fn(() => caQueryResult),
                 getRootCRL: jest.fn(() => crlQueryResult),

@@ -6,7 +6,7 @@ const sanitizeParams = require('./sanitizeParams');
 
 const CERT_SERVICE = 'certificateService';
 
-const CA_SERVICE = 'internalCAService';
+const CA_SERVICE = 'caService';
 
 const TRUSTED_CA_SERVICE = 'trustedCAService';
 

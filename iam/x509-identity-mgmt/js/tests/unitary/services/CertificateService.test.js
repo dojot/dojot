@@ -144,6 +144,23 @@ describe("Unit tests of script 'CertificateService.js'", () => {
     jest.clearAllMocks();
   });
 
+  describe('elevates and drops the service privileges', () => {
+    let containerCradle = null;
+
+    beforeEach(() => {
+      containerCradle = { ...containerCradleTemplate };
+    });
+
+    it('should elevate and drop the service privileges', async () => {
+      const certificateService = new CertificateService(containerCradle);
+      expect(certificateService.elevatedPrivileges).toBe(false);
+      certificateService.elevatePrivileges();
+      expect(certificateService.elevatedPrivileges).toBe(true);
+      certificateService.dropPrivileges();
+      expect(certificateService.elevatedPrivileges).toBe(false);
+    });
+  });
+
   describe('certificate generation based on CSR', () => {
     let containerCradle = null;
 
