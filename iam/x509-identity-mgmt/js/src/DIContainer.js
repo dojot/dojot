@@ -35,7 +35,7 @@ const EjbcaHealthCheck = require('./ejbca/EjbcaHealthCheck');
 
 const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
 
-const throwAwayRoutes = require('./express/routes/throwAwayRoutes');
+const internalThrowAwayRoutes = require('./express/routes/internal/throwAwayRoutes');
 
 const internalCertificateRoutes = require('./express/routes/internal/certificateRoutes');
 
@@ -256,7 +256,7 @@ function createObject(config) {
         ],
         routes: ([
           // The order of the routes matters
-          DIContainer.resolve('throwAwayRoutes'),
+          DIContainer.resolve('internalThrowAwayRoutes'),
           DIContainer.resolve('internalCertificateRoutes'),
           DIContainer.resolve('caRoutes'),
           DIContainer.resolve('trustedCARoutes'),
@@ -359,7 +359,7 @@ function createObject(config) {
     // | Routes |
     // +--------+
 
-    throwAwayRoutes: asFunction(throwAwayRoutes, {
+    internalThrowAwayRoutes: asFunction(internalThrowAwayRoutes, {
       injector: () => ({
         mountPoint: '/internal/api/v1',
         validApplications: config.certificate.belongsto.application || [],

@@ -1,8 +1,8 @@
 const HttpStatus = require('http-status-codes');
 
-const { ContentType, contentNegotiation } = require('./contentNegotiation');
+const { ContentType, contentNegotiation } = require('../contentNegotiation');
 
-const sanitizeParams = require('./sanitizeParams');
+const sanitizeParams = require('../sanitizeParams');
 
 const CERT_SERVICE = 'certificateService';
 

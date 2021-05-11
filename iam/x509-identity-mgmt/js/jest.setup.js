@@ -21,7 +21,7 @@ const updTrustCaSchema = require('./schemas/update-trusted-ca-certificate.json')
 const regOrGenCertSchema = require('./schemas/register-or-generate-certificate.json');
 const chOwnCertSchema = require('./schemas/change-owner-certificate.json');
 
-const throwAwayRoutes = require('./src/express/routes/throwAwayRoutes');
+const internalThrowAwayRoutes = require('./src/express/routes/internal/throwAwayRoutes');
 const internalCertificateRoutes = require('./src/express/routes/internal/certificateRoutes');
 
 const certificateRoutes = require('./src/express/routes/certificateRoutes');
@@ -62,7 +62,7 @@ global.paginateInterceptor = paginateInterceptor({
 
 const validApplications = global.config.certificate.belongsto.application;
 
-global.throwAwayRoutes = throwAwayRoutes({
+global.internalThrowAwayRoutes = internalThrowAwayRoutes({
   mountPoint: '/internal/api/v1', schemaValidator, errorTemplate, validApplications,
 });
 global.internalCertificateRoutes = internalCertificateRoutes({ mountPoint: '/internal/api/v1' });
