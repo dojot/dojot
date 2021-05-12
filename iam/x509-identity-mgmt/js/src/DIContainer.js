@@ -35,9 +35,11 @@ const EjbcaHealthCheck = require('./ejbca/EjbcaHealthCheck');
 
 const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
 
-const throwAwayRoutes = require('./express/routes/throwAwayRoutes');
+const internalThrowAwayRoutes = require('./express/routes/internal/throwAwayRoutes');
 
-const internalCARoutes = require('./express/routes/internalCARoutes');
+const internalCertificateRoutes = require('./express/routes/internal/certificateRoutes');
+
+const caRoutes = require('./express/routes/caRoutes');
 
 const trustedCARoutes = require('./express/routes/trustedCARoutes');
 
@@ -45,7 +47,7 @@ const certificateRoutes = require('./express/routes/certificateRoutes');
 
 const CertificateService = require('./services/CertificateService');
 
-const InternalCAService = require('./services/InternalCAService');
+const CAService = require('./services/CAService');
 
 const TrustedCAService = require('./services/TrustedCAService');
 
@@ -254,8 +256,9 @@ function createObject(config) {
         ],
         routes: ([
           // The order of the routes matters
-          DIContainer.resolve('throwAwayRoutes'),
-          DIContainer.resolve('internalCARoutes'),
+          DIContainer.resolve('internalThrowAwayRoutes'),
+          DIContainer.resolve('internalCertificateRoutes'),
+          DIContainer.resolve('caRoutes'),
           DIContainer.resolve('trustedCARoutes'),
           DIContainer.resolve('certificateRoutes'),
         ]).flat(),
@@ -332,7 +335,7 @@ function createObject(config) {
 
     tokenParsingInterceptor: asFunction(tokenParsingInterceptor, {
       injector: () => ({
-        ignoredPaths: ['/throw-away'],
+        ignoredPaths: ['/internal/api/'],
         path: '/',
       }),
       lifetime: Lifetime.SINGLETON,
@@ -356,7 +359,7 @@ function createObject(config) {
     // | Routes |
     // +--------+
 
-    throwAwayRoutes: asFunction(throwAwayRoutes, {
+    internalThrowAwayRoutes: asFunction(internalThrowAwayRoutes, {
       injector: () => ({
         mountPoint: '/internal/api/v1',
         validApplications: config.certificate.belongsto.application || [],
@@ -364,7 +367,12 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    internalCARoutes: asFunction(internalCARoutes, {
+    internalCertificateRoutes: asFunction(internalCertificateRoutes, {
+      injector: () => ({ mountPoint: '/internal/api/v1' }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    caRoutes: asFunction(caRoutes, {
       injector: () => ({ mountPoint: '/api/v1' }),
       lifetime: Lifetime.SINGLETON,
     }),
@@ -396,7 +404,7 @@ function createObject(config) {
       lifetime: Lifetime.SCOPED,
     }),
 
-    internalCAService: asFunction(fromDecoratedClass(InternalCAService), {
+    caService: asFunction(fromDecoratedClass(CAService), {
       injector: () => ({
         rootCA: config.ejbca.rootca,
       }),

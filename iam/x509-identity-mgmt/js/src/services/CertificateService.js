@@ -75,6 +75,39 @@ class CertificateService {
     Object.defineProperty(this, 'error', { value: errorTemplate });
     Object.defineProperty(this, 'deviceMgrProvider', { value: deviceMgrProvider });
     Object.defineProperty(this, 'ownershipNotifier', { value: ownershipNotifier });
+
+    // Flag used to determine the privilege of an operation.
+    // An operation performed with elevated privileges bypasses some access restrictions
+    // Avoid changing the value of this flag directly.
+    // To make the code more readable, use the specific methods.
+    Object.defineProperty(this, 'elevatedPrivileges', { value: false, writable: true });
+  }
+
+  /**
+   * It elevates the privileges of the operations, in this
+   * way it is possible to bypass certain restrictions.
+   *
+   * @returns Returns the reference of the service itself
+   */
+  elevatePrivileges() {
+    this.elevatedPrivileges = true;
+    return this;
+  }
+
+  /**
+   * It drops the privileges of the operations, in this way,
+   * some restrictions will be applied to operations,
+   * for example, control by tenant.
+   *
+   * Restrictions are applied by default. Thus, the use of
+   * this method only makes sense since the privileges were
+   * previously elevated.
+   *
+   * @returns Returns the reference of the service itself
+   */
+  dropPrivileges() {
+    this.elevatedPrivileges = false;
+    return this;
   }
 
   /**
@@ -250,7 +283,11 @@ class CertificateService {
    * @throws an exception if no record is found with the entered filters.
    */
   async changeOwnership(filterFields, belongsTo = {}) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    // If there are no elevated privileges, we must overwrite
+    // the tenant according to the scope of the service...
+    if (!this.elevatedPrivileges) {
+      Object.assign(filterFields, { tenant: this.tenant });
+    }
 
     // Checks on the certificate owner
     await this.checkBelongsTo(belongsTo);
@@ -292,7 +329,11 @@ class CertificateService {
    * @throws an exception if no record is found with the informed filters.
    */
   async getCertificate(queryFields, filterFields) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    // If there are no elevated privileges, we must overwrite
+    // the tenant according to the scope of the service...
+    if (!this.elevatedPrivileges) {
+      Object.assign(filterFields, { tenant: this.tenant });
+    }
 
     /* Executes the query and converts the result to JSON */
     const result = await this.CertificateModel.findOne(filterFields)
@@ -319,7 +360,11 @@ class CertificateService {
    * @returns a set of certificates that meet the search criteria
    */
   async listCertificates(queryFields, filterFields, limit = 0, offset = 0) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    // If there are no elevated privileges, we must overwrite
+    // the tenant according to the scope of the service...
+    if (!this.elevatedPrivileges) {
+      Object.assign(filterFields, { tenant: this.tenant });
+    }
 
     const query = this.CertificateModel.find(filterFields)
       .select(queryFields.join(' '))

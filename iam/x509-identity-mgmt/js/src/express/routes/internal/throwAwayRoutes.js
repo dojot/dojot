@@ -1,12 +1,12 @@
 const HttpStatus = require('http-status-codes');
 
-const { ContentType, contentNegotiation } = require('./contentNegotiation');
+const { ContentType, contentNegotiation } = require('../contentNegotiation');
 
-const sanitizeParams = require('./sanitizeParams');
+const sanitizeParams = require('../sanitizeParams');
 
 const CERT_SERVICE = 'certificateService';
 
-const CA_SERVICE = 'internalCAService';
+const CA_SERVICE = 'caService';
 
 const TRUSTED_CA_SERVICE = 'trustedCAService';
 

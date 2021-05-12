@@ -1,17 +1,23 @@
 const createInterceptor = require('../../../../src/express/interceptors/scopedDIInterceptor');
 
 function diContainerMock() {
-  const runnable = {
-    run: jest.fn().mockResolvedValue(undefined),
-  };
   const scope = {
-    register: jest.fn(),
-    resolve: jest.fn(() => runnable),
+    cradle: {},
+    register: jest.fn((entries) => {
+      scope.cradle = { ...scope.cradle, ...entries };
+    }),
+    resolve: jest.fn((entry) => {
+      const resolver = Reflect.get(scope.cradle, entry);
+      if (resolver) {
+        return resolver.resolve();
+      }
+      return null;
+    }),
   };
+
   const diContainer = {
     createScope: jest.fn(() => scope),
     scope,
-    runnable,
   };
   return diContainer;
 }
