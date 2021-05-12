@@ -69,4 +69,4 @@ CPQD <www.cpqd.com.br> and till release v0.5.1 were licensed under the [GPLv3](h
 
 You can use and/or modify the software for free (no license costs apply).
 
-Hello World!
+Hello Universe!
