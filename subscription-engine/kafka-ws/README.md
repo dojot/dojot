@@ -31,6 +31,7 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 3. [Examples](#examples)
 4. [Documentation](#documentation)
 5. [Issues and help](#issues-and-help)
+6. [License](#license)
 
 # **Overview**
 
@@ -422,3 +423,11 @@ Check the documentation for more information:
 
 If you found a problem or need help, leave an issue in the main
 [dojot repository](https://github.com/dojot/dojot) and we will help you!
+
+
+# **License**
+
+The Kafka-WS source code is released under Apache License 2.0.
+
+Check NOTICE and LICENSE files for more information.
+
