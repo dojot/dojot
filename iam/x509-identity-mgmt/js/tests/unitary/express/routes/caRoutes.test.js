@@ -15,7 +15,7 @@ const crlQueryResult = {
 const getRootCRL = jest.fn(() => crlQueryResult);
 
 const framework = WebUtils.framework.createExpress({
-  logger: new Logger('internalCARoutes.test.js'),
+  logger: new Logger('caRoutes.test.js'),
   interceptors: [
     global.jsonBodyParsingInterceptor,
     {
@@ -31,12 +31,12 @@ const framework = WebUtils.framework.createExpress({
       },
     },
   ],
-  routes: global.internalCARoutes,
+  routes: global.caRoutes,
 });
 
 const request = supertest(framework);
 
-describe("Testing 'internalCARoutes.js' Script Routes", () => {
+describe("Testing 'caRoutes.js' Script Routes", () => {
   it('should get the internal Root CA',
     () => request.get('/api/v1/ca')
       .expect(200)

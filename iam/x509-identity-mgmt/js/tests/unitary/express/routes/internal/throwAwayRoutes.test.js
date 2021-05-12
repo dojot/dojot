@@ -1,7 +1,7 @@
 const { Logger, WebUtils } = require('@dojot/microservice-sdk');
 const supertest = require('supertest');
 
-const util = require('../../../util.test');
+const util = require('../../../../util.test');
 
 const generatedCert = {
   certificateFingerprint: util.p256CertFingerprint,
@@ -18,7 +18,7 @@ const crlQueryResult = {
 };
 
 const framework = WebUtils.framework.createExpress({
-  logger: new Logger('throwAwayRoutes.test.js'),
+  logger: new Logger('internal/throwAwayRoutes.test.js'),
   interceptors: [
     global.jsonBodyParsingInterceptor,
     {
@@ -26,7 +26,7 @@ const framework = WebUtils.framework.createExpress({
       middleware: (req, res, next) => {
         req.scope = {
           resolve: jest.fn((dep) => {
-            if (dep === 'internalCAService') {
+            if (dep === 'caService') {
               return {
                 getRootCertificate: jest.fn(() => caQueryResult),
                 getRootCRL: jest.fn(() => crlQueryResult),
@@ -47,12 +47,12 @@ const framework = WebUtils.framework.createExpress({
       },
     },
   ],
-  routes: global.throwAwayRoutes,
+  routes: global.internalThrowAwayRoutes,
 });
 
 const request = supertest(framework);
 
-describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
+describe("Testing 'internal/throwAwayRoutes.js' Script Routes", () => {
   it('should post a CSR and receive a certificate ("Accept: application/json")',
     () => request.post('/internal/api/v1/throw-away')
       .set('Accept', 'application/json')
