@@ -51,8 +51,8 @@
     <properties>
         <maven.compiler.release>11</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <keycloak.version>12.0.4</keycloak.version>
-        <kafka.version>2.7.0</kafka.version>
+        <keycloak.version>13.0.0</keycloak.version>
+        <kafka.version>2.8.0</kafka.version>
         <jboss.logging.version>3.4.1.Final</jboss.logging.version>
         <smartics.maven.plugin.version>2.1.5</smartics.maven.plugin.version>
     </properties>
@@ -158,29 +158,45 @@
                     <targetNamespace>urn:jboss:module:1.5</targetNamespace>
                     <defaultSlot>dojot</defaultSlot>
                     <modules>
+                        <!-- Reads configuration file: './src/etc/jboss-modules/jboss-modules-descriptor.xml' -->
                         <dir>src/etc/jboss-modules</dir>
                     </modules>
                     <dependencyExcludes>
+
+                        <!-- Wildfly modules/system/layers/keycloak/ already has this module -->
                         <exclude>
                             <groupId>org.keycloak</groupId>
                         </exclude>
 
-                        <!-- Wildfly already had this module as a base (version: 3.4.1.Final) -->
+                        <!-- Wildfly modules/system/layers/base/ already has this module (version: 3.4.1.Final) -->
                         <exclude>
                             <groupId>org.jboss.logging</groupId>
                         </exclude>
 
-                        <!-- Wildfly already had this module as a base (version: 2.10.5.0) -->
-                        <exclude>
-                            <groupId>com.fasterxml.jackson.core</groupId>
-                            <artifactId>jackson-databind</artifactId>
-                        </exclude>
-
-                        <!-- Wildfly already had this module as a base (version: 1.7.30) -->
+                        <!-- Wildfly modules/system/layers/base/ already has this module (version: 1.7.30) -->
                         <exclude>
                             <groupId>org.slf4j</groupId>
                             <artifactId>slf4j-api</artifactId>
                         </exclude>
+
+                        <!-- Wildfly modules/system/layers/base/ (.jars in version 2.12.1)
+                             but org.apache.kafka.kafka-clients:2.8.0 references the version 2.10.5
+                             because of this, the <exclude> below are commented
+                             until there is a matching of versions -->
+                        <!--
+                        <exclude>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-databind</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-core</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-annotations</artifactId>
+                        </exclude>
+                        -->
 
                     </dependencyExcludes>
                 </configuration>

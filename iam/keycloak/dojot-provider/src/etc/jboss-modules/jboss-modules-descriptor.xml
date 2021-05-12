@@ -36,11 +36,16 @@
                     <artifactId>kafka-clients</artifactId>
                 </include>
 
-                <!-- Compile Dependencies - https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/2.7.0 -->
+                <!-- Compile Dependencies - https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/2.8.0 -->
+                <!-- com.github.luben > zstd-jni > (1.4.9-1) -->
+                <!-- org.lz4 > lz4-java > (1.7.1) -->
+                <!-- org.xerial.snappy > snappy-java > 1.1.8.1 -->
+                <!--     >> 'snappy-java' depends on 'org.osgi.core'-->
+                <!--     >> org.osgi > org.osgi.core > 4.3.0 -->
                 <include>
                     <groupId>com.github.luben</groupId>
                     <artifactId>zstd-jni</artifactId>
-                    <!-- version: 1.4.5-6  -->
+                    <!-- version: 1.4.9-1  -->
                 </include>
 
                 <include>
@@ -52,7 +57,7 @@
                 <include>
                     <groupId>org.xerial.snappy</groupId>
                     <artifactId>snappy-java</artifactId>
-                    <!-- version: 1.1.7.7  -->
+                    <!-- version: 1.1.8.1  -->
                 </include>
                 <!-- 'snappy-java' depends on 'org.osgi.core' -->
                 <include>
@@ -60,20 +65,46 @@
                     <artifactId>org.osgi.core</artifactId>
                     <!-- version: 4.3.0  -->
                 </include>
+
+                <!-- Provided Dependencies - https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients/2.8.0 -->
+                <!-- com.fasterxml.jackson.core > jackson-databind > (2.10.5.1) -->
+                <!--     >> 'jackson-databind' depends on 'jackson-core' and 'jackson-annotations' -->
+                <!--     >> com.fasterxml.jackson.core > jackson-core > 2.10.5 -->
+                <!--     >> com.fasterxml.jackson.core > jackson-annotations > 2.10.5 -->
+
+                <!-- Including this dependency as part of the module until the version
+                     is equivalent to the one offered natively by Wildfly -->
+                <include>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <!-- version: 2.10.5.1 -->
+                </include>
+                <include>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                    <!-- version: 2.10.5 -->
+                </include>
+                <include>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                    <!-- version: 2.10.5 -->
+                </include>
             </includes>
         </match>
         <apply-to-module>
             <dependencies>
                 <module name="javax.api"/>
 
-                <!-- Wildfly Base Module (.jar version 1.7.30) -->
+                <!-- Wildfly modules/system/layers/base/ (.jars in version 1.7.30) = MATCH OK -->
                 <module name="org.slf4j"/>
 
-                <!-- Wildfly Base Module (.jar version 2.10.5.0)
-                     but org.apache.kafka.kafka-clients:2.7.0 references the version 2.10.5.1  -->
-                <module name="com.fasterxml.jackson.core.jackson-core"/>
-                <module name="com.fasterxml.jackson.core.jackson-databind"/>
-                <module name="com.fasterxml.jackson.core.jackson-annotations"/>
+                <!-- Wildfly modules/system/layers/base/ (.jars in version 2.12.1)
+                     but org.apache.kafka.kafka-clients:2.8.0 references the version 2.10.5
+                     because of this, the dependencies below are commented
+                     until there is a matching of versions -->
+                <!--module name="com.fasterxml.jackson.core.jackson-core"/-->
+                <!--module name="com.fasterxml.jackson.core.jackson-databind"/-->
+                <!--module name="com.fasterxml.jackson.core.jackson-annotations"/-->
             </dependencies>
         </apply-to-module>
     </module>

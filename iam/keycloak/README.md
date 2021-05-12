@@ -5,7 +5,7 @@ _Identity and Access Manager_ ([IAM](https://en.wikipedia.org/wiki/Identity_mana
 
 
 In addition to generating access tokens for the platform's APIs, the Keycloak
-has also been customized to run a specific [provider](https://www.keycloak.org/docs/12.0/server_development/index.html#_providers)
+has also been customized to run a specific [provider](https://www.keycloak.org/docs/13.0/server_development/index.html#_providers)
 for the dojot. This is called [Dojot Provider](./dojot-provider) and has the
 role of managing the creation of tenants (Keycloak Realms), applying
 validations, customizations and publishing events on Kafka to notify the other
@@ -14,14 +14,14 @@ platform's microservices.
 The dojot platform uses a _strong password policy_ and validates user passwords
 against a [list](./dojot-password-blacklist.txt) of passwords that are not
 allowed, but you can define your own list of passwords that are not allowed.
-[Here](https://www.keycloak.org/docs-api/12.0/javadocs/org/keycloak/policy/BlacklistPasswordPolicyProviderFactory.html)
+[Here](https://www.keycloak.org/docs-api/13.0/javadocs/org/keycloak/policy/BlacklistPasswordPolicyProviderFactory.html)
 you can find out more details about this Keycloak functionality.
 
 ## Configuration
 
 | Environment variable | Reference values | Description |
 | -------------------- | ---------------- | ----------- |
-| JAVA_OPTS_APPEND     | `-Dkeycloak.profile.feature.impersonation=disabled -Dkeycloak.profile.feature.upload_scripts=enabled` | Changes the default configuration of [Profiles](https://www.keycloak.org/docs/12.0/server_installation/#profiles) for dojot use. |
+| JAVA_OPTS_APPEND     | `-Dkeycloak.profile.feature.impersonation=disabled -Dkeycloak.profile.feature.upload_scripts=enabled` | Changes the default configuration of [Profiles](https://www.keycloak.org/docs/13.0/server_installation/#profiles) for dojot use. |
 | KEYCLOAK_USER        | `admin` | General administrator `username` of the platform. In a real deployment this value must be changed. |
 | KEYCLOAK_PASSWORD    | `admin` | General administrator `password` of the platform. In a real deployment this value must be changed. |
 | DB_VENDOR            | `postgres` | Database identifier used by Keycloak. |
