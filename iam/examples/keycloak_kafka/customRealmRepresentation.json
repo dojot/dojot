@@ -704,7 +704,7 @@
             "clientId": "broker",
             "name": "${client_broker}",
             "surrogateAuthRequired": false,
-            "enabled": true,
+            "enabled": false,
             "alwaysDisplayInConsole": false,
             "clientAuthenticatorType": "client-secret",
             "secret": "407dc145-234f-4bd1-8cd6-21a086744ded",
