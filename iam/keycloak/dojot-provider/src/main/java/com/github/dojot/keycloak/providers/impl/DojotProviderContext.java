@@ -1,5 +1,6 @@
 package com.github.dojot.keycloak.providers.impl;
 
+import org.keycloak.common.enums.SslRequired;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.representations.idm.RealmRepresentation;
 
@@ -21,6 +22,7 @@ public class DojotProviderContext {
     private Pattern validRealmName;
     private RealmRepresentation customRealmRepresentation;
     private SMTPServerConfig smtpServerConfig;
+    private SslRequired sslMode;
 
     public KeycloakSession getKeycloakSession() {
         return keycloakSession;
@@ -84,6 +86,14 @@ public class DojotProviderContext {
 
     public void setSmtpServerConfig(SMTPServerConfig smtpServerConfig) {
         this.smtpServerConfig = smtpServerConfig;
+    }
+
+    public SslRequired getSslMode() {
+        return sslMode;
+    }
+
+    public void setSslMode(SslRequired sslMode) {
+        this.sslMode = sslMode;
     }
 
     static class SMTPServerConfig {

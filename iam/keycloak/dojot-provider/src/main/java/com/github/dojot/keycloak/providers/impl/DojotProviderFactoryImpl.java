@@ -7,6 +7,7 @@ import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
+import org.keycloak.common.enums.SslRequired;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.representations.idm.RealmRepresentation;
@@ -15,12 +16,15 @@ import org.keycloak.util.JsonSerialization;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Dojot Provider Factory implementation
@@ -35,6 +39,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
 
     private String rootUrl;
     private String adminPassword;
+    private SslRequired sslMode;
     private String kafkaTopic;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
@@ -52,6 +57,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         initKafkaProducerConfig(scope);
         initSMTPServerConfig(scope);
         initCustomRealmConfig(scope);
+        initSslMode(scope);
     }
 
     private void initRealmValidationConfig(Config.Scope scope) {
@@ -142,6 +148,22 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         }
     }
 
+    private void initSslMode(Config.Scope scope) {
+        String realmSslMode = scope.get("realmSslMode");
+        if (realmSslMode != null) {
+            try {
+                sslMode = SslRequired.valueOf(realmSslMode.toUpperCase().trim());
+            } catch (IllegalArgumentException ex) {
+                StringBuilder err = new StringBuilder();
+                err.append("Error in determining the enumerator for Realm's SSL Mode. ");
+                err.append(String.format("Value '%s' is not valid. ", realmSslMode));
+                List<String> validValues = Arrays.stream(SslRequired.values()).map(Enum::name).collect(Collectors.toList());
+                err.append(String.format("Valid values are: %s", String.join(", ", validValues)));
+                LOG.error(err.toString(), ex);
+            }
+        }
+    }
+
     @Override
     public void postInit(KeycloakSessionFactory keycloakSessionFactory) {
         DojotProviderFactory.super.postInit(keycloakSessionFactory);
@@ -167,6 +189,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             context.setValidRealmName(validRealmName);
             context.setCustomRealmRepresentation(customRealmRepClone);
             context.setSmtpServerConfig(smtpServerConfig);
+            context.setSslMode(sslMode);
             return new DojotProviderImpl(context);
         } catch (IOException ex) {
             String err = "Error creating DojotProvider. Json file " + customRealmRepFileName + " is invalid";
@@ -205,6 +228,8 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
                     map.put("smtp." + entry.getKey(), entry.getValue());
                 }
             }
+        } else {
+            map.put("Generic SMTP server", "Not configured!");
         }
 
         return map;

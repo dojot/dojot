@@ -2,6 +2,7 @@ package com.github.dojot.keycloak.custom;
 
 import com.github.dojot.keycloak.providers.impl.DojotProviderContext;
 import org.jboss.logging.Logger;
+import org.keycloak.common.enums.SslRequired;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.migration.MigrationModelManager;
 import org.keycloak.models.ClientModel;
@@ -41,55 +42,61 @@ public class DojotRealmManager extends RealmManager {
 
     private final KeycloakSession session;
     private final RealmRepresentation realmRepresentation;
-    private final RealmModel realmModel;
+    private final RealmModel realm;
     private final String dojotRootUrl;
     private final String adminPassword;
+    private final SslRequired sslMode;
+    private final boolean isResetPasswordAllowed;
 
-    public DojotRealmManager(DojotProviderContext context, RealmModel realmModel) {
+    public DojotRealmManager(DojotProviderContext context, RealmModel realm) {
         super(context.getKeycloakSession());
         session = context.getKeycloakSession();
         realmRepresentation = context.getCustomRealmRepresentation();
         dojotRootUrl = context.getRootUrl();
         adminPassword = context.getAdminPassword();
-        this.realmModel = realmModel;
+        sslMode = context.getSslMode();
+        this.realm = realm;
+
+        // Resetting the password depends on the SMTP server settings
+        this.isResetPasswordAllowed = (context.getSmtpServerConfig() != null);
     }
 
     public void doImport() {
         LOG.info("Importing customizations to make Realm operational with the dojot platform...");
 
+        // Performs the preparations in the representation (json) of the Realm to be imported
         prepareRealm();
-
         prepareClientScopes();
-
         prepareAuthenticationFlows();
-
         prepareRequiredActions();
-
         prepareComponentExports();
-
         prepareClients();
-
         prepareRoles();
-
         prepareUsers();
 
-        RepresentationToModel.importRealm(session, realmRepresentation, realmModel, false);
+        RepresentationToModel.importRealm(session, realmRepresentation, realm, false);
 
         setupClientServiceAccountsAndAuthorizationOnImport(realmRepresentation, false);
 
         if (realmRepresentation.getKeycloakVersion() != null) {
-            MigrationModelManager.migrateImport(session, realmModel, realmRepresentation, false);
+            MigrationModelManager.migrateImport(session, realm, realmRepresentation, false);
         }
+
+        // Disables unused clients...
+        List<String> disabled = List.of("admin-cli", "broker");
+        realm.getClientsStream()
+                .filter(c -> (disabled.contains(c.getClientId())))
+                .forEach(c -> c.setEnabled(false));
 
         LOG.info("Import customizations complete!");
     }
 
     private void prepareRealm() {
         // These values must not be modified by customization
-        realmRepresentation.setRealm(realmModel.getName());
-        realmRepresentation.setDisplayName(realmModel.getDisplayName());
-        realmRepresentation.setDisplayNameHtml(realmModel.getDisplayNameHtml());
-        realmRepresentation.setEnabled(realmModel.isEnabled());
+        realmRepresentation.setRealm(realm.getName());
+        realmRepresentation.setDisplayName(realm.getDisplayName());
+        realmRepresentation.setDisplayNameHtml(realm.getDisplayNameHtml());
+        realmRepresentation.setEnabled(realm.isEnabled());
 
         // ---------------------------------------------
         // treatment to avoid creating a repeated entity
@@ -97,11 +104,22 @@ public class DojotRealmManager extends RealmManager {
         if (realmRepresentation.getRequiredCredentials() != null) {
             realmRepresentation.getRequiredCredentials().clear();
         }
+
+        // If there is no way to reset the password (by email),
+        // there is no point in considering the json config...
+        if (isResetPasswordAllowed == false) {
+            realmRepresentation.setResetPasswordAllowed(false);
+        }
+
+        // If defined, override Realm's SSL Mode
+        if (sslMode != null) {
+            realmRepresentation.setSslRequired(sslMode.name());
+        }
     }
 
     private void prepareClientScopes() {
         if (realmRepresentation.getClientScopes() != null) {
-            List<ClientScopeModel> clientScopes = realmModel.getClientScopesStream().collect(Collectors.toList());
+            List<ClientScopeModel> clientScopes = realm.getClientScopesStream().collect(Collectors.toList());
             Iterator<ClientScopeRepresentation> it = realmRepresentation.getClientScopes().iterator();
             while (it.hasNext()) {
                 ClientScopeRepresentation clientScope = it.next();
@@ -112,7 +130,7 @@ public class DojotRealmManager extends RealmManager {
             }
         }
         if (realmRepresentation.getDefaultDefaultClientScopes() != null) {
-            List<ClientScopeModel> defaultClientScopes = realmModel.getDefaultClientScopesStream(true).collect(Collectors.toList());
+            List<ClientScopeModel> defaultClientScopes = realm.getDefaultClientScopesStream(true).collect(Collectors.toList());
             Iterator<String> it = realmRepresentation.getDefaultDefaultClientScopes().iterator();
             while (it.hasNext()) {
                 String defaultClientScopeName = it.next();
@@ -123,7 +141,7 @@ public class DojotRealmManager extends RealmManager {
             }
         }
         if (realmRepresentation.getDefaultOptionalClientScopes() != null) {
-            List<ClientScopeModel> defaultOptClientScopes = realmModel.getDefaultClientScopesStream(false).collect(Collectors.toList());
+            List<ClientScopeModel> defaultOptClientScopes = realm.getDefaultClientScopesStream(false).collect(Collectors.toList());
             Iterator<String> it = realmRepresentation.getDefaultOptionalClientScopes().iterator();
             while (it.hasNext()) {
                 String defaultOptClientScopeName = it.next();
@@ -141,7 +159,7 @@ public class DojotRealmManager extends RealmManager {
             while (it.hasNext()) {
                 AuthenticatorConfigRepresentation cfg = it.next();
                 if (cfg.getAlias() != null) {
-                    if (realmModel.getAuthenticatorConfigByAlias(cfg.getAlias()) != null) {
+                    if (realm.getAuthenticatorConfigByAlias(cfg.getAlias()) != null) {
                         LOG.info(existsMessage(cfg));
                         it.remove();
                     }
@@ -154,7 +172,7 @@ public class DojotRealmManager extends RealmManager {
             while (it.hasNext()) {
                 AuthenticationFlowRepresentation flow = it.next();
                 if (flow.getAlias() != null) {
-                    if (realmModel.getFlowByAlias(flow.getAlias()) != null) {
+                    if (realm.getFlowByAlias(flow.getAlias()) != null) {
                         LOG.info(existsMessage(flow));
                         it.remove();
                     }
@@ -168,7 +186,7 @@ public class DojotRealmManager extends RealmManager {
             Iterator<RequiredActionProviderRepresentation> it = realmRepresentation.getRequiredActions().iterator();
             while (it.hasNext()) {
                 RequiredActionProviderRepresentation action = it.next();
-                if (action.getAlias() != null && realmModel.getRequiredActionProviderByAlias(action.getAlias()) != null) {
+                if (action.getAlias() != null && realm.getRequiredActionProviderByAlias(action.getAlias()) != null) {
                     LOG.info(existsMessage(action));
                     it.remove();
                 }
@@ -178,7 +196,7 @@ public class DojotRealmManager extends RealmManager {
 
     private void prepareComponentExports() {
         if (realmRepresentation.getComponents() != null) {
-            List<ComponentModel> realmComponents = realmModel.getComponentsStream(realmModel.getId()).collect(Collectors.toList());
+            List<ComponentModel> realmComponents = realm.getComponentsStream(realm.getId()).collect(Collectors.toList());
             for (Map.Entry<String, List<ComponentExportRepresentation>> entry : realmRepresentation.getComponents().entrySet()) {
                 String providerType = entry.getKey();
                 Iterator<ComponentExportRepresentation> it = entry.getValue().iterator();
@@ -295,7 +313,7 @@ public class DojotRealmManager extends RealmManager {
      * check if client currently exists or will exists as a result of this import
      */
     private boolean clientExists(String clientId) {
-        if (realmModel.getClientByClientId(clientId) != null) {
+        if (realm.getClientByClientId(clientId) != null) {
             return true;
         }
         if (realmRepresentation.getClients() == null) {
@@ -313,21 +331,21 @@ public class DojotRealmManager extends RealmManager {
      * check if client exists
      */
     private boolean exists(ClientRepresentation clientRep) {
-        return realmModel.getClientByClientId(clientRep.getClientId()) != null;
+        return realm.getClientByClientId(clientRep.getClientId()) != null;
     }
 
     /**
      * check if realm role exists
      */
     private boolean exists(RoleRepresentation roleRep) {
-        return realmModel.getRolesStream().anyMatch(role -> Objects.equals(roleRep.getName(), role.getName()));
+        return realm.getRolesStream().anyMatch(role -> Objects.equals(roleRep.getName(), role.getName()));
     }
 
     /**
      * check if client role exists
      */
     private boolean exists(String clientId, RoleRepresentation roleRep) {
-        ClientModel client = realmModel.getClientByClientId(clientId);
+        ClientModel client = realm.getClientByClientId(clientId);
         if (client == null) return false;
 
         return client.getRolesStream().anyMatch(role -> Objects.equals(roleRep.getName(), role.getName()));
@@ -338,9 +356,9 @@ public class DojotRealmManager extends RealmManager {
      */
     private boolean exists(UserRepresentation user) {
         UserProvider userProvider = session.users();
-        return (userProvider.getUserByUsername(user.getUsername(), realmModel) != null)
-                || ((user.getEmail() != null) && !realmModel.isDuplicateEmailsAllowed()
-                && (userProvider.getUserByEmail(user.getEmail(), realmModel) != null));
+        return (userProvider.getUserByUsername(realm, user.getUsername()) != null)
+                || ((user.getEmail() != null) && !realm.isDuplicateEmailsAllowed()
+                && (userProvider.getUserByEmail(realm, user.getEmail()) != null));
     }
 
     private boolean exists(List<ClientScopeModel> clientScopes, ClientScopeRepresentation clientScope) {
@@ -389,7 +407,7 @@ public class DojotRealmManager extends RealmManager {
             userName = user.getUsername();
         }
 
-        if (user.getEmail() == null || !realmModel.isDuplicateEmailsAllowed()) {
+        if (user.getEmail() == null || !realm.isDuplicateEmailsAllowed()) {
             return String.format("User with user name '%s' already exists, will not be processed", userName);
         }
         return String.format("User with username '%s' or with email '%s' already exists, will not be processed", userName, user.getEmail());

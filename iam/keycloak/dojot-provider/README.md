@@ -151,6 +151,9 @@ With the CLI in embedded mode, we will execute the following commands:
 
 # This command tells our Service Provider the full path of the json file to be used for the customization of a new Realm, according to the needs of the dojot platform
 [standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE:})
+
+# This command tells our Service Provider the SSL Mode to be used for the customization of a new Realm (override the one defined in the json file)
+[standalone@embedded /] /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.realmSslMode,value=${env.DOJOT_REALM_SSL_MODE:})
 ```
 
 If we want to set up a single SMTP server for all Realms, just run the following
@@ -210,6 +213,7 @@ batch
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.realmSslMode,value=${env.DOJOT_REALM_SSL_MODE:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpHost,value=${env.DOJOT_SMTP_HOST:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpPort,value=${env.DOJOT_SMTP_PORT:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpSSL,value=${env.DOJOT_SMTP_SSL:})
@@ -247,6 +251,7 @@ $JBOSS_HOME/bin/standalone.sh --server-config=standalone-ha.xml
 | DOJOT_VALID_REALM_NAME_REGEX | `^[a-zA-Z0-9]{1,30}$` | Regular expression to be applied in the name of the newly created tenant to force it to be compatible with the rules of the dojot platform. |
 | DOJOT_CUSTOM_REALM_REP_FILE | `/opt/dojot/customRealmRepresentation.json` | Full path of the json file used as a basis for customizing the tenant according to the rules of the dojot platform. |
 | DOJOT_ADMIN_PASSWORD | `aA1!bB2@cC3#`   | Default password for the `admin` user created automatically (by dojot-provider) when creating a new Realm. This password must follow the _strong password policies_ defined in the Realm customization json file. |
+| DOJOT_REALM_SSL_MODE | `EXTERNAL` | The SSL Mode defines the SSL/HTTPS requirements for interacting with the realm. Valid values: `ALL`, `EXTERNAL` or `NONE`. For more details, see the Keycloak [documentation](https://www.keycloak.org/docs/13.0/server_admin/#_ssl_modes). |
 
 _Note that_ the json file must follow the structure (Schema) defined in the
 [REST API](https://www.keycloak.org/docs-api/13.0/rest-api/index.html#_realmrepresentation)
@@ -272,6 +277,13 @@ Check the [example](../../examples/keycloak_kafka/) directory for more details.
 
 _Note that_ the reference values are used only in examples and do not
 necessarily reflect the values of a real deployment.
+
+_Note that_ the [Forgot password](https://www.keycloak.org/docs/13.0/server_admin/#forgot-password)
+feature will not be enabled by default unless you have the SMTP server
+configuration. You can enable this functionality manually after creating the
+Realm, but you will still need to manually configure the SMTP server after
+the Realm is created for this feature to actually work.
+
 
 ## Coding and Debugging
 

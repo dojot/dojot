@@ -11,6 +11,7 @@ batch
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:dojot-management.dojot.tenancy})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX:^[a-zA-Z0-9]{1,30}$})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.realmSslMode,value=${env.DOJOT_REALM_SSL_MODE:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpHost,value=${env.DOJOT_SMTP_HOST:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpPort,value=${env.DOJOT_SMTP_PORT:})
 /subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpSSL,value=${env.DOJOT_SMTP_SSL:})
