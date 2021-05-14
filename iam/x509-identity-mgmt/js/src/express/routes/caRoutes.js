@@ -1,6 +1,6 @@
 const HttpStatus = require('http-status-codes');
 
-const CA_SERVICE = 'internalCAService';
+const CA_SERVICE = 'caService';
 
 module.exports = ({ mountPoint }) => {
   const caRoute = {

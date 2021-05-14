@@ -1,4 +1,4 @@
-const InternalCAService = require('../../../src/services/InternalCAService');
+const CAService = require('../../../src/services/CAService');
 
 const util = require('../../util.test');
 
@@ -40,7 +40,7 @@ beforeAll(() => {
   };
 });
 
-describe("Unit tests of script 'InternalCAService.js'", () => {
+describe("Unit tests of script 'CAService.js'", () => {
   let containerCradle = null;
 
   beforeEach(() => {
@@ -59,9 +59,9 @@ describe("Unit tests of script 'InternalCAService.js'", () => {
   });
 
   it('should obtain the dojot root CA certificate', async () => {
-    const internalCAService = new InternalCAService(containerCradle);
+    const caService = new CAService(containerCradle);
 
-    await expect(internalCAService.getRootCertificate())
+    await expect(caService.getRootCertificate())
       .resolves.toEqual({
         certificateFingerprint: util.caFingerprint,
         caPem: util.caCert,
@@ -72,9 +72,9 @@ describe("Unit tests of script 'InternalCAService.js'", () => {
   });
 
   it('should obtain the latest valid Certificate Revocation List', async () => {
-    const internalCAService = new InternalCAService(containerCradle);
+    const caService = new CAService(containerCradle);
 
-    await expect(internalCAService.getRootCRL())
+    await expect(caService.getRootCRL())
       .resolves.toEqual({
         crl: util.caCRL,
       });
