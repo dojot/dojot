@@ -7,6 +7,7 @@ import com.github.dojot.keycloak.kafka.Event;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import org.jboss.logging.Logger;
 import org.keycloak.models.RealmModel;
+import org.keycloak.policy.PasswordPolicyNotMetException;
 
 import javax.ws.rs.core.Response;
 import java.util.regex.Matcher;
@@ -40,8 +41,15 @@ public class DojotProviderImpl implements DojotProvider {
 
     @Override
     public void customizeRealm(RealmModel realm) {
-        DojotRealmManager dojotRealmManager = new DojotRealmManager(context, realm);
-        dojotRealmManager.doImport();
+        try {
+            DojotRealmManager dojotRealmManager = new DojotRealmManager(context, realm);
+            dojotRealmManager.doImport();
+        } catch (PasswordPolicyNotMetException ex) {
+            LOG.error(ex);
+            String errMsg = String.format("The '%s' user does not meet the required password policies", ex.getUsername());
+            DojotProviderException error = new DojotProviderException(errMsg, Response.Status.BAD_REQUEST);
+            throw error;
+        }
 
         // configure SMTP Server
         DojotProviderContext.SMTPServerConfig smtpServerConfig = context.getSmtpServerConfig();

@@ -52,12 +52,19 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         LOG.info("Init DojotProviderFactory...");
         DojotProviderFactory.super.init(scope);
         rootUrl = scope.get("rootUrl");
-        adminPassword = scope.get("adminPassword");
+        initAdminPasswordConfig(scope);
         initRealmValidationConfig(scope);
         initKafkaProducerConfig(scope);
         initSMTPServerConfig(scope);
         initCustomRealmConfig(scope);
-        initSslMode(scope);
+        initSslModeConfig(scope);
+    }
+
+    private void initAdminPasswordConfig(Config.Scope scope) {
+        adminPassword = scope.get("adminPassword");
+        if (adminPassword == null) {
+            throw new NullPointerException("Dojot SPI 'adminPassword' attribute must not be null!");
+        }
     }
 
     private void initRealmValidationConfig(Config.Scope scope) {
@@ -148,7 +155,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         }
     }
 
-    private void initSslMode(Config.Scope scope) {
+    private void initSslModeConfig(Config.Scope scope) {
         String realmSslMode = scope.get("realmSslMode");
         if (realmSslMode != null) {
             try {

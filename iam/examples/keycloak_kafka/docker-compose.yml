@@ -13,7 +13,7 @@ services:
       KEYCLOAK_PASSWORD: admin
       DOJOT_ROOT_URL: "http://localhost:8080"
       DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
-      # DOJOT_ADMIN_PASSWORD: aA1!bB2@cC3#
+      DOJOT_ADMIN_PASSWORD: aA1!bB2@cC3#
       # DOJOT_REALM_SSL_MODE: NONE
       # DOJOT_KAFKA_SERVERS: kafka:9092
       # DOJOT_KAFKA_CLIENT_ID: keycloak
