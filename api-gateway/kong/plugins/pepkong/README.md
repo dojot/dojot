@@ -47,7 +47,7 @@ luarocks make
 
 Key    | Purpose        | Default Value      | Valid Values  |
 -------------- | ----------------- | ---------------| -----------|
-DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization settings:   o invoke Keycloak authorization service is necessary define a **client** that has authorization settings  | kong  | string
+DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization settings: To invoke Keycloak authorization service is necessary define a **client** that has authorization settings  | kong  | string
 DOJOT_PLUGIN_SSL_CAFILE     |  Path to the file that contains a set of trusting certificates (in PEM format). | none  | path
 DOJOT_PLUGIN_SSL_CERTFILE     | Path to the file that contains the chain certificates. These must be in PEM format and must be sorted starting from the subject's certificate (client or server), followed by intermediate CA certificates if applicable, and ending at the highest level CA. | none  | path
 DOJOT_PLUGIN_SSL_KEYFILE  |  Path to the file that contains the key (in PEM format). | none  | path
