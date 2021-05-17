@@ -12,13 +12,13 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 - [Tested and working for](#tested-and-working-for)
 - [Installation](#installation)
   - [From source](#from-source)
-  - [Changing default resource server](#Changing-default-resource-server)
+- [Configuration](#configuration)
+  - [Environment variables](#environment-variables)
 - [Usage](#usage)
   - [Enabling on endpoints](#enabling-on-endpoints)
-    - [Service](#service)
+    - [Configuring on a service registered in kong](#configuring-on-a-service-registered-in-kong)
   - [Parameters](#parameters)
-- [Testing](#testing)
-  - [Running tests](#running-tests)
+- [Running tests](#running-tests)
 
 ## Tested and working for
 
