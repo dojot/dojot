@@ -3,7 +3,7 @@ local function build_form_params(resource, scope)
     local grant_type = "urn:ietf:params:oauth:grant-type:uma-ticket"
 
     -- define client identifier
-    local client_id_env_var = "KONG_CLIENT_ID"
+    local client_id_env_var = "DOJOT_PLUGIN_CLIENT_ID"
     local client_id = "kong"
     if os.getenv(client_id_env_var) then
         client_id = os.getenv(client_id_env_var)

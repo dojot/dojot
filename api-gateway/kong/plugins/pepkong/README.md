@@ -30,6 +30,8 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 | Keycloak Version |   Tests passing    |
 | ---------------- | :----------------: |
 | 12.0.2           | :white_check_mark: |
+| 12.0.4           | :white_check_mark: |
+| 13.0.0           | :white_check_mark: |
 
 ## Installation
 
@@ -39,10 +41,17 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 luarocks make
 ```
 
-## Change the default `client` that has authorization settings
+## Configuration
 
-To invoke Keycloak authorization service is necessary define a **client** that has authorization settings, the default value is `kong`,
-but is possible to change it through `CLIENT_ID` environment variable.
+### Environment variables
+
+Key    | Purpose        | Default Value      | Valid Values  |
+-------------- | ----------------- | ---------------| -----------|
+DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization settings:   o invoke Keycloak authorization service is necessary define a **client** that has authorization settings  | kong  | string
+DOJOT_PLUGIN_SSL_CAFILE     |  Path to the file that contains a set of trusting certificates (in PEM format). | none  | path
+DOJOT_PLUGIN_SSL_CERTFILE     | Path to the file that contains the chain certificates. These must be in PEM format and must be sorted starting from the subject's certificate (client or server), followed by intermediate CA certificates if applicable, and ending at the highest level CA. | none  | path
+DOJOT_PLUGIN_SSL_KEYFILE  |  Path to the file that contains the key (in PEM format). | none  | path
+DOJOT_PLUGIN_SSL_VERIFY  |  Options used to verify the certificates.  | peer  | peer or none
 
 ## Usage
 
@@ -50,7 +59,9 @@ but is possible to change it through `CLIENT_ID` environment variable.
 
 The same principle applies to this plugin as the [standard jwt plugin that comes with kong](https://docs.konghq.com/hub/kong-inc/jwt/). You can enable it on service, routes and globally.
 
-#### Service
+#### Configuring on a service registered in kong
+
+To configure this plugin in kong in an where the admin port is 8001 and there is a registered service, {service}, we can use:
 
 ```bash
 curl -X POST http://localhost:8001/services/{service}/plugins \
@@ -68,7 +79,7 @@ curl -X POST http://localhost:8001/services/{service}/plugins \
 | config.resource    | yes    | `Default Resource`| Resource name. |
 | config.scope       | yes   | `POST=>create`, `GET=>view`, `PATCH=>update`, `PUT=>update`, `DELTE=>delete`       | Map HTTPS verbs to scopes.  |
 
-### Running tests
+## Running tests
 
 ```bash
 docker build -t pepkong -f tests/unit_tests/Dockerfile ../.. && docker container run pepkong

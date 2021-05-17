@@ -63,7 +63,7 @@ services:
       KONG_PG_DATABASE: kong
       KONG_PG_PASSWORD: kong
       KONG_LOG_LEVEL: debug
-      # KONG_CLIENT_ID: "kong"
+      # DOJOT_PLUGIN_CLIENT_ID: "kong"
       # To enable HTTPs external, it is necessary to configure public certificates
       # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
       # KONG_SSL_CERT_KEY: /certs/example-external.key
