@@ -2,6 +2,7 @@ local BasePlugin = require "kong.plugins.base_plugin"
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
 local http = require "socket.http"
 local https = require "ssl.https"
+local inspect = require 'inspect'
 
 local build_form_params = require("kong.plugins.pepkong.utils").build_form_params
 
@@ -101,6 +102,10 @@ local function do_authorization(conf)
 
         if (ssl_ca_file) then
             base_request['cafile']=ssl_ca_file
+        else
+            -- place where kong always places the chain of trusted certificates,
+            -- the library 'ssl.https' does not have this internally
+            base_request['cafile']="/etc/ssl/certs/ca-certificates.crt"
         end
 
         if (ssl_cert_file) then
@@ -126,7 +131,8 @@ local function do_authorization(conf)
             "no_sslv2",
             "no_sslv3",
             "no_tlsv1",
-            "no_tlsv1_1"}
+            "no_tlsv1_1"
+        }
 
         do_request = https.request
 
@@ -139,6 +145,18 @@ local function do_authorization(conf)
     local message = response[1]
 
     if code ~= 200 then
+
+        kong.log.err('Error when trying to check permission on keycloak')
+        kong.log.debug('...request=', inspect(base_request))
+        kong.log.debug('...status=', status)
+        kong.log.debug('...body=', body)
+        kong.log.debug('...headers=', headers)
+        kong.log.debug('...code=', code)
+
+        if (type(code) ~= "number") then
+            code = 500
+        end
+
         return false, {
             status = code,
             message = message
