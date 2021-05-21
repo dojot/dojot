@@ -5,18 +5,20 @@ services:
     command: bash slave_entrypoint.sh
     volumes:
       - ..:/usr/src/app
+      # - ../cert/:/usr/src/app/cert
+      # - ../db/:/usr/src/app/db
     environment:
       # Don't forget to set the environment variables
-      DOJOT_MQTT_HOST: "127.0.0.1"
+      DOJOT_MQTT_HOST: "10.50.11.53"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
-      DOJOT_MQTT_PORT: "1883"
+      DOJOT_MQTT_PORT: "8883"
       DOJOT_MQTT_TIMEOUT: "120"
-      LOCUST_MASTER_HOST: "locust-master"
+      LOCUST_MASTER_NODE_HOST: "locust-master"
       REDIS_HOST: "redis"
       REDIS_PORT: "6379"
       REDIS_PASSWD: ""
-      TASK_MIN_TIME: "29500"
-      TASK_MAX_TIME: "30000"
+      TASK_MIN_TIME: "29"
+      TASK_MAX_TIME: "30"
       LOG_LEVEL: "info"
 
       RENEW_DEVICES: "False"

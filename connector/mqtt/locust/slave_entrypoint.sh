@@ -8,7 +8,7 @@ readonly DOJOT_MQTT_PORT=${DOJOT_MQTT_PORT:-"1883"}
 readonly DOJOT_MQTT_TIMEOUT=${DOJOT_MQTT_TIMEOUT:-"60"}
 
 # Locust parameters
-readonly LOCUST_MASTER_HOST=${LOCUST_MASTER_HOST:-"127.0.0.1"}
+readonly LOCUST_MASTER_NODE_HOST=${LOCUST_MASTER_NODE_HOST:-"127.0.0.1"}
 
 # Redis parameters
 readonly REDIS_CONN_TIMEOUT=${REDIS_CONN_TIMEOUT:-"180"}
@@ -73,4 +73,4 @@ done
 echo "dojot MQTT broker at host '${DOJOT_MQTT_HOST}', port '${DOJOT_MQTT_PORT}' fully started."
 
 echo "Starting locust slave node ..."
-locust -f main.py --slave --master-host=${LOCUST_MASTER_HOST}
+locust -f main.py --worker --master-host=${LOCUST_MASTER_NODE_HOST}
