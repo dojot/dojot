@@ -1,7 +1,7 @@
 version: '3'
 services:
   locust-master:
-    image: jonaphael/locust:development
+    image: dojot/locust:development
     networks:
       - default
     depends_on:
