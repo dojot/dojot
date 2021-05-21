@@ -1,7 +1,7 @@
 version: '3'
 services:
   locust-slave:
-    image: jonaphael/locust:development
+    image: dojot/locust:development
     command: bash slave_entrypoint.sh
     volumes:
       - ..:/usr/src/app
