@@ -29,9 +29,9 @@ module.exports = () => {
         if (authHeader.length === 2 && authHeader[0] === 'Bearer') {
           const token = authHeader[1];
           const payload = jwtDecode(token);
-          if (payload.service && payload.exp) {
+          if (payload.iss && payload.exp) {
             req.auth = {
-              tenant: payload.service,
+              tenant: payload.iss.substring(payload.iss.lastIndexOf('/') + 1),
               expiration: payload.exp,
             };
             return next();

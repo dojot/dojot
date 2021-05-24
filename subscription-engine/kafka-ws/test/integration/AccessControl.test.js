@@ -132,7 +132,7 @@ describe('Integration tests related to websocket access control', () => {
 
     beforeAll((done) => {
       jwtSignAsync(
-        { service: tenant },
+        { iss: `http://localhost:8000/auth/realms/${tenant}` },
         mockConfig.ticket.secret,
         { expiresIn: 60 },
       ).then((token) => new Promise(((resolve, reject) => {
