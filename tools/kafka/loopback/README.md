@@ -4,6 +4,8 @@ This service's goal is to simulate actuations in dojot by forwarding messages in
 topic (publishing topic) to the `device-manager.device` topic (actuation topic), adapting its format
 to be dojot-compliant.
 
+__Note__ You need to enable the `dev-test-cli` client in the keycloak. For security reasons it is disabled by default, after use it is recommended to disable it again.
+
 # Configurations
 
 ## Environment Variables

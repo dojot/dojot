@@ -24,8 +24,9 @@ readonly LOOPBACK_CONSUMER_GROUP=${LOOPBACK_CONSUMER_GROUP:-"loopback-group"}
 readonly DEVICE_DATA_TOPIC=${DEVICE_DATA_TOPIC:-"device-data"}
 readonly DEVICE_MANAGER_TOPIC=${DEVICE_MANAGER_TOPIC:-"dojot.device-manager.device"}
 
-readonly AUTH_DATA=" --data-urlencode \"username=${DOJOT_USERNAME}\" --data-urlencode \"password=${DOJOT_PASSWORD}\" --data-urlencode \"client_id=admin-cli\" --data-urlencode \"grant_type=password\""
-readonly TOKEN=$(curl --silent -X POST ${KEYCLOAK_ADDRESS}  "${AUTH_DATA}" | jq '.access_token' -r)
+readonly AUTH_URL = "${KEYCLOAK_ADDRESS}/auth/realms/${DOJOT_TENANT}/protocol/openid-connect/token"
+readonly AUTH_DATA=" --data-urlencode \"username=${DOJOT_USERNAME}\" --data-urlencode \"password=${DOJOT_PASSWORD}\" --data-urlencode \"client_id=dev-test-cli\" --data-urlencode \"grant_type=password\""
+readonly TOKEN=$(curl --silent -X POST "${AUTH_URL}" "${AUTH_DATA}" | jq '.access_token' -r)
 
 if [ ! -z "$TOKEN" ]
 then
@@ -45,7 +46,7 @@ then
         kafkacat -C -b "${KAFKA_BROKER_LIST}" -q -f '{ "key": "%k" , "msg": %s }\n' -u -G "${LOOPBACK_CONSUMER_GROUP}" "${LOCAL_DEVICE_DATA_TOPIC}" \
         | unbuffer -p jq -r '"\(.key)@{\"event\": \"configure\",\"meta\": {\"service\": \"\(.msg.metadata.tenant)\",\"timestamp\": \(.msg.metadata.timestamp)},\"data\" : {\"id\" : \"\(.msg.metadata.deviceid)\",\"attrs\": \(.msg.attrs)}}"' \
         | kafkacat -P -b "${KAFKA_BROKER_LIST}" -t "${LOCAL_DEVICE_MANAGER_TOPIC}" -K @ -l
-        
+
         echo "Application Failed restarting ..."
     else
        echo "Restarting - unable to retrieve '${DEVICE_DATA_TOPIC}' and '${DEVICE_MANAGER_TOPIC}' topics"
