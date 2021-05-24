@@ -63,7 +63,7 @@ function getToken() {
   JWT=$(curl -sS -X POST "${HOST}:${PORT}/auth/realms/${TENANT}/protocol/openid-connect/token" \
         --data-urlencode "username=${USERNAME}" \
         --data-urlencode "password=${PASSWD}" \
-        --data-urlencode "client_id=cli" \
+        --data-urlencode "client_id=dev-test-cli" \
         --data-urlencode "grant_type=password" 2>/dev/null \
     | jq -j '.access_token')
 

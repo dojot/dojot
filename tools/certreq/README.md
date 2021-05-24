@@ -15,6 +15,8 @@ It uses:
 
 ## Usage
 
+__Note__ You need to enable the `dev-test-cli` client in the keycloak. For security reasons it is disabled by default, after use it is recommended to disable it again.
+
 This tool creates the directories `./ca` and `./cert_{identifier}` to store the certificates and public/private keys.
 
 ###### Example 1
