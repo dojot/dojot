@@ -990,7 +990,7 @@
                     {
                         "name": "cron",
                         "ownerManagedAccess": true,
-                        "displayName": "cron:  /backstage",
+                        "displayName": "cron:  /cron",
                         "attributes": {},
                         "_id": "d979270d-5e8c-4695-b61d-dff066e00554",
                         "uris": [],
@@ -1030,28 +1030,6 @@
                         "_id": "aa068759-4f0e-4338-a14b-841d3cd91d76",
                         "uris": [],
                         "scopes": [
-                            {
-                                "name": "create"
-                            }
-                        ]
-                    },
-                    {
-                        "name": "backstage",
-                        "ownerManagedAccess": true,
-                        "displayName": "backstage:  /backstage",
-                        "attributes": {},
-                        "_id": "1353fdb6-e080-4b65-8523-9860dc27a769",
-                        "uris": [],
-                        "scopes": [
-                            {
-                                "name": "view"
-                            },
-                            {
-                                "name": "update"
-                            },
-                            {
-                                "name": "delete"
-                            },
                             {
                                 "name": "create"
                             }
@@ -1315,18 +1293,6 @@
                         "config": {
                             "resources": "[\"data-manager-export\"]",
                             "scopes": "[\"view\"]",
-                            "applyPolicies": "[\"Should be user\"]"
-                        }
-                    },
-                    {
-                        "id": "4536bce6-1244-471c-8218-c1917e000a3f",
-                        "name": "Full access in backstage - /backstage",
-                        "type": "scope",
-                        "logic": "POSITIVE",
-                        "decisionStrategy": "UNANIMOUS",
-                        "config": {
-                            "resources": "[\"backstage\"]",
-                            "scopes": "[\"update\",\"create\",\"delete\",\"view\"]",
                             "applyPolicies": "[\"Should be user\"]"
                         }
                     },
