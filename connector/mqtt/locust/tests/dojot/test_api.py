@@ -52,7 +52,7 @@ class TestDojotAPIGetJwt(unittest.TestCase):
             "data": {
                 "username": MOCK_CONFIG['dojot']['user'],
                 "password": MOCK_CONFIG['dojot']['passwd'],
-                "client_id": "admin-cli",
+                "client_id": "dev-test-cli",
                 "grant_type": "password",
             }
         }

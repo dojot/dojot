@@ -4,6 +4,8 @@ The Dojot Load Test tool is an implementation using the open-source load testing
 
 # **How to use**
 
+__Note__ You need to enable the `dev-test-cli` client in the keycloak. For security reasons it is disabled by default, after use it is recommended to disable it again.
+
 ## **Prerequisites**
 
 If you don't have any certificates, you should first generate them. See the
