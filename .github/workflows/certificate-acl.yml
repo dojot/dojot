@@ -68,7 +68,7 @@ jobs:
     - name: Build and Push
       uses: elgohr/Publish-Docker-Github-Action@2.16
       with:
-        name: ${{ steps.get_owner.outputs.owner }}/dojot-acl
+        name: ${{ steps.get_owner.outputs.owner }}/certificate-acl
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         workdir: iam/certificate-acl
