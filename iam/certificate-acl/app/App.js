@@ -1,16 +1,16 @@
+const camelCase = require('lodash.camelcase');
 const util = require('util');
+
 const {
-  ConfigManager: { getConfig },
+  ConfigManager: { getConfig, transformObjectKeys },
   Logger,
+  ServiceStateManager,
 } = require('@dojot/microservice-sdk');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
+const HTTPServer = require('./server/HTTPServer');
 
 const logger = new Logger('certificate-acl:app');
-
-// configuration
-const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
-const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
 
 const CERTIFICATE_ACL_CREATE_EVENT_TYPE = 'ownership.create';
 const CERTIFICATE_ACL_DELETE_EVENT_TYPE = 'ownership.delete';
@@ -21,13 +21,24 @@ class Application {
    * Instantiates the application
    */
   constructor() {
+    // configuration
+    this.config = getConfig('CERTIFICATE_ACL');
+
+    // instantiate Service State Manager
+    this.serviceStateManager = new ServiceStateManager(
+      { lightship: transformObjectKeys(this.config.lightship, camelCase) },
+    );
+
     // instantiate Kafka Consumer
-    this.kafkaConsumer = new KafkaConsumer();
+    this.kafkaConsumer = new KafkaConsumer(this.serviceStateManager);
 
     // instantiate Redis Manager
-    this.redisManager = new RedisManager();
+    this.redisManager = new RedisManager(this.serviceStateManager);
     this.redisManager.on('healthy', () => this.kafkaConsumer.resume());
     this.redisManager.on('unhealthy', () => this.kafkaConsumer.suspend());
+
+    // instantiate HTTP server
+    this.server = new HTTPServer(this.serviceStateManager, this.redisManager);
   }
 
   /**
@@ -119,10 +130,14 @@ class Application {
    * @returns
    */
   init() {
+    // start http server
+    this.server.init();
+
+    // start kafka consumer
     return this.kafkaConsumer.init().then(() => {
       // register processing callback
       this.kafkaConsumer.registerCallback(
-        new RegExp(config.app['consumer.topic']),
+        new RegExp(this.config.app['kafka.consumer.topic.regex']),
         this.processData.bind(this),
       );
     });

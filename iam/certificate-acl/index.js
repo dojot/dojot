@@ -20,13 +20,13 @@ const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
 /**
  * Log configuration
  */
-Logger.setVerbose(config.log.verbose);
-Logger.setTransport('console', { level: config.log['console.level'] });
+Logger.setVerbose(config.logger.verbose);
+Logger.setTransport('console', { level: config.logger['console.level'] });
 const logger = new Logger('certificate-acl:index');
 
 logger.info(`Configuration: \n${util.inspect(config, false, 5, true)}`);
-if (config.log['file.enable']) {
-  const fileLoggerConfig = { level: config.log['file.level'], filename: config.log['file.filename'] };
+if (config.logger['file.enable']) {
+  const fileLoggerConfig = { level: config.logger['file.level'], filename: config.logger['file.filename'] };
   Logger.setTransport('file', fileLoggerConfig);
 }
 

@@ -1,22 +1,10 @@
-In the current solution, this services writes in Redis and the VerneMQ
-reads from it. We can get in trouble if Redis becomes inconsistent. So,
-it would be better to change the solution to use Redis as a cache.
+1) The x.509 service doesn't persist the applications' certificates, so there is
+   no event for deleting them.  Considering that an application is associated with
+   a single certificate, the ACL service must check if an entry exists for an
+   application before adding a new one and remove it. The ACL service can use
+   an auxiliary table in REDIS (DB 1) which associates the application with its
+   certificate (application -> fingerprint). So, if an entry exists in DB 1 the
+   corresponding entry in DB 0 must be removed before adding the new one.
 
-The proposal is the following:
-
-1) ACL service consumes events from Kafka and populates Redis
-
-    fingerprint -> tenant:deviceID | application
-
-2) VerneMQ calls an internal REST endpoint provided by ACL service
-    GET /internal/certificates-acl/entries/:fingerprint
-
-    {
-        value: tenant:deviceID | application
-    }
-
-3) For the GET call, ACL service checks if an entry exists into REDIS.
-   If it exists, it will return immediately, otherwise, it will query the
-   x509-identity-mgmt. If the fingerprint is associated with a device or
-   an application a new entry will be added to REDIS to keep it consistent.
+2) Analyse if worths to expire the devices' entries so that Redis works as a cache.
 

@@ -4,8 +4,6 @@ const {
   Kafka: { Consumer },
 } = require('@dojot/microservice-sdk');
 
-const StateManager = require('../StateManager');
-
 const logger = new Logger('certificate-acl:kafka-consumer');
 
 const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
@@ -15,9 +13,12 @@ const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
  */
 class kafkaConsumer {
   /**
-   * Creates a Kafka Consumer
+   * Creates a high-level Kafka Consumer wrapper
+   *
+   * @param {*} serviceStateManager instance of a ServiceStateManager
+   * @returns KafkaConsumer instance
    */
-  constructor() {
+  constructor(serviceStateManager) {
     const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
     this.consumer = new Consumer({
       ...config.kafka,
@@ -33,9 +34,11 @@ class kafkaConsumer {
 
     // health-check and shutdown
     this.healthy = false;
-    StateManager.addHealthChecker('kafka',
+    this.serviceStateManager = serviceStateManager;
+    this.serviceStateManager.registerService('kafka');
+    this.serviceStateManager.addHealthChecker('kafka',
       this.checkHealth.bind(this), config.healthcheck['kafka.interval.ms']);
-    StateManager.registerShutdownHandler(this.shutdown.bind(this));
+    this.serviceStateManager.registerShutdownHandler(this.shutdown.bind(this));
     Object.seal(this);
 
     logger.info('Kafka Consumer created!');
@@ -133,6 +136,7 @@ class kafkaConsumer {
    * TODO: Create a robust health check strategy for Kafka clients.
    * @param {function} signalReady
    * @param {function} signalNotReady
+   *
    */
   checkHealth(signalReady, signalNotReady) {
     return this.consumer.getStatus().then((data) => {
@@ -161,6 +165,7 @@ class kafkaConsumer {
    * Shutdown function to be passed to the ServiceStateManager
    *
    * It tries to terminate the kafka consumer gracefully.
+   *
    */
   shutdown() {
     return this.consumer.finish().then(() => {
