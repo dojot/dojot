@@ -83,21 +83,17 @@ public class DojotkafkaProducer {
         }
     }
 
-    private Map<String, Object> generateMetadata(String tenant) {
+    private Map<String, Object> generateMetadata() {
         Map<String, Object> metadata = new LinkedHashMap<>();
         metadata.put("msgid", UUID.randomUUID().toString());
         metadata.put("timestamp", String.valueOf(System.currentTimeMillis()));
         metadata.put("service", String.valueOf(properties.get(ProducerConfig.CLIENT_ID_CONFIG)));
-        metadata.put("tenant", tenant);
         metadata.put("contentType", "application/vnd.dojot.keycloak+json");
         return metadata;
     }
 
     private Message generateTenantMessage(Event event, String tenant) {
-       Map<String, Object> metadata = generateMetadata(tenant);
-        Map<String, Object> data = new LinkedHashMap<>();
-        data.put("type", event.toString());
-        data.put("tenant", tenant);
-        return new Message(metadata, data);
+        Map<String, Object> metadata = generateMetadata();
+        return new Message(metadata,  event.toString(), tenant);
     }
 }
