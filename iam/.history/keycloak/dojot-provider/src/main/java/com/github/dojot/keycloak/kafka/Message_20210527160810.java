@@ -12,6 +12,10 @@ class Message {
     private String type;
     private String tenant;
 
+    public Message() {
+        metadata = new LinkedHashMap<>();
+    }
+
     public Message(Map<String, Object> metadata, String type, String tenant) {
         this.metadata = metadata;
         this.type = type;
