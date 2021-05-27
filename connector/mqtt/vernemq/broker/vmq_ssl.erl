@@ -18,9 +18,19 @@
          cert_to_common_name/1,
          opts/1]).
 
--define(REDIS_HOST, os:getenv("REDIS_HOST", "vernemq-redis")).
--define(REDIS_PORT, erlang:list_to_integer(os:getenv("REDIS_PORT", "6379"), 10)).
--define(REDIS_DB, erlang:list_to_integer(os:getenv("REDIS_DB", "0"), 10)).
+-define(CERTIFICATE_ACL_URL, os:getenv("CERTIFICATE_ACL_URL", "http://certificate-acl:3000/internal/api/v1/acl-entries/")).
+-define(CERTIFICATE_ACL_REQ_TIMEOUT_MS, erlang:list_to_integer(os:getenv("CERTIFICATE_ACL_REQ_TIMEOUT_MS", "1000"), 10)).
+
+get_acl_entry(Fingerprint) ->
+    Url = string:concat(?CERTIFICATE_ACL_URL, Fingerprint),
+    HTTPOpts =  [{timeout, ?CERTIFICATE_ACL_REQ_TIMEOUT_MS}],
+    case httpc:request(get, {Url, []}, HTTPOpts, []) of
+        {ok, {{_, 200, _}, _, Body}} ->
+            % the body is a json string \"entry\"
+            list_to_binary(string:sub_string(Body, 2, length(Body)-1));
+        _  ->
+            undefined
+    end.
 
 socket_to_common_name(Socket) ->
     case ssl:peercert(Socket) of
@@ -28,21 +38,17 @@ socket_to_common_name(Socket) ->
             undefined;
         {ok, Cert} ->
             Fingerprint = crypto:hash(sha256, Cert),
-            
+
             % the fingerprint at this point is with formatted but with the ":" as it's last character
             FormattedFingerprint = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= Fingerprint ]),
 
             % remove the last ":" character
             ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
 
-            % TODO create an module that wrapper the redis Client (suggestion use a gen_server as behavior)
-            {ok, Client} = eredis:start_link(?REDIS_HOST, ?REDIS_PORT, ?REDIS_DB),            
-            {ok, ReturnedValue} = eredis:q(Client, ["GET", ValidFingerprint]),
-            eredis:stop(Client),
-
-            % return the value retrieved from redis.
-            ReturnedValue
-    end. 
+            % get certificate owner from certificate-acl service
+            Owner = get_acl_entry(ValidFingerprint),
+            Owner
+    end.
 
 cert_to_common_name(Cert) ->
     case Cert of
@@ -50,20 +56,16 @@ cert_to_common_name(Cert) ->
             undefined;
         _ ->
             Fingerprint = crypto:hash(sha256, Cert),
-            
+
             % the fingerprint at this point is with formatted but with the ":" as it's last character
             FormattedFingerprint = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= Fingerprint ]),
 
             % remove the last ":" character
             ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
 
-            % TODO create an module that wrapper the redis Client (suggestion use a gen_server as behavior)
-            {ok, Client} = eredis:start_link(?REDIS_HOST, ?REDIS_PORT, ?REDIS_DB),            
-            {ok, ReturnedValue} = eredis:q(Client, ["GET", ValidFingerprint]),
-            eredis:stop(Client),
-
-            % return the value retrieved from redis.
-            ReturnedValue
+            % get certificate owner from certificate-acl service
+            Owner = get_acl_entry(ValidFingerprint),
+            Owner
     end.
 
 opts(Opts) ->
