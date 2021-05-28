@@ -15,7 +15,19 @@ local env_ssl_ca_file = "DOJOT_PLUGIN_SSL_CAFILE"
 local env_ssl_verify = "DOJOT_PLUGIN_SSL_VERIFY"
 local env_ssl_cert_file = "DOJOT_PLUGIN_SSL_CERTFILE"
 local env_ssl_key_file = "DOJOT_PLUGIN_SSL_KEYFILE"
+local env_request_timeout = "DOJOT_PLUGIN_REQUEST_TIMEOUT"
 
+----------- configure timeout for requests -----------
+local request_timeout = os.getenv(env_request_timeout)
+
+if (request_timeout) then
+    http.TIMEOUT = tonumber(request_timeout)
+    https.TIMEOUT = tonumber(request_timeout)
+else
+    http.TIMEOUT = 10
+    https.TIMEOUT = 10
+end
+-------------------------------------------------------
 
 local pepKongHandler = BasePlugin:extend()
 
