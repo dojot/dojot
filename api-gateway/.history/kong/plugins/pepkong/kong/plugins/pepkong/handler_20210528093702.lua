@@ -4,6 +4,9 @@ local http = require "socket.http"
 local https = require "ssl.https"
 local inspect = require 'inspect'
 
+http.TIMEOUT = 10
+https.TIMEOUT = 10
+
 local build_form_params = require("kong.plugins.pepkong.utils").build_form_params
 
 local re_gmatch = ngx.re.gmatch
@@ -21,8 +24,8 @@ if (request_timeout) then
     http.TIMEOUT = tonumber(request_timeout)
     https.TIMEOUT = tonumber(request_timeout)
 else
-    http.TIMEOUT = 2
-    https.TIMEOUT = 2
+    http.TIMEOUT = 10
+    https.TIMEOUT = 10
 end
 -------------------------------------------------------
 
