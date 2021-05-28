@@ -73,20 +73,17 @@ fore mentioned convention.
 | logger.console.level | string | `info` | `error`, `warn`, `info` or `debug` | CERTIFICATE_ACL_LOGGER_CONSOLE_LEVEL | logging level. |
 | logger.file.enable | boolean | `false` | `true` or `false` | CERTIFICATE_ACL_LOGGER_FILE_ENABLE | Flag that enables logging to file. |
 | logger.file.level | string | `info` | `error`, `warn`, `info` or `debug` | CERTIFICATE_ACL_LOGGER_FILE_LEVEL | logging level. |
-| logger.file.dir | string | `./temp/log/` | | CERTIFICATE_ACL_LOGGER_FILE_DIR | Directory where the log files will be saved. |
-| logger.file.name | string | `dojot.certificate-acl-%DATE%.log` | | CERTIFICATE_ACL_LOGGER_FILE_NAME | Log file name pattern. |
-| logger.file.max | string | `7d` | | CERTIFICATE_ACL_LOGGER_FILE_MAX | Maximum number of logs to keep. If not set, no logs will be removed. This can be a number of files or number of days. If using days, add 'd' as the suffix. |
-| logger.file.size | string | `10m` | | CERTIFICATE_ACL_LOGGER_FILE_SIZE | Maximum size of the file after which it will rotate. This can be a number of bytes, or units of kb, mb, and gb. If using the units, add 'k', 'm', or 'g' as the suffix. The units need to directly follow the number. |
+| logger.file.filename | string | `dojot.certificate-acl-%DATE%.log` | | CERTIFICATE_ACL_LOGGER_FILE_FILENAME | Log file name pattern. |
 
 #### Kafka integration settings
 
 | Key | type | Default Value | Valid Values | Environment variable | Purpose |
 |-----|------|---------------|--------------|----------------------|---------|
-| enable.async.commit| boolean | `true` | `true` or `false` | CERTIFICATE_ACL_ENABLE_ASYNC_COMMIT | Enable asynchronous processing mode. |
-| commit.on.failure| boolean | `false` | `true` or `false` | CERTIFICATE_ACL_ENABLE_ASYNC_COMMIT | Enable to commit even if the processing callback has failed. |
-| kafka.topic.auto.offset.reset | string | `earliest` | `latest`, `earliest`, `none` | CERTIFICATE_ACL_KAFKA_TOPIC_AUTO_OFFSET_RESET | What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset). |
-| kafka.consumer.group.id | string | `certificate-acl` | | CERTIFICATE_ACL_KAFKA_CONSUMER_GROUP_ID | A unique string that identifies the consumer group this consumer belongs to. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_group.id). |
-| kafka.consumer.metadata.broker.list | string | `kafka:9092` | - | CERTIFICATE_ACL_KAFKA_CONSUMER_METADATA_BROKER_LIST | A comma-separated list containing the kafka's `host:port`. |
+| kafka.enable.async.commit| boolean | `true` | `true` or `false` | CERTIFICATE_ACL_KAFKA_ENABLE_ASYNC_COMMIT | Enable asynchronous processing mode. |
+| kafka.commit.on.failure| boolean | `false` | `true` or `false` | CERTIFICATE_ACL_KAFKA_COMMIT_ON_FAILURE | Enable to commit even if the processing callback has failed. |
+| topic.auto.offset.reset | string | `earliest` | `latest`, `earliest`, `none` | CERTIFICATE_ACL_TOPIC_AUTO_OFFSET_RESET | What to do when there is no initial offset in Kafka or if the current offset does not exist any more on the server. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_auto.offset.reset). |
+| consumer.group.id | string | `certificate-acl` | | CERTIFICATE_ACL_CONSUMER_GROUP_ID | A unique string that identifies the consumer group this consumer belongs to. See more [here](https://kafka.apache.org/documentation/#consumerconfigs_group.id). |
+| consumer.metadata.broker.list | string | `kafka:9092` | - | CERTIFICATE_ACL_CONSUMER_METADATA_BROKER_LIST | A comma-separated list containing the kafka's `host:port`. |
 
 #### Redis integration settings
 
@@ -102,7 +99,7 @@ fore mentioned convention.
 
 | Key | type | Default Value | Valid Values | Environment variable | Purpose |
 |-----|------|---------------|--------------|----------------------|---------|
-|service.hostname | string | `x509-identity-mgmt` | | CERTIFICATE_ACL_SERVICE_HOSTNAME | Hostname for the x509-identity-mgmt service. |
-|service.port | integer | `3000` |  | CERTIFICATE_ACL_SERVICE_PORT | Port for the x509-identity-mgmt service. |
-|service.path | integer | `/internal/api/v1/certificates/` | `` | CERTIFICATE_ACL_SERVICE_PATH | Path to the certificate collection. |
-|service.timeout | integer | `3000` | `[0,...]` | CERTIFICATE_ACL_SERVICE_TIMEOUT |Timeout of the request to the x509-identity-mgmt service in milliseconds. |
+|x509im.hostname | string | `x509-identity-mgmt` | | CERTIFICATE_ACL_X509IM_HOSTNAME | Hostname for the x509-identity-mgmt service. |
+|x509im.port | integer | `3000` |  | CERTIFICATE_ACL_X509IM_PORT | Port for the x509-identity-mgmt service. |
+|x509im.path | integer | `/internal/api/v1/certificates/` | `` | CERTIFICATE_ACL_X509IM_PATH | Path to the certificate collection. |
+|x509im.timeout | integer | `3000` | `[0,...]` | CERTIFICATE_ACL_X509IM_TIMEOUT |Timeout of the request to the x509-identity-mgmt service in milliseconds. |

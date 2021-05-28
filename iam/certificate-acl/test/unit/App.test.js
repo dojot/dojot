@@ -24,7 +24,7 @@ const mockConfig = {
     host: '0.0.0.0',
     port: 3000,
   },
-  service: {
+  x509im: {
     hostname: 'x509-identity-mgmt',
     port: 3000,
     path: '/internal/api/v1/certificates/',

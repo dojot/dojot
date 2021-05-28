@@ -32,7 +32,7 @@ class HTTPServer {
     this.server = WebUtils.createServer({ config: this.config, logger });
 
     // framework
-    const x509ServiceConfig = getConfig('CERTIFICATE_ACL').service;
+    const x509ServiceConfig = getConfig('CERTIFICATE_ACL').x509im;
     const framework = createFramework(
       aclRoute(queryOwnerByFingerprint(redisManager, x509ServiceConfig)),
     );
