@@ -4,6 +4,9 @@ local http = require "socket.http"
 local https = require "ssl.https"
 local inspect = require 'inspect'
 
+http.TIMEOUT = 10
+https.TIMEOUT = 10
+
 local build_form_params = require("kong.plugins.pepkong.utils").build_form_params
 
 local re_gmatch = ngx.re.gmatch
