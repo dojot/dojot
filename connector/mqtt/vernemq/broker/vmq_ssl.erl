@@ -29,7 +29,7 @@ get_acl_entry(Fingerprint) ->
             % the body is a json string \"entry\"
             list_to_binary(string:sub_string(Body, 2, length(Body)-1));
         _  ->
-            undefined
+            {error, acl_failure}
     end.
 
 socket_to_common_name(Socket) ->
@@ -46,8 +46,7 @@ socket_to_common_name(Socket) ->
             ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
 
             % get certificate owner from certificate-acl service
-            Owner = get_acl_entry(ValidFingerprint),
-            Owner
+            get_acl_entry(ValidFingerprint)
     end.
 
 cert_to_common_name(Cert) ->
@@ -64,8 +63,7 @@ cert_to_common_name(Cert) ->
             ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
 
             % get certificate owner from certificate-acl service
-            Owner = get_acl_entry(ValidFingerprint),
-            Owner
+            get_acl_entry(ValidFingerprint)
     end.
 
 opts(Opts) ->
