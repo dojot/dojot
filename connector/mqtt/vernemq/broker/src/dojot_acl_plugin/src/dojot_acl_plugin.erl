@@ -11,19 +11,15 @@
          auth_on_subscribe/3]).
 
 auth_on_register({_IpAddr, _Port} = Peer, {_MountPoint, _ClientId} = SubscriberId, UserName, Password, CleanSession) ->
-    
-    if 
-        UserName == undefined -> 
-            error;
-        true -> 
+    case UserName of
+        {error, _} ->
+            {error, not_authorized_to_register};
+        _ ->
             ok
-    end.
-
-    
+        end.
 
 auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, Payload, IsRetain) ->
-    
-    Result  = dojot_acl:check_valid_topic(UserName, Topic),
+   Result  = dojot_acl:check_valid_topic(UserName, Topic),
 
     case Result of
         % the topic match with config
@@ -39,19 +35,17 @@ auth_on_publish(UserName, {_MountPoint, _ClientId} = SubscriberId, QoS, Topic, P
                     ok
             end;
         % Username don't match
-        error ->
-            {error, notMatch}
+        _ ->
+            {error, not_authorized_to_publish}
     end.
 
 auth_on_subscribe(UserName, ClientId, [{_Topic, _QoS}|_] = Topics) ->
-
     Result  = dojot_acl:check_config_topic(UserName, Topics),
 
     case Result of
         % the topic match with config
         ok ->
             ok;
-        error ->
-            %%The vernemq has a bug... even if this clause is activated, the verne return ok to the main app
-            {error, notMatch}
+        _ ->
+            {error, not_authorized_to_subscribe}
     end.
