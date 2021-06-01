@@ -4,11 +4,34 @@ const {
 
 const logger = new Logger('certificate-acl:express');
 
-module.exports = (aclRoute) => WebUtils.framework.createExpress(
+const {
+  responseCompressInterceptor,
+  requestIdInterceptor,
+  beaconInterceptor,
+  requestLogInterceptor,
+  readinessInterceptor,
+} = WebUtils.framework.interceptors;
+
+module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExpress(
   {
-    logger,
+    interceptors: [
+      readinessInterceptor({
+        stateManager: serviceStateManager,
+        logger,
+      }),
+      beaconInterceptor({
+        stateManager: serviceStateManager,
+        logger,
+      }),
+      requestIdInterceptor(),
+      requestLogInterceptor({
+        logger,
+      }),
+      responseCompressInterceptor(),
+    ],
     routes: ([
       aclRoute,
     ]),
+    logger,
   },
 );
