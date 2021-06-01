@@ -35,7 +35,7 @@ class HTTPServer {
     const x509ServiceConfig = getConfig('CERTIFICATE_ACL').x509im;
     const framework = createFramework(
       aclRoute(queryOwnerByFingerprint(redisManager, x509ServiceConfig)),
-      serviceStateManager
+      serviceStateManager,
     );
     this.server.on('request', framework);
 
