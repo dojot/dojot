@@ -45,3 +45,23 @@ variables can be configured. For more details, see the Keycloak page on the
 The Dojot Provider settings are defined by environment variables and are
 documented on the page of this component.
 
+### How to use keycloak with a nginx proxy
+
+First set `PROXY ADDRESS FORWARDING` to the value "true". In the example below there is an example of setting no **nginx** to access the keycloak via port *80* that is running on host *keycloak* on port *8080*.
+
+```nginx
+server {
+    listen      80;
+    location /auth {
+
+        proxy_set_header X-Forwarded-For $proxy_protocol_addr; # To forward the original client's IP address
+        proxy_set_header X-Forwarded-Proto $scheme; # to forward the  original protocol (HTTP or HTTPS)
+        proxy_set_header Host $host; # to forward the original host requested by the client
+        proxy_set_header X-Forwarded-Port $server_port; # to forward the original port requested by the client
+
+        proxy_pass           http://keycloak:8080/auth;
+
+    }
+}
+
+```
