@@ -47,7 +47,7 @@ documented on the page of this component.
 
 ### How to use keycloak with a nginx proxy
 
-First set `PROXY ADDRESS FORWARDING` to the value "true". In the example below there is an example of setting no **nginx** to access the keycloak via port *80* that is running on host *keycloak* on port *8080*.
+First set `PROXY ADDRESS FORWARDING` to the value *true*. In the example below, there is an example configuration in **nginx** to access keycloak through port *80* running on host *keycloak* on port *8080*.
 
 ```nginx
 server {
