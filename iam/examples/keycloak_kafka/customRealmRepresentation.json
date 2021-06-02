@@ -2216,10 +2216,12 @@
             }
         ]
     },
-    "internationalizationEnabled": false,
+    "internationalizationEnabled": true,
     "supportedLocales": [
-        ""
+        "pt-BR",
+        "en"
     ],
+    "defaultLocale": "en",
     "authenticationFlows": [
         {
             "id": "c189fd48-5d68-435b-9502-ca1e4c506e69",
