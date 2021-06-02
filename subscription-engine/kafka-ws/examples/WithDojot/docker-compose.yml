@@ -5,14 +5,14 @@ services:
       context: ./WSClient/
       dockerfile: ./Dockerfile
     ## Change to your Dojot environment
-    # environment:
-      # KAFKAWS_DOJOT_ADDRESS: "localhost:3000"
-      # KAFKAWS_DOJOT_USER: "admin"
-      # KAFKAWS_DOJOT_PASSWORD: "admin"
-
+    environment:
+      KAFKAWS_DOJOT_ADDRESS: "localhost:8000"
+      KAFKAWS_DOJOT_USER: "admin"
+      KAFKAWS_DOJOT_PASSWORD: "admin"
+      KAFKAWS_DOJOT_TENANT: "admin"
       ## You can change here these variables to test with other topics and filters
       # Don't forget that the Dojot user must have access to the topic
-      # KAFKAWS_APP_KAFKA_TOPIC: "admin.device-data"
+      KAFKAWS_APP_KAFKA_TOPIC: "admin.device-data"
 
       ## The filters are, by default, empty. If you want to change this, here are some examples:
       # Ex. 1
