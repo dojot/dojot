@@ -24,6 +24,7 @@ readonly LOOPBACK_CONSUMER_GROUP=${LOOPBACK_CONSUMER_GROUP:-"loopback-group"}
 readonly DEVICE_DATA_TOPIC=${DEVICE_DATA_TOPIC:-"device-data"}
 readonly DEVICE_MANAGER_TOPIC=${DEVICE_MANAGER_TOPIC:-"dojot.device-manager.device"}
 
+# TODO: This change to using keycloak needs to be further tested in the future.
 readonly AUTH_URL = "${KEYCLOAK_ADDRESS}/auth/realms/${DOJOT_TENANT}/protocol/openid-connect/token"
 readonly AUTH_DATA=" --data-urlencode \"username=${DOJOT_USERNAME}\" --data-urlencode \"password=${DOJOT_PASSWORD}\" --data-urlencode \"client_id=dev-test-cli\" --data-urlencode \"grant_type=password\""
 readonly TOKEN=$(curl --silent -X POST "${AUTH_URL}" "${AUTH_DATA}" | jq '.access_token' -r)
