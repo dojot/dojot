@@ -59,7 +59,33 @@
                 "composites": {
                     "realm": [
                         "user"
-                    ]
+                    ],
+                    "client": {
+                        "realm-management": [
+                            "realm-admin",
+                            "manage-users",
+                            "view-events",
+                            "query-clients",
+                            "view-realm",
+                            "manage-clients",
+                            "manage-realm",
+                            "impersonation",
+                            "query-groups",
+                            "view-users",
+                            "view-identity-providers",
+                            "manage-authorization",
+                            "query-users",
+                            "create-client",
+                            "view-clients",
+                            "view-authorization",
+                            "manage-events",
+                            "manage-identity-providers"
+                        ],
+                        "account": [
+                            "manage-account",
+                            "view-profile"
+                        ]
+                    }
                 },
                 "clientRole": false,
                 "containerId": "bea9700a-4561-4075-a089-ce49cfd39516",
@@ -453,6 +479,11 @@
             "enabled": true,
             "totp": false,
             "emailVerified": false,
+            "attributes": {
+                "locale": [
+                    "en"
+                ]
+            },
             "credentials": [
                 {
                     "id": "0b06ea86-efbc-4c5e-bac2-f5650397defb",
@@ -471,27 +502,6 @@
                 "uma_authorization",
                 "admin"
             ],
-            "clientRoles": {
-                "realm-management": [
-                    "view-realm",
-                    "manage-authorization",
-                    "view-identity-providers",
-                    "view-users",
-                    "manage-events",
-                    "manage-identity-providers",
-                    "view-clients",
-                    "view-events",
-                    "view-authorization",
-                    "manage-clients",
-                    "manage-users",
-                    "manage-realm",
-                    "create-client"
-                ],
-                "account": [
-                    "view-profile",
-                    "manage-account"
-                ]
-            },
             "notBefore": 0,
             "groups": []
         },
@@ -1095,7 +1105,7 @@
                     {
                         "name": "x509-identity-mgmt",
                         "ownerManagedAccess": true,
-                        "displayName": "x509-identity-mgmt: /x50",
+                        "displayName": "x509-identity-mgmt: /x509",
                         "attributes": {},
                         "_id": "fb028ae4-bfb2-4059-9fd3-febc49326192",
                         "uris": [],
