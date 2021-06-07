@@ -1,6 +1,7 @@
 #!/bin/sh
 
 kong="http://apigw:8001"
+dojot_domain_name=${DOJOT_DOMAIN_NAME:-localhost}
 
 # check if kong is started
 if curl --output /dev/null --silent --head --fail "$kong"; then
@@ -20,9 +21,13 @@ echo ""
 echo ""
 echo "- addAuthToEndpoint: ServiceName=${1}"
 
+# To understand about lua patterns and its limitations http://lua-users.org/wiki/PatternsTutorial
+# This regex is to guarantee whether or not it has port 443 and 80, it will be able to validate the issuer
+allowed_iss_url="https?://${dojot_domain_name}:?(%d*)/auth/realms/(.+)"
+
 curl -X POST ${kong}/services/"${1}"/plugins \
   --data "name=jwt-keycloak" \
-  --data "config.allowed_iss=http://localhost:8000/auth/realms/(.*)"
+  --data-urlencode "config.allowed_iss=${allowed_iss_url}"
 
 curl  -sS  -X POST \
 --url ${kong}/services/"${1}"/plugins/ \
