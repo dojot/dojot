@@ -132,13 +132,6 @@ function getCertificates() {
     csrContent=${csrContent:0:(-2)}
 
     # Requesting the certificate
-    # cert=$(curl -sS -X POST "${HOST}:${PORT}/x509/v1/certificates" \
-    #   -H 'Content-Type:application/json' \
-    #   -H "Authorization: Bearer ${JWT}" \
-    #   -H 'Accept:application/json' \
-    #   --data-binary "{ \"csr\": \"${csrContent}\" }" | jq '.certificatePem' -r )
-
-
     reponse=$(curl -sS -X POST "${HOST}:${PORT}/x509/v1/certificates" \
       -H 'Content-Type:application/json' \
       -H "Authorization: Bearer ${JWT}" \
