@@ -9,6 +9,7 @@ lib64
 share
 pyvenv.cfg
 .coverage
+.history
 
 # Certificates
 cert
