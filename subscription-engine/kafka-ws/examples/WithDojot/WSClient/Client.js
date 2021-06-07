@@ -28,7 +28,7 @@ async function generateAccessToken() {
   const authAddress = `${dojotAddress}/auth/realms/${dojotTenant}/protocol/openid-connect/token`;
   const payload = querystring.stringify({
     grant_type: 'password',
-    client_id: 'cli',
+    client_id: 'dev-test-cli',
     username: dojotUser,
     password: dojotPassword,
   });

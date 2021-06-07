@@ -6,6 +6,8 @@ capability.
 
 ## Usage
 
+__Note__ You need to enable the `dev-test-cli` client in the keycloak. For security reasons it is disabled by default, after use it is recommended to disable it again.
+
 First of all, you need access to some Dojot environment. If you don't have one, check out our
 [installation guide](https://dojotdocs.readthedocs.io/en/latest/installation-guide.html).
 
