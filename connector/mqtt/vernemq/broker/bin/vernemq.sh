@@ -132,6 +132,7 @@ sigterm_handler() {
         # this will stop the VerneMQ process
         /vernemq/bin/vmq-admin cluster leave node=VerneMQ@$IP_ADDRESS -k > /dev/null
         wait "$pid"
+
     fi
     exit 143; # 128 + 15 -- SIGTERM
 }
@@ -144,3 +145,4 @@ trap 'sigterm_handler' SIGTERM
 /vernemq/bin/vernemq console -noshell -noinput $@
 pid=$(ps aux | grep '[b]eam.smp' | awk '{print $2}')
 wait $pid
+

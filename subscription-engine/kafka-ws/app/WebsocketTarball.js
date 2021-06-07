@@ -89,16 +89,14 @@ class Tarball {
    * Initializes all objects that make up the Tarball
    */
   async init() {
-    logger.info('Initializing the Kafka and Redis Components of the Websocket Tarball...');
+    logger.info('Initializing the Kafka of the Websocket Tarball...');
     try {
       await this.kafkaTopicsCallbacksMgmt.init();
-      this.redisExpirationMgmt.initPublisher();
-      await this.redisExpirationMgmt.initSubscribe();
     } catch (error) {
       logger.error(`Websocket Tarball init: Caught ${error.stack}`);
       throw error;
     }
-    logger.info('Successfully initialized Websocket Tarball Kafka and Redis Components!');
+    logger.info('Successfully initialized Websocket Tarball Kafka Components!');
   }
 
   /**

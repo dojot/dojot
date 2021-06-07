@@ -39,7 +39,6 @@ describe("Unit tests of script 'OwnershipNotifier.js'", () => {
 
   it('should create an OwnershipNotifier whose topic does not contain the tenant', () => {
     const ownershipNotifierWithoutTenant = new OwnershipNotifier({
-      tenant: null,
       kafkaTopicSuffix: global.config.notifications.kafka.producer.ownership.topic.suffix,
       notificationEngine: notificationEngineMock(),
       logger: new Logger('OwnershipNotifier.test.js'),

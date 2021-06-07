@@ -113,6 +113,7 @@ describe('AgentMessenger', () => {
     beforeEach(() => {
       mqttClient = {
         init: jest.fn(),
+        connectOrDisconnectClient: jest.fn(),
       };
     });
 
@@ -124,6 +125,7 @@ describe('AgentMessenger', () => {
       expect(mockConfig.Producer.connect).toHaveBeenCalled();
       expect(mqttClient.init).toHaveBeenCalled();
       expect(agentMessenger.logger).toBeDefined();
+      expect(agentMessenger.mqttClient).toBeDefined();
     });
 
     it('should not correctly initialize - Promise rejected', async () => {
@@ -183,33 +185,51 @@ describe('AgentMessenger', () => {
   describe('healthChecker', () => {
     let signalReady;
     let signalNotReady;
+    let mqttClient;
+
+    afterAll(() => {
+      mockExit.mockRestore();
+    });
 
     beforeEach(() => {
       signalReady = jest.fn();
       signalNotReady = jest.fn();
+      agentMessenger = new AgentMessenger();
+      mqttClient = {
+        init: jest.fn(),
+        connectOrDisconnectClient: jest.fn(),
+      };
+      mockConfig.Producer.connect.mockReturnValue(Promise.resolve());
+      jest.clearAllMocks();
     });
 
     it('should signal as ready - is connected to Kafka', async () => {
       mockConfig.Producer.getStatus.mockReturnValue(Promise.resolve({ connected: true }));
 
+      await agentMessenger.init(mqttClient);
       await agentMessenger.healthChecker(signalReady, signalNotReady);
 
+      expect(mqttClient.connectOrDisconnectClient).toHaveBeenCalledWith(true);
       expect(signalReady).toHaveBeenCalled();
     });
 
     it('should signal as not ready - is not connected to Kafka', async () => {
       mockConfig.Producer.getStatus.mockReturnValue(Promise.resolve({ connected: false }));
 
+      await agentMessenger.init(mqttClient);
       await agentMessenger.healthChecker(signalReady, signalNotReady);
 
+      expect(mqttClient.connectOrDisconnectClient).toHaveBeenCalledWith(false);
       expect(signalNotReady).toHaveBeenCalled();
     });
 
     it('should signal as not ready - Promise was rejected', async () => {
       mockConfig.Producer.getStatus.mockReturnValue(Promise.reject());
 
+      await agentMessenger.init(mqttClient);
       await agentMessenger.healthChecker(signalReady, signalNotReady);
 
+      expect(mqttClient.connectOrDisconnectClient).toHaveBeenCalledWith(false);
       expect(signalNotReady).toHaveBeenCalled();
     });
   });

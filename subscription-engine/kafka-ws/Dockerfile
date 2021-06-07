@@ -18,7 +18,7 @@ RUN apk add --no-cache --virtual .build-deps gcc zlib-dev libc-dev bsd-compat-he
 COPY package.json .
 COPY package-lock.json .
 
-RUN npm install
+RUN npm install --only=prod
 
 COPY ./index.js ./index.js
 COPY ./bin ./bin
@@ -44,6 +44,5 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 CMD ["./bin/entryPoint.sh", "npm", "run", "kafka-ws"]
 
-HEALTHCHECK --start-period=5s --interval=30s --timeout=5s --retries=2 \
-    CMD HC=$(wget -q -O - "http://localhost:9000/health") \
-        && echo $HC && echo $HC | grep -q 'SERVER_IS_READY' 
+HEALTHCHECK --start-period=30s --interval=30s --timeout=10s --retries=3 \
+    CMD wget http://localhost:9000/health -q -O - > /dev/null 2>&1

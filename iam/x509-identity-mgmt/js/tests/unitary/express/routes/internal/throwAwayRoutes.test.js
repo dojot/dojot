@@ -1,7 +1,7 @@
 const { Logger, WebUtils } = require('@dojot/microservice-sdk');
 const supertest = require('supertest');
 
-const util = require('../../../util.test');
+const util = require('../../../../util.test');
 
 const generatedCert = {
   certificateFingerprint: util.p256CertFingerprint,
@@ -18,7 +18,7 @@ const crlQueryResult = {
 };
 
 const framework = WebUtils.framework.createExpress({
-  logger: new Logger('throwAwayRoutes.test.js'),
+  logger: new Logger('internal/throwAwayRoutes.test.js'),
   interceptors: [
     global.jsonBodyParsingInterceptor,
     {
@@ -26,7 +26,7 @@ const framework = WebUtils.framework.createExpress({
       middleware: (req, res, next) => {
         req.scope = {
           resolve: jest.fn((dep) => {
-            if (dep === 'internalCAService') {
+            if (dep === 'caService') {
               return {
                 getRootCertificate: jest.fn(() => caQueryResult),
                 getRootCRL: jest.fn(() => crlQueryResult),
@@ -47,15 +47,39 @@ const framework = WebUtils.framework.createExpress({
       },
     },
   ],
-  routes: global.throwAwayRoutes,
+  routes: global.internalThrowAwayRoutes,
 });
 
 const request = supertest(framework);
 
-describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
-  it('should post a CSR and receive a certificate',
+describe("Testing 'internal/throwAwayRoutes.js' Script Routes", () => {
+  it('should post a CSR and receive a certificate ("Accept: application/json")',
     () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
       .send({ csr: util.p256CSR })
+      .expect(201)
+      .then((res) => {
+        expect(res.body).toEqual(generatedCert);
+      }));
+
+  it('should post a CSR and receive a certificate ("Accept: application/x-pem-file")',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/x-pem-file')
+      .send({ csr: util.p256CSR })
+      .expect(201)
+      .then((res) => {
+        expect(res.text).toEqual(generatedCert.certificatePem);
+      }));
+
+  it('should post a CSR and receive a certificate (belongsTo = application)',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
+      .send({
+        csr: util.p256CSR,
+        belongsTo: {
+          application: `${global.config.certificate.belongsto.application[0]}`,
+        },
+      })
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
@@ -63,6 +87,7 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
 
   it('should return an error because the CSR was not provided',
     () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
       .send({
         certificateChain: util.certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2'),
       })
@@ -73,18 +98,69 @@ describe("Testing 'throwAwayRoutes.js' Script Routes", () => {
         });
       }));
 
-  it('should get the internal Root CA',
+  it('should deny the issuance of a certificate in the case of owner = device',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
+      .send({
+        csr: util.p256CSR,
+        belongsTo: {
+          device: 'abc123',
+        },
+      })
+      .expect(403)
+      .then((res) => {
+        expect(res.body).toEqual({
+          error: 'Operations on certificates for devices are not authorized through this endpoint.',
+        });
+      }));
+
+  it('should deny the issuance of a certificate because of the invalid name of the application',
+    () => request.post('/internal/api/v1/throw-away')
+      .set('Accept', 'application/json')
+      .send({
+        csr: util.p256CSR,
+        belongsTo: {
+          application: 'invalid-app',
+        },
+      })
+      .expect(400)
+      .then((res) => {
+        expect(res.body).toEqual({
+          error: 'Application name is not valid.',
+        });
+      }));
+
+  it('should get the internal Root CA ("Accept: application/json")',
     () => request.get('/internal/api/v1/throw-away/ca')
+      .set('Accept', 'application/json')
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(caQueryResult);
       }));
 
-  it('should get the latest CRL issued by the internal Root CA',
+  it('should get the internal Root CA ("Accept: application/x-pem-file")',
+    () => request.get('/internal/api/v1/throw-away/ca')
+      .set('Accept', 'application/x-pem-file')
+      .expect(200)
+      .then((res) => {
+        expect(res.text).toEqual(caQueryResult.caPem);
+      }));
+
+
+  it('should get the latest CRL issued by the internal Root CA ("Accept: application/json")',
     () => request.get('/internal/api/v1/throw-away/ca/crl')
+      .set('Accept', 'application/json')
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(crlQueryResult);
+      }));
+
+  it('should get the latest CRL issued by the internal Root CA ("Accept: application/x-pem-file")',
+    () => request.get('/internal/api/v1/throw-away/ca/crl')
+      .set('Accept', 'application/x-pem-file')
+      .expect(200)
+      .then((res) => {
+        expect(res.text).toEqual(crlQueryResult.crl);
       }));
 
   it('should get the Trusted CAs bundle ("Accept: application/json")',

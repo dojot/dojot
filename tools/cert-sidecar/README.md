@@ -6,19 +6,21 @@ __NOTE THAT__ In Kubernetes, a pod is a group of one or more containers with sha
 
 ## **Table of Contents**
 
-1. [Overview](#overview)
-2. [Dependencies](#dependencies)
-   1. [Dojot Services](#dojot-services)
-3. [Running the service](#running-the-service)
-   1. [Configuration](#configuration)
-      1. [General](#general)
-      2. [Certificates](#certificates)
-      3. [Cron](#cron)
-      4. [x509 identity mgmt](#x509-identity-mgmt)
-      5. [Service State Manager](#service-state-manager)
-   2. [How to run](#how-to-run)
-4. [Documentation](#documentation)
-5. [Issues and help](#issues-and-help)
+- [**Cert-Sidecar**](#cert-sidecar)
+  - [**Table of Contents**](#table-of-contents)
+  - [**Overview**](#overview)
+  - [Dependencies](#dependencies)
+    - [Dojot Services](#dojot-services)
+  - [Running the service](#running-the-service)
+    - [Configuration](#configuration)
+      - [General](#general)
+      - [Certificates](#certificates)
+      - [Cron](#cron)
+      - [x509 identity mgmt](#x509-identity-mgmt)
+      - [Service State Manager](#service-state-manager)
+  - [How to run](#how-to-run)
+  - [Documentation](#documentation)
+  - [Issues and help](#issues-and-help)
 
 ## **Overview**
 
@@ -41,7 +43,7 @@ In the end, we can say that **Cert-Sidecar** creates four files in the *PEM* for
 
 __ATTENTION__ When the service is unable to retrieve a CRL or update certificates if they have been revoked or expired (if these settings are active), after several defined attempts using the Exponential Backoff strategy the service will terminate and delete all files (if deletions are enabled). And at each configured time, the service checks if it can connect with *x509-identity-mgmt* and if it does not, the service changes to unhealthy. For more information about that, check the [__Service State Manager__ ](https://github.com/dojot/dojot-microservice-sdk-js/blob/master/lib/serviceStateManager/README.md) module in our [Microservice SDK](https://github.com/dojot/dojot-microservice-sdk-js).
 
-__ATTENTION__  It's important to note that in services that use Node.js and [TLS module](https://nodejs.org/api/tls.html#tls_tls_ssl), the certificates, including the crl, are not changed automatically after the service starts even if the files are updated. The [`server.setSecureContext()`](https://nodejs.org/api/tls.html#tls_server_setsecurecontext_options) method can be used for this purpose, available from version 11 of Node.js. 
+__ATTENTION__  It's important to note that in services that use Node.js and [TLS module](https://nodejs.org/api/tls.html#tls_tls_ssl), the certificates, including the crl, are not changed automatically after the service starts even if the files are updated. The [`server.setSecureContext()`](https://nodejs.org/api/tls.html#tls_server_setsecurecontext_options) method can be used for this purpose, available from version 11 of Node.js.
 
 There is a examples of how to use  **Cert-Sidecar** with kubernetes and docker-compose within the directory [examples](./examples).
 
@@ -80,7 +82,7 @@ General configurations
 
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
-| app.sidecar.to      | Suffix to be used to identify logs | app | string | CERT_SC_APP_SIDECAR_TO
+| app.sidecar.to      | Name of the application in which the sidecar will be associated. **Note:** The `x509-identity-mgmt` service must be configured to recognize the _application name_ as valid. | app | string | CERT_SC_APP_SIDECAR_TO
 | app.delete.certificates  | Enables deleting certificate files if you are unable to connect and retrieve a new one after a given number of attempts | false | boolean | CERT_SC_APP_DELETE_CERTIFICATES
 | app.shutdown  | Enables the service to gracefully shut down if after a given number of attempts it is not possible to obtain new certificates | true | boolean | CERT_SC_APP_SHUTDOWN
 | log.console.level   | Console logger level | info | info, debug, error, warn | CERT_SC_LOG_CONSOLE_LEVEL
@@ -100,6 +102,7 @@ Certificates configurations
 | certs.crl | Enables the use of CRL (obtaining and creating the file)  | false | boolean | CERT_SC_CERTS_CRL
 | certs.files.basepath | Path to create files  | /certs | path | CERT_SC_CERTS_FILES_BASEPATH
 | certs.files.ca |  CA root certificate filename | ca.pem | filename  | CERT_SC_CERTS_FILES_CA
+| certs.files.cabundle |  CA certificates Bundle (TrustStore) filename | cabundle.pem | filename  | CERT_SC_CERTS_FILES_CABUNDLE
 | certs.files.cert | Public certificate filename | cert.pem | filename  | CERT_SC_CERTS_FILES_CERT
 | certs.files.crl | CRL filename  | crl.pem | filename | CERT_SC_CERTS_FILES_CRL
 | certs.files.key | Private keys filename | key.pem | filename | CERT_SC_CERTS_FILES_KEY
@@ -111,11 +114,14 @@ Cron configurations
 | Key | Purpose | Default Value | Valid Values | Environment variable
 | --- | ------- | ------------- | ------------ | --------------------
 | cron.crl | Enables the use of *cron* for updating CRL. | true | boolean | CERT_SC_CRON_CRL
-| cron.crl.time | Cron patterns for updating CRL. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | 0 * */2 * * * | string | CERT_SC_CRON_CRL_TIME
+| cron.crl.time | Cron patterns for updating CRL. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */2 * * *` | string | CERT_SC_CRON_CRL_TIME
 | cron.expiration | Enables the use of *cron* for checking expiration for Public Certificate and Public CA certificate.  | true | boolean | CERT_SC_CRON_EXPIRATION
-| cron.expiration.time |  Cron patterns for checking expiration. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | 0 * */1 * * * | string | CERT_SC_CRON_EXPIRATION_TIME
+| cron.expiration.time |  Cron patterns for checking expiration. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */1 * * *` | string | CERT_SC_CRON_EXPIRATION_TIME
 | cron.revoke | Enables the use of *cron* for checking if the  Public Certificate is revoked. This needs `certs.crl` to be true. Note: *x509 identity mgmt*  is not yet supported for revoking internal certificates | false | boolean | CERT_SC_CRON_REVOKE
-| cron.revoke.time |  Cron patterns for checking revoking. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | 0 * */3 * * * | string | CERT_SC_CRON_REVOKE_TIME
+| cron.revoke.time |  Cron patterns for checking revoking. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */3 * * *` | string | CERT_SC_CRON_REVOKE_TIME
+| cron.cabundle | Enables the use of *cron* for update the CA certificates Bundle (TrustStore) | false | boolean | CERT_SC_CRON_CABUNDLE
+| cron.cabundle.time |  Cron patterns for update the CA certificates Bundle. [Read up on cron patterns](https://www.npmjs.com/package/cron#available-cron-patterns) | `0 0 */1 * * *` | string | CERT_SC_CRON_CABUNDLE_TIME
+
 
 #### x509 identity mgmt
 
@@ -128,6 +134,7 @@ X509 identity mgmt configurations
 | x509.path.sign | Resource to sign the csr, create a public certificate.  | /internal/api/v1/throw-away | string | CERT_SC_X509_PATH_SIGN
 | x509.path.crl | Resource to retrieve the latest CRL released by the root CA. | /internal/api/v1/throw-away/ca/crl | string | CERT_SC_X509_PATH_CRL
 | x509.path.ca | Resource to retrieve the root CA of the dojot platform | /internal/api/v1/throw-away/ca | string | CERT_SC_X509_PATH_CA
+| x509.path.cabundle | Resource to retrieve the root CA of the dojot platform and all the external trusted CAs | /internal/api/v1/throw-away/ca/bundle | string | CERT_SC_X509_PATH_CABUNDLE
 | x509.retries | Number of retries when using *x509 identity mgmt*  before service shutdown. The strategy used is described in [Exponential Backoff](https://developers.google.com/analytics/devguides/reporting/core/v3/errors#backoff) | 9 | integer | CERT_SC_X509_RETRIES
 | x509.timeout.ms | Specifies the number of milliseconds before the request times out. If the request takes longer than `timeout`, the request will be aborted. | 1000 | integer | CERT_SC_X509_TIMEOUT
 

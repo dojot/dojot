@@ -4,8 +4,7 @@ const mockConfig = {
     port: 6379,
     database: 1,
     connect_timeout: 3600000,
-    'reconnect.max.attemps': 2,
-    'reconnect.after': 500,
+    'strategy.reconnect.after': 500,
   },
   log: {
     verbose: false,
@@ -16,6 +15,8 @@ const mockConfig = {
   },
 };
 
+const mockShutdown = jest.fn().mockResolvedValue('ok');
+const mockSignalReady = jest.fn();
 const mockMicroServiceSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -29,48 +30,87 @@ const mockMicroServiceSdk = {
   })),
   ServiceStateManager: jest.fn(() => ({
     registerService: jest.fn(),
-    signalReady: jest.fn(),
+    signalReady: mockSignalReady,
     signalNotReady: jest.fn(),
     addHealthChecker: jest.fn((service, callback) => callback(jest.fn(), jest.fn())),
     registerShutdownHandler: jest.fn(),
-    shutdown: jest.fn(),
+    shutdown: mockShutdown,
   })),
 };
 
+const mockQuit = jest.fn();
+const reqEventMapMock = {};
+
 const mockRedis = {
   createClient: jest.fn(() => ({
-    on: jest.fn(),
-    quit: jest.fn((callback) => callback()),
+    on: jest.fn().mockImplementation((event, onCallback) => {
+      if (!reqEventMapMock[event]) {
+        reqEventMapMock[event] = [];
+      }
+      reqEventMapMock[event].push(onCallback);
+    }),
+    quit: mockQuit,
   })),
 };
 
 jest.mock('redis', () => mockRedis);
 
 jest.mock('@dojot/microservice-sdk', () => mockMicroServiceSdk);
-jest.mock('../../app/StateManager');
 
 const RedisManger = require('../../app/Redis/RedisManager');
-const StateManager = require('../../app/StateManager');
 
+class ErrorRedis extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('isNumber', () => {
-  it('Init Shutdown redis successfully', async () => {
-    await RedisManger.shutdownProcess();
-    expect(RedisManger.redisClient.quit).toHaveBeenCalled();
+describe('RedisManger', () => {
+  test('init', () => {
+    reqEventMapMock.connect[0]();
+    reqEventMapMock.ready[0]();
+
+    expect(mockSignalReady)
+      .toHaveBeenNthCalledWith(1, 'redis');
   });
-});
 
-describe('should test redis strategy', () => {
-  it('Init Shutdown redis successfully', async () => {
-    const opions = { attempt: 1 };
-    RedisManger.retryStrategy(opions);
-    expect(StateManager.shutdown).toHaveBeenCalledTimes(0);
+  test('Can\'t reconnect, Shutdown ok ', () => {
+    reqEventMapMock.error[0](new ErrorRedis('msg', 'CONNECTION_BROKEN'));
+    expect(mockShutdown)
+      .toHaveBeenCalled();
+  });
 
-    opions.attempt = mockConfig.redis['reconnect.max.attemps'];
-    RedisManger.retryStrategy(opions);
-    expect(StateManager.shutdown).toHaveBeenCalledTimes(1);
+  test('Can\'t reconnect, Shutdown with error ', () => {
+    mockShutdown.mockRejectedValue(new Error());
+    reqEventMapMock.error[0](new ErrorRedis('msg', 'CONNECTION_BROKEN'));
+    expect(mockShutdown)
+      .toHaveBeenCalled();
+  });
+
+  it('Shutdown redis successfully', async () => {
+    mockQuit
+      .mockImplementationOnce((callback) => callback(null));
+
+    await RedisManger.shutdownProcess();
+
+    expect(mockQuit)
+      .toHaveBeenCalledTimes(1);
+  });
+
+  it('Shutdown redis with error', async () => {
+    const msgError = 'x';
+    mockQuit
+      .mockImplementationOnce((callback) => callback(new Error(msgError), null));
+    expect.assertions(1);
+    try {
+      await RedisManger.shutdownProcess();
+    } catch (e) {
+      expect(mockQuit)
+        .toHaveBeenCalledTimes(1);
+    }
   });
 });
