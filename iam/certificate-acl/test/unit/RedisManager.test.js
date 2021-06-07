@@ -4,42 +4,52 @@ const mockConfig = {
     port: 6379,
     db: 0,
     'reconnect.after.ms': 5000,
+    'operation.timeout.ms': 1000,
   },
 };
 
 jest.mock('@dojot/microservice-sdk');
+
 const sdkMock = require('@dojot/microservice-sdk');
 
 sdkMock.ConfigManager.getConfig = jest.fn(() => mockConfig);
 
-jest.mock('../../app/StateManager');
-const stateManagerMock = require('../../app/StateManager');
+const { ServiceStateManager } = require('@dojot/microservice-sdk');
+
+const stateManagerMock = new ServiceStateManager();
 // registerShutdownHandler and shutdown - defined inside a constructor
 stateManagerMock.registerShutdownHandler = jest.fn();
 stateManagerMock.shutdown = jest.fn();
 
-class MockRedisClient {
-  constructor() {
-    this.eventListener = {};
-    this.emit = (event, data) => {
-      this.eventListener[event](data);
-    };
-    this.on = jest.fn((event, cb) => {
-      this.eventListener[event] = cb;
-    });
-    this.table = new Map();
-    this.set = jest.fn((key, value, cb) => {
-      this.table.set(key, value);
-      cb(null, 'OK');
-    });
-    this.del = jest.fn((key, cb) => {
-      const ret = this.table.delete(key);
-      cb(null, (ret) ? 1 : 0);
-    });
-    this.quit = jest.fn((cb) => cb());
-  }
+function MockRedisClient() {
+  this.eventListener = {};
+  this.table = new Map();
 }
+MockRedisClient.prototype.emit = function emit(event, data) {
+  this.eventListener[event](data);
+  return this;
+};
+MockRedisClient.prototype.on = function on(event, cb) {
+  this.eventListener[event] = cb;
+  return this;
+};
+MockRedisClient.prototype.get = function get(key, cb) {
+  const value = this.table.get(key);
+  cb(null, value);
+};
+MockRedisClient.prototype.set = function set(key, value, cb) {
+  this.table.set(key, value);
+  cb(null, 'OK');
+};
+MockRedisClient.prototype.del = function del(key, cb) {
+  const ret = this.table.delete(key);
+  cb(null, (ret) ? 1 : 0);
+};
+MockRedisClient.prototype.quit = jest.fn((cb) => {
+  cb();
+});
 const mockRedis = {
+  RedisClient: MockRedisClient,
   createClient: jest.fn(() => new MockRedisClient()),
 };
 
@@ -51,42 +61,38 @@ const RedisManager = require('../../app/redis/RedisManager');
 
 describe('Redis Initialization', () => {
   it('Constructor', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
 
     expect(redisManager.eventEmitter).toBeDefined();
-    expect(redisManager.setAsync).toBeDefined();
-    expect(redisManager.delAsync).toBeDefined();
     expect(stateManagerMock.registerShutdownHandler).toBeCalled();
   });
 });
 
 describe('Set/Delete', () => {
-  it('Set data successfully', () => {
-    const redisManager = new RedisManager();
+  it('Set data successfully', async () => {
+    const redisManager = new RedisManager(stateManagerMock);
 
-    expect(redisManager.setAsync('fingerprintX', 'tenant:deviceId'))
-      .resolves.toBe('OK');
-    expect(redisManager.setAsync('fingerprintY', 'application'))
-      .resolves.toBe('OK');
+    const ret = await redisManager.setAsync('fingerprintX', 'tenant:deviceId');
+    expect(ret).toBe('OK');
   });
 
-  it('Delete data successfully', () => {
-    const redisManager = new RedisManager();
-    redisManager.setAsync('fingerprintX', 'tenant:deviceId');
-    redisManager.setAsync('fingerprintY', 'application');
+  it('Delete data successfully', async () => {
+    const redisManager = new RedisManager(stateManagerMock);
+    await redisManager.setAsync('fingerprintX', 'tenant:deviceId');
+    await redisManager.setAsync('fingerprintY', 'application');
 
-    expect(redisManager.delAsync('fingerprintX'))
-      .resolves.toBe(1);
-    expect(redisManager.delAsync('fingerprintY'))
-      .resolves.toBe(1);
-    expect(redisManager.delAsync('fingerprintZ'))
-      .resolves.toBe(0);
+    const ret1 = await redisManager.delAsync('fingerprintX');
+    expect(ret1).toBe(1);
+    const ret2 = await redisManager.delAsync('fingerprintY');
+    expect(ret2).toBe(1);
+    const ret3 = await redisManager.delAsync('fingerprintZ');
+    expect(ret3).toBe(0);
   });
 });
 
 describe('Redis Events', () => {
   it('connect', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     redisManager.redisClient.emit('connect');
 
     expect(stateManagerMock.signalReady).toBeCalled();
@@ -94,7 +100,7 @@ describe('Redis Events', () => {
   });
 
   it('reconnecting', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     redisManager.redisClient.emit('reconnecting');
 
     expect(stateManagerMock.signalNotReady).toBeCalled();
@@ -102,14 +108,14 @@ describe('Redis Events', () => {
   });
 
   it('error - exhausted retries', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     redisManager.redisClient.emit('error', { code: 'CONNECTION_BROKEN' });
 
     expect(stateManagerMock.shutdown).toBeCalled();
   });
 
   it('error - except exhausted retries', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     redisManager.redisClient.emit('error',
       { code: 'ANY ERROR, EXCEPT CONNECTION_BROKEN' });
 
@@ -117,7 +123,7 @@ describe('Redis Events', () => {
   });
 
   it('end', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     redisManager.redisClient.emit('end');
 
     expect(stateManagerMock.signalNotReady).toBeCalled();
@@ -127,7 +133,7 @@ describe('Redis Events', () => {
 
 describe('Register on event', () => {
   it('healthy', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     const fn = jest.fn();
     redisManager.on('healthy', fn);
 
@@ -136,7 +142,7 @@ describe('Register on event', () => {
   });
 
   it('unhealthy', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     const fn = jest.fn();
     redisManager.on('unhealthy', fn);
 
@@ -145,7 +151,7 @@ describe('Register on event', () => {
   });
 
   it('invalid event', () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
     const fn = jest.fn();
 
     expect(() => redisManager.on('invalid event', fn)).toThrow();
@@ -154,7 +160,7 @@ describe('Register on event', () => {
 
 describe('Graceful Shutdown', () => {
   it('Finish Redis Client', async () => {
-    const redisManager = new RedisManager();
+    const redisManager = new RedisManager(stateManagerMock);
 
     await redisManager.shutdown();
 

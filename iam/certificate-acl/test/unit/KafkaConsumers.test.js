@@ -13,12 +13,14 @@ const mockConfig = {
 };
 
 jest.mock('@dojot/microservice-sdk');
+
 const sdkMock = require('@dojot/microservice-sdk');
 
 sdkMock.ConfigManager.getConfig = jest.fn(() => mockConfig);
 
-jest.mock('../../app/StateManager');
-const stateManagerMock = require('../../app/StateManager');
+const { ServiceStateManager } = require('@dojot/microservice-sdk');
+
+const stateManagerMock = new ServiceStateManager();
 // registerShutdownHandler - defined inside a constructor
 stateManagerMock.registerShutdownHandler = jest.fn();
 
@@ -26,7 +28,7 @@ const KafkaConsumer = require('../../app/kafka/KafkaConsumer');
 
 describe('KafkaConsumer Initialization', () => {
   it('Constructor', () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
 
     expect(kconsumer.suspended).toBeFalsy();
     expect(kconsumer.healthy).toBeFalsy();
@@ -37,7 +39,7 @@ describe('KafkaConsumer Initialization', () => {
   });
 
   it('Init', () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.init();
     expect(kconsumer.consumer.init).toBeCalled();
   });
@@ -45,7 +47,7 @@ describe('KafkaConsumer Initialization', () => {
 
 describe('Register Callbacks', () => {
   it('Register when Kafka Consumer is suspended', () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.suspended = true;
 
     const cb = jest.fn();
@@ -62,7 +64,7 @@ describe('Register Callbacks', () => {
   });
 
   it('Register when Kafka Consumer is not suspended', () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.suspended = false;
     const cb = jest.fn();
     const topic = 'topic.test';
@@ -83,7 +85,7 @@ describe('Register Callbacks', () => {
   });
 
   it('Register callback twice', () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.suspended = false;
     const cb = jest.fn();
     const topic = 'topic.test';
@@ -110,7 +112,7 @@ describe('Suspend and Resume Processing Callbacks', () => {
   const cbId = 'ckId.test';
 
   beforeEach(() => {
-    kconsumer = new KafkaConsumer();
+    kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.consumer.registerCallback = jest.fn().mockReturnValue(cbId);
     kconsumer.suspend = false;
     kconsumer.registerCallback(topic, cb);
@@ -183,7 +185,7 @@ describe('Suspend and Resume Processing Callbacks', () => {
 
 describe('Health-Check', () => {
   it('Unhealthy to Healthy', async () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.healthy = false;
     kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: true }));
 
@@ -197,7 +199,7 @@ describe('Health-Check', () => {
   });
 
   it('Healthy to Unhealthy', async () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.healthy = true;
     kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: false }));
 
@@ -211,7 +213,7 @@ describe('Health-Check', () => {
   });
 
   it('Continues Healthy', async () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.healthy = true;
     kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: true }));
 
@@ -225,7 +227,7 @@ describe('Health-Check', () => {
   });
 
   it('Continues Unhealthy', async () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.healthy = false;
     kconsumer.consumer.getStatus = jest.fn(() => Promise.resolve({ connected: false }));
 
@@ -239,7 +241,7 @@ describe('Health-Check', () => {
   });
 
   it('Failed to Get Status', async () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.healthy = true;
     kconsumer.consumer.getStatus = jest.fn(() => Promise.reject(new Error('Error test message')));
 
@@ -255,7 +257,7 @@ describe('Health-Check', () => {
 
 describe('Graceful Shutdown', () => {
   it('Finish Kafka Consumer', async () => {
-    const kconsumer = new KafkaConsumer();
+    const kconsumer = new KafkaConsumer(stateManagerMock);
     kconsumer.consumer.finish = jest.fn(() => Promise.resolve());
 
     await kconsumer.shutdown();
