@@ -133,17 +133,39 @@ function getCertificates() {
     csrContent=${csrContent:0:(-2)}
 
     # Requesting the certificate
-    cert=$(curl -sS -X POST "${HOST}:${PORT}/x509/v1/certificates" \
+    # cert=$(curl -sS -X POST "${HOST}:${PORT}/x509/v1/certificates" \
+    #   -H 'Content-Type:application/json' \
+    #   -H "Authorization: Bearer ${JWT}" \
+    #   -H 'Accept:application/json' \
+    #   --data-binary "{ \"csr\": \"${csrContent}\" }" | jq '.certificatePem' -r )
+
+
+    reponse=$(curl -sS -X POST "${HOST}:${PORT}/x509/v1/certificates" \
       -H 'Content-Type:application/json' \
       -H "Authorization: Bearer ${JWT}" \
       -H 'Accept:application/json' \
-      --data-binary "{ \"csr\": \"${csrContent}\" }" | jq '.certificatePem' -r )
+      --data-binary "{ \"csr\": \"${csrContent}\" }" )
+
+    cert=$( echo "$reponse"  | jq '.certificatePem' -r )
+
+    fingerprint=$( echo "$reponse"  | jq '.certificateFingerprint' -r )
 
     echo "${cert}" > "${dir}/${CERT_FILE}"
     printf '\r\xE2\x9C\x94 Obtained the certificate for device "%s"!    \n' "${id}"
 
     # removes temporary CSR
     rm "${dir}/${CSR_FILE}"
+
+    curl -X PATCH ${HOST}:${PORT}/x509/v1/certificates/${fingerprint} \
+    -H "Authorization: Bearer ${JWT}" \
+    -H 'Content-Type:application/json' \
+    -d "{
+      \"belongsTo\": {
+        \"device\": \"${id}\"
+      }
+    }"
+    printf '\r\xE2\x9C\x94 Associate this certificate to the device "%s"!    \n' "${id}"
+
   done
 }
 
