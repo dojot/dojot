@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/change-owner-certificate.json",
+  "title": "Change ownership of a Certificate Schema",
+  "description": "Schema for validating the input body of route for change the ownership of a certificate'.",
+  "type": "object",
+  "default": {},
+  "properties": {
+    "belongsTo": {
+      "$ref": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo"
+    }
+  },
+  "required": [
+    "belongsTo"
+  ],
+  "additionalProperties": false
+}

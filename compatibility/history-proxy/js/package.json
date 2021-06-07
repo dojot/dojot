@@ -1,0 +1,65 @@
+{
+  "name": "history-proxy",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": {
+    "name": "Francisco Angelo Cabelo",
+    "email": "francisco.a.cabelo@gmail.com",
+    "url": "https://github.com/cfrancisco"
+  },
+  "engines": {
+    "node": ">=12.21.0",
+    "npm": ">=6.14.10"
+  },
+  "description": "The GUI Proxy allows the Dojot GUI v1 to be compliant with InfluxDb, which is used in newer versions of Dojot.",
+  "scripts": {
+    "lint": "eslint src/**",
+    "start": "node index.js",
+    "dev": "node --trace-sync-io --unhandled-rejections=strict index",
+    "test": "jest --verbose",
+    "debugtest": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "check-licenses": "apache2-license-checker"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot"
+  },
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "keywords": [
+    "proxy",
+    "dojot",
+    "gui"
+  ],
+  "private": false,
+  "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "@types/jest": "^26.0.10",
+    "caniuse-lite": "1.0.30001207",
+    "eslint": "^7.22.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.2",
+    "eslint-plugin-security": "^1.4.0",
+    "jest": "^26.6.3",
+    "mocha": "^8.3.0",
+    "require-main-filename": "^2.0.0",
+    "supertest": "^6.1.3"
+  },
+  "dependencies": {
+    "@dojot/microservice-sdk": "0.1.11",
+    "axios": "^0.21.1",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "flat": "^5.0.2",
+    "http-errors": "^1.8.0",
+    "http-proxy-middleware": "^1.0.6",
+    "http-terminator": "^3.0.0",
+    "request": "^2.88.2"
+  }
+}

@@ -2,22 +2,19 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const util = require('util');
+const { createHttpTerminator } = require('http-terminator');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 
-const application = require('./app/App');
-const websocketTarball = require('./app/WebsocketTarball');
-const terminus = require('./app/Terminus');
-const StateManager = require('./app/StateManager');
-
-// Loading the configurations with the configManager
 const KAFKA_WS_CONFIG_LABEL = 'KAFKA_WS';
-
 const userConfigFile = process.env.KAFKA_WS_APP_USER_CONFIG_FILE || 'production.conf';
-
 ConfigManager.loadSettings(KAFKA_WS_CONFIG_LABEL, userConfigFile);
 
 const config = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL);
+
+const StateManager = require('./app/StateManager');
+const application = require('./app/App');
+const websocketTarball = require('./app/WebsocketTarball');
 
 Logger.setTransport('console', { level: config.log['console.level'] });
 
@@ -31,7 +28,7 @@ Logger.setVerbose(config.log.verbose);
 const logger = new Logger('app');
 const stateService = 'http';
 
-logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
+logger.debug(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
 let server = null;
 
@@ -51,7 +48,14 @@ if (config.server.tls) {
 }
 
 // register shutdown
-StateManager.registerShutdownHandler(websocketTarball.onClose);
+const httpTerminator = createHttpTerminator({ server });
+
+StateManager.registerShutdownHandler(async () => {
+  logger.debug('Stopping the server from accepting new connections...');
+  await httpTerminator.terminate();
+  logger.debug('The server no longer accepts connections!');
+  return Promise.resolve(true);
+});
 
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
@@ -73,9 +77,6 @@ server.listen(config.server.port, config.server.host, async () => {
 server.on('close', () => {
   StateManager.signalNotReady(stateService);
 });
-
-/* adds health checks and graceful shutdown to the application */
-terminus.setup(server);
 
 const unhandledRejections = new Map();
 

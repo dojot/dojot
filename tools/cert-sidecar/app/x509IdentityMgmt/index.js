@@ -28,6 +28,7 @@ class X509IdentityMgmt {
         sign: configX509['path.sign'],
         crl: configX509['path.crl'],
         ca: configX509['path.ca'],
+        caBundle: configX509['path.cabundle'],
       },
     );
     this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509IdentityMgmt`);

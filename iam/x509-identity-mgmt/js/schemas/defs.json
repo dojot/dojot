@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json",
+  "definitions": {
+    "fingerprint": {
+      "type": "string",
+      "title": "Fingerprint Schema",
+      "description": "fingerprint is a SHA-256 hash of some data.",
+      "minLength": 64,
+      "maxLength": 95,
+      "pattern": "^([A-Fa-f0-9]{2}:?){32}$"
+    },
+    "cert-pem": {
+      "type": "string",
+      "title": "X509 Certificate PEM Schema",
+      "description": "Schema for validating one or more v3 x.509 certificates in PEM format.",
+      "contentEncoding": "base64",
+      "contentMediaType": "application/x-pem-file",
+      "maxLength": 65536,
+      "pattern": "^(-{5}BEGIN CERTIFICATE-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE-{5}(\\r\\n|\\r|\\n)?)+$"
+    },
+    "csr": {
+      "type": "string",
+      "title": "Certificate Signing Request (CSR) Schema",
+      "description": "Schema for validating an PKCS#10 CSR.",
+      "contentEncoding": "base64",
+      "contentMediaType": "application/pkcs10",
+      "maxLength": 65536,
+      "pattern": "^-{5}BEGIN CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)([-A-Za-z0-9+/=]{1,64}(\\r\\n|\\r|\\n))+-{5}END CERTIFICATE REQUEST-{5}(\\r\\n|\\r|\\n)?$"
+    },
+    "belongsTo": {
+      "type": "object",
+      "title": "Link between certificate and entity",
+      "description": "Object that associates the certificate with an entity.",
+      "default": {
+        "device": null
+      },
+      "additionalProperties": false,
+      "properties": {
+        "device": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "title": "Device ID",
+          "description": "Identifies the device that the x.509 certificate is attached to.",
+          "maxLength": 36,
+          "pattern": "^[0-9a-fA-F-]{5,36}$"
+        },
+        "application": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "title": "Application Identifier",
+          "description": "Identifies the type of application that owns the certificate.",
+          "maxLength": 64,
+          "pattern": "^[0-9a-zA-Z-]{1,64}$"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "device"
+          ]
+        },
+        {
+          "required": [
+            "application"
+          ]
+        }
+      ],
+      "dependencies": {
+        "device": {
+          "not": {
+            "required": [
+              "application"
+            ]
+          }
+        },
+        "application": {
+          "not": {
+            "required": [
+              "device"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -71,9 +71,7 @@ describe('x509Req.getRequests().getRequests().', () => {
   test('createCertificateByCSR: ok', async () => {
     mockAxiosPost.mockResolvedValueOnce({
       status: 201,
-      data: {
-        certificatePem: 'CERT',
-      },
+      data: 'CERT',
     });
     const newCert = await x509Req.getRequests().createCertificateByCSR('CSR');
 
@@ -106,9 +104,7 @@ describe('x509Req.getRequests().getRequests().', () => {
   test('getCRL: ok', async () => {
     mockAxiosGet.mockResolvedValueOnce({
       status: 200,
-      data: {
-        crl: 'CRL',
-      },
+      data: 'CRL',
     });
     const newCRL = await x509Req.getRequests().getCRL();
 
@@ -140,9 +136,7 @@ describe('x509Req.getRequests().getRequests().', () => {
   test('getCACertificate: ok', async () => {
     mockAxiosGet.mockResolvedValueOnce({
       status: 200,
-      data: {
-        caPem: 'CA',
-      },
+      data: 'CA',
     });
     const newCRL = await x509Req.getRequests().getCACertificate();
 
@@ -168,6 +162,38 @@ describe('x509Req.getRequests().getRequests().', () => {
     } catch (e) {
       expect(mockAxiosGet).toHaveBeenCalled();
       expect(e.message).toBe('Cannot retrieve CA certificate');
+    }
+  });
+
+  test('getCACertBundle: ok', async () => {
+    mockAxiosGet.mockResolvedValueOnce({
+      status: 200,
+      data: 'ca bundle',
+    });
+    const bundle = await x509Req.getRequests().getCACertBundle();
+
+    expect(mockAxiosGet).toHaveBeenCalled();
+    expect(bundle).toBe('ca bundle');
+  });
+
+  test('getCACertBundle: error 400', async () => {
+    mockAxiosGet.mockResolvedValueOnce({
+      status: 400,
+    });
+    const bundle = await x509Req.getRequests().getCACertBundle();
+
+    expect(mockAxiosGet).toHaveBeenCalled();
+    expect(bundle).toBe(null);
+  });
+
+  test('getCACertBundle: reject', async () => {
+    expect.assertions(2);
+    mockAxiosGet.mockRejectedValueOnce(new Error());
+    try {
+      await x509Req.getRequests().getCACertBundle();
+    } catch (e) {
+      expect(mockAxiosGet).toHaveBeenCalled();
+      expect(e.message).toBe('Cannot retrieve CA certificate bundle');
     }
   });
 

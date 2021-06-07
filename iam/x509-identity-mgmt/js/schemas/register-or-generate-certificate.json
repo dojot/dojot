@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-or-generate-certificate.json",
+  "title": "Register or Generate x.509 Certificate Schema",
+  "description": "Schema for validating the input body of route for register x.509 external certificate or generate one'.",
+  "type": "object",
+  "default": {},
+  "additionalProperties": false,
+  "properties": {
+    "caFingerprint": {
+      "$ref": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/fingerprint"
+    },
+    "certificateChain": {
+      "$ref": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem"
+    },
+    "csr": {
+      "$ref": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/csr"
+    },
+    "belongsTo": {
+      "$ref": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/belongsTo"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "certificateChain"
+      ]
+    },
+    {
+      "required": [
+        "csr"
+      ]
+    }
+  ],
+  "dependencies": {
+    "certificateChain": {
+      "not": {
+        "required": [
+          "csr"
+        ]
+      }
+    },
+    "csr": {
+      "not": {
+        "required": [
+          "certificateChain"
+        ]
+      }
+    }
+  }
+}
