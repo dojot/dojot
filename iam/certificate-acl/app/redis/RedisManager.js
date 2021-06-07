@@ -1,12 +1,18 @@
 const events = require('events');
-const redis = require('redis');
 const { promisify } = require('util');
+const { timeout } = require('promise-timeout');
+
+const redis = require('redis');
+
+redis.RedisClient.prototype.getAsync = promisify(redis.RedisClient.prototype.get);
+redis.RedisClient.prototype.setAsync = promisify(redis.RedisClient.prototype.set);
+redis.RedisClient.prototype.delAsync = promisify(redis.RedisClient.prototype.del);
+redis.RedisClient.prototype.quitAsync = promisify(redis.RedisClient.prototype.quit);
 
 const {
   ConfigManager: { getConfig },
   Logger,
 } = require('@dojot/microservice-sdk');
-const StateManager = require('../StateManager');
 
 const logger = new Logger('certificate-acl:redis-manager');
 
@@ -27,12 +33,17 @@ class RedisManager {
    * Creates a Redis Manager
    *
    * @constructor
+   * @param {*} serviceStateManager instance of a ServiceStateManager
    * @returns Redis Manager Object
    */
-  constructor() {
+  constructor(serviceStateManager) {
     // config
     this.config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL).redis;
     this.config.retry_strategy = this.reconnectAfter.bind(this);
+
+    // service state manager
+    this.serviceStateManager = serviceStateManager;
+    this.serviceStateManager.registerService('redis');
 
     // redis client
     this.redisClient = redis.createClient(this.config);
@@ -41,14 +52,14 @@ class RedisManager {
     this.eventEmitter = new events.EventEmitter();
 
     this.redisClient.on('connect', () => {
-      StateManager.signalReady('redis');
+      this.serviceStateManager.signalReady('redis');
       logger.info('Redis Manager is healthy (Connected).');
       this.eventEmitter.emit('healthy');
     });
 
     this.redisClient.on('reconnecting', () => {
-      StateManager.signalNotReady('redis');
-      logger.info('Redis Manager is unhealthy (Reconnecting).');
+      this.serviceStateManager.signalNotReady('redis');
+      logger.warn('Redis Manager is unhealthy (Reconnecting).');
       this.eventEmitter.emit('unhealthy');
     });
 
@@ -58,33 +69,69 @@ class RedisManager {
         // connection timeout, retry won't work anymore
         if (error.code === 'CONNECTION_BROKEN') {
           logger.error('Exhausted all attempts to connect to Redis.');
-          StateManager.shutdown();
+          this.serviceStateManager.shutdown();
         }
       });
 
     this.redisClient.on('end', () => {
-      StateManager.signalNotReady('redis');
+      this.serviceStateManager.signalNotReady('redis');
       logger.info('Redis Manager is unhealthy (Connection Closed).');
       this.eventEmitter.emit('unhealthy');
     });
 
     // graceful shutdown
-    StateManager.registerShutdownHandler(
+    this.serviceStateManager.registerShutdownHandler(
       this.shutdown.bind(this),
     );
-
-    // redis async functions
-    this.setAsync = promisify(this.redisClient.set)
-      .bind(this.redisClient);
-    this.delAsync = promisify(this.redisClient.del)
-      .bind(this.redisClient);
-    this.quitAsync = promisify(this.redisClient.quit)
-      .bind(this.redisClient);
 
     Object.seal(this);
 
     logger.info('Redis manager created!');
     logger.info(`Redis manager configuration: ${JSON.stringify(this.config)}`);
+  }
+
+  /**
+   * Asynchronous get operation for redis with timeout
+   *
+   * @param  {...any} args any argument accepted by redis get
+   * @returns Promise
+   */
+  getAsync(...args) {
+    return timeout(this.redisClient.getAsync(...args),
+      this.config['operation.timeout.ms']);
+  }
+
+  /**
+   * Asynchronous set operation for redis with timeout
+   *
+   * @param  {...any} args any argument accepted by redis set
+   * @returns Promise
+   */
+  setAsync(...args) {
+    return timeout(this.redisClient.setAsync(...args),
+      this.config['operation.timeout.ms']);
+  }
+
+  /**
+   * Asynchronous del operation for redis with timeout
+   *
+   * @param  {...any} args any argument accepted by redis del
+   * @returns Promise
+   */
+  delAsync(...args) {
+    return timeout(this.redisClient.delAsync(...args),
+      this.config['operation.timeout.ms']);
+  }
+
+  /**
+   * Asynchronous quit operation for redis with timeout
+   *
+   * @param  {...any} args any argument accepted by redis quit
+   * @returns Promise
+   */
+  quitAsync(...args) {
+    return timeout(this.redisClient.quitAsync(...args),
+      this.config['operation.timeout.ms']);
   }
 
   /**
