@@ -12,13 +12,13 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 - [Tested and working for](#tested-and-working-for)
 - [Installation](#installation)
   - [From source](#from-source)
-  - [Changing default resource server](#Changing-default-resource-server)
+- [Configuration](#configuration)
+  - [Environment variables](#environment-variables)
 - [Usage](#usage)
   - [Enabling on endpoints](#enabling-on-endpoints)
-    - [Service](#service)
+    - [Configuring on a service registered in kong](#configuring-on-a-service-registered-in-kong)
   - [Parameters](#parameters)
-- [Testing](#testing)
-  - [Running tests](#running-tests)
+- [Running tests](#running-tests)
 
 ## Tested and working for
 
@@ -30,6 +30,8 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 | Keycloak Version |   Tests passing    |
 | ---------------- | :----------------: |
 | 12.0.2           | :white_check_mark: |
+| 12.0.4           | :white_check_mark: |
+| 13.0.0           | :white_check_mark: |
 
 ## Installation
 
@@ -39,10 +41,18 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 luarocks make
 ```
 
-## Change the default `client` that has authorization settings
+## Configuration
 
-To invoke Keycloak authorization service is necessary define a **client** that has authorization settings, the default value is `kong`,
-but is possible to change it through `CLIENT_ID` environment variable.
+### Environment variables
+
+Key    | Purpose        | Default Value      | Valid Values  |
+-------------- | ----------------- | ---------------| -----------|
+DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization settings: To invoke Keycloak authorization service is necessary define a **client** that has authorization settings  | kong  | string
+DOJOT_PLUGIN_SSL_CAFILE     |  Path to the file that contains a set of trusting certificates (in PEM format). | /etc/ssl/certs/ca-certificates.crt  | path
+DOJOT_PLUGIN_SSL_CERTFILE     | Path to the file that contains the certificates. (in PEM format) | none  | path
+DOJOT_PLUGIN_SSL_KEYFILE  |  Path to the file that contains the private key (in PEM format). | none  | path
+DOJOT_PLUGIN_SSL_VERIFY  |  Options used to verify the certificates.  | peer  | peer or none
+DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout of requests made to the keycloak in seconds | 2 |  number
 
 ## Usage
 
@@ -50,7 +60,9 @@ but is possible to change it through `CLIENT_ID` environment variable.
 
 The same principle applies to this plugin as the [standard jwt plugin that comes with kong](https://docs.konghq.com/hub/kong-inc/jwt/). You can enable it on service, routes and globally.
 
-#### Service
+#### Configuring on a service registered in kong
+
+An example of how to configure this plugin in kong on a service (`{service}`), where `{resource_name}` is `Resources` configured in `Authorization` inside on a `Client`with name defined by  `DOJOT_PLUGIN_CLIENT_ID` and configured in **Keycloak**. And kong running in administrative port 8001.
 
 ```bash
 curl -X POST http://localhost:8001/services/{service}/plugins \
@@ -68,7 +80,7 @@ curl -X POST http://localhost:8001/services/{service}/plugins \
 | config.resource    | yes    | `Default Resource`| Resource name. |
 | config.scope       | yes   | `POST=>create`, `GET=>view`, `PATCH=>update`, `PUT=>update`, `DELTE=>delete`       | Map HTTPS verbs to scopes.  |
 
-### Running tests
+## Running tests
 
 ```bash
 docker build -t pepkong -f tests/unit_tests/Dockerfile ../.. && docker container run pepkong
