@@ -18,20 +18,25 @@ const mockConfig = {
   },
   app: {
     // eslint-disable-next-line no-useless-escape
-    'consumer.topic': '^.*dojot\.x509-identity-mgmt\.certificates',
+    'kafka.consumer.topic.regex': '^.*dojot\.x509-identity-mgmt\.certificates',
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+  },
+  x509im: {
+    hostname: 'x509-identity-mgmt',
+    port: 3000,
+    path: '/internal/api/v1/certificates/',
+    timeout: 3000,
   },
 };
 
 jest.mock('@dojot/microservice-sdk');
+
 const sdkMock = require('@dojot/microservice-sdk');
 
 sdkMock.ConfigManager.getConfig = jest.fn(() => mockConfig);
-
-jest.mock('../../app/StateManager');
-const mockStateManager = require('../../app/StateManager');
-// registerShutdownHandler and shutdown - defined inside a constructor
-mockStateManager.registerShutdownHandler = jest.fn();
-mockStateManager.shutdown = jest.fn();
 
 const mockKill = jest.fn();
 process.kill = mockKill;
@@ -39,6 +44,8 @@ process.kill = mockKill;
 jest.mock('../../app/kafka/KafkaConsumer');
 
 jest.mock('../../app/redis/RedisManager');
+
+jest.mock('../../app/server/HTTPServer');
 
 const Application = require('../../app/App');
 
@@ -50,12 +57,13 @@ describe('Application Initialization', () => {
 
     expect(app.kafkaConsumer).toBeDefined();
     expect(app.redisManager).toBeDefined();
+    expect(app.server).toBeDefined();
     expect(app.kafkaConsumer.init).toBeCalled();
     expect(app.kafkaConsumer.registerCallback).toBeCalled();
   });
 
   it('Initialized Unsuccessfully', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
     const app = new Application();
     app.kafkaConsumer.init = jest.fn(() => Promise.reject());
     try {
@@ -63,6 +71,7 @@ describe('Application Initialization', () => {
     } catch (error) {
       expect(app.kafkaConsumer).toBeDefined();
       expect(app.redisManager).toBeDefined();
+      expect(app.server).toBeDefined();
       expect(app.kafkaConsumer.init).toBeCalled();
       expect(app.kafkaConsumer.registerCallback).not.toBeCalled();
     }
