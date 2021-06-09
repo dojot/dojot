@@ -40,7 +40,7 @@ The following example explores all the parameters that can be entered for the sc
 
 ~~~bash
 ./certreq.sh \
-    -h localhost \
+    -h http://localhost \
     -p 8000 \
     -i '123,456,789' \
     -t 'admin' \
@@ -48,13 +48,13 @@ The following example explores all the parameters that can be entered for the sc
     -s 'admin'
 ~~~
 
-Given a _username_ `admin` and _password_ `admin`, this command will request 3 certificates with _identifiers_ `123`, `456` and `789` for the dojot platform _host_ `localhost` on _port_ `8000`.
+Given a _username_ `admin` and _password_ `admin`, this command will request 3 certificates with _identifiers_ `123`, `456` and `789` for the dojot platform _host_ `http://localhost` on _port_ `8000`.
 
 #### Parameters
 
 key | value
 --- | -----
--h  | Hostname (or IP) of the dojot platform.<br>**Default**: 127.0.0.1
+-h  | Hostname (or IP) of the dojot platform.<br>**Default**: http://127.0.0.1
 -p  | Port on which the dojot platform responds to the certificate issuing API.<br>**Default**: 8000
 -i  | Entity identifier. It must have the same device ID registered on the dojot platform. If not informed, a certificate will be generated _for each device_ that the user has access to.
 -t  | Tenant  to access the _x509-identity-mgmt_ API for issuing certificates.<br>**Default**: admin

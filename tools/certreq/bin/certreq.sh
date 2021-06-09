@@ -15,7 +15,7 @@ if [ -n "${DEBUG+x}" ] ; then
 fi
 
 # default values (can be changed by parameters)
-HOST="127.0.0.1"
+HOST="http://127.0.0.1"
 PORT="8000"
 TENANT="admin"
 USERNAME="admin"
