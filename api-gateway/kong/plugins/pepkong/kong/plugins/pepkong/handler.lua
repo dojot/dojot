@@ -21,8 +21,8 @@ if (request_timeout) then
     http.TIMEOUT = tonumber(request_timeout)
     https.TIMEOUT = tonumber(request_timeout)
 else
-    http.TIMEOUT = 2
-    https.TIMEOUT = 2
+    http.TIMEOUT = 1
+    https.TIMEOUT = 1
 end
 -------------------------------------------------------
 
