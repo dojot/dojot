@@ -27,7 +27,7 @@ readonly DEVICE_MANAGER_TOPIC=${DEVICE_MANAGER_TOPIC:-"dojot.device-manager.devi
 # TODO: This change to using keycloak needs to be further tested in the future.
 readonly AUTH_URL = "${KEYCLOAK_ADDRESS}/auth/realms/${DOJOT_TENANT}/protocol/openid-connect/token"
 readonly AUTH_DATA=" --data-urlencode \"username=${DOJOT_USERNAME}\" --data-urlencode \"password=${DOJOT_PASSWORD}\" --data-urlencode \"client_id=dev-test-cli\" --data-urlencode \"grant_type=password\""
-readonly TOKEN=$(curl --silent -X POST "${AUTH_URL}" "${AUTH_DATA}" | jq '.access_token' -r)
+readonly TOKEN=$(curl --silent -X POST "${AUTH_URL}" -d "${AUTH_DATA}" | jq '.access_token' -r)
 
 if [ ! -z "$TOKEN" ]
 then
