@@ -7,11 +7,19 @@ local build_form_params = require("kong.plugins.pepkong.utils").build_form_param
 
 local re_gmatch = ngx.re.gmatch
 
+----------- Load environment variables ---------------
 local env_ssl_ca_file = "DOJOT_PLUGIN_SSL_CAFILE"
 local env_ssl_verify = "DOJOT_PLUGIN_SSL_VERIFY"
 local env_ssl_cert_file = "DOJOT_PLUGIN_SSL_CERTFILE"
 local env_ssl_key_file = "DOJOT_PLUGIN_SSL_KEYFILE"
 local env_request_timeout = "DOJOT_PLUGIN_REQUEST_TIMEOUT"
+
+local ssl_ca_file = os.getenv(env_ssl_ca_file)
+local ssl_cert_file = os.getenv(env_ssl_cert_file)
+local ssl_key_file = os.getenv(env_ssl_key_file)
+local ssl_verify = os.getenv(env_ssl_verify)
+
+------------------------------------------------------
 
 ----------- configure timeout for requests -----------
 local request_timeout = os.getenv(env_request_timeout)
@@ -105,12 +113,29 @@ local function do_authorization(conf)
 
     local do_request = nil
 
-    if protocol == "https" then
-        local ssl_ca_file = os.getenv(env_ssl_ca_file)
-        local ssl_cert_file = os.getenv(env_ssl_cert_file)
-        local ssl_key_file = os.getenv(env_ssl_key_file)
-        local ssl_verify = os.getenv(env_ssl_verify)
+    -- This lib "ssl.https" doesn't use certificate verification as we explicitly specified
+    -- base_request['verify']="none" in the parameter list. Certificate verification allows the client
+    -- (this script in this case) to confirm that the site it is connected to has access
+    -- to a valid certificate, signed by a certificate authority.
+    -- This is the same process that your web browser does for you
+    -- when you connect to a website over https. To enable certificate
+    -- verification in SSL verify="none" needs to be replaced with verify="peer" or "client_once".
+    -- This is not enough, however: if you run this code with verify="peer" or "client_once",
+    -- you will get: `certificate verify failed error`.
+    -- This error indicates that we requested certificate verification,
+    -- but have no means to verify this certificate as we don't have any certificate
+    -- authority certificates we can use to validate the signature on
+    -- the certificate provided by the website we are connecting to.
+    -- To do that, we need to find and download the file with these certificates;
+    -- it comes with your browser, but can also be found online.
+    -- For example, this internal cert from kong "/etc/ssl/certs/ca-certificates.crt"
+    -- I was loading an internal kong base_request['cafile']="/etc/ssl/certs/ca-certificates.crt" and verify="peer",
+    -- but that was what I was doing greatly increase the memory
+    -- consumption of the kong container, reaching more than 1 gb without decreasing.
+    -- https://github.com/brunoos/luasec/wiki
+    -- https://github.com/brunoos/luasec/wiki/LuaSec-1.0.x
 
+    if protocol == "https" then
         if (ssl_ca_file) then
             base_request['cafile']=ssl_ca_file
         end
@@ -125,14 +150,9 @@ local function do_authorization(conf)
 
         if (ssl_verify) then
             base_request['verify']=ssl_verify
-        else
-            base_request['verify']="peer"
         end
 
         base_request['protocol']="any"
-
-        base_request['mode']="client"
-
         base_request['options']= { "all",
             -- disable this protocols bellow
             "no_sslv2",

@@ -51,7 +51,7 @@ DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization 
 DOJOT_PLUGIN_SSL_CAFILE     |  Path to the file that contains a set of trusting certificates (in PEM format). | none  | path
 DOJOT_PLUGIN_SSL_CERTFILE     | Path to the file that contains the certificates. (in PEM format) | none  | path
 DOJOT_PLUGIN_SSL_KEYFILE  |  Path to the file that contains the private key (in PEM format). | none  | path
-DOJOT_PLUGIN_SSL_VERIFY  |  Options used to verify the certificates.  | peer  | peer or none
+DOJOT_PLUGIN_SSL_VERIFY  |  Options used to verify the certificates.  | none  | peer, client_once, fail_if_no_peer_cert or none
 DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout of requests made to the keycloak in seconds | 1 |  number
 
 ## Usage
