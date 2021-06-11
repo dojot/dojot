@@ -151,12 +151,6 @@ local function do_authorization(conf)
 
     local message = response[1]
 
-
-    do_request = nil
-    base_request =  nil
-    body = nil
-    headers = nil
-
     if code ~= 200 then
 
         kong.log.err('Error when trying to check permission on keycloak')
