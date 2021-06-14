@@ -111,7 +111,7 @@ local function do_authorization(conf)
         sink = sink_request
     }
 
-    local do_request = nil
+    local do_request
 
     -- This lib "ssl.https" doesn't use certificate verification as we explicitly specified
     -- base_request['verify']="none" in the parameter list. Certificate verification allows the client
