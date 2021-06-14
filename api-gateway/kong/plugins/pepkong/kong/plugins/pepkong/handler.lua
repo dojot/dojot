@@ -167,14 +167,13 @@ local function do_authorization(conf)
         do_request = http.request
     end
 
-    local body, code, headers, status = do_request (base_request)
+    local body, code = do_request (base_request)
 
     local message = response[1]
 
     if code ~= 200 then
 
         kong.log.err('Error when trying to check permission on keycloak')
-        kong.log.debug('...status=', status)
         kong.log.debug('...code=', code)
 
         if (type(code) ~= "number") then
