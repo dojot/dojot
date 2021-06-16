@@ -131,7 +131,8 @@ local function do_authorization(conf)
     -- For example, this internal cert from kong "/etc/ssl/certs/ca-certificates.crt"
     -- I was loading an internal kong base_request['cafile']="/etc/ssl/certs/ca-certificates.crt" and verify="peer",
     -- but that was what I was doing greatly increase the memory
-    -- consumption of the kong container, reaching more than 1 gb without decreasing. We have to think about how to solve this.
+    -- consumption of the kong container, reaching more than 1 gb without decreasing. 
+    -- Check this related issue https://github.com/brunoos/luasec/issues/174
     -- https://github.com/brunoos/luasec/wiki
     -- https://github.com/brunoos/luasec/wiki/LuaSec-1.0.x
 
