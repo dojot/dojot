@@ -101,7 +101,7 @@ local function do_authorization(conf)
 
 
     if not res then
-        kong.log.debug('Error ',500, tostring(err))
+        kong.log.debug('Error ',500,' ', tostring(err))
         return false, {
             status = 500,
             message = tostring(err)
@@ -110,7 +110,7 @@ local function do_authorization(conf)
 
 
     if res.status ~= 200 then
-        kong.log.debug('Error ',res.status,res.body)
+        kong.log.debug('Error ',res.status,' ', res.body)
         return false, {
             status = res.status,
             message = res.body
