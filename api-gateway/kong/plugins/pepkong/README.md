@@ -26,6 +26,7 @@ while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP 
 | ------------ | :----------------: |
 | 2.0.x        | :white_check_mark: |
 | 2.3.x        | :white_check_mark: |
+| 2.4.x        | :white_check_mark: |
 
 | Keycloak Version |   Tests passing    |
 | ---------------- | :----------------: |
@@ -48,11 +49,8 @@ luarocks make
 Key    | Purpose        | Default Value      | Valid Values  |
 -------------- | ----------------- | ---------------| -----------|
 DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization settings: To invoke Keycloak authorization service is necessary define a **client** that has authorization settings  | kong  | string
-DOJOT_PLUGIN_SSL_CAFILE     |  Path to the file that contains a set of trusting certificates (in PEM format). | none  | path
-DOJOT_PLUGIN_SSL_CERTFILE     | Path to the file that contains the certificates. (in PEM format) | none  | path
-DOJOT_PLUGIN_SSL_KEYFILE  |  Path to the file that contains the private key (in PEM format). | none  | path
-DOJOT_PLUGIN_SSL_VERIFY  |  Options used to verify the certificates.  | none  | peer, client_once, fail_if_no_peer_cert or none
-DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout of requests made to the keycloak in seconds | 1 |  number
+DOJOT_PLUGIN_SSL_VERIFY  |  String option used to enable verify the certificates  | true  | "true" or "false" as a string
+DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout of requests made to the keycloak in miliseconds | 500 |  number
 
 ## Usage
 

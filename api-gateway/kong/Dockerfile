@@ -1,5 +1,5 @@
 # Based on https://github.com/gbbirkisson/kong-plugin-jwt-keycloak/blob/master/Dockerfile that is licensed under Apache-2.0 License
-FROM kong:2.3-alpine as builder
+FROM kong:2.4-alpine as builder
 
 USER root
 
@@ -31,7 +31,7 @@ RUN luarocks make && luarocks pack kong-plugin-jwt-keycloak
 USER kong
 
 # Create final image
-FROM kong:2.3-alpine
+FROM kong:2.4-alpine
 
 # Copy default config
 COPY kong.conf /etc/kong/

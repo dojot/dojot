@@ -1,36 +1,27 @@
 local BasePlugin = require "kong.plugins.base_plugin"
 local jwt_decoder = require "kong.plugins.jwt.jwt_parser"
-local http = require "socket.http"
-local https = require "ssl.https"
+local http = require "resty.http"
 
 local build_form_params = require("kong.plugins.pepkong.utils").build_form_params
 
 local re_gmatch = ngx.re.gmatch
 
 ----------- Load environment variables ---------------
-local env_ssl_ca_file = "DOJOT_PLUGIN_SSL_CAFILE"
+
 local env_ssl_verify = "DOJOT_PLUGIN_SSL_VERIFY"
-local env_ssl_cert_file = "DOJOT_PLUGIN_SSL_CERTFILE"
-local env_ssl_key_file = "DOJOT_PLUGIN_SSL_KEYFILE"
 local env_request_timeout = "DOJOT_PLUGIN_REQUEST_TIMEOUT"
 
-local ssl_ca_file = os.getenv(env_ssl_ca_file)
-local ssl_cert_file = os.getenv(env_ssl_cert_file)
-local ssl_key_file = os.getenv(env_ssl_key_file)
-local ssl_verify = os.getenv(env_ssl_verify)
 
-------------------------------------------------------
-
------------ configure timeout for requests -----------
-local request_timeout = os.getenv(env_request_timeout)
-
-if (request_timeout) then
-    http.TIMEOUT = tonumber(request_timeout)
-    https.TIMEOUT = tonumber(request_timeout)
-else
-    http.TIMEOUT = 1
-    https.TIMEOUT = 1
+local ssl_verify = true
+if (os.getenv(env_ssl_verify) and  string.lower(os.getenv(env_ssl_verify)) == "false" ) then
+    ssl_verify = false
 end
+
+local request_timeout = 500
+if(os.getenv(env_request_timeout)) then
+    request_timeout = tonumber(os.getenv(env_request_timeout))
+end
+
 -------------------------------------------------------
 
 local pepKongHandler = BasePlugin:extend()
@@ -85,107 +76,47 @@ local function do_authorization(conf)
     local params = build_form_params(conf.resource, conf.scopes[kong.request.get_method()])
     local token_endpoint = jwt.claims.iss .. "/protocol/openid-connect/token"
 
-    local protocol = string.sub(token_endpoint, 0, 5)
+    kong.log.debug('Invoke PDP/Keycloak at ', token_endpoint, ' with: ')
+    kong.log.debug(' params: ', params)
+    kong.log.debug(' ssl_verify: ', ssl_verify)
+    kong.log.debug(' request_timeout: ', request_timeout)
 
-    kong.log.debug('Invoke PDP/Keycloak in endpoint: ', token_endpoint)
-    kong.log.debug('Invoke PDP/Keycloak with params: ', params)
+    local httpc = http.new()
 
-    local response = {}
-
-    local header_request = {
-        ["Authorization"] = "Bearer " .. token,
-        ["Content-Type"] = "application/x-www-form-urlencoded",
-        ["Accept"] = 'application/json',
-        ["content-length"] = string.len(params)
-    }
-
-    local source_request = ltn12.source.string(params)
-    local method_request = "POST"
-    local sink_request = ltn12.sink.table(response)
-
-    local base_request = {
-        method = method_request,
-        url = token_endpoint,
-        source = source_request,
-        headers = header_request,
-        sink = sink_request
-    }
-
-    local do_request
-
-    -- This lib "ssl.https" doesn't use certificate verification as we explicitly specified
-    -- base_request['verify']="none" in the parameter list. Certificate verification allows the client
-    -- (this script in this case) to confirm that the site it is connected to has access
-    -- to a valid certificate, signed by a certificate authority.
-    -- This is the same process that your web browser does for you
-    -- when you connect to a website over https. To enable certificate
-    -- verification in SSL verify="none" needs to be replaced with verify="peer" or "client_once".
-    -- This is not enough, however: if you run this code with verify="peer" or "client_once",
-    -- you will get: `certificate verify failed error`.
-    -- This error indicates that we requested certificate verification,
-    -- but have no means to verify this certificate as we don't have any certificate
-    -- authority certificates we can use to validate the signature on
-    -- the certificate provided by the website we are connecting to.
-    -- To do that, we need to find and download the file with these certificates;
-    -- it comes with your browser, but can also be found online.
-    -- For example, this internal cert from kong "/etc/ssl/certs/ca-certificates.crt"
-    -- I was loading an internal kong base_request['cafile']="/etc/ssl/certs/ca-certificates.crt" and verify="peer",
-    -- but that was what I was doing greatly increase the memory
-    -- consumption of the kong container, reaching more than 1 gb without decreasing. 
-    -- Check this related issue https://github.com/brunoos/luasec/issues/174
-    -- https://github.com/brunoos/luasec/wiki
-    -- https://github.com/brunoos/luasec/wiki/LuaSec-1.0.x
-
-    if protocol == "https" then
-        if (ssl_ca_file) then
-            base_request['cafile']=ssl_ca_file
-        end
-
-        if (ssl_cert_file) then
-            base_request['certificate']=ssl_cert_file
-        end
-
-        if (ssl_key_file) then
-            base_request['key']=ssl_key_file
-        end
-
-        if (ssl_verify) then
-            base_request['verify']=ssl_verify
-        end
-
-        base_request['protocol']="any"
-        base_request['options']= { "all",
-            -- disable this protocols bellow
-            "no_sslv2",
-            "no_sslv3",
-            "no_tlsv1",
-            "no_tlsv1_1"
-        }
-
-        do_request = https.request
-
-    else
-        do_request = http.request
+    if(request_timeout) then
+        httpc:set_timeout(request_timeout)
     end
 
-    local body, code = do_request (base_request)
+    local res, err = httpc:request_uri(token_endpoint,  {
+        method = "POST",
+        ssl_verify = ssl_verify,
+        body = params,
+        headers = {
+            ["Authorization"] = "Bearer " .. token,
+            ["Content-Type"] = "application/x-www-form-urlencoded",
+            ["Accept"] = 'application/json',
+            ["content-length"] = string.len(params)
+        },
+    } )
 
-    local message = response[1]
 
-    if code ~= 200 then
-
-        kong.log.err('Error when trying to check permission on keycloak')
-        kong.log.debug('...code=', code)
-
-        if (type(code) ~= "number") then
-            code = 500
-        end
-
+    if not res then
+        kong.log.debug('Error ',500, tostring(err))
         return false, {
-            status = code,
-            message = message
+            status = 500,
+            message = tostring(err)
         }
     end
+
+
+    if res.status ~= 200 then
+        kong.log.debug('Error ',res.status,res.body)
+        return false, {
+            status = res.status,
+            message = res.body
+        }
+    end
+
 
     return true
 
