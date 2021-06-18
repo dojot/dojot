@@ -87,6 +87,7 @@ local function do_authorization(conf)
         httpc:set_timeout(request_timeout)
     end
 
+    -- to use ssl_verify=true it is necessary to set the variable lua_ssl_trusted_certificate
     local res, err = httpc:request_uri(token_endpoint,  {
         method = "POST",
         ssl_verify = ssl_verify,
