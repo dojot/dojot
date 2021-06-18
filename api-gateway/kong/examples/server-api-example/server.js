@@ -29,7 +29,7 @@ try {
   app.use((req, res, next) => {
     const rawToken = req.get('authorization');
 
-    if (req.path == '/insecure'){
+    if (req.path === '/insecure'){
       return next();
     }
 
@@ -51,19 +51,19 @@ try {
   });
 
   app.get('/secure', (req, res) =>  {
-    res.send('GET - secure route, tenant:' + req.tenant + '\n')
+    res.send(`GET - secure route, tenant: ${req.tenant} \n`)
   });
 
   app.post('/secure', (req, res) =>  {
-    res.send('POST - secure route, tenant:' + req.tenant + '\n');
+    res.send(`POST - secure route, tenant: ${req.tenant} \n`)
   });
 
   app.put('/secure', (req, res) => {
-    res.send('PUT - secure route, tenant:' + req.tenant + '\n');
+    res.send(`PUT - secure route, tenant: ${req.tenant} \n`)
   });
 
   app.delete('/secure', (req, res) => {
-    res.send('DELETE - secure route, tenant:' + req.tenant + '\n');
+    res.send(`DELETE - secure route, tenant: ${req.tenant} \n`)
   });
 
   app.get('/insecure', (req, res) =>  {
