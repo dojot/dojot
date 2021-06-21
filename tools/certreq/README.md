@@ -48,7 +48,7 @@ The following example explores all the parameters that can be entered for the sc
     -s 'admin'
 ~~~
 
-Given a _username_ `admin` and _password_ `admin`, this command will request 3 certificates with _identifiers_ `123`, `456` and `789` for the dojot platform _host_ `http://localhost` on _port_ `8000`.
+Given a _username_ `admin`, a _password_ `admin` and  a _tenant_ `admin`, this command will request 3 certificates with _identifiers_ `123`, `456` and `789` for the dojot platform _host_ `http://localhost` on _port_ `8000`.
 
 #### Parameters
 
