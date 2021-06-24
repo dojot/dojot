@@ -52,6 +52,11 @@ DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization 
 DOJOT_PLUGIN_SSL_VERIFY  |  String option used to enable verify the certificates  | true  | "true" or "false" as a string
 DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout of requests made to the keycloak in miliseconds | 500 |  number
 
+
+
+__NOTE__  To load a CA certificate, for example a self-signed one, it is necessary to pass the path to environment variable ``KONG_LUA_SSL_TRUSTED_CERTIFICATE``.
+
+
 ## Usage
 
 ### Enabling on endpoints
