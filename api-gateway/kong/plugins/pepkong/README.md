@@ -1,7 +1,7 @@
 # Kong plugin PEPkong
 
 A plugin for the [Kong Microservice API Gateway](https://konghq.com/solutions/gateway/) intended to work with [Keycloak](https://www.keycloak.org/)
-to build an authorization layer for Restful APIs.
+to build an authorization layer for Rest API.
 
 This plugin interact with Keycloak through [Authorization Service Endpoint](https://www.keycloak.org/docs/12.0/authorization_services/#_service_authorization_api),
 while this plugin is the PEP (Policy Enforcement Point) and Keycloak is the PDP (Policy Decision Point).
@@ -48,9 +48,9 @@ luarocks make
 
 Key    | Purpose        | Default Value      | Valid Values  |
 -------------- | ----------------- | ---------------| -----------|
-DOJOT_PLUGIN_CLIENT_ID     | Change the default `client` that has authorization settings: To invoke Keycloak authorization service is necessary define a **client** that has authorization settings  | kong  | string
-DOJOT_PLUGIN_SSL_VERIFY  |  String option used to enable verify the certificates  | true  | "true" or "false" as a string
-DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout of requests made to the keycloak in miliseconds | 500 |  number
+DOJOT_PLUGIN_CLIENT_ID     | Client ID with permissions to invoke the Keycloack authorization service | kong  | string
+DOJOT_PLUGIN_SSL_VERIFY  |  Enables certificate validation  | "true"  | "true" or "false" as a string
+DOJOT_PLUGIN_REQUEST_TIMEOUT | Timeout in milliseconds for requests made to the Keycloack | 500 |  number
 
 
 

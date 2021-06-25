@@ -95,7 +95,7 @@ In Roles on the left sidebar:
 
 Users in the left sidebar:
 
-- I created a new user with username `admin` that will have *role*  `admin`
+- Create a new user with username `admin` that will have *role*  `admin`
   - Enable the `Email Verified` option (for local testing only)
   - Go to the `Credentials` tab
     - Define a password and confirm it in `Password` and`Password Confirmation`, in the example the password `admin` is used (Only for local testing)
@@ -103,7 +103,7 @@ Users in the left sidebar:
   - Go to the `Role Mappings` tab
     - In `Available Roles` select `admin` and `Add selected`, so that `admin` will be listed in `Associated Roles`.
 
-- I created a new user with username `user` that will have *role* `user`
+- Create a new user with username `user` that will have *role* `user`
   - Enable the `Email Verified` option (for local testing only)
   - Go to the `Credentials` tab
     - Define a password and confirm it in `Password` and`Password Confirmation`, in the example the password `user` is used (Only for local testing)
