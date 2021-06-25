@@ -13,9 +13,6 @@ class MissingJWTTokenError {
 }
 
 const b64decode = (data) => {
-  if (typeof Buffer.from === 'function') {
-      return Buffer.from(data, 'base64').toString();
-  }
   return (Buffer.from(data, 'base64')).toString();
 };
 
