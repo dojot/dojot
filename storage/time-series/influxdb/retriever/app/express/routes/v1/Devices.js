@@ -133,7 +133,7 @@ module.exports = ({
   const deviceGraphqlRoute = {
     mountPoint,
     name: 'graphql-route',
-    path: ['/graphql'],
+    path: ['/devices/graphql'],
     handlers: [
       {
         method: 'get',
