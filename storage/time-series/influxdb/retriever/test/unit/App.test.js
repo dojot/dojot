@@ -1,6 +1,8 @@
 const mockConfig = {
   lightship: { a: 'abc' },
+  graphql: { graphiql: true },
 };
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -40,6 +42,7 @@ const mockInflux = jest.fn().mockImplementation(() => ({
   getInfluxDataQueryInstance: jest.fn().mockImplementation(() => ({
     queryByField: jest.fn(),
     queryByMeasurement: jest.fn(),
+    queryUsingGraphql: jest.fn(),
   })),
 }));
 jest.mock('../../app/influx', () => mockInflux);
@@ -68,7 +71,7 @@ describe('App', () => {
     app = new App();
     mockStateIsReady.mockResolvedValueOnce(false);
     try {
-      await app.init(() => {});
+      await app.init(() => { });
     } catch (e) {
       expect(e.message).toBe('Influxdb is not ready');
     }
@@ -77,10 +80,23 @@ describe('App', () => {
   test('instantiate class and init', async () => {
     app = new App();
     mockStateIsReady.mockResolvedValueOnce(true);
-    await app.init(() => {});
+    await app.init(() => { });
 
     expect(mockCreateInfluxHealthChecker).toBeCalled();
     expect(mockServerRegisterShutdown).toBeCalled();
     expect(mockServerInit).toBeCalled();
+  });
+
+  test('instantiate class with  error in constructor', async () => {
+    mockServer.mockImplementationOnce(
+      () => {
+        throw new Error('Error in Server instantiation.');
+      },
+    );
+    try {
+      app = new App();
+    } catch (e) {
+      expect(e.message).toBe('constructor: Error in Server instantiation.');
+    }
   });
 });
