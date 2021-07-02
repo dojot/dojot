@@ -28,7 +28,7 @@ Keycloak _core_ is responsible for correctly loading all modules and registering
 their event listeners.
 
 In order to be able to capture the events triggered by the Keycloak modules, it
-is necessary to implement an SPI and deploy it to Wildfly so that Keycloak knows
+is necessary to implement a SPI and deploy it to Wildfly so that Keycloak knows
 how to load it.
 
 In summary, this README is intended to explain how the _Dojot Provider_ is
@@ -85,7 +85,7 @@ Now we need to
 [configure Keycloak](https://www.keycloak.org/docs/13.0/server_installation/#_config_spi_providers)
 to recognize our _service provider_ as one of its modules, that is, to
 [load it](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/ServiceLoader.html)
-as an SPI.
+as a SPI.
 
 We could perform the configuration by editing the correct file manually, but the
 ideal is to do this through the CLI of Wildlfy, so first of all we will access
