@@ -1,0 +1,82 @@
+diff -Naur vernemq-1.10.0/apps/vmq_server/src/vmq_ssl.erl vernemq-1.10.0-cert-fingerprint/apps/vmq_server/src/vmq_ssl.erl
+--- vernemq-1.10.0/apps/vmq_server/src/vmq_ssl.erl	2019-11-26 07:11:10.000000000 -0300
++++ vernemq-1.10.0-cert-fingerprint/apps/vmq_server/src/vmq_ssl.erl	2021-07-12 11:20:59.282576280 -0300
+@@ -18,15 +18,35 @@
+          cert_to_common_name/1,
+          opts/1]).
+ 
++-define(CERTIFICATE_ACL_URL, os:getenv("CERTIFICATE_ACL_URL", "http://certificate-acl:3000/internal/api/v1/acl-entries/")).
++-define(CERTIFICATE_ACL_REQ_TIMEOUT_MS, erlang:list_to_integer(os:getenv("CERTIFICATE_ACL_REQ_TIMEOUT_MS", "1000"), 10)).
++
++get_acl_entry(Fingerprint) ->
++    Url = string:concat(?CERTIFICATE_ACL_URL, Fingerprint),
++    HTTPOpts =  [{timeout, ?CERTIFICATE_ACL_REQ_TIMEOUT_MS}],
++    case httpc:request(get, {Url, []}, HTTPOpts, []) of
++        {ok, {{_, 200, _}, _, Body}} ->
++            % the body is a json string \"entry\"
++            list_to_binary(string:sub_string(Body, 2, length(Body)-1));
++        _  ->
++            {error, acl_failure}
++    end.
++
+ socket_to_common_name(Socket) ->
+     case ssl:peercert(Socket) of
+         {error, no_peercert} ->
+             undefined;
+         {ok, Cert} ->
+-            OTPCert = public_key:pkix_decode_cert(Cert, otp),
+-            TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
+-            Subject = TBSCert#'OTPTBSCertificate'.subject,
+-            extract_cn(Subject)
++            Fingerprint = crypto:hash(sha256, Cert),
++
++            % the fingerprint at this point is with formatted but with the ":" as it's last character
++            FormattedFingerprint = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= Fingerprint ]),
++
++            % remove the last ":" character
++            ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
++
++            % get certificate owner from certificate-acl service
++            get_acl_entry(ValidFingerprint)
+     end.
+ 
+ cert_to_common_name(Cert) ->
+@@ -34,28 +54,17 @@
+         undefined ->
+             undefined;
+         _ ->
+-            OTPCert = public_key:pkix_decode_cert(Cert, otp),
+-            TBSCert = OTPCert#'OTPCertificate'.tbsCertificate,
+-            Subject = TBSCert#'OTPTBSCertificate'.subject,
+-            extract_cn(Subject)
+-    end.
++            Fingerprint = crypto:hash(sha256, Cert),
++
++            % the fingerprint at this point is with formatted but with the ":" as it's last character
++            FormattedFingerprint = lists:flatten([io_lib:format("~2.16.0B:",[X]) || <<X:8>> <= Fingerprint ]),
+ 
+--spec extract_cn({'rdnSequence', list()}) -> undefined | binary().
+-extract_cn({rdnSequence, List}) ->
+-    extract_cn2(List).
+-
+--spec extract_cn2(list()) -> undefined | list().
+-extract_cn2([[#'AttributeTypeAndValue'{
+-                 type=?'id-at-commonName',
+-                 value={utf8String, CN}}]|_]) ->
+-    list_to_binary(unicode:characters_to_list(CN));
+-extract_cn2([[#'AttributeTypeAndValue'{
+-                 type=?'id-at-commonName',
+-                 value={printableString, CN}}]|_]) ->
+-    list_to_binary(unicode:characters_to_list(CN));
+-extract_cn2([_|Rest]) ->
+-    extract_cn2(Rest);
+-extract_cn2([]) -> undefined.
++            % remove the last ":" character
++            ValidFingerprint = [string:strip(FormattedFingerprint, right, $:)],
++
++            % get certificate owner from certificate-acl service
++            get_acl_entry(ValidFingerprint)
++    end.
+ 
+ opts(Opts) ->
+     [{cacertfile, proplists:get_value(cafile, Opts)},
