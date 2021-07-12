@@ -8,6 +8,8 @@ ENV OTP_VERSION="22.3.4.20" \
 
 LABEL org.opencontainers.image.version=$OTP_VERSION
 
+WORKDIR /
+
 # Copy otp patch file
 COPY ./otp-17435.patch .
 
@@ -67,7 +69,7 @@ RUN set -xe \
 	&& HOME=$PWD ./bootstrap \
 	&& install -v ./rebar3 /usr/local/bin/ \
 	&& rm -rf /usr/src/rebar3-src \
-	&& apk add --virtual .erlang-rundeps \
+	&& apk add --no-cache --virtual .erlang-rundeps \
 		$runDeps \
 		lksctp-tools \
 		ca-certificates \
@@ -94,9 +96,8 @@ RUN apk add --no-cache --virtual .build-deps \
         bsd-compat-headers \
         cmake \
         openssl-dev \
-        bash
-
-RUN git clone -b $VERNEMQ_VERSION $VERNEMQ_REPO .
+        bash \
+    && git clone -b $VERNEMQ_VERSION $VERNEMQ_REPO .
 
 # Copy VerneMQ patch files
 COPY ./vernemq-${VERNEMQ_VERSION}-*.patch ./
