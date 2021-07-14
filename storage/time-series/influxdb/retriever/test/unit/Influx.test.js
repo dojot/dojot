@@ -31,6 +31,7 @@ const mockInfluxDataQueryByField = jest.fn();
 const mockInfluxDataQuery = jest.fn().mockImplementation(() => ({
   queryByField: mockInfluxDataQueryByField,
   queryByMeasurement: jest.fn(),
+  queryUsingGraphql: jest.fn(),
 }));
 jest.mock('../../app/influx/DataQuery', () => mockInfluxDataQuery);
 
