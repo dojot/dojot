@@ -26,24 +26,21 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
     if (typeof payload.timestamp === "number") {
       if (!isNaN(payload.timestamp)) {
         metadata.timestamp = payload.timestamp;
-      }
-      else {
+      } else {
         logger.warn("Received an invalid timestamp (NaN)");
         metadata = {};
       }
-    }
-    else {
+    } else {
       // If it is a ISO string...
       const parsed = Date.parse(payload.timestamp);
       if (!isNaN(parsed)) {
         metadata.timestamp = parsed;
-      }
-      else {
+      } else {
         // Invalid timestamp.
         metadata = {};
       }
     }
-  } else{
+  } else {
     metadata.timestamp = Date.now();
   }
 
