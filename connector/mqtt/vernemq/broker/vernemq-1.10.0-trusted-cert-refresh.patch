@@ -1,0 +1,136 @@
+diff -Naur vernemq-1.10.0/apps/vmq_server/priv/vmq_server.schema vernemq-1.10.0-trusted-cert-refresh/apps/vmq_server/priv/vmq_server.schema
+--- vernemq-1.10.0/apps/vmq_server/priv/vmq_server.schema	2019-11-26 07:11:10.000000000 -0300
++++ vernemq-1.10.0-trusted-cert-refresh/apps/vmq_server/priv/vmq_server.schema	2021-07-12 11:27:37.418754173 -0300
+@@ -1416,6 +1416,22 @@
+  end}.
+ 
+ 
++%% @doc The integer number of milli-seconds between trusted
++%% certificates refreshes. A value of 0 disables the automatic
++%% refresh completely. If unset, defaults to 5 minutes.
++{mapping, "ssl_trusted_cert_refresh_interval", "vmq_server.ssl_trusted_cert_refresh_interval", [
++                                                                      {default, 300000},
++                                                                      {datatype, integer},
++                                                                      {validators, ["non-neg-integer"]},
++                                                                      hidden
++                                                                     ]}.
++
++{validator, "non-neg-integer", "must be a non-negative integer",
++ fun(Integer) ->
++         Integer >= 0
++ end}.
++
++
+ %% @doc Enable the $SYSTree Reporter. 
+ {mapping, "systree_enabled", "vmq_server.systree_enabled", [
+                                                         {default, on},
+diff -Naur vernemq-1.10.0/apps/vmq_server/src/vmq_server_sup.erl vernemq-1.10.0-trusted-cert-refresh/apps/vmq_server/src/vmq_server_sup.erl
+--- vernemq-1.10.0/apps/vmq_server/src/vmq_server_sup.erl	2019-11-26 07:11:10.000000000 -0300
++++ vernemq-1.10.0-trusted-cert-refresh/apps/vmq_server/src/vmq_server_sup.erl	2021-07-12 13:06:48.713413303 -0300
+@@ -47,6 +47,7 @@
+            [
+                ?CHILD(vmq_config, worker, []),
+                ?CHILD(vmq_crl_srv, worker, []),
++               ?CHILD(vmq_trusted_cert_srv, worker, []),
+                ?CHILD(vmq_metrics_sup, supervisor, []),
+                ?CHILD(vmq_queue_sup_sup, supervisor, [infinity, 5, 10]),
+                ?CHILD(vmq_reg_sup, supervisor, []),
+diff -Naur vernemq-1.10.0/apps/vmq_server/src/vmq_trusted_cert_srv.erl vernemq-1.10.0-trusted-cert-refresh/apps/vmq_server/src/vmq_trusted_cert_srv.erl
+--- vernemq-1.10.0/apps/vmq_server/src/vmq_trusted_cert_srv.erl	1969-12-31 21:00:00.000000000 -0300
++++ vernemq-1.10.0-trusted-cert-refresh/apps/vmq_server/src/vmq_trusted_cert_srv.erl	2021-07-12 13:20:49.745789089 -0300
+@@ -0,0 +1,95 @@
++%% Copyright 2021 CPQD
++%%
++%% Licensed under the Apache License, Version 2.0 (the "License");
++%% you may not use this file except in compliance with the License.
++%% You may obtain a copy of the License at
++%%
++%%     http://www.apache.org/licenses/LICENSE-2.0
++%%
++%% Unless required by applicable law or agreed to in writing, software
++%% distributed under the License is distributed on an "AS IS" BASIS,
++%% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++%% See the License for the specific language governing permissions and
++%% limitations under the License.
++
++-module(vmq_trusted_cert_srv).
++
++-behaviour(gen_server).
++
++%% API
++-export([start_link/0,
++         refresh_trusted_cert/0]).
++
++%% gen_server callbacks
++-export([init/1,
++         handle_call/3,
++         handle_cast/2,
++         handle_info/2,
++         terminate/2,
++         code_change/3]).
++
++-record(state, {}).
++
++-type state() :: #state{}.
++
++%%%===================================================================
++%%% API
++%%%===================================================================
++
++-spec start_link() -> 'ignore' | {'error',_} | {'ok',pid()}.
++start_link() ->
++    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
++
++refresh_trusted_cert() ->
++    gen_server:call(?MODULE, clear_ssl_pem_cache).
++
++%%%===================================================================
++%%% gen_server callbacks
++%%%===================================================================
++
++-spec init([]) -> {'ok', state()}.
++init([]) ->
++    schedule_ssl_pem_cache_cleaning_tick(),
++    {ok, #state{}}.
++
++-spec handle_call(_, _, _) -> {'reply','ok', _}.
++handle_call(clear_ssl_pem_cache, _From, State) ->
++    clear_ssl_pem_cache(),
++    {reply, ok, State}.
++
++
++-spec handle_cast(_, _) -> {'noreply', _}.
++handle_cast(_Msg, State) ->
++    {noreply, State}.
++
++-spec handle_info(_, _) -> {'noreply', _}.
++handle_info(ssl_pem_cache_cleaning_tick, State) ->
++    clear_ssl_pem_cache(),
++    schedule_ssl_pem_cache_cleaning_tick(),
++    {noreply, State};
++handle_info(_Info, State) ->
++    {noreply, State}.
++
++-spec terminate(_, _) -> 'ok'.
++terminate(_Reason, _State) ->
++    ok.
++
++-spec code_change(_, _, _) -> {'ok', _}.
++code_change(_OldVsn, State, _Extra) ->
++    {ok, State}.
++
++%%%===================================================================
++%%% Internal functions
++%%%===================================================================
++
++schedule_ssl_pem_cache_cleaning_tick() ->
++    TickMS = vmq_config:get_env(ssl_trusted_cert_refresh_interval, 300000),
++    case TickMS of
++        0 -> ok;
++        _ ->
++            erlang:send_after(TickMS, ?MODULE, ssl_pem_cache_cleaning_tick)
++    end.
++
++%% TODO: call ssl_pem_cache if and only if the cabundle has changed
++clear_ssl_pem_cache() ->
++    ssl_pem_cache:clear().
