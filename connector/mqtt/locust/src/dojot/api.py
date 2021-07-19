@@ -253,6 +253,26 @@ class DojotAPI():
         return (res['certificateFingerprint'], res['certificatePem'])
 
     @staticmethod
+    def associate_device_with_certificate(jwt: str, device_id, fingerprint):
+        LOGGER.debug("associating a device with cert...")
+
+        req = json.dumps({
+            "belongsTo" : {"device" : device_id}
+        })
+        args = {
+            "url": "{0}/x509/v1/certificates/{1}".format(CONFIG['dojot']['url'], fingerprint),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(jwt),
+            },
+            "data": req,
+        }
+
+        DojotAPI.call_api(requests.patch, args, False)
+
+        LOGGER.debug("... configured")
+
+    @staticmethod
     def revoke_certificate(jwt: str, fingerprint: str) -> None:
         """
         Revoke a certificate.
