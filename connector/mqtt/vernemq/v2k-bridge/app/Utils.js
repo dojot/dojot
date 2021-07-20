@@ -21,19 +21,19 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   const deviceIdValue = splitUsername[1];
 
   if ("timestamp" in payload) {
-    metadata = { timestamp: 0 };
+    const metadata = { timestamp: 0 };
     // If it is a number, just copy it. Probably Unix time.
     if (typeof payload.timestamp === "number") {
-      if (!isNaN(payload.timestamp)) {
+      if (!Number.isNaN(payload.timestamp)) {
         metadata.timestamp = payload.timestamp;
       } else {
-        logger.warn("Received an invalid timestamp (NaN)");
+        logging.info("Received an invalid timestamp (NaN)");
         metadata = {};
       }
     } else {
       // If it is a ISO string...
       const parsed = Date.parse(payload.timestamp);
-      if (!isNaN(parsed)) {
+      if (!Number.isNaN(parsed)) {
         metadata.timestamp = parsed;
       } else {
         // Invalid timestamp.
