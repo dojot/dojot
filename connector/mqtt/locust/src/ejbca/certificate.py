@@ -61,7 +61,11 @@ class Certificate:
 
         Returns the pem certificate.
         """
-        return DojotAPI.generate_certificate(self.jwt, self.csr["pem"])
+
+        fingerprint, pem_crt = DojotAPI.generate_certificate(self.jwt, self.csr["pem"])
+        DojotAPI.associate_device_with_certificate(self.jwt, self.c_name, fingerprint)
+
+        return fingerprint, pem_crt
 
     def renew_cert(self) -> None:
         """
