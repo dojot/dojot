@@ -19,7 +19,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
 
   const tenantValue = splitUsername[0];
   const deviceIdValue = splitUsername[1];
-  const metadata = { timestamp: 0 };
+  let metadata = { timestamp: 0 };
 
   if ("timestamp" in payload) {
     //metadata = { timestamp: 0 };
