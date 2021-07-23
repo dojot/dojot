@@ -20,15 +20,15 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   const tenantValue = splitUsername[0];
   const deviceIdValue = splitUsername[1];
   let metadata = { timestamp: 0 };
-
+  this.logger = new Logger('v2k:mqtt-utils');
+  
   if ("timestamp".indexOf(payload)) {
-    // metadata = { timestamp: 0 };
     // If it is a number, just copy it. Probably Unix time.
     if (typeof payload.timestamp === "number") {
       if (!Number.isNaN(payload.timestamp)) {
         metadata.timestamp = payload.timestamp;
-      } else {
-        this.logger.info('Received an invalid timestamp (NaN)');
+      } else {        
+        logger.info('Received an invalid timestamp (NaN)');
         metadata = {};
       }
     } else {
@@ -37,11 +37,12 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
       if (!Number.isNaN(parsed)) {
         metadata.timestamp = parsed;
       } else {
-        // Invalid timestamp.
+        logger.info('Received an invalid timestamp (NaN)');
         metadata = {};
       }
     }
   } else {
+    logger.info('Create new timestamp');
     metadata.timestamp = Date.now();
   }
 
