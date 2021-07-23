@@ -28,7 +28,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
     if (typeof payload.timestamp === "number") {
       if (!Number.isNaN(payload.timestamp)) {
         metadata.timestamp = payload.timestamp;
-      } else {      
+      } else {
         this.logger.info('Received an invalid timestamp (NaN)');
         metadata = {};
       }
