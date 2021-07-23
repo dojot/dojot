@@ -1,3 +1,4 @@
+const { Logger } = require('@dojot/microservice-sdk');
 /**
  * A module with helper functions
  * @module utils
@@ -27,8 +28,8 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
     if (typeof payload.timestamp === "number") {
       if (!Number.isNaN(payload.timestamp)) {
         metadata.timestamp = payload.timestamp;
-      } else {        
-        logger.info('Received an invalid timestamp (NaN)');
+      } else {      
+        this.logger.info('Received an invalid timestamp (NaN)');
         metadata = {};
       }
     } else {
@@ -37,12 +38,12 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
       if (!Number.isNaN(parsed)) {
         metadata.timestamp = parsed;
       } else {
-        logger.info('Received an invalid timestamp (NaN)');
+        this.logger.info('Received an invalid timestamp (NaN)');
         metadata = {};
       }
     }
   } else {
-    logger.info('Create new timestamp');
+    this.logger.info('Stamping new timestamp');
     metadata.timestamp = Date.now();
   }
 
