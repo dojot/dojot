@@ -22,7 +22,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   const deviceIdValue = splitUsername[1];
   let metadata = { timestamp: 0 };
   this.logger = new Logger('v2k:mqtt-utils');
-  
+
   if ("timestamp".indexOf(payload)) {
     // If it is a number, just copy it. Probably Unix time.
     if (typeof payload.timestamp === "number") {
