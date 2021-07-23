@@ -21,7 +21,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   const deviceIdValue = splitUsername[1];
   let metadata = { timestamp: 0 };
 
-  if ("timestamp" in payload) {
+  if ("timestamp".indexOf(payload)) {
     // metadata = { timestamp: 0 };
     // If it is a number, just copy it. Probably Unix time.
     if (typeof payload.timestamp === "number") {
