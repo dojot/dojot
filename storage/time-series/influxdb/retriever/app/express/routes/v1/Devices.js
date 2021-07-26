@@ -1,8 +1,10 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const HttpStatus = require('http-status-codes');
 const util = require('util');
+const DeviceDataService = require("../../services/v1/DeviceDataService");
 
 const logger = new Logger('influxdb-retriever:express/routes/v1/Device');
+
 
 /**
  * Routes to Devices
@@ -14,6 +16,10 @@ const logger = new Logger('influxdb-retriever:express/routes/v1/Device');
  *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
+
+
+  const deviceDataService = new DeviceDataService(queryDataByField, queryDataByMeasurement);
+
 /**
  * if there is no dateTo, add dateTo to
  * the pagination makes sense even
@@ -26,6 +32,26 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
     return next();
   };
 
+  /**
+   * 
+   * @param {string} accept the accept entered in the request
+   * @returns {"json"|"csv"}  the format the data will be returned
+   */
+
+  const _getExpectedResponseFormat = (accept) => {
+    accept = accept.toLowerCase();
+    try{
+        const regex = /((aplication|text)\/(?<accept>json|csv))/gm;
+        const matches = regex.exec(accept);
+          
+        return matches ? matches.groups.accept : "json";
+
+    }catch (e) {
+        throw e;
+    }
+  }
+
+  
   /**
    * This feature returns data for an device with time
    * filter, pagination and order
@@ -43,21 +69,23 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
             logger.debug(`device-route.get: req.params=${util.inspect(req.params)}`);
             logger.debug(`device-route.get: req.query=${util.inspect(req.query)}`);
 
-
             try {
               const { deviceId } = req.params;
+              const { accept } = req.headers;                  
               const {
-                dateFrom, dateTo, limit, page, order,
+                  dateFrom, dateTo, limit, page, order,
               } = req.query;
+                  
+              const [result, paging] = await deviceDataService.getDeviceData(req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging);
+              
+              if(accept && _getExpectedResponseFormat(accept) === "csv" ){
 
-              const filters = { dateFrom, dateTo };
-              const pagination = { limit, page };
-
-              const {
-                result, totalItems,
-              } = await queryDataByMeasurement(req.tenant, deviceId, filters, pagination, order);
-              const paging = req.getPaging(totalItems);
-              res.status(HttpStatus.OK).json({ data: result, paging });
+                const resultInCsv = deviceDataService.parseDeviceDataToCsv(result);
+                return res.status(HttpStatus.OK).send(resultInCsv);
+              }
+                
+              return res.status(HttpStatus.OK).json({ data : result, paging });              
+              
             } catch (e) {
               logger.error('device-route.get:', e);
               throw e;
@@ -87,18 +115,21 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
 
             try {
               const { deviceId, attr } = req.params;
+              const { accept } = req.headers;
+
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const filters = { dateFrom, dateTo };
-              const pagination = { limit, page };
+              const [result, paging] = await deviceDataService.getDeviceAttrData(req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging);
 
-              const {
-                result, totalItems,
-              } = await queryDataByField(req.tenant, deviceId, attr, filters, pagination, order);
-              const paging = req.getPaging(totalItems);
-              res.status(HttpStatus.OK).json({ data: result, paging });
+              if(accept && _getExpectedResponseFormat(accept) === "csv" ){
+                const resultInCsv = deviceDataService.parseDeviceAttrDataToCsv(result);
+                return res.status(HttpStatus.OK).send(resultInCsv);
+              }
+                
+              return res.status(HttpStatus.OK).json({ data : result, paging});              
+
             } catch (e) {
               logger.error('device-route-attr.get:', e);
               throw e;
