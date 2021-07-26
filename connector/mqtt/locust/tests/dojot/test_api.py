@@ -385,7 +385,7 @@ class TestDojotAPIGenerateCertificate(unittest.TestCase):
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIAssociateDeviceWithCertificate(unittest.TestCase):
     """
-    DojotAPI generate_certificate() tests.
+    DojotAPI associate_device_with_certificate() tests.
     """
     def setUp(self):
         self.call_api = DojotAPI.call_api
