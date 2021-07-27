@@ -1,104 +1,98 @@
-const json2csv = require("json2csv");
+const json2csv = require('json2csv');
 
 
 module.exports = class DevicesService {
-    
-    /**
-     * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByField
-     *                               A promise that returns a result and a totalItems inside that result
-     * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByMeasurement
-     *                               A promise that returns a result and a totalItems inside that result
-    */
-    constructor(queryDataByField, queryDataByMeasurement){
-        this.queryDataByField = queryDataByField;
-        this.queryDataByMeasurement = queryDataByMeasurement;
-    }
+  /**
+  * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByField
+  *   A promise that returns a result and a totalItems inside that result
+  * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByMeasurement
+  *   A promise that returns a result and a totalItems inside that result
+  */
+  constructor(queryDataByField, queryDataByMeasurement) {
+    this.queryDataByField = queryDataByField;
+    this.queryDataByMeasurement = queryDataByMeasurement;
+  }
 
-    /**
-     * 
-     * @param {*} tenant    tenant to which the device belongs
-     * @param {*} deviceId  device id
-     * @param {*} dateFrom  search interval start date
-     * @param {*} dateTo    search interval end date
-     * @param {*} limit     limit of data that will be returned
-     * @param {*} page      page that will be returned 
-     * @param {*} order     ordering of the data that will be returned
-     * @param {*} getPaging paging metadata formatting method
-     * @returns the device dataset
-     */
-    async getDeviceData (tenant, deviceId, dateFrom, dateTo, limit, page, order, getPaging) {
-        
-        const filters = { dateFrom, dateTo };
-        const pagination = { limit, page };
+  /**
+   *
+   * @param {*} tenant    tenant to which the device belongs
+   * @param {*} deviceId  device id
+   * @param {*} dateFrom  search interval start date
+   * @param {*} dateTo    search interval end date
+   * @param {*} limit     limit of data that will be returned
+   * @param {*} page      page that will be returned
+   * @param {*} order     ordering of the data that will be returned
+   * @param {*} getPaging paging metadata formatting method
+   * @returns the device dataset
+   */
+  async getDeviceData(tenant, deviceId, dateFrom, dateTo, limit, page, order, getPaging) {
+    const filters = { dateFrom, dateTo };
+    const pagination = { limit, page };
 
-        const {
-            result, totalItems,
-        } = await this.queryDataByMeasurement(tenant, deviceId, filters, pagination, order);
-        const paging = getPaging(totalItems);   
- 
-        return [result,paging];
-    };
+    const {
+      result, totalItems,
+    } = await this.queryDataByMeasurement(tenant, deviceId, filters, pagination, order);
+    const paging = getPaging(totalItems);
 
-    /**
-     * 
-     * @param {*} deviceData device dataset
-     * @returns device dataset in CSV format
-     */
-    parseDeviceDataToCsv(deviceData){
+    return [result, paging];
+  }
 
-        const messages = deviceData.map((message) => {    
-            const newMessage = {};
-            for(const attr of message.attrs){
-                newMessage[attr.label] = attr.value;
-            }
-        
-            return {
-                ts : message.ts,
-                ...newMessage
-            }
-        })
-        
-        const csvParser = new json2csv.Parser ({defaultValue : undefined});
-        
-        return csvParser.parse(messages);
-    };
+  /**
+   *
+   * @param {*} deviceData device dataset
+   * @returns device dataset in CSV format
+   */
+  static parseDeviceDataToCsv(deviceData) {
+    const messages = deviceData.map((message) => {
+      const newMessage = {};
+      message.attrs.array.forEach((attr) => {
+        newMessage[attr.label] = attr.value;
+      });
 
-    /**
-     * 
-     * @param {*} tenant    tenant to which the device belongs
-     * @param {*} deviceId  device id
-     * @param {*} attr      attribute to be returned
-     * @param {*} dateFrom  search interval start date
-     * @param {*} dateTo    search interval end date
-     * @param {*} limit     limit of data that will be returned
-     * @param {*} page      page that will be returned 
-     * @param {*} order     ordering of the data that will be returned
-     * @param {*} getPaging paging metadata formatting method
-     * @returns the device attribute dataset
-     */
-    async getDeviceAttrData (tenant, deviceId, attr,  dateFrom, dateTo, limit, page, order, getPaging) {
+      return {
+        ts: message.ts,
+        ...newMessage,
+      };
+    });
 
-        const filters = { dateFrom, dateTo };
-        const pagination = { limit, page };
+    const csvParser = new json2csv.Parser({ defaultValue: undefined });
+    return csvParser.parse(messages);
+  }
 
-        const {
-          result, totalItems,
-        } = await this.queryDataByField(tenant, deviceId, attr, filters, pagination, order);
-        const paging = getPaging(totalItems);
+  /**
+   *
+   * @param {*} tenant    tenant to which the device belongs
+   * @param {*} deviceId  device id
+   * @param {*} attr      attribute to be returned
+   * @param {*} dateFrom  search interval start date
+   * @param {*} dateTo    search interval end date
+   * @param {*} limit     limit of data that will be returned
+   * @param {*} page      page that will be returned
+   * @param {*} order     ordering of the data that will be returned
+   * @param {*} getPaging paging metadata formatting method
+   * @returns the device attribute dataset
+   */
+  async getDeviceAttrData(
+    tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, getPaging,
+  ) {
+    const filters = { dateFrom, dateTo };
+    const pagination = { limit, page };
 
-        return [result, paging];
-    }
+    const {
+      result, totalItems,
+    } = await this.queryDataByField(tenant, deviceId, attr, filters, pagination, order);
+    const paging = getPaging(totalItems);
 
-    /**
-     * 
-     * @param {*} attrData device attribute dataset
-     * @returns device attribute dataset in CSV format
-     */
-    parseDeviceAttrDataToCsv(attrData){
+    return [result, paging];
+  }
 
-        const csvParser = new json2csv.Parser ({defaultValue : undefined});        
-        return csvParser.parse(attrData);
-    };
-
-
-}      
+  /**
+   *
+   * @param {*} attrData device attribute dataset
+   * @returns device attribute dataset in CSV format
+   */
+  static parseDeviceAttrDataToCsv(attrData) {
+    const csvParser = new json2csv.Parser({ defaultValue: undefined });
+    return csvParser.parse(attrData);
+  }
+};
