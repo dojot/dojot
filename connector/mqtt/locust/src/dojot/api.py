@@ -253,7 +253,7 @@ class DojotAPI():
         return (res['certificateFingerprint'], res['certificatePem'])
 
     @staticmethod
-    def associate_device_with_certificate(jwt: str, device_id, fingerprint):
+    def associate_device_with_certificate(jwt: str, device_id: str, fingerprint: str):
         LOGGER.debug("associating a device with cert...")
 
         req = json.dumps({

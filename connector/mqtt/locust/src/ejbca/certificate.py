@@ -18,6 +18,7 @@ class Certificate:
 
         self.jwt = RedisClient().get_jwt()
 
+        self.device_id = device_id
         self.c_name = device_id
         self.key = {"pem": self.generate_private_key()}
         self.csr = {"pem": self.generate_csr()}
@@ -63,7 +64,7 @@ class Certificate:
         """
 
         fingerprint, pem_crt = DojotAPI.generate_certificate(self.jwt, self.csr["pem"])
-        DojotAPI.associate_device_with_certificate(self.jwt, self.c_name, fingerprint)
+        DojotAPI.associate_device_with_certificate(self.jwt, self.device_id, fingerprint)
 
         return fingerprint, pem_crt
 
