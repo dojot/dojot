@@ -15,13 +15,10 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const data = {
-        timestamp: 1595880131
-      };
-
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
+      expect(payload.timestamp).toEqual('2020-05-05T05:00:00.000000Z');
     });
   });
 
