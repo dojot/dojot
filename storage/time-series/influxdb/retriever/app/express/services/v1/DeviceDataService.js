@@ -45,7 +45,7 @@ module.exports = class DevicesService {
   static parseDeviceDataToCsv(deviceData) {
     const messages = deviceData.map((message) => {
       const newMessage = {};
-      message.attrs.array.forEach((attr) => {
+      message.attrs.forEach((attr) => {
         newMessage[attr.label] = attr.value;
       });
 

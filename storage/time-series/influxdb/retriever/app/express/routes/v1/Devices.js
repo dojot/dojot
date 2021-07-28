@@ -2,6 +2,7 @@ const { Logger } = require('@dojot/microservice-sdk');
 const HttpStatus = require('http-status-codes');
 const util = require('util');
 const DeviceDataServ = require('../../services/v1/DeviceDataService');
+const { getExpectedResponseFormat } = require('../../helpers/AcceptHeaderHelper');
 
 const logger = new Logger('influxdb-retriever:express/routes/v1/Device');
 
@@ -28,24 +29,6 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
       req.query.dateTo = new Date().toISOString();
     }
     return next();
-  };
-
-  /**
-   *
-   * @param {string} accept the accept entered in the request
-   * @returns {"json"|"csv"}  the format the data will be returned
-   */
-
-  const getExpectedResponseFormat = (accept) => {
-    try {
-      const regex = new RegExp('^(aplication|text)/(?<ext>json|csv)$', 'igm');
-
-      const matches = regex.exec(accept);
-
-      return matches ? matches.groups.ext : 'json';
-    } catch (e) {
-      throw new Error('The HTTP Accept header is invalid');
-    }
   };
 
   /**
@@ -77,7 +60,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
               );
 
               if (accept && getExpectedResponseFormat(accept) === 'csv') {
-                return res.status(HttpStatus.OK).send(deviceDataServ.parseDeviceDataToCsv(result));
+                return res.status(HttpStatus.OK).send(DeviceDataServ.parseDeviceDataToCsv(result));
               }
 
               return res.status(HttpStatus.OK).json({ data: result, paging });
@@ -122,7 +105,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
 
               if (accept && getExpectedResponseFormat(accept) === 'csv') {
                 return res.status(HttpStatus.OK).send(
-                  deviceDataServ.parseDeviceAttrDataToCsv(result),
+                  DeviceDataServ.parseDeviceAttrDataToCsv(result),
                 );
               }
 
