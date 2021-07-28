@@ -23,7 +23,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(timestampMatch).toBe(true);
-
     });
   });
 
@@ -42,7 +41,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(data.metadata.timestamp).toEqual(1605093071000);
-
     });
   });
 
@@ -61,7 +59,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(data.metadata.timestamp).toEqual("2020-05-05T05:00:00.000000Z");
-
     });
   });
 
