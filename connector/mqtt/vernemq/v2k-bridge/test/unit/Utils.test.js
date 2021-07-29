@@ -7,22 +7,23 @@ describe('Utils', () => {
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const timestamp_before = Date.now();
+      const tsBefore = Date.now();
       const topic = 'admin:deviceid/topic';
       const payload = 'data';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      const timestamp_after = Date.now();
+      const tsAfter = Date.now();
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const timestampMatch = timestamp_before <= data.metadata.timestamp && timestamp_after >= data.metadata.timestamp;
+      const tsMatch = tsBefore <= data.metadata.timestamp && tsAfter >= data.metadata.timestamp;
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(timestampMatch).toBe(true);
+      expect(tsMatch).toBe(true);
+
     });
   });
 
@@ -40,7 +41,8 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toEqual(1605093071000);
+      expect(data.metadata.timestamp).toEqual(timestampFake);
+
     });
   });
 
@@ -58,7 +60,8 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toEqual("2020-05-05T05:00:00.000000Z");
+      expect(data.metadata.timestamp).toEqual(timestampFake);
+
     });
   });
 
