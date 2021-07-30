@@ -60,7 +60,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
                 req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
-              if (accept && accept === 'csv') {
+              if (accept === 'csv') {
                 return res.status(HttpStatus.OK).send(DeviceDataServ.parseDeviceDataToCsv(result));
               }
 
@@ -104,7 +104,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
                 req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
-              if (accept && accept === 'csv') {
+              if (accept === 'csv') {
                 return res.status(HttpStatus.OK).send(
                   DeviceDataServ.parseDeviceAttrDataToCsv(result),
                 );
