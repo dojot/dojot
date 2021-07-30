@@ -1,8 +1,9 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const HttpStatus = require('http-status-codes');
 const util = require('util');
+const ApplicationError = require('../../errors/ApplicationError');
 const DeviceDataServ = require('../../services/v1/DeviceDataService');
-const { getExpectedResponseFormat } = require('../../helpers/AcceptHeaderHelper');
+const AcceptHeaderHelper = require('../../helpers/AcceptHeaderHelper');
 
 const logger = new Logger('influxdb-retriever:express/routes/v1/Device');
 
@@ -50,7 +51,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
 
             try {
               const { deviceId } = req.params;
-              const { accept } = req.headers;
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
@@ -59,14 +60,14 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
                 req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
-              if (accept && getExpectedResponseFormat(accept) === 'csv') {
+              if (accept && accept === 'csv') {
                 return res.status(HttpStatus.OK).send(DeviceDataServ.parseDeviceDataToCsv(result));
               }
 
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route.get:', e);
-              throw e;
+              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
             }
           },
         ],
@@ -93,7 +94,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
 
             try {
               const { deviceId, attr } = req.params;
-              const { accept } = req.headers;
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
 
               const {
                 dateFrom, dateTo, limit, page, order,
@@ -103,7 +104,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
                 req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
-              if (accept && getExpectedResponseFormat(accept) === 'csv') {
+              if (accept && accept === 'csv') {
                 return res.status(HttpStatus.OK).send(
                   DeviceDataServ.parseDeviceAttrDataToCsv(result),
                 );
@@ -112,7 +113,7 @@ module.exports = ({ mountPoint, queryDataByField, queryDataByMeasurement }) => {
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route-attr.get:', e);
-              throw e;
+              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
             }
           },
         ],

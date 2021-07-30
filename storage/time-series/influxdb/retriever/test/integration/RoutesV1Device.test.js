@@ -142,6 +142,18 @@ describe('Test Devices Routes', () => {
       });
   });
 
+  test('should respond with code 406 - Data from device - Test endpoint', (done) => {
+    mockQueryDataByMeasurement.mockResolvedValueOnce();
+    request(app)
+      .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('accept', 'application/xml')
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        done();
+      });
+  });
+
   test('Data from attr on a device in json -  Test endpoint  1', (done) => {
     mockQueryDataByField.mockResolvedValueOnce({
       result: [
@@ -249,6 +261,19 @@ describe('Test Devices Routes', () => {
         done();
       });
   });
+
+  test('should respond with code 406 - Data from attr on a device - Test endpoint', (done) => {
+    mockQueryDataByMeasurement.mockResolvedValueOnce({});
+    request(app)
+      .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('accept', 'application/xml')
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        done();
+      });
+  });
+
 
   test('Data from attr on a device -  Test endpoint 2', (done) => {
     mockQueryDataByField.mockResolvedValueOnce({

@@ -14,6 +14,7 @@ module.exports = class DevicesService {
   }
 
   /**
+   * Fetches data about the device entered.
    *
    * @param {*} tenant    tenant to which the device belongs
    * @param {*} deviceId  device id
@@ -38,11 +39,11 @@ module.exports = class DevicesService {
   }
 
   /**
-   *
    * @param {*} deviceData device dataset
    * @returns device dataset in CSV format
    */
   static parseDeviceDataToCsv(deviceData) {
+    // transforms attrs objects into message properties
     const messages = deviceData.map((message) => {
       const newMessage = {};
       message.attrs.forEach((attr) => {
@@ -60,6 +61,7 @@ module.exports = class DevicesService {
   }
 
   /**
+   * Fetches data about the device attribute entered.
    *
    * @param {*} tenant    tenant to which the device belongs
    * @param {*} deviceId  device id
