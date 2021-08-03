@@ -46,7 +46,6 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
     }
   } else {
     metadata.timestamp = Date.now();
-    this.logger.info('Stamping new timestamp:' + metadata.timestamp);
   }
 
   return {
