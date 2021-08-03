@@ -40,7 +40,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(payload.timestamp).toEqual('2020-11-11T11:11:11.000Z');
+      expect(data.metadata.timestamp).toEqual('2020-11-11T11:11:11.000Z');
 
     });
   });
@@ -58,7 +58,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(payload.timestamp).toEqual('2020-05-05T05:00:00.000Z');
+      expect(data.metadata.timestamp).toEqual('2020-05-05T05:00:00.000Z');
 
     });
   });
