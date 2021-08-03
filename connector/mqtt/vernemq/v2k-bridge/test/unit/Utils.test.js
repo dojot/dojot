@@ -16,10 +16,9 @@ describe('Utils', () => {
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
-      console.log('tsCurrent'+tsCurrent);
+      console.log(`tsCurrent${tsCurrent}`);
 
       const tsMatch = tsBefore.getTime() < tsCurrent.getTime();
-
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
