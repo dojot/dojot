@@ -7,7 +7,7 @@ describe('Utils', () => {
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const tsBefore = Date.now();
+      const tsBefore = new Date();
       const topic = 'admin:deviceid/topic';
       const payload = 'data';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -16,10 +16,10 @@ describe('Utils', () => {
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
-      console.log('tsCurrent'+tsCurrent);
+      this.logger = new Logger('v2k:mqtt-utils');
+      this.logger.info('tsCurrent'+tsCurrent);
 
       const tsMatch = tsBefore.getTime() < tsCurrent.getTime();
-
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
