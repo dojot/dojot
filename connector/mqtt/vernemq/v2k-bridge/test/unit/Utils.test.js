@@ -11,13 +11,15 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = 'data';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      const tsCurrent = payload.timestamp;
+      const tsCurrent = data.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
+      console.log('tsCurrent'+tsCurrent);
 
-      const tsMatch = tsBefore < tsCurrent;
+      const tsMatch = tsBefore.getTime() < tsCurrent.getTime();
+
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
@@ -31,7 +33,7 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = '{"temperatura":10,"timestamp":1605093071000}';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      const tsCurrent = payload.timestamp;
+      const tsCurrent = data.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
@@ -51,7 +53,7 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = '{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      const tsCurrent = payload.timestamp;
+      const tsCurrent = data.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
