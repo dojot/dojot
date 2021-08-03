@@ -383,6 +383,61 @@ class TestDojotAPIGenerateCertificate(unittest.TestCase):
 
 @patch('src.dojot.api.requests', autospec=True)
 @patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
+class TestDojotAPIAssociateDeviceWithCertificate(unittest.TestCase):
+    """
+    DojotAPI associate_device_with_certificate() tests.
+    """
+    def setUp(self):
+        self.call_api = DojotAPI.call_api
+        DojotAPI.call_api = MagicMock()
+
+        self.jwt = "testJWT"
+        self.username = "testUser"
+        self.passwd = "testPasswd"
+        self.csr = "testCsr"
+        self.device_id = "0123ab"
+        self.req = json.dumps({
+            "belongsTo": {"device": self.device_id}
+        })
+        self.fingerprint = "01:02:03:04:05:06:07:08:09:10:0A"
+        self.args = {
+            "url": MOCK_CONFIG['dojot']['url'] + "/x509/v1/certificates/" + self.fingerprint,
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {0}".format(self.jwt),
+            },
+            "data": self.req,
+        }
+
+    def tearDown(self):
+        DojotAPI.call_api = self.call_api
+
+    def test_associate_device_with_certificate(self, mock_requests):
+        """
+        Test associate_device_with_certificate
+        """
+        DojotAPI.associate_device_with_certificate(self.jwt, self.device_id, self.fingerprint)
+
+        return_json = False
+        DojotAPI.call_api.assert_called_once_with(mock_requests.patch, self.args, return_json)
+
+    def test_associate_device_with_certificate_exception(self, mock_requests):
+        """
+        Should not associate the cert, because rose an exception.
+        """
+        DojotAPI.call_api.side_effect = APICallError()
+
+        with self.assertRaises(Exception) as context:
+            DojotAPI.associate_device_with_certificate(self.jwt, self.device_id, self.fingerprint)
+
+        self.assertIsNotNone(context.exception)
+        self.assertIsInstance(context.exception, APICallError)
+        return_json = False
+        DojotAPI.call_api.assert_called_once_with(mock_requests.patch, self.args, return_json)
+
+
+@patch('src.dojot.api.requests', autospec=True)
+@patch.dict('src.dojot.api.CONFIG', MOCK_CONFIG, autospec=True)
 class TestDojotAPIRevokeCertificate(unittest.TestCase):
     """
     DojotAPI revoke_certificate() tests.
