@@ -31,7 +31,7 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10,"timestamp":1605093071000}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      const tsCurrent = data.metadata.timestamp;
+      //const tsCurrent = data.metadata.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
@@ -51,7 +51,7 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      const tsCurrent = data.metadata.timestamp;
+      //const tsCurrent = data.metadata.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
