@@ -16,7 +16,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = tsBefore.getTime() <= data.metadata.timestamp;
+      const tsMatch = typeof data.metadata.timestamp === "number" && !Number.isNaN(data.metadata.timestamp);
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
