@@ -6,8 +6,7 @@ describe('Utils', () => {
   });
 
   describe('generateDojotDeviceDataMessage', () => {
-    it('Case 1 - payload without timestamp', () => {
-      const tsBefore = new Date();
+    it('Case 1 - Payload without timestamp', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -16,7 +15,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = typeof data.metadata.timestamp === "number" && !Number.isNaN(data.metadata.timestamp);
+      const tsMatch = data.metadata.timestamp === "number";
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
