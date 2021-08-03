@@ -16,7 +16,7 @@ describe('Utils', () => {
       const { attrs } = data;
       let { tsCheck } = true;
 
-      if("timestamp".indexOf(payload)) {
+      if ("timestamp".indexOf(payload)) {
         tsCheck = false;
       }
 
