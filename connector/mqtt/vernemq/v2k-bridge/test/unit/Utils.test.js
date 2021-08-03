@@ -9,7 +9,7 @@ describe('Utils', () => {
     it('Should correctly generate the payload', () => {
       const tsBefore = new Date();
       const topic = 'admin:deviceid/topic';
-      const payload = 'data';
+      const payload = JSON.parse('{"temperatura":10}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
       const tsCurrent = data.timestamp;
 
@@ -29,7 +29,7 @@ describe('Utils', () => {
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
       const topic = 'admin:deviceid/topic';
-      const payload = '{"temperatura":10,"timestamp":1605093071000}';
+      const payload = JSON.parse('{"temperatura":10,"timestamp":1605093071000}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
       const tsCurrent = data.timestamp;
 
@@ -49,7 +49,7 @@ describe('Utils', () => {
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
       const topic = 'admin:deviceid/topic';
-      const payload = '{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}';
+      const payload = JSON.parse('{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
       const tsCurrent = data.timestamp;
 
