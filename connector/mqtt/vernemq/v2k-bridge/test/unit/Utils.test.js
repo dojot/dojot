@@ -43,7 +43,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(tsMatch).toBe(true);
-
     });
   });
 
@@ -64,7 +63,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(tsMatch).toEqual(true);
-
     });
   });
 
