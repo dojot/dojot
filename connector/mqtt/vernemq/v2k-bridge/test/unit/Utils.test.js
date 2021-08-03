@@ -18,12 +18,12 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = Date(tsBefore) <= Date(tsCurrent) && Date(tsAfter) >= Date(tsCurrent);
+      const tsMatch = tsBefore <= tsCurrent && tsAfter >= tsCurrent;
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(tsMatch).toBe(1);
+      expect(tsMatch).toBe(true);
     });
   });
 
@@ -40,7 +40,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(timestampFake).toEqual('2020-11-11T11:11:11.000Z');
+      expect(payload.timestamp).toEqual('2020-11-11T11:11:11.000Z');
 
     });
   });
@@ -58,7 +58,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(timestampFake).toEqual('2020-05-05T05:00:00.000Z');
+      expect(payload.timestamp).toEqual('2020-05-05T05:00:00.000Z');
 
     });
   });
