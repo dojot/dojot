@@ -11,7 +11,7 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      // const tsCurrent = data.metadata.timestamp;
+      //const tsCurrent = data.metadata.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
@@ -42,7 +42,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toBe('1605093071000');
+      expect(data.metadata.timestamp).toEqual(1605093071000);
     });
   });
 
@@ -62,7 +62,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toEqual('2020-05-05T05:00:00.000Z');
+      expect(data.metadata.timestamp).toEqual(1588654800000);
     });
   });
 
