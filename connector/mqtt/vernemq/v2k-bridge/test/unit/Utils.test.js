@@ -17,7 +17,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = tsBefore <= data.metadata.timestamp && tsAfter >= data.metadata.timestamp;
+      const tsMatch = tsBefore <= payload.timestamp && tsAfter >= payload.timestamp;
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
@@ -41,7 +41,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toEqual(timestampFake);
+      expect(payload.timestamp).toEqual(timestampFake);
 
     });
   });
@@ -60,7 +60,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toEqual(timestampFake);
+      expect(payload.timestamp).toEqual(timestampFake);
 
     });
   });
