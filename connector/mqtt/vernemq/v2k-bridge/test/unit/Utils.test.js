@@ -11,7 +11,7 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
-      //const tsCurrent = data.metadata.timestamp;
+      // const tsCurrent = data.metadata.timestamp;
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
