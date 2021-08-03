@@ -18,7 +18,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).toBeTruthy();
+      expect(data.metadata.timestamp).not.toBeNaN();
     });
   });
 
