@@ -14,11 +14,16 @@ describe('Utils', () => {
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
+      const tsCheck
+
+      if ("timestamp".indexOf(payload)) {
+        tsCheck = false;
+      }
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(data.metadata.timestamp).not.toBeNaN();
+      expect(tsCheck).toEqual(false);
     });
   });
 
@@ -35,6 +40,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
+      expect(data.metadata.timestamp).not.toBeNaN();
       expect(data.metadata.timestamp).toEqual(1605093071000);
     });
   });
@@ -52,6 +58,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
+      expect(data.metadata.timestamp).not.toBeNaN();
       expect(data.metadata.timestamp).toEqual(1588654800000);
     });
   });
