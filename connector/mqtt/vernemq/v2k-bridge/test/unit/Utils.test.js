@@ -23,7 +23,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(tsMatch).toBe(true);
-
     });
   });
 
@@ -42,7 +41,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(data.metadata.timestamp).toEqual(timestampFake);
-
     });
   });
 
@@ -61,7 +59,6 @@ describe('Utils', () => {
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
       expect(data.metadata.timestamp).toEqual(timestampFake);
-
     });
   });
 
