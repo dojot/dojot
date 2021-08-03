@@ -16,11 +16,6 @@ describe('Utils', () => {
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
-<<<<<<< HEAD
-=======
-      this.logger = new Logger('v2k:mqtt-utils');
-      this.logger.info(`tsCurrent${tsCurrent}`);
->>>>>>> 2196b6f19a42bcd064c148c302b8839a3459ce49
 
       const tsMatch = tsBefore.getTime() < tsCurrent.getTime();
 
