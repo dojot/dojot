@@ -17,7 +17,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = tsBefore <= payload.timestamp && tsAfter >= payload.timestamp;
+      const tsMatch = Date(tsBefore) <= Date(payload.timestamp) & Date(tsAfter) >= Date(payload.timestamp);
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
@@ -28,7 +28,7 @@ describe('Utils', () => {
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const timestampFake = 1605093071000;
+      const timestampFake = new Date(1605093071000);
       const topic = 'admin:deviceid/topic';
 
       const payload = '{"temperatura":10,"timestamp":1605093071000}';
@@ -42,14 +42,14 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(payload.timestamp).toEqual(timestampFake);
+      expect(timestampFake).toEqual(payload.timestamp);
 
     });
   });
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const timestampFake = "2020-05-05T05:00:00.000000Z";
+      const timestampFake = new Date("2020-05-05T05:00:00.000000Z");
       const topic = 'admin:deviceid/topic';
       const payload = '{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -61,7 +61,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(payload.timestamp).toEqual(timestampFake);
+      expect(timestampFake).toEqual(payload.timestamp);
 
     });
   });
