@@ -20,7 +20,8 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(tsMatch).toBe(true);
+      expect(data.metadata.timestamp).toBe(true);
+      expect(data.metadata.timestamp).toBeTruthy();
     });
   });
 
