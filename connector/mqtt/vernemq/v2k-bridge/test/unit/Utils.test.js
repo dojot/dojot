@@ -30,7 +30,7 @@ describe('Utils', () => {
     it('Should correctly generate the payload', () => {
       const timestampFake = 1605093071000;
       const topic = 'admin:deviceid/topic';
-      
+
       const payload = '{"temperatura":10,"timestamp":1605093071000}';
 
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
