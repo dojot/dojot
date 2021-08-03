@@ -7,7 +7,7 @@ describe('Utils', () => {
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const tsBefore = new Date();
+      const tsBefore = Date.now();
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -17,7 +17,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = tsBefore.getTime() < data.metadata.timestamp;
+      const tsMatch = tsBefore <= data.metadata.timestamp;
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
@@ -37,7 +37,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = data.metadata.timestamp.toISOString() === '2020-11-11T11:11:11.000Z';
+      const tsMatch = data.metadata.timestamp === Date.parse('1605093071000');
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
@@ -57,7 +57,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = data.metadata.timestamp.toISOString() === '2020-05-05T05:00:00.000Z';
+      const tsMatch = data.metadata.timestamp === Date.parse('2020-05-05T05:00:00.000Z');
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
