@@ -37,7 +37,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      //const tsMatch = data.metadata.timestamp === Date.parse('1605093071000');
+      // const tsMatch = data.metadata.timestamp === Date.parse('1605093071000');
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
@@ -57,7 +57,7 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      //const tsMatch = data.metadata.timestamp === Date.parse('2020-05-05T05:00:00.000Z');
+      // const tsMatch = data.metadata.timestamp === Date.parse('2020-05-05T05:00:00.000Z');
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
