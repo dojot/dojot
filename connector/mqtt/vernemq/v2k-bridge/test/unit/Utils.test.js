@@ -6,7 +6,7 @@ describe('Utils', () => {
   });
 
   describe('generateDojotDeviceDataMessage', () => {
-    it('Should correctly generate the payload', () => {
+    it('Case 1 - payload without timestamp', () => {
       const tsBefore = Date.now();
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10}');
@@ -27,7 +27,7 @@ describe('Utils', () => {
   });
 
   describe('generateDojotDeviceDataMessage', () => {
-    it('Should correctly generate the payload', () => {
+    it('Case 2 - payload with Unix timestamp', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10,"timestamp":1605093071000}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -37,17 +37,17 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = data.metadata.timestamp === Date.parse('1605093071000');
+      //const tsMatch = data.metadata.timestamp === Date.parse('1605093071000');
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(tsMatch).toBe(true);
+      expect(data.metadata.timestamp).toBe('1605093071000');
     });
   });
 
   describe('generateDojotDeviceDataMessage', () => {
-    it('Should correctly generate the payload', () => {
+    it('Case 3 - payload with String timestamp', () => {
       const topic = 'admin:deviceid/topic';
       const payload = JSON.parse('{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -57,12 +57,12 @@ describe('Utils', () => {
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = data.metadata.timestamp === Date.parse('2020-05-05T05:00:00.000Z');
+      //const tsMatch = data.metadata.timestamp === Date.parse('2020-05-05T05:00:00.000Z');
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(tsMatch).toEqual(true);
+      expect(data.metadata.timestamp).toEqual('2020-05-05T05:00:00.000Z');
     });
   });
 
