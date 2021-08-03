@@ -14,9 +14,9 @@ describe('Utils', () => {
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
-      const tsCheck
+      const tsCheck;
 
-      if ("timestamp".indexOf(payload)) {
+      if("timestamp".indexOf(payload)) {
         tsCheck = false;
       }
 
