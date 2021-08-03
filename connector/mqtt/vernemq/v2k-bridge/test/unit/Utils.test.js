@@ -11,28 +11,26 @@ describe('Utils', () => {
       const topic = 'admin:deviceid/topic';
       const payload = 'data';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
+      const tsCurrent = payload.timestamp;
       const tsAfter = Date.now();
 
       const { deviceid } = data.metadata;
       const { tenant } = data.metadata;
       const { attrs } = data;
 
-      const tsMatch = Date(tsBefore) <= Date(payload.timestamp) & Date(tsAfter) >= Date(payload.timestamp);
+      const tsMatch = Date(tsBefore) <= Date(tsCurrent) && Date(tsAfter) >= Date(tsCurrent);
 
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(tsMatch).toBe(true);
+      expect(tsMatch).toBe(1);
     });
   });
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const timestampFake = new Date(1605093071000);
       const topic = 'admin:deviceid/topic';
-
       const payload = '{"temperatura":10,"timestamp":1605093071000}';
-
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
 
       const { deviceid } = data.metadata;
@@ -42,14 +40,13 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(timestampFake).toEqual(payload.timestamp);
+      expect(timestampFake).toEqual('2020-11-11T11:11:11.000Z');
 
     });
   });
 
   describe('generateDojotDeviceDataMessage', () => {
     it('Should correctly generate the payload', () => {
-      const timestampFake = new Date("2020-05-05T05:00:00.000000Z");
       const topic = 'admin:deviceid/topic';
       const payload = '{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}';
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
@@ -61,7 +58,7 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
-      expect(timestampFake).toEqual(payload.timestamp);
+      expect(timestampFake).toEqual('2020-05-05T05:00:00.000Z');
 
     });
   });
