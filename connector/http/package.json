@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "IoTAgent to receive messages from devices via HTTPS and forward them to the dojot messaging system.",
   "engines": {
-    "node": ">=12.18",
+    "node": ">=12.22.0",
     "npm": ">=6.14"
   },
   "private": true,
@@ -12,7 +12,7 @@
     "start": "node index.js",
     "dev": "nodemon --inspect ./index.js --ignore ./config -V",
     "test": "jest",
-    "test:watch": "jest --watchAll --coverage",
+    "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js .",
     "check-licenses": "apache2-license-checker"
@@ -31,7 +31,7 @@
     "app/**/*.js",
     "app/*.js",
     "test/",
-    "!test/unit/coverage/"
+    "!test/coverage/"
   ],
   "author": "Gilmaicor Leandro",
   "license": "Apache-2.0",
@@ -77,7 +77,6 @@
     ],
     "collectCoverageFrom": [
       "app/**/*.js",
-      "app/*.js",
       "!index.js",
       "!app/sdk/**/*.js"
     ],
