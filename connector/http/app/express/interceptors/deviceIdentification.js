@@ -19,7 +19,7 @@ module.exports = ({ cache, config }) => ({
     if (req.socket instanceof tls.TLSSocket) {
       const clientCert = req.socket.getPeerCertificate();
       if (
-        config['authorization.mode'] === 'cn' &&
+        config.authorizationMode === 'cn' &&
         Object.prototype.hasOwnProperty.call(clientCert, 'subject') &&
         Object.hasOwnProperty.bind(clientCert.subject)('CN')
       ) {
@@ -36,7 +36,7 @@ module.exports = ({ cache, config }) => ({
       }
 
       if (
-        config['authorization.mode'] === 'fingerprint' &&
+        config.authorizationMode === 'fingerprint' &&
         Object.prototype.hasOwnProperty.call(clientCert, 'fingerprint256')
       ) {
         const { fingerprint256 } = clientCert;
@@ -52,7 +52,7 @@ module.exports = ({ cache, config }) => ({
             )
             .then((resp) => resp.data.split(':'));
           [req.tenant, req.deviceId] = messageKey;
-          cache.set(fingerprint256, messageKey, 30000);
+          cache.set(fingerprint256, messageKey, config.setTll);
           return next();
         } catch (e) {
           err.message =
@@ -67,7 +67,7 @@ module.exports = ({ cache, config }) => ({
 
     const reqType = req.path.split('/');
 
-    if (config['unsecure.mode'] && reqType[3] === 'unsecure') {
+    if (config.unsecureMode && reqType[3] === 'unsecure') {
       const {
         query: { tenant, deviceId },
       } = req;

@@ -458,12 +458,6 @@ services:
       - 8080:3000
       - 8081:3001
     restart: always
-    healthcheck:
-      test: ['CMD', 'wget', '-q', '-O', '-', 'http://localhost:9000/health']
-      interval: 10s
-      timeout: 10s
-      retries: 6
-      start_period: 2m
     environment:
       SERVER_PORT_HTTP: 3123
       SERVER_PORT_HTTPS: 3124

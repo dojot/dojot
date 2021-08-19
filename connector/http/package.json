@@ -44,6 +44,7 @@
   "homepage": "https://github.com/dojot",
   "dependencies": {
     "@dojot/microservice-sdk": "0.1.9",
+    "@types/jest": "^27.0.1",
     "axios": "^0.21.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -55,19 +56,6 @@
     "joi": "^17.4.2",
     "lodash.camelcase": "^4.3.0",
     "node-cache": "^5.1.2"
-  },
-  "devDependencies": {
-    "@bbc/apache2-license-checker": "^1.1.4",
-    "eslint": "^7.10.0",
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "^24.4.0",
-    "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-security-node": "^1.0.14",
-    "jest": "^26.4.2",
-    "methods": "^1.1.2",
-    "nodemon": "^2.0.12",
-    "supertest": "^6.0.1"
   },
   "jest": {
     "verbose": true,
@@ -98,5 +86,18 @@
         "statements": 80
       }
     }
+  },
+  "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.4.0",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-security-node": "^1.0.14",
+    "jest": "^26.4.2",
+    "methods": "^1.1.2",
+    "nodemon": "^2.0.12",
+    "supertest": "^6.0.1"
   }
 }

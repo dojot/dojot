@@ -20,7 +20,7 @@ class Cache {
    * @constructor
    *
    * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
-   *          with register service 'http-producer'} serviceState
+   *          with register service 'http-cache'} serviceState
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
@@ -66,7 +66,7 @@ class Cache {
       if (this.myCache) {
         try {
           const stats = this.myCache.getStats();
-          if (stats.misses) {
+          if (Object.keys(stats).length) {
             signalReady();
           } else {
             signalNotReady();

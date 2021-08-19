@@ -5,8 +5,11 @@ const logger = new Logger('http-agent:express');
 // const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
 const deviceIdentificationInterceptor = require('./interceptors/deviceIdentification');
 
-const { express: configExpress, security: configSecurity } =
-  ConfigManager.getConfig('HTTP-AGENT');
+const {
+  express: configExpress,
+  security: configSecurity,
+  cache: ConfigCache,
+} = ConfigManager.getConfig('HTTP-AGENT');
 
 /**
  * Creates an express and receives the routes to register
@@ -44,7 +47,11 @@ module.exports = (routes, serviceState, cache) => {
     interceptors: [
       deviceIdentificationInterceptor({
         cache,
-        config: configSecurity,
+        config: {
+          unsecureMode: configSecurity['unsecure.mode'],
+          authorizationMode: configSecurity['authorization.mode'],
+          setTll: ConfigCache['set.tll'],
+        },
       }),
       requestIdInterceptor(),
       beaconInterceptor({

@@ -1,6 +1,6 @@
 FROM node:12.22.0-alpine AS base
 
-WORKDIR /opt/nodejs
+WORKDIR /opt/http-agent
 
 RUN apk --no-cache add \
   bash \
@@ -25,22 +25,28 @@ RUN apk --no-cache add \
 COPY package.json ./package.json
 COPY package-lock.json ./package-lock.json
 
-RUN npm install --production
-
-FROM node:12.22.0-alpine
-WORKDIR /opt/nodejs
-
-RUN apk --no-cache add \
-  libsasl \
-  lz4-libs
-
-COPY --from=base /opt/nodejs /opt/nodejs
+RUN npm install --only=prod
 
 COPY app ./app
 COPY config ./config
 COPY index.js ./index.js
 
+FROM node:12.22.0-alpine
+
+WORKDIR /opt/http-agent
+
+RUN apk --no-cache add \
+  libsasl \
+  lz4-libs \
+  openssl \
+  tini \
+  curl
+
+COPY --from=base /opt/http-agent /opt/http-agent
+
+ENTRYPOINT ["/sbin/tini", "--"]
+
 CMD ["npm", "start"]
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
-  CMD wget -q -O - http://localhost:9000/health || exit 1
+  CMD curl -f http://localhost:9000/health || exit 1
