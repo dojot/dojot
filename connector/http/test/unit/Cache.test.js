@@ -125,7 +125,7 @@ describe('Cache', () => {
     });
 
     it('should signal as not ready - is not connected to Kafka', async () => {
-      cache.myCache.getStats.mockReturnValue({ misses: 0 });
+      cache.myCache.getStats.mockReturnValue({});
 
       cache.createHealthChecker();
 

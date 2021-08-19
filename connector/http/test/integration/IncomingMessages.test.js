@@ -2,7 +2,8 @@ const fs = require('fs');
 
 const mockConfig = {
   express: { trustproxy: true, 'parsing.limit': 256000 },
-  security: { 'unsecure.mode': true, 'authorization.mode': 'cn' },
+  security: { 'unsecure.mode': true, 'authorization.mode': 'fingerprint' },
+  cache: { 'set.tll': 30000 },
 };
 
 const mockAxiosGet = jest.fn();
@@ -69,28 +70,30 @@ const mockProducerMessages = {
   send: mockProducerMessagesSend,
 };
 jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
-const app = express(
-  [
-    incomingMessagesRoutes({
-      mountPoint: '/http-agent/v1',
-      producerMessages: mockProducerMessages,
-    }),
-  ],
-  serviceStateMock,
-  mockCache,
-);
 
 jest.setTimeout(30000);
 
+let app;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  app = express(
+    [
+      incomingMessagesRoutes({
+        mountPoint: '/http-agent/v1',
+        producerMessages: mockProducerMessages,
+      }),
+    ],
+    serviceStateMock,
+    mockCache,
+  );
+});
+
 describe('HTTPS', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
   describe('single-message', () => {
     describe('fingerprint', () => {
       beforeAll(() => {
         jest.clearAllMocks();
-        mockConfig.security['authorization.mode'] = 'fingerprint';
       });
 
       it('should successfully execute the request with tenant and deviceId from cache', async () => {
@@ -119,7 +122,7 @@ describe('HTTPS', () => {
 
       it('should successfully execute the request with tenant and deviceId from certificate-acl', async () => {
         mockCache.get.mockReturnValue(undefined);
-        await mockAxios.get.mockResolvedValue({ data: 'test:abc123' });
+        mockAxios.get.mockResolvedValue({ data: 'test:abc123' });
         await requestHttps(app)
           .post('/http-agent/v1/incoming-messages')
           .set('Content-Type', 'application/json')
@@ -143,6 +146,7 @@ describe('HTTPS', () => {
           });
       });
     });
+
     describe('CN', () => {
       beforeAll(() => {
         jest.clearAllMocks();

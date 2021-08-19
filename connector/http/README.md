@@ -90,10 +90,10 @@ These are the environment variables used by iotagent-http
 
 | Key               | Default Value                            | Valid Values             | Environment variable         |
 | ----------------- | ---------------------------------------- | ------------------------ | ---------------------------- |
-| log.verbose       | true                                     | boolean                  | HTTP_AGENT_LOG_VERBOSE       |
-| log.console.level | debug                                    | info, debug, error, warn | HTTP_AGENT_LOG_CONSOLE_LEVEL |
+| log.verbose       | false                                    | boolean                  | HTTP_AGENT_LOG_VERBOSE       |
+| log.console.level | info                                     | info, debug, error, warn | HTTP_AGENT_LOG_CONSOLE_LEVEL |
 | log.file          | false                                    | boolean                  | HTTP_AGENT_LOG_FILE          |
-| log.file.level    | debug                                    | info, debug, error, warn | HTTP_AGENT_LOG_FILE_LEVEL    |
+| log.file.level    | info                                     | info, debug, error, warn | HTTP_AGENT_LOG_FILE_LEVEL    |
 | log.file.filename | http-agent-${HOSTNAME:-}-logs-%DATE%.log | string                   | HTTP_AGENT_LOG_FILE_FILENAME |
 
 ### Kafka Producer
@@ -183,6 +183,7 @@ These are the environment variables used by iotagent-http
 | ----------------- | ------------- | ------------ | ---------------------------- |
 | cache.std.tll     | 100           | integer      | HTTP_AGENT_CACHE_STD_TLL     |
 | cache.checkperiod | 120           | integer      | HTTP_AGENT_CACHE_CHECKPERIOD |
+| cache.set.tll     | 30000         | integer      | HTTP_AGENT_CACHE_SET_TLL     |
 
 ## Notes
 
