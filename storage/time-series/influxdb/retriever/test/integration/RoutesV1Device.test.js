@@ -398,7 +398,7 @@ describe('Test Devices Routes', () => {
     );
 
     request(app)
-      .get('/tss/v1/graphql')
+      .get('/tss/v1/devices/graphql')
       .send({ query: graphqlQuery })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${validToken}`)
@@ -438,7 +438,7 @@ describe('Test Devices Routes', () => {
     );
 
     request(app)
-      .get('/tss/v1/graphql')
+      .get('/tss/v1/devices/graphql')
       .send({ query: graphqlQuery2 })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${validToken}`)
@@ -463,7 +463,7 @@ describe('Test Devices Routes', () => {
   test('Test graphQl endpoint - invalid graphql query', (done) => {
     expect.assertions(2);
     request(app)
-      .get('/tss/v1/graphql')
+      .get('/tss/v1/devices/graphql')
       .send({ query: graphqlInvalidQuery })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${validToken}`)
@@ -486,7 +486,7 @@ describe('Test Devices Routes', () => {
     );
 
     request(app)
-      .get('/tss/v1/graphql')
+      .get('/tss/v1/devices/graphql')
       .send({ query: graphqlQuery })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${validToken}`)
@@ -496,7 +496,7 @@ describe('Test Devices Routes', () => {
           data: { getData: null },
           errors: [{
             locations: [{ column: 9, line: 2 }],
-            message: 'qraphql-route.get: Error inside flux data',
+            message: 'graphql-route.get: Error inside flux data',
             path: ['getData'],
           }],
         });

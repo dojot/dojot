@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "The InfluxDB Retriever is responsible for retrieving data from device data time series in InfluxDB.",
   "engines": {
-    "node": ">=12.22",
+    "node": ">=12.18",
     "npm": ">=6.14"
   },
   "main": "index.js",
