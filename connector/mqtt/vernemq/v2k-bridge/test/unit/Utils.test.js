@@ -6,9 +6,31 @@ describe('Utils', () => {
   });
 
   describe('generateDojotDeviceDataMessage', () => {
-    it('Should correctly generate the payload', () => {
+    it('Case 1 - Payload without timestamp', () => {
       const topic = 'admin:deviceid/topic';
-      const payload = 'data';
+      const payload = JSON.parse('{"temperatura":10}');
+      const data = utils.generateDojotDeviceDataMessage(topic, payload);
+
+      const { deviceid } = data.metadata;
+      const { tenant } = data.metadata;
+      const { attrs } = data;
+      let { tsCheck } = true;
+
+      if ("timestamp".indexOf(payload)) {
+        tsCheck = false;
+      }
+
+      expect(deviceid).toEqual('deviceid');
+      expect(tenant).toEqual('admin');
+      expect(attrs).toEqual(payload);
+      expect(tsCheck).toEqual(false);
+    });
+  });
+
+  describe('generateDojotDeviceDataMessage', () => {
+    it('Case 2 - payload with Unix timestamp', () => {
+      const topic = 'admin:deviceid/topic';
+      const payload = JSON.parse('{"temperatura":10,"timestamp":1605093071000}');
       const data = utils.generateDojotDeviceDataMessage(topic, payload);
 
       const { deviceid } = data.metadata;
@@ -18,6 +40,26 @@ describe('Utils', () => {
       expect(deviceid).toEqual('deviceid');
       expect(tenant).toEqual('admin');
       expect(attrs).toEqual(payload);
+      expect(data.metadata.timestamp).not.toBeNaN();
+      expect(data.metadata.timestamp).toEqual(1605093071000);
+    });
+  });
+
+  describe('generateDojotDeviceDataMessage', () => {
+    it('Case 3 - payload with String timestamp', () => {
+      const topic = 'admin:deviceid/topic';
+      const payload = JSON.parse('{"temperatura":10, "timestamp":"2020-05-05T05:00:00.000000Z"}');
+      const data = utils.generateDojotDeviceDataMessage(topic, payload);
+
+      const { deviceid } = data.metadata;
+      const { tenant } = data.metadata;
+      const { attrs } = data;
+
+      expect(deviceid).toEqual('deviceid');
+      expect(tenant).toEqual('admin');
+      expect(attrs).toEqual(payload);
+      expect(data.metadata.timestamp).not.toBeNaN();
+      expect(data.metadata.timestamp).toEqual(1588654800000);
     });
   });
 
