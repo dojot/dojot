@@ -1,0 +1,54 @@
+
+  #Defining a type for influx's point
+  type InfluxPoint {
+      ts: String
+      value: String
+      id: String!
+  }
+
+  #Type used to return the influx data
+  type FetchedData {
+      data: [InfluxPoint]!
+  }
+
+  #Information for next, previous or current page
+  type PageInfo {
+      number: Int!
+      url: String!
+  }
+
+  #The pagination links for the data
+  type Paging {
+      previous: PageInfo
+      current: PageInfo
+      next:PageInfo
+  }
+
+
+  #Necessary informations request one device
+  input Device {
+      id: String!
+      #list of attributes will be retrieved#
+      attributes: [String]!
+  }
+
+  input Range {
+    start: String! #dateFrom#
+    stop: String #dateTo#
+  }
+,
+  #main query schema to request Devices from InfluxDb
+  type Query {
+    #Returns historical data
+    getData(filter: ParamsInput): FetchedData
+  }
+
+  #Parameters to query historical device data
+  input ParamsInput {
+    #list of devices will be retrieved#
+    devices: [Device]!
+    # number of elements will be returned#
+    limit: Int
+    # time interval used in flux query#
+    range: Range
+  }
