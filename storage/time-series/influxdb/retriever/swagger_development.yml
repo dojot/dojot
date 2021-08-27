@@ -104,15 +104,36 @@ paths:
                     type: string
         default:
           description: Unexpected error
+  "/tss/v1/devices/graphql":
+    get:
+      tags:
+        - graphql
+      summary: "graphql"
+      description: |
+        This endpoint is to be used with graphql, if graphiql (graphql graphical interface) is active, it is possible to access this endpoint via get via browser, containing documentation of queries and mutations available for graphql.
+      operationId: graphqlGet
+      x-allow-unknown-query-parameters: true
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        default:
+          description: Unexpected error
 externalDocs:
   description: Find out more about Dojot
   url: https://dojotdocs.readthedocs.io/
 servers:
-- url: "{url}"
-  description: URL for Time Series Service
-  variables:
-    url:
-      default: 'http://localhost:8000/'
+  - url: "{url}"
+    description: URL for Time Series Service
+    variables:
+      url:
+        default: "http://localhost:8000/"
 components:
   securitySchemes:
     bearerAuth:
@@ -125,11 +146,11 @@ components:
       name: dateFrom
       in: query
       description: |
-          Start time of a time-based query results.
+        Start time of a time-based query results.
 
-          Default is `1970-01-01T00:00:00.000Z`.
+        Default is `1970-01-01T00:00:00.000Z`.
 
-          It must be `greater` than or `equal` to `1970-01-01T00:00:00.000Z`
+        It must be `greater` than or `equal` to `1970-01-01T00:00:00.000Z`
       required: false
       allowReserved: true
       examples:
@@ -216,36 +237,36 @@ components:
         pattern: ^[a-zA-Z0-9_-]+$
   schemas:
     paging:
-        type: object
-        properties:
-          previous:
-            anyOf:
-              - type: object
-                default: null
-                nullable: true
-              - $ref: '#/components/schemas/Page'
-          current:
-            anyOf:
-              - $ref: '#/components/schemas/Page'
-              - type: object
-                properties:
-                  number:
-                    default: 1
-                  url:
-                    default: "/tss/v1/devices..."
-          next:
-            description: |
-              `Note that:` It can happen that the next is filled even when there is no data for a next page to avoid unnecessary counts. But don't worry, as the next one will be accessible and with next null.
-            anyOf:
-              - type: object
-                default: null
-                nullable: true
-                properties:
-                    number:
-                      default: 2
-                    url:
-                      default: "/tss/v1/devices..."
-              - $ref: '#/components/schemas/Page'
+      type: object
+      properties:
+        previous:
+          anyOf:
+            - type: object
+              default: null
+              nullable: true
+            - $ref: "#/components/schemas/Page"
+        current:
+          anyOf:
+            - $ref: "#/components/schemas/Page"
+            - type: object
+              properties:
+                number:
+                  default: 1
+                url:
+                  default: "/tss/v1/devices..."
+        next:
+          description: |
+            `Note that:` It can happen that the next is filled even when there is no data for a next page to avoid unnecessary counts. But don't worry, as the next one will be accessible and with next null.
+          anyOf:
+            - type: object
+              default: null
+              nullable: true
+              properties:
+                number:
+                  default: 2
+                url:
+                  default: "/tss/v1/devices..."
+            - $ref: "#/components/schemas/Page"
     Page:
       type: object
       properties:
@@ -288,7 +309,7 @@ components:
                           items: {}
                         - type: object
         paging:
-          $ref: '#/components/schemas/paging'
+          $ref: "#/components/schemas/paging"
     DeviceAttrResponse:
       type: object
       properties:
@@ -311,4 +332,4 @@ components:
                     items: {}
                   - type: object
         paging:
-          $ref: '#/components/schemas/paging'
+          $ref: "#/components/schemas/paging"
