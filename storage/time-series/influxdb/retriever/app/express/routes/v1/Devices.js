@@ -167,19 +167,21 @@ module.exports = ({
                 const page = { limit };
 
                 // request data
-                const res = await queryDataUsingGraphql(
-                  params.tenant,
-                  devices,
-                  filters,
-                  page,
-                  order,
-                ).catch((e) => {
+                try {
+                  const res = await queryDataUsingGraphql(
+                    params.tenant,
+                    devices,
+                    filters,
+                    page,
+                    order,
+                  );
+                  return res;
+                } catch (e) {
                   logger.error('graphql-route.get:', e);
                   const er = new Error(e);
                   er.message = `graphql-route.get: ${e.message}`;
                   throw er;
-                });
-                return res;
+                }
               },
             },
           }),
