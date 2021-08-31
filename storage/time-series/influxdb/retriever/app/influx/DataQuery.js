@@ -7,6 +7,7 @@ const {
   fluxInteger,
   fluxDateTime,
   fluxString,
+  fluxDuration,
 } = require('@influxdata/influxdb-client');
 const util = require('util');
 const { Logger } = require('@dojot/microservice-sdk');
@@ -138,6 +139,85 @@ class DataQuery {
 
 
   /**
+ * Fetch data after using a GraphQL query following the params below
+ *
+ * @param {String} org Organization Name (Dojot's Tenant)
+ * @param {Array} devices a list of devices containing
+ * device id and its attributes list
+ * @param {object} filters Filters for query
+ * @param {string} filters.dateFrom earliest time to include in results
+ *                 (-1h, 2019-08-28T22:00:00Z, or 1567029600.)
+ * @param {string} filters.dateFrom latest time to include in results
+ *                 (-1h, 2019-08-28T22:00:00Z, 1567029600, or current_time.)
+ * @param {object} page Paginate information for query
+ * @param {number} page.limit= number of results to be returned
+ * @param {{String='desc','asc'}} order=desc Defines whether the order
+ * by **time** should be ascending (asc) or descending (desc)
+ *
+ * @returns {Promise.<{result: [{ ts: timeIsoData(string),
+ *                                value: any,
+ *                                id: string,
+ *                                attr: string }]}| error>}
+ *           A promise that returns a list of points from influxDB
+ */
+  async queryUsingGraphql(org, devices, filters = {}, page = {}, order = 'desc') {
+    try {
+      logger.debug('queryUsingGraphql: Handling query created using Graphql.');
+      logger.debug(`queryUsingGraphql: org=${org}`);
+      logger.debug(`queryUsingGraphql: devices=${util.inspect(devices)}`);
+      logger.debug(`queryUsingGraphql: filters=${util.inspect(filters)}`);
+      logger.debug(`queryUsingGraphql: page=${util.inspect(page)}`);
+      logger.debug(`queryUsingGraphql: order=${order}`);
+
+      const {
+        start, stop, limit, offset,
+      } = DataQuery.commonQueryParams(page, filters);
+
+      const orderExp = DataQuery.commonQueryOrderExpression(order);
+      const limitExp = DataQuery.commonLimitExpression(limit, offset);
+
+      const fluxQuery = `from(bucket:${fluxString(this.defaultBucket)})
+        |> range(start: ${start} , stop: ${stop})
+        ${DataQuery.createFluxFilter(devices)}
+        ${fluxExpression(orderExp)}
+        ${fluxExpression(limitExp)}`;
+
+      logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
+
+      const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
+
+      return new Promise((resolve, reject) => {
+        const result = [];
+        queryApi.queryRows(fluxQuery, {
+          next(row, tableMeta) {
+            const o = tableMeta.toObject(row);
+            logger.debug(`queryUsingGraphql: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            result.push({
+              id: o._measurement,
+              ts: o._time,
+              value: o._value,
+              attr: o._field.replace('dojot.', ''),
+            });
+          },
+          error(error) {
+            return reject(DataQuery.commonHandleError(error));
+          },
+          complete() {
+            logger.debug(`queryUsingGraphql: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            return resolve({ data: result });
+          },
+        });
+      });
+    } catch (e) {
+      logger.error('queryUsingGraphql:', e);
+      const er = new Error(e);
+      er.message = `queryUsingGraphql: ${e.message}`;
+      throw er;
+    }
+  }
+
+
+  /**
  * Fetch data for a given field considering the time
  * slot and paging filter for a default bucket and an given org.
  *
@@ -240,8 +320,28 @@ class DataQuery {
   static commonQueryParams(page, filters) {
     const limit = page.limit ? fluxInteger(page.limit) : 256;
     const pageNumber = page.page && page.page >= 1 ? fluxInteger(page.page) : 1;
-    const start = filters.dateFrom ? fluxDateTime(filters.dateFrom) : 0;
-    const stop = filters.dateTo ? fluxDateTime(filters.dateTo) : fluxExpression('now()');
+    /*  Start is the earliest time to include in results.
+        Use a relative duration, absolute time, or integer (Unix
+        timestamp in seconds). For example, -1h, 2019-08-28T22:00:00Z,
+        or 1567029600.
+    */
+    const re = new RegExp('(-)\\d+\\w+');
+    const isRelative = (str) => re.exec(str);
+    let start = 0;
+    let stop = fluxExpression('now()');
+    if (filters.dateFrom) {
+      if (isRelative(filters.dateFrom)) {
+        start = fluxDuration(filters.dateFrom);
+      } else { start = fluxDateTime(filters.dateFrom); }
+    }
+    /* Stop is the latest time to include in results and follows the same
+       previous pattern. */
+    if (filters.dateTo) {
+      if (isRelative(filters.dateTo)) {
+        stop = fluxDuration(filters.dateTo);
+      } else { stop = fluxDateTime(filters.dateTo); }
+    }
+
     return {
       start, stop, limit, offset: (pageNumber - 1) * limit,
     };
@@ -271,6 +371,27 @@ class DataQuery {
    */
   static commonLimitExpression(limit, offset) {
     return `|> limit(n: ${limit} , offset: ${offset})`;
+  }
+
+  /**
+   * It should be used to create the influx query filter,
+   * passing a device list
+   *
+   * @param {object} devices device list [{id=String, attributes[String]}]
+   * @returns String
+   */
+  static createFluxFilter(devices) {
+    let rtnString = '|> filter(fn: (r) => ';
+    const strDevices = devices.map((device) => {
+      let rtnDev = `(r._measurement == ${fluxString(device.id)}`;
+      const strAttrs = device.attributes.map((attr) => `r._field == ${fluxString(`dojot.${attr}`)}`).join(' or ');
+
+      if (device.attributes.length) { rtnDev += ` and (${strAttrs})`; }
+      rtnDev += ')';
+      return rtnDev;
+    }).join(' or ');
+    rtnString += `${strDevices})`;
+    return rtnString;
   }
 }
 
