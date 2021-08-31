@@ -325,7 +325,8 @@ class DataQuery {
         timestamp in seconds). For example, -1h, 2019-08-28T22:00:00Z,
         or 1567029600.
     */
-    const re = new RegExp('(-)\\d+\\w+');
+
+    const re = new RegExp('^(-)([0-9]+)(w|d|h|(m)(s)?|s)$');
     const isRelative = (str) => re.exec(str);
     let start = 0;
     let stop = fluxExpression('now()');
