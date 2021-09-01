@@ -6,7 +6,7 @@ const {
 
 const camelCase = require('lodash.camelcase');
 
-const { lightship: configLightship } = getConfig('HTTP-AGENT');
+const { lightship: configLightship } = getConfig('HTTP_AGENT');
 
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),

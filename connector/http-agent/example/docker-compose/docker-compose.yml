@@ -459,16 +459,13 @@ services:
       - 8081:3001
     restart: always
     environment:
-      SERVER_PORT_HTTP: 3123
-      SERVER_PORT_HTTPS: 3124
-      HTTP_TLS_SECURE_CERT: '/certs/http-agent.crt'
-      HTTP_TLS_SECURE_KEY: '/certs/http-agent.key'
-      HTTP_TLS_CA_CERT: '/certs/ca.crt'
-      HTTP_TLS_CRL_CERT: '/certs/ca.crl'
-      HTTP_CERT_DIRECTORY: '/certs'
-      ALLOW_UNSECURED_MODE: 'true'
-      LOG_LEVEL: 'debug'
-      REQUEST_CERT: 'false'
+      HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
+      HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
+      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
+      HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
+      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
     volumes:
       - http-agent-cert-side-volume:/certs
     logging:

@@ -9,7 +9,7 @@ const {
   express: configExpress,
   security: configSecurity,
   cache: ConfigCache,
-} = ConfigManager.getConfig('HTTP-AGENT');
+} = ConfigManager.getConfig('HTTP_AGENT');
 
 /**
  * Creates an express and receives the routes to register
