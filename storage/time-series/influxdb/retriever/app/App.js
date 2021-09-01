@@ -41,7 +41,9 @@ class App {
       this.influxDB = new InfluxDB(serviceState);
     } catch (e) {
       logger.error('constructor:', e);
-      throw e;
+      const er = new Error(e);
+      er.message = `constructor: ${e.message}`;
+      throw er;
     }
   }
 
@@ -55,8 +57,12 @@ class App {
       if (!influxIsReady) {
         throw new Error('Influxdb is not ready');
       }
-
       this.influxDB.createInfluxHealthChecker();
+
+      const boundQueryDataUsingGraphql = this
+        .influxDB.getInfluxDataQueryInstance()
+        .queryUsingGraphql.bind(this.influxDB.getInfluxDataQueryInstance());
+
 
       const boundQueryDataByField = this
         .influxDB.getInfluxDataQueryInstance()
@@ -72,6 +78,7 @@ class App {
         [
           devicesRoutes({
             mountPoint: '/tss/v1',
+            queryDataUsingGraphql: boundQueryDataUsingGraphql,
             queryDataByField: boundQueryDataByField,
             queryDataByMeasurement: boundQueryDataByMeasurement,
           }),
