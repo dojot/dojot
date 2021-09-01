@@ -11,7 +11,7 @@ const {
   http: configHttpServer,
   reload: configReload,
   security: configSecurity,
-} = ConfigManager.getConfig('HTTP-AGENT');
+} = ConfigManager.getConfig('HTTP_AGENT');
 const configHttpsServerCamelCase = ConfigManager.transformObjectKeys(
   configHttpsServer,
   camelCase,

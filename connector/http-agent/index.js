@@ -6,8 +6,8 @@ const { killApplication } = require('./app/Utils');
 // Creating the configuration
 const userConfigFile =
   process.env.HTTP_AGENT_USER_CONFIG_FILE || 'production.conf';
-ConfigManager.loadSettings('HTTP-AGENT', userConfigFile);
-const config = ConfigManager.getConfig('HTTP-AGENT');
+ConfigManager.loadSettings('HTTP_AGENT', userConfigFile);
+const config = ConfigManager.getConfig('HTTP_AGENT');
 
 const { log: configLog } = config;
 Logger.setTransport('console', {
