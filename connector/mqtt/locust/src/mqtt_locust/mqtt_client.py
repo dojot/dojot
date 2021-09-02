@@ -20,6 +20,7 @@ MESSAGE_TYPE_RECV_MESSAGE = 'recv_message'
 MESSAGE_TYPE_RENEW = 'renew'
 MESSAGE_TYPE_REVOKE = 'revoke'
 
+logger = Utils.create_logger("mqtt_client")
 
 class LocustError(Exception):
     """
@@ -66,8 +67,6 @@ class MQTTClient:
             should_revoke: whether this client should have its certificate revoked
             should_renew: whether this client should have its certificate renewed
         """
-        self.logger = Utils.create_logger("mqtt_client")
-
         Utils.validate_tenant(CONFIG["app"]["tenant"])
         Utils.validate_device_id(device_id)
 
@@ -162,7 +161,7 @@ class MQTTClient:
                                      keepalive=CONFIG['mqtt']['con_timeout'])
             self.mqttc.loop_start()
         except Exception as exception:
-            self.logger.error("Error while connecting to the broker: %s", str(exception))
+            logging.error("Error while connecting to the broker: %s", str(exception))
             Utils.fire_locust_failure(
                 request_type=REQUEST_TYPE,
                 name='connect',
@@ -232,7 +231,7 @@ class MQTTClient:
 
         except Exception as exception:
             error = Utils.error_message(int(str(exception)))
-            self.logger.error("Error while subscribing: %s", error)
+            logging.error("Error while subscribing: %s", error)
 
             Utils.fire_locust_failure(
                 request_type=REQUEST_TYPE,
@@ -367,7 +366,7 @@ class MQTTClient:
             try:
                 publish_time = float(json.loads(message.payload.decode())["timestamp"])
             except Exception as exception:
-                self.logger.error("Error while parsing the message payload: %s", str(exception))
+                logging.error("Error while parsing the message payload: %s", str(exception))
                 raise Exception(str(exception))
             else:
                 Utils.fire_locust_success(
@@ -410,8 +409,8 @@ class MQTTClient:
                 response_length=0,
                 exception=CertRenovationError("failed to renew")
             )
-            self.logger.error("An error occurred while trying to renew the certificate")
-            self.logger.error(str(exception))
+            logging.error("An error occurred while trying to renew the certificate")
+            logging.error(str(exception))
             return False
 
         else:
@@ -440,7 +439,7 @@ class MQTTClient:
         """
         try:
             if CertUtils.has_been_revoked(self.new_cert):
-                self.logger.debug("Already revoked, skipping step...")
+                logging.debug("Already revoked, skipping step...")
             else:
                 CertUtils.revoke_cert(self.new_cert)
                 Utils.fire_locust_success(
@@ -454,8 +453,8 @@ class MQTTClient:
             return True
 
         except Exception as exception:
-            self.logger.error("An error occurred while trying to revoke the certificate")
-            self.logger.error(str(exception))
+            logging.error("An error occurred while trying to revoke the certificate")
+            logging.error(str(exception))
 
         Utils.fire_locust_failure(
             request_type=REQUEST_TYPE,
