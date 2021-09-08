@@ -1,4 +1,7 @@
 const { Logger } = require('@dojot/microservice-sdk');
+
+const logger = new Logger('v2k:mqtt-utils');
+
 /**
  * A module with helper functions
  * @module utils
@@ -20,41 +23,41 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
 
   const tenantValue = splitUsername[0];
   const deviceIdValue = splitUsername[1];
-  let metadata = { timestamp: 0 };
-  this.logger = new Logger('v2k:mqtt-utils');
 
-  if ("timestamp".indexOf(payload)) {
-    // If it is a number, just copy it. Probably Unix time.
-    if (typeof payload.timestamp === "number") {
-      if (!Number.isNaN(payload.timestamp)) {
-        metadata.timestamp = payload.timestamp;
-        this.logger.info(`Received new timestamp:${metadata.timestamp}`);
-      } else {
-        this.logger.info('Received an invalid timestamp (NaN)');
-        metadata = {};
-      }
+  const attrs = payload;
+
+  let timestamp = Date.now();
+
+  const overwriteTimestamp = (ts) => {
+    if (!Number.isNaN(ts)) {
+      timestamp = ts;
     } else {
-      // If it is a ISO string...
-      const parsed = Date.parse(payload.timestamp);
-      if (!Number.isNaN(parsed)) {
-        metadata.timestamp = parsed;
-        this.logger.info(`Received new timestamp:${metadata.timestamp}`);
-      } else {
-        this.logger.info('Received an invalid timestamp (NaN)');
-        metadata = {};
-      }
+      logger.warn(`Timestamp ${payload.timestamp} is invalid. `
+        + 'It\'ll be considered the current time.');
     }
-  } else {
-    metadata.timestamp = Date.now();
+  };
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'timestamp')) {
+    // If it is a number, just copy it. Probably Unix time.
+    if (typeof payload.timestamp === 'number') {
+      overwriteTimestamp(payload.timestamp);
+    } else if (typeof payload.timestamp === 'string') {
+      // If it is a ISO string...
+      overwriteTimestamp(Date.parse(payload.timestamp));
+    } else {
+      logger.warn(`Times+tamp ${payload.timestamp} is invalid. `
+      + 'It\'ll be considered the current time.');
+    }
+    delete attrs.payload;
   }
 
   return {
     metadata: {
-      deviceid: deviceIdValue,
       tenant: tenantValue,
-      timestamp: metadata.timestamp,
+      deviceid: deviceIdValue,
+      timestamp,
     },
-    attrs: payload,
+    attrs,
   };
 };
 
