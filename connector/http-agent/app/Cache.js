@@ -8,7 +8,7 @@ const { killApplication } = require('./Utils');
 const logger = new Logger('http-agent:Cache');
 
 const { cache: configCache, healthchecker: configHealthChecker } =
-  getConfig('HTTP-AGENT');
+  getConfig('HTTP_AGENT');
 
 /**
  * Class representing an Producer

@@ -13,7 +13,7 @@ const {
   topic: configTopic,
   messenger: configMessenger,
   healthchecker: configHealthChecker,
-} = getConfig('HTTP-AGENT');
+} = getConfig('HTTP_AGENT');
 
 /**
  * Class representing an Producer
