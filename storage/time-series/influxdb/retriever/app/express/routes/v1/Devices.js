@@ -2,18 +2,19 @@ const {
   ConfigManager: { getConfig },
   Logger,
 } = require('@dojot/microservice-sdk');
-
+const { graphqlHTTP } = require('express-graphql');
 const HttpStatus = require('http-status-codes');
 
 const util = require('util');
+const ApplicationError = require('../../errors/ApplicationError');
+const DeviceDataServ = require('../../services/v1/DeviceDataService');
+const AcceptHeaderHelper = require('../../helpers/AcceptHeaderHelper');
 
 const logger = new Logger('influxdb-retriever:express/routes/v1/Devices');
 
 const { graphql: { graphiql } } = getConfig('RETRIEVER');
-
-const { graphqlHTTP } = require('express-graphql');
-
 const rootSchema = require('../../../graphql/Schema');
+
 
 /**
  * Routes to Devices
@@ -31,6 +32,7 @@ const rootSchema = require('../../../graphql/Schema');
 module.exports = ({
   mountPoint, queryDataUsingGraphql, queryDataByField, queryDataByMeasurement,
 }) => {
+  const deviceDataServ = new DeviceDataServ(queryDataByField, queryDataByMeasurement);
   /**
    * if there is no dateTo, add dateTo to
    * the pagination makes sense even
@@ -60,24 +62,25 @@ module.exports = ({
             logger.debug(`device-route.get: req.params=${util.inspect(req.params)}`);
             logger.debug(`device-route.get: req.query=${util.inspect(req.query)}`);
 
-
             try {
               const { deviceId } = req.params;
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const filters = { dateFrom, dateTo };
-              const pagination = { limit, page };
+              const [result, paging] = await deviceDataServ.getDeviceData(
+                req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
+              );
 
-              const {
-                result, totalItems,
-              } = await queryDataByMeasurement(req.tenant, deviceId, filters, pagination, order);
-              const paging = req.getPaging(totalItems);
-              res.status(HttpStatus.OK).json({ data: result, paging });
+              if (accept === 'csv') {
+                return res.status(HttpStatus.OK).send(DeviceDataServ.parseDeviceDataToCsv(result));
+              }
+
+              return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route.get:', e);
-              throw e;
+              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
             }
           },
         ],
@@ -104,21 +107,26 @@ module.exports = ({
 
             try {
               const { deviceId, attr } = req.params;
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
+
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const filters = { dateFrom, dateTo };
-              const pagination = { limit, page };
+              const [result, paging] = await deviceDataServ.getDeviceAttrData(
+                req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
+              );
 
-              const {
-                result, totalItems,
-              } = await queryDataByField(req.tenant, deviceId, attr, filters, pagination, order);
-              const paging = req.getPaging(totalItems);
-              res.status(HttpStatus.OK).json({ data: result, paging });
+              if (accept === 'csv') {
+                return res.status(HttpStatus.OK).send(
+                  DeviceDataServ.parseDeviceAttrDataToCsv(result),
+                );
+              }
+
+              return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route-attr.get:', e);
-              throw e;
+              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
             }
           },
         ],

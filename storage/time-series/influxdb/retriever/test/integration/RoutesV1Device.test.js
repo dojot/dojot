@@ -77,7 +77,7 @@ describe('Test Devices Routes', () => {
   });
 
 
-  test('Data from device - Test endpoint', (done) => {
+  test('Data from device in json - Test endpoint', (done) => {
     mockQueryDataByMeasurement.mockResolvedValueOnce({
       result: [
         {
@@ -122,6 +122,32 @@ describe('Test Devices Routes', () => {
       });
   });
 
+  test('Data from device in csv - Test endpoint', (done) => {
+    mockQueryDataByMeasurement.mockResolvedValueOnce({
+      result: [
+        {
+          ts: '2020-11-25T16:37:10.590Z',
+          attrs: [
+            {
+              label: 'string',
+              value: 'string',
+            },
+          ],
+        },
+      ],
+      totalItems: 1,
+    });
+    request(app)
+      .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('accept', 'text/csv')
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toStrictEqual('"ts","string"\n"2020-11-25T16:37:10.590Z","string"');
+        done();
+      });
+  });
+
   test('Data from device - Error query data', (done) => {
     mockQueryDataByMeasurement.mockRejectedValueOnce(new Error());
     request(app)
@@ -133,7 +159,19 @@ describe('Test Devices Routes', () => {
       });
   });
 
-  test('Data from attr on a device -  Test endpoint  1', (done) => {
+  test('should respond with code 406 - Data from device - Test endpoint', (done) => {
+    mockQueryDataByMeasurement.mockResolvedValueOnce();
+    request(app)
+      .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('accept', 'application/xml')
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        done();
+      });
+  });
+
+  test('Data from attr on a device in json -  Test endpoint  1', (done) => {
     mockQueryDataByField.mockResolvedValueOnce({
       result: [
         {
@@ -159,6 +197,27 @@ describe('Test Devices Routes', () => {
             next: null,
           },
         });
+        done();
+      });
+  });
+
+  test('Data from attr on a device in csv -  Test endpoint  1', (done) => {
+    mockQueryDataByField.mockResolvedValueOnce({
+      result: [
+        {
+          ts: '2020-11-25T16:37:10.590Z',
+          value: 'string',
+        },
+      ],
+      totalItems: 1,
+    });
+    request(app)
+      .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('Accept', 'Text/csv')
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toStrictEqual('"ts","value"\n"2020-11-25T16:37:10.590Z","string"');
         done();
       });
   });
@@ -198,6 +257,40 @@ describe('Test Devices Routes', () => {
         done();
       });
   });
+
+  test('Data from attr on a device in csv -  More results then limit and page 2', (done) => {
+    mockQueryDataByField.mockResolvedValueOnce({
+      result: [
+        {
+          ts: '2020-11-25T16:37:10.590Z',
+          value: 'string',
+        },
+      ],
+      totalItems: 1,
+    });
+    request(app)
+      .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('accept', 'Text/csv')
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toStrictEqual('"ts","value"\n"2020-11-25T16:37:10.590Z","string"');
+        done();
+      });
+  });
+
+  test('should respond with code 406 - Data from attr on a device - Test endpoint', (done) => {
+    mockQueryDataByMeasurement.mockResolvedValueOnce({});
+    request(app)
+      .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .set('Authorization', `Bearer ${validToken}`)
+      .set('accept', 'application/xml')
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        done();
+      });
+  });
+
 
   test('Data from attr on a device -  Test endpoint 2', (done) => {
     mockQueryDataByField.mockResolvedValueOnce({
