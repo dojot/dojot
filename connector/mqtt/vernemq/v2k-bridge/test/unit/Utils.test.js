@@ -1,23 +1,130 @@
 const utils = require('../../app/Utils');
 
+jest.mock('@dojot/microservice-sdk', () => ({
+  Logger: jest.fn(() => ({ warn: jest.fn() })),
+}));
+
+// mock Date.now()
+const DATE_NOW = 1631110777091;
+Date.now = jest.fn(() => DATE_NOW);
+
 describe('Utils', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('generateDojotDeviceDataMessage', () => {
-    it('Should correctly generate the payload', () => {
-      const topic = 'admin:deviceid/topic';
-      const payload = 'data';
-      const data = utils.generateDojotDeviceDataMessage(topic, payload);
+    it('Payload without timestamp', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = { temperature: 10 };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+      const expectedMsg = {
+        metadata: {
+          tenant: 'tenant',
+          deviceid: 'device',
+          timestamp: DATE_NOW,
+        },
+        attrs: {
+          temperature: 10,
+        },
+      };
+      expect(msg).toMatchObject(expectedMsg);
+    });
 
-      const { deviceid } = data.metadata;
-      const { tenant } = data.metadata;
-      const { attrs } = data;
+    it('Payload with Unix timestamp', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = {
+        temperature: 10,
+        timestamp: 1605093071000,
+      };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+      const expectedMsg = {
+        metadata: {
+          tenant: 'tenant',
+          deviceid: 'device',
+          timestamp: 1605093071000,
+        },
+        attrs: {
+          temperature: 10,
+        },
+      };
+      expect(msg).toMatchObject(expectedMsg);
+    });
 
-      expect(deviceid).toEqual('deviceid');
-      expect(tenant).toEqual('admin');
-      expect(attrs).toEqual(payload);
+    it('Payload with String timestamp', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = {
+        temperature: 10,
+        timestamp: '2020-05-05T05:00:00.000000Z',
+      };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+      const expectedMsg = {
+        metadata: {
+          tenant: 'tenant',
+          deviceid: 'device',
+          timestamp: 1588654800000,
+        },
+        attrs: {
+          temperature: 10,
+        },
+      };
+      expect(msg).toMatchObject(expectedMsg);
+    });
+
+    it('Payload with invalid unix timestamp', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = {
+        temperature: 10,
+        timestamp: Number.NaN,
+      };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+      const expectedMsg = {
+        metadata: {
+          tenant: 'tenant',
+          deviceid: 'device',
+          timestamp: DATE_NOW,
+        },
+        attrs: {
+          temperature: 10,
+        },
+      };
+      expect(msg).toMatchObject(expectedMsg);
+    });
+
+    it('Payload with invalid string timestamp', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = {
+        temperature: 10,
+        timestamp: 'invalid timestamp',
+      };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+      const expectedMsg = {
+        metadata: {
+          tenant: 'tenant',
+          deviceid: 'device',
+          timestamp: DATE_NOW,
+        },
+        attrs: {
+          temperature: 10,
+        },
+      };
+      expect(msg).toMatchObject(expectedMsg);
+    });
+
+    it('Payload with invalid type of timestamp', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = {
+        temperature: 10,
+        timestamp: true,
+      };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+      const expectedMsg = {
+        metadata: {
+          tenant: 'tenant',
+          deviceid: 'device',
+          timestamp: DATE_NOW,
+        },
+        attrs: {
+          temperature: 10,
+        },
+      };
+      expect(msg).toMatchObject(expectedMsg);
     });
   });
 

@@ -1,9 +1,4 @@
-jest.mock('../../app/Utils');
-jest.mock('../../app/MQTTClient.js');
-
 const mockProcess = require('jest-mock-process');
-const utils = require('../../app/Utils');
-const AgentMessenger = require('../../app/AgentMessenger');
 
 const mockExit = mockProcess.mockProcessExit();
 
@@ -86,6 +81,13 @@ jest.mock('@dojot/microservice-sdk', () => ({
     getConfig: jest.fn(() => mockConfig.ConfigManager),
   },
 }));
+
+const AgentMessenger = require('../../app/AgentMessenger');
+
+jest.mock('../../app/Utils');
+jest.mock('../../app/MQTTClient.js');
+
+const utils = require('../../app/Utils');
 
 describe('AgentMessenger', () => {
   let agentMessenger;

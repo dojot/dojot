@@ -1,3 +1,7 @@
+const { Logger } = require('@dojot/microservice-sdk');
+
+const logger = new Logger('v2k:mqtt-utils');
+
 /**
  * A module with helper functions
  * @module utils
@@ -20,13 +24,40 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
   const tenantValue = splitUsername[0];
   const deviceIdValue = splitUsername[1];
 
+  const attrs = payload;
+
+  let timestamp = Date.now();
+
+  const overwriteTimestamp = (ts) => {
+    if (!Number.isNaN(ts)) {
+      timestamp = ts;
+    } else {
+      logger.warn(`Timestamp ${payload.timestamp} is invalid. `
+        + 'It\'ll be considered the current time.');
+    }
+  };
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'timestamp')) {
+    // If it is a number, just copy it. Probably Unix time.
+    if (typeof payload.timestamp === 'number') {
+      overwriteTimestamp(payload.timestamp);
+    } else if (typeof payload.timestamp === 'string') {
+      // If it is a ISO string...
+      overwriteTimestamp(Date.parse(payload.timestamp));
+    } else {
+      logger.warn(`Times+tamp ${payload.timestamp} is invalid. `
+      + 'It\'ll be considered the current time.');
+    }
+    delete attrs.payload;
+  }
+
   return {
     metadata: {
-      deviceid: deviceIdValue,
       tenant: tenantValue,
-      timestamp: Date.now(),
+      deviceid: deviceIdValue,
+      timestamp,
     },
-    attrs: payload,
+    attrs,
   };
 };
 
