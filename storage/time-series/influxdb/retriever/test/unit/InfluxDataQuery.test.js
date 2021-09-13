@@ -10,17 +10,19 @@ const mockSdk = {
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 const mockGetQueryRows = jest.fn();
+const mockGetQueryApi = jest.fn().mockImplementation(() => ({
+  queryRows: mockGetQueryRows,
+}));
 const mockInflux = {
   InfluxDB: jest.fn().mockImplementation(() => ({
-    getQueryApi: jest.fn().mockImplementation(() => ({
-      queryRows: mockGetQueryRows,
-    })),
+    getQueryApi: mockGetQueryApi,
   })),
   flux: jest.fn((a) => a),
   fluxExpression: jest.fn((a) => a),
   fluxDateTime: jest.fn((a) => a),
   fluxInteger: jest.fn((a) => a),
   fluxString: jest.fn((a) => a),
+  fluxDuration: jest.fn((a) => a),
 };
 jest.mock('@influxdata/influxdb-client', () => mockInflux);
 
@@ -38,6 +40,8 @@ const DataQuery = require('../../app/influx/DataQuery');
 
 describe('Test Influx Data Query', () => {
   let dataQuery = null;
+
+  /* Cleaners */
   beforeAll(() => {
     dataQuery = null;
   });
@@ -53,6 +57,29 @@ describe('Test Influx Data Query', () => {
     jest.clearAllMocks();
   });
 
+  /* auxiliary functions */
+  const mockError500onGetQueryRows = () => {
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error }) => {
+        const error2 = {
+          body: JSON.stringify({ message: 'message' }),
+          statusMessage: 'statusMessage',
+          statusCode: 500,
+        };
+        error2.prototype = Error.prototype;
+        error(error2);
+      },
+    );
+  };
+  const mockThrowErrorInGetQueryApi = () => {
+    mockGetQueryApi.mockImplementationOnce(
+      () => {
+        throw new Error('Error during GetQueryApi instantiation.');
+      },
+    );
+  };
+
+  /* Test block */
   test('Instantiate class', () => {
     dataQuery = new DataQuery('url', 'token', 'defaultBucket');
   });
@@ -106,17 +133,7 @@ describe('Test Influx Data Query', () => {
 
   test('queryByField - error ', async () => {
     expect.assertions(2);
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error }) => {
-        const error2 = {
-          body: JSON.stringify({ message: 'message' }),
-          statusMessage: 'statusMessage',
-          statusCode: 500,
-        };
-        error2.prototype = Error.prototype;
-        error(error2);
-      },
-    );
+    mockError500onGetQueryRows();
 
     try {
       await dataQuery.queryByField('org', 'measurement', 'field');
@@ -293,19 +310,10 @@ describe('Test Influx Data Query', () => {
     });
   });
 
+  /* checking for handler errors */
   test('queryByMeasurement - error ', async () => {
     expect.assertions(2);
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error }) => {
-        const error2 = {
-          body: JSON.stringify({ message: 'message' }),
-          statusMessage: 'statusMessage',
-          statusCode: 500,
-        };
-        error2.prototype = Error.prototype;
-        error(error2);
-      },
-    );
+    mockError500onGetQueryRows();
 
     try {
       await dataQuery.queryByMeasurement('org', 'measurement');
@@ -330,6 +338,159 @@ describe('Test Influx Data Query', () => {
     }
   });
 
+
+  /* Testing queryUsingGraphql method
+*/
+  test('queryUsingGraphql - test with two devices', async () => {
+    const mockResInflux = [{
+      toObject: jest.fn(() => (
+        {
+          result: '_result',
+          table: 0,
+          _time: '2021-06-17T20:00:00.000Z',
+          _value: '36.2',
+          _measurement: 'RANDID1',
+          _field: 'dojot.temperature',
+        })),
+    }, {
+      toObject: jest.fn(() => (
+        {
+          result: '_result',
+          table: 0,
+          _time: '2021-06-17T20:30:00.000Z',
+          _value: '38.1',
+          _measurement: 'RANDID1',
+          _field: 'dojot.temperature',
+        })),
+    }, {
+      toObject: jest.fn(() => (
+        {
+          result: '_result',
+          table: 1,
+          _time: '2021-06-17T20:30:00.000Z',
+          _value: '-23,21',
+          _measurement: 'RANDID1',
+          _field: 'dojot.gps',
+        })),
+    }, {
+      toObject: jest.fn(() => (
+        {
+          result: '_result',
+          table: 2,
+          _time: '2021-06-17T20:30:00.000Z',
+          _value: '-20,22',
+          _measurement: 'RANDID2',
+          _field: 'dojot.gps',
+        })),
+    }];
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('l0', mockResInflux[0]);
+        next('l1', mockResInflux[1]);
+        next('l2', mockResInflux[2]);
+        next('l3', mockResInflux[3]);
+        complete();
+      },
+    );
+
+    const devices = [
+      { id: 'RANDID1', attributes: ['temperature', 'gps'] }];
+
+    const res = await dataQuery.queryUsingGraphql('org', devices, { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc');
+
+    expect(res).toStrictEqual({
+      data: [{
+        attr: 'temperature',
+        id: 'RANDID1',
+        ts: '2021-06-17T20:00:00.000Z',
+        value: '36.2',
+      }, {
+        attr: 'temperature',
+        id: 'RANDID1',
+        ts: '2021-06-17T20:30:00.000Z',
+        value: '38.1',
+      }, {
+        attr: 'gps',
+        id: 'RANDID1',
+        ts: '2021-06-17T20:30:00.000Z',
+        value: '-23,21',
+      }, {
+        attr: 'gps',
+        id: 'RANDID2',
+        ts: '2021-06-17T20:30:00.000Z',
+        value: '-20,22',
+      },
+      ],
+    });
+  });
+
+
+  /* checking for handler errors */
+  test('queryUsingGraphql - error ', async () => {
+    expect.assertions(2);
+    mockError500onGetQueryRows();
+
+    const devices = [
+      { id: 'RANDID1', attributes: ['temperature', 'gps'] },
+      { id: 'RANDID2', attributes: ['temperature'] }];
+
+    try {
+      await dataQuery.queryUsingGraphql('org', devices);
+    } catch (e) {
+      expect(e.statusCode).toBe(500);
+      expect(e.message).toBe('InfluxDB: statusMessage -> message');
+    }
+  });
+
+  test('queryUsingGraphql - error om getQueryApi ', async () => {
+    mockThrowErrorInGetQueryApi();
+    const devices = [
+      { id: 'RANDID1', attributes: ['temperature', 'gps'] },
+      { id: 'RANDID2', attributes: ['temperature'] }];
+
+    try {
+      const res = await dataQuery.queryUsingGraphql('org', devices);
+    } catch (e) {
+      expect(e.message).toBe('queryUsingGraphql: Error during GetQueryApi instantiation.');
+    }
+  });
+
+  test('should return a durantion flux value when dateTo is a absolute time(ISO 8601)', () => {
+    const expectValue = '2021-08-31T21:05:01.000Z';
+    const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0, dateTo: '2021-08-31T21:05:01.000Z' });
+    expect(returnedObject.stop).toBe(expectValue);
+  });
+
+  test('should return a time flux value, when dateTo is a relative date', () => {
+    const expectValue = '-3d';
+    const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0, dateTo: '-3d' });
+    expect(returnedObject.stop).toBe(expectValue);
+  });
+
+  test('should return a now expression, when dateTo is undefined', () => {
+    const expectValue = 'now()';
+    const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0 });
+    expect(returnedObject.stop).toBe(expectValue);
+  });
+
+  test('should return value 0, when dateFrom is undefined', () => {
+    const expectValue = 0;
+    const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0 });
+    expect(returnedObject.start).toBe(expectValue);
+  });
+
+  test('should return a query considered page as 1, when page is equals 0', () => {
+    const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 0 }, { dateFrom: 0, dateTo: '-3d' });
+    expect(returnedObject.offset).toBe(0);
+  });
+
+  test('should return a query using the maximum possible value for limit, when limit is undefined', () => {
+    const returnedObject = DataQuery.commonQueryParams({ page: 2 }, { dateFrom: 0, dateTo: '3d' });
+    expect(returnedObject.offset).toBe(256);
+  });
+
+  /* Below we check influx query creation functions.  */
+  /* commonLimitExpression */
   test('commonLimitExpression - case 1', () => {
     const {
       limit, offset,
@@ -360,5 +521,25 @@ describe('Test Influx Data Query', () => {
     } = DataQuery.commonQueryParams({ limit: 5, page: 3 }, {});
     const limitExp = DataQuery.commonLimitExpression(limit, offset);
     expect(limitExp).toBe('|> limit(n: 5 , offset: 10)');
+  });
+
+  /* commonQueryOrderExpression */
+  test('commonQueryOrderExpression - case 1', () => {
+    const descExp = DataQuery.commonQueryOrderExpression('desc');
+    expect(descExp).toBe('|> sort(columns: ["_time"], desc: true)');
+  });
+
+  test('commonQueryOrderExpression - case 2', () => {
+    const descExp = DataQuery.commonQueryOrderExpression('asc');
+    expect(descExp).toBe('');
+  });
+
+  /* createFluxFilter */
+  test('createFluxFilter - case 1', () => {
+    const devices = [
+      { id: 'RANDID1', attributes: ['temperature', 'gps'] },
+      { id: 'RANDID2', attributes: ['temperature'] }];
+    const descExp = DataQuery.createFluxFilter(devices);
+    expect(descExp).toBe('|> filter(fn: (r) => (r._measurement == RANDID1 and (r._field == dojot.temperature or r._field == dojot.gps)) or (r._measurement == RANDID2 and (r._field == dojot.temperature)))');
   });
 });
