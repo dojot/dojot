@@ -31,7 +31,7 @@ function configure(server) {
   app.use(
     (req, res, next) => {
       if (process.env.NODE_ENV === 'development') {
-        logger.debug('The application is not ready, but the request will be handled in a development environment', StateManager.isReady());
+        logger.debug('The application might be not ready, but the request will be handled in a development environment', StateManager.isReady());
         next();
       } else if (StateManager.isReady()) {
         next();

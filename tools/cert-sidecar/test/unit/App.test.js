@@ -37,6 +37,7 @@ const mockCertificatesMgmt = jest.fn().mockImplementation(() => ({
     certHasRevoked: jest.fn(),
     certsWillExpire: jest.fn(),
     retrieveCRL: jest.fn(),
+    retrieveCaBundle: jest.fn(),
     deleteAllFiles: jest.fn(),
   })),
 }));

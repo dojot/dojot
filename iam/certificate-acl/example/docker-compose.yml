@@ -1,0 +1,151 @@
+version: '3.8'
+services:
+
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:5.5.0"
+    restart: always
+    environment:
+        ZOOKEEPER_REPLICAS: "1"
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_ELECTION_PORT: 3888
+        ZOOKEEPER_SERVER_PORT: 2888
+        ZOOKEEPER_HEAP_SIZE: "2G"
+        ZOOKEEPER_INIT_LIMIT: "5"
+        ZOOKEEPER_LOG_LEVEL: "INFO"
+        ZOOKEEPER_MAX_CLIENT_CNXNS: "100"
+        ZOOKEEPER_MAX_SESSION_TIMEOUT: "40000"
+        ZOOKEEPER_MIN_SESSION_TIMEOUT: "4000"
+        ZOOKEEPER_PURGE_INTERVAL: "0"
+        ZOOKEEPER_SNAP_RETAIN_COUNT: "3"
+        ZOOKEEPER_SYNC_LIMIT: "10"
+        ZOOKEEPER_TICK_TIME: "2000"
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kafka:
+    image: confluentinc/cp-kafka:5.5.0
+    depends_on:
+      - zookeeper
+    restart: always
+    hostname: "kafka"
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_LOG_RETENTION_MINUTES: "30"
+      KAFKA_LOG_SEGMENT_BYTES: "262144000"
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "30000"
+      KAFKA_TOPICS: "dojot.x509-identity-mgmt.certificates,admin.dojot.x509-identity-mgmt.certificates"
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kafkacat-producer:
+    image: confluentinc/cp-kafkacat:latest
+    depends_on:
+      - kafka
+    restart: always
+    command: >
+      bash -c '
+        for ((; ;)) do
+          FINGERPRINT1=$$(cat /dev/urandom | tr -dc 'A-F0-9' | fold -w 64 | head -n 1)
+          FINGERPRINT2=$$(cat /dev/urandom | tr -dc 'A-F0-9' | fold -w 64 | head -n 1)
+          DEVICE1=$$(cat /dev/urandom | tr -dc 'A-F0-9' | fold -w 6 | head -n 1)
+          DEVICE2=$$(cat /dev/urandom | tr -dc 'A-F0-9' | fold -w 6 | head -n 1)
+          APP1="aplicationX",
+          echo {\
+          \"metadata\": {\"tenant\": \"admin\"},\
+          \"data\": {\
+          \"eventType\": \"ownership.create\",\
+          \"eventData\": {\
+          \"fingerprint\": \"$${FINGERPRINT1}\",\
+          \"belongsTo\": {\
+          \"device\": \"$${DEVICE1}\"\
+          }}}} |\
+          kafkacat -b kafka:9092 -P -t admin.dojot.x509-identity-mgmt.certificates
+          sleep 5
+          echo {\
+          \"metadata\": {\"tenant\": \"admin\"},\
+          \"data\": {\
+          \"eventType\": \"ownership.update\",\
+          \"eventData\": {\
+          \"fingerprint\": \"$${FINGERPRINT1}\",\
+          \"previousBelongsTo\": {\
+            \"device\": \"$${DEVICE1}\"},\
+          \"belongsTo\": {\
+          \"device\": \"$${DEVICE2}\"}\
+          }}} |\
+          kafkacat -b kafka:9092 -P -t admin.dojot.x509-identity-mgmt.certificates
+          sleep 5
+          echo {\
+          \"metadata\": {\"tenant\": \"admin\"},\
+          \"data\": {\
+          \"eventType\": \"ownership.delete\",\
+          \"eventData\": {\
+          \"fingerprint\": \"$${FINGERPRINT1}\"\
+          }}} |\
+          kafkacat -b kafka:9092 -P -t admin.dojot.x509-identity-mgmt.certificates
+          sleep 5
+          echo {\
+          \"metadata\": {},\
+          \"data\": {\
+          \"eventType\": \"ownership.create\",\
+          \"eventData\": {\
+          \"fingerprint\": \"$${FINGERPRINT2}\",\
+          \"belongsTo\": {\
+          \"application\": \"$${APP1}\"\
+          }}}} |\
+          kafkacat -b kafka:9092 -P -t dojot.x509-identity-mgmt.certificates
+          sleep 5
+          echo {\
+          \"metadata\": {},\
+          \"data\": {\
+          \"eventType\": \"ownership.delete\",\
+          \"eventData\": {\
+          \"fingerprint\": \"$${FINGERPRINT2}\"\
+          }}} |\
+          kafkacat -b kafka:9092 -P -t dojot.x509-identity-mgmt.certificates
+          sleep 5
+        done
+      '
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  acl-redis:
+    image: redis:6.2.1-alpine
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  certificate-acl:
+    build:
+      context: ./../
+      dockerfile: ./Dockerfile
+    environment:
+      CERTIFICATE_ACL_LOG_CONSOLE_LEVEL: "debug"
+    depends_on:
+      - kafka
+      - kafkacat-producer
+      - acl-redis
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'

@@ -1,0 +1,15 @@
+1) The x.509 service doesn't persist the applications' certificates, so there is
+   no event for deleting them.  Considering that an application is associated with
+   a single certificate, the ACL service must check if an entry exists for an
+   application before adding a new one and remove it. The ACL service can use
+   an auxiliary table in REDIS (DB 1) which associates the application with its
+   certificate (application -> fingerprint). So, if an entry exists in DB 1 the
+   corresponding entry in DB 0 must be removed before adding the new one.
+
+2) Analyse if worths to expire the devices' entries so that Redis works as a cache.
+
+3) This issue https://github.com/dojot/dojot/issues/2094 also happens here, so the
+   same bugfix developed for the kafka-ws service can be used. See:
+
+   https://github.com/dojot/backstage/blob/ca9ffa2a205e7c09265cd28e2458bedc7f6d3580/app/redis/Utils.js#L14
+   https://github.com/dojot/backstage/blob/ca9ffa2a205e7c09265cd28e2458bedc7f6d3580/app/redis/index.js#L100

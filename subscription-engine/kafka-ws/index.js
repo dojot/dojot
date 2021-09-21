@@ -28,7 +28,7 @@ Logger.setVerbose(config.log.verbose);
 const logger = new Logger('app');
 const stateService = 'http';
 
-logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
+logger.debug(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
 let server = null;
 

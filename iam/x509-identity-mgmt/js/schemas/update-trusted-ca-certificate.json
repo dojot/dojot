@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/update-trusted-ca-certificate.json",
+  "title": "Update Trusted CA Schema",
+  "description": "Schema for validating the input body of Route 'Update Trusted CA Certificate'.",
+  "additionalProperties": false,
+  "type": "object",
+  "default": {},
+  "required": [
+    "allowAutoRegistration"
+  ],
+  "properties": {
+    "allowAutoRegistration": {
+      "type": "boolean",
+      "title": "Allow Auto Registration",
+      "description": "Allows the CA certificate to be used for auto-registration of 'things' certificate."
+    }
+  }
+}

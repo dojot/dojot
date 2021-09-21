@@ -31,6 +31,7 @@ It was designed to be used in the context of dojot IoT Platform for allowing use
 3. [Examples](#examples)
 4. [Documentation](#documentation)
 5. [Issues and help](#issues-and-help)
+6. [License](#license)
 
 # **Overview**
 
@@ -325,7 +326,7 @@ Ticket management
 
 | Key | Purpose   | Default Value   | Valid Values | Environment variable
 ------| ----------| ----------------|--------------|------------------------
-ticket.secret|Secret used to sign single-use tickets and prevent forgery | Random value | string | KAFKA_WS_TICKET_SECRET
+ticket.secret|Secret used to sign single-use tickets and prevent forgery  (must be unique for each environment and always configured)| 0ed6004202bdd3ef04fb | string | KAFKA_WS_TICKET_SECRET
 ticket.expiration.sec| Duration time (in seconds) of the single-use ticket. | 60 | integer | KAFKA_WS_TICKET_DURATION_SECRET
 
 ## **Redis**
@@ -340,7 +341,7 @@ redis.db | Redis database | 1 | integer | KAFKA_WS_REDIS_DB
 redis.connect_timeout | Redis Connection timeout | 3600000 | integer | KAFKA_WS_REDIS_CONNECT__TIMEOUT
 redis.strategy.connect.after | Redis strategy connection timeout (ms) | 5000 | integer | KAFKA_WS_REDIS_RECONNECT_AFTER
 redis.healthcheck.ms | Specifies how often it is to check if it is possible to communicate with the redis in milliseconds. | 30000 | integer | KAFKA_WS_REDIS_HEALTHCHECK_MS
-redis.healthcheck.timeout.ms | the timeout to wait if the service can verify if it is health, if the timeout occurs the service is considered unhealthy. (ms) | 30000 | integer | KAFKA_WS_REDIS_HEALTHCHECK_TIMEOUT_MS
+redis.healthcheck.timeout.ms | the timeout to wait if the service can verify if it is health, if the timeout occurs the service is considered unhealthy. (ms) | 5000 | integer | KAFKA_WS_REDIS_HEALTHCHECK_TIMEOUT_MS
 
 ## **Kafka Consumer**
 
@@ -377,8 +378,7 @@ __NOTE THAT__ a websocket connection is closed by the server when certain condit
 
 __NOTE THAT__ it is checked whether the service (tenant) that is passed in the JSON Web Token (JWT) when requesting a *single-use ticket* can access the kafka topic, generally topics start with `tenant.*`
 
-__NOTE THAT__ if you pass a TICKET_SECRET, give preference to large random values. Also note that in a cluster environment all instances must share the same secret.
-
+__NOTE THAT__ The configurable value `ticket.secret` (`KAFKA_WS_TICKET_SECRET`) must be unique for each environment and always configured, give preference to large random values. Also note that in a cluster environment all instances must share the same secret.
 
 ## **Parser compilation**
 
@@ -423,3 +423,11 @@ Check the documentation for more information:
 
 If you found a problem or need help, leave an issue in the main
 [dojot repository](https://github.com/dojot/dojot) and we will help you!
+
+
+# **License**
+
+The Kafka-WS source code is released under Apache License 2.0.
+
+Check NOTICE and LICENSE files for more information.
+

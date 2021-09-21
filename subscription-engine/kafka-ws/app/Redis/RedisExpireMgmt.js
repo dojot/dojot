@@ -1,7 +1,7 @@
 const redis = require('redis');
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const StateManager = require('../StateManager');
-const { createRedisHealthChecker } = require('./Utils');
+const { createRedisHealthChecker, redisHandleOnError } = require('./Utils');
 
 const logger = new Logger('kafka-ws:redis-expire-mgmt');
 
@@ -62,14 +62,7 @@ class RedisExpireMgmt {
 
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
-      if (error.code === 'CONNECTION_BROKEN') {
-        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
-        StateManager.shutdown().then(() => {
-          logger.warn('The service was gracefully shutdown');
-        }).catch(() => {
-          logger.error('The service was unable to be shutdown gracefully');
-        });
-      }
+      redisHandleOnError(error, StateManager, logger);
     });
 
     this.clients.pub.on('end', () => {
@@ -117,14 +110,7 @@ class RedisExpireMgmt {
 
     this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
-      if (error.code === 'CONNECTION_BROKEN') {
-        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
-        StateManager.shutdown().then(() => {
-          logger.warn('The service was gracefully shutdown');
-        }).catch(() => {
-          logger.error('The service was unable to be shutdown gracefully');
-        });
-      }
+      redisHandleOnError(error, StateManager, logger);
     });
 
     this.clients.sub.on('warning', (error) => {

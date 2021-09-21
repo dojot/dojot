@@ -3,7 +3,7 @@ const redis = require('redis');
 
 const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
 const StateManager = require('../StateManager');
-const { createRedisHealthChecker } = require('./Utils');
+const { createRedisHealthChecker, redisHandleOnError } = require('./Utils');
 
 const logger = new Logger('kafka-ws:redis-manager');
 
@@ -61,15 +61,7 @@ class RedisManager {
      * the service is unhealthy
      */
     this.redisClient.on('error', (error) => {
-      logger.error('Redis has an error:', error);
-      if (error.code === 'CONNECTION_BROKEN') {
-        logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');
-        StateManager.shutdown().then(() => {
-          logger.warn('The service was gracefully shutdown');
-        }).catch(() => {
-          logger.error('The service was unable to be shutdown gracefully');
-        });
-      }
+      redisHandleOnError(error, StateManager, logger);
     });
     this.redisClient.on('end', () => {
       logger.info('end');
