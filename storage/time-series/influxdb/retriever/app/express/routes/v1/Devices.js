@@ -30,7 +30,7 @@ const rootSchema = require('../../../graphql/Schema');
  *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({
-  mountPoint, queryDataUsingGraphql, queryDataByField, queryDataByMeasurement,
+  localPersistence, mountPoint, queryDataUsingGraphql, queryDataByField, queryDataByMeasurement,
 }) => {
   const deviceDataServ = new DeviceDataServ(queryDataByField, queryDataByMeasurement);
   /**
@@ -65,6 +65,14 @@ module.exports = ({
             try {
               const { deviceId } = req.params;
               const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              try {
+                await localPersistence.get(req.tenant, deviceId);
+              } catch (error) {
+                logger.info(error.message);
+                throw new ApplicationError(error.message, 404);
+              }
+
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
@@ -108,6 +116,13 @@ module.exports = ({
             try {
               const { deviceId, attr } = req.params;
               const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              try {
+                await localPersistence.get(req.tenant, deviceId);
+              } catch (error) {
+                logger.info(error.message);
+                throw new ApplicationError(error.message, 404);
+              }
 
               const {
                 dateFrom, dateTo, limit, page, order,
