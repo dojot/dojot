@@ -47,6 +47,8 @@ class App {
       .certsWillExpire.bind(this.certMgmt.getCertificates());
     const boundRetrieveCRL = this.certMgmt.getCertificates()
       .retrieveCRL.bind(this.certMgmt.getCertificates());
+    const boundRetrieveCaBundle = this.certMgmt.getCertificates()
+      .retrieveCaBundle.bind(this.certMgmt.getCertificates());
 
     let errorHandleShutdown = null;
     if (configApp.shutdown) {
@@ -59,6 +61,7 @@ class App {
       boundRetrieveCRL,
       boundCertWillExpire,
       boundCertHasRevoked,
+      boundRetrieveCaBundle,
       errorHandleShutdown,
     );
   }

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/register-trusted-ca-certificate.json",
+  "title": "Register Trusted CA Schema",
+  "description": "Schema for validating the input body of Route 'Register Trusted CA Certificate'.",
+  "additionalProperties": false,
+  "type": "object",
+  "default": {},
+  "required": [
+    "caPem"
+  ],
+  "properties": {
+    "caPem": {
+      "$ref": "https://raw.githubusercontent.com/dojot/dojot/development/iam/x509-identity-mgmt/js/schemas/defs.json#/definitions/cert-pem"
+    },
+    "allowAutoRegistration": {
+      "type": "boolean",
+      "title": "Allow Auto Registration",
+      "description": "Allows the CA certificate to be used for auto-registration of 'things' in the Device Management.",
+      "default": false
+    }
+  }
+}

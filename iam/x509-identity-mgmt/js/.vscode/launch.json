@@ -1,0 +1,40 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Service",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "runtimeExecutable":"node",
+      "runtimeVersion": "12.21.0",
+      "runtimeArgs": ["--unhandled-rejections=strict"],
+      "program": "${workspaceFolder}/index.js",
+      "env": {
+        //"NODE_DEBUG": "tls,https,http,request",
+        "NODE_ENV": "development",
+        "X509IDMGMT_USER_CONFIG_FILE": "development.conf",
+      },
+      "console": "internalConsole",
+      "outputCapture": "std"
+    },
+    {
+      "name": "Debug Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "--runInBand"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "port": 9229
+    }
+  ]
+}

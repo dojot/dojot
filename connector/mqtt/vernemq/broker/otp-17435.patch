@@ -1,0 +1,118 @@
+diff -Naur otp-OTP-22.3.4.20/lib/ssl/src/ssl_manager.erl otp-OTP-22.3.4.20-patch-otp-17435/lib/ssl/src/ssl_manager.erl
+--- otp-OTP-22.3.4.20/lib/ssl/src/ssl_manager.erl	2021-05-31 11:35:46.000000000 -0300
++++ otp-OTP-22.3.4.20-patch-otp-17435/lib/ssl/src/ssl_manager.erl	2021-07-08 13:38:42.418001038 -0300
+@@ -30,6 +30,7 @@
+ 	 connection_init/3, cache_pem_file/2,
+ 	 lookup_trusted_cert/4,
+ 	 new_session_id/1, clean_cert_db/2,
++     refresh_trusted_db/1, refresh_trusted_db/2,
+ 	 register_session/2, register_session/4, invalidate_session/2,
+ 	 insert_crls/2, insert_crls/3, delete_crls/1, delete_crls/2, 
+ 	 invalidate_session/3, name/1]).
+@@ -168,6 +169,20 @@
+     ok.
+ 
+ %%--------------------------------------------------------------------
++-spec refresh_trusted_db(normal | dist) -> ok.
++%%
++%% Description: Send refresh of trusted cert db to ssl_manager process should
++%% be called by ssl-connection processes.
++%%--------------------------------------------------------------------
++refresh_trusted_db(ManagerType) ->
++    put(ssl_manager, name(ManagerType)),
++    call(refresh_trusted_db).
++
++refresh_trusted_db(ManagerType, File) ->
++    put(ssl_manager, name(ManagerType)),
++    call({refresh_trusted_db, File}).
++
++%%--------------------------------------------------------------------
+ %%
+ %% Description: Make the session available for reuse.
+ %%--------------------------------------------------------------------
+@@ -306,7 +321,13 @@
+     Id = new_id(Port, ?GEN_UNIQUE_ID_MAX_TRIES, Cache, CacheCb),
+     {reply, Id, State};
+ handle_call({{register_session, Host, Port, Session},_}, _, State0) ->
+-    State = client_register_session(Host, Port, Session, State0), 
++    State = client_register_session(Host, Port, Session, State0),
++    {reply, ok, State};
++handle_call({refresh_trusted_db, _}, _, #state{certificate_db = Db} = State) ->
++    ssl_pkix_db:refresh_trusted_certs(Db),
++    {reply, ok, State};
++handle_call({{refresh_trusted_db, File}, _}, _, #state{certificate_db = Db} = State) ->
++    ssl_pkix_db:refresh_trusted_certs(File, Db),
+     {reply, ok, State}.
+ 
+ %%--------------------------------------------------------------------
+diff -Naur otp-OTP-22.3.4.20/lib/ssl/src/ssl_pem_cache.erl otp-OTP-22.3.4.20-patch-otp-17435/lib/ssl/src/ssl_pem_cache.erl
+--- otp-OTP-22.3.4.20/lib/ssl/src/ssl_pem_cache.erl	2021-05-31 11:35:46.000000000 -0300
++++ otp-OTP-22.3.4.20-patch-otp-17435/lib/ssl/src/ssl_pem_cache.erl	2021-07-08 13:39:55.382050929 -0300
+@@ -154,7 +154,8 @@
+ handle_call({unconditionally_clear_pem_cache, _},_, 
+ 	    #state{pem_cache = PemCache} = State) ->
+     ssl_pkix_db:clear(PemCache),
+-    {reply, ok,  State}.
++    Result = ssl_manager:refresh_trusted_db(ssl_manager_type()),
++    {reply, Result,  State}.
+ 
+ %%--------------------------------------------------------------------
+ -spec  handle_cast(msg(), #state{}) -> {noreply, #state{}}.
+@@ -170,6 +171,7 @@
+ 
+ handle_cast({invalidate_pem, File}, #state{pem_cache = Db} = State) ->
+     ssl_pkix_db:remove(File, Db),
++    ssl_manager:refresh_trusted_db(ssl_manager_type(), File),
+     {noreply, State}.
+ 
+ 
+@@ -253,3 +255,11 @@
+ 	_ ->
+ 	    false
+     end.
++
++ssl_manager_type() ->
++    case get(ssl_pem_cache) of
++        ?MODULE ->
++            normal;
++        _ ->
++            dist
++    end.
+diff -Naur otp-OTP-22.3.4.20/lib/ssl/src/ssl_pkix_db.erl otp-OTP-22.3.4.20-patch-otp-17435/lib/ssl/src/ssl_pkix_db.erl
+--- otp-OTP-22.3.4.20/lib/ssl/src/ssl_pkix_db.erl	2021-05-31 11:35:46.000000000 -0300
++++ otp-OTP-22.3.4.20-patch-otp-17435/lib/ssl/src/ssl_pkix_db.erl	2021-07-08 13:40:34.562079273 -0300
+@@ -29,8 +29,9 @@
+ -include_lib("kernel/include/file.hrl").
+ -include_lib("kernel/include/logger.hrl").
+ 
+--export([create/1, create_pem_cache/1, 
+-	 add_crls/3, remove_crls/2, remove/1, add_trusted_certs/3, 
++-export([create/1, create_pem_cache/1,
++	 add_crls/3, remove_crls/2, remove/1, add_trusted_certs/3,
++     refresh_trusted_certs/1, refresh_trusted_certs/2,
+ 	 extract_trusted_certs/1,
+ 	 remove_trusted_certs/2, insert/3, remove/2, clear/1, db_size/1,
+ 	 ref_count/3, lookup_trusted_cert/4, foldl/3, select_cert_by_issuer/2,
+@@ -144,6 +145,22 @@
+ 	    new_trusted_cert_entry(File, Db)
+     end.
+ 
++refresh_trusted_certs(File, [CertsDb, {_, FileMapDb} | _]) ->
++    case lookup(File, FileMapDb) of
++        [Ref] ->
++            {ok, Content} = decode_pem_file(File),
++            remove_trusted_certs(Ref, CertsDb),
++            add_certs_from_pem(Content, Ref, CertsDb);
++        undefined ->
++            ok
++    end.
++refresh_trusted_certs([_, {_, FileMapDb} | _] = Db) ->
++    Refresh = fun({File, _}, Acc) ->
++                      refresh_trusted_certs(File, Db),
++                      Acc
++              end,
++    foldl(Refresh, refresh, FileMapDb).
++
+ extract_trusted_certs({der, DerList}) ->
+     {ok, {extracted, certs_from_der(DerList)}};
+ extract_trusted_certs(File) ->

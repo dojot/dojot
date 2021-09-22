@@ -9,6 +9,8 @@
     check_config_topic/2
 ]).
 
+%% TODO: Review the methods below
+
 check_valid_topic(Username, Topic) ->
     AttrsTopic = <<"attrs">>,
     ConfigTopic = <<"config">>,
