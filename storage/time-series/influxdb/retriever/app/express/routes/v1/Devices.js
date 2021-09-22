@@ -1,12 +1,12 @@
 const {
   ConfigManager: { getConfig },
   Logger,
+  WebUtils: { framework },
 } = require('@dojot/microservice-sdk');
 const { graphqlHTTP } = require('express-graphql');
 const HttpStatus = require('http-status-codes');
 
 const util = require('util');
-const ApplicationError = require('../../errors/ApplicationError');
 const DeviceDataServ = require('../../services/v1/DeviceDataService');
 const AcceptHeaderHelper = require('../../helpers/AcceptHeaderHelper');
 
@@ -69,8 +69,7 @@ module.exports = ({
               try {
                 await localPersistence.get(req.tenant, deviceId);
               } catch (error) {
-                logger.info(error.message);
-                throw new ApplicationError(error.message, 404);
+                throw framework.errorTemplate.NotFound(error.message);
               }
 
               const {
@@ -87,8 +86,8 @@ module.exports = ({
 
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
-              logger.error('device-route.get:', e);
-              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
+              logger.error('device-route-attr.get:', e);
+              throw e;
             }
           },
         ],
@@ -120,8 +119,7 @@ module.exports = ({
               try {
                 await localPersistence.get(req.tenant, deviceId);
               } catch (error) {
-                logger.info(error.message);
-                throw new ApplicationError(error.message, 404);
+                throw framework.errorTemplate.NotFound(error.message);
               }
 
               const {
@@ -141,7 +139,7 @@ module.exports = ({
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route-attr.get:', e);
-              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
+              throw e;
             }
           },
         ],
