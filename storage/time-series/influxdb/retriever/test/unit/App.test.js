@@ -18,11 +18,33 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils: {
+    framework: {
+      errorTemplate: jest.fn(),
+    },
+  },
+  LocalPersistenceManager: jest.fn().mockImplementation(() => ({
+    init: jest.fn(),
+  })),
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 jest.mock('../../app/express');
 jest.mock('../../app/express/routes/v1/Devices');
+
+const mockConsumer = jest.fn().mockImplementation(() => ({
+  init: jest.fn(),
+  initCallbackForNewTenantEvents: jest.fn(),
+  initCallbackForDeviceEvents: jest.fn(),
+}));
+
+const mockTenancyLoader = {
+  // eslint-disable-next-line no-unused-vars
+  load: jest.fn((localPersistence, retrieverConsumer) => {}),
+};
+
+jest.mock('../../app/kafka/RetrieverConsumer', () => mockConsumer);
+jest.mock('../../app/kafka/TenancyConsumerLoader', () => mockTenancyLoader);
 
 const mockServerRegisterShutdown = jest.fn();
 const mockServerInit = jest.fn();
