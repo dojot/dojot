@@ -9,6 +9,7 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
+
 const config = ConfigManager.getConfig('RETRIEVER');
 const logger = new Logger('influxdb-retriever:kafka/DojotConsumer');
 
@@ -74,15 +75,16 @@ class RetrieverConsumer {
 
     this.consumer = new Consumer({
       ...config.sdk,
+      'enable.async.commit': true,
       'kafka.consumer': config.consumer,
       'kafka.topic': config.topic,
     });
+
     this.localPersistence = localPersistence;
     this.inputPersister = new InputPersister(localPersistence, INPUT_PERSISTER_CONFIG);
 
     this.idCallbackTenant = null;
     this.idCallbackDeviceManager = null;
-    this.idCallbackDeviceData = null;
   }
 
   /**
@@ -100,13 +102,8 @@ class RetrieverConsumer {
     }
   }
 
-  initCallbackForNewTenantEvents() {
-    const topicSuffix = config.subscribe['topics.suffix.tenants'];
-    logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with suffix ${topicSuffix}`);
-    // TODO: better understand why this regex is unsafe and change it
-    const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
-
-    const callback = async (data) => {
+  getCallbackForNewTenantEvents() {
+    return (data, ack) => {
       const { value: payload } = data;
       const payloadObject = JSON.parse(payload.toString());
       if (payloadObject.type === 'CREATE') {
@@ -114,41 +111,58 @@ class RetrieverConsumer {
         this.inputPersister.dispatch(
           payloadObject, InputPersisterArgs.INSERT_OPERATION,
         ).then(() => {
-          this.registerCallbacksForDeviceEvents(payloadObject.tenant);
+          ack();
         }).catch((error) => {
           logger.error(`Dispatch failed. ${error.message}`);
         });
       }
     };
+  }
 
-    this.idCallbackTenant = this.consumer.registerCallback(topic, callback);
+  initCallbackForNewTenantEvents() {
+    const topicSuffix = config.subscribe['topics.suffix.tenants'];
+    logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with suffix ${topicSuffix}`);
+    // TODO: better understand why this regex is unsafe and change it
+    const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
+
+    this.idCallbackTenant = this.consumer.registerCallback(
+      topic, this.getCallbackForNewTenantEvents(),
+    );
     logger.debug('registerCallback: Registered Callback');
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  registerCallbacksForDeviceEvents(tenant) {
-    const topicSuffix = config.subscribe['topics.suffix.device.manager'];
-
-    const callback = async (data) => {
+  getCallbacksForDeviceEvents() {
+    return (data, ack) => {
       const { value: payload } = data;
       const payloadObject = JSON.parse(payload.toString());
 
       const opTypes = {
         create: InputPersisterArgs.INSERT_OPERATION,
-        delete: InputPersisterArgs.DELETE_OPERATION,
+        remove: InputPersisterArgs.DELETE_OPERATION,
       };
 
-      if (payloadObject.event === 'create' || payloadObject.event === 'delete') {
-        logger.info(`${payloadObject.event} tenant event received`);
+      if (payloadObject.event === 'create' || payloadObject.event === 'remove') {
+        logger.info(`${payloadObject.event} device event received`);
         this.inputPersister.dispatch(
-          JSON.parse(payload.toString()), opTypes[payloadObject.event],
-        ).catch((error) => {
+          payloadObject, opTypes[payloadObject.event],
+        ).then(() => {
+          ack();
+        }).catch((error) => {
           logger.error(`Dispatch failed. ${error.message}`);
         });
       }
     };
+  }
 
-    this.idCallbackTenant = this.consumer.registerCallback(`${tenant}.${topicSuffix}`, callback);
+  // eslint-disable-next-line class-methods-use-this
+  initCallbackForDeviceEvents() {
+    const topicSuffix = config.subscribe['topics.suffix.device.manager'];
+    const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
+
+    this.idCallbackDeviceManager = this.consumer.registerCallback(
+      topic,
+      this.getCallbacksForDeviceEvents(),
+    );
   }
 
   /**
@@ -191,16 +205,20 @@ class RetrieverConsumer {
      * @throws If Cannot unregister callback
      */
   unregisterCallbacks() {
-    try {
-      if (this.idCallbackTenant) {
-        this.consumer.unregisterCallback(this.idCallbackTenant);
-        this.idCallbackTenant = null;
-        logger.debug('unregisterCallbacks: Unregistered callback for tenant');
-      } else {
-        logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for tenant');
-      }
-    } catch (e) {
-      logger.error('unregisterCallbacks:', e);
+    if (this.idCallbackTenant) {
+      this.consumer.unregisterCallback(this.idCallbackTenant);
+      this.idCallbackTenant = null;
+      logger.debug('unregisterCallbacks: Unregistered callback for tenant');
+    } else {
+      logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for tenant');
+    }
+
+    if (this.idCallbackDeviceManager) {
+      this.consumer.unregisterCallback(this.idCallbackDeviceManager);
+      this.idCallbackDeviceManager = null;
+      logger.debug('unregisterCallbacks: Unregistered callback for tenant');
+    } else {
+      logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for devices');
     }
   }
 }

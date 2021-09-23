@@ -4,6 +4,8 @@ const {
   Logger,
   LocalPersistence: { LocalPersistenceManager },
 } = require('@dojot/microservice-sdk');
+
+
 const path = require('path');
 
 const camelCase = require('lodash.camelcase');
@@ -24,7 +26,6 @@ const RetrieverConsumer = require('./kafka/RetrieverConsumer');
 
 const express = require('./express');
 const devicesRoutes = require('./express/routes/v1/Devices');
-const TenancyConsumerLoader = require('./kafka/TenancyConsumerLoader');
 
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
@@ -82,7 +83,7 @@ class App {
       await this.localPersistence.init();
       await this.retrieverConsumer.init();
       this.retrieverConsumer.initCallbackForNewTenantEvents();
-      await TenancyConsumerLoader.load(this.localPersistence, this.retrieverConsumer);
+      this.retrieverConsumer.initCallbackForDeviceEvents();
 
       this.server.init(express(
         [
