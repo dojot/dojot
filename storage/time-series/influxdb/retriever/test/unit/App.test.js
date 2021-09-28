@@ -1,6 +1,10 @@
 const mockConfig = {
   lightship: { a: 'abc' },
   graphql: { graphiql: true },
+  sync: {
+    tenants: 'apigettenants',
+    devices: 'apigetdevices',
+  },
 };
 
 const mockSdk = {
@@ -38,13 +42,17 @@ const mockConsumer = jest.fn().mockImplementation(() => ({
   initCallbackForDeviceEvents: jest.fn(),
 }));
 
-const mockTenancyLoader = {
-  // eslint-disable-next-line no-unused-vars
-  load: jest.fn((localPersistence, retrieverConsumer) => {}),
-};
+const mockSyncLoader = jest.fn().mockImplementation(() => ({
+  load: jest.fn(),
+}));
+
+const mockTenantService = jest.fn().mockImplementation();
+const mockDeviceManager = jest.fn().mockImplementation();
 
 jest.mock('../../app/kafka/RetrieverConsumer', () => mockConsumer);
-jest.mock('../../app/kafka/TenancyConsumerLoader', () => mockTenancyLoader);
+jest.mock('../../app/sync/TenantService', () => mockTenantService);
+jest.mock('../../app/sync/DeviceService', () => mockDeviceManager);
+jest.mock('../../app/sync/SyncLoader', () => mockSyncLoader);
 
 const mockServerRegisterShutdown = jest.fn();
 const mockServerInit = jest.fn();

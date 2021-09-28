@@ -5,12 +5,11 @@ const {
   LocalPersistence: { LocalPersistenceManager },
 } = require('@dojot/microservice-sdk');
 
-
 const path = require('path');
 
 const camelCase = require('lodash.camelcase');
 
-const { lightship: configLightship } = getConfig('RETRIEVER');
+const { lightship: configLightship, sync } = getConfig('RETRIEVER');
 
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
@@ -26,6 +25,9 @@ const RetrieverConsumer = require('./kafka/RetrieverConsumer');
 
 const express = require('./express');
 const devicesRoutes = require('./express/routes/v1/Devices');
+const DeviceService = require('./sync/DeviceService');
+const SyncLoader = require('./sync/SyncLoader');
+const TenantService = require('./sync/TenantService');
 
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
@@ -45,6 +47,9 @@ class App {
       this.influxDB = new InfluxDB(serviceState);
       this.localPersistence = new LocalPersistenceManager(logger, true);
       this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
+      this.authService = new TenantService(sync.tenants);
+      this.deviceService = new DeviceService(sync.devices);
+      this.syncLoader = new SyncLoader(this.localPersistence, this.authService, this.deviceService);
     } catch (e) {
       logger.error('constructor:', e);
       const er = new Error(e);
@@ -84,6 +89,8 @@ class App {
       await this.retrieverConsumer.init();
       this.retrieverConsumer.initCallbackForNewTenantEvents();
       this.retrieverConsumer.initCallbackForDeviceEvents();
+
+      this.syncLoader.load();
 
       this.server.init(express(
         [
