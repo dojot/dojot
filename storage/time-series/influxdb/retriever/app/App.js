@@ -90,6 +90,7 @@ class App {
       this.retrieverConsumer.initCallbackForNewTenantEvents();
       this.retrieverConsumer.initCallbackForDeviceEvents();
 
+      // sync service
       this.syncLoader.load();
 
       this.server.init(express(
