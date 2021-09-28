@@ -68,8 +68,8 @@ const INPUT_PERSISTER_CONFIG = {
    */
 class RetrieverConsumer {
   /**
-     * Create an instance
-     */
+   * Create an instance
+   */
   constructor(localPersistence) {
     logger.debug('constructor: Instantiating a Kafka Consumer for Retrieve');
 
@@ -88,9 +88,9 @@ class RetrieverConsumer {
   }
 
   /**
-     * Initialize kafka consumer
-     * @throws If Cannot init kafka consumer
-     */
+   * Initialize kafka consumer
+   * @throws If Cannot init kafka consumer
+   */
   async init() {
     try {
       logger.info('init: Kafka starting...');
@@ -102,6 +102,11 @@ class RetrieverConsumer {
     }
   }
 
+  /**
+   * Instantiates the consumer callback for the tenancy topic
+   *
+   * @returns callback
+   */
   getCallbackForNewTenantEvents() {
     return (data, ack) => {
       const { value: payload } = data;
@@ -119,6 +124,11 @@ class RetrieverConsumer {
     };
   }
 
+  /*
+  * Initializes the consumption of the tenancy topic
+  *
+  * @public
+  */
   initCallbackForNewTenantEvents() {
     const topicSuffix = config.subscribe['topics.suffix.tenants'];
     logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with suffix ${topicSuffix}`);
@@ -131,11 +141,17 @@ class RetrieverConsumer {
     logger.debug('registerCallback: Registered Callback');
   }
 
+  /**
+   * Instantiates the consumer callback for the device manager topic
+   *
+   * @returns callback
+   */
   getCallbacksForDeviceEvents() {
     return (data, ack) => {
       const { value: payload } = data;
       const payloadObject = JSON.parse(payload.toString());
 
+      // Mapping the operations
       const opTypes = {
         create: InputPersisterArgs.INSERT_OPERATION,
         remove: InputPersisterArgs.DELETE_OPERATION,
@@ -144,6 +160,7 @@ class RetrieverConsumer {
       if (payloadObject.event === 'create' || payloadObject.event === 'remove') {
         logger.info(`${payloadObject.event} device event received`);
         this.inputPersister.dispatch(
+          // write data to database
           payloadObject, opTypes[payloadObject.event],
         ).then(() => {
           ack();
@@ -154,6 +171,11 @@ class RetrieverConsumer {
     };
   }
 
+  /*
+  * Initializes the consumption of the device manager topic
+  *
+  * @public
+  */
   // eslint-disable-next-line class-methods-use-this
   initCallbackForDeviceEvents() {
     const topicSuffix = config.subscribe['topics.suffix.device.manager'];
@@ -184,10 +206,9 @@ class RetrieverConsumer {
   }
 
   /**
-     * Finishes kafka consumer
-     *
-     *  @throws If Cannot finish
-     */
+   * Finishes kafka consumer
+   *
+   */
   async finish() {
     logger.warn('finish: Finishing Kafka...');
     try {
@@ -200,10 +221,9 @@ class RetrieverConsumer {
   }
 
   /**
-     * Unregister all callbacks
-     *
-     * @throws If Cannot unregister callback
-     */
+   * Unregister all callbacks
+   *
+   */
   unregisterCallbacks() {
     if (this.idCallbackTenant) {
       this.consumer.unregisterCallback(this.idCallbackTenant);
