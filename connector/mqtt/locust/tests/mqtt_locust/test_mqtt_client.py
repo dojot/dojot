@@ -356,10 +356,9 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
         """
         Should fire locust success on connection callback
         """
-        mock_paho.MQTT_ERR_SUCCESS = 1
         client = MQTTClient("123", "987", False, False)
         client.subscribe = MagicMock()
-        client.locust_on_connect(client.mqttc, {}, {}, 1)
+        client.locust_on_connect(client.mqttc, {}, {}, mock_paho.CONNACK_ACCEPTED)
         client.subscribe.assert_called_once()
         mock_utils.fire_locust_success.assert_called_once()
 
@@ -367,9 +366,8 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
         """
         Should fire locust failure on connection callback
         """
-        mock_paho.MQTT_ERR_SUCCESS = 1
         client = MQTTClient("123", "987", False, False)
-        client.locust_on_connect(client.mqttc, {}, {}, 101010)
+        client.locust_on_connect(client.mqttc, {}, {}, mock_paho.CONNACK_REFUSED_NOT_AUTHORIZED)
         mock_utils.conack_error_message.assert_called_once()
         mock_utils.fire_locust_failure.assert_called_once()
 

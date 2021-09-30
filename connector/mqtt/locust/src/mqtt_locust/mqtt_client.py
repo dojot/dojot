@@ -323,7 +323,7 @@ class MQTTClient:
         """
         Connection callback function.
         """
-        if result_code == mqtt.MQTT_ERR_SUCCESS:
+        if result_code == mqtt.CONNACK_ACCEPTED:
             self.subscribe()
             self.is_connected = True
             Utils.fire_locust_success(

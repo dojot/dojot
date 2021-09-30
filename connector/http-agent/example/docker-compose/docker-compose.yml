@@ -1,0 +1,491 @@
+version: '3.8'
+services:
+  mongodb:
+    image: dojot/mongo:3.2
+    restart: always
+    user: 'mongodb'
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+    volumes:
+      - mongodb-volume:/data/db
+      - mongodb-cfg-volume:/data/configdb
+
+  data-broker:
+    image: dojot/data-broker:v0.7.0-rc.1
+    restart: always
+    depends_on:
+      - kafka
+      - data-broker-redis
+      - auth
+    environment:
+      DOJOT_MANAGEMENT_USER: 'data-broker'
+      KAFKA_GROUP_ID: 'data-broker-group'
+      SERVICE_PORT: 80
+      DATA_BROKER_URL: 'http://data-broker:80'
+      LOG_LEVEL: 'info'
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_REPLICATION_FACTOR: 1
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  data-broker-redis:
+    image: dojot/redis:5.0.5-alpine3.10
+    restart: always
+    volumes:
+      - data-broker-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  device-manager:
+    image: dojot/device-manager:v0.7.0-rc.1
+    restart: always
+    environment:
+      # TODO: Fill these env variables with suitable values
+      DEV_MNGR_CRYPTO_PASS: kamehameHA
+      DEV_MNGR_CRYPTO_IV: 1234567890123456
+      DEV_MNGR_CRYPTO_SALT: shuriken
+      DBHOST: postgres
+      DBUSER: devm
+      DBPASS: devm
+      LOG_LEVEL: INFO
+    depends_on:
+      kafka:
+        condition: service_started
+      data-broker:
+        condition: service_started
+      device-manager-redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  device-manager-redis:
+    image: dojot/redis:5.0.5-alpine3.10
+    restart: always
+    volumes:
+      - device-manager-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  postgres:
+    image: dojot/postgres:9.5.21-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    volumes:
+      - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:Z
+      - postgres-volume:/var/lib/postgresql/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  # Prepare database, Bootstrap the database
+  kong-migrations:
+    image: dojot/kong:v0.7.0-rc.1
+    command: kong migrations bootstrap
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: 'kong'
+      KONG_PG_DATABASE: kong
+      KONG_LOG_LEVEL: info
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  # Run any new migrations and Finish running any pending migrations after 'up'.
+  kong-migrations-up:
+    image: dojot/kong:v0.7.0-rc.1
+    command: kong migrations up && kong migrations finish
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: 'kong'
+      KONG_PG_DATABASE: kong
+      KONG_LOG_LEVEL: info
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  apigw:
+    image: dojot/kong:v0.7.0-rc.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kong-migrations:
+        condition: service_started
+      kong-migrations-up:
+        condition: service_started
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_DATABASE: kong
+      KONG_PG_PASSWORD: kong
+      KONG_LOG_LEVEL: info
+      # To enable HTTPs external, it is necessary to configure public certificates
+      # issued by a public CA, such as lets encrypt in KONG_SSL_CERT.
+      # KONG_SSL_CERT_KEY: /certs/example-external.key
+      # KONG_SSL_CERT: /certs/example-external.crt
+      # To enable HTTPs internal with mutual authentication, it is necessary to configure public certificates
+      # issued by a EJBCA internal from dojot in KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE.
+      # KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE_KEY: /certs/example-internal.key
+      # KONG_NGINX_PROXY_PROXY_SSL_CERTIFICATE: /certs/example-internal.crt
+      # Root cerficate from internal CA
+      # KONG_NGINX_PROXY_PROXY_SSL_TRUSTED_CERTIFICATE: /certs/root-ca-internal.crt
+      # KONG_NGINX_PROXY_PROXY_SSL_VERIFY: "on"
+      # KONG_NGINX_PROXY_PROXY_SSL_VERIFY_DEPTH: "2"
+    ports:
+      - '8000:8000/tcp'
+      # Proxy listen to HTTPS traffic (8443). services and routes must be configured to use the https protocol
+      # Each service must have its certificate with Subject Alternative Name generated by dojot's EJBCA.
+      #- "8443:8443/tcp"
+    healthcheck:
+      test: ['CMD', 'kong', 'health']
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    # Exposes certificates
+    #volumes:
+    #  - ./kong/certificates/:/certs/:Z
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kong-config:
+    image: dojot/appropriate-curl
+    entrypoint: /opt/kong.config.sh
+    restart: on-failure
+    depends_on:
+      - apigw
+    volumes:
+      - ./kong/kong.config.sh:/opt/kong.config.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  auth:
+    image: dojot/auth:v0.7.0-rc.1
+    restart: always
+    depends_on:
+      - apigw
+      - postgres
+      - auth-redis
+    environment:
+      AUTH_DB_HOST: 'postgres'
+      AUTH_DB_USER: 'auth'
+      AUTH_DB_PWD: 'auth'
+      AUTH_KONG_URL: 'http://apigw:8001'
+      AUTH_CACHE_HOST: 'auth-redis'
+      # This is used to select the type of cache to be used.
+      # Allowed values are "redis" or "nocache"
+      AUTH_CACHE_NAME: 'redis'
+      DOJOT_MANAGEMENT_USER: 'auth'
+      KAFKA_GROUP_ID: 'auth-group'
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  auth-redis:
+    image: dojot/redis:5.0.5-alpine3.10
+    restart: always
+    volumes:
+      - auth-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:5.5.0'
+    restart: always
+    environment:
+      ZOOKEEPER_REPLICAS: '1'
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_ELECTION_PORT: 3888
+      ZOOKEEPER_SERVER_PORT: 2888
+      ZOOKEEPER_HEAP_SIZE: '2G'
+      ZOOKEEPER_INIT_LIMIT: '5'
+      ZOOKEEPER_LOG_LEVEL: 'INFO'
+      ZOOKEEPER_MAX_CLIENT_CNXNS: '100'
+      ZOOKEEPER_MAX_SESSION_TIMEOUT: '40000'
+      ZOOKEEPER_MIN_SESSION_TIMEOUT: '4000'
+      ZOOKEEPER_PURGE_INTERVAL: '0'
+      ZOOKEEPER_SNAP_RETAIN_COUNT: '3'
+      ZOOKEEPER_SYNC_LIMIT: '10'
+      ZOOKEEPER_TICK_TIME: '2000'
+    volumes:
+      - zookeeper-volume:/var/lib/zookeeper/data
+      - zookeeper-log-volume:/var/lib/zookeeper/log
+      - zookeeper-secrets-volume:/etc/zookeeper/secrets
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kafka:
+    image: confluentinc/cp-kafka:5.5.0
+    depends_on:
+      - zookeeper
+    restart: always
+    hostname: 'kafka'
+    environment:
+      KAFKA_BROKER_ID: '1'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: '1'
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: '1'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: '0'
+      KAFKA_LOG_RETENTION_MINUTES: '30'
+      KAFKA_LOG_SEGMENT_BYTES: '262144000'
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: '30000'
+    volumes:
+      - kafka-volume:/var/lib/kafka/data
+      - kafka-secrets-volume:/etc/kafka/secrets
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  x509-identity-mgmt:
+    image: dojot/x509-identity-mgmt:v0.7.0-rc.1
+    depends_on:
+      - x509-ejbca
+      - postgres
+      - mongodb
+      - kafka
+    restart: always
+    environment:
+      NODE_ENV: production
+      X509IDMGMT_CERTIFICATE_BELONGSTO_APPLICATION: '["iotagent-mqtt", "v2k-bridge", "k2v-bridge", "http-agent"]'
+      X509IDMGMT_MONGO_CONN_URI: 'mongodb://mongodb:27017/x509-identity-mgmt'
+      X509IDMGMT_EJBCA_HEALTHCHECK_URL: 'http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth'
+      X509IDMGMT_EJBCA_WSDL: 'https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl'
+      # X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: 'true'
+      X509IDMGMT_EJBCA_FORCECRLRENEW: 'true'
+      # ROARR_LOG: "true" # healthcheck is using 'Roarr' to implement logging.
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '-', 'http://localhost:9000/health']
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 2m
+    volumes:
+      - 'ejbca-client-tls-volume:/opt/tls'
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  x509-ejbca: # this service cannot be called 'ejbca'
+    image: dojot/ejbca:v0.7.0-rc.1
+    depends_on:
+      - postgres
+    restart: always
+    hostname:
+      'x509-ejbca' # The 'hostname' must have the same name as the 'service'
+      # and cannot be called 'ejbca' so as not to conflict with
+      # the ejbca's internal End-Entity (hidden)
+    domainname:
+      '' # the 'domainname' must remain empty unless the
+      # service name contains periods (such as an FQDN)
+    environment:
+      DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/ejbca?characterEncoding=UTF-8
+      DATABASE_USER: ejbca
+      DATABASE_PASSWORD: ejbca
+      EJBCA_EXTERNAL_ACCESS: 'true' # to make the Wildfly server visible on the x509-identity-mgmt
+      EJBCA_SERVER_CERT_REGEN: 'true' # Used to force the generation of a new certificate for the server
+      # EJBCA_LOCK_FILE_TIMEOUT: "0" # Used to break the '.lock' file
+      # EJBCA_ADMIN_USER: "true" # Access to the EJBCA web interface is useful for debugging purposes
+      EJBCA_CRL_EXPIRE_PERIOD_DEVICES_CA: '1m'
+      EJBCA_CRL_ISSUE_INTERVAL_DEVICES_CA: '1m'
+      EJBCA_CRL_OVERLAP_TIME_DEVICES_CA: '1m'
+      EJBCA_DELTA_CRL_PERIOD_DEVICES_CA: '1m'
+      EJBCA_CRL_EXPIRE_PERIOD_INTERNAL_CA: '1m'
+      EJBCA_CRL_ISSUE_INTERVAL_INTERNAL_CA: '1m'
+      EJBCA_CRL_OVERLAP_TIME_INTERNAL_CA: '1m'
+      EJBCA_DELTA_CRL_PERIOD_INTERNAL_CA: '1m'
+      EJBCA_CRL_UPDATER_SERVICE_INTERVAL_VALUE: 1
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          'http://localhost:8080/ejbca/publicweb/healthcheck/ejbcahealth',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 2
+      start_period: 2m
+    volumes:
+      - 'ejbca-volume:/mnt/persistent'
+      - 'ejbca-client-tls-volume:/opt/tls'
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    depends_on:
+      - kafka
+    restart: always
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+      JVM_OPTS: '-Xms32M -Xmx64M'
+      SERVER_SERVLET_CONTEXTPATH: '/'
+    ports:
+      - '9090:9000'
+
+  certificate-acl:
+    image: dojot/certificate-acl:v0.7.0-rc.1
+    depends_on:
+      - acl-redis
+      - kafka
+      - x509-identity-mgmt
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  acl-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - acl-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  http-agent-cert-sidecar:
+    image: dojot/cert-sidecar:v0.7.0-rc.1
+    depends_on:
+      - x509-identity-mgmt
+    environment:
+      CERT_SC_APP_SIDECAR_TO: 'http-agent'
+      CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "localhost"]'
+      HOSTNAME: http-agent
+      CERT_SC_CERTS_FILES_BASEPATH: /certs
+      CERT_SC_CERTS_FILES_CA: ca.crt
+      CERT_SC_CERTS_FILES_CERT: http-agent.crt
+      CERT_SC_CERTS_FILES_KEY: http-agent.key
+      CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CRON_CRL_TIME: '0 */1 * * * *'
+    volumes:
+      - http-agent-cert-side-volume:/certs
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  http-agent:
+    build:
+      context: ./../../
+      dockerfile: ./Dockerfile
+    depends_on:
+      - kafka
+      - data-broker
+      - auth
+      - http-agent-cert-sidecar
+      - device-manager
+      - certificate-acl
+    ports:
+      - 8080:3000
+      - 8081:3001
+    restart: always
+    environment:
+      HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
+      HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
+      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
+      HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
+      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
+    volumes:
+      - http-agent-cert-side-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+volumes:
+  ejbca-volume:
+  ejbca-client-tls-volume:
+  postgres-volume:
+  mongodb-volume:
+  mongodb-cfg-volume:
+  zookeeper-volume:
+  zookeeper-log-volume:
+  zookeeper-secrets-volume:
+  kafka-volume:
+  kafka-secrets-volume:
+  auth-redis-volume:
+  data-broker-redis-volume:
+  device-manager-redis-volume:
+  http-agent-cert-side-volume:
+  acl-redis-volume:
