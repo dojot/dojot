@@ -334,12 +334,12 @@ class MQTTClient:
             )
             self.start_time = Utils.seconds_to_milliseconds(time.time())
         else:
-            error = Utils.error_message(result_code)
+            error = Utils.conack_error_message(result_code)
             Utils.fire_locust_failure(
                 request_type=REQUEST_TYPE,
                 name=MESSAGE_TYPE_CONNECT,
                 response_time=0,
-                exception=DisconnectError(error)
+                exception=ConnectError(error)
             )
 
     def locust_on_disconnect(self, _client: mqtt.Client, _userdata, result_code: int) -> None:

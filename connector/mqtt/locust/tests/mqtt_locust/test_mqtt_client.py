@@ -370,7 +370,7 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
         mock_paho.MQTT_ERR_SUCCESS = 1
         client = MQTTClient("123", "987", False, False)
         client.locust_on_connect(client.mqttc, {}, {}, 101010)
-        mock_utils.error_message.assert_called_once()
+        mock_utils.conack_error_message.assert_called_once()
         mock_utils.fire_locust_failure.assert_called_once()
 
 
