@@ -2,8 +2,11 @@ const {
   ServiceStateManager,
   ConfigManager: { getConfig, transformObjectKeys },
   Logger,
-  LocalPersistence: { LocalPersistenceManager },
+  LocalPersistence: {
+    LocalPersistenceManager,
+  },
 } = require('@dojot/microservice-sdk');
+
 
 const path = require('path');
 
@@ -85,14 +88,14 @@ class App {
 
       this.server.registerShutdown();
 
+      // Initializes Sync Services
       await this.localPersistence.init();
       await this.retrieverConsumer.init();
       this.retrieverConsumer.initCallbackForNewTenantEvents();
       this.retrieverConsumer.initCallbackForDeviceEvents();
+      this.syncLoader.init();
 
-      // sync service
-      this.syncLoader.load();
-
+      // Initializes API
       this.server.init(express(
         [
           devicesRoutes({

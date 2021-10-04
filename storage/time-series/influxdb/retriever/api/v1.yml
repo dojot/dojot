@@ -57,6 +57,17 @@ paths:
                 properties:
                   error:
                     type: string
+
+        "404":
+          description: Not found device or tenant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
         "406":
           description: Not Acceptable
           content:
@@ -117,6 +128,16 @@ paths:
                 type: object
                 properties:
                   message:
+                    type: string
+
+        "404":
+          description: Not found device or tenant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
                     type: string
 
         "406":

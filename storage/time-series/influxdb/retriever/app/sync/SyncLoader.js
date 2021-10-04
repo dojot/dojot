@@ -1,14 +1,19 @@
 /* eslint-disable no-await-in-loop */
-
+const cron = require('node-cron');
 const util = require('util');
 const { pipeline, Writable } = require('stream');
+const {
+  ConfigManager: { getConfig },
+  LocalPersistence: { InputPersister, InputPersisterArgs },
+} = require('@dojot/microservice-sdk');
+
+const { sync } = getConfig('RETRIEVER');
 
 const {
   Logger,
-  localPersistence: {
-    InputPersister, InputPersisterArgs,
-  },
+
 } = require('@dojot/microservice-sdk');
+
 
 // Promissify functions.
 const pipelineAsync = util.promisify(pipeline);
@@ -78,6 +83,22 @@ class SyncLoader {
     this.tenantService = TenantService;
     this.deviceService = deviceService;
     this.inputPersister = new InputPersister(localPersistence, INPUT_CONFIG);
+  }
+
+  /**
+   * Runs first synchronization and schedules data synchronization with other services
+   */
+  init() {
+    try {
+      this.load();
+      logger.info('Data sync scheduled');
+      cron.schedule(sync['cron.expression'], () => {
+        logger.debug('Start data synchronization with other services');
+        this.load();
+      });
+    } catch (error) {
+      logger.error(error);
+    }
   }
 
   /**

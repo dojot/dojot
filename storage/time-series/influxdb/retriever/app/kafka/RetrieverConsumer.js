@@ -76,7 +76,10 @@ class RetrieverConsumer {
     this.consumer = new Consumer({
       ...config.sdk,
       'enable.async.commit': true,
-      'kafka.consumer': config.consumer,
+      'kafka.consumer': {
+        ...config.consumer,
+        'group.id': config.consumer['group.id'] + process.env.INSTANCE_ID,
+      },
       'kafka.topic': config.topic,
     });
 

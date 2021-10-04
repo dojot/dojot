@@ -69,7 +69,7 @@ module.exports = ({
               try {
                 await localPersistence.get(req.tenant, deviceId);
               } catch (error) {
-                throw framework.errorTemplate.NotFound(error.message);
+                throw framework.errorTemplate.NotFound(`Not found ${req.tenant}/${deviceId}`);
               }
 
               const {
@@ -119,7 +119,7 @@ module.exports = ({
               try {
                 await localPersistence.get(req.tenant, deviceId);
               } catch (error) {
-                throw framework.errorTemplate.NotFound(error.message);
+                throw framework.errorTemplate.NotFound(`Not found ${req.tenant}/${deviceId}`);
               }
 
               const {
