@@ -1,8 +1,6 @@
 const { default: axios } = require('axios');
 const {
-  WebUtils: {
-    createTokenGen,
-  },
+  WebUtils: { createTokenGen },
 } = require('@dojot/microservice-sdk');
 
 
