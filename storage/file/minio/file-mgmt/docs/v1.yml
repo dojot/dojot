@@ -1,0 +1,20 @@
+---
+openapi: 3.0.0
+info:
+  description: ""
+  version: 0.0.1 #Version from package.json
+  title: ""
+tags:
+  - name: files
+    description: Device data
+paths:
+  "/api/v1/files":
+    get:
+      tags:
+        - files
+      responses:
+        "201":
+          description: "Uploaded File"
+externalDocs:
+  description: Find out more about Dojot
+  url: https://dojotdocs.readthedocs.io/

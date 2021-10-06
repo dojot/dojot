@@ -1,0 +1,20 @@
+{
+    "lightship": {
+        "detect.kubernetes": false,
+        "port": 7001
+    },
+    "log": {
+        "verbose": false,
+        "console.level": "debug",
+        "file": false,
+        "file.level": "info",
+        "file.filename": "influxdb-retriever--logs-%DATE%.log"
+    },
+    "server": {
+        "host": "0.0.0.0",
+        "port": 7000
+    },
+    "express": {
+        "trustproxy": true
+    }
+}

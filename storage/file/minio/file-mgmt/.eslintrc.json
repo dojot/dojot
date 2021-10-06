@@ -1,0 +1,14 @@
+{
+    "env": {
+        "es2021": true,
+        "jest": true
+    },
+    "extends": [
+        "airbnb-base"
+    ],
+    "parser": "babel-eslint",
+    "plugins": [
+    ],
+    "settings": {
+    }
+}
