@@ -135,7 +135,6 @@ class RetrieverConsumer {
   initCallbackForNewTenantEvents() {
     const topicSuffix = config.subscribe['topics.suffix.tenants'];
     logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with suffix ${topicSuffix}`);
-    // TODO: better understand why this regex is unsafe and change it
     const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
 
     this.idCallbackTenant = this.consumer.registerCallback(

@@ -5,6 +5,9 @@ const mockConfig = {
     'topics.suffix.tenants': 'tenancy.topic',
     'topics.suffix.device.manager': 'device.topic',
   },
+  consumer: {
+    'group.id': '',
+  },
 };
 
 const mockSdk = {
@@ -29,18 +32,18 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  LocalPersistence: {
+    InputPersister: jest.fn().mockImplementation(() => ({
+      dispatch: jest.fn(() => Promise.resolve()),
+    })),
+    InputPersisterArgs: {
+      INSERT_OPERATION: 'put',
+    },
+  },
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
-jest.mock('../../app/lib/localPersistence/index', () => ({
-  InputPersister: jest.fn().mockImplementation(() => ({
-    dispatch: jest.fn(() => Promise.resolve()),
-  })),
-  InputPersisterArgs: {
-    INSERT_OPERATION: 'put',
-  },
-}));
 
 const RetrieverConsumer = require('../../app/kafka/RetrieverConsumer');
 
@@ -65,7 +68,9 @@ describe('RetrieverConsumer', () => {
   it('Should throw an error when an error happened ', async () => {
     let error;
 
-    retrieverConsumer.consumer.init = jest.fn(() => { throw new Error('error'); });
+    retrieverConsumer.consumer.init = jest.fn(() => {
+      throw new Error('error');
+    });
 
     try {
       await retrieverConsumer.init();
@@ -78,7 +83,7 @@ describe('RetrieverConsumer', () => {
 
   it('Should init the consumer of the tenancy topic', async () => {
     let error;
-    retrieverConsumer.getCallbackForNewTenantEvents = jest.fn(() => () => {});
+    retrieverConsumer.getCallbackForNewTenantEvents = jest.fn(() => () => jest.fn());
 
     try {
       await retrieverConsumer.initCallbackForNewTenantEvents();
@@ -96,7 +101,7 @@ describe('RetrieverConsumer', () => {
     const data = {
       value: '{"type": "CREATE"}',
     };
-    const ack = () => {};
+    const ack = jest.fn();
     expect.assertions(1);
     try {
       const callback = retrieverConsumer.getCallbackForNewTenantEvents();
@@ -110,7 +115,7 @@ describe('RetrieverConsumer', () => {
 
   it('Should init the consumer of the devices topic', async () => {
     let error;
-    retrieverConsumer.getCallbacksForDeviceEvents = jest.fn(() => () => {});
+    retrieverConsumer.getCallbacksForDeviceEvents = jest.fn(() => jest.fn());
     try {
       await retrieverConsumer.initCallbackForDeviceEvents('tenant');
     } catch (e) {
@@ -127,7 +132,7 @@ describe('RetrieverConsumer', () => {
     const data = {
       value: '{"event": "create"}',
     };
-    const ack = () => {};
+    const ack = () => jest.fn();
     expect.assertions(1);
     try {
       const callback = retrieverConsumer.getCallbacksForDeviceEvents();
@@ -182,7 +187,9 @@ describe('RetrieverConsumer', () => {
   it('Should handle the error, when an error happened', async () => {
     let error;
 
-    retrieverConsumer.consumer.unregisterCallback = jest.fn(() => { throw new Error('error'); });
+    retrieverConsumer.consumer.unregisterCallback = jest.fn(() => {
+      throw new Error('error');
+    });
     retrieverConsumer.idCallbackTenant = 1;
     retrieverConsumer.idCallbackDeviceManager = 1;
 

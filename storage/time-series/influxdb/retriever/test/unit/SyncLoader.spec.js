@@ -7,6 +7,23 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  ConfigManager: {
+    getConfig: jest.fn((name) => {
+      const sync = {};
+      sync['cron.expression'] = '* */12 * * *';
+      sync.name = name;
+      return sync;
+    }),
+  },
+  LocalPersistence: {
+    InputPersister: jest.fn().mockImplementation(() => ({
+      dispatch: jest.fn(() => Promise.resolve()),
+    })),
+    InputPersisterArgs: {
+      INSERT_OPERATION: 'put',
+    },
+  },
+
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
@@ -89,11 +106,26 @@ describe('SyncLoader', () => {
 
   it('Should fetch devices using data from database, when the API consumption failed', async () => {
     let error;
-    loader.loadTenants = jest.fn(() => { throw new Error(''); });
+    loader.loadTenants = jest.fn(() => {
+      throw new Error('');
+    });
     loader.loadDevices = jest.fn();
 
     try {
       await loader.load();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+  it('Should  ', async () => {
+    let error;
+    loader.load = jest.fn();
+
+    try {
+      await loader.init();
     } catch (e) {
       error = e;
     }
