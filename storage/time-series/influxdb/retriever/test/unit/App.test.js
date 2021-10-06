@@ -27,9 +27,11 @@ const mockSdk = {
       errorTemplate: jest.fn(),
     },
   },
-  LocalPersistenceManager: jest.fn().mockImplementation(() => ({
-    init: jest.fn(),
-  })),
+  LocalPersistence: {
+    LocalPersistenceManager: jest.fn().mockImplementation(() => ({
+      init: jest.fn(),
+    })),
+  },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
@@ -43,7 +45,7 @@ const mockConsumer = jest.fn().mockImplementation(() => ({
 }));
 
 const mockSyncLoader = jest.fn().mockImplementation(() => ({
-  load: jest.fn(),
+  init: jest.fn(),
 }));
 
 const mockTenantService = jest.fn().mockImplementation();

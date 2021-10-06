@@ -11,7 +11,9 @@ const {
 const getAcceptableType = (req) => {
   const allowedTypes = ['json', 'csv'];
   const accept = req.accepts(allowedTypes);
-  if (!accept) throw framework.errorTemplate.NotAcceptable('Not Acceptable', 'Not Acceptable');
+  if (!accept) {
+    throw framework.errorTemplate.NotAcceptable('Not Acceptable', 'Not Acceptable');
+  }
   return accept;
 };
 
