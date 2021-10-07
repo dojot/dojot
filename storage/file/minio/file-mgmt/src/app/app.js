@@ -9,18 +9,19 @@ module.exports = class App {
    * @param {Server} server server
    * @param {Logger} server logger
    */
-  constructor(server, kafkaConsumer, logger, openApiPath, config) {
+  constructor(server, kafkaConsumer, services, config, logger, openApiPath) {
     this.server = server;
     this.logger = logger;
     this.openApiPath = openApiPath;
     this.config = config;
     this.kafkaConsumer = kafkaConsumer;
+    this.services = services;
   }
 
   async init() {
     try {
       this.kafkaConsumer.init(
-        topics(this.config),
+        topics(this.config, this.services, this.logger),
       );
 
       this.server.init(ExpressAdapter.adapt(

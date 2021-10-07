@@ -1,15 +1,24 @@
 const KafkaPayloadUtil = require('../../../utils/Kafka-payload-util');
 
 class KafkaController {
-  constructor(tenantCreationService) {
-    this.tenantCreationService = tenantCreationService;
+  constructor(tenantService, logger) {
+    this.tenantService = tenantService;
+    this.logger = logger;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  createTenant = (payload, ack) => {
-    const data = KafkaPayloadUtil.getValue(payload);
-    console.log(data);
-    ack();
+  handle = async (payload, ack) => {
+    try {
+      const data = KafkaPayloadUtil.getValue(payload);
+      const operation = {
+        CREATE: this.tenantService.create,
+      };
+
+      this.logger.info(`Creating bucket for ${data.tenant} tenant`);
+      await operation[data.type](data.tenant);
+      ack();
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 }
 

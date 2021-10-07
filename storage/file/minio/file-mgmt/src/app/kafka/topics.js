@@ -1,12 +1,12 @@
 const KafkaController = require('./controllers/kafka-controller');
 
-const topics = (config) => {
-  const kafkaController = new KafkaController(null);
+const topics = (config, services, logger) => {
+  const kafkaController = new KafkaController(services.tenantService, logger);
 
   return [
     {
       topicSuffix: config.subscribe['topics.suffix.tenants'],
-      handler: kafkaController.createTenant,
+      handler: kafkaController.handle,
     },
   ];
 };
