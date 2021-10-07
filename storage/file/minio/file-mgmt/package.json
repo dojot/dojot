@@ -4,7 +4,9 @@
   "description": "The file-mgmt is responsible for managing MinIO resources on the dojot platform",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/index.js",
+    "start": "node src/index.js",
+    "dev": "node --inspect=0.0.0.0 src/index.js",
+    "local": "node src/index.js",
     "test": "jest --no-cache"
   },
   "repository": {
