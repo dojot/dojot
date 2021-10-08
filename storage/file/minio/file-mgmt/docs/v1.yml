@@ -9,7 +9,7 @@ tags:
     description: Device data
 paths:
   "/api/v1/files":
-    get:
+    post:
       tags:
         - files
       responses:

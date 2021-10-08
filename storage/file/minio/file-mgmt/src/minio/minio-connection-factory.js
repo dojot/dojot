@@ -12,6 +12,8 @@ module.exports = (configMinio) => {
 
   minioClient.makeBucket = promisify(minioClient.makeBucket);
   minioClient.removeBucket = promisify(minioClient.removeBucket);
+  minioClient.putObject = promisify(minioClient.putObject);
+  minioClient.bucketExists = promisify(minioClient.bucketExists);
 
   return minioClient;
 };

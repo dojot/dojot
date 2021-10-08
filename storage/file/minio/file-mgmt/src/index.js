@@ -9,8 +9,10 @@ const KafkaConsumer = require('./app/kafka-consumer');
 const createMinIOConnection = require('./minio/minio-connection-factory');
 const MinIoRepository = require('./minio/minio-repository');
 const TenantService = require('./domain/tenant-service');
+const UploadFileService = require('./domain/upload-file-service');
 
 // Instance external dependecies
+Logger.setLevel('console', 'debug');
 const logger = new Logger('file-mgmt:Server');
 ConfigManager.loadSettings('FILE-MGMT', 'default.conf');
 const config = ConfigManager.getConfig('FILE-MGMT');
@@ -32,9 +34,11 @@ const minioConnection = createMinIOConnection(config.minio);
 const minioRepository = new MinIoRepository(minioConnection, config.minio);
 // Services
 const tenantService = new TenantService(minioRepository);
+const uploadFileService = new UploadFileService(minioRepository);
 
 const services = {
   tenantService,
+  uploadFileService,
 };
 
 const app = new App(httpServer, consumerKafka, services, config, logger, openApiPath);

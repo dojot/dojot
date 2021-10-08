@@ -30,7 +30,9 @@
   "homepage": "https://github.com/dojot",
   "dependencies": {
     "@dojot/microservice-sdk": "^0.1.15",
+    "@types/multer": "^1.4.7",
     "babel-eslint": "^10.1.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-openapi-validator": "^4.13.1",
     "http-errors": "^1.8.0",
@@ -39,6 +41,7 @@
     "jwt-decode": "^3.1.2",
     "lodash.camelcase": "^4.3.0",
     "minio": "^7.0.19",
+    "multer": "^1.4.3",
     "s3": "^4.4.0",
     "supertest": "^6.1.6",
     "swagger-ui-express": "^4.1.6"
