@@ -18,7 +18,7 @@ const {
 // Promissify functions.
 const pipelineAsync = util.promisify(pipeline);
 
-const logger = new Logger('influxdb-retriever:kafka/DojotConsumer');
+const logger = new Logger('influxdb-retriever:sync');
 
 // Config InputPersister
 const INPUT_CONFIG = {
@@ -78,24 +78,45 @@ class SyncLoader {
    * @param {*} tenantService the tenant service object
    * @param {*} deviceService the device service object
    */
-  constructor(localPersistence, TenantService, deviceService) {
+  constructor(localPersistence, tenantService, deviceService, retrieverConsumer) {
     this.localPersistence = localPersistence;
-    this.tenantService = TenantService;
+    this.tenantService = tenantService;
     this.deviceService = deviceService;
     this.inputPersister = new InputPersister(localPersistence, INPUT_CONFIG);
+    this.retrieverConsumer = retrieverConsumer;
   }
 
   /**
    * Runs first synchronization and schedules data synchronization with other services
    */
-  init() {
+  async init() {
     try {
-      this.load();
-      logger.info('Data sync scheduled');
-      cron.schedule(sync['cron.expression'], () => {
-        logger.debug('Start data synchronization with other services');
-        this.load();
-      });
+      // Initializes Sync Services
+      await this.localPersistence.init();
+      // First synchronization
+      logger.debug('First synchronization..');
+      await this.load();
+      // Kafka
+      try {
+        await this.retrieverConsumer.init();
+      } catch (error) {
+        logger.debug('It was not possible to init kafka');
+        logger.error(error);
+      }
+      // Cron
+      try {
+        logger.info('Data sync scheduled');
+        cron.schedule(sync['cron.expression'], () => {
+          this.retrieverConsumer.unregisterCallbacks();
+          logger.debug('Start data synchronization with other services');
+          this.load().finally(() => {
+            this.retrieverConsumer.resume();
+          });
+        });
+      } catch (error) {
+        logger.debug('It was not possible to schedule synchronization');
+        logger.error(error);
+      }
     } catch (error) {
       logger.error(error);
     }
@@ -127,10 +148,10 @@ class SyncLoader {
 
       try {
         // Processing of data obtained from the database
-        const devices = this.loadDevices;
+        const outerThis = this;
         const tenantWritableStream = Writable({
           async write(key, encoding, cb) {
-            await devices(key);
+            await outerThis.loadDevices(key);
             cb();
           },
         });
@@ -157,11 +178,17 @@ class SyncLoader {
     logger.info('Sync Auth.');
     const tenants = await this.tenantService.getTenants();
 
-    await this.localPersistence.clear('tenants');
+    try {
+      logger.debug('Clean up tenants sublevel');
+      await this.localPersistence.clear('tenants');
+    } catch (error) {
+      logger.error(error);
+    }
+
     // eslint-disable-next-line no-restricted-syntax
     for (const tenant of tenants) {
       // Write devices
-      await this.inputPersister.dispatch({ tenant, service: 'admin' }, InputPersisterArgs.INSERT_OPERATION);
+      await this.inputPersister.dispatch({ tenant }, InputPersisterArgs.INSERT_OPERATION);
     }
 
     return tenants;
@@ -174,6 +201,13 @@ class SyncLoader {
   async loadDevices(tenant) {
     logger.info('Sync device-manager.');
     const devices = await this.deviceService.getDevices(tenant);
+
+    try {
+      logger.debug(`Clean up ${tenant} sublevel`);
+      await this.localPersistence.clear(tenant);
+    } catch (error) {
+      logger.error(error);
+    }
 
     // eslint-disable-next-line no-restricted-syntax
     for (const device of devices) {

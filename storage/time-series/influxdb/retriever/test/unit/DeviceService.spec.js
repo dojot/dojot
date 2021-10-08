@@ -1,15 +1,17 @@
 const mockAxios = {
   default: {
-    // eslint-disable-next-line no-unused-vars
-    get: jest.fn((url, options) => {
-      if (url) {
-        return {
-          data: ['device1', 'device2'],
-        };
-      }
+    create: jest.fn(() => ({
+      // eslint-disable-next-line no-unused-vars
+      get: jest.fn((url, options) => {
+        if (url) {
+          return {
+            data: ['device1', 'device2'],
+          };
+        }
 
-      throw new Error('Error');
-    }),
+        throw new Error('Error');
+      }),
+    })),
   },
 };
 jest.mock('axios', () => mockAxios);

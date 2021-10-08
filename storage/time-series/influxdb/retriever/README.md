@@ -102,6 +102,50 @@ convention.
 | server.reject.unauthorized | If true, the server certificate is verified against the list of supplied CAs. It is considered only if 'server.ca' is passed.                                     | none          | boolean      | RETRIEVER_SERVER_REJECT_UNAUTHORIZED |
 | server.request.cert        | Whether to authenticate the remote peer by requesting a certificate. Clients always request a server certificate. It is considered only if 'server.ca' is passed. | none          | boolean      | RETRIEVER_SERVER_REQUEST_CERT        |
 
+#### SDK Consumer
+
+These parameters are passed directly to the SDK consumer. Check the
+[official repository](https://github.com/dojot/dojot-microservice-sdk-js) for more info on the
+values.
+
+##### **Main object**
+
+Key | Default Value | Valid Values | Environment variable
+--- | ------------- | ------------ | --------------------
+sdk.in.processing.max.messages | 1 | integer | STORER_SDK_IN_PROCESSING_MAX_MESSAGES
+sdk.queued.max.messages.bytes | 10485760 | integer | STORER_SDK_QUEUED_MAX_MESSAGES_BYTES
+sdk.subscription.backoff.min.ms | 1000 | integer | STORER_SDK_SUBSCRIPTION_BACKOFF_MIN_MS
+sdk.subscription.backoff.max.ms | 60000 | integer | STORER_SDK_SUBSCRIPTION_BACKOFF_MAX_MS
+sdk.subscription.backoff.delta.ms | 1000 | integer | STORER_SDK_SUBSCRIPTION_BACKOFF_DELTA_MS
+sdk.commit.interval.ms | 5000 | integer | STORER_SDK_COMMIT_INTERVAL_MS
+
+##### **kafka.consumer object**
+
+Key | Default Value | Valid Values | Environment variable
+--- | ------------- | ------------ | --------------------
+consumer.client.id | ${HOSTNAME:-influxdb-storer} | string | STORER_CONSUMER_CLIENT_ID
+consumer.group.id | influxdb-storer | string | STORER_CONSUMER_GROUP_ID
+consumer.metadata.broker.list | kafka-server:9092 | Initial list of brokers as a CSV list of broker host or host:port.  | STORER_CONSUMER_METADATA_BROKER_LIST
+consumer.topic.metadata.refresh.interval.ms | 30000 | milliseconds (integer) | STORER_CONSUMER_TOPIC_METADATA_REFRESH_INTERVAL_MS
+
+##### **kafka.topic object**
+
+| Key | Default Value | Valid Values | Environment variable
+| --- | ------------- | ------------ | --------------------
+| topic.auto.offset.reset | earliest | smallest, earliest, beginning, largest, latest, end, error | STORER_TOPIC_AUTO_OFFSET_RESET
+
+
+#### Sync Configurations
+
+| Key                   | Purpose                                                                           | Default Value        | Valid Values | Environment variable            |
+| --------------------- | --------------------------------------------------------------------------------- | -------------------- | ------------ | ------------------------------- |
+| sync.tenants               |Defines the route that must be consulted to synchronize tenants.         |  'http://auth:5000/admin/tenants' | string | RETRIEVER_SYNC_TENANTS|
+| sync.devices               |Defines the route that must be consulted to synchronize devices. |  'http://device-manager:5000/device' | string | RETRIEVER_SYNC_DEVICES
+| sync.cron.expression             | Defines the time interval between synchronizations | * */12 * * * | Node-cron expression (https://www.npmjs.com/package/node-cron). | RETRIEVER_SYNC_CRON_EXPRESSION|
+|sync.database.path | Defines database  path | ./data | string | RETRIEVER_SYNC_DATABASE_PATH|
+
+
+
 #### InfluxDB Configurations
 
 | Key                   | Purpose                                                                           | Default Value        | Valid Values | Environment variable            |

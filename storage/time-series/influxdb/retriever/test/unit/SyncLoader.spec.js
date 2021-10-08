@@ -30,6 +30,7 @@ jest.mock('@dojot/microservice-sdk', () => mockSdk);
 const SyncLoader = require('../../app/sync/SyncLoader');
 
 const localPersistence = {
+  init: jest.fn(),
   logger: {
     debug: jest.fn(),
     error: jest.fn(),
@@ -60,10 +61,18 @@ const deviceService = {
   }),
 };
 
+const kafkaConsumer = {
+  init: jest.fn(),
+  initCallbackForNewTenantEvents: jest.fn(),
+  initCallbackForDeviceEvents: jest.fn(),
+  pause: jest.fn(),
+  resume: jest.fn(),
+};
+
 describe('SyncLoader', () => {
   let loader;
   beforeEach(() => {
-    loader = new SyncLoader(localPersistence, tenantService, deviceService);
+    loader = new SyncLoader(localPersistence, tenantService, deviceService, kafkaConsumer);
   });
 
   it('Should load tenants successfully', async () => {

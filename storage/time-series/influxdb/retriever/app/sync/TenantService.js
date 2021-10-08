@@ -1,4 +1,4 @@
-const { default: axios } = require('axios');
+const createAxios = require('./createAxios');
 
 class TenantService {
   /**
@@ -18,6 +18,7 @@ class TenantService {
    * @returns a list of tenants
    */
   async getTenants() {
+    const axios = createAxios();
     const tenants = await axios.get(this.tenantsRouteUrl);
 
     return tenants.data.tenants;

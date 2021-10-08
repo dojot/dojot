@@ -12,7 +12,10 @@ const getAcceptableType = (req) => {
   const allowedTypes = ['json', 'csv'];
   const accept = req.accepts(allowedTypes);
   if (!accept) {
-    throw framework.errorTemplate.NotAcceptable('Not Acceptable', 'Not Acceptable');
+    throw framework.errorTemplate.NotAcceptable(
+      `This server does not support ${req.headers.accept}`,
+      'Not Acceptable',
+    );
   }
   return accept;
 };

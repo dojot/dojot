@@ -1,7 +1,8 @@
-const { default: axios } = require('axios');
 const {
   WebUtils: { createTokenGen },
 } = require('@dojot/microservice-sdk');
+
+const createAxios = require('./createAxios');
 
 
 class DeviceService {
@@ -25,6 +26,7 @@ class DeviceService {
     const tokenGen = createTokenGen();
     const token = await tokenGen.generate({ payload: {}, tenant });
 
+    const axios = createAxios();
     const devices = await axios.get(this.deviceRouteUrl, {
       params: {
         idsOnly: true,
