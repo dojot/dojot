@@ -99,6 +99,8 @@ class RetrieverConsumer {
       logger.info('init: Kafka starting...');
       await this.consumer.init();
       logger.info('init: ...Kafka started ');
+      this.initCallbackForNewTenantEvents();
+      this.initCallbackForDeviceEvents();
     } catch (error) {
       logger.error('init: Error starting kafka', error);
       throw new Error('Cannot init kafka consumer');
@@ -112,17 +114,23 @@ class RetrieverConsumer {
    */
   getCallbackForNewTenantEvents() {
     return (data, ack) => {
-      const { value: payload } = data;
-      const payloadObject = JSON.parse(payload.toString());
-      if (payloadObject.type === 'CREATE') {
-        logger.info('New tenant event received');
-        this.inputPersister.dispatch(
-          payloadObject, InputPersisterArgs.INSERT_OPERATION,
-        ).then(() => {
-          ack();
-        }).catch((error) => {
-          logger.error(`Dispatch failed. ${error.message}`);
-        });
+      try {
+        const { value: payload } = data;
+        const payloadObject = JSON.parse(payload.toString());
+        if (payloadObject.type === 'CREATE') {
+          logger.info('New tenant event received');
+          this.inputPersister.dispatch(
+            payloadObject, InputPersisterArgs.INSERT_OPERATION,
+          ).then(() => {
+            ack();
+          }).catch((error) => {
+            logger.error(`Dispatch failed. ${error.message}`);
+            ack();
+          });
+        }
+      } catch (error) {
+        logger.error(error);
+        ack();
       }
     };
   }
@@ -133,9 +141,8 @@ class RetrieverConsumer {
   * @public
   */
   initCallbackForNewTenantEvents() {
-    const topicSuffix = config.subscribe['topics.suffix.tenants'];
-    logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with suffix ${topicSuffix}`);
-    const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
+    logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with regex ${config.subscribe['topics.regex.tenants']}`);
+    const topic = new RegExp(config.subscribe['topics.regex.tenants']);
 
     this.idCallbackTenant = this.consumer.registerCallback(
       topic, this.getCallbackForNewTenantEvents(),
@@ -150,25 +157,31 @@ class RetrieverConsumer {
    */
   getCallbacksForDeviceEvents() {
     return (data, ack) => {
-      const { value: payload } = data;
-      const payloadObject = JSON.parse(payload.toString());
+      try {
+        const { value: payload } = data;
+        const payloadObject = JSON.parse(payload.toString());
 
-      // Mapping the operations
-      const opTypes = {
-        create: InputPersisterArgs.INSERT_OPERATION,
-        remove: InputPersisterArgs.DELETE_OPERATION,
-      };
+        // Mapping the operations
+        const opTypes = {
+          create: InputPersisterArgs.INSERT_OPERATION,
+          remove: InputPersisterArgs.DELETE_OPERATION,
+        };
 
-      if (payloadObject.event === 'create' || payloadObject.event === 'remove') {
-        logger.info(`${payloadObject.event} device event received`);
-        this.inputPersister.dispatch(
-          // write data to database
-          payloadObject, opTypes[payloadObject.event],
-        ).then(() => {
-          ack();
-        }).catch((error) => {
-          logger.error(`Dispatch failed. ${error.message}`);
-        });
+        if (payloadObject.event === 'create' || payloadObject.event === 'remove') {
+          logger.info(`${payloadObject.event} device event received`);
+          this.inputPersister.dispatch(
+            // write data to database
+            payloadObject, opTypes[payloadObject.event],
+          ).then(() => {
+            ack();
+          }).catch((error) => {
+            logger.error(`Dispatch failed. ${error.message}`);
+            ack();
+          });
+        }
+      } catch (error) {
+        logger.error(error);
+        ack();
       }
     };
   }
@@ -180,8 +193,7 @@ class RetrieverConsumer {
   */
   // eslint-disable-next-line class-methods-use-this
   initCallbackForDeviceEvents() {
-    const topicSuffix = config.subscribe['topics.suffix.device.manager'];
-    const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
+    const topic = new RegExp(config.subscribe['topics.regex.device.manager']);
 
     this.idCallbackDeviceManager = this.consumer.registerCallback(
       topic,
@@ -242,6 +254,12 @@ class RetrieverConsumer {
     } else {
       logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for devices');
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  resume() {
+    this.initCallbackForNewTenantEvents();
+    this.initCallbackForDeviceEvents();
   }
 }
 

@@ -45,7 +45,7 @@ const mockSdk = {
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 
-const RetrieverConsumer = require('../../app/kafka/RetrieverConsumer');
+const RetrieverConsumer = require('../../app/sync/RetrieverConsumer');
 
 describe('RetrieverConsumer', () => {
   let retrieverConsumer;
@@ -56,6 +56,9 @@ describe('RetrieverConsumer', () => {
 
   it('Should init the consumer ', async () => {
     let error;
+    retrieverConsumer.initCallbackForNewTenantEvents = jest.fn();
+    retrieverConsumer.initCallbackForDeviceEvents = jest.fn();
+
     try {
       await retrieverConsumer.init();
     } catch (e) {

@@ -1,17 +1,19 @@
 const mockAxios = {
   default: {
-    // eslint-disable-next-line no-unused-vars
-    get: jest.fn((url, options) => {
-      if (url) {
-        return {
-          data: {
-            tenants: ['tenant1', 'tenant2'],
-          },
-        };
-      }
+    create: jest.fn(() => ({
+      // eslint-disable-next-line no-unused-vars
+      get: jest.fn((url, options) => {
+        if (url) {
+          return {
+            data: {
+              tenants: ['tenant1', 'tenant2'],
+            },
+          };
+        }
 
-      throw new Error('Error');
-    }),
+        throw new Error('Error');
+      }),
+    })),
   },
 };
 jest.mock('axios', () => mockAxios);

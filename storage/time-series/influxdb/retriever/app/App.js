@@ -24,7 +24,7 @@ const logger = new Logger('influxdb-retriever:App');
 
 const Server = require('./Server');
 const InfluxDB = require('./influx');
-const RetrieverConsumer = require('./kafka/RetrieverConsumer');
+const RetrieverConsumer = require('./sync/RetrieverConsumer');
 
 const express = require('./express');
 const devicesRoutes = require('./express/routes/v1/Devices');
@@ -48,11 +48,13 @@ class App {
     try {
       this.server = new Server(serviceState);
       this.influxDB = new InfluxDB(serviceState);
-      this.localPersistence = new LocalPersistenceManager(logger, true);
+      this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
       this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
       this.authService = new TenantService(sync.tenants);
       this.deviceService = new DeviceService(sync.devices);
-      this.syncLoader = new SyncLoader(this.localPersistence, this.authService, this.deviceService);
+      this.syncLoader = new SyncLoader(
+        this.localPersistence, this.authService, this.deviceService, this.retrieverConsumer,
+      );
     } catch (e) {
       logger.error('constructor:', e);
       const er = new Error(e);
@@ -87,12 +89,6 @@ class App {
         .queryByMeasurement.bind(this.influxDB.getInfluxDataQueryInstance());
 
       this.server.registerShutdown();
-
-      // Initializes Sync Services
-      await this.localPersistence.init();
-      await this.retrieverConsumer.init();
-      this.retrieverConsumer.initCallbackForNewTenantEvents();
-      this.retrieverConsumer.initCallbackForDeviceEvents();
       this.syncLoader.init();
 
       // Initializes API

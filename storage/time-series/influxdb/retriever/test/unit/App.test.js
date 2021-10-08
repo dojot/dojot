@@ -51,7 +51,7 @@ const mockSyncLoader = jest.fn().mockImplementation(() => ({
 const mockTenantService = jest.fn().mockImplementation();
 const mockDeviceManager = jest.fn().mockImplementation();
 
-jest.mock('../../app/kafka/RetrieverConsumer', () => mockConsumer);
+jest.mock('../../app/sync/RetrieverConsumer', () => mockConsumer);
 jest.mock('../../app/sync/TenantService', () => mockTenantService);
 jest.mock('../../app/sync/DeviceService', () => mockDeviceManager);
 jest.mock('../../app/sync/SyncLoader', () => mockSyncLoader);

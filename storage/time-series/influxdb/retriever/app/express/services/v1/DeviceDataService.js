@@ -39,7 +39,7 @@ module.exports = class DevicesService {
   }
 
   /**
-   * @param {[*}] deviceData device dataset
+   * @param {[*]}deviceData device dataset
    * @returns device dataset in CSV format
    */
   static parseDeviceDataToCsv(deviceData) {
