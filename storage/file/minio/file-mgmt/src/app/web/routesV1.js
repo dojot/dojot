@@ -1,9 +1,10 @@
-const multer = require('multer');
-// const { multerInterceptor } = require('./interceptors');
 const UploadController = require('./controllers/upload-controller');
+const { busboyHandlerInterceptor } = require('./interceptors');
 
-const routesV1 = (mountPoint, services) => {
-  const uploadController = new UploadController(services.uploadFileService);
+const routesV1 = (mountPoint, services, repositories, logger) => {
+  const uploadController = new UploadController(
+    services.uploadFileService, repositories.minioRepository, logger,
+  );
 
   const uploadRoute = {
     mountPoint,
@@ -13,7 +14,7 @@ const routesV1 = (mountPoint, services) => {
       {
         method: 'post',
         middleware: [
-          multer().single('file'),
+          busboyHandlerInterceptor(logger, repositories.minioRepository).middleware,
           uploadController.upload,
         ],
       },

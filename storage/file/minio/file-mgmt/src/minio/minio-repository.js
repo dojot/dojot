@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+
 module.exports = class MinIoRepository {
   constructor(minioConnection, configMinio) {
     this.client = minioConnection;
@@ -14,16 +16,52 @@ module.exports = class MinIoRepository {
 
   async bucketExists(bucketName) {
     try {
-      this.client.bucketExists(this.suffixBucket + bucketName);
-      return true;
+      return await this.client.bucketExists(this.suffixBucket + bucketName);
     } catch (error) {
       return false;
     }
   }
 
-  async putObject(bucketName, path, fileStream, size) {
-    return this.client.putObject(
-      this.suffixBucket + bucketName, path, fileStream, size,
+  async putObject(bucketName, path, fileStream) {
+    const info = await this.client.putObject(
+      this.suffixBucket + bucketName, path, fileStream,
+    );
+
+    return {
+      etag: typeof info === 'string' ? info : info.etag,
+      versionId: typeof info === 'string' ? null : info.versionId,
+    };
+  }
+
+  async putTmpObject(fileStream) {
+    const transactionCode = uuidv4();
+    const info = await this.client.putObject(
+      `${this.suffixBucket}tmp`, `/tmp/${transactionCode}`, fileStream,
+    );
+
+    return {
+      transactionCode,
+      info: {
+        etag: typeof info === 'string' ? info : info.etag,
+        versionId: typeof info === 'string' ? null : info.versionId,
+      },
+    };
+  }
+
+  async commitObject(bucketName, path, transactionCode) {
+    await this.client.copyObject(`${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}tmp/tmp/${transactionCode}`);
+    await this.client.removeObject(`${this.suffixBucket}tmp`, `/tmp/${transactionCode}`);
+  }
+
+  async rollbackObject(transactionCode) {
+    return this.client.removeObject(
+      `${this.suffixBucket}tmp`, `/tmp/${transactionCode}`,
+    );
+  }
+
+  async removeObject(bucketName, path) {
+    return this.client.removeObject(
+      this.suffixBucket + bucketName, path,
     );
   }
 };
