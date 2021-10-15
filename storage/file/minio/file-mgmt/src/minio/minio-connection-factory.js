@@ -16,6 +16,7 @@ module.exports = (configMinio) => {
   minioClient.putObject = promisify(minioClient.putObject);
   minioClient.removeObject = promisify(minioClient.removeObject);
   minioClient.copyObject = promisify(minioClient.copyObject);
+  minioClient.statObject = promisify(minioClient.statObject);
 
   return minioClient;
 };

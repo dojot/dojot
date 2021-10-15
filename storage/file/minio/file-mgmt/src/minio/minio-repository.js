@@ -14,10 +14,12 @@ module.exports = class MinIoRepository {
   }
 
   async createBucket(bucketName, region) {
+    this.logger.debug(`Creating bucket ${this.suffixBucket + bucketName}`);
     await this.client.makeBucket(this.suffixBucket + bucketName, region);
   }
 
   async removeBucket(bucketName) {
+    this.logger.debug(`Removing bucket ${this.suffixBucket + bucketName}`);
     await this.client.removeBucket(this.suffixBucket + bucketName);
   }
 
@@ -25,11 +27,13 @@ module.exports = class MinIoRepository {
     try {
       return await this.client.bucketExists(this.suffixBucket + bucketName);
     } catch (error) {
+      this.logger.error(error.message);
       return false;
     }
   }
 
   async putObject(bucketName, path, fileStream) {
+    this.logger.debug(`Putting object ${path}`);
     const info = await this.client.putObject(
       this.suffixBucket + bucketName, path, fileStream,
     );
@@ -42,6 +46,7 @@ module.exports = class MinIoRepository {
 
   async putTmpObject(bucketName, fileStream) {
     const transactionCode = uuidv4();
+    this.logger.debug(`Start file transaction ${transactionCode}`);
     const info = await this.client.putObject(
       `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`, fileStream,
     );
@@ -56,20 +61,34 @@ module.exports = class MinIoRepository {
   }
 
   async commitObject(bucketName, path, transactionCode) {
+    this.logger.debug(`Commit file transaction ${transactionCode}`);
     await this.client.copyObject(`${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}${bucketName}/.tmp/${transactionCode}`);
     await this.client.removeObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`);
   }
 
   async rollbackObject(bucketName, transactionCode) {
+    this.logger.debug(`Rollback file transaction ${transactionCode}`);
     return this.client.removeObject(
       `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`,
     );
   }
 
   async removeObject(bucketName, path) {
-    return this.client.removeObject(
+    let stat;
+
+    try {
+      this.logger.debug(`Checking if the file ${path} exists `);
+      stat = await this.client.statObject(this.suffixBucket + bucketName, path);
+    } catch (error) {
+      this.logger.error(error);
+      return null;
+    }
+
+    await this.client.removeObject(
       this.suffixBucket + bucketName, path,
     );
+
+    return stat;
   }
 
   async listObjects(bucketName, pathPrefix, limit, startAfter) {
@@ -96,6 +115,7 @@ module.exports = class MinIoRepository {
 
     minioReadableStream.on('data', (obj) => {
       if (limit && result.length >= limit) {
+        this.logger.debug('Objects limit reached');
         readableStream.push(null);
         minioReadableStream.pause();
         minioReadableStream.destroy();
@@ -104,14 +124,17 @@ module.exports = class MinIoRepository {
 
       readableStream.push(JSON.stringify(obj));
     }).on('end', () => {
+      this.logger.debug('Finish list stream');
       readableStream.push(null);
     }).on('error', (error) => {
-      this.logger.error(error);
+      this.logger.debug('Stop list stream');
+      this.logger.error(error.message);
       readableStream.push(null);
       minioReadableStream.pause();
       minioReadableStream.destroy();
     });
 
+    this.logger.debug('Start list stream');
     await pipelineAsync(readableStream, writebleStream);
     return result;
   }

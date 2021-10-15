@@ -1,5 +1,6 @@
-module.exports = class UploadController {
-  constructor(uploadFileService, logger) {
+module.exports = class FileController {
+  constructor(uploadFileService, removeFileService, logger) {
+    this.removeFileService = removeFileService;
     this.uploadFileService = uploadFileService;
     this.logger = logger;
   }
@@ -14,5 +15,15 @@ module.exports = class UploadController {
       req.tenant, uploadedFile, path, md5,
     );
     res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
+  }
+
+  delete = async (req, res) => {
+    const {
+      path,
+    } = req.query;
+
+    const statFile = await this.removeFileService.handle(req.tenant, path);
+
+    res.status(200).json({ message: `File ${path} removed successfully.`, info: statFile });
   }
 };

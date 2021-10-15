@@ -11,6 +11,7 @@ const MinIoRepository = require('./minio/minio-repository');
 const TenantService = require('./services/tenant-service');
 const UploadFileService = require('./services/upload-file-service');
 const ListFilesService = require('./services/list-files-service');
+const RemoveFileService = require('./services/remove-file-service');
 
 // Instance external dependecies
 Logger.setLevel('console', 'debug');
@@ -40,13 +41,15 @@ const repositories = {
 
 // Services
 const tenantService = new TenantService(minioRepository);
-const uploadFileService = new UploadFileService(minioRepository);
-const listFilesController = new ListFilesService(minioRepository);
+const uploadFileService = new UploadFileService(minioRepository, logger);
+const listFilesService = new ListFilesService(minioRepository, logger);
+const removeFileService = new RemoveFileService(minioRepository, logger);
 
 const services = {
   tenantService,
   uploadFileService,
-  listFilesController,
+  listFilesService,
+  removeFileService,
 };
 
 const app = new App(httpServer, consumerKafka, services, repositories, config, logger, openApiPath);
