@@ -1,10 +1,10 @@
 const UploadController = require('./controllers/upload-controller');
+const ListFilesController = require('./controllers/list-files-controller');
 const { busboyHandlerInterceptor } = require('./interceptors');
 
 const routesV1 = (mountPoint, services, repositories, logger, config) => {
-  const uploadController = new UploadController(
-    services.uploadFileService, repositories.minioRepository, logger,
-  );
+  const uploadController = new UploadController(services.uploadFileService, logger);
+  const listFileController = new ListFilesController(services.listFilesController, logger);
 
   const uploadRoute = {
     mountPoint,
@@ -21,8 +21,23 @@ const routesV1 = (mountPoint, services, repositories, logger, config) => {
     ],
   };
 
+  const listFilesRoute = {
+    mountPoint,
+    name: 'files-list',
+    path: ['/files/list'],
+    handlers: [
+      {
+        method: 'get',
+        middleware: [
+          listFileController.get,
+        ],
+      },
+    ],
+  };
+
   return [
     uploadRoute,
+    listFilesRoute,
   ];
 };
 

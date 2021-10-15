@@ -1,8 +1,7 @@
 module.exports = class UploadController {
-  constructor(uploadFileService, minioRepositories, logger) {
+  constructor(uploadFileService, logger) {
     this.uploadFileService = uploadFileService;
     this.logger = logger;
-    this.minioRepositories = minioRepositories;
   }
 
   // eslint-disable-next-line no-unused-vars

@@ -31,7 +31,7 @@ module.exports = class ExpressAdapter {
           middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
         },
         Interceptors.dojotTenantJwtParseInterceptor(),
-        Interceptors.openApiValidatorInterceptor({ openApiPath }),
+        // Interceptors.openApiValidatorInterceptor({ openApiPath }),
         requestIdInterceptor(),
         beaconInterceptor({
           stateManager: serviceState,

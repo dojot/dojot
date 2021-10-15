@@ -1,9 +1,16 @@
 const { v4: uuidv4 } = require('uuid');
+const {
+  pipeline, Writable, Readable,
+} = require('stream');
+const { promisify } = require('util');
+
+const pipelineAsync = promisify(pipeline);
 
 module.exports = class MinIoRepository {
-  constructor(minioConnection, configMinio) {
+  constructor(minioConnection, configMinio, logger) {
     this.client = minioConnection;
     this.suffixBucket = configMinio['bucket.suffix'];
+    this.logger = logger;
   }
 
   async createBucket(bucketName, region) {
@@ -63,5 +70,49 @@ module.exports = class MinIoRepository {
     return this.client.removeObject(
       this.suffixBucket + bucketName, path,
     );
+  }
+
+  async listObjects(bucketName, pathPrefix, limit, startAfter) {
+    const result = {
+      files: [],
+      length: 0,
+    };
+    const writebleStream = Writable({
+      async write(data, encoding, cb) {
+        result.length += 1;
+        result.files.push(JSON.parse(data));
+
+        cb();
+      },
+    });
+
+    const readableStream = Readable({
+      read() {},
+    });
+
+    const minioReadableStream = this.client.listObjectsV2(
+      this.suffixBucket + bucketName, pathPrefix, true, startAfter,
+    );
+
+    minioReadableStream.on('data', (obj) => {
+      if (limit && result.length >= limit) {
+        readableStream.push(null);
+        minioReadableStream.pause();
+        minioReadableStream.destroy();
+        return;
+      }
+
+      readableStream.push(JSON.stringify(obj));
+    }).on('end', () => {
+      readableStream.push(null);
+    }).on('error', (error) => {
+      this.logger.error(error);
+      readableStream.push(null);
+      minioReadableStream.pause();
+      minioReadableStream.destroy();
+    });
+
+    await pipelineAsync(readableStream, writebleStream);
+    return result;
   }
 };

@@ -10,6 +10,7 @@ const createMinIOConnection = require('./minio/minio-connection-factory');
 const MinIoRepository = require('./minio/minio-repository');
 const TenantService = require('./services/tenant-service');
 const UploadFileService = require('./services/upload-file-service');
+const ListFilesService = require('./services/list-files-service');
 
 // Instance external dependecies
 Logger.setLevel('console', 'debug');
@@ -31,7 +32,7 @@ const httpServer = new Server(serviceState, configServerCamelCase, logger, confi
 const consumerKafka = new KafkaConsumer(config, logger);
 // Repositories
 const minioConnection = createMinIOConnection(config.minio);
-const minioRepository = new MinIoRepository(minioConnection, config.minio);
+const minioRepository = new MinIoRepository(minioConnection, config.minio, logger);
 
 const repositories = {
   minioRepository,
@@ -40,10 +41,12 @@ const repositories = {
 // Services
 const tenantService = new TenantService(minioRepository);
 const uploadFileService = new UploadFileService(minioRepository);
+const listFilesController = new ListFilesService(minioRepository);
 
 const services = {
   tenantService,
   uploadFileService,
+  listFilesController,
 };
 
 const app = new App(httpServer, consumerKafka, services, repositories, config, logger, openApiPath);
