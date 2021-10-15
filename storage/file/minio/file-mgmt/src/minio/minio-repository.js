@@ -33,10 +33,10 @@ module.exports = class MinIoRepository {
     };
   }
 
-  async putTmpObject(fileStream) {
+  async putTmpObject(bucketName, fileStream) {
     const transactionCode = uuidv4();
     const info = await this.client.putObject(
-      `${this.suffixBucket}tmp`, `/tmp/${transactionCode}`, fileStream,
+      `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`, fileStream,
     );
 
     return {
@@ -49,13 +49,13 @@ module.exports = class MinIoRepository {
   }
 
   async commitObject(bucketName, path, transactionCode) {
-    await this.client.copyObject(`${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}tmp/tmp/${transactionCode}`);
-    await this.client.removeObject(`${this.suffixBucket}tmp`, `/tmp/${transactionCode}`);
+    await this.client.copyObject(`${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}${bucketName}/.tmp/${transactionCode}`);
+    await this.client.removeObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`);
   }
 
-  async rollbackObject(transactionCode) {
+  async rollbackObject(bucketName, transactionCode) {
     return this.client.removeObject(
-      `${this.suffixBucket}tmp`, `/tmp/${transactionCode}`,
+      `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`,
     );
   }
 

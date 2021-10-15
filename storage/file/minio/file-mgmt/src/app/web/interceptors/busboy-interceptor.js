@@ -1,10 +1,10 @@
 const Busboy = require('busboy');
 const EventEmitter = require('events');
 
-module.exports = (logger, minioRepositories) => ({
+module.exports = (logger, minioRepositories, config) => ({
   name: 'dojot-busboy-interceptor',
   middleware: (req, res, next) => {
-    const busboy = new Busboy({ headers: req.headers });
+    const busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: config.minio['upload.size.limit'] } });
     const eventEmitter = new EventEmitter();
     req.body = {};
     let loadedFile = false;
@@ -19,7 +19,10 @@ module.exports = (logger, minioRepositories) => ({
     busboy.on('file', async (fieldname, fileStream, filename, encoding, mimetype) => {
       try {
         logger.debug('Gets file stream..');
-        const fileinfo = await minioRepositories.putTmpObject(fileStream);
+        fileStream.on('limit', () => {
+          res.status(413).json({ error: 'The file is too large', details: `The file size has a limit of ${config.minio['upload.size.limit']}` });
+        });
+        const fileinfo = await minioRepositories.putTmpObject(req.tenant, fileStream);
         req.body.uploadedFile = {
           ...fileinfo,
           filename,

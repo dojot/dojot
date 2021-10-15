@@ -1,7 +1,7 @@
 const UploadController = require('./controllers/upload-controller');
 const { busboyHandlerInterceptor } = require('./interceptors');
 
-const routesV1 = (mountPoint, services, repositories, logger) => {
+const routesV1 = (mountPoint, services, repositories, logger, config) => {
   const uploadController = new UploadController(
     services.uploadFileService, repositories.minioRepository, logger,
   );
@@ -14,7 +14,7 @@ const routesV1 = (mountPoint, services, repositories, logger) => {
       {
         method: 'post',
         middleware: [
-          busboyHandlerInterceptor(logger, repositories.minioRepository).middleware,
+          busboyHandlerInterceptor(logger, repositories.minioRepository, config).middleware,
           uploadController.upload,
         ],
       },

@@ -26,7 +26,7 @@ module.exports = class App {
       );
 
       this.server.init(ExpressAdapter.adapt(
-        routesV1('/api/v1', this.services, this.repositories, this.logger),
+        routesV1('/api/v1', this.services, this.repositories, this.logger, this.config),
         this.server.serviceState,
         this.openApiPath,
         this.logger,
