@@ -1,4 +1,6 @@
-FROM alpine:3.14 as basis
+FROM alpine:3.14 as python-build
+# This stage is a copy of python official image, tag 3.6-alpine, and modified to support more connections using one
+# worker instance of Locust.
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -60,6 +62,10 @@ RUN set -ex \
 		tk-dev \
 		xz-dev \
 		zlib-dev \
+    # WARNING: the following three lines makes possible to connect more devices per worker instance of Locust
+	&& apk add --no-cache sed \
+    && sed -i '/#define __FD_SETSIZE/c\#define __FD_SETSIZE 65536' /usr/include/linux/posix_types.h \
+    && sed -i '/#define FD_SETSIZE/c\#define FD_SETSIZE 65536' /usr/include/sys/select.h \
 # add build deps before removing fetch deps in case there's overlap
 	&& apk del --no-network .fetch-deps \
 	\
@@ -167,7 +173,7 @@ RUN set -ex; \
 		\) -exec rm -rf '{}' +; \
 	rm -f get-pip.py
 
-FROM basis
+FROM python-build as build
 
 # build time dependencies
 RUN apk update && \
@@ -176,16 +182,55 @@ RUN apk update && \
         g++ \
         musl-dev \
         zeromq-dev \
-        bash \
         libzmq \
-				redis \
-				jq \
-				curl \
-				netcat-openbsd \
         openssl-dev \
         libffi-dev
 
 WORKDIR /usr/src/app
 ENV PYTHONPATH="/usr/src/app"
-COPY . /usr/src/app
+COPY requirements/prod.txt requirements/prod.txt
 RUN pip3 install -r requirements/prod.txt
+
+
+FROM python-build as basis
+
+COPY --from=build /usr/local/lib/python3.6/site-packages/ /usr/local/lib/python3.6/site-packages/
+COPY --from=build /usr/local/bin/ /usr/local/bin/
+
+RUN apk update && \
+        apk add --no-cache \
+            bash \
+            redis \
+            jq \
+            curl \
+            netcat-openbsd \
+            libzmq
+
+WORKDIR /usr/src/app
+ENV PYTHONPATH="/usr/src/app"
+
+RUN touch ~/.bashrc
+RUN echo "alias generate_certs='python3 -m src.scripts.generate_certs'" >> ~/.bashrc
+
+# This command will do nothing and prevent the container from exiting from lack of commands
+CMD tail -f /dev/null
+
+FROM basis as development
+
+COPY requirements requirements
+
+RUN apk update && \
+        apk add --no-cache --virtual .build-deps  \
+            musl-dev \
+            gcc && \
+    \
+    pip3 install -r requirements/dev.txt && \
+    apk del --no-network .build-deps
+
+RUN echo "alias run_cov='coverage run -m pytest tests && coverage html'" >> ~/.bashrc && \
+    echo "alias run_lint='pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc'" >> ~/.bashrc
+
+
+FROM basis
+
+COPY . /usr/src/app/
