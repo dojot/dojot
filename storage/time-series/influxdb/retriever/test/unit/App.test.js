@@ -1,6 +1,10 @@
 const mockConfig = {
   lightship: { a: 'abc' },
   graphql: { graphiql: true },
+  sync: {
+    tenants: 'apigettenants',
+    devices: 'apigetdevices',
+  },
 };
 
 const mockSdk = {
@@ -18,11 +22,39 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils: {
+    framework: {
+      errorTemplate: jest.fn(),
+    },
+  },
+  LocalPersistence: {
+    LocalPersistenceManager: jest.fn().mockImplementation(() => ({
+      init: jest.fn(),
+    })),
+  },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 jest.mock('../../app/express');
 jest.mock('../../app/express/routes/v1/Devices');
+
+const mockConsumer = jest.fn().mockImplementation(() => ({
+  init: jest.fn(),
+  initCallbackForNewTenantEvents: jest.fn(),
+  initCallbackForDeviceEvents: jest.fn(),
+}));
+
+const mockSyncLoader = jest.fn().mockImplementation(() => ({
+  init: jest.fn(),
+}));
+
+const mockTenantService = jest.fn().mockImplementation();
+const mockDeviceManager = jest.fn().mockImplementation();
+
+jest.mock('../../app/sync/RetrieverConsumer', () => mockConsumer);
+jest.mock('../../app/sync/TenantService', () => mockTenantService);
+jest.mock('../../app/sync/DeviceService', () => mockDeviceManager);
+jest.mock('../../app/sync/SyncLoader', () => mockSyncLoader);
 
 const mockServerRegisterShutdown = jest.fn();
 const mockServerInit = jest.fn();
