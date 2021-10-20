@@ -23,7 +23,7 @@ module.exports = class RemoveFileService {
     const statFile = await this.minioRepository.removeObject(tenant, path);
 
     if (!statFile) {
-      throw framework.errorTemplate.NotFound('The file does not exist.', 'The file does not exist');
+      throw framework.errorTemplate.NotFound('The file does not exist.', 'The file does not exist.');
     }
 
     return statFile;

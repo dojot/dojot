@@ -27,7 +27,7 @@ module.exports = class UploadFileService {
       if (md5 !== file.info.etag) {
         this.logger.debug('The "md5" is invalid');
         await this.minioRepository.rollbackObject(tenant, file.transactionCode);
-        throw framework.errorTemplate.BadRequest('The "md5" is invalid', 'The "md5" is invalid.');
+        throw framework.errorTemplate.BadRequest('The "md5" is invalid.', 'The "md5" is invalid.');
       }
     }
 

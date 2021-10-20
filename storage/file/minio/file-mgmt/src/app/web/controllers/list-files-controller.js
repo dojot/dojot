@@ -1,4 +1,4 @@
-module.exports = class ListFileController {
+module.exports = class ListFilesController {
   constructor(listFilesService, logger) {
     this.listFilesService = listFilesService;
     this.logger = logger;
@@ -16,10 +16,10 @@ module.exports = class ListFileController {
       ? encodeURIComponent(data.files[data.files.length - 1].name)
       : undefined;
     const nextPageStartsAfter = startAfter
-      ? req.originalUrl.replace(`startAfter=${startAfter}`, `startAfter=${lastFile}`)
+      ? req.originalUrl.replace(`startAfter=${encodeURIComponent(startAfter)}`, `startAfter=${lastFile}`)
       : `${req.originalUrl}&startAfter=${lastFile}`;
 
-    res.status(200).json({
+    return res.status(200).json({
       ...data,
       nextPageStartsAfter,
     });

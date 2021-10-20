@@ -17,17 +17,19 @@ class Server {
     this.config = config.server;
   }
 
+  onListening = () => {
+    this.logger.info('Server ready to accept connections!');
+    this.logger.info(this.server.address());
+    this.serviceState.signalReady('server');
+  }
+
   /**
    * Initializes the service based on the instance of express received
    * @param {Express} express  instance of express
    */
   init(express) {
     this.server.on('request', express);
-    this.server.on('listening', () => {
-      this.logger.info('Server ready to accept connections!');
-      this.logger.info(this.server.address());
-      this.serviceState.signalReady('server');
-    });
+    this.server.on('listening', this.onListening);
     this.server.on('close', () => {
       this.serviceState.signalNotReady('server');
     });

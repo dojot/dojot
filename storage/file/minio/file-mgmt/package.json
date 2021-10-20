@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "dev": "node --inspect=0.0.0.0 src/index.js",
     "local": "node src/index.js",
-    "test": "jest --no-cache"
+    "test": "jest --no-cache --coverage"
   },
   "repository": {
     "type": "git",

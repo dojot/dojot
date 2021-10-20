@@ -14,7 +14,7 @@ module.exports = class FileController {
     const fileInfo = await this.uploadFileService.handle(
       req.tenant, uploadedFile, path, md5,
     );
-    res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
+    return res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
   }
 
   delete = async (req, res) => {
@@ -24,6 +24,6 @@ module.exports = class FileController {
 
     const statFile = await this.removeFileService.handle(req.tenant, path);
 
-    res.status(200).json({ message: `File ${path} removed successfully.`, info: statFile });
+    return res.status(200).json({ message: `File ${path} removed successfully.`, info: statFile });
   }
 };

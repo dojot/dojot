@@ -92,15 +92,14 @@ module.exports = class MinIoRepository {
   }
 
   async listObjects(bucketName, pathPrefix, limit, startAfter) {
+    let error;
     const result = {
       files: [],
       length: 0,
     };
+
     const writebleStream = Writable({
       async write(data, encoding, cb) {
-        result.length += 1;
-        result.files.push(JSON.parse(data));
-
         cb();
       },
     });
@@ -122,13 +121,16 @@ module.exports = class MinIoRepository {
         return;
       }
 
+      result.length += 1;
+      result.files.push(obj);
       readableStream.push(JSON.stringify(obj));
     }).on('end', () => {
       this.logger.debug('Finish list stream');
       readableStream.push(null);
-    }).on('error', (error) => {
+    }).on('error', (e) => {
       this.logger.debug('Stop list stream');
-      this.logger.error(error.message);
+      this.logger.error(e.message);
+      error = e;
       readableStream.push(null);
       minioReadableStream.pause();
       minioReadableStream.destroy();
@@ -136,6 +138,11 @@ module.exports = class MinIoRepository {
 
     this.logger.debug('Start list stream');
     await pipelineAsync(readableStream, writebleStream);
+
+    if (error) {
+      throw error;
+    }
+
     return result;
   }
 };

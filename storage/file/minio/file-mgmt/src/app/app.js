@@ -34,6 +34,7 @@ module.exports = class App {
       ));
     } catch (error) {
       this.logger.error(error);
+      throw error;
     }
   }
 };
