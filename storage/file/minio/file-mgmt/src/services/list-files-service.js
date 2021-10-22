@@ -17,6 +17,10 @@ module.exports = class ListFilesService {
       throw framework.errorTemplate.NotFound('Tenant does not exist.', 'There is no tenancy for this tenant.');
     }
 
+    if (!limit || Number.isNaN(limit)) {
+      throw framework.errorTemplate.BadRequest('The limit field is required and must be a integer.', 'The limit field is required and must be a number.');
+    }
+
     const result = await this.minioRepository.listObjects(tenant, pathPrefix, limit, startAfter);
     return result;
   }

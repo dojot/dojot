@@ -1,6 +1,11 @@
 const Busboy = require('busboy');
+const {
+  WebUtils: {
+    framework,
+  },
+} = require('@dojot/microservice-sdk');
 
-module.exports = (logger, minioRepositories, config) => ({
+module.exports = (logger, minioRepository, config) => ({
   name: 'dojot-busboy-interceptor',
   middleware: (req, res, next) => {
     const busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: config.minio['upload.size.limit'] } });
@@ -18,9 +23,16 @@ module.exports = (logger, minioRepositories, config) => ({
       try {
         logger.debug('Gets file stream..');
         fileStream.on('limit', () => {
-          res.status(413).json({ error: 'The file is too large', details: `The file size has a limit of ${config.minio['upload.size.limit']}` });
+          next(framework.errorTemplate.PayloadTooLarge('The file is too large', `The file size has a limit of ${config.minio['upload.size.limit']}`));
         });
-        const fileinfo = await minioRepositories.putTmpObject(req.tenant, fileStream);
+
+        if (!(await minioRepository.bucketExists(req.tenant))) {
+          logger.debug('Tenant does not exist.');
+          next(framework.errorTemplate.NotFound('Tenant does not exist.', 'There is no tenancy for this tenant.'));
+          return;
+        }
+
+        const fileinfo = await minioRepository.putTmpObject(req.tenant, fileStream);
         req.body.uploadedFile = {
           ...fileinfo,
           filename,
@@ -29,7 +41,7 @@ module.exports = (logger, minioRepositories, config) => ({
         };
         busboy.emit('loaded-meta');
       } catch (error) {
-        res.status(500).json({ error: 'Internal Error' });
+        next(error);
       }
     });
 

@@ -1,4 +1,4 @@
-const KafkaPayloadUtil = require('../../../utils/Kafka-payload-util');
+const KafkaPayloadUtil = require('../../../utils/kafka-payload-util');
 
 class KafkaController {
   constructor(tenantService, logger) {

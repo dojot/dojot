@@ -1,6 +1,7 @@
 const topics = require('./kafka/topics');
 const ExpressAdapter = require('./web/express-adapter');
 const routesV1 = require('./web/routesV1');
+const Dependecies = require('./dependecies');
 
 module.exports = class App {
   /**
@@ -9,29 +10,30 @@ module.exports = class App {
    * @param {Server} server server
    * @param {Logger} server logger
    */
-  constructor(server, kafkaConsumer, services, repositories, config, logger, openApiPath) {
-    this.server = server;
+  constructor(config, logger, openApiPath) {
     this.logger = logger;
     this.openApiPath = openApiPath;
     this.config = config;
-    this.kafkaConsumer = kafkaConsumer;
-    this.services = services;
-    this.repositories = repositories;
   }
 
   async init() {
+    const { web, kafka } = Dependecies(this.config, this.logger);
+    this.server = web.httpServer;
+    this.kafkaConsumer = kafka.kafkaConsumer;
+
     try {
       this.kafkaConsumer.init(
-        topics(this.config, this.services, this.logger),
+        topics(this.config, kafka.controllers),
       );
 
-      this.server.init(ExpressAdapter.adapt(
-        routesV1('/api/v1', this.services, this.repositories, this.logger, this.config),
+      this.express = ExpressAdapter.adapt(
+        routesV1('/api/v1', web.controllers, web.interceptors),
         this.server.serviceState,
         this.openApiPath,
         this.logger,
         this.config,
-      ));
+      );
+      this.server.init(this.express);
     } catch (error) {
       this.logger.error(error);
       throw error;

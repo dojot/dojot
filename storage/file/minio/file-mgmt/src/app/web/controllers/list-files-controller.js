@@ -4,20 +4,23 @@ module.exports = class ListFilesController {
     this.logger = logger;
   }
 
-  // eslint-disable-next-line no-unused-vars
   get = async (req, res) => {
     const {
       pathPrefix, limit, startAfter,
     } = req.query;
 
-    const data = await this.listFilesService.list(req.tenant, pathPrefix, limit, startAfter);
+    const nLimit = Number(limit);
 
-    const lastFile = data.files.length > 0
-      ? encodeURIComponent(data.files[data.files.length - 1].name)
-      : undefined;
-    const nextPageStartsAfter = startAfter
-      ? req.originalUrl.replace(`startAfter=${encodeURIComponent(startAfter)}`, `startAfter=${lastFile}`)
-      : `${req.originalUrl}&startAfter=${lastFile}`;
+    const data = await this.listFilesService.list(req.tenant, pathPrefix, nLimit, startAfter);
+    let nextPageStartsAfter = null;
+
+    if (data.length > 0 && data.length === nLimit) {
+      const lastFile = encodeURIComponent(data.files[data.files.length - 1].name);
+
+      nextPageStartsAfter = startAfter
+        ? req.originalUrl.replace(`startAfter=${encodeURIComponent(startAfter)}`, `startAfter=${lastFile}`)
+        : `${req.originalUrl}&startAfter=${lastFile}`;
+    }
 
     return res.status(200).json({
       ...data,

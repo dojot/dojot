@@ -13,12 +13,6 @@ module.exports = class UploadFileService {
 
   // eslint-disable-next-line no-unused-vars
   handle = async (tenant, file, path, md5) => {
-    if (!(await this.minioRepository.bucketExists(tenant))) {
-      await this.minioRepository.rollbackObject(tenant, file.transactionCode);
-      this.logger.debug('Tenant does not exist.');
-      throw framework.errorTemplate.NotFound('Tenant does not exist.', 'There is no tenancy for this tenant.');
-    }
-
     await PathValidatorUtil.validate(path, this.logger, async () => {
       await this.minioRepository.rollbackObject(tenant, file.transactionCode);
     });

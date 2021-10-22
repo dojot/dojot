@@ -1,13 +1,4 @@
-const FileController = require('./controllers/file-controller');
-const ListFilesController = require('./controllers/list-files-controller');
-const { busboyHandlerInterceptor } = require('./interceptors');
-
-const routesV1 = (mountPoint, services, repositories, logger, config) => {
-  const fileController = new FileController(
-    services.uploadFileService, services.removeFileService, logger,
-  );
-  const listFileController = new ListFilesController(services.listFilesService, logger);
-
+const routesV1 = (mountPoint, controllers, interceptors) => {
   const uploadRoute = {
     mountPoint,
     name: 'files',
@@ -16,8 +7,8 @@ const routesV1 = (mountPoint, services, repositories, logger, config) => {
       {
         method: 'post',
         middleware: [
-          busboyHandlerInterceptor(logger, repositories.minioRepository, config).middleware,
-          fileController.upload,
+          interceptors.busboyHandlerInterceptor,
+          controllers.fileController.upload,
         ],
       },
     ],
@@ -31,7 +22,7 @@ const routesV1 = (mountPoint, services, repositories, logger, config) => {
       {
         method: 'get',
         middleware: [
-          listFileController.get,
+          controllers.listFileController.get,
         ],
       },
     ],
@@ -45,7 +36,7 @@ const routesV1 = (mountPoint, services, repositories, logger, config) => {
       {
         method: 'delete',
         middleware: [
-          fileController.delete,
+          controllers.fileController.delete,
         ],
       },
     ],
