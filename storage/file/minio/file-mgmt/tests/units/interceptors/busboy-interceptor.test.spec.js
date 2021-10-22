@@ -43,14 +43,12 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
+      tenant: 'test',
     };
     const response = new ResponseMock();
-    // eslint-disable-next-line no-unused-vars
-    response.json = (body) => {
-      throw new Error('Failure Upload');
-    };
 
-    busboyInterceptor.middleware(request, response, () => {
+    busboyInterceptor.middleware(request, response, (error) => {
+      expect(error).toBeUndefined();
       expect(request.body).toEqual({
         path: '/test/',
         md5: 'md5',
@@ -85,14 +83,11 @@ describe('BusboyInterceptor', () => {
       pipe: pipeMock,
     };
     const response = new ResponseMock();
-    response.json = (body) => {
-      expect(body.error).toEqual('The file is too large');
-      expect(body.details).toEqual(`The file size has a limit of ${config.minio['upload.size.limit']}`);
-      done();
-    };
 
-    busboyInterceptor.middleware(request, response, () => {
-      throw new Error('Successfully Upload');
+    busboyInterceptor.middleware(request, response, (error) => {
+      expect(error.responseJSON.error).toEqual('The file is too large');
+      expect(error.responseJSON.detail).toEqual(`The file size has a limit of ${config.minio['upload.size.limit']}`);
+      done();
     });
   });
 
@@ -112,13 +107,10 @@ describe('BusboyInterceptor', () => {
       pipe: pipeMock,
     };
     const response = new ResponseMock();
-    response.json = (body) => {
-      expect(body.error).toEqual('Internal Error');
-      done();
-    };
 
-    busboyInterceptor.middleware(request, response, () => {
-      throw new Error('Successfully Upload');
+    busboyInterceptor.middleware(request, response, (error) => {
+      expect(error).toBeDefined();
+      done();
     });
   });
 });

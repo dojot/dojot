@@ -17,7 +17,7 @@ describe('PathValidatorUtil', () => {
       error = e;
     }
     expect.assertions(2);
-    expect(error.responseJSON.error).toEqual('The "path" field.');
+    expect(error.responseJSON.error).toEqual('The "path" field is required.');
     expect(error.responseJSON.detail).toEqual('The "path" field is required.');
   });
 
@@ -29,7 +29,7 @@ describe('PathValidatorUtil', () => {
       error = e;
     }
     expect.assertions(2);
-    expect(error.responseJSON.error).toEqual('The "path" field.');
+    expect(error.responseJSON.error).toEqual('The "path" field is invalid.');
     expect(error.responseJSON.detail).toEqual('The value in the "path" field must be between 3 and 100 characters.');
   });
 
@@ -45,7 +45,7 @@ describe('PathValidatorUtil', () => {
       error = e;
     }
     expect.assertions(2);
-    expect(error.responseJSON.error).toEqual('The "path" field.');
+    expect(error.responseJSON.error).toEqual('The "path" field is invalid.');
     expect(error.responseJSON.detail).toEqual('The value in the "path" field must be between 3 and 100 characters.');
   });
 
@@ -57,7 +57,7 @@ describe('PathValidatorUtil', () => {
       error = e;
     }
     expect.assertions(2);
-    expect(error.responseJSON.error).toEqual('The "path" field.');
+    expect(error.responseJSON.error).toEqual('The "path" field is invalid.');
     expect(error.responseJSON.detail).toEqual('The value in the "path" field is reserved.');
   });
 });

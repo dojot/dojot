@@ -13,6 +13,7 @@ const listFilesServiceMock = {
         size: 27,
       },
     ],
+    length: 1,
   })),
 };
 
@@ -27,7 +28,7 @@ describe('ListFilesController', () => {
       tenant: 'test',
       originalUrl: '/api/v1/files/list?pathPrefix=/app/&limit=1',
       query: {
-        pathPrefix: '/app/', limit: '1', startAfter: undefined,
+        pathPrefix: '/app/', limit: '1',
       },
     };
     const responseMock = new ResponseMock();

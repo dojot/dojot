@@ -4,21 +4,31 @@ jest.mock('../../../src/app/web/express-adapter', () => ({
 }));
 jest.mock('../../../src/app/web/routesV1', () => jest.fn());
 
+const mockKafkaConsumer = {
+  init: jest.fn(),
+};
+
+const mockHttpServer = {
+  init: jest.fn(),
+};
+
+jest.mock('../../../src/app/dependecies', () => () => ({
+  web: {
+    httpServer: mockHttpServer,
+  },
+  kafka: {
+    kafkaConsumer: mockKafkaConsumer,
+  },
+}));
+
 const App = require('../../../src/app/app');
+const openApiValidator = require('../../../src/app/web/interceptors/open-api-validator');
 const loggerMock = require('../../mocks/logger-mock');
-
-const kafkaConsumerMock = {
-  init: jest.fn(),
-};
-
-const serverMock = {
-  init: jest.fn(),
-};
 
 describe('App', () => {
   let app;
   beforeEach(() => {
-    app = new App(serverMock, kafkaConsumerMock, {}, {}, loggerMock, {});
+    app = new App({}, loggerMock, openApiValidator);
   });
 
   it('Should init application', async () => {
@@ -26,8 +36,19 @@ describe('App', () => {
     expect.anything();
   });
 
-  it('Should throw an error, when there is an error on application initialization', async () => {
-    kafkaConsumerMock.init = jest.fn(() => { throw new Error('Error'); });
+  it('Should throw an error, when there is an error on kafka initialization', async () => {
+    mockKafkaConsumer.init.mockImplementationOnce(() => { throw new Error('Error'); });
+    let error;
+    try {
+      await app.init();
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeDefined();
+  });
+
+  it('Should throw an error, when there is an error on HttpServer initialization', async () => {
+    mockHttpServer.init.mockImplementationOnce(() => { throw new Error('Error'); });
     let error;
     try {
       await app.init();

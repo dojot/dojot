@@ -7,7 +7,9 @@
     "start": "node src/index.js",
     "dev": "node --inspect=0.0.0.0 src/index.js",
     "local": "node src/index.js",
-    "test": "jest --no-cache --coverage"
+    "test": "jest ./tests --no-cache --coverage",
+    "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
+    "unit-test": "jest ./tests/units --no-cache --coverage"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
     "http-terminator": "^3.0.3",
     "js-yaml": "^4.1.0",
     "jwt-decode": "^3.1.2",
+    "jwt-encode": "^1.0.1",
     "lodash.camelcase": "^4.3.0",
     "minio": "^7.0.19",
     "supertest": "^6.1.6",
