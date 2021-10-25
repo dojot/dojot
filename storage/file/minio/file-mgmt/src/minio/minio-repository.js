@@ -10,6 +10,7 @@ module.exports = class MinIoRepository {
   constructor(minioConnection, configMinio, logger) {
     this.client = minioConnection;
     this.suffixBucket = configMinio['bucket.suffix'];
+    this.presignedExpiry = configMinio['presigned.expiry'];
     this.logger = logger;
   }
 
@@ -71,6 +72,48 @@ module.exports = class MinIoRepository {
     return this.client.removeObject(
       `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`,
     );
+  }
+
+  async getObject(bucketName, path) {
+    try {
+      const info = await this.client.statObject(this.suffixBucket + bucketName, path);
+      const stream = await this.client.getObject(`${this.suffixBucket}${bucketName}`, path);
+
+      const file = {
+        stream,
+        info: {
+          contentType: info.metaData['content-type'],
+          etag: info.etag,
+          size: info.size,
+        },
+      };
+
+      return file;
+    } catch (error) {
+      this.logger.debug(error.message);
+      return null;
+    }
+  }
+
+  async getObjectUrl(bucketName, path) {
+    try {
+      const info = await this.client.statObject(this.suffixBucket + bucketName, path);
+      const url = await this.client.presignedGetObject(`${this.suffixBucket}${bucketName}`, path, this.presignedExpiry);
+
+      const file = {
+        url,
+        info: {
+          contentType: info.metaData['content-type'],
+          etag: info.etag,
+          size: info.size,
+        },
+      };
+
+      return file;
+    } catch (error) {
+      this.logger.debug(error.message);
+      return null;
+    }
   }
 
   async removeObject(bucketName, path) {

@@ -15,6 +15,7 @@ const BusboyHandlerInterceptor = require('./web/interceptors/busboy-interceptor'
 const FileController = require('./web/controllers/file-controller');
 const ListFilesController = require('./web/controllers/list-files-controller');
 const KafkaController = require('./kafka/controllers/kafka-controller');
+const RetrievalFileService = require('../services/retrieval-file-service');
 
 module.exports = (config, logger) => {
   const configServerCamelCase = ConfigManager
@@ -36,6 +37,7 @@ module.exports = (config, logger) => {
   const uploadFileService = new UploadFileService(minioRepository, logger);
   const listFilesService = new ListFilesService(minioRepository, logger);
   const removeFileService = new RemoveFileService(minioRepository, logger);
+  const retrievalFileService = new RetrievalFileService(minioRepository, logger);
 
   // Interceptors
   const busboyHandlerInterceptor = BusboyHandlerInterceptor(
@@ -44,7 +46,7 @@ module.exports = (config, logger) => {
 
   // Controllers
   const fileController = new FileController(
-    uploadFileService, removeFileService, logger,
+    uploadFileService, retrievalFileService, removeFileService, logger,
   );
   const listFileController = new ListFilesController(listFilesService, logger);
   const kafkaController = new KafkaController(tenantService, logger);

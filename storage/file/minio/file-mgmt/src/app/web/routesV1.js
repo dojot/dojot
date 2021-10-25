@@ -28,6 +28,20 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
     ],
   };
 
+  const retrievalFileRoute = {
+    mountPoint,
+    name: 'retrieval-file',
+    path: ['/files'],
+    handlers: [
+      {
+        method: 'get',
+        middleware: [
+          controllers.fileController.get,
+        ],
+      },
+    ],
+  };
+
   const deleteFileRoute = {
     mountPoint,
     name: 'remove-file',
@@ -45,6 +59,7 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
   return [
     uploadRoute,
     listFilesRoute,
+    retrievalFileRoute,
     deleteFileRoute,
   ];
 };

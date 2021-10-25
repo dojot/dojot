@@ -1,6 +1,7 @@
 module.exports = class FileController {
-  constructor(uploadFileService, removeFileService, logger) {
+  constructor(uploadFileService, retrieverFileService, removeFileService, logger) {
     this.removeFileService = removeFileService;
+    this.retrieverFileService = retrieverFileService;
     this.uploadFileService = uploadFileService;
     this.logger = logger;
   }
@@ -15,6 +16,20 @@ module.exports = class FileController {
       req.tenant, uploadedFile, path, md5,
     );
     return res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
+  }
+
+  get = async (req, res) => {
+    const { path, alt } = req.query;
+
+    const data = await this.retrieverFileService.handle(req.tenant, path, alt);
+    if (alt === 'media') {
+      res.setHeader('Content-Type', data.info.contentType);
+      res.setHeader('Content-Length', data.info.size);
+
+      return data.stream.pipe(res);
+    }
+
+    return res.status(200).json(data);
   }
 
   delete = async (req, res) => {

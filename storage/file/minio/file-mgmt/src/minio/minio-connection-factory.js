@@ -17,6 +17,8 @@ module.exports = (configMinio) => {
   minioClient.removeObject = promisify(minioClient.removeObject);
   minioClient.copyObject = promisify(minioClient.copyObject);
   minioClient.statObject = promisify(minioClient.statObject);
+  minioClient.getObject = promisify(minioClient.getObject);
+  minioClient.presignedGetObject = promisify(minioClient.presignedGetObject);
 
   return minioClient;
 };
