@@ -47,8 +47,15 @@ module.exports = (configMinio) => {
 
   };
 
-  minioClient.statObject = async (bucketName, path) => minioClient.buckets[bucketName]
-    .find((file) => `/${file.name}` === path);
+  minioClient.statObject = async (bucketName, path) => {
+    const stat = minioClient.buckets[bucketName]
+      .find((file) => `/${file.name}` === path);
+    stat.metaData = {
+      'content-type': 'binary/octet-stream',
+    };
+
+    return stat;
+  };
 
   minioClient.listObjectsV2 = (
     bucketName, pathPrefix, _recursive, startAfter,
@@ -70,6 +77,34 @@ module.exports = (configMinio) => {
       this.push(null);
     },
   });
+
+  minioClient.getObject = async (bucketName, path) => {
+    const fileStat = minioClient.buckets[bucketName].find((file) => `/${file.name}` === path);
+    if (!fileStat) {
+      throw new Error('Not Found');
+    }
+
+    fileStat.metaData = { 'content-type': 'text/plain' };
+    return Readable({
+      read() {
+        this.push('file');
+        this.push('file');
+        this.push(null);
+      },
+    });
+  };
+
+  minioClient.presignedGetObject = async (bucketName, path) => {
+    const fileStat = minioClient.buckets[bucketName].find((file) => `/${file.name}` === path);
+    if (!fileStat) {
+      throw new Error('Not Found');
+    }
+
+    return {
+      url: `url:7000/file?bucket=${bucketName}&path=${path}`,
+      info: fileStat,
+    };
+  };
 
   minioClient.buckets = {
     'cpqd.dojot.admin': [

@@ -5,7 +5,8 @@ const setup = require('./setup');
 
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
-describe('DELETE /files', () => {
+describe('GET /files', () => {
+  jest.setTimeout(100000000);
   let app;
   let jwt;
   beforeAll(async () => {
@@ -14,29 +15,24 @@ describe('DELETE /files', () => {
     await app.init();
   });
 
-  afterAll(() => {
-    app.server.registerShutdown();
-  });
-
   it('Should reply with an unauthorized HTTP response, when the jwt token is not entered', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .expect(401, done);
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is invalid', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${invalidJwt}`)
       .expect(401, done);
   });
 
   it('Should reply with a bad request http response, when the tenant does not exist.', (done) => {
-    const path = crypto.randomBytes(20).toString('hex');
     request(app.server.server)
       .delete('/api/v1/files')
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
-      .query({ path })
+      .query({ path: '/test/test_sample', alt: 'media' })
       .expect(404)
       .then((response) => {
         expect(response.body.error).toEqual('Tenant does not exist.');
@@ -47,15 +43,42 @@ describe('DELETE /files', () => {
       });
   });
 
-  it('Should remove a file', (done) => {
-    const path = '/test/test_sample1';
+  it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path })
+      .query({ path: '/test/test_sample1', alt: 'media' })
+      .expect(200)
+      .expect()
+      .parse((response, next) => {
+        response.setEncoding('ascii');
+        response.data = '';
+        response.on('data', (chunk) => {
+          response.data += chunk;
+          next(null, { file: true });
+        });
+        response.on('error', () => {
+          next(null, { file: false });
+        });
+      })
+      .buffer()
+      .then((response) => {
+        expect(response.body.file).toBeTruthy();
+        done();
+      })
+      .catch((error) => {
+        done(error);
+      });
+  });
+
+  it('Should reply with an url to download the requested file, when the value of the "alt" param is "url"', (done) => {
+    request(app.server.server)
+      .get('/api/v1/files')
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ path: '/test/test_sample1', alt: 'url' })
       .expect(200)
       .then((response) => {
-        expect(response.body.message).toEqual(`File ${path} removed successfully.`);
+        expect(response.body.url).toBeDefined();
         done();
       })
       .catch((error) => {
@@ -64,11 +87,10 @@ describe('DELETE /files', () => {
   });
 
   it('Should reply with a not found http response, when the file was not found ', (done) => {
-    const path = '/test/test_sample_notfound';
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path })
+      .query({ path: '/test/test_sample_not_found', alt: 'media' })
       .expect(404)
       .then((response) => {
         expect(response.body.error).toEqual('The file does not exist.');
@@ -79,13 +101,47 @@ describe('DELETE /files', () => {
       });
   });
 
-  it('Should reply with a bad request http response, when the path param is not entered ', (done) => {
+  it('Should reply with an Bad request http response, when the "alt" param is not entered', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)
+      .query({ path: '/test/test_sample' })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.error).toEqual('The "alt" param is required');
+        expect(response.body.detail).toEqual('The "alt" param is required');
+        done();
+      })
+      .catch((error) => {
+        done(error);
+      });
+  });
+
+  it('Should reply with an Bad request http response, when the value of the "alt" param is invalid', (done) => {
+    request(app.server.server)
+      .get('/api/v1/files')
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ path: '/test/test_sample', alt: 'invalid' })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.error).toEqual('The "alt" param is invalid');
+        expect(response.body.detail).toEqual('The value of the "alt" parameter must be "media" or "url".');
+        done();
+      })
+      .catch((error) => {
+        done(error);
+      });
+  });
+
+  it('Should reply with a bad request http response, when the "path" param is not entered ', (done) => {
+    request(app.server.server)
+      .get('/api/v1/files')
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ alt: 'url' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "path" field is required.');
+        expect(response.body.detail).toEqual('The "path" field is required.');
         done();
       })
       .catch((error) => {
@@ -94,11 +150,10 @@ describe('DELETE /files', () => {
   });
 
   it('Should reply with a bad request http response, when the length of the "path" param is less than 3 characters ', (done) => {
-    const path = '12';
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path })
+      .query({ path: '12', alt: 'url' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "path" field is invalid.');
@@ -113,9 +168,9 @@ describe('DELETE /files', () => {
   it('Should reply with a bad request http response, when the length of the "path" param is greater than 100 characters', (done) => {
     const path = crypto.randomBytes(101).toString('hex');
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path })
+      .query({ path, alt: 'url' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "path" field is invalid.');
@@ -130,9 +185,9 @@ describe('DELETE /files', () => {
   it('Should reply with a bad request http response, when the value of the "path" param is "/.tmp/"', (done) => {
     const path = '/.tmp/';
     request(app.server.server)
-      .delete('/api/v1/files')
+      .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path })
+      .query({ path, alt: 'url' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "path" field is invalid.');

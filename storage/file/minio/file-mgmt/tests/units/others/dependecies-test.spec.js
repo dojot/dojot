@@ -14,6 +14,7 @@ jest.mock('../../../src/services/tenant-service', () => jest.fn().mockImplementa
 jest.mock('../../../src/services/upload-file-service', () => jest.fn().mockImplementation(() => ({})));
 jest.mock('../../../src/services/list-files-service', () => jest.fn().mockImplementation(() => ({})));
 jest.mock('../../../src/services/remove-file-service', () => jest.fn().mockImplementation(() => ({})));
+jest.mock('../../../src/services/retrieval-file-service', () => jest.fn().mockImplementation(() => ({})));
 jest.mock('../../../src/app/web/controllers/file-controller', () => jest.fn().mockImplementation(() => ({})));
 jest.mock('../../../src/app/web/controllers/list-files-controller', () => jest.fn().mockImplementation(() => ({})));
 jest.mock('../../../src/app/kafka/controllers/kafka-controller', () => jest.fn().mockImplementation(() => ({})));

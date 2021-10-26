@@ -1,3 +1,8 @@
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+
+const pipelineAsync = promisify(pipeline);
+
 module.exports = class FileController {
   constructor(uploadFileService, retrieverFileService, removeFileService, logger) {
     this.removeFileService = removeFileService;
@@ -26,7 +31,8 @@ module.exports = class FileController {
       res.setHeader('Content-Type', data.info.contentType);
       res.setHeader('Content-Length', data.info.size);
 
-      return data.stream.pipe(res);
+      await pipelineAsync(data.stream, res);
+      return res;
     }
 
     return res.status(200).json(data);

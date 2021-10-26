@@ -69,14 +69,3 @@ module.exports = class MinIoRepository {
       } : undefined;
   }
 };
-
-// "message": "File /test/dojot-7.docx removed successfully.",
-//     "info": {
-//         "size": 53942,
-//         "metaData": {
-//             "content-type": "binary/octet-stream"
-//         },
-//         "lastModified": "2021-10-18T18:40:29.000Z",
-//         "versionId": null,
-//         "etag": "13bbd25d7156e88034abab840826cd87"
-//     }

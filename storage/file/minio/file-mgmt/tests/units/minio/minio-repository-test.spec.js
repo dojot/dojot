@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { Readable } = require('stream');
 
 jest.mock('uuid', () => ({
@@ -10,6 +11,7 @@ const loggerMock = require('../../mocks/logger-mock');
 
 const configMinio = {
   'bucket.suffix': 'dojot.test.',
+  'presigned.expiry': 900,
 };
 
 describe('MinIoRepository', () => {
@@ -24,6 +26,8 @@ describe('MinIoRepository', () => {
       removeObject: jest.fn(),
       copyObject: jest.fn(),
       statObject: jest.fn(),
+      getObject: jest.fn((bucketName, path) => true),
+      presignedGetObject: jest.fn((bucketName, path) => `http://url:7000/object?bucket=${bucketName}&path=${path}`),
     };
 
     minioRepository = new MinIoRepository(minioConnection, configMinio, loggerMock);
@@ -186,6 +190,64 @@ describe('MinIoRepository', () => {
       { file: 2 },
       { file: 3 },
     ]);
+  });
+
+  it('Should return a file for download', async () => {
+    minioConnection.statObject.mockReturnValueOnce({
+      metaData: {
+        'content-type': 'binary/octet-stream',
+      },
+      etag: 'md5',
+      size: 500,
+    });
+
+    const fileMetadata = await minioRepository.getObject('test', '/path/file/');
+
+    expect(fileMetadata.stream).toBeDefined();
+    expect(fileMetadata.info).toEqual({
+      contentType: 'binary/octet-stream',
+      etag: 'md5',
+      size: 500,
+    });
+  });
+
+  it('getObject() > Should return null, when the requested file was not found', async () => {
+    minioConnection.statObject.mockImplementationOnce(() => {
+      throw new Error('Not Found file');
+    });
+
+    const fileMetadata = await minioRepository.getObject('test', '/path/file/');
+
+    expect(fileMetadata).toBeNull();
+  });
+
+  it('Should return an url to download the requested file', async () => {
+    minioConnection.statObject.mockReturnValueOnce({
+      metaData: {
+        'content-type': 'binary/octet-stream',
+      },
+      etag: 'md5',
+      size: 500,
+    });
+
+    const fileMetadata = await minioRepository.getObjectUrl('test', '/path/file/');
+
+    expect(fileMetadata.url).toBeDefined();
+    expect(fileMetadata.info).toEqual({
+      contentType: 'binary/octet-stream',
+      etag: 'md5',
+      size: 500,
+    });
+  });
+
+  it('getObjectUrl() > Should return null, when the requested file was not found', async () => {
+    minioConnection.statObject.mockImplementationOnce(() => {
+      throw new Error('Not Found file');
+    });
+
+    const fileMetadata = await minioRepository.getObjectUrl('test', '/path/file/');
+
+    expect(fileMetadata).toBeNull();
   });
 
   it('Should throw an error', async () => {

@@ -13,7 +13,7 @@ describe('OpenAPIValidator', () => {
     expect(middleware).toBeDefined();
   });
 
-  it('Should make middleware', () => {
+  it('Should throw an error', () => {
     // eslint-disable-next-line no-unused-vars
     mockOpenApiValidator.middleware = jest.fn(() => {
       throw Error('Error');

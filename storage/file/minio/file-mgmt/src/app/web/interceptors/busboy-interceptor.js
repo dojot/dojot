@@ -7,7 +7,7 @@ const {
 
 module.exports = (logger, minioRepository, config) => ({
   name: 'dojot-busboy-interceptor',
-  middleware: (req, res, next) => {
+  middleware: async (req, res, next) => {
     const busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: config.minio['upload.size.limit'] } });
     req.body = {};
     let loadedFile = false;
@@ -45,7 +45,7 @@ module.exports = (logger, minioRepository, config) => ({
       }
     });
 
-    busboy.on('finish', async () => {
+    busboy.on('finish', () => {
       logger.debug('Form upload successfully');
       busboy.emit('loaded-form');
     });
@@ -65,8 +65,8 @@ module.exports = (logger, minioRepository, config) => ({
       }
     });
 
-    busboy.on('loaded-end', async () => next());
+    busboy.on('loaded-end', () => next());
 
-    req.pipe(busboy);
+    await req.pipe(busboy);
   },
 });

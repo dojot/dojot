@@ -67,7 +67,7 @@ describe('BusboyInterceptor', () => {
     });
   });
 
-  it('Should return a http error response (413), when the file size is greater than the limit ', (done) => {
+  it('Should return a too large http response, when the file size is greater than the limit ', (done) => {
     const pipeMock = (busboy) => {
       const fileStreamMock = new MockEventEmitter();
       fileStreamMock.on('limit', () => {
@@ -81,17 +81,22 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
+      tenant: 'test',
     };
     const response = new ResponseMock();
 
     busboyInterceptor.middleware(request, response, (error) => {
-      expect(error.responseJSON.error).toEqual('The file is too large');
-      expect(error.responseJSON.detail).toEqual(`The file size has a limit of ${config.minio['upload.size.limit']}`);
-      done();
+      try {
+        expect(error.responseJSON.error).toEqual('The file is too large');
+        expect(error.responseJSON.detail).toEqual(`The file size has a limit of ${config.minio['upload.size.limit']}`);
+        done();
+      } catch (e) {
+        done(e);
+      }
     });
   });
 
-  it('Should return a http error response (500), when there is an error ', (done) => {
+  it('Should return a internal server http response response, when there is an error ', (done) => {
     const pipeMock = (busboy) => {
       const fileStreamMock = new MockEventEmitter();
       fileStreamMock.on('end', () => {
@@ -105,12 +110,46 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
+      tenant: 'test',
     };
     const response = new ResponseMock();
 
     busboyInterceptor.middleware(request, response, (error) => {
-      expect(error).toBeDefined();
-      done();
+      try {
+        expect(error).toBeDefined();
+        done();
+      } catch (e) {
+        done(e);
+      }
+    });
+  });
+
+  it('Should return a Not found http response, when the tenant was not found ', (done) => {
+    const pipeMock = (busboy) => {
+      const fileStreamMock = new MockEventEmitter();
+      fileStreamMock.on('end', () => {
+        busboy.removeAllListeners('loaded-meta');
+        throw new Error('Error');
+      });
+
+      busboy.emit('field', 'path', '/test/');
+      busboy.emit('field', 'md5', 'md5');
+      busboy.emit('file', 'file', fileStreamMock, '', '', '');
+    };
+    const request = {
+      pipe: pipeMock,
+      tenant: 'test_not_found',
+    };
+    const response = new ResponseMock();
+
+    busboyInterceptor.middleware(request, response, (error) => {
+      try {
+        expect(error.responseJSON.error).toEqual('Tenant does not exist.');
+        expect(error.responseJSON.detail).toEqual('There is no tenancy for this tenant.');
+        done();
+      } catch (e) {
+        done(e);
+      }
     });
   });
 });

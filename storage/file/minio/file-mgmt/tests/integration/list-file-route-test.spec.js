@@ -4,7 +4,7 @@ const setup = require('./setup');
 
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
-describe('get /files/list', () => {
+describe('GET /files/list', () => {
   let app;
   let jwt;
   beforeAll(async () => {
@@ -54,7 +54,8 @@ describe('get /files/list', () => {
       .set('Authorization', `Bearer ${jwt}`)
       .expect(400)
       .then((response) => {
-        expect(response.body.error).toEqual('The limit field is required and must be a integer.');
+        expect(response.body.error).toEqual('The limit param is invalid or undefined.');
+        expect(response.body.detail).toEqual('The limit param is required and must be a positive integer.');
         done();
       })
       .catch((err) => {
@@ -66,10 +67,43 @@ describe('get /files/list', () => {
     request(app.server.server)
       .get('/api/v1/files/list')
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ limit: 'string' })
+      .query({ limit: 2.5 })
       .expect(400)
       .then((response) => {
-        expect(response.body.error).toEqual('The limit field is required and must be a integer.');
+        expect(response.body.error).toEqual('The limit param is invalid or undefined.');
+        expect(response.body.detail).toEqual('The limit param is required and must be a positive integer.');
+        done();
+      })
+      .catch((err) => {
+        done(err);
+      });
+  });
+
+  it('Should reply with an bad request HTTP response, when the limit param is not a number', (done) => {
+    request(app.server.server)
+      .get('/api/v1/files/list')
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ limit: 'limit' })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.error).toEqual('The limit param is invalid or undefined.');
+        expect(response.body.detail).toEqual('The limit param is required and must be a positive integer.');
+        done();
+      })
+      .catch((err) => {
+        done(err);
+      });
+  });
+
+  it('Should reply with an bad request HTTP response, when the limit param is negative', (done) => {
+    request(app.server.server)
+      .get('/api/v1/files/list')
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ limit: -2 })
+      .expect(400)
+      .then((response) => {
+        expect(response.body.error).toEqual('The limit param is invalid or undefined.');
+        expect(response.body.detail).toEqual('The limit param is required and must be a positive integer.');
         done();
       })
       .catch((err) => {

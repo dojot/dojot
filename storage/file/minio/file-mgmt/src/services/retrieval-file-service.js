@@ -6,8 +6,9 @@ const {
 const PathValidatorUtil = require('../utils/path-validator-util');
 
 module.exports = class RetrievalFileService {
-  constructor(minioRepository) {
+  constructor(minioRepository, logger) {
     this.minioRepository = minioRepository;
+    this.logger = logger;
   }
 
   download = async (tenant, path) => {
@@ -29,6 +30,9 @@ module.exports = class RetrievalFileService {
   }
 
   handle = async (tenant, path, alt) => {
+    if (!alt) {
+      throw framework.errorTemplate.BadRequest('The "alt" param is required', 'The "alt" param is required');
+    }
     await PathValidatorUtil.validate(path, this.logger);
 
     if (alt === 'media') {
@@ -39,6 +43,6 @@ module.exports = class RetrievalFileService {
       return this.getUrl(tenant, path);
     }
 
-    throw framework.errorTemplate.BadRequest('The "alt" param is invalid', 'The "alt" param is invalid');
+    throw framework.errorTemplate.BadRequest('The "alt" param is invalid', 'The value of the "alt" parameter must be "media" or "url".');
   }
 };
