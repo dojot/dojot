@@ -8,12 +8,12 @@ const mockValidator = {
 };
 jest.mock('../../../src/utils/path-validator-util', () => mockValidator);
 
-const UploadFileService = require('../../../src/services/upload-file-service');
+const FileUploadService = require('../../../src/services/file-upload-service');
 
-describe('UploadFileService', () => {
-  let uploadFileService;
+describe('FileUploadService', () => {
+  let fileUploadService;
   beforeEach(() => {
-    uploadFileService = new UploadFileService(new MinIoRepositoryMock(), LoggerMock);
+    fileUploadService = new FileUploadService(new MinIoRepositoryMock(), LoggerMock);
   });
 
   it('Should commit the file and return a file statistics', async () => {
@@ -25,7 +25,7 @@ describe('UploadFileService', () => {
       },
     };
 
-    const fileStat = await uploadFileService.handle('test', file, '', 'md5');
+    const fileStat = await fileUploadService.handle('test', file, '', 'md5');
 
     expect(fileStat).toEqual(file);
   });
@@ -40,7 +40,7 @@ describe('UploadFileService', () => {
     };
 
     try {
-      await uploadFileService.handle('test', file, '', 'md5error');
+      await fileUploadService.handle('test', file, '', 'md5error');
     } catch (e) {
       error = e;
     }

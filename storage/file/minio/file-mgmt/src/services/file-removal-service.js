@@ -5,12 +5,25 @@ const {
 } = require('@dojot/microservice-sdk');
 const PathValidatorUtil = require('../utils/path-validator-util');
 
-module.exports = class RemoveFileService {
+/**
+ * File removal service
+ *
+ * @class
+ */
+module.exports = class FileRemovalService {
   constructor(minioRepository, logger) {
     this.minioRepository = minioRepository;
     this.logger = logger;
   }
 
+  /**
+   * Operation handler.
+   *
+   * @param {*} tenant The tenant to which the file belongs
+   * @param {*} path Path file
+   *
+   * @returns the file's metadata.
+   */
   // eslint-disable-next-line no-unused-vars
   handle = async (tenant, path) => {
     if (!(await this.minioRepository.bucketExists(tenant))) {

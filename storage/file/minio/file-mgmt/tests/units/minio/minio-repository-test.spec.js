@@ -221,7 +221,7 @@ describe('MinIoRepository', () => {
     expect(fileMetadata).toBeNull();
   });
 
-  it('Should return an url to download the requested file', async () => {
+  it('Should return a url to download the requested file', async () => {
     minioConnection.statObject.mockReturnValueOnce({
       metaData: {
         'content-type': 'binary/octet-stream',

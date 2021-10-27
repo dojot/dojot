@@ -1,9 +1,17 @@
-module.exports = class ListFilesController {
+module.exports = class FileListingController {
   constructor(listFilesService, logger) {
     this.listFilesService = listFilesService;
     this.logger = logger;
   }
 
+  /**
+   * File listing routes
+   *
+   * @param {Express.Request} req Http Request
+   * @param {Express.Response} res Http response
+   *
+   * @returns an http response
+   */
   get = async (req, res) => {
     const {
       pathPrefix, limit, startAfter,

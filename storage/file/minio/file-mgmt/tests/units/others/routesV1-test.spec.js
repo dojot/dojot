@@ -3,7 +3,7 @@ jest.mock('../../../src/app/web/controllers/file-controller', () => jest.fn().mo
   delete: jest.fn(),
 })));
 
-jest.mock('../../../src/app/web/controllers/list-files-controller', () => jest.fn().mockImplementation(() => ({
+jest.mock('../../../src/app/web/controllers/file-listing-controller', () => jest.fn().mockImplementation(() => ({
   get: jest.fn(),
 })));
 
@@ -16,7 +16,7 @@ jest.mock('../../../src/app/web/interceptors', () => ({
 }));
 
 const controllers = {
-  listFileController: {
+  fileListingController: {
     get: jest.fn(),
   },
   fileController: {

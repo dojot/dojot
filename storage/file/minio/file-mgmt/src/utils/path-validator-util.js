@@ -4,6 +4,13 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
+/**
+ * Validate a path according to rules
+ *
+ * @param {*} path the file path
+ * @param {*} logger the logger
+ * @param {*} errorCallback a function that will be called before an error is thrown.
+ */
 async function validate(path, logger, errorCallback) {
   if (!path) {
     logger.debug('The "path" field is required.');

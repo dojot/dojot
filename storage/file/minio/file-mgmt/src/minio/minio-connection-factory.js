@@ -1,6 +1,13 @@
 const Minio = require('minio');
 const { promisify } = require('util');
 
+/**
+ * Creates the MinIo client.
+ *
+ * @param {*} configMinio the minio settings
+ *
+ * @returns MinIo Client
+ */
 module.exports = (configMinio) => {
   const minioClient = new Minio.Client({
     endPoint: configMinio.host,
@@ -10,6 +17,7 @@ module.exports = (configMinio) => {
     secretKey: configMinio.secretKey,
   });
 
+  // Promissify callback-based methods
   minioClient.makeBucket = promisify(minioClient.makeBucket);
   minioClient.removeBucket = promisify(minioClient.removeBucket);
   minioClient.bucketExists = promisify(minioClient.bucketExists);

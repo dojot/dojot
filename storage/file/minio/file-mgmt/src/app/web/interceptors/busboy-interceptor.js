@@ -5,6 +5,15 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
+/**
+ * Makes an instance of busboy interceptor.
+ *
+ * @param {Logger} logger Dojot Logger
+ * @param {MinIoRepository} minioRepository MinIo Repository
+ * @param {Config} config Application settings
+ *
+ * @returns an instance of busboy interceptor
+ */
 module.exports = (logger, minioRepository, config) => ({
   name: 'dojot-busboy-interceptor',
   middleware: async (req, res, next) => {
@@ -13,15 +22,17 @@ module.exports = (logger, minioRepository, config) => ({
     let loadedFile = false;
     let loadedMeta = false;
 
-    // Busboy events
+    // Gets the fields
     busboy.on('field', (fieldname, value) => {
       req.body[fieldname] = value;
     });
 
+    // Gets the file
     // eslint-disable-next-line no-unused-vars
     busboy.on('file', async (fieldname, fileStream, filename, encoding, mimetype) => {
       try {
         logger.debug('Gets file stream..');
+        // If the file exceeds the size limit
         fileStream.on('limit', () => {
           next(framework.errorTemplate.PayloadTooLarge('The file is too large', `The file size has a limit of ${config.minio['upload.size.limit']}`));
         });
@@ -32,6 +43,7 @@ module.exports = (logger, minioRepository, config) => ({
           return;
         }
 
+        // Initialize a transaction
         const fileinfo = await minioRepository.putTmpObject(req.tenant, fileStream);
         req.body.uploadedFile = {
           ...fileinfo,
@@ -39,18 +51,21 @@ module.exports = (logger, minioRepository, config) => ({
           encoding,
           mimetype,
         };
+
+        // Emits the signal that the transaction metadata has been loaded
         busboy.emit('loaded-meta');
       } catch (error) {
         next(error);
       }
     });
 
+    // When the file has finished loading, it emits a signal that the form has been loaded.
     busboy.on('finish', () => {
       logger.debug('Form upload successfully');
       busboy.emit('loaded-form');
     });
 
-    // App control auxiliary events
+    // Checks if the file and its metadata have been loaded
     busboy.on('loaded-form', () => {
       loadedFile = true;
       if (loadedMeta) {
@@ -65,6 +80,7 @@ module.exports = (logger, minioRepository, config) => ({
       }
     });
 
+    // If that's ok.
     busboy.on('loaded-end', () => next());
 
     await req.pipe(busboy);

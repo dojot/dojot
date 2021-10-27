@@ -70,12 +70,12 @@ describe('FileController', () => {
     };
     const responseMock = new ResponseMock();
 
-    const response = await fileController.delete(request, responseMock);
+    const response = await fileController.remove(request, responseMock);
 
     expect(response.body.message).toEqual('File /test/sample_1 removed successfully.');
   });
 
-  it('Should reply with an url to download the requested file, when the value of the "alt" param is "url"', async () => {
+  it('Should reply with a url to download the requested file, when the value of the "alt" param is "url"', async () => {
     const request = {
       tenant: 'test',
       query: {

@@ -45,10 +45,10 @@ class KafkaConsumer extends Consumer {
   }
 
   /**
-     * A function to get if kafka is connected
-     *
-     * @returns {Promise<boolean>} if kafka is connect
-     */
+   * A function to get if kafka is connected
+   *
+   * @returns {Promise<boolean>} if kafka is connect
+   */
   async isConnected() {
     try {
       const { connected } = await this.getStatus();
@@ -63,10 +63,10 @@ class KafkaConsumer extends Consumer {
   }
 
   /**
-       * Unregister all callbacks
-       *
-       * @throws If Cannot unregister callback
-       */
+   * Unregister all callbacks
+   *
+   * @throws If Cannot unregister callback
+   */
   unregisterCallbacks() {
     if (this.idCallbackTenant) {
       this.unregisterCallback(this.idCallbackTenant);

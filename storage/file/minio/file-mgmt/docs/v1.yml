@@ -150,7 +150,7 @@ paths:
         - files
       security:
         - bearerAuth: []
-      summary: "Retrieves an URL to extern download"
+      summary: "Retrieves a URL to extern download"
       description: "Retrieves a MinIo URL to extern download and file metadata."
       operationId: "retrieveFile"
       parameters:

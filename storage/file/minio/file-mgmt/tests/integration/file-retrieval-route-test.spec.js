@@ -71,7 +71,7 @@ describe('GET /files', () => {
       });
   });
 
-  it('Should reply with an url to download the requested file, when the value of the "alt" param is "url"', (done) => {
+  it('Should reply with a url to download the requested file, when the value of the "alt" param is "url"', (done) => {
     request(app.server.server)
       .get('/api/v1/files')
       .set('Authorization', `Bearer ${jwt}`)

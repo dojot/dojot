@@ -6,22 +6,22 @@ const mockValidator = {
 };
 jest.mock('../../../src/utils/path-validator-util', () => mockValidator);
 
-const RetrievalFileService = require('../../../src/services/retrieval-file-service');
+const FileRetrievalService = require('../../../src/services/file-retrieval-service');
 
-describe('RetrievalFileService', () => {
-  let retrievalFileService;
+describe('FileRetrievalService', () => {
+  let fileRetrievalService;
   let minIoRepositoryMock;
   beforeEach(() => {
     minIoRepositoryMock = new MinIoRepositoryMock();
     minIoRepositoryMock.getObject = jest.fn();
     minIoRepositoryMock.getObjectUrl = jest.fn();
-    retrievalFileService = new RetrievalFileService(minIoRepositoryMock, LoggerMock);
+    fileRetrievalService = new FileRetrievalService(minIoRepositoryMock, LoggerMock);
   });
 
   it('Should return the requeted file', async () => {
     minIoRepositoryMock.getObject.mockReturnValueOnce({});
 
-    const file = await retrievalFileService.download('test', '/test/test_sample1');
+    const file = await fileRetrievalService.download('test', '/test/test_sample1');
 
     expect(file).toBeDefined();
   });
@@ -31,7 +31,7 @@ describe('RetrievalFileService', () => {
 
     let error;
     try {
-      await retrievalFileService.download('test', '/test/test_sample1');
+      await fileRetrievalService.download('test', '/test/test_sample1');
     } catch (e) {
       error = e;
     }
@@ -42,10 +42,10 @@ describe('RetrievalFileService', () => {
     });
   });
 
-  it('Should return a js object with an url of the requested file ', async () => {
+  it('Should return a js object with a url of the requested file ', async () => {
     minIoRepositoryMock.getObjectUrl.mockReturnValueOnce({ url: 'url' });
 
-    const file = await retrievalFileService.getUrl('test', '/test/test_sample1');
+    const file = await fileRetrievalService.getUrl('test', '/test/test_sample1');
 
     expect(file.url).toBeDefined();
   });
@@ -55,7 +55,7 @@ describe('RetrievalFileService', () => {
 
     let error;
     try {
-      await retrievalFileService.getUrl('test', '/test/test_sample1');
+      await fileRetrievalService.getUrl('test', '/test/test_sample1');
     } catch (e) {
       error = e;
     }
@@ -67,20 +67,20 @@ describe('RetrievalFileService', () => {
   });
 
   it('Should return the object returned from the download method, when the value of the "alt" is "media"', async () => {
-    retrievalFileService.download = jest.fn(() => ({ stream: '' }));
-    retrievalFileService.getUrl = jest.fn(() => ({ url: 'url' }));
+    fileRetrievalService.download = jest.fn(() => ({ stream: '' }));
+    fileRetrievalService.getUrl = jest.fn(() => ({ url: 'url' }));
 
-    const file = await retrievalFileService.handle('test', 'path', 'media');
+    const file = await fileRetrievalService.handle('test', 'path', 'media');
     expect(file).toEqual({
       stream: '',
     });
   });
 
   it('Should return the object returned from the GetUrl method, when the value of the "alt" is "url"', async () => {
-    retrievalFileService.download = jest.fn(() => ({ stream: '' }));
-    retrievalFileService.getUrl = jest.fn(() => ({ url: 'url' }));
+    fileRetrievalService.download = jest.fn(() => ({ stream: '' }));
+    fileRetrievalService.getUrl = jest.fn(() => ({ url: 'url' }));
 
-    const file = await retrievalFileService.handle('test', 'path', 'url');
+    const file = await fileRetrievalService.handle('test', 'path', 'url');
     expect(file).toEqual({
       url: 'url',
     });
@@ -89,7 +89,7 @@ describe('RetrievalFileService', () => {
   it('Should return an error, when the alt is not entered', async () => {
     let error;
     try {
-      await retrievalFileService.handle('test', 'path', undefined);
+      await fileRetrievalService.handle('test', 'path', undefined);
     } catch (e) {
       error = e;
     }
@@ -103,7 +103,7 @@ describe('RetrievalFileService', () => {
   it('Should return an error, when the value of the alt is invalid', async () => {
     let error;
     try {
-      await retrievalFileService.handle('test', 'path', 'invalid');
+      await fileRetrievalService.handle('test', 'path', 'invalid');
     } catch (e) {
       error = e;
     }
@@ -119,7 +119,7 @@ describe('RetrievalFileService', () => {
 
     let error;
     try {
-      await retrievalFileService.handle('test', 'path', 'media');
+      await fileRetrievalService.handle('test', 'path', 'media');
     } catch (e) {
       error = e;
     }

@@ -7,6 +7,13 @@ const { promisify } = require('util');
 const pipelineAsync = promisify(pipeline);
 
 module.exports = class MinIoRepository {
+  /**
+   * Performs operations on MioIo
+   *
+   * @param {MinioClient} minioConnection MinIO Client
+   * @param {object} configMinio MinIO settings
+   * @param {object} logger Dojot logger
+   */
   constructor(minioConnection, configMinio, logger) {
     this.client = minioConnection;
     this.suffixBucket = configMinio['bucket.suffix'];
@@ -14,16 +21,34 @@ module.exports = class MinIoRepository {
     this.logger = logger;
   }
 
+  /**
+   * Creates a bucket.
+   *
+   * @param {string} bucketName Bucket name
+   * @param {string} region AWS regions
+   */
   async createBucket(bucketName, region) {
     this.logger.debug(`Creating bucket ${this.suffixBucket + bucketName}`);
     await this.client.makeBucket(this.suffixBucket + bucketName, region);
   }
 
+  /**
+   * Removes a bucket.
+   *
+   * @param {string} bucketName Bucket Name
+   */
   async removeBucket(bucketName) {
     this.logger.debug(`Removing bucket ${this.suffixBucket + bucketName}`);
     await this.client.removeBucket(this.suffixBucket + bucketName);
   }
 
+  /**
+   * Checks checks if the bucket exists
+   *
+   * @param {string} bucketName Bucket Name
+   *
+   * @returns a boolean
+   */
   async bucketExists(bucketName) {
     try {
       return await this.client.bucketExists(this.suffixBucket + bucketName);
@@ -33,6 +58,15 @@ module.exports = class MinIoRepository {
     }
   }
 
+  /**
+   * Stores a file.
+   *
+   * @param {string} bucketName Bucket name
+   * @param {string} path Path where the file will be persisted.
+   * @param {FileStream} fileStream File stream
+   *
+   * @returns the metadata of the operation
+   */
   async putObject(bucketName, path, fileStream) {
     this.logger.debug(`Putting object ${path}`);
     const info = await this.client.putObject(
@@ -45,6 +79,14 @@ module.exports = class MinIoRepository {
     };
   }
 
+  /**
+   * Initializes a store transaction. Storing the file temporarily.
+   *
+   * @param {string} bucketName Bucket name
+   * @param {FileStream} fileStream File stream
+   *
+   * @returns the transaction code and metadata of the put operation
+   */
   async putTmpObject(bucketName, fileStream) {
     const transactionCode = uuidv4();
     this.logger.debug(`Start file transaction ${transactionCode}`);
@@ -61,12 +103,26 @@ module.exports = class MinIoRepository {
     };
   }
 
+  /**
+   * Commits a store transaction. Permanently storing the file.
+   *
+   * @param {string} bucketName Bucket name
+   * @param {string} path Path where the file will be persisted.
+   * @param {string} fileStream the transaction code
+   *
+   */
   async commitObject(bucketName, path, transactionCode) {
     this.logger.debug(`Commit file transaction ${transactionCode}`);
     await this.client.copyObject(`${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}${bucketName}/.tmp/${transactionCode}`);
     await this.client.removeObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`);
   }
 
+  /**
+   * Reverses a store transaction. Removes a temporary file.
+   *
+   * @param {string} bucketName Bucket name
+   * @param {string} transactionCode the transaction code
+   */
   async rollbackObject(bucketName, transactionCode) {
     this.logger.debug(`Rollback file transaction ${transactionCode}`);
     return this.client.removeObject(
@@ -74,6 +130,14 @@ module.exports = class MinIoRepository {
     );
   }
 
+  /**
+   * Retrieves a file
+   *
+   * @param {string} bucketName  Bucket name
+   * @param {string} path File Path
+   *
+   * @returns an object with the file stream and the file's metadata.
+   */
   async getObject(bucketName, path) {
     try {
       const info = await this.client.statObject(this.suffixBucket + bucketName, path);
@@ -95,6 +159,14 @@ module.exports = class MinIoRepository {
     }
   }
 
+  /**
+   * Gets a url to download the file directly from the MinIo.
+   *
+   * @param {string} bucketName  Bucket name
+   * @param {string} path File Path
+   *
+   * @returns an object with the MinIO URL to the file and the file's metadata.
+   */
   async getObjectUrl(bucketName, path) {
     try {
       const info = await this.client.statObject(this.suffixBucket + bucketName, path);
@@ -116,6 +188,14 @@ module.exports = class MinIoRepository {
     }
   }
 
+  /**
+   * Removes a file.
+   *
+   * @param {string} bucketName  Bucket name
+   * @param {string} path File Path
+   *
+   * @returns the metadata of the operation.
+   */
   async removeObject(bucketName, path) {
     let stat;
 
@@ -134,6 +214,16 @@ module.exports = class MinIoRepository {
     return stat;
   }
 
+  /**
+   * Lists available files.
+   *
+   * @param {string} bucketName Bucket name
+   * @param {string} pathPrefix Path prefix where the files will be fetched.
+   * @param {number} limit The limit of items to be returned.
+   * @param {string} startAfter Sets which file the list should start from.
+   *
+   * @returns a list of files
+   */
   async listObjects(bucketName, pathPrefix, limit, startAfter) {
     let error;
     const result = {

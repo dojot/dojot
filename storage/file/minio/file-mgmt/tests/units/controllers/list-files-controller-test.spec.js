@@ -1,4 +1,4 @@
-const ListFilesController = require('../../../src/app/web/controllers/list-files-controller');
+const FileListingController = require('../../../src/app/web/controllers/file-listing-controller');
 const ResponseMock = require('../../mocks/express-response-mock');
 const loggerMock = require('../../mocks/logger-mock');
 
@@ -17,10 +17,10 @@ const listFilesServiceMock = {
   })),
 };
 
-describe('ListFilesController', () => {
-  let listFilesController;
+describe('FileListingController', () => {
+  let fileListingController;
   beforeEach(() => {
-    listFilesController = new ListFilesController(listFilesServiceMock, loggerMock);
+    fileListingController = new FileListingController(listFilesServiceMock, loggerMock);
   });
 
   it('Should return a response, when startAfter has not been entered', async () => {
@@ -33,7 +33,7 @@ describe('ListFilesController', () => {
     };
     const responseMock = new ResponseMock();
 
-    const response = await listFilesController.get(request, responseMock);
+    const response = await fileListingController.get(request, responseMock);
     expect(response.body.files.length).toEqual(1);
     expect(response.body.nextPageStartsAfter)
       .toEqual('/api/v1/files/list?pathPrefix=/app/&limit=1&startAfter=test%2Fsample_1');
@@ -49,7 +49,7 @@ describe('ListFilesController', () => {
     };
     const responseMock = new ResponseMock();
 
-    const response = await listFilesController.get(request, responseMock);
+    const response = await fileListingController.get(request, responseMock);
     expect(response.body.files.length).toEqual(1);
     expect(response.body.nextPageStartsAfter)
       .toEqual('/api/v1/files/list?pathPrefix=/app/&limit=1&startAfter=test%2Fsample_1');

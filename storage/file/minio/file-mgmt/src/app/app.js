@@ -7,8 +7,9 @@ module.exports = class App {
   /**
    * App
    *
-   * @param {Server} server server
-   * @param {Logger} server logger
+   * @param {Server} server Dojot server
+   * @param {Logger} logger Dojot logger
+   * @param {string} logger The path to the yml file
    */
   constructor(config, logger, openApiPath) {
     this.logger = logger;
@@ -16,16 +17,23 @@ module.exports = class App {
     this.config = config;
   }
 
+  /**
+   * Initializes the application
+   *
+   */
   async init() {
+    // Initialize internal dependencies
     const { web, kafka } = Dependecies(this.config, this.logger);
     this.server = web.httpServer;
     this.kafkaConsumer = kafka.kafkaConsumer;
 
     try {
+      // Init Kafka and handles listeners
       this.kafkaConsumer.init(
         topics(this.config, kafka.controllers),
       );
 
+      // Adapts express to the application and manages the routes
       this.express = ExpressAdapter.adapt(
         routesV1('/api/v1', web.controllers, web.interceptors),
         this.server.serviceState,

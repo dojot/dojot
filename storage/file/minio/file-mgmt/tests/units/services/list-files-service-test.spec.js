@@ -1,16 +1,16 @@
-const ListFilesService = require('../../../src/services/list-files-service');
+const FileListingService = require('../../../src/services/file-listing-service');
 
 const MinIoRepositoryMock = require('../../mocks/minio-repository-mock');
 const LoggerMock = require('../../mocks/logger-mock');
 
-describe('ListFilesService', () => {
-  let listFilesService;
+describe('FileListingService', () => {
+  let fileListingService;
   beforeEach(() => {
-    listFilesService = new ListFilesService(new MinIoRepositoryMock(), LoggerMock);
+    fileListingService = new FileListingService(new MinIoRepositoryMock(), LoggerMock);
   });
 
   it('Should return an array', async () => {
-    const files = await listFilesService.list('test', '', 4, undefined);
+    const files = await fileListingService.list('test', '', 4, undefined);
 
     expect(files.length).toEqual(4);
   });
@@ -18,7 +18,7 @@ describe('ListFilesService', () => {
   it('Should return a not found http error, when the tenant does not exist', async () => {
     let error;
     try {
-      await listFilesService.list('test_error', '', 4, undefined);
+      await fileListingService.list('test_error', '', 4, undefined);
     } catch (e) {
       error = e;
     }
@@ -30,7 +30,7 @@ describe('ListFilesService', () => {
   it('return a bad request http error, when the limit is not number', async () => {
     let error;
     try {
-      await listFilesService.list('test', '', 'number invalid', undefined);
+      await fileListingService.list('test', '', 'number invalid', undefined);
     } catch (e) {
       error = e;
     }
@@ -42,7 +42,7 @@ describe('ListFilesService', () => {
   it('return a bad request http error, when the limit is not integer', async () => {
     let error;
     try {
-      await listFilesService.list('test', '', 2.5, undefined);
+      await fileListingService.list('test', '', 2.5, undefined);
     } catch (e) {
       error = e;
     }
@@ -54,7 +54,7 @@ describe('ListFilesService', () => {
   it('return a bad request http error, when the limit is negative', async () => {
     let error;
     try {
-      await listFilesService.list('test', '', -2, undefined);
+      await fileListingService.list('test', '', -2, undefined);
     } catch (e) {
       error = e;
     }

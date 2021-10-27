@@ -1,12 +1,23 @@
 const KafkaPayloadUtil = require('../../../utils/kafka-payload-util');
 
+/**
+ * Responsible for controlling kafka's operations
+ *
+ * @class
+ */
 class KafkaController {
   constructor(tenantService, logger) {
     this.tenantService = tenantService;
     this.logger = logger;
   }
 
-  handle = async (payload, ack) => {
+  /**
+   * Handles location topic
+   *
+   * @param {*} payload Kafka payload
+   * @param {*} ack ack callback function
+   */
+  handleTenancy = async (payload, ack) => {
     try {
       const data = KafkaPayloadUtil.getValue(payload);
       const operation = {

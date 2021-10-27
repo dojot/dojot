@@ -8,15 +8,23 @@ const KafkaConsumer = require('./kafka-consumer');
 const createMinIOConnection = require('../minio/minio-connection-factory');
 const MinIoRepository = require('../minio/minio-repository');
 const TenantService = require('../services/tenant-service');
-const UploadFileService = require('../services/upload-file-service');
-const ListFilesService = require('../services/list-files-service');
-const RemoveFileService = require('../services/remove-file-service');
+const FileUploadService = require('../services/file-upload-service');
+const FileListingService = require('../services/file-listing-service');
+const FileRemoveService = require('../services/file-removal-service');
 const BusboyHandlerInterceptor = require('./web/interceptors/busboy-interceptor');
 const FileController = require('./web/controllers/file-controller');
-const ListFilesController = require('./web/controllers/list-files-controller');
+const FileListingController = require('./web/controllers/file-listing-controller');
 const KafkaController = require('./kafka/controllers/kafka-controller');
-const RetrievalFileService = require('../services/retrieval-file-service');
+const FileRetrievalService = require('../services/file-retrieval-service');
 
+/**
+ * Initializes the internal dependencies.
+ *
+ * @param {*} config  Application settings
+ * @param {*} logger Dojot logger
+ *
+ * @returns the border dependencies
+ */
 module.exports = (config, logger) => {
   const configServerCamelCase = ConfigManager
     .transformObjectKeys(config.server, camelCase);
@@ -34,10 +42,10 @@ module.exports = (config, logger) => {
 
   // Services
   const tenantService = new TenantService(minioRepository);
-  const uploadFileService = new UploadFileService(minioRepository, logger);
-  const listFilesService = new ListFilesService(minioRepository, logger);
-  const removeFileService = new RemoveFileService(minioRepository, logger);
-  const retrievalFileService = new RetrievalFileService(minioRepository, logger);
+  const fileUploadService = new FileUploadService(minioRepository, logger);
+  const fileListingService = new FileListingService(minioRepository, logger);
+  const fileRemovalService = new FileRemoveService(minioRepository, logger);
+  const fileretrievalService = new FileRetrievalService(minioRepository, logger);
 
   // Interceptors
   const busboyHandlerInterceptor = BusboyHandlerInterceptor(
@@ -46,9 +54,9 @@ module.exports = (config, logger) => {
 
   // Controllers
   const fileController = new FileController(
-    uploadFileService, retrievalFileService, removeFileService, logger,
+    fileUploadService, fileretrievalService, fileRemovalService, logger,
   );
-  const listFileController = new ListFilesController(listFilesService, logger);
+  const fileListingController = new FileListingController(fileListingService, logger);
   const kafkaController = new KafkaController(tenantService, logger);
 
   return {
@@ -56,7 +64,7 @@ module.exports = (config, logger) => {
       httpServer,
       controllers: {
         fileController,
-        listFileController,
+        fileListingController,
       },
       interceptors: {
         busboyHandlerInterceptor,

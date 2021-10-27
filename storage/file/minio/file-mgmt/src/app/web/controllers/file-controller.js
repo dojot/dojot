@@ -3,6 +3,11 @@ const { promisify } = require('util');
 
 const pipelineAsync = promisify(pipeline);
 
+/**
+ * Responsible for controlling file operations
+ *
+ * @class
+ */
 module.exports = class FileController {
   constructor(uploadFileService, retrieverFileService, removeFileService, logger) {
     this.removeFileService = removeFileService;
@@ -11,7 +16,14 @@ module.exports = class FileController {
     this.logger = logger;
   }
 
-  // eslint-disable-next-line no-unused-vars
+  /**
+   * File upload route
+   *
+   * @param {Express.Request} req Http Request
+   * @param {Express.Response} res Http response
+   *
+   * @returns an http response
+   */
   upload = async (req, res) => {
     const {
       uploadedFile, path, md5,
@@ -23,6 +35,14 @@ module.exports = class FileController {
     return res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
   }
 
+  /**
+   * File retrieval route
+   *
+   * @param {Express.Request} req Http Request
+   * @param {Express.Response} res Http response
+   *
+   * @returns an http response
+   */
   get = async (req, res) => {
     const { path, alt } = req.query;
 
@@ -38,7 +58,15 @@ module.exports = class FileController {
     return res.status(200).json(data);
   }
 
-  delete = async (req, res) => {
+  /**
+   * File removal route.
+   *
+   * @param {Express.Request} req Http Request
+   * @param {Express.Response} res Http response
+   *
+   * @returns an http response
+   */
+  remove = async (req, res) => {
     const {
       path,
     } = req.query;

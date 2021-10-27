@@ -6,6 +6,17 @@ const swaggerUi = require('swagger-ui-express');
 const Interceptors = require('./interceptors');
 
 module.exports = class ExpressAdapter {
+  /**
+   * Creates express in the application contex.
+   *
+   * @param {*} routes The http routes
+   * @param {*} serviceState Dojot service state
+   * @param {*} openApiPath The path to the yml file
+   * @param {*} logger Dojot logger
+   * @param {*} config Application settings
+   *
+   * @returns the express server
+   */
   static adapt(routes, serviceState, openApiPath, logger, config) {
     let openApiJson = null;
     try {

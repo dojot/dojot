@@ -6,16 +6,16 @@ const mockValidator = {
 };
 jest.mock('../../../src/utils/path-validator-util', () => mockValidator);
 
-const RemoveFileService = require('../../../src/services/remove-file-service');
+const FileRemovalService = require('../../../src/services/file-removal-service');
 
-describe('RemoveFileService', () => {
-  let removeFileService;
+describe('FileRemovalService', () => {
+  let fileRemovalService;
   beforeEach(() => {
-    removeFileService = new RemoveFileService(new MinIoRepositoryMock(), LoggerMock);
+    fileRemovalService = new FileRemovalService(new MinIoRepositoryMock(), LoggerMock);
   });
 
   it('Should remove the file and return a file statistics', async () => {
-    const fileStat = await removeFileService.handle('test', '/test/file');
+    const fileStat = await fileRemovalService.handle('test', '/test/file');
 
     expect(fileStat).toBeDefined();
   });
@@ -24,7 +24,7 @@ describe('RemoveFileService', () => {
     let error;
 
     try {
-      await removeFileService.handle('test', '/test_error/file');
+      await fileRemovalService.handle('test', '/test_error/file');
     } catch (e) {
       error = e;
     }
@@ -36,7 +36,7 @@ describe('RemoveFileService', () => {
   it('Should return an error, when the tenant does not exist', async () => {
     let error;
     try {
-      await removeFileService.handle('test_error', '/test_error/file');
+      await fileRemovalService.handle('test_error', '/test_error/file');
     } catch (e) {
       error = e;
     }

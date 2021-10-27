@@ -1,5 +1,14 @@
+/**
+ * Manages the routes
+ *
+ * @param {string} mountPoint
+ * @param {object[]} controllers http controllers
+ * @param {object[]} interceptors http interceptors
+ *
+ * @returns the http routes
+ */
 const routesV1 = (mountPoint, controllers, interceptors) => {
-  const uploadRoute = {
+  const fileUploadRoute = {
     mountPoint,
     name: 'files',
     path: ['/files'],
@@ -14,7 +23,7 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
     ],
   };
 
-  const listFilesRoute = {
+  const fileListingRoute = {
     mountPoint,
     name: 'files-list',
     path: ['/files/list'],
@@ -22,13 +31,13 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
       {
         method: 'get',
         middleware: [
-          controllers.listFileController.get,
+          controllers.fileListingController.get,
         ],
       },
     ],
   };
 
-  const retrievalFileRoute = {
+  const fileRetrievalRoute = {
     mountPoint,
     name: 'retrieval-file',
     path: ['/files'],
@@ -42,7 +51,7 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
     ],
   };
 
-  const deleteFileRoute = {
+  const fileRemovalFileRoute = {
     mountPoint,
     name: 'remove-file',
     path: ['/files'],
@@ -50,17 +59,17 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
       {
         method: 'delete',
         middleware: [
-          controllers.fileController.delete,
+          controllers.fileController.remove,
         ],
       },
     ],
   };
 
   return [
-    uploadRoute,
-    listFilesRoute,
-    retrievalFileRoute,
-    deleteFileRoute,
+    fileUploadRoute,
+    fileListingRoute,
+    fileRetrievalRoute,
+    fileRemovalFileRoute,
   ];
 };
 

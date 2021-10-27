@@ -4,12 +4,27 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
-module.exports = class ListFilesService {
+/**
+ * File Listing Service.
+ *
+ * @class
+ */
+module.exports = class FileListingService {
   constructor(minioRepository, logger) {
     this.minioRepository = minioRepository;
     this.logger = logger;
   }
 
+  /**
+   * List files.
+   *
+   * @param {string} tenant The tenant you want to list the files
+   * @param {string} pathPrefix Path prefix where the files will be fetched.
+   * @param {number} limit The limit of items to be returned.
+   * @param {string} startAfter Sets which file the list should start from.
+   *
+   * @returns a list of files
+   */
   // eslint-disable-next-line class-methods-use-this
   async list(tenant, pathPrefix, limit, startAfter) {
     if (!(await this.minioRepository.bucketExists(tenant))) {
