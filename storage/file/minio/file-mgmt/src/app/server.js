@@ -28,6 +28,7 @@ class Server {
    * @param {Express} express  instance of express
    */
   init(express) {
+    this.serviceState.registerService('server');
     this.server.on('request', express);
     this.server.on('listening', this.onListening);
     this.server.on('close', () => {

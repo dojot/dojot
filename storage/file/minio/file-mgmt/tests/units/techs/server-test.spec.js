@@ -20,6 +20,7 @@ const Server = require('../../../src/app/server');
 const loggerMock = require('../../mocks/logger-mock');
 
 const serviceStateMock = {
+  registerService: jest.fn(),
   signalReady: jest.fn(),
   registerShutdownHandler: jest.fn((callback) => {
     callback();

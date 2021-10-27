@@ -13,6 +13,7 @@ const mockDojot = {
   Logger: loggerMock,
   ConfigManager,
   ServiceStateManager: jest.fn().mockImplementation(() => ({
+    registerService: jest.fn(),
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
     registerShutdownHandler: jest.fn(),
