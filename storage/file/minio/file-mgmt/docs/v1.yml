@@ -24,41 +24,41 @@ paths:
       responses:
         "201":
           description: "Uploaded File"
-          content: 
+          content:
             application/json:
-              schema: 
-               $ref: "#/components/schemas/uploadedFile"         
+              schema:
+               $ref: "#/components/schemas/uploadedFile" 
         "400":
           description: "Bad Request"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "404":
           description: "Not found tenant"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "413":
           description: "The file is too large"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
-          content: 
+          content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/apiErrorUnknown"    
-    delete: 
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+    delete:
       tags:
         - files
       security:
@@ -71,35 +71,35 @@ paths:
       responses:
         "200":
           description: "Removed File"
-          content: 
+          content:
             application/json:
-              schema: 
-               $ref: "#/components/schemas/removedFile"         
+              schema:
+                $ref: "#/components/schemas/removedFile"   
         "400":
           description: "Bad Request"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "404":
           description: "Not found tenant or file"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
-          content: 
+          content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/apiErrorUnknown" 
-  
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
   "/api/v1/files?alt=media":
     get:
       tags:
@@ -116,34 +116,34 @@ paths:
           description: "Retrieved file"
           content:
             Any:
-              schema: 
+              schema:
                type: string
-               format: binary   
+               format: binary
         "400":
           description: "Bad Request"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "404":
           description: "Not found tenant"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
-          content: 
+          content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/apiErrorUnknown"      
-   
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
   "/api/v1/files?alt=url":
     get:
       tags:
@@ -160,35 +160,35 @@ paths:
           description: "MinIo URL and file metadata"
           content:
             application/json:
-              schema: 
-               $ref: "#/components/schemas/retrieveUrlFile"   
+              schema:
+               $ref: "#/components/schemas/retrieveUrlFile"
         "400":
           description: "Bad Request"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "404":
           description: "Not found tenant"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
-          content: 
+          content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/apiErrorUnknown"      
-   
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
   "/api/v1/files/list":
-    get: 
+    get:
       tags:
         - files
       security:
@@ -200,38 +200,38 @@ paths:
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/pathPrefix"
         - $ref: "#/components/parameters/startAfter"
-        
+
       responses:
         "200":
           description: "List of files"
-          content: 
+          content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/listFiles"                      
+              schema:
+                $ref: "#/components/schemas/listFiles"       
         "400":
           description: "Bad Request"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "404":
           description: "Not found tenant or file"
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
-          content: 
+          content:
             application/json:
-              schema: 
-                $ref: "#/components/schemas/apiErrorUnknown" 
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
 
 
 externalDocs:
@@ -272,7 +272,7 @@ components:
 
         Minimum length: 3
 
-        Maximum length: 100  
+        Maximum length: 100 
       allowReserved: true
       schema:
         $ref: "#/components/schemas/pathParamenter"
@@ -294,10 +294,10 @@ components:
 
         Minimum length: 3
 
-        Maximum length: 100  
+        Maximum length: 100
       allowReserved: true
       schema:
-        $ref: "#/components/schemas/pathParamenter"     
+        $ref: "#/components/schemas/pathParamenter"
     alt:
       name: alt
       in: query
@@ -318,7 +318,7 @@ components:
 
         Minimum length: 3
 
-        Maximum length: 100  
+        Maximum length: 100
       allowReserved: true
       schema:
         $ref: "#/components/schemas/pathParamenter"
@@ -351,10 +351,10 @@ components:
         format: path
 
   schemas:
-    pathParamenter: 
+    pathParamenter:
       type: string
       minLength: 3
-      maxLength: 100  
+      maxLength: 100
 
     uploadedFile:
       type: object
@@ -362,7 +362,7 @@ components:
         message:
           anyOf:
             - type: string
-        details: 
+        details:
           $ref: "#/components/schemas/fileDetails"
 
     retrieveUrlFile:
@@ -397,20 +397,20 @@ components:
         message:
           anyOf:
             - type: string
-        details: 
+        details:
           $ref: "#/components/schemas/fileDetails2"
 
-    listFiles: 
+    listFiles:
       type: object
       properties:
-        files: 
+        files:
           anyOf:
             - type: array
-              items: 
+              items:
                 $ref: "#/components/schemas/fileSummary"
         length:
           anyOf:
-            - type: string 
+            - type: string
         nextPageStartsAfter:
           anyOf:
             - type: string
@@ -419,62 +419,62 @@ components:
       type: object
       properties:
         transactionCode:
-          anyOf: 
+          anyOf:
             - type: "string"
         filename:
-          anyOf: 
+         anyOf:
             - type: "string"
         info:
-          $ref: "#/components/schemas/minioFileInfo"            
+          $ref: "#/components/schemas/minioFileInfo"         
         encoding:
-          anyOf: 
+          anyOf:
             - type: "string"
         mimetype:
-          anyOf: 
+          anyOf:
             - type: "string"
 
     fileDetails2:
       type: object
       properties:
         size:
-          anyOf: 
+          anyOf:
             - type: "integer"
         metadata:
-          anyOf: 
+          anyOf:
             - type: object
               properties:
-                content-type: 
+                content-type:
                   anyOf:
                     - type: string
         lastModified:
-          anyOf: 
-            - type: "string"       
+         anyOf:
+            - type: "string" 
         versionId:
-          anyOf: 
+         anyOf:
             - type: "string"
         etag:
-          anyOf: 
+         anyOf:
             - type: "string"
 
-    fileSummary: 
+    fileSummary:
       properties:
         name:
-          anyOf: 
-            - type: "string"   
-        lastModified:
-          anyOf: 
-            - type: "string"       
-        etag:
-          anyOf: 
+         anyOf:
             - type: "string" 
+        lastModified:
+         anyOf:
+            - type: "string"      
+        etag:
+         anyOf:
+            - type: "string"
         size:
-          anyOf: 
+         anyOf:
             - type: "integer"
 
     minioFileInfo:
       type: object
       properties:
-        etag: 
+        etag:
           anyOf:
             - type: string
         versionId:
@@ -489,11 +489,11 @@ components:
             - type: string
         detail:
           anyOf:
-            - type: string  
+            - type: string
 
-    apiErrorUnknown:   
+    apiErrorUnknown:
       type: object
       properties:
         error:
           anyOf:
-            - type: string                
+            - type: string             

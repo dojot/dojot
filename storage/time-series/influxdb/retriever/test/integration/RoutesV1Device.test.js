@@ -50,10 +50,15 @@ const serviceStateMock = {
 const mockQueryDataByField = jest.fn();
 const mockQueryDataByMeasurement = jest.fn();
 const mockQueryDataUsingGraphql = jest.fn();
+const mockLocalPersistenceManager = {
+  // eslint-disable-next-line no-unused-vars
+  get: jest.fn((level, key) => true),
+};
 
 const app = express(
   [
     devicesRoutes({
+      localPersistence: mockLocalPersistenceManager,
       mountPoint: '/tss/v1',
       queryDataByField: mockQueryDataByField,
       queryDataByMeasurement: mockQueryDataByMeasurement,

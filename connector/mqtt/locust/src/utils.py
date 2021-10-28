@@ -10,6 +10,14 @@ from decimal import getcontext
 import paho.mqtt.client as mqtt
 from locust import events
 
+MQTT_CONACK_ERRORS = {
+    mqtt.CONNACK_ACCEPTED: "CONNACK_ACCEPTED",
+    mqtt.CONNACK_REFUSED_PROTOCOL_VERSION: "CONNACK_REFUSED_PROTOCOL_VERSION",
+    mqtt.CONNACK_REFUSED_IDENTIFIER_REJECTED: "CONNACK_REFUSED_IDENTIFIER_REJECTED",
+    mqtt.CONNACK_REFUSED_SERVER_UNAVAILABLE: "CONNACK_REFUSED_SERVER_UNAVAILABLE",
+    mqtt.CONNACK_REFUSED_BAD_USERNAME_PASSWORD: "CONNACK_REFUSED_BAD_USERNAME_PASSWORD",
+    mqtt.CONNACK_REFUSED_NOT_AUTHORIZED: "CONNACK_REFUSED_NOT_AUTHORIZED",
+}
 
 MQTT_ERRORS = {
     mqtt.MQTT_ERR_AGAIN: "MQTT_ERR_AGAIN",
@@ -79,6 +87,15 @@ class Utils():
         """
 
         return string.lower() == "true"
+
+    @staticmethod
+    def conack_error_message(error: int) -> str:
+        """Converts the error code from Locust in an understandable string."""
+
+        if MQTT_CONACK_ERRORS.get(error):
+            return MQTT_CONACK_ERRORS[error]
+
+        return "{}\n".format(error)
 
     @staticmethod
     def error_message(error: int) -> str:

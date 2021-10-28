@@ -39,7 +39,7 @@ module.exports = class DevicesService {
   }
 
   /**
-   * @param {*} deviceData device dataset
+   * @param {[*]}deviceData device dataset
    * @returns device dataset in CSV format
    */
   static parseDeviceDataToCsv(deviceData) {
@@ -57,7 +57,7 @@ module.exports = class DevicesService {
     });
 
     const csvParser = new json2csv.Parser({ defaultValue: undefined });
-    return csvParser.parse(messages);
+    return messages.length > 0 ? csvParser.parse(messages) : '';
   }
 
   /**
@@ -90,11 +90,11 @@ module.exports = class DevicesService {
 
   /**
    *
-   * @param {*} attrData device attribute dataset
+   * @param {[*]} attrData device attribute dataset
    * @returns device attribute dataset in CSV format
    */
   static parseDeviceAttrDataToCsv(attrData) {
     const csvParser = new json2csv.Parser({ defaultValue: undefined });
-    return csvParser.parse(attrData);
+    return attrData.length > 0 ? csvParser.parse(attrData) : '';
   }
 };

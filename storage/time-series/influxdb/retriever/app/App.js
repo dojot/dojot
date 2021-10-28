@@ -2,12 +2,17 @@ const {
   ServiceStateManager,
   ConfigManager: { getConfig, transformObjectKeys },
   Logger,
+  LocalPersistence: {
+    LocalPersistenceManager,
+  },
 } = require('@dojot/microservice-sdk');
+
+
 const path = require('path');
 
 const camelCase = require('lodash.camelcase');
 
-const { lightship: configLightship } = getConfig('RETRIEVER');
+const { lightship: configLightship, sync } = getConfig('RETRIEVER');
 
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
@@ -19,9 +24,13 @@ const logger = new Logger('influxdb-retriever:App');
 
 const Server = require('./Server');
 const InfluxDB = require('./influx');
+const RetrieverConsumer = require('./sync/RetrieverConsumer');
 
 const express = require('./express');
 const devicesRoutes = require('./express/routes/v1/Devices');
+const DeviceService = require('./sync/DeviceService');
+const SyncLoader = require('./sync/SyncLoader');
+const TenantService = require('./sync/TenantService');
 
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
@@ -39,6 +48,13 @@ class App {
     try {
       this.server = new Server(serviceState);
       this.influxDB = new InfluxDB(serviceState);
+      this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
+      this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
+      this.authService = new TenantService(sync.tenants);
+      this.deviceService = new DeviceService(sync.devices);
+      this.syncLoader = new SyncLoader(
+        this.localPersistence, this.authService, this.deviceService, this.retrieverConsumer,
+      );
     } catch (e) {
       logger.error('constructor:', e);
       const er = new Error(e);
@@ -73,10 +89,13 @@ class App {
         .queryByMeasurement.bind(this.influxDB.getInfluxDataQueryInstance());
 
       this.server.registerShutdown();
+      this.syncLoader.init();
 
+      // Initializes API
       this.server.init(express(
         [
           devicesRoutes({
+            localPersistence: this.localPersistence,
             mountPoint: '/tss/v1',
             queryDataUsingGraphql: boundQueryDataUsingGraphql,
             queryDataByField: boundQueryDataByField,
