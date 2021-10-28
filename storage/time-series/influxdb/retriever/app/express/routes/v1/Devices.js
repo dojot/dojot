@@ -1,12 +1,12 @@
 const {
   ConfigManager: { getConfig },
   Logger,
+  WebUtils: { framework },
 } = require('@dojot/microservice-sdk');
 const { graphqlHTTP } = require('express-graphql');
 const HttpStatus = require('http-status-codes');
 
 const util = require('util');
-const ApplicationError = require('../../errors/ApplicationError');
 const DeviceDataServ = require('../../services/v1/DeviceDataService');
 const AcceptHeaderHelper = require('../../helpers/AcceptHeaderHelper');
 
@@ -30,7 +30,7 @@ const rootSchema = require('../../../graphql/Schema');
  *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({
-  mountPoint, queryDataUsingGraphql, queryDataByField, queryDataByMeasurement,
+  localPersistence, mountPoint, queryDataUsingGraphql, queryDataByField, queryDataByMeasurement,
 }) => {
   const deviceDataServ = new DeviceDataServ(queryDataByField, queryDataByMeasurement);
   /**
@@ -65,6 +65,13 @@ module.exports = ({
             try {
               const { deviceId } = req.params;
               const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              try {
+                await localPersistence.get(req.tenant, deviceId);
+              } catch (error) {
+                throw framework.errorTemplate.NotFound(`Not found ${req.tenant}/${deviceId}`);
+              }
+
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
@@ -79,8 +86,8 @@ module.exports = ({
 
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
-              logger.error('device-route.get:', e);
-              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
+              logger.error('device-route-attr.get:', e);
+              throw e;
             }
           },
         ],
@@ -109,6 +116,12 @@ module.exports = ({
               const { deviceId, attr } = req.params;
               const accept = AcceptHeaderHelper.getAcceptableType(req);
 
+              try {
+                await localPersistence.get(req.tenant, deviceId);
+              } catch (error) {
+                throw framework.errorTemplate.NotFound(`Not found ${req.tenant}/${deviceId}`);
+              }
+
               const {
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
@@ -126,7 +139,7 @@ module.exports = ({
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route-attr.get:', e);
-              return res.status(ApplicationError.handleCode(e.code)).json({ error: e.message });
+              throw e;
             }
           },
         ],

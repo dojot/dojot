@@ -1,17 +1,7 @@
 const DeviceDataService = require('../../app/express/services/v1/DeviceDataService');
 
 describe('DeviceDataService', () => {
-  // let deviceDataService = null;
   const values = Array.from({ length: 3 }, (_, i) => i + 1);
-
-  // beforeEach(() => {
-  //   deviceDataService = new DeviceDataService();
-  // });
-
-  // beforeEach(() => {
-  //   deviceDataService = null;
-  // });
-
 
   test('should transform device data object to a spreadsheet in csv', () => {
     const deviceData = [
@@ -48,6 +38,15 @@ describe('DeviceDataService', () => {
     expect(sheet).toBe(correctValue);
   });
 
+  test('should transform device data object to empty string, when device data object is empty', () => {
+    const deviceData = [];
+
+    const correctValue = '';
+
+    const sheet = DeviceDataService.parseDeviceDataToCsv(deviceData);
+    expect(sheet).toBe(correctValue);
+  });
+
   test('should transform the device attr data object to a spreadsheet in csv', () => {
     const deviceData = [
       {
@@ -61,6 +60,14 @@ describe('DeviceDataService', () => {
     ];
 
     const correctValue = '"ts","value"\n"2021-07-28T11:47:53.365Z",10\n"2021-07-29T11:47:53.365Z",20';
+    const sheet = DeviceDataService.parseDeviceAttrDataToCsv(deviceData);
+    expect(sheet).toBe(correctValue);
+  });
+
+  test('should transform the device attr data object to empty string, when device attr data object is empty', () => {
+    const deviceData = [];
+
+    const correctValue = '';
     const sheet = DeviceDataService.parseDeviceAttrDataToCsv(deviceData);
     expect(sheet).toBe(correctValue);
   });
