@@ -4,8 +4,9 @@
  * @class
  */
 module.exports = class TenantService {
-  constructor(minioRepository) {
+  constructor(minioRepository, logger) {
     this.minioRepository = minioRepository;
+    this.logger = logger;
   }
 
   /**

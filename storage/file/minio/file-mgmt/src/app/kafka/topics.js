@@ -8,7 +8,7 @@
  */
 const topics = (config, controllers) => [
   {
-    topicSuffix: config.subscribe['topics.suffix.tenants'],
+    topicRegex: config.subscribe['topics.regex.tenants'],
     handler: controllers.kafkaController.handleTenancy,
   },
 ];

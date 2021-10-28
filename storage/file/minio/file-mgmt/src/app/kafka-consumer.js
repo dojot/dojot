@@ -31,12 +31,12 @@ class KafkaConsumer extends Consumer {
 
   registerTopics(consumers) {
     consumers.forEach((consumer) => {
-      this.registerTopic(consumer.topicSuffix, consumer.handler);
+      this.registerTopic(consumer.topicRegex, consumer.handler);
     });
   }
 
-  registerTopic(topicSuffix, handler) {
-    const topic = new RegExp(`^.+${topicSuffix.replace(/\./g, '\\.')}`);
+  registerTopic(topicRegex, handler) {
+    const topic = new RegExp(topicRegex);
 
     this.idCallbackTenant = this.registerCallback(
       topic, handler,

@@ -1,7 +1,7 @@
 const KafkaPayloadUtil = require('../../../utils/kafka-payload-util');
 
 /**
- * Responsible for controlling kafka's operations
+ * Responsible for controlling kafka's operations.
  *
  * @class
  */
@@ -12,7 +12,7 @@ class KafkaController {
   }
 
   /**
-   * Handles location topic
+   * Handles location topic.
    *
    * @param {*} payload Kafka payload
    * @param {*} ack ack callback function
@@ -29,6 +29,7 @@ class KafkaController {
       ack();
     } catch (error) {
       this.logger.error(error);
+      ack(error);
     }
   }
 }

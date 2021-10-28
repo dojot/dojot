@@ -1,11 +1,14 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-empty-function */
 /* eslint-disable class-methods-use-this */
 module.exports = class MinIoRepository {
+  async createBucket(bucketName) {
+  }
+
   async bucketExists(bucketName) {
     return bucketName === 'test';
   }
 
-  // eslint-disable-next-line no-unused-vars
   async listObjects(tenant, pathPrefix, limit, startAfter) {
     return [
       {
@@ -35,7 +38,6 @@ module.exports = class MinIoRepository {
     ];
   }
 
-  // eslint-disable-next-line no-unused-vars
   async putTmpObject(bucketName, fileStream) {
     fileStream.emit('end');
     return {
@@ -47,15 +49,12 @@ module.exports = class MinIoRepository {
     };
   }
 
-  // eslint-disable-next-line no-unused-vars
   async commitObject(tenant, transactionCode) {
   }
 
-  // eslint-disable-next-line no-unused-vars
   async rollbackObject(tenant, transactionCode) {
   }
 
-  // eslint-disable-next-line no-unused-vars
   async removeObject(tenant, path) {
     return path === '/test/file'
       ? {

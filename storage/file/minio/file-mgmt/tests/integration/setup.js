@@ -1,13 +1,17 @@
 const jwtEncode = require('jwt-encode');
 const path = require('path');
 
+const { ConsumerTest, sendFakePayload } = require('../mocks/consumer-test');
+
+const mockConsumer = ConsumerTest;
+
 const loggerMock = require('../mocks/logger-mock');
 
 const mockMinioConnection = require('../mocks/minio-connection-integration-mock');
 
 jest.mock('../../src/minio/minio-connection-factory', () => mockMinioConnection);
 
-const { WebUtils, ConfigManager, Kafka } = jest.requireActual('@dojot/microservice-sdk');
+const { WebUtils, ConfigManager } = jest.requireActual('@dojot/microservice-sdk');
 
 const mockDojot = {
   Logger: loggerMock,
@@ -24,7 +28,9 @@ const mockDojot = {
     })),
   })),
   WebUtils,
-  Kafka,
+  Kafka: {
+    Consumer: mockConsumer,
+  },
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockDojot);
@@ -47,4 +53,5 @@ function generateJWT(tenant = 'admin') {
 module.exports = {
   generateApp,
   generateJWT,
+  sendFakePayload,
 };

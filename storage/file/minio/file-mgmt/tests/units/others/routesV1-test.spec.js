@@ -1,20 +1,3 @@
-jest.mock('../../../src/app/web/controllers/file-controller', () => jest.fn().mockImplementation(() => ({
-  upload: jest.fn(),
-  delete: jest.fn(),
-})));
-
-jest.mock('../../../src/app/web/controllers/file-listing-controller', () => jest.fn().mockImplementation(() => ({
-  get: jest.fn(),
-})));
-
-jest.mock('../../../src/app/web/interceptors', () => ({
-  busboyHandlerInterceptor: jest.fn(() => ({
-    // eslint-disable-next-line no-unused-vars
-    middleware: (req, res, next) => {
-    },
-  })),
-}));
-
 const controllers = {
   fileListingController: {
     get: jest.fn(),
