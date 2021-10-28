@@ -10,5 +10,10 @@
     "plugins": [
     ],
     "settings": {
+    },
+    "rules": {
+        /* the rule import/no-unresolved is needed to avoid problems with the codefactor */
+        "import/no-unresolved": "off"
     }
+
 }
