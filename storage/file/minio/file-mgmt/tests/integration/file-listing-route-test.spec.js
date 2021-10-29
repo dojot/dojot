@@ -5,6 +5,7 @@ const setup = require('./setup');
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
 describe('GET /files/list', () => {
+  const route = '/api/v1/files/list';
   let app;
   let jwt;
   beforeAll(async () => {
@@ -19,13 +20,13 @@ describe('GET /files/list', () => {
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is not entered', (done) => {
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .expect(401, done);
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is invalid', (done) => {
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${invalidJwt}`)
       .expect(401, done);
   });
@@ -33,7 +34,7 @@ describe('GET /files/list', () => {
   it('Should reply with a list of 3 files, when the limit parameter value is 3', (done) => {
     const limit = 3;
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .query({ limit })
       .set('Authorization', `Bearer ${jwt}`)
       .expect(200)
@@ -50,7 +51,7 @@ describe('GET /files/list', () => {
 
   it('Should reply with an bad request HTTP response, when the limit param is not entered', (done) => {
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .expect(400)
       .then((response) => {
@@ -65,7 +66,7 @@ describe('GET /files/list', () => {
 
   it('Should reply with an bad request HTTP response, when the limit param is not a integer', (done) => {
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit: 2.5 })
       .expect(400)
@@ -81,7 +82,7 @@ describe('GET /files/list', () => {
 
   it('Should reply with an bad request HTTP response, when the limit param is not a number', (done) => {
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit: 'limit' })
       .expect(400)
@@ -97,7 +98,7 @@ describe('GET /files/list', () => {
 
   it('Should reply with an bad request HTTP response, when the limit param is negative', (done) => {
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit: -2 })
       .expect(400)
@@ -114,7 +115,7 @@ describe('GET /files/list', () => {
   it('Should reply with a list of 3 files starting after a file, when the startAfter param is entered', (done) => {
     const limit = 2;
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit, startAfter: 'test/test_sample2' })
       .expect(200)
@@ -132,7 +133,7 @@ describe('GET /files/list', () => {
   it('Should reply with a list of just one file starting after a file and nextPageStartsAfter must be null, when the page cannot be completed', (done) => {
     const limit = 3;
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit, startAfter: 'test2/test_sample5' })
       .expect(200)
@@ -151,7 +152,7 @@ describe('GET /files/list', () => {
     const limit = 2;
     const pathPrefix = 'test2/';
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit, pathPrefix })
       .expect(200)
@@ -171,7 +172,7 @@ describe('GET /files/list', () => {
     const limit = 2;
     const pathPrefix = 'test3/';
     request(app.server.server)
-      .get('/api/v1/files/list')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ limit, pathPrefix })
       .expect(200)

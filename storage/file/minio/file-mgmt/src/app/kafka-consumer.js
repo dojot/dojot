@@ -36,6 +36,9 @@ class KafkaConsumer extends Consumer {
   }
 
   registerTopic(topicRegex, handler) {
+    // It is a system necessity get the regex expression from the configuration file
+    // eslint-disable-next-line max-len
+    // eslint-disable-next-line security/detect-non-literal-regexp, security-node/non-literal-reg-expr
     const topic = new RegExp(topicRegex);
 
     this.idCallbackTenant = this.registerCallback(

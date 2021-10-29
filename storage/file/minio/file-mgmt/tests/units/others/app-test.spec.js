@@ -37,7 +37,10 @@ describe('App', () => {
   });
 
   it('Should throw an error, when there is an error on kafka initialization', async () => {
-    mockKafkaConsumer.init.mockImplementationOnce(() => { throw new Error('Error'); });
+    mockKafkaConsumer.init.mockImplementationOnce(() => {
+      throw new Error('Error');
+    });
+
     let error;
     try {
       await app.init();
@@ -48,7 +51,10 @@ describe('App', () => {
   });
 
   it('Should throw an error, when there is an error on HttpServer initialization', async () => {
-    mockHttpServer.init.mockImplementationOnce(() => { throw new Error('Error'); });
+    mockHttpServer.init.mockImplementationOnce(() => {
+      throw new Error('Error');
+    });
+
     let error;
     try {
       await app.init();

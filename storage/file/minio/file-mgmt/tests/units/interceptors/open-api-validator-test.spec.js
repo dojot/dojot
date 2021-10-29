@@ -8,7 +8,7 @@ const openAPIValidator = require('../../../src/app/web/interceptors/open-api-val
 describe('OpenAPIValidator', () => {
   it('Should make middleware', () => {
     // eslint-disable-next-line no-unused-vars
-    mockOpenApiValidator.middleware.mockReturnValue((req, res, next) => {});
+    mockOpenApiValidator.middleware.mockReturnValue(jest.fn());
     const middleware = openAPIValidator('');
     expect(middleware).toBeDefined();
   });

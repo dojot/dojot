@@ -27,7 +27,7 @@ paths:
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/uploadedFile" 
+               $ref: "#/components/schemas/uploadedFile"
         "400":
           description: "Bad Request"
           content:
@@ -74,7 +74,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/removedFile"   
+                $ref: "#/components/schemas/removedFile"
         "400":
           description: "Bad Request"
           content:
@@ -207,7 +207,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/listFiles"       
+                $ref: "#/components/schemas/listFiles"
         "400":
           description: "Bad Request"
           content:
@@ -272,7 +272,7 @@ components:
 
         Minimum length: 3
 
-        Maximum length: 100 
+        Maximum length: 100
       allowReserved: true
       schema:
         $ref: "#/components/schemas/pathParamenter"
@@ -410,7 +410,7 @@ components:
                 $ref: "#/components/schemas/fileSummary"
         length:
           anyOf:
-            - type: string
+            - type: number
         nextPageStartsAfter:
           anyOf:
             - type: string
@@ -420,18 +420,18 @@ components:
       properties:
         transactionCode:
           anyOf:
-            - type: "string"
+            - type: string
         filename:
          anyOf:
-            - type: "string"
+            - type: string
         info:
-          $ref: "#/components/schemas/minioFileInfo"         
+          $ref: "#/components/schemas/minioFileInfo"
         encoding:
           anyOf:
-            - type: "string"
+            - type: string
         mimetype:
           anyOf:
-            - type: "string"
+            - type: string
 
     fileDetails2:
       type: object
@@ -447,26 +447,26 @@ components:
                   anyOf:
                     - type: string
         lastModified:
-         anyOf:
-            - type: "string" 
+          anyOf:
+            - type: string
         versionId:
-         anyOf:
-            - type: "string"
+          anyOf:
+            - type: string
         etag:
          anyOf:
-            - type: "string"
+            - type: string
 
     fileSummary:
       properties:
         name:
          anyOf:
-            - type: "string" 
+            - type: string
         lastModified:
          anyOf:
-            - type: "string"      
+            - type: string  
         etag:
          anyOf:
-            - type: "string"
+            - type: string
         size:
          anyOf:
             - type: "integer"
@@ -496,4 +496,4 @@ components:
       properties:
         error:
           anyOf:
-            - type: string             
+            - type: string

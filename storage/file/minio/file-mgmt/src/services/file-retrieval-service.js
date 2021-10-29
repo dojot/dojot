@@ -15,6 +15,17 @@ module.exports = class FileRetrievalService {
   }
 
   /**
+   * Checks if the file was found.
+   *
+   * @param {any} file the file
+   */
+  checkFile = (file) => {
+    if (!file) {
+      throw framework.errorTemplate.NotFound('The file does not exist.', 'The file does not exist.');
+    }
+  }
+
+  /**
    * Retrieves a file.
    *
    * @param {string} tenant The tenant to which the file belongs
@@ -24,9 +35,7 @@ module.exports = class FileRetrievalService {
    */
   download = async (tenant, path) => {
     const file = await this.minioRepository.getObject(tenant, path);
-    if (!file) {
-      throw framework.errorTemplate.NotFound('The file does not exist.', 'The file does not exist.');
-    }
+    this.checkFile(file);
 
     return file;
   }
@@ -41,9 +50,7 @@ module.exports = class FileRetrievalService {
    */
   getUrl = async (tenant, path) => {
     const fileData = await this.minioRepository.getObjectUrl(tenant, path);
-    if (!fileData) {
-      throw framework.errorTemplate.NotFound('The file does not exist.', 'The file does not exist.');
-    }
+    this.checkFile(fileData);
 
     return fileData;
   }

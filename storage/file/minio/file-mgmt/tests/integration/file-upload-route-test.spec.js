@@ -10,7 +10,7 @@ const filePath = `${path}${filename}`;
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
 describe('POST /files', () => {
-  jest.setTimeout(10000);
+  const route = '/api/v1/files';
   let app;
   let jwt;
   beforeAll(async () => {
@@ -25,20 +25,20 @@ describe('POST /files', () => {
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is not entered', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .delete(route)
       .expect(401, done);
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is invalid', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .delete(route)
       .set('Authorization', `Bearer ${invalidJwt}`)
       .expect(401, done);
   });
 
   it('Should reply with a bad request http response, when the tenant does not exist.', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .field('path', '/test/test_sample7')
@@ -53,7 +53,7 @@ describe('POST /files', () => {
 
   it('Should upload file', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .field('path', '/test/test_sample7')
@@ -73,7 +73,7 @@ describe('POST /files', () => {
 
   it('Should upload file and validate integrity', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .field('path', '/test/test_sample7')
@@ -94,7 +94,7 @@ describe('POST /files', () => {
 
   it('Should reply with a bad request http response, when the path field is not entered', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .attach('file', filePath)
@@ -108,7 +108,7 @@ describe('POST /files', () => {
 
   it('Should reply with a bad request http response, when the length of the "path" field is less than 3 characters', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .field('path', '/t')
@@ -123,7 +123,7 @@ describe('POST /files', () => {
 
   it('Should reply with a bad request http response, when the length of the "path" field is greater than 100 characters', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .field('path', crypto.randomBytes(101).toString('hex'))
@@ -139,7 +139,7 @@ describe('POST /files', () => {
 
   it('Should reply with a bad request http response, when the value of the "path" field is "/.tmp/"', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .field('path', '/.tmp/')
@@ -155,7 +155,7 @@ describe('POST /files', () => {
 
   it('Should reply with a PayloadTooLarge http response, when the file size is greater than the size limit', (done) => {
     request(app.server.server)
-      .post('/api/v1/files')
+      .post(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
       .field('path', filePath)

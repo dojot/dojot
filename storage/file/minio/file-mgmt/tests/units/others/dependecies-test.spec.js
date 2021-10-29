@@ -1,5 +1,5 @@
 jest.mock('@dojot/microservice-sdk', () => ({
-  ServiceStateManager: jest.fn().mockImplementation(() => {}),
+  ServiceStateManager: jest.fn().mockImplementation(),
   ConfigManager: {
     transformObjectKeys: jest.fn(),
   },

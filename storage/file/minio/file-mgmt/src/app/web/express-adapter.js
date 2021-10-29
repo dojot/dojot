@@ -20,6 +20,8 @@ module.exports = class ExpressAdapter {
   static adapt(routes, serviceState, openApiPath, logger, config) {
     let openApiJson = null;
     try {
+      // It is a system necessity get the yaml file dynamically
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       openApiJson = yaml.load(fs.readFileSync(openApiPath, 'utf8'));
       logger.debug(`OpenApi Json load: ${JSON.stringify(openApiJson)}`);
     } catch (e) {

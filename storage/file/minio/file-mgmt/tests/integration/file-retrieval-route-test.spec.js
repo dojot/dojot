@@ -6,7 +6,8 @@ const setup = require('./setup');
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
 describe('GET /files', () => {
-  jest.setTimeout(100000000);
+  const route = '/api/v1/files';
+  const path = '/test/test_sample1';
   let app;
   let jwt;
   beforeAll(async () => {
@@ -17,22 +18,22 @@ describe('GET /files', () => {
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is not entered', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .expect(401, done);
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is invalid', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${invalidJwt}`)
       .expect(401, done);
   });
 
   it('Should reply with a bad request http response, when the tenant does not exist.', (done) => {
     request(app.server.server)
-      .delete('/api/v1/files')
+      .delete(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
-      .query({ path: '/test/test_sample', alt: 'media' })
+      .query({ path, alt: 'media' })
       .expect(404)
       .then((response) => {
         expect(response.body.error).toEqual('Tenant does not exist.');
@@ -45,9 +46,9 @@ describe('GET /files', () => {
 
   it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path: '/test/test_sample1', alt: 'media' })
+      .query({ path, alt: 'media' })
       .expect(200)
       .expect()
       .parse((response, next) => {
@@ -73,7 +74,7 @@ describe('GET /files', () => {
 
   it('Should reply with a url to download the requested file, when the value of the "alt" param is "url"', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '/test/test_sample1', alt: 'url' })
       .expect(200)
@@ -88,7 +89,7 @@ describe('GET /files', () => {
 
   it('Should reply with a not found http response, when the file was not found ', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '/test/test_sample_not_found', alt: 'media' })
       .expect(404)
@@ -103,9 +104,9 @@ describe('GET /files', () => {
 
   it('Should reply with an Bad request http response, when the "alt" param is not entered', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path: '/test/test_sample' })
+      .query({ path })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "alt" param is required');
@@ -119,9 +120,9 @@ describe('GET /files', () => {
 
   it('Should reply with an Bad request http response, when the value of the "alt" param is invalid', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path: '/test/test_sample', alt: 'invalid' })
+      .query({ path, alt: 'invalid' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "alt" param is invalid');
@@ -135,7 +136,7 @@ describe('GET /files', () => {
 
   it('Should reply with a bad request http response, when the "path" param is not entered ', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ alt: 'url' })
       .expect(400)
@@ -151,7 +152,7 @@ describe('GET /files', () => {
 
   it('Should reply with a bad request http response, when the length of the "path" param is less than 3 characters ', (done) => {
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '12', alt: 'url' })
       .expect(400)
@@ -166,11 +167,10 @@ describe('GET /files', () => {
   });
 
   it('Should reply with a bad request http response, when the length of the "path" param is greater than 100 characters', (done) => {
-    const path = crypto.randomBytes(101).toString('hex');
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path, alt: 'url' })
+      .query({ path: crypto.randomBytes(101).toString('hex'), alt: 'url' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "path" field is invalid.');
@@ -183,11 +183,10 @@ describe('GET /files', () => {
   });
 
   it('Should reply with a bad request http response, when the value of the "path" param is "/.tmp/"', (done) => {
-    const path = '/.tmp/';
     request(app.server.server)
-      .get('/api/v1/files')
+      .get(route)
       .set('Authorization', `Bearer ${jwt}`)
-      .query({ path, alt: 'url' })
+      .query({ path: '/.tmp/', alt: 'url' })
       .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('The "path" field is invalid.');

@@ -115,7 +115,9 @@ describe('FileRetrievalService', () => {
   });
 
   it('Should throw an error, when Path Validator fails ', async () => {
-    mockValidator.validate.mockImplementationOnce(() => { throw new Error('Error'); });
+    mockValidator.validate.mockImplementationOnce(() => {
+      throw new Error('Error');
+    });
 
     let error;
     try {

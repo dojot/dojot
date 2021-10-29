@@ -39,7 +39,6 @@ module.exports = class FileListingService {
       );
     }
 
-    const result = await this.minioRepository.listObjects(tenant, pathPrefix, limit, startAfter);
-    return result;
+    return this.minioRepository.listObjects(tenant, pathPrefix, limit, startAfter);
   }
 };

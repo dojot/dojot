@@ -143,7 +143,7 @@ module.exports = class MinIoRepository {
       const info = await this.client.statObject(this.suffixBucket + bucketName, path);
       const stream = await this.client.getObject(`${this.suffixBucket}${bucketName}`, path);
 
-      const file = {
+      return {
         stream,
         info: {
           contentType: info.metaData['content-type'],
@@ -151,8 +151,6 @@ module.exports = class MinIoRepository {
           size: info.size,
         },
       };
-
-      return file;
     } catch (error) {
       this.logger.debug(error.message);
       return null;
@@ -172,7 +170,7 @@ module.exports = class MinIoRepository {
       const info = await this.client.statObject(this.suffixBucket + bucketName, path);
       const url = await this.client.presignedGetObject(`${this.suffixBucket}${bucketName}`, path, this.presignedExpiry);
 
-      const file = {
+      return {
         url,
         info: {
           contentType: info.metaData['content-type'],
@@ -180,8 +178,6 @@ module.exports = class MinIoRepository {
           size: info.size,
         },
       };
-
-      return file;
     } catch (error) {
       this.logger.debug(error.message);
       return null;
@@ -238,7 +234,11 @@ module.exports = class MinIoRepository {
     });
 
     const readableStream = Readable({
-      read() {},
+      // Ignore thesonar cloud smell, because ReadableStream needs this function,
+      // but in this case it is not used.
+      read() {
+        this.logger.debug('Start list stream');
+      },
     });
 
     const minioReadableStream = this.client.listObjectsV2(
@@ -269,7 +269,6 @@ module.exports = class MinIoRepository {
       minioReadableStream.destroy();
     });
 
-    this.logger.debug('Start list stream');
     await pipelineAsync(readableStream, writebleStream);
 
     if (error) {

@@ -112,7 +112,7 @@ describe('FileController', () => {
       if (!responseMock.headers) {
         responseMock.headers = [];
       }
-      responseMock.headers[header] = value;
+      responseMock.headers[`${header}`] = value;
     };
 
     retrievalFileService.handle.mockReturnValueOnce({

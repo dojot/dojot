@@ -27,8 +27,10 @@ class ConsumerTest {
   }
 
   unregisterCallback(registerId) {
+    // Only test
+    // eslint-disable-next-line security/detect-object-injection
     const topic = this.listenersIndex[registerId];
-    listeners.delete(new RegExp(topic).source);
+    listeners.delete(topic.source);
   }
 
   getStatus() {

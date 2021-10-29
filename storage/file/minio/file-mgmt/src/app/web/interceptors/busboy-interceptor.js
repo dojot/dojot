@@ -5,6 +5,7 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
+
 /**
  * Makes an instance of busboy interceptor.
  *
@@ -24,7 +25,7 @@ module.exports = (logger, minioRepository, config) => ({
 
     // Gets the fields
     busboy.on('field', (fieldname, value) => {
-      req.body[fieldname] = value;
+      req.body[`${fieldname}`] = value;
     });
 
     // Gets the file
@@ -64,6 +65,7 @@ module.exports = (logger, minioRepository, config) => ({
       logger.debug('Form upload successfully');
       busboy.emit('loaded-form');
     });
+
 
     // Checks if the file and its metadata have been loaded
     busboy.on('loaded-form', () => {

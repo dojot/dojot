@@ -1,9 +1,6 @@
 const MockEventEmitter = require('events');
 
-jest.mock('busboy', () => jest.fn().mockImplementation(() => {
-  const mockbusboy = new MockEventEmitter();
-  return mockbusboy;
-}));
+jest.mock('busboy', () => jest.fn().mockImplementation(() => new MockEventEmitter()));
 
 const BusboyInterceptor = require('../../../src/app/web/interceptors/busboy-interceptor');
 const loggerMock = require('../../mocks/logger-mock');
@@ -15,6 +12,18 @@ const config = {
     'bucket.suffix': 'test.test.',
     'upload.size.limit': 2500000,
   },
+};
+
+const pipeErrorMock = (busboy) => {
+  const fileStreamMock = new MockEventEmitter();
+  fileStreamMock.on('end', () => {
+    busboy.removeAllListeners('loaded-meta');
+    throw new Error('error');
+  });
+
+  busboy.emit('field', 'path', '/test/');
+  busboy.emit('field', 'md5', 'md5');
+  busboy.emit('file', 'file', fileStreamMock, '', '', '');
 };
 
 describe('BusboyInterceptor', () => {
@@ -35,7 +44,9 @@ describe('BusboyInterceptor', () => {
     const mimetype = 'text/csv';
     const pipeMock = (busboy) => {
       const fileStreamMock = new MockEventEmitter();
-      fileStreamMock.on('end', () => { busboy.emit('finish'); });
+      fileStreamMock.on('end', () => {
+        busboy.emit('finish');
+      });
 
       busboy.emit('field', 'path', '/test/');
       busboy.emit('field', 'md5', 'md5');
@@ -97,19 +108,8 @@ describe('BusboyInterceptor', () => {
   });
 
   it('Should return a internal server http response response, when there is an error ', (done) => {
-    const pipeMock = (busboy) => {
-      const fileStreamMock = new MockEventEmitter();
-      fileStreamMock.on('end', () => {
-        busboy.removeAllListeners('loaded-meta');
-        throw new Error('Error');
-      });
-
-      busboy.emit('field', 'path', '/test/');
-      busboy.emit('field', 'md5', 'md5');
-      busboy.emit('file', 'file', fileStreamMock, '', '', '');
-    };
     const request = {
-      pipe: pipeMock,
+      pipe: pipeErrorMock,
       tenant: 'test',
     };
     const response = new ResponseMock();
@@ -125,19 +125,8 @@ describe('BusboyInterceptor', () => {
   });
 
   it('Should return a Not found http response, when the tenant was not found ', (done) => {
-    const pipeMock = (busboy) => {
-      const fileStreamMock = new MockEventEmitter();
-      fileStreamMock.on('end', () => {
-        busboy.removeAllListeners('loaded-meta');
-        throw new Error('Error');
-      });
-
-      busboy.emit('field', 'path', '/test/');
-      busboy.emit('field', 'md5', 'md5');
-      busboy.emit('file', 'file', fileStreamMock, '', '', '');
-    };
     const request = {
-      pipe: pipeMock,
+      pipe: pipeErrorMock,
       tenant: 'test_not_found',
     };
     const response = new ResponseMock();

@@ -53,7 +53,10 @@ describe('ExpressAdapter', () => {
   });
 
   it('Should throw an error, when there is an error in the adapter', () => {
-    mockYaml.load = () => { throw Error('Error'); };
+    mockYaml.load = () => {
+      throw Error('Error');
+    };
+
     let error;
     try {
       ExpressAdapter.adapt(routes, {}, {}, loggerMock, config);
