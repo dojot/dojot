@@ -25,10 +25,10 @@ jest.mock('../../../src/app/web/interceptors/busboy-interceptor', () => jest.fn(
   name: '',
 })));
 
-const Dependecies = require('../../../src/app/dependecies');
+const Dependecies = require('../../../src/app/dependencies');
 
-describe('Dependecies', () => {
-  it('Should construct the dependecies', async () => {
+describe('Dependencies', () => {
+  it('Should construct the dependencies', async () => {
     const dep = Dependecies({}, {});
     expect(dep.web.httpServer).toEqual({});
     expect(dep.web.controllers).toEqual({

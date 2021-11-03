@@ -4,24 +4,19 @@
         "jest": true,
         "node": true
     },
+    "plugins": [
+        "security",
+        "security-node"
+    ],
     "extends": [
         "airbnb-base",
         "plugin:security/recommended",
         "plugin:security-node/recommended"
     ],
-    "plugins": [
-        "security",
-        "security-node"
-    ],
     "parser": "babel-eslint",
     "rules": {
         /* the rule import/no-unresolved is needed to avoid problems with the codefactor */
-        "import/no-unresolved": [
-            "error",
-            {
-              "ignore": [ "src/" ]
-            }
-        ],
+        "import/no-unresolved": "off",
         /* Workaround:
             Codefactor is using a newer version of airbnb-base, and it is not
             availabe at NPM yet. So this line forces codefactor to keep the
@@ -35,6 +30,7 @@
                 "maxBOF": 1,
                 "maxEOF": 0
             }
-        ]
+        ],
+        "no-trailing-spaces": "off"
     }
 }

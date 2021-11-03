@@ -355,7 +355,6 @@ components:
       type: string
       minLength: 3
       maxLength: 100
-
     uploadedFile:
       type: object
       properties:
@@ -364,7 +363,6 @@ components:
             - type: string
         details:
           $ref: "#/components/schemas/fileDetails"
-
     retrieveUrlFile:
       type: object
       properties:
@@ -374,7 +372,6 @@ components:
             - format: URL
         info:
           $ref: "#/components/schemas/retrieveUrlFileMetadata"
-
     retrieveUrlFileMetadata:
       type: object
       properties:
@@ -388,9 +385,7 @@ components:
             - format: MD5
         size:
           anyOf:
-            - type: number
-
-
+            - type: integer
     removedFile:
       type: object
       properties:
@@ -399,7 +394,6 @@ components:
             - type: string
         details:
           $ref: "#/components/schemas/fileDetails2"
-
     listFiles:
       type: object
       properties:
@@ -410,11 +404,10 @@ components:
                 $ref: "#/components/schemas/fileSummary"
         length:
           anyOf:
-            - type: number
+            - type: integer
         nextPageStartsAfter:
           anyOf:
             - type: string
-
     fileDetails:
       type: object
       properties:
@@ -432,7 +425,6 @@ components:
         mimetype:
           anyOf:
             - type: string
-
     fileDetails2:
       type: object
       properties:
@@ -455,7 +447,6 @@ components:
         etag:
          anyOf:
             - type: string
-
     fileSummary:
       properties:
         name:
@@ -469,8 +460,7 @@ components:
             - type: string
         size:
          anyOf:
-            - type: "integer"
-
+            - type: integer
     minioFileInfo:
       type: object
       properties:
@@ -480,7 +470,6 @@ components:
         versionId:
           anyOf:
             - type: string
-
     apiError:
       type: object
       properties:

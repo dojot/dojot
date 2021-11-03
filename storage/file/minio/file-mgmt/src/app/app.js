@@ -1,7 +1,7 @@
 const topics = require('./kafka/topics');
 const ExpressAdapter = require('./web/express-adapter');
 const routesV1 = require('./web/routesV1');
-const Dependecies = require('./dependecies');
+const Dependencies = require('./dependencies');
 
 module.exports = class App {
   /**
@@ -23,7 +23,7 @@ module.exports = class App {
    */
   async init() {
     // Initialize internal dependencies
-    const { web, kafka } = Dependecies(this.config, this.logger);
+    const { web, kafka } = Dependencies(this.config, this.logger);
     this.server = web.httpServer;
     this.kafkaConsumer = kafka.kafkaConsumer;
 
