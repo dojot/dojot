@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "dev": "node --inspect=0.0.0.0 src/index.js",
     "local": "node src/index.js",
-    "test": "jest ./tests --no-cache --coverage",
+    "test": "jest --verbose",
     "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
     "unit-test": "jest ./tests/units --no-cache --coverage"
   },
