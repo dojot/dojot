@@ -1,0 +1,10 @@
+*.swp
+*.pdf
+*.html
+
+.idea/
+node_modules
+build/
+.vscode/
+.env
+
