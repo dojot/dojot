@@ -1,14 +1,16 @@
+const moment = require('moment');
 const { generateDeviceDataMessage } = require('../../app/Utils');
 
 const tenant = 'test';
 const deviceid = 'abc123';
-const fakeMessageWithTimestamp = {
+const fakeMessageWithUTC = {
   ts: '2021-07-12T09:31:01.683000Z',
   data: {
     temperature: 25.79,
   },
 };
-const fakeMessageWithoutTimestamp = {
+const fakeMessageWithUnix = {
+  ts: '1636513779579',
   data: {
     temperature: 25.79,
   },
@@ -25,9 +27,9 @@ describe('Util', () => {
     jest.clearAllMocks();
   });
 
-  it('should format the message correctly with timestamp', async () => {
+  it('should format the message correctly with UTC', async () => {
     const deviceDataMessage = generateDeviceDataMessage(
-      fakeMessageWithTimestamp,
+      fakeMessageWithUTC,
       tenant,
       deviceid,
     );
@@ -36,9 +38,9 @@ describe('Util', () => {
       metadata: {
         deviceid,
         tenant,
-        timestamp: Date.parse(fakeMessageWithTimestamp.ts),
+        timestamp: moment(fakeMessageWithUTC.ts).valueOf(),
       },
-      attrs: fakeMessageWithTimestamp.data,
+      attrs: fakeMessageWithUTC.data,
     };
 
     expect(JSON.stringify(deviceDataMessage)).toEqual(
@@ -46,9 +48,9 @@ describe('Util', () => {
     );
   });
 
-  it('should format the message correctly without timestamp', async () => {
+  it('should format the message correctly with unix', async () => {
     const deviceDataMessage = generateDeviceDataMessage(
-      fakeMessageWithoutTimestamp,
+      fakeMessageWithUnix,
       tenant,
       deviceid,
     );
@@ -57,9 +59,9 @@ describe('Util', () => {
       metadata: {
         deviceid,
         tenant,
-        timestamp: new Date().getTime(),
+        timestamp: moment(fakeMessageWithUnix.ts, 'X', true).valueOf(),
       },
-      attrs: fakeMessageWithoutTimestamp.data,
+      attrs: fakeMessageWithUnix.data,
     };
 
     expect(JSON.stringify(deviceDataMessage)).toEqual(
@@ -68,23 +70,17 @@ describe('Util', () => {
   });
 
   it('should format the message correctly with invalid timestamp', async () => {
-    const deviceDataMessage = generateDeviceDataMessage(
-      fakeMessageWithInvalidTimestamp,
-      tenant,
-      deviceid,
-    );
-
-    const formattedMessage = {
-      metadata: {
-        deviceid,
+    let err;
+    try {
+      generateDeviceDataMessage(
+        fakeMessageWithInvalidTimestamp,
         tenant,
-        timestamp: new Date().getTime(),
-      },
-      attrs: fakeMessageWithInvalidTimestamp.data,
-    };
+        deviceid,
+      );
+    } catch (e) {
+      err = e;
+    }
 
-    expect(JSON.stringify(deviceDataMessage)).toEqual(
-      JSON.stringify(formattedMessage),
-    );
+    expect(err.message).toEqual('Invalid timestamp');
   });
 });

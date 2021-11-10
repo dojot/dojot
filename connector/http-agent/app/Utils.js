@@ -1,3 +1,6 @@
+const moment = require('moment');
+const createError = require('http-errors');
+
 /**
  * A module with helper functions
  * @module utils
@@ -13,12 +16,13 @@
  * @returns {number}
  */
 const parseTimestamp = (ts) => {
-  if (ts) {
-    const parsedTimestamp = Date.parse(ts);
-    if (Number.isNaN(parsedTimestamp)) return new Date().getTime();
-    return parsedTimestamp;
-  }
-  return new Date().getTime();
+  const err = new createError.BadRequest();
+  const date = moment(ts);
+  const unix = moment(ts, 'X', true);
+  if (date.isValid()) return date.valueOf();
+  if (unix.isValid()) return unix.valueOf();
+  err.message = 'Invalid timestamp';
+  throw err;
 };
 
 /**
@@ -26,9 +30,9 @@ const parseTimestamp = (ts) => {
  *
  * Generates a payload for device-data topic for Dojot
  *
- * @param {string} payload
+ * @param {Object} payload
  * @param {string} tenant
- * @param {Object} deviceid
+ * @param {string} deviceid
  *
  * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
  */
