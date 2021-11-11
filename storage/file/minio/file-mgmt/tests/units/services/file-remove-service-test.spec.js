@@ -42,6 +42,6 @@ describe('FileRemovalService', () => {
     }
 
     expect(error.responseJSON.error).toEqual('Tenant does not exist.');
-    expect(error.responseJSON.detail).toEqual('There is no tenancy for this tenant.');
+    expect(error.responseJSON.detail).toEqual('There is no bucket for this tenant.');
   });
 });

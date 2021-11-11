@@ -233,11 +233,12 @@ module.exports = class MinIoRepository {
       },
     });
 
+    const outerThis = this;
     const readableStream = Readable({
       // Ignore thesonar cloud smell, because ReadableStream needs this function,
       // but in this case it is not used.
       read() {
-        this.logger.debug('Start list stream');
+        outerThis.logger.debug('Start list stream');
       },
     });
 

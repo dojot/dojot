@@ -11,7 +11,7 @@ const jwtDecode = require('jwt-decode');
  *
  * */
 module.exports = () => ({
-  name: 'dojot-tenant-jwt-parse-interceptor',
+  name: 'dojot-tenant-jwt-parser-interceptor',
   middleware: (req, res, next) => {
     const err = new createError.Unauthorized();
     if (req.headers.authorization) {

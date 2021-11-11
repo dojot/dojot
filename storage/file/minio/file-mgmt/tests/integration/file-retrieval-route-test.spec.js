@@ -5,8 +5,8 @@ const setup = require('./setup');
 
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
-describe('GET /files', () => {
-  const route = '/api/v1/files';
+describe('GET /files/download', () => {
+  const route = '/api/v1/files/download';
   const path = '/test/test_sample1';
   let app;
   let jwt;
@@ -31,10 +31,10 @@ describe('GET /files', () => {
 
   it('Should reply with a bad request http response, when the tenant does not exist.', (done) => {
     request(app.server.server)
-      .delete(route)
+      .get(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .query({ path, alt: 'media' })
-      .expect(404)
+      .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('Tenant does not exist.');
         done();

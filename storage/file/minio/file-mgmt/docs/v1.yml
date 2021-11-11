@@ -2,14 +2,14 @@
 openapi: 3.0.0
 info:
   description: "Dojot service for file management."
-  version: 0.0.1 #Version from package.json
+  version: 1.0.0 #Version from package.json
   title: "File-Mgmt"
 tags:
   - name: files
     description: File manager
 paths:
-  "/api/v1/files":
-    post:
+  "/api/v1/files/upload":
+    put:
       tags:
         - files
       security:
@@ -40,12 +40,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/apiError"
-        "404":
-          description: "Not found tenant"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/apiError"
         "413":
           description: "The file is too large"
           content:
@@ -58,6 +52,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/apiErrorUnknown"
+
+  "/api/v1/files/remove":
     delete:
       tags:
         - files
@@ -87,12 +83,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/apiError"
-        "404":
-          description: "Not found tenant or file"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
           content:
@@ -100,7 +90,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/apiErrorUnknown"
 
-  "/api/v1/files?alt=media":
+  "/api/v1/files/download?alt=media":
     get:
       tags:
         - files
@@ -131,12 +121,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/apiError"
-        "404":
-          description: "Not found tenant"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/apiError"
         "500":
           description: "Internal Server Error"
           content:
@@ -144,7 +128,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/apiErrorUnknown"
 
-  "/api/v1/files?alt=url":
+  "/api/v1/files/download?alt=url":
     get:
       tags:
         - files
@@ -170,12 +154,6 @@ paths:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/apiError"
-        "404":
-          description: "Not found tenant"
           content:
             application/json:
               schema:
@@ -216,12 +194,6 @@ paths:
                 $ref: "#/components/schemas/apiError"
         "401":
           description: "Unauthorized"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/apiError"
-        "404":
-          description: "Not found tenant or file"
           content:
             application/json:
               schema:

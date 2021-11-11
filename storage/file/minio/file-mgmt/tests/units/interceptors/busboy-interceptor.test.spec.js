@@ -99,7 +99,7 @@ describe('BusboyInterceptor', () => {
     busboyInterceptor.middleware(request, response, (error) => {
       try {
         expect(error.responseJSON.error).toEqual('The file is too large');
-        expect(error.responseJSON.detail).toEqual(`The file size has a limit of ${config.minio['upload.size.limit']}`);
+        expect(error.responseJSON.detail).toEqual(`The file exceeds the maximum size of ${config.minio['upload.size.limit']}`);
         done();
       } catch (e) {
         done(e);
@@ -134,7 +134,7 @@ describe('BusboyInterceptor', () => {
     busboyInterceptor.middleware(request, response, (error) => {
       try {
         expect(error.responseJSON.error).toEqual('Tenant does not exist.');
-        expect(error.responseJSON.detail).toEqual('There is no tenancy for this tenant.');
+        expect(error.responseJSON.detail).toEqual('There is no bucket for this tenant.');
         done();
       } catch (e) {
         done(e);

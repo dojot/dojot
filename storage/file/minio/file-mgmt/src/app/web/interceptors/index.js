@@ -1,9 +1,9 @@
-const dojotTenantJwtParseInterceptor = require('./dojot-tenant-jwt-parse');
+const dojotTenantJwtParserInterceptor = require('./dojot-tenant-jwt-parser');
 const openApiValidatorInterceptor = require('./open-api-validator');
 const busboyHandlerInterceptor = require('./busboy-interceptor');
 
 module.exports = {
-  dojotTenantJwtParseInterceptor,
+  dojotTenantJwtParserInterceptor,
   openApiValidatorInterceptor,
   busboyHandlerInterceptor,
 };

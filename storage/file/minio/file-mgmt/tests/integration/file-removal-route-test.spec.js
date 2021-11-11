@@ -5,8 +5,8 @@ const setup = require('./setup');
 
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
 
-describe('DELETE /files', () => {
-  const route = '/api/v1/files';
+describe('DELETE /files/remove', () => {
+  const route = '/api/v1/files/remove';
   let app;
   let jwt;
   beforeAll(async () => {
@@ -38,7 +38,7 @@ describe('DELETE /files', () => {
       .delete(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .query({ path })
-      .expect(404)
+      .expect(400)
       .then((response) => {
         expect(response.body.error).toEqual('Tenant does not exist.');
         done();

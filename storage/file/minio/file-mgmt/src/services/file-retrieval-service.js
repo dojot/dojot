@@ -66,6 +66,11 @@ module.exports = class FileRetrievalService {
    *  with the file's metadata.
    */
   handle = async (tenant, path, alt) => {
+    if (!(await this.minioRepository.bucketExists(tenant))) {
+      this.logger.debug('Tenant does not exist.');
+      throw framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.');
+    }
+
     if (!alt) {
       throw framework.errorTemplate.BadRequest('The "alt" param is required', 'The "alt" param is required');
     }

@@ -45,7 +45,7 @@ module.exports = (config, logger) => {
   const fileUploadService = new FileUploadService(minioRepository, logger);
   const fileListingService = new FileListingService(minioRepository, logger);
   const fileRemovalService = new FileRemoveService(minioRepository, logger);
-  const fileretrievalService = new FileRetrievalService(minioRepository, logger);
+  const fileRetrievalService = new FileRetrievalService(minioRepository, logger);
 
   // Interceptors
   const busboyHandlerInterceptor = BusboyHandlerInterceptor(
@@ -54,7 +54,7 @@ module.exports = (config, logger) => {
 
   // Controllers
   const fileController = new FileController(
-    fileUploadService, fileretrievalService, fileRemovalService, logger,
+    fileUploadService, fileRetrievalService, fileRemovalService, logger,
   );
   const fileListingController = new FileListingController(fileListingService, logger);
   const kafkaController = new KafkaController(tenantService, logger);

@@ -11,10 +11,10 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
   const fileUploadRoute = {
     mountPoint,
     name: 'files',
-    path: ['/files'],
+    path: ['/files/upload'],
     handlers: [
       {
-        method: 'post',
+        method: 'put',
         middleware: [
           interceptors.busboyHandlerInterceptor,
           controllers.fileController.upload,
@@ -40,7 +40,7 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
   const fileRetrievalRoute = {
     mountPoint,
     name: 'retrieval-file',
-    path: ['/files'],
+    path: ['/files/download'],
     handlers: [
       {
         method: 'get',
@@ -54,7 +54,7 @@ const routesV1 = (mountPoint, controllers, interceptors) => {
   const fileRemovalFileRoute = {
     mountPoint,
     name: 'remove-file',
-    path: ['/files'],
+    path: ['/files/remove'],
     handlers: [
       {
         method: 'delete',

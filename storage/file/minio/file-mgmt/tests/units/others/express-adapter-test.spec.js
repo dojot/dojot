@@ -27,7 +27,7 @@ jest.mock('swagger-ui-express', () => ({
 }));
 
 jest.mock('../../../src/app/web/interceptors', () => ({
-  dojotTenantJwtParseInterceptor: jest.fn(),
+  dojotTenantJwtParserInterceptor: jest.fn(),
   openApiValidatorInterceptor: jest.fn(),
 }));
 

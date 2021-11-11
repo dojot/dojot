@@ -25,11 +25,10 @@ module.exports = class FileListingService {
    *
    * @returns a list of files
    */
-  // eslint-disable-next-line class-methods-use-this
   async list(tenant, pathPrefix, limit, startAfter) {
     if (!(await this.minioRepository.bucketExists(tenant))) {
       this.logger.debug('Tenant does not exist.');
-      throw framework.errorTemplate.NotFound('Tenant does not exist.', 'There is no tenancy for this tenant.');
+      throw framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.');
     }
 
     if (!(limit && Math.sign(limit) === 1 && Number.isInteger(limit))) {

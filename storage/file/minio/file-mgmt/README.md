@@ -1,6 +1,6 @@
 # FILE-MGMT
 
-The "File-mgmt" service is responsible for storing files in dojot. Through the REST interface provided by the service, it's possible to upload, download and delete files.
+The "File-mgmt" service is responsible for storing files in dojot. Through the REST interface provided by the service, it's possible to list, upload, download and delete files.
 
 ## Running the service
 
@@ -42,7 +42,7 @@ available by default.
 Key                                         | Default Value             | Valid Values  | Environment variable
 --------------------------------------------|---------------------------| ------------  | --------------------
 consumer.client.id                          | ${HOSTNAME:-file-mgmt}    | string                | FILEMGMT_CONSUMER_CLIENT_ID
-consumer.group.id                           | influxdb-storer           | string                | FILEMGMT_CONSUMER_GROUP_ID
+consumer.group.id                           | file-mgmt                 | string                | FILEMGMT_CONSUMER_GROUP_ID
 consumer.metadata.broker.list               | kafka-server:9092         | Initial list of brokers as a CSV list of broker host or host:port.| FILEMGMT_CONSUMER_METADATA_BROKER_LIST
 consumer.topic.metadata.refresh.interval.ms | 30000                     | milliseconds (integer)| FILEMGMT_CONSUMER_TOPIC_METADATA_REFRESH_INTERVAL_MS
 topic.auto.offset.reset                     | earliest                  | string                | FILEMGMT_TOPIC_AUTO_OFFSET_RESET

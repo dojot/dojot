@@ -35,12 +35,12 @@ module.exports = (logger, minioRepository, config) => ({
         logger.debug('Gets file stream..');
         // If the file exceeds the size limit
         fileStream.on('limit', () => {
-          next(framework.errorTemplate.PayloadTooLarge('The file is too large', `The file size has a limit of ${config.minio['upload.size.limit']}`));
+          next(framework.errorTemplate.PayloadTooLarge('The file is too large', `The file exceeds the maximum size of ${config.minio['upload.size.limit']}`));
         });
 
         if (!(await minioRepository.bucketExists(req.tenant))) {
           logger.debug('Tenant does not exist.');
-          next(framework.errorTemplate.NotFound('Tenant does not exist.', 'There is no tenancy for this tenant.'));
+          next(framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.'));
           return;
         }
 

@@ -43,7 +43,7 @@ module.exports = class ExpressAdapter {
           path: '/tss/v1/api-docs',
           middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
         },
-        Interceptors.dojotTenantJwtParseInterceptor(),
+        Interceptors.dojotTenantJwtParserInterceptor(),
         // Interceptors.openApiValidatorInterceptor({ openApiPath }),
         requestIdInterceptor(),
         beaconInterceptor({

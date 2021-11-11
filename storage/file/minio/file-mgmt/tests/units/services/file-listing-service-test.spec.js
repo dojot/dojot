@@ -24,7 +24,7 @@ describe('FileListingService', () => {
     }
 
     expect(error.responseJSON.error).toEqual('Tenant does not exist.');
-    expect(error.responseJSON.detail).toEqual('There is no tenancy for this tenant.');
+    expect(error.responseJSON.detail).toEqual('There is no bucket for this tenant.');
   });
 
   it('return a bad request http error, when the limit is not number', async () => {

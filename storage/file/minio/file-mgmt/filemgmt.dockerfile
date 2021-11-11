@@ -13,8 +13,6 @@ RUN apk --no-cache add \
     make \
     python
 
-COPY package.json package.json
-
 RUN apk add --no-cache --virtual .build-deps \
     gcc \
     zlib-dev \
@@ -23,6 +21,7 @@ RUN apk add --no-cache --virtual .build-deps \
     py-setuptools \
     bash
 
+COPY package.json package.json
 COPY package-lock.json package-lock.json
 
 RUN npm install --only=prod

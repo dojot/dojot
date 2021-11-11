@@ -12,7 +12,7 @@ const mockHttpServer = {
   init: jest.fn(),
 };
 
-jest.mock('../../../src/app/dependecies', () => () => ({
+jest.mock('../../../src/app/dependencies', () => () => ({
   web: {
     httpServer: mockHttpServer,
   },

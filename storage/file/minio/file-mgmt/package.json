@@ -1,15 +1,15 @@
 {
   "name": "file-mgmt",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "The file-mgmt is responsible for managing MinIO resources on the dojot platform",
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --inspect=0.0.0.0 src/index.js",
-    "local": "node src/index.js",
+    "dev-debug": "node --inspect=0.0.0.0 src/index.js",
     "test": "jest --verbose",
     "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
-    "unit-test": "jest ./tests/units --no-cache --coverage"
+    "unit-test": "jest ./tests/units --no-cache --coverage",
+    "check-licenses": "apache2-license-checker"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
     "@dojot/microservice-sdk": "^0.1.15",
     "babel-eslint": "^10.1.0",
     "busboy": "^0.3.1",

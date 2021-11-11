@@ -7,7 +7,7 @@ const mockPayload = {
 };
 jest.mock('jwt-decode', () => () => mockPayload.functionReturn());
 
-const dojotTenantJwtParseInterceptor = require('../../../src/app/web/interceptors/dojot-tenant-jwt-parse');
+const dojotTenantJwtParseInterceptor = require('../../../src/app/web/interceptors/dojot-tenant-jwt-parser');
 
 const ResponseMock = require('../../mocks/express-response-mock');
 
