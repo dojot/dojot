@@ -15,7 +15,8 @@
     "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js .",
-    "check-licenses": "apache2-license-checker"
+    "check-licenses": "apache2-license-checker",
+    "clear_jest": "jest --clearCache"
   },
   "repository": {
     "type": "git",
@@ -55,7 +56,9 @@
     "http-terminator": "^2.0.3",
     "joi": "^17.4.2",
     "lodash.camelcase": "^4.3.0",
-    "node-cache": "^5.1.2"
+    "moment": "^2.29.1",
+    "promise-timeout": "^1.3.0",
+    "redis": "^3.1.2"
   },
   "jest": {
     "verbose": true,
@@ -101,7 +104,7 @@
     "eslint-plugin-jest": "^24.4.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-security-node": "^1.0.14",
-    "jest": "^26.4.2",
+    "jest": "^27.3.1",
     "methods": "^1.1.2",
     "nodemon": "^2.0.12",
     "supertest": "^6.0.1"

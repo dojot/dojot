@@ -1,6 +1,25 @@
 const createError = require('http-errors');
-const axios = require('axios');
 const tls = require('tls');
+
+/**
+ * Function to decode basic authentication base64
+ *
+ * */
+const decodeBasic = (req) => {
+  try {
+    const authHeader = req.headers.authorization.split(' ');
+    // eslint-disable-next-line new-cap
+    const buff = new Buffer.from(authHeader[1], 'base64');
+    const text = buff.toString('ascii');
+
+    const [username, password] = text.split(':');
+    const [tenant, deviceId] = username.split('@');
+
+    return [authHeader[1], username, password, tenant, deviceId];
+  } catch (err) {
+    throw new Error('Invalid Basic token.');
+  }
+};
 
 /**
  * A middleware to get device identification from the certificate
@@ -11,10 +30,14 @@ const tls = require('tls');
  * and add the new tenant request (req.tenant and req.deviceId).
  *
  * */
-module.exports = ({ cache, config }) => ({
+module.exports = ({
+  redisManager, deviceAuthService, certificateAclService, config,
+}) => ({
   name: 'device-identification-interceptor',
   middleware: async (req, res, next) => {
-    const err = new createError.Unauthorized();
+    const Forbidden = new createError[403]();
+    const Unauthorized = new createError[401]();
+    const BadRequest = new createError[400]();
 
     if (req.socket instanceof tls.TLSSocket) {
       const clientCert = req.socket.getPeerCertificate();
@@ -29,9 +52,9 @@ module.exports = ({ cache, config }) => ({
           [req.tenant, req.deviceId] = messageKey;
           return next();
         } catch (e) {
-          err.message =
+          Forbidden.message =
             'Error trying to get tenant and deviceId in CN of certificate.';
-          return next(err);
+          return next(Forbidden);
         }
       }
 
@@ -39,43 +62,89 @@ module.exports = ({ cache, config }) => ({
         config.authorizationMode === 'fingerprint' &&
         Object.prototype.hasOwnProperty.call(clientCert, 'fingerprint256')
       ) {
-        const { fingerprint256 } = clientCert;
-        let messageKey = cache.get(fingerprint256);
-        if (messageKey) {
-          [req.tenant, req.deviceId] = messageKey;
-          return next();
-        }
         try {
-          messageKey = await axios
-            .get(
-              `http://certificate-acl:3000/internal/api/v1/acl-entries/${fingerprint256}`,
-            )
-            .then((resp) => resp.data.split(':'));
-          [req.tenant, req.deviceId] = messageKey;
-          cache.set(fingerprint256, messageKey, config.setTll);
+          const { fingerprint256 } = clientCert;
+          let messageKeyFP = await redisManager.getAsync(fingerprint256);
+
+          if (messageKeyFP) {
+            [req.tenant, req.deviceId] = messageKeyFP.split(':');
+            return next();
+          }
+
+          messageKeyFP = await certificateAclService.getAclEntries(fingerprint256);
+          [req.tenant, req.deviceId] = messageKeyFP.split(':');
+
+          redisManager.setAsync(fingerprint256, messageKeyFP);
           return next();
         } catch (e) {
-          err.message =
+          Forbidden.message =
             'Error trying to get tenant and deviceId in certificate-acl.';
-          return next(err);
+          return next(Forbidden);
         }
       }
 
-      err.message = 'Client certificate is invalid';
-      return next(err);
+      if (config.authorizationMode === 'basic-auth') {
+        try {
+          const [authHeader, username, password, tenant, deviceId] = decodeBasic(req);
+
+          const messageKeyDA = await redisManager.getAsync(authHeader);
+          if (messageKeyDA) {
+            [req.tenant, req.deviceId] = [tenant, deviceId];
+            return next();
+          }
+
+          try {
+            const authenticated = await deviceAuthService
+              .getAuthenticationStatus(username, password);
+            if (authenticated) {
+              [req.tenant, req.deviceId] = [tenant, deviceId];
+              await redisManager.setAsync(authHeader, true);
+              return next();
+            }
+          } catch (err) {
+            throw new Error('Error trying to get tenant and deviceId in basic-auth.');
+          }
+
+          throw new Error('Invalid credentials.');
+        } catch (err) {
+          Unauthorized.message = err.message;
+          return next(Unauthorized);
+        }
+      }
     }
 
     const reqType = req.path.split('/');
 
-    if (config.unsecureMode && reqType[3] === 'unsecure') {
-      const {
-        query: { tenant, deviceId },
-      } = req;
-      [req.tenant, req.deviceId] = [tenant, deviceId];
-      return next();
+    if (config.authorizationMode === 'basic-auth' && reqType[3] === 'unsecure') {
+      try {
+        const [authHeader, username, password, tenant, deviceId] = decodeBasic(req);
+
+        const messageKeyDA = await redisManager.getAsync(authHeader);
+        if (messageKeyDA) {
+          [req.tenant, req.deviceId] = [tenant, deviceId];
+          return next();
+        }
+
+        try {
+          const authenticated = await deviceAuthService
+            .getAuthenticationStatus(username, password);
+          if (authenticated) {
+            [req.tenant, req.deviceId] = [tenant, deviceId];
+            await redisManager.setAsync(authHeader, true);
+            return next();
+          }
+        } catch (err) {
+          throw new Error('Error trying to get tenant and deviceId in basic-auth.');
+        }
+
+        throw new Error('Invalid credentials.');
+      } catch (err) {
+        Unauthorized.message = err.message;
+        return next(Unauthorized);
+      }
     }
 
-    err.message = 'Missing client certificate';
-    return next(err);
+    BadRequest.message = 'Unable to authenticate';
+    return next(BadRequest);
   },
 });

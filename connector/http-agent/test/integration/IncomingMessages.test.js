@@ -1,16 +1,11 @@
 const fs = require('fs');
 
 const mockConfig = {
+  https: { 'request.cert': true },
   express: { trustproxy: true, 'parsing.limit': 256000 },
   security: { 'unsecure.mode': true, 'authorization.mode': 'fingerprint' },
-  cache: { 'set.tll': 30000 },
+  redis: { 'set.tll': 30000 },
 };
-
-const mockAxiosGet = jest.fn();
-const mockAxios = {
-  get: mockAxiosGet,
-};
-jest.mock('axios', () => mockAxios);
 
 const { WebUtils } = jest.requireActual('@dojot/microservice-sdk');
 
@@ -55,15 +50,30 @@ const certCN = fs.readFileSync('test/certs/client/client_cn_cert.pem');
 const keyCN = fs.readFileSync('test/certs/client/client_cn_key.pem');
 const ca = fs.readFileSync('test/certs/ca/ca_cert.pem');
 
-const mockCacheInit = jest.fn();
-const mockCacheGet = jest.fn();
-const mockCacheSet = jest.fn();
-const mockCache = {
-  init: mockCacheInit,
-  get: mockCacheGet,
-  set: mockCacheSet,
+
+const validBasic = 'dGVzdEBhYmMxMjM6UGFzc1dvckQvMTIz';
+
+const mockRedisInit = jest.fn();
+const mockRedisGet = jest.fn();
+const mockRedisSet = jest.fn();
+const mockRedis = {
+  init: mockRedisInit,
+  getAsync: mockRedisGet,
+  setAsync: mockRedisSet,
 };
-jest.mock('../../app/Cache', () => mockCache);
+jest.mock('../../app/redis/RedisManager.js', () => mockRedis);
+
+const mockGetAuthenticationStatus = jest.fn();
+const mockDeviceAuthService = {
+  getAuthenticationStatus: mockGetAuthenticationStatus,
+};
+jest.mock('../../app/axios/DeviceAuthService.js', () => mockDeviceAuthService);
+
+const mockgetAclEntries = jest.fn();
+const mockCertificateAclService = {
+  getAclEntries: mockgetAclEntries,
+};
+jest.mock('../../app/axios/CertificateAclService.js', () => mockCertificateAclService);
 
 const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
@@ -85,7 +95,9 @@ beforeEach(() => {
       }),
     ],
     serviceStateMock,
-    mockCache,
+    mockRedis,
+    mockDeviceAuthService,
+    mockCertificateAclService,
   );
 });
 
@@ -96,8 +108,8 @@ describe('HTTPS', () => {
         jest.clearAllMocks();
       });
 
-      it('should successfully execute the request with tenant and deviceId from cache', async () => {
-        mockCache.get.mockReturnValue(['test', 'abc123']);
+      it('should successfully execute the request with tenant and deviceId from redis', async () => {
+        mockRedis.getAsync.mockReturnValue('test:abc123');
         await requestHttps(app)
           .post('/http-agent/v1/incoming-messages')
           .set('Content-Type', 'application/json')
@@ -110,19 +122,14 @@ describe('HTTPS', () => {
           .key(key)
           .cert(cert)
           .ca(ca)
-          .expect('Content-Type', /json/)
-          .expect(200)
           .then((response) => {
-            expect(response.body).toStrictEqual({
-              success: true,
-              message: 'Successfully published!',
-            });
+            expect(response.statusCode).toStrictEqual(204);
           });
       });
 
       it('should successfully execute the request with tenant and deviceId from certificate-acl', async () => {
-        mockCache.get.mockReturnValue(undefined);
-        mockAxios.get.mockResolvedValue({ data: 'test:abc123' });
+        mockRedis.getAsync.mockReturnValue(undefined);
+        mockCertificateAclService.getAclEntries.mockReturnValue('test:abc123');
         await requestHttps(app)
           .post('/http-agent/v1/incoming-messages')
           .set('Content-Type', 'application/json')
@@ -135,20 +142,17 @@ describe('HTTPS', () => {
           .key(key)
           .cert(cert)
           .ca(ca)
-          .expect('Content-Type', /json/)
-          .expect(200)
           .then((response) => {
-            expect(response.body).toStrictEqual({
-              success: true,
-              message: 'Successfully published!',
-            });
-            expect(mockCache.set).toHaveBeenCalled();
+            expect(response.statusCode).toStrictEqual(204);
+            expect(mockRedis.setAsync).toHaveBeenCalled();
           });
       });
 
       it('should unsuccessfully execute the request with tenant and deviceId from certificate-acl', async () => {
-        mockCache.get.mockReturnValue(undefined);
-        mockAxios.get.mockResolvedValue({ data: {} });
+        mockRedis.getAsync.mockReturnValue(undefined);
+        mockCertificateAclService.getAclEntries.mockImplementationOnce(() => {
+          throw new Error('Test');
+        });
         await requestHttps(app)
           .post('/http-agent/v1/incoming-messages')
           .set('Content-Type', 'application/json')
@@ -162,7 +166,7 @@ describe('HTTPS', () => {
           .cert(cert)
           .ca(ca)
           .expect('Content-Type', /json/)
-          .expect(401)
+          .expect(403)
           .then((response) => {
             expect(response.body).toStrictEqual({
               error:
@@ -191,13 +195,8 @@ describe('HTTPS', () => {
           .key(keyCN)
           .cert(certCN)
           .ca(ca)
-          .expect('Content-Type', /json/)
-          .expect(200)
           .then((response) => {
-            expect(response.body).toStrictEqual({
-              success: true,
-              message: 'Successfully published!',
-            });
+            expect(response.statusCode).toStrictEqual(204);
           });
       });
     });
@@ -248,13 +247,8 @@ describe('HTTPS', () => {
         .key(keyCN)
         .cert(certCN)
         .ca(ca)
-        .expect('Content-Type', /json/)
-        .expect(200)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: true,
-            message: 'Successfully published!',
-          });
+          expect(response.statusCode).toStrictEqual(204);
         });
     });
 
@@ -283,20 +277,218 @@ describe('HTTPS', () => {
         });
     });
   });
+
+  describe('basic-auth', () => {
+    beforeAll(() => {
+      jest.clearAllMocks();
+      mockConfig.security['authorization.mode'] = 'basic-auth';
+      mockConfig.https['request.cert'] = false;
+    });
+
+    it('should successfully execute the request with tenant and deviceId from redis', async () => {
+      mockRedis.getAsync.mockReturnValue(true);
+      await requestHttps(app)
+        .post('/http-agent/v1/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.70,
+          },
+        })
+        .ca(ca)
+        .then((response) => {
+          expect(response.statusCode).toStrictEqual(204);
+        });
+    });
+
+    it('should successfully execute the request with authentication by basic-auth', async () => {
+      mockRedis.getAsync.mockReturnValue(false);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(true);
+      await requestHttps(app)
+        .post('/http-agent/v1/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .ca(ca)
+        .then((response) => {
+          expect(response.statusCode).toStrictEqual(204);
+          expect(mockRedis.setAsync).toHaveBeenCalled();
+        });
+    });
+
+    it('should unsuccessfully execute the request with authentication by basic-auth', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
+      await requestHttps(app)
+        .post('/http-agent/v1/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .ca(ca)
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid credentials.',
+          });
+        });
+    });
+
+    it('execute the request without success due to Missing Basic', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
+      await requestHttps(app)
+        .post('/http-agent/v1/incoming-messages')
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .ca(ca)
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid Basic token.',
+          });
+        });
+    });
+
+    it('execute the request without success due to Invalid Basic', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
+      await requestHttps(app)
+        .post('/http-agent/v1/incoming-messages')
+        .set('Authorization', `${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .ca(ca)
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid Basic token.',
+          });
+        });
+    });
+
+    it('should unsuccessfully execute the request with error in basic-auth', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(() => {
+        throw new Error('Test');
+      });
+      await requestHttps(app)
+        .post('/http-agent/v1/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .ca(ca)
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error:
+                  'Error trying to get tenant and deviceId in basic-auth.',
+          });
+        });
+    });
+  });
 });
 
 describe('HTTP', () => {
+  beforeAll(() => {
+    mockConfig.security['authorization.mode'] = undefined;
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('unsecure-single-message', () => {
-    it('should successfully execute the request', async () => {
+  describe('basic-auth', () => {
+    beforeAll(() => {
+      jest.clearAllMocks();
+      mockConfig.security['authorization.mode'] = 'basic-auth';
+      mockConfig.https['request.cert'] = false;
+    });
+
+    it('should successfully execute the request with tenant and deviceId from redis', async () => {
+      mockRedis.getAsync.mockReturnValue(true);
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123',
-        )
-        .set('Content-Type', 'application/json')
+        .post('/http-agent/v1/unsecure/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.70,
+          },
+        })
+        .then((response) => {
+          expect(response.statusCode).toStrictEqual(204);
+        });
+    });
+
+    it('should successfully execute the request with authentication by basic-auth', async () => {
+      mockRedis.getAsync.mockReturnValue(false);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(true);
+      await requestHttp(app)
+        .post('/http-agent/v1/unsecure/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .then((response) => {
+          expect(response.statusCode).toStrictEqual(204);
+          expect(mockRedis.setAsync).toHaveBeenCalled();
+        });
+    });
+
+    it('should unsuccessfully execute the request with authentication by basic-auth', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
+      await requestHttp(app)
+        .post('/http-agent/v1/unsecure/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.733,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid credentials.',
+          });
+        });
+    });
+
+    it('execute the request without success due to Missing Basic', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
+      await requestHttp(app)
+        .post('/http-agent/v1/unsecure/incoming-messages')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
           data: {
@@ -304,89 +496,58 @@ describe('HTTP', () => {
           },
         })
         .expect('Content-Type', /json/)
-        .expect(200)
+        .expect(401)
         .then((response) => {
           expect(response.body).toStrictEqual({
-            success: true,
-            message: 'Successfully published!',
+            error: 'Invalid Basic token.',
           });
         });
     });
 
-    it('should return bad request error', async () => {
+    it('execute the request without success due to Invalid Basic', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123',
-        )
-        .set('Content-Type', 'application/json')
+        .post('/http-agent/v1/unsecure/incoming-messages')
+        .set('Authorization', `${validBasic}`)
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
         })
         .expect('Content-Type', /json/)
-        .expect(400)
+        .expect(401)
         .then((response) => {
           expect(response.body).toStrictEqual({
-            success: false,
-            message: '"attrs" is required',
+            error: 'Invalid Basic token.',
           });
         });
     });
-  });
 
-  describe('unsecure-many-messages', () => {
-    it('should successfully execute the request', async () => {
-      await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123',
-        )
-        .set('Content-Type', 'application/json')
-        .send([
-          {
-            ts: '2021-07-12T09:31:01.683000Z',
-            data: {
-              temperature: 25.79,
-            },
-          },
-          {
-            ts: '2021-07-12T09:31:01.683000Z',
-            data: {
-              temperature: 25.79,
-            },
-          },
-        ])
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: true,
-            message: 'Successfully published!',
-          });
-        });
-    });
-  });
-
-  it('should return bad request error', async () => {
-    await requestHttp(app)
-      .post(
-        '/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123',
-      )
-      .set('Content-Type', 'application/json')
-      .send([
-        {
-          ts: '2021-07-12T09:31:01.683000Z',
-        },
-        {
-          ts: '2021-07-12T09:31:01.683000Z',
-        },
-      ])
-      .expect('Content-Type', /json/)
-      .expect(400)
-      .then((response) => {
-        expect(response.body).toStrictEqual({
-          success: false,
-          message: { 0: '"attrs" is required', 1: '"attrs" is required' },
-        });
+    it('should unsuccessfully execute the request with error in basic-auth', async () => {
+      mockRedis.getAsync.mockReturnValue(undefined);
+      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(() => {
+        throw new Error('Test');
       });
+      await requestHttp(app)
+        .post('/http-agent/v1/unsecure/incoming-messages')
+        .set('Authorization', `Basic ${validBasic}`)
+        .send({
+          ts: '2021-07-12T09:31:01.683000Z',
+          data: {
+            temperature: 25.79,
+          },
+        })
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error:
+                  'Error trying to get tenant and deviceId in basic-auth.',
+          });
+        });
+    });
   });
 });
 
@@ -407,30 +568,10 @@ describe('Unauthorized', () => {
         },
       })
       .expect('Content-Type', /json/)
-      .expect(401)
+      .expect(400)
       .then((response) => {
         expect(response.body).toStrictEqual({
-          error: 'Missing client certificate',
-        });
-      });
-  });
-
-  it('should return unauthorized error: Client certificate is invalid', async () => {
-    await requestHttps(app)
-      .post('/http-agent/v1/incoming-messages')
-      .set('Content-Type', 'application/json')
-      .send({
-        ts: '2021-07-12T09:31:01.683000Z',
-        data: {
-          temperature: 25.79,
-        },
-      })
-      .ca(ca)
-      .expect('Content-Type', /json/)
-      .expect(401)
-      .then((response) => {
-        expect(response.body).toStrictEqual({
-          error: 'Client certificate is invalid',
+          error: 'Unable to authenticate',
         });
       });
   });

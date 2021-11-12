@@ -21,6 +21,7 @@ const configHttpServerCamelCase = ConfigManager.transformObjectKeys(
   camelCase,
 );
 const allowUnsecuredMode = configSecurity['unsecure.mode'];
+const allowUnsecuredModeOnly = configSecurity['unsecure.mode.only'];
 
 /**
  * Wrapper to initialize the Server
@@ -32,12 +33,12 @@ class Server {
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
-    this.httpsServer = WebUtils.createServer({
+    this.httpsServer = !allowUnsecuredModeOnly && WebUtils.createServer({
       config: configHttpsServerCamelCase,
       logger,
     });
     this.httpServer =
-      allowUnsecuredMode &&
+      (allowUnsecuredMode || allowUnsecuredModeOnly) &&
       WebUtils.createServer({
         config: (({ host, port }) => ({ host, port }))(
           configHttpServerCamelCase,
@@ -53,26 +54,28 @@ class Server {
    * @param {Express} express  instance of express
    */
   init(express) {
-    this.httpsServer.on('request', express);
-    this.httpsServer.on('listening', () => {
-      logger.info('HTTPS server ready to accept connections!');
-      logger.info(this.httpsServer.address());
-      this.serviceState.signalReady('http-server');
-    });
-    this.httpsServer.on('close', () => {
-      this.serviceState.signalNotReady('http-server');
-    });
-    this.httpsServer.on('error', (e) => {
-      logger.error('HTTPS server experienced an error:', e);
-    });
-    this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
+    if (this.httpsServer) {
+      this.httpsServer.on('request', express);
+      this.httpsServer.on('listening', () => {
+        logger.info('HTTPS server ready to accept connections!');
+        logger.info(this.httpsServer.address());
+        this.serviceState.signalReady('http-server');
+      });
+      this.httpsServer.on('close', () => {
+        this.serviceState.signalNotReady('http-server');
+      });
+      this.httpsServer.on('error', (e) => {
+        logger.error('HTTPS server experienced an error:', e);
+      });
+      this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
-    fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
-      logger.debug(`${eventType}: The ${filename} was modified!`);
-      const interval = setInterval(() => {
-        this.reloadCertificates(interval);
-      }, configReload['interval.ms']);
-    });
+      fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
+        logger.debug(`${eventType}: The ${filename} was modified!`);
+        const interval = setInterval(() => {
+          this.reloadCertificates(interval);
+        }, configReload['interval.ms']);
+      });
+    }
 
     if (this.httpServer) {
       this.httpServer.on('request', express);
@@ -115,10 +118,12 @@ class Server {
    *  Register a shutdown to the http server
    */
   async registerShutdown() {
-    const httpTerminator = createHttpTerminator({ server: this.httpsServer });
+    const httpsTerminator = this.httpsServer && createHttpTerminator({ server: this.httpsServer });
+    const httpTerminator = this.httpServer && createHttpTerminator({ server: this.httpServer });
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('Stopping the server from accepting new connections...');
-      await httpTerminator.terminate();
+      if (httpsTerminator) await httpsTerminator.terminate();
+      if (httpTerminator) await httpTerminator.terminate();
       logger.warn('The server no longer accepts connections!');
     });
   }
