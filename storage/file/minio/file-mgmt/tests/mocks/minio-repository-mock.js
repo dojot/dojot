@@ -5,6 +5,9 @@ module.exports = class MinIoRepository {
   async createBucket(bucketName) {
   }
 
+  async removeBucket(bucketName) {
+  }
+
   async bucketExists(bucketName) {
     return bucketName === 'test';
   }

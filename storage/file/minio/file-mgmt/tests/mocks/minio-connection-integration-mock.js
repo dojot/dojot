@@ -20,6 +20,13 @@ module.exports = (configMinio) => {
 
   };
 
+  // eslint-disable-next-line no-unused-vars
+  minioClient.listObjects = (bucketName, pathPrefix, recursive) => Readable({
+    read() {
+      this.emit('end');
+    },
+  });
+
   minioClient.bucketExists = async (bucketName) => minioClient.buckets.has(bucketName);
 
   minioClient.putObject = async (bucketName, path, fileStream) => {

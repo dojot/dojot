@@ -22,9 +22,10 @@ class KafkaController {
       const data = KafkaPayloadUtil.getValue(payload);
       const operation = {
         CREATE: this.tenantService.create,
+        DELETE: this.tenantService.remove,
       };
 
-      this.logger.info(`Creating bucket for ${data.tenant} tenant`);
+      this.logger.info(`${data.type} bucket for ${data.tenant} tenant`);
       await operation[data.type](data.tenant);
       ack();
     } catch (error) {

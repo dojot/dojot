@@ -13,8 +13,8 @@ module.exports = (configMinio) => {
     endPoint: configMinio.host,
     port: configMinio.port,
     useSSL: configMinio.ssl,
-    accessKey: configMinio.accessKey,
-    secretKey: configMinio.secretKey,
+    accessKey: configMinio['access.key'],
+    secretKey: configMinio['secret.key'],
   });
 
   // Promissify callback-based methods
@@ -27,6 +27,7 @@ module.exports = (configMinio) => {
   minioClient.statObject = promisify(minioClient.statObject);
   minioClient.getObject = promisify(minioClient.getObject);
   minioClient.presignedGetObject = promisify(minioClient.presignedGetObject);
+  minioClient.removeObjects = promisify(minioClient.removeObjects);
 
   return minioClient;
 };

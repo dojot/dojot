@@ -1,9 +1,9 @@
 const loggerMock = require('../../mocks/logger-mock');
 
-const mockKkafkaPayloadUtil = {
+const mockKafkaPayloadUtil = {
   getValue: jest.fn(),
 };
-jest.mock('../../../src/utils/kafka-payload-util', () => mockKkafkaPayloadUtil);
+jest.mock('../../../src/utils/kafka-payload-util', () => mockKafkaPayloadUtil);
 
 const KafkaController = require('../../../src/app/kafka/controllers/kafka-controller');
 
@@ -18,7 +18,7 @@ describe('KafkaController', () => {
   });
 
   it('Should work successfully ', async () => {
-    mockKkafkaPayloadUtil.getValue.mockReturnValueOnce({ type: 'CREATE', tenant: 'test' });
+    mockKafkaPayloadUtil.getValue.mockReturnValueOnce({ type: 'CREATE', tenant: 'test' });
 
     await kafkaController.handleTenancy('', (error) => {
       expect(error).toBeUndefined();
@@ -27,7 +27,7 @@ describe('KafkaController', () => {
   });
 
   it('Should throw an error', async () => {
-    mockKkafkaPayloadUtil.getValue.mockReturnValueOnce({ type: 'UNKNOWN', tenant: 'test' });
+    mockKafkaPayloadUtil.getValue.mockReturnValueOnce({ type: 'UNKNOWN', tenant: 'test' });
 
     await kafkaController.handleTenancy('', (error) => {
       expect(error).toBeDefined();

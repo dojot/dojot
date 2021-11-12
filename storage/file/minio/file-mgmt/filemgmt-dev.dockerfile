@@ -42,7 +42,7 @@ RUN apk --no-cache add \
 
 COPY --from=base /opt/filemgmt /opt/filemgmt
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev-debug"]
 
 EXPOSE 7000 9229
 

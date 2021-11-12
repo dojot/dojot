@@ -14,4 +14,10 @@ describe('TenantService', () => {
 
     expect.anything();
   });
+
+  it('Should remove a bucket', async () => {
+    await tenantService.remove('test');
+
+    expect.anything();
+  });
 });

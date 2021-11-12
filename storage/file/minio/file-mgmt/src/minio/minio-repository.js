@@ -38,10 +38,31 @@ module.exports = class MinIoRepository {
    * @param {string} bucketName Bucket Name
    */
   async removeBucket(bucketName) {
-    this.logger.debug(`Removing bucket ${this.suffixBucket + bucketName}`);
-    await this.client.removeBucket(this.suffixBucket + bucketName);
-  }
+    const outerThis = this;
+    const objectsList = [];
+    // List all object paths
+    const objectsStream = this.client.listObjects(outerThis.suffixBucket + bucketName, '', true);
 
+    objectsStream.on('data', (obj) => {
+      objectsList.push(obj.name);
+    });
+
+    objectsStream.on('error', (e) => {
+      this.logger.error(e);
+    });
+
+    objectsStream.on('end', async () => {
+      try {
+        this.logger.debug('Removing all bucket objects');
+        await outerThis.client.removeObjects(outerThis.suffixBucket + bucketName, objectsList);
+        this.logger.debug(`Removing bucket ${outerThis.suffixBucket + bucketName}`);
+        await outerThis.client.removeBucket(outerThis.suffixBucket + bucketName);
+      } catch (error) {
+        outerThis.logger.error('error');
+      }
+    });
+  }
+    
   /**
    * Checks checks if the bucket exists
    *

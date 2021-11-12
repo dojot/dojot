@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev-debug": "node --inspect=0.0.0.0 src/index.js",
-    "test": "jest --verbose",
+    "test": "jest --verbose --coverage",
     "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
     "unit-test": "jest ./tests/units --no-cache --coverage",
     "check-licenses": "apache2-license-checker"

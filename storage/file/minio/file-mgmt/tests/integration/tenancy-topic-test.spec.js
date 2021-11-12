@@ -7,8 +7,17 @@ describe('TOPIC *.dojot.tenancy', () => {
     await app.init();
   });
 
-  it('Should execute sucessfully ', (done) => {
+  it('Should create tenant when the message type is CREATE', (done) => {
     const message = '{ "type": "CREATE", "tenant": "test" }';
+
+    sendFakePayload('dojot.tenancy', message, (error) => {
+      expect(error).toBeUndefined();
+      done();
+    });
+  });
+
+  it('Should remove tenant when the message type is DELETE ', (done) => {
+    const message = '{ "type": "DELETE", "tenant": "test" }';
 
     sendFakePayload('dojot.tenancy', message, (error) => {
       expect(error).toBeUndefined();

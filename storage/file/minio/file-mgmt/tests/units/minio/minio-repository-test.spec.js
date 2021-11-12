@@ -39,6 +39,15 @@ describe('MinIoRepository', () => {
   });
 
   it('Should remove a bucket', async () => {
+    minioConnection.listObjects = jest.fn((
+      // eslint-disable-next-line no-unused-vars
+      bucketName, pathPrefix, recursive,
+    ) => Readable({
+      read() {
+        this.emit('end');
+      },
+    }));
+
     await minioRepository.removeBucket('test');
     expect.anything();
   });

@@ -17,4 +17,8 @@ module.exports = class TenantService {
   create = async (bucketName) => {
     await this.minioRepository.createBucket(bucketName, 'us-east-1');
   }
+
+  remove = async (bucketName) => {
+    await this.minioRepository.removeBucket(bucketName);
+  }
 };
