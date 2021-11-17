@@ -9,14 +9,7 @@ const mockSdk = {
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
-const mockGetQueryRows = jest.fn();
-const mockGetQueryApi = jest.fn().mockImplementation(() => ({
-  queryRows: mockGetQueryRows,
-}));
 const mockInflux = {
-  InfluxDB: jest.fn().mockImplementation(() => ({
-    getQueryApi: mockGetQueryApi,
-  })),
   flux: jest.fn((a) => a),
   fluxExpression: jest.fn((a) => a),
   fluxDateTime: jest.fn((a) => a),
@@ -36,7 +29,15 @@ const mockHttpError = jest.fn((statusCode, message) => {
 });
 jest.mock('http-errors', () => mockHttpError);
 
-const DataQuery = require('../../app/influx/DataQuery');
+const mockGetQueryRows = jest.fn();
+const mockGetQueryApi = jest.fn(() => ({
+  queryRows: mockGetQueryRows,
+}));
+const mockInfluxDBConnection = {
+  getQueryApi: mockGetQueryApi,
+};
+
+const DataQuery = require('../../app/influx/DeviceDataRepository');
 
 describe('Test Influx Data Query', () => {
   let dataQuery = null;
@@ -81,7 +82,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('url', 'token', 'defaultBucket');
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection);
   });
 
   test('queryByField - test ok 1', async () => {

@@ -2,6 +2,35 @@ const DeviceDataService = require('../../app/express/services/v1/DeviceDataServi
 
 describe('DeviceDataService', () => {
   const values = Array.from({ length: 3 }, (_, i) => i + 1);
+  const deviceDataRepository = {
+    async queryByMeasurement() {
+      return { result: 'result', totalItems: 0 };
+    },
+    async queryByField() {
+      return { result: 'result', totalItems: 0 };
+    },
+  };
+  let deviceDataService;
+
+  beforeEach(() => {
+    deviceDataService = new DeviceDataService(deviceDataRepository);
+  });
+
+  test('should return all device data', async () => {
+    const returnData = await deviceDataService.getDeviceData('test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }));
+    expect(returnData).toEqual([
+      'result',
+      { current: 'url' },
+    ]);
+  });
+
+  test('should return only selected attributes', async () => {
+    const returnData = await deviceDataService.getDeviceAttrData('test', 'test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }));
+    expect(returnData).toEqual([
+      'result',
+      { current: 'url' },
+    ]);
+  });
 
   test('should transform device data object to a spreadsheet in csv', () => {
     const deviceData = [
