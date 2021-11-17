@@ -31,8 +31,6 @@ jobs:
           npm ci
           npm run check-licenses
           npm run test
-          npm run integration-test
-          npm run unit-test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
