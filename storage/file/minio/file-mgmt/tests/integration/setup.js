@@ -27,7 +27,22 @@ const mockDojot = {
       die: () => jest.fn(),
     })),
   })),
-  WebUtils,
+  WebUtils: {
+    ...WebUtils,
+    framework: {
+      ...WebUtils.framework,
+      interceptors: {
+        ...WebUtils.framework.interceptors,
+        beaconInterceptor: () => ({
+          path: '/',
+          name: 'beacon-interceptor',
+          middleware: (req, res, next) => {
+            next();
+          },
+        }),
+      },
+    },
+  },
   Kafka: {
     Consumer: mockConsumer,
   },
@@ -35,6 +50,12 @@ const mockDojot = {
 
 jest.mock('@dojot/microservice-sdk', () => mockDojot);
 
+const mockServer = jest.fn().mockImplementation(() => ({
+  init: jest.fn(),
+  registerShutdown: jest.fn(),
+}));
+
+jest.mock('../../src/app/server', () => mockServer);
 const App = require('../../src/app/app');
 
 function generateApp() {

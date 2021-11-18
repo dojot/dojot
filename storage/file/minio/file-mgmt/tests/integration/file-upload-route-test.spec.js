@@ -24,20 +24,20 @@ describe('PUT /files', () => {
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is not entered', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .expect(401, done);
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is invalid', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Authorization', `Bearer ${invalidJwt}`)
       .expect(401, done);
   });
 
   it('Should reply with a bad request http response, when the tenant does not exist.', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
@@ -52,7 +52,7 @@ describe('PUT /files', () => {
   });
 
   it('Should upload file', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
@@ -72,7 +72,7 @@ describe('PUT /files', () => {
   });
 
   it('Should upload file and validate integrity', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
@@ -93,7 +93,7 @@ describe('PUT /files', () => {
   });
 
   it('Should reply with a bad request http response, when the path field is not entered', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
@@ -107,7 +107,7 @@ describe('PUT /files', () => {
   });
 
   it('Should reply with a bad request http response, when the length of the "path" field is less than 3 characters', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
@@ -122,7 +122,7 @@ describe('PUT /files', () => {
   });
 
   it('Should reply with a bad request http response, when the length of the "path" field is greater than 100 characters', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
@@ -138,7 +138,7 @@ describe('PUT /files', () => {
   });
 
   it('Should reply with a bad request http response, when the value of the "path" field is "/.tmp/"', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
@@ -154,7 +154,7 @@ describe('PUT /files', () => {
   });
 
   it('Should reply with a PayloadTooLarge http response, when the file size is greater than the size limit', (done) => {
-    request(app.server.server)
+    request(app.express)
       .put(route)
       .set('Content-Type', 'multipart/form-data')
       .set('Authorization', `Bearer ${jwt}`)
