@@ -85,6 +85,7 @@ describe('ProducerMessages', () => {
     it('should successfully create constructor', () => {
       expect(producerMessages.serviceState).toEqual(mockServiceState);
       expect(producerMessages.producer).toBeDefined();
+      expect(producerMessages.isReady).toBeFalsy();
     });
   });
 
@@ -162,6 +163,7 @@ describe('ProducerMessages', () => {
     });
 
     it('should signal as ready - is connected to Kafka', async () => {
+      producerMessages.isReady = false;
       mockProducer.getStatus.mockReturnValue(
         Promise.resolve({ connected: true }),
       );
@@ -177,6 +179,7 @@ describe('ProducerMessages', () => {
     });
 
     it('should signal as not ready - is not connected to Kafka', async () => {
+      producerMessages.isReady = true;
       mockProducer.getStatus.mockReturnValue(
         Promise.resolve({ connected: false }),
       );

@@ -8,6 +8,8 @@ const mockLogMessages = [];
 
 jest.mock('mongoose');
 
+jest.mock('uuid');
+
 const mockConfig = {
   healthchecker: { 'kafka.interval.ms': 30000 },
   mongo: { conn: { options: {} } },

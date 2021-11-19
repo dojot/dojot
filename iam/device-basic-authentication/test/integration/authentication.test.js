@@ -4,6 +4,8 @@ const mockConfig = {
   cache: { 'set.tll': 30000 },
 };
 
+jest.mock('uuid');
+
 const mockAxiosGet = jest.fn();
 const mockAxios = {
   get: mockAxiosGet,
@@ -92,7 +94,7 @@ describe('Authentication', () => {
       });
 
       await request(app)
-        .post('/basic-auth/v1/123abc/basic-credentials')
+        .post('/basic-auth/v1/devices/123abc/basic-credentials')
         .set('Authorization', `Bearer ${validToken}`)
         .then((response) => {
           expect(response.statusCode).toBe(200);
@@ -113,7 +115,7 @@ describe('Authentication', () => {
         password: 'AOxRg!v1heGuQ0Y',
       });
       await request(app)
-        .post('/basic-auth/v1/123abc/basic-credentials')
+        .post('/basic-auth/v1/devices/123abc/basic-credentials')
         .set('Authorization', `Bearer ${tokenWithoutTenant}`)
         .then((response) => {
           expect(response.statusCode).toBe(401);
@@ -124,7 +126,7 @@ describe('Authentication', () => {
     it('should return bad request when device not found', async () => {
       mockDeviceService.validDevice.mockReturnValue(false);
       await request(app)
-        .post('/basic-auth/v1/abc123/basic-credentials')
+        .post('/basic-auth/v1/devices/abc123/basic-credentials')
         .set('Authorization', `Bearer ${validToken}`)
         .then((response) => {
           expect(response.statusCode).toBe(400);
@@ -137,7 +139,7 @@ describe('Authentication', () => {
         throw new Error();
       });
       await request(app)
-        .post('/basic-auth/v1/abc123/basic-credentials')
+        .post('/basic-auth/v1/devices/abc123/basic-credentials')
         .set('Authorization', `Bearer ${validToken}`)
         .then((response) => {
           expect(response.statusCode).toBe(400);
@@ -151,7 +153,7 @@ describe('Authentication', () => {
         throw new Error('Test.');
       });
       await request(app)
-        .post('/basic-auth/v1/abc123/basic-credentials')
+        .post('/basic-auth/v1/devices/abc123/basic-credentials')
         .set('Authorization', `Bearer ${validToken}`)
         .then((response) => {
           expect(response.statusCode).toBe(500);

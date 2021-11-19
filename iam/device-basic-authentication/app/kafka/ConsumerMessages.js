@@ -16,7 +16,7 @@ const {
 } = getConfig('BASIC_AUTH');
 
 /**
- * Class representing an Producer
+ * Class representing an Consumer
  *
  * @class
  */
@@ -25,7 +25,7 @@ class ConsumerMessages {
    * @constructor
    *
    * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
-   *          with register service 'basic-auth-producer'} serviceState
+   *          with register service 'basic-auth-consumer'} serviceState
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState, basicCredentials) {
@@ -34,6 +34,7 @@ class ConsumerMessages {
     this.consumer = null;
     this.idCallbackTenant = null;
     this.idCallbackDeviceManager = null;
+    this.isReady = false;
   }
 
   async init() {
@@ -64,7 +65,7 @@ class ConsumerMessages {
    *
    * @returns callback
    */
-  getCallbackForNewTenantEvents() {
+  getCallbackForTenantEvents() {
     return async (data) => {
       try {
         const { value: payload } = data;
@@ -86,13 +87,13 @@ class ConsumerMessages {
       * @public
       */
   initCallbackForNewTenantEvents() {
-    logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with regex ${configMessenger['consume.topic.suffix.tenancy']}`);
+    logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with regex ${configMessenger['consume.topic.tenancy']}`);
     const topic = RegExp(
-      `^.+${configMessenger['consume.topic.suffix.tenancy'].replace(/\./g, '\\.')}`,
+      `^.+${configMessenger['consume.topic.tenancy'].replace(/\./g, '\\.')}`,
     );
 
     this.idCallbackTenant = this.consumer.registerCallback(
-      topic, this.getCallbackForNewTenantEvents(),
+      topic, this.getCallbackForTenantEvents(),
     );
     logger.debug('registerCallback: Registered Callback');
   }
@@ -188,10 +189,12 @@ class ConsumerMessages {
       if (this.consumer) {
         try {
           const status = await this.consumer.getStatus();
-          if (status.connected) {
+          if (status.connected && !this.isReady) {
             signalReady();
-          } else {
+            this.isReady = true;
+          } else if (!status.connected && this.isReady) {
             signalNotReady();
+            this.isReady = false;
           }
         } catch (error) {
           signalNotReady();

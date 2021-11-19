@@ -181,7 +181,7 @@ Run the following command:
 
 ```sh
   curl -X POST \
-    https://localhost:8080/basic-auth/v1/:deviceId/basic-credentials \
+    https://localhost:8080/basic-auth/v1/devices/:deviceId/basic-credentials \
     -H 'content-type: application/json' \
     -H 'Authorization: Bearer ${TOKEN}'
 ```

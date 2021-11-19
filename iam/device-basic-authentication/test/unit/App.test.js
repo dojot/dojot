@@ -8,6 +8,9 @@ const mockConfig = {
   },
   mongo: { conn: {} },
 };
+
+jest.mock('uuid');
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),

@@ -29,7 +29,7 @@ const mockBasicCredentials = {
 const mockConfig = {
   lightship: { a: 'abc' },
   messenger: {
-    'consume.topic.suffix.tenancy': 'tenancy.topic',
+    'consume.topic.tenancy': 'tenancy.topic',
     'consume.topic.suffix.device.manager': 'device.topic',
   },
   consumer: { 'group.id': '' },
@@ -76,6 +76,7 @@ describe('ConsumerMessages', () => {
       expect(consumerMessages.consumer).toBeDefined();
       expect(consumerMessages.idCallbackTenant).toBeDefined();
       expect(consumerMessages.idCallbackDeviceManager).toBeDefined();
+      expect(consumerMessages.isReady).toBeFalsy();
     });
   });
 
@@ -150,10 +151,10 @@ describe('ConsumerMessages', () => {
     });
 
     it('should init callback', async () => {
-      consumerMessages.getCallbackForNewTenantEvents = jest.fn();
+      consumerMessages.getCallbackForTenantEvents = jest.fn();
 
       consumerMessages.initCallbackForNewTenantEvents();
-      expect(consumerMessages.getCallbackForNewTenantEvents).toHaveBeenCalled();
+      expect(consumerMessages.getCallbackForTenantEvents).toHaveBeenCalled();
     });
 
     it('should call removeAllFromTenant', async () => {
@@ -161,7 +162,7 @@ describe('ConsumerMessages', () => {
       const payloadBuf = Buffer.from(payload, 'utf8');
       const data = { value: payloadBuf };
 
-      const callback = consumerMessages.getCallbackForNewTenantEvents();
+      const callback = consumerMessages.getCallbackForTenantEvents();
       callback(data);
       expect(mockBasicCredentials.removeAllFromTenant).toHaveBeenCalled();
     });
@@ -231,6 +232,7 @@ describe('ConsumerMessages', () => {
     });
 
     it('should signal as ready - is connected to Kafka', async () => {
+      consumerMessages.isReady = false;
       mockConsumer.getStatus.mockReturnValue(
         Promise.resolve({ connected: true }),
       );
@@ -243,9 +245,11 @@ describe('ConsumerMessages', () => {
       expect(mockAddHealthChecker).toHaveBeenCalled();
       expect(signalNotReady).not.toHaveBeenCalled();
       expect(signalReady).toHaveBeenCalled();
+      expect(consumerMessages.isReady).toBeTruthy();
     });
 
     it('should signal as not ready - is not connected to Kafka', async () => {
+      consumerMessages.isReady = true;
       mockConsumer.getStatus.mockReturnValue(
         Promise.resolve({ connected: false }),
       );
@@ -258,6 +262,7 @@ describe('ConsumerMessages', () => {
       expect(mockAddHealthChecker).toHaveBeenCalled();
       expect(signalReady).not.toHaveBeenCalled();
       expect(signalNotReady).toHaveBeenCalled();
+      expect(consumerMessages.isReady).toBeFalsy();
     });
 
     it('should signal as not ready - getStatus returns error', async () => {
@@ -273,6 +278,7 @@ describe('ConsumerMessages', () => {
       expect(mockAddHealthChecker).toHaveBeenCalled();
       expect(signalReady).not.toHaveBeenCalled();
       expect(signalNotReady).toHaveBeenCalled();
+      expect(consumerMessages.isReady).toBeFalsy();
     });
 
     it('should signal as not ready - a new Producer instance is not correctly created', async () => {
@@ -286,6 +292,7 @@ describe('ConsumerMessages', () => {
       expect(mockAddHealthChecker).toHaveBeenCalled();
       expect(signalReady).not.toHaveBeenCalled();
       expect(signalNotReady).toHaveBeenCalled();
+      expect(consumerMessages.isReady).toBeFalsy();
     });
   });
 

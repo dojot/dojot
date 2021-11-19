@@ -22,7 +22,7 @@ $ docker build -t <tag> .
 Request:
 
 ```HTTP
-  POST /basic-auth/v1/:deviceId/basic-credentials \
+  POST /basic-auth/v1/devices/:deviceId/basic-credentials \
     -H 'content-type: application/json' \
     -H 'Authorization: Bearer ${TOKEN}'
 ```
@@ -40,6 +40,8 @@ response:
     },
     basicAuth: 'Basic dGVuYW50MUAxMjNhYmM6QU94UmchdjFoZUd1UTBZ',
   }
+```
+#### basicAuth is the Base64 encoding of username and password joined by a single colon `:`
 
 
 Request:
@@ -63,7 +65,7 @@ HTTPS response:
 
 ## General Configurations
 
-These are the environment variables used by iotagent-http
+These are the environment variables used by this service
 
 ### Lightship
 
@@ -135,9 +137,9 @@ These are the environment variables used by iotagent-http
 
 ### Kafka Messenger
 
-| Key                            | Default Value | Valid Values | Environment variable                      |
-|--------------------------------|---------------|--------------|-------------------------------------------|
-| messenger.produce.topic.suffix | device-data   | string       | BASIC_AUTH_MESSENGER_PRODUCE_TOPIC_SUFFIX |
+| Key                            | Default Value                          | Valid Values | Environment variable                      |
+|--------------------------------|----------------------------------------|--------------|-------------------------------------------|
+| messenger.produce.topic.suffix | dojot.device-manager.basic-credentials | string       | BASIC_AUTH_MESSENGER_PRODUCE_TOPIC_SUFFIX |
 
 ### HTTP
 
@@ -194,6 +196,6 @@ If you found a problem or need help, leave an issue in the main
 
 # **License**
 
-The Cron source code is released under Apache License 2.0.
+The device-basic-authentication source code is released under Apache License 2.0.
 
 Check NOTICE and LICENSE files for more information.

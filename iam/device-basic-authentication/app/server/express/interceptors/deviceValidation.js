@@ -7,7 +7,7 @@ const createError = require('http-errors');
  *
  * */
 module.exports = ({ deviceService }) => ({
-  path: '/basic-auth/v1/:deviceId/basic-credentials',
+  path: '/basic-auth/v1/devices/:deviceId/basic-credentials',
   name: 'device-validation-interceptor',
   middleware: async (req, res, next) => {
     const err = new createError.BadRequest();

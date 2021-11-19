@@ -25,7 +25,7 @@ module.exports = ({
     {
       mountPoint,
       name: 'generate-credentials',
-      path: ['/:deviceId/basic-credentials'],
+      path: ['/devices/:deviceId/basic-credentials'],
       handlers: [
         {
           method: 'post',
@@ -37,7 +37,7 @@ module.exports = ({
                 const credentials = await basicCredentialsCtrl.create(tenant, deviceId);
 
                 await producerMessages.send(
-                  generateMessage('create', tenant, deviceId),
+                  generateMessage(tenant, deviceId),
                   tenant,
                   deviceId,
                 );

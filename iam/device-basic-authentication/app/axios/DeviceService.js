@@ -42,11 +42,13 @@ class DeviceService {
   /**
  * @function valideDevice
  *
- * Generates a payload for device-data topic for Dojot
+ * Check if device exists and is valid
  *
- * @param {Object} deviceid
+ * @param {string} tenant the tenant name
  *
- * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
+ * @param {string} deviceId
+ *
+ * @returns {boolean} device existence
  */
   async validDevice(tenant, deviceId) {
     try {

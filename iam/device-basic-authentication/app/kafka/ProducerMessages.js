@@ -31,6 +31,7 @@ class ProducerMessages {
   constructor(serviceState) {
     this.producer = null;
     this.serviceState = serviceState;
+    this.isReady = false;
   }
 
   /**
@@ -92,10 +93,12 @@ class ProducerMessages {
       if (this.producer) {
         try {
           const status = await this.producer.getStatus();
-          if (status.connected) {
+          if (status.connected && !this.isReady) {
             signalReady();
-          } else {
+            this.isReady = true;
+          } else if (!status.connected && this.isReady) {
             signalNotReady();
+            this.isReady = false;
           }
         } catch (error) {
           signalNotReady();

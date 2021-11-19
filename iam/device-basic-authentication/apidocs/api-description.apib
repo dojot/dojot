@@ -2,21 +2,22 @@ FORMAT: 1A
 HOST: https://localhost:3000/basic-auth/v1
 # Device Authentication
 
-API documentation for Device Authentication
+API documentation for Device Basic Authentication
 
 # Group basic-auth
 
 API to provide credentials for authentication of
 devices that communicate with the dojot IoT platform.
 
-## Endpoint issuing credentials[ [/{deviceId}/basic-credentials]
+## Endpoint issuing credentials[ [/devices/{deviceId}/basic-credentials]
 
-### generates username and password for use in authenticating devices [POST]
+### generates username and password for use in devices' authentication [POST]
 
-A basic authentication token will also be returned.
+
+The endpoint will return a username and password, plus the Base64 encoding of username and password joined by a single colon.
 
 If deviceId does not have a valid structure or if any of the above conditions are
-not answered, a response status of 400 (Bad Request) will be returned, containing a
+not met, a response status of 400 (Bad Request) will be returned, containing a
 message detailing the cause of the error.
 
 + Request issued credential to device (application/json)
@@ -32,8 +33,6 @@ message detailing the cause of the error.
           - username: tenant1@123abc (string)
           - password: AOxRg!v1heGuQ0Y (string)
         - basicAuth: Basic dGVuYW50MUAxMjNhYmM6QU94UmchdjFoZUd1UTBZ (string)
-
-          Credencias
 
 + Response 400 (application/json)
 

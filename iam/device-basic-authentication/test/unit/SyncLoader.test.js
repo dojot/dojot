@@ -15,6 +15,8 @@ const mockSdk = {
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
+jest.mock('uuid');
+
 const { killApplication } = require('../../app/Utils');
 
 jest.mock('../../app/Utils');

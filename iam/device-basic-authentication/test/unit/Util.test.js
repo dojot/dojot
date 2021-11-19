@@ -1,7 +1,7 @@
 const { generateMessage } = require('../../app/Utils');
 
 const tenant = 'test';
-const deviceId = 'abc123';
+const device = 'abc123';
 
 describe('Util', () => {
   beforeEach(() => {
@@ -9,20 +9,18 @@ describe('Util', () => {
   });
 
   it('should format the message correctly', async () => {
-    const deviceDataMessage = generateMessage('create', tenant, deviceId);
+    const dataMessage = generateMessage(tenant, device);
 
-    const formattedMessage = {
-      event: 'create',
-      meta: {
-        service: 'test',
-      },
-      data: {
-        id: 'abc123',
-      },
+    const formattedData = {
+      opr: 'create',
+      tenant,
+      device,
     };
 
-    expect(JSON.stringify(deviceDataMessage)).toEqual(
-      JSON.stringify(formattedMessage),
-    );
+    expect(dataMessage.metadata.msgid).toBeDefined();
+    expect(dataMessage.metadata.ts).toBeDefined();
+    expect(dataMessage.metadata.service).toEqual('basic-auth');
+    expect(dataMessage.metadata.content_type).toEqual('application/vnd.dojot.devices.basic-credentials+json');
+    expect(JSON.stringify(dataMessage.data)).toEqual(JSON.stringify(formattedData));
   });
 });
