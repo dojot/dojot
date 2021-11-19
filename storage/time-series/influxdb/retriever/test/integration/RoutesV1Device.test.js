@@ -52,7 +52,7 @@ const mockLocalPersistenceManager = {
 };
 
 const mockData = jest.fn();
-const mockQueryRows = {
+const mockQueryApi = jest.fn(() => ({
   queryRows(fluxQuery, consumer) {
     const data = mockData();
     data.forEach((mockRow) => {
@@ -64,23 +64,26 @@ const mockQueryRows = {
     });
     consumer.complete();
   },
-};
+}));
 
 const mockInfluxDBConnection = {
-  getQueryApi: () => mockQueryRows,
+  getQueryApi: mockQueryApi,
 };
 
 const DeviceDataService = require('../../app/express/services/v1/DeviceDataService');
 const DeviceDataRepository = require('../../app/influx/DeviceDataRepository');
+const GenericQueryService = require('../../app/express/services/v1/GenericQueryService');
 
 const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection);
 const deviceDataService = new DeviceDataService(deviceDataRepository);
+const genericQueryService = new GenericQueryService(deviceDataRepository);
 
 const app = express(
   [
     devicesRoutes({
       localPersistence: mockLocalPersistenceManager,
       mountPoint: '/tss/v1',
+      genericQueryService,
       deviceDataService,
       deviceDataRepository,
     }),
@@ -153,6 +156,7 @@ describe('Test Devices Routes', () => {
       .then((response) => {
         expect(response.statusCode).toBe(200);
         expect(response.text).toStrictEqual('"ts","string"\n"2020-11-25T16:37:10.590Z","string"');
+        expect(response.type).toEqual('text/csv');
         done();
       });
   });
@@ -222,6 +226,7 @@ describe('Test Devices Routes', () => {
       .then((response) => {
         expect(response.statusCode).toBe(200);
         expect(response.text).toStrictEqual('"ts","value"\n"2020-11-25T16:37:10.590Z","string"');
+        expect(response.type).toEqual('text/csv');
         done();
       });
   });
@@ -269,10 +274,11 @@ describe('Test Devices Routes', () => {
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
-      .set('accept', 'Text/csv')
+      .set('accept', 'text/csv')
       .then((response) => {
         expect(response.statusCode).toBe(200);
         expect(response.text).toStrictEqual('"ts","value"\n"2020-11-25T16:37:10.590Z","string"');
+        expect(response.type).toEqual('text/csv');
         done();
       });
   });
@@ -557,6 +563,119 @@ describe('Test Devices Routes', () => {
           getData: null,
         });
         expect(response.body.errors.length).toEqual(1);
+        done();
+      });
+  });
+
+  test('Test Generic Route - should return data in json', (done) => {
+    mockData.mockReturnValueOnce(
+      [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ],
+    );
+
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'query' })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.body.result).toStrictEqual([
+          {
+            result: '_result',
+            table: 0,
+            _value: '_value',
+          },
+          {
+            result: '_result',
+            table: 0,
+            _value: '_value',
+          },
+        ]);
+        expect(response.body.result.length).toEqual(2);
+        done();
+      });
+  });
+
+  test('Test Generic Route - should return data in csv', (done) => {
+    mockData.mockReturnValueOnce(
+      [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ],
+    );
+
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'query' })
+      .set('Accept', 'text/csv')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toStrictEqual('"result","table","_value"\n"_result",0,"_value"\n"_result",0,"_value"');
+        expect(response.type).toEqual('text/csv');
+        done();
+      });
+  });
+
+  test('Test Generic Route - should throw an error when the influxdb throws a query error', (done) => {
+    mockQueryApi.mockReturnValueOnce({
+      queryRows: (fluxQuery, consumer) => {
+        consumer.error({ statusMessage: 'BadRequest', body: '{ "message": "Error" }', statusCode: 400 });
+      },
+    });
+
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'query' })
+      .set('Accept', 'text/csv')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+        done();
+      });
+  });
+
+  test('Test Generic Route - should throw an error, when the query has a from operation', (done) => {
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'from(bucket:"default")' })
+      .set('Accept', 'Application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+        expect(response.body.error).toEqual('The "from" function is determined by dojot');
+        done();
+      });
+  });
+
+  test('Test Generic Route - should throw an error, when the accept header is not acceptable', (done) => {
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'from(bucket:\'default\')' })
+      .set('Accept', 'Application/xml')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        expect(response.body.error).toEqual('This server does not support Application/xml');
         done();
       });
   });

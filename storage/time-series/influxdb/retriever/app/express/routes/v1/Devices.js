@@ -14,6 +14,7 @@ const logger = new Logger('influxdb-retriever:express/routes/v1/Devices');
 const { graphql: { graphiql } } = getConfig('RETRIEVER');
 const rootSchema = require('../../../graphql/Schema');
 const DeviceDataService = require('../../services/v1/DeviceDataService');
+const { parseCSV } = require('../../helpers/SimpleCSVParser');
 
 
 /**
@@ -30,7 +31,7 @@ const DeviceDataService = require('../../services/v1/DeviceDataService');
  *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({
-  localPersistence, mountPoint, deviceDataService, deviceDataRepository,
+  localPersistence, mountPoint, deviceDataService, genericQueryService, deviceDataRepository,
 }) => {
   /**
    * if there is no dateTo, add dateTo to
@@ -79,12 +80,12 @@ module.exports = ({
                 req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
+              res.type(accept);
               if (accept === 'csv') {
                 return res.status(HttpStatus.OK).send(
                   DeviceDataService.parseDeviceDataToCsv(result),
                 );
               }
-
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route-attr.get:', e);
@@ -131,9 +132,10 @@ module.exports = ({
                 req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
+              res.type(accept);
               if (accept === 'csv') {
                 return res.status(HttpStatus.OK).send(
-                  DeviceDataService.parseDeviceAttrDataToCsv(result),
+                  parseCSV(result),
                 );
               }
 
@@ -218,10 +220,29 @@ module.exports = ({
     path: ['/query'],
     handlers: [
       {
-        method: 'get',
+        method: 'post',
         middleware: [
+          // eslint-disable-next-line consistent-return
           async (req, res) => {
-            res.status(501).json({ error: 'Not Implemented' });
+            try {
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              const { query } = req.body;
+              const result = await genericQueryService.runQuery(req.tenant, query);
+
+              res.type(accept);
+              if (accept === 'csv') {
+                return res.status(HttpStatus.OK).send(
+                  parseCSV(result),
+                );
+              }
+
+              res.status(200).json({ result });
+            } catch (error) {
+              logger.error('query-route', error);
+              error.message = `query-route: ${error.message}`;
+              throw error;
+            }
           },
         ],
       },

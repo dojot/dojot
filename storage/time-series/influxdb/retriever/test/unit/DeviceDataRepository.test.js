@@ -456,36 +456,79 @@ describe('Test Influx Data Query', () => {
     }
   });
 
-  test('should return a durantion flux value when dateTo is a absolute time(ISO 8601)', () => {
+  test('runGenericQuery - should return a data', async () => {
+    const tableMeta1 = {
+      toObject: jest.fn(() => ({
+        result: '_result',
+        table: '0',
+        _time: '_time',
+        _value: '_value',
+      })),
+    };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x', tableMeta1);
+        complete();
+      },
+    );
+
+    const data = await dataQuery.runGenericQuery('org', 'query');
+
+    expect(data.length).toEqual(1);
+    expect(data.shift()).toEqual({
+      result: '_result',
+      table: '0',
+      _time: '_time',
+      _value: '_value',
+    });
+  });
+
+  test('runGenericQuery - should return a data', async () => {
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        throw new Error('Error');
+      },
+    );
+    let error;
+
+    try {
+      await dataQuery.runGenericQuery('org', 'query');
+    } catch (e) {
+      error = e;
+    }
+    expect(error.message).toEqual('Error');
+  });
+
+  test('commonQueryParams - should return a durantion flux value when dateTo is a absolute time(ISO 8601)', () => {
     const expectValue = '2021-08-31T21:05:01.000Z';
     const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0, dateTo: '2021-08-31T21:05:01.000Z' });
     expect(returnedObject.stop).toBe(expectValue);
   });
 
-  test('should return a time flux value, when dateTo is a relative date', () => {
+  test('commonQueryParams - should return a time flux value, when dateTo is a relative date', () => {
     const expectValue = '-3d';
     const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0, dateTo: '-3d' });
     expect(returnedObject.stop).toBe(expectValue);
   });
 
-  test('should return a now expression, when dateTo is undefined', () => {
+  test('commonQueryParams - should return a now expression, when dateTo is undefined', () => {
     const expectValue = 'now()';
     const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0 });
     expect(returnedObject.stop).toBe(expectValue);
   });
 
-  test('should return value 0, when dateFrom is undefined', () => {
+  test('commonQueryParams - should return value 0, when dateFrom is undefined', () => {
     const expectValue = 0;
     const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 1 }, { dateFrom: 0 });
     expect(returnedObject.start).toBe(expectValue);
   });
 
-  test('should return a query considered page as 1, when page is equals 0', () => {
+  test('commonQueryParams - should return a query considered page as 1, when page is equals 0', () => {
     const returnedObject = DataQuery.commonQueryParams({ limit: 10, page: 0 }, { dateFrom: 0, dateTo: '-3d' });
     expect(returnedObject.offset).toBe(0);
   });
 
-  test('should return a query using the maximum possible value for limit, when limit is undefined', () => {
+  test('commonQueryParams - should return a query using the maximum possible value for limit, when limit is undefined', () => {
     const returnedObject = DataQuery.commonQueryParams({ page: 2 }, { dateFrom: 0, dateTo: '3d' });
     expect(returnedObject.offset).toBe(256);
   });

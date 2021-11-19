@@ -86,14 +86,4 @@ module.exports = class DevicesService {
 
     return [result, paging];
   }
-
-  /**
-   *
-   * @param {[*]} attrData device attribute dataset
-   * @returns device attribute dataset in CSV format
-   */
-  static parseDeviceAttrDataToCsv(attrData) {
-    const csvParser = new json2csv.Parser({ defaultValue: undefined });
-    return attrData.length > 0 ? csvParser.parse(attrData) : '';
-  }
 };

@@ -35,6 +35,7 @@ const TenantService = require('./sync/TenantService');
 const DeviceDataRepository = require('./influx/DeviceDataRepository');
 const DeviceDataService = require('./express/services/v1/DeviceDataService');
 const InfluxState = require('./influx/State');
+const GenericQueryService = require('./express/services/v1/GenericQueryService');
 
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
@@ -62,12 +63,12 @@ class App {
       // API Dependencies
       this.deviceDataRepository = new DeviceDataRepository(configInflux['default.bucket'], this.influxDBConnection);
       this.deviceDataService = new DeviceDataService(this.deviceDataRepository);
+      this.genericQueryService = new GenericQueryService(this.deviceDataRepository);
       // Sync Dependencies
       this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
       this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
       this.authService = new TenantService(sync.tenants);
       this.deviceManagerService = new DeviceManagerService(sync.devices);
-
       this.syncLoader = new SyncLoader(
         this.localPersistence, this.authService, this.deviceManagerService, this.retrieverConsumer,
       );
@@ -100,6 +101,7 @@ class App {
             localPersistence: this.localPersistence,
             mountPoint: '/tss/v1',
             deviceDataService: this.deviceDataService,
+            genericQueryService: this.genericQueryService,
             deviceDataRepository: this.deviceDataRepository,
           }),
         ],

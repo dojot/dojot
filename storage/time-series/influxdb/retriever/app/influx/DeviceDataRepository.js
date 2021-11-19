@@ -285,6 +285,36 @@ class DeviceDataRepository {
     }
   }
 
+  async runGenericQuery(org, query) {
+    try {
+      let fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)}) \n |>`;
+      fluxQuery += query;
+
+      const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
+
+      return new Promise((resolve, reject) => {
+        const result = [];
+        queryApi.queryRows(fluxQuery, {
+          next(row, tableMeta) {
+            const o = tableMeta.toObject(row);
+            logger.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            result.push(o);
+          },
+          error(error) {
+            return reject(DeviceDataRepository.commonHandleError(error));
+          },
+          complete() {
+            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)}`);
+            return resolve(result);
+          },
+        });
+      });
+    } catch (e) {
+      logger.error('GenericQuery:', e);
+      throw e;
+    }
+  }
+
   /**
    * Handles error coming from the influx lib to be used by the sdk web lib
    * @param {Error} error
