@@ -7,6 +7,7 @@ const events = require('events');
 const { promisify } = require('util');
 const { timeout } = require('promise-timeout');
 const redis = require('redis');
+const bcrypt = require('bcrypt');
 const { killApplication } = require('../Utils');
 
 
@@ -97,7 +98,9 @@ class RedisManager {
    * @returns Promise
    */
   getAsync(...args) {
-    return timeout(this.redisClient.getAsync(...args),
+    const newArgs = [...args];
+    newArgs[0] = RedisManager.generateHash(args[0]);
+    return timeout(this.redisClient.getAsync(...newArgs),
       configRedis['operation.timeout.ms']);
   }
 
@@ -108,8 +111,16 @@ class RedisManager {
    * @returns Promise
    */
   setAsync(...args) {
-    return timeout(this.redisClient.setAsync(...args),
+    const newArgs = [...args];
+    newArgs[0] = RedisManager.generateHash(args[0]);
+    return timeout(this.redisClient.setAsync(...newArgs),
       configRedis['operation.timeout.ms']);
+  }
+
+  static generateHash(key) {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(key, salt);
+    return hash;
   }
 
   /**

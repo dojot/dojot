@@ -210,6 +210,6 @@ If you found a problem or need help, leave an issue in the main
 
 # **License**
 
-The Cron source code is released under Apache License 2.0.
+The http-agent source code is released under Apache License 2.0.
 
 Check NOTICE and LICENSE files for more information.
