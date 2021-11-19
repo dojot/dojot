@@ -17,20 +17,20 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is not entered', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .expect(401, done);
   });
 
   it('Should reply with an unauthorized HTTP response, when the jwt token is invalid', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${invalidJwt}`)
       .expect(401, done);
   });
 
   it('Should reply with a bad request http response, when the tenant does not exist.', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .query({ path, alt: 'media' })
@@ -45,7 +45,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path, alt: 'media' })
@@ -73,7 +73,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with a url to download the requested file, when the value of the "alt" param is "url"', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '/test/test_sample1', alt: 'url' })
@@ -88,7 +88,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with a not found http response, when the file was not found ', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '/test/test_sample_not_found', alt: 'media' })
@@ -103,7 +103,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with an Bad request http response, when the "alt" param is not entered', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path })
@@ -119,7 +119,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with an Bad request http response, when the value of the "alt" param is invalid', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path, alt: 'invalid' })
@@ -135,7 +135,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with a bad request http response, when the "path" param is not entered ', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ alt: 'url' })
@@ -151,7 +151,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with a bad request http response, when the length of the "path" param is less than 3 characters ', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '12', alt: 'url' })
@@ -167,7 +167,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with a bad request http response, when the length of the "path" param is greater than 100 characters', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: crypto.randomBytes(101).toString('hex'), alt: 'url' })
@@ -183,7 +183,7 @@ describe('GET /files/download', () => {
   });
 
   it('Should reply with a bad request http response, when the value of the "path" param is "/.tmp/"', (done) => {
-    request(app.server.server)
+    request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path: '/.tmp/', alt: 'url' })
