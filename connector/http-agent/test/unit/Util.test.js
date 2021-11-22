@@ -68,23 +68,16 @@ describe('Util', () => {
   });
 
   it('should format the message correctly with invalid timestamp', async () => {
-    const deviceDataMessage = generateDeviceDataMessage(
-      fakeMessageWithInvalidTimestamp,
-      tenant,
-      deviceid,
-    );
-
-    const formattedMessage = {
-      metadata: {
-        deviceid,
+    let error;
+    try {
+      generateDeviceDataMessage(
+        fakeMessageWithInvalidTimestamp,
         tenant,
-        timestamp: new Date().getTime(),
-      },
-      attrs: fakeMessageWithInvalidTimestamp.data,
-    };
-
-    expect(JSON.stringify(deviceDataMessage)).toEqual(
-      JSON.stringify(formattedMessage),
-    );
+        deviceid,
+      );
+    } catch (err) {
+      error = err;
+    }
+    expect(error.message).toEqual('Invalid timestamp');
   });
 });

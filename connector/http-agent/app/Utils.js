@@ -1,7 +1,28 @@
+const createError = require('http-errors');
+
+const err = new createError.BadRequest();
+
 /**
  * A module with helper functions
  * @module utils
  */
+
+/**
+ * @function isInteger
+ *
+ * check if is integer
+ *
+ * @param {string} str
+ *
+ * @returns {boolean}
+ */
+
+const isInteger = (str) => {
+  if (typeof str !== 'string') return false; // we only process strings!
+  // eslint-disable-next-line max-len
+  return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+         !isNaN(parseInt(str, 10));// ...and ensure strings of whitespace fail
+};
 
 /**
  * @function parseTimestamp
@@ -14,9 +35,15 @@
  */
 const parseTimestamp = (ts) => {
   if (ts) {
-    const parsedTimestamp = Date.parse(ts);
-    if (Number.isNaN(parsedTimestamp)) return new Date().getTime();
-    return parsedTimestamp;
+    if (isInteger(ts)) {
+      const isValidDate = (new Date(parseInt(ts, 10))).getTime() > 0;
+      if (isValidDate) return new Date(parseInt(ts, 10)).getTime();
+    } else {
+      const isValidDate = (new Date(ts)).getTime() > 0;
+      if (isValidDate) return new Date(ts).getTime();
+    }
+    err.message = 'Invalid timestamp';
+    throw err;
   }
   return new Date().getTime();
 };
