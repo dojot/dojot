@@ -177,10 +177,10 @@ paths:
     post:
       tags:
         - generic-query
-      parameters: 
+      parameters:
         - in: header
           name: Accept
-          schema: 
+          schema:
             type: string
           description:
             The content-type accepted in response
@@ -194,7 +194,7 @@ paths:
           description: The query was executed successfully
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   query:
@@ -202,20 +202,20 @@ paths:
             text/csv:
               schema:
                 type: string
-        "400": 
+        "400":
           description: An error occurred while executing the query
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   error:
                     type: string
-        "500": 
+        "500":
           description: Intern error
           content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
                   error:
