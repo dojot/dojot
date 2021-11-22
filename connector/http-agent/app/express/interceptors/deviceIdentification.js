@@ -14,7 +14,8 @@ const tls = require('tls');
 module.exports = ({ cache, config }) => ({
   name: 'device-identification-interceptor',
   middleware: async (req, res, next) => {
-    const err = new createError.Unauthorized();
+    const Forbidden = new createError[403]();
+    const BadRequest = new createError[400]();
 
     if (req.socket instanceof tls.TLSSocket) {
       const clientCert = req.socket.getPeerCertificate();
@@ -29,9 +30,9 @@ module.exports = ({ cache, config }) => ({
           [req.tenant, req.deviceId] = messageKey;
           return next();
         } catch (e) {
-          err.message =
+          Forbidden.message =
             'Error trying to get tenant and deviceId in CN of certificate.';
-          return next(err);
+          return next(Forbidden);
         }
       }
 
@@ -55,14 +56,14 @@ module.exports = ({ cache, config }) => ({
           cache.set(fingerprint256, messageKey, config.setTll);
           return next();
         } catch (e) {
-          err.message =
+          Forbidden.message =
             'Error trying to get tenant and deviceId in certificate-acl.';
-          return next(err);
+          return next(Forbidden);
         }
       }
 
-      err.message = 'Client certificate is invalid';
-      return next(err);
+      Forbidden.message = 'Client certificate is invalid';
+      return next(Forbidden);
     }
 
     const reqType = req.path.split('/');
@@ -75,7 +76,7 @@ module.exports = ({ cache, config }) => ({
       return next();
     }
 
-    err.message = 'Missing client certificate';
-    return next(err);
+    BadRequest.message = 'Unable to authenticate';
+    return next(BadRequest);
   },
 });
