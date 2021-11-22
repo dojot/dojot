@@ -32,12 +32,12 @@ jobs:
           npm run check-licenses
           npm run test
 
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v1
-      #   with:
-      #     file: storage/file/minio/file-mgmt/coverage/lcov.info # create when run npm test
-      #     flags: file-mgmt # Flags allow you to isolate coverage reports for different tests
-      #     name: file-mgmt # Custom defined name for the upload
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: storage/file/minio/file-mgmt/coverage/lcov.info # create when run npm test
+          flags: file-mgmt # Flags allow you to isolate coverage reports for different tests
+          name: file-mgmt # Custom defined name for the upload
 
   docker-hub:
     needs: unit-test
