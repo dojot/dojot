@@ -61,6 +61,7 @@ jobs:
           name: ${{ steps.get_owner.outputs.owner }}/file-mgmt
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          workdir: connector/http-agent
+          dockerfile: filemgmt.dockerfile
+          workdir: storage/file/minio/file-mgmt
           buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
           tag_names: true # tag will be based in branch name or tag name
