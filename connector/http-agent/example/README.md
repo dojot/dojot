@@ -112,7 +112,7 @@ The request should give back a message like this one:
   }
 ```
 
-To create a device based on template, send the following request to dojot:
+To create a device based on one or more templates, send the following request to dojot:
 
 ```sh
   curl -X POST http://localhost:8000/device \

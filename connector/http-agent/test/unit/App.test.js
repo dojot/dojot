@@ -2,6 +2,7 @@
 /* eslint-disable jest/no-try-expect */
 const mockConfig = {
   lightship: { a: 'abc' },
+  url: {},
 };
 const mockSdk = {
   ConfigManager: {
@@ -31,11 +32,11 @@ const mockServer = jest.fn().mockImplementation(() => ({
 }));
 jest.mock('../../app/Server', () => mockServer);
 
-const mockCacheInit = jest.fn();
-const mockCache = jest.fn().mockImplementation(() => ({
-  init: mockCacheInit,
+const mockRedisInit = jest.fn();
+const mockRedis = jest.fn().mockImplementation(() => ({
+  init: mockRedisInit,
 }));
-jest.mock('../../app/Cache', () => mockCache);
+jest.mock('../../app/redis/RedisManager.js', () => mockRedis);
 
 const mockProducerMessagesInit = jest.fn();
 const mockProducerMessages = jest.fn().mockImplementation(() => ({
@@ -60,7 +61,9 @@ describe('App', () => {
     it('should successfully create a new instance', () => {
       expect(app.server).toBeDefined();
       expect(app.producerMessages).toBeDefined();
-      expect(app.cache).toBeDefined();
+      expect(app.redisManager).toBeDefined();
+      expect(app.deviceAuthService).toBeDefined();
+      expect(app.certificateAclService).toBeDefined();
     });
   });
 
@@ -71,7 +74,7 @@ describe('App', () => {
     it('should correctly initialize', async () => {
       await app.init();
 
-      expect(mockCacheInit).toHaveBeenCalled();
+      expect(mockRedisInit).toHaveBeenCalled();
       await expect(mockProducerMessagesInit).toHaveBeenCalled();
       expect(mockServerInit).toHaveBeenCalled();
       expect(mockServerRegisterShutdown).toHaveBeenCalled();

@@ -2,13 +2,12 @@ const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('http-agent:express');
 
-// const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
+const identificationService = require('./interceptors/identificationService');
 const deviceIdentificationInterceptor = require('./interceptors/deviceIdentification');
 
 const {
   express: configExpress,
   security: configSecurity,
-  cache: ConfigCache,
 } = ConfigManager.getConfig('HTTP_AGENT');
 
 /**
@@ -28,13 +27,20 @@ const {
  * @param {an instance of @dojot/microservice-sdk.ServiceStateManager} serviceState
  *          Manages the services' states, providing health check and shutdown utilities.
  *
- * @param {string}openApiPath FilePath to OpenApi
+ * @param {an instance of RedisManager} redisManager
+ *          Provisions functions to get and set data in redis.
+ *
+ * @param {an instance of DeviceAuthService} deviceAuthService
+ *          Provides query to basic-auth to verify the validity of credentials.
+ *
+ * @param {an instance of CertificateAclService} certificateAclService
+ *          Provides query to certificate-acl to verify certificate.
  *
  * @throws  Some error when try load open api in yaml
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, cache) => {
+module.exports = (routes, serviceState, redisManager, deviceAuthService, certificateAclService) => {
   const {
     responseCompressInterceptor,
     requestIdInterceptor,
@@ -45,14 +51,7 @@ module.exports = (routes, serviceState, cache) => {
 
   return WebUtils.framework.createExpress({
     interceptors: [
-      deviceIdentificationInterceptor({
-        cache,
-        config: {
-          unsecureMode: configSecurity['unsecure.mode'],
-          authorizationMode: configSecurity['authorization.mode'],
-          setTll: ConfigCache['set.tll'],
-        },
-      }),
+      jsonBodyParsingInterceptor({ config: configExpress['parsing.limit'] }),
       requestIdInterceptor(),
       beaconInterceptor({
         stateManager: serviceState,
@@ -62,7 +61,17 @@ module.exports = (routes, serviceState, cache) => {
       requestLogInterceptor({
         logger,
       }),
-      jsonBodyParsingInterceptor({ config: configExpress['parsing.limit'] }),
+      deviceIdentificationInterceptor({
+        config: {
+          unsecureMode: configSecurity['unsecure.mode'],
+          authorizationMode: configSecurity['authorization.mode'],
+        },
+        identificationService: identificationService({
+          redisManager,
+          deviceAuthService,
+          certificateAclService,
+        }),
+      }),
     ],
     routes: routes.flat(),
     logger,
