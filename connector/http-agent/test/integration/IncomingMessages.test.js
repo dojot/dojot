@@ -155,8 +155,7 @@ describe('HTTPS', () => {
           .expect(403)
           .then((response) => {
             expect(response.body).toStrictEqual({
-              error:
-                'Error trying to get tenant and deviceId in certificate-acl.',
+              error: 'Client certificate is invalid: resp.data.split is not a function',
             });
           });
       });
@@ -397,10 +396,10 @@ describe('Unauthorized', () => {
       })
       .ca(ca)
       .expect('Content-Type', /json/)
-      .expect(403)
+      .expect(400)
       .then((response) => {
         expect(response.body).toStrictEqual({
-          error: 'Client certificate is invalid',
+          error: 'Unable to authenticate',
         });
       });
   });
