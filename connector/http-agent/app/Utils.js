@@ -8,23 +8,6 @@ const err = new createError.BadRequest();
  */
 
 /**
- * @function isInteger
- *
- * check if is integer
- *
- * @param {string} str
- *
- * @returns {boolean}
- */
-
-const isInteger = (str) => {
-  if (typeof str !== 'string') return false; // we only process strings!
-  // eslint-disable-next-line max-len
-  return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-         !isNaN(parseInt(str, 10));// ...and ensure strings of whitespace fail
-};
-
-/**
  * @function parseTimestamp
  *
  * Return timestamp in proper format
@@ -34,18 +17,19 @@ const isInteger = (str) => {
  * @returns {number}
  */
 const parseTimestamp = (ts) => {
-  if (ts) {
-    if (isInteger(ts)) {
-      const isValidDate = (new Date(parseInt(ts, 10))).getTime() > 0;
-      if (isValidDate) return new Date(parseInt(ts, 10)).getTime();
-    } else {
-      const isValidDate = (new Date(ts)).getTime() > 0;
-      if (isValidDate) return new Date(ts).getTime();
-    }
-    err.message = 'Invalid timestamp';
-    throw err;
+  // if wasn't received ts value, return the current timestamp;
+  if (!ts) {
+    return new Date().getTime();
   }
-  return new Date().getTime();
+  if (!isNaN(ts)) {
+    const unix = parseInt(ts, 10);
+    return new Date(unix).getTime();
+  }
+  if ((new Date(ts)).getTime() > 0) {
+    return new Date(ts).getTime();
+  }
+  err.message = 'Invalid timestamp';
+  throw err;
 };
 
 /**
@@ -53,24 +37,20 @@ const parseTimestamp = (ts) => {
  *
  * Generates a payload for device-data topic for Dojot
  *
- * @param {string} payload
+ * @param {object} payload
  * @param {string} tenant
- * @param {Object} deviceid
+ * @param {string} deviceid
  *
  * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
  */
-const generateDeviceDataMessage = (payload, tenant, deviceid) => {
-  const formattedMessage = {
-    metadata: {
-      deviceid,
-      tenant,
-      timestamp: parseTimestamp(payload.ts),
-    },
-    attrs: payload.data,
-  };
-
-  return formattedMessage;
-};
+const generateDeviceDataMessage = (payload, tenant, deviceid) => ({
+  metadata: {
+    deviceid,
+    tenant,
+    timestamp: parseTimestamp(payload.ts),
+  },
+  attrs: payload.data,
+});
 
 /**
  * Kills the program process.

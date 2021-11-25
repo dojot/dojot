@@ -8,6 +8,12 @@ const fakeMessageWithTimestamp = {
     temperature: 25.79,
   },
 };
+const fakeMessageWithUnixTimestamp = {
+  ts: '1626082261683',
+  data: {
+    temperature: 25.79,
+  },
+};
 const fakeMessageWithoutTimestamp = {
   data: {
     temperature: 25.79,
@@ -28,6 +34,27 @@ describe('Util', () => {
   it('should format the message correctly with timestamp', async () => {
     const deviceDataMessage = generateDeviceDataMessage(
       fakeMessageWithTimestamp,
+      tenant,
+      deviceid,
+    );
+
+    const formattedMessage = {
+      metadata: {
+        deviceid,
+        tenant,
+        timestamp: Date.parse(fakeMessageWithTimestamp.ts),
+      },
+      attrs: fakeMessageWithTimestamp.data,
+    };
+
+    expect(JSON.stringify(deviceDataMessage)).toEqual(
+      JSON.stringify(formattedMessage),
+    );
+  });
+
+  it('should format the message correctly with unix timestamp', async () => {
+    const deviceDataMessage = generateDeviceDataMessage(
+      fakeMessageWithUnixTimestamp,
       tenant,
       deviceid,
     );
