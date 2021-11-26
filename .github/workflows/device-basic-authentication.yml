@@ -39,7 +39,7 @@ jobs:
         npm test
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v1
       with:
         # Created when 'npm test' was executed
         directory: iam/device-basic-authentication/coverage
