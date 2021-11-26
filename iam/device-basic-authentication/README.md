@@ -200,4 +200,3 @@ The device-basic-authentication source code is released under Apache License 2.0
 
 Check NOTICE and LICENSE files for more information.
 
-

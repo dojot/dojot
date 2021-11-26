@@ -22,31 +22,28 @@ jobs:
         node-version: [12.x]
     steps:
 
-    - name: checkout
-      uses: actions/checkout@v1
+      - name: checkout
+        uses: actions/checkout@v1
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: npm install, build, lint and test
-      run: |
-        cd iam/device-basic-authentication
-        npm ci
-        npm run lint
-        npm run check-licenses
-        npm test
+      - name: npm install, build, lint and test
+        run: |
+          cd iam/device-basic-authentication
+          npm ci
+          npm run lint
+          npm run check-licenses
+          npm test
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        # Created when 'npm test' was executed
-        directory: iam/device-basic-authentication/coverage
-        # Flags allow you to isolate coverage reports for different tests
-        flags: device-basic-authentication
-        # Custom name for the upload
-        name: device-basic-authentication
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          file: iam/device-basic-authentication/coverage/lcov.info # create when run npm test
+          flags: device-basic-authentication # Flags allow you to isolate coverage reports for different tests
+          name: device-basic-authentication # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests
@@ -57,23 +54,23 @@ jobs:
     if: contains(github.ref, 'refs/pull/') == false
     steps:
 
-    - name: Owner Repository
-      id: get_owner
-      run: |
-        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
-        echo Current Owner is $OWNER
-        echo ::set-output name=owner::$OWNER
-    - name: Checkout
-      uses: actions/checkout@v1
+      - name: Owner Repository
+        id: get_owner
+        run: |
+          export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+          echo Current Owner is $OWNER
+          echo ::set-output name=owner::$OWNER
+      - name: Checkout
+        uses: actions/checkout@v1
 
-    - name: Build and Push
-      uses: elgohr/Publish-Docker-Github-Action@2.16
-      with:
-        name: ${{ steps.get_owner.outputs.owner }}/device-basic-authentication
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        workdir: iam/device-basic-authentication
-        # Label with the built image's commit
-        buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
-        # Whether tag will be based in the branch name or in the tag name
-        tag_names: true
+      - name: Build and Push
+        uses: elgohr/Publish-Docker-Github-Action@2.16
+        with:
+          name: ${{ steps.get_owner.outputs.owner }}/device-basic-authentication
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          workdir: iam/device-basic-authentication
+          # Label with the built image's commit
+          buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
+          # Whether tag will be based in the branch name or in the tag name
+          tag_names: true
