@@ -136,6 +136,7 @@ beforeAll(() => {
     caCertAutoRegistration: global.config.certificate.external.ca.autoregistration,
     errorTemplate: WebUtils.framework.errorTemplate,
     logger: new Logger('CertificateService.test.js'),
+    xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
   };
 });
 
