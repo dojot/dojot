@@ -1,0 +1,79 @@
+name: Device Basic Authentication (iam/device-basic-authentication)
+
+# Triggered after a branch is created, a tag or a branch is pushed or a PR with changes in
+# 'iam/device-basic-authentication/**' is submitted
+
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'iam/device-basic-authentication/**'
+
+jobs:
+  unit-tests:
+    # Path to help identify each job in the status checks
+    name: (iam/device-basic-authentication) Unit Tests
+    # If the commit message contains 'ci skip', it is not necessary to run this job
+    if: contains(github.event.head_commit.message, 'ci skip') == false
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: npm install, build, lint and test
+      run: |
+        cd iam/device-basic-authentication
+        npm ci
+        npm run lint
+        npm run check-licenses
+        npm test
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        # Created when 'npm test' was executed
+        directory: iam/device-basic-authentication/coverage
+        # Flags allow you to isolate coverage reports for different tests
+        flags: device-basic-authentication
+        # Custom name for the upload
+        name: device-basic-authentication
+
+  docker-hub:
+    needs: unit-tests
+    # Path to help identify each job in the status checks
+    name: (iam/device-basic-authentication) Build and Publish image to DockerHUb
+    runs-on: ubuntu-latest
+    # If this is a PR, it won't run
+    if: contains(github.ref, 'refs/pull/') == false
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.16
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/device-basic-authentication
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: iam/device-basic-authentication
+        # Label with the built image's commit
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' "
+        # Whether tag will be based in the branch name or in the tag name
+        tag_names: true
