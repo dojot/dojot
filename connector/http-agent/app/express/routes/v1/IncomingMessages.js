@@ -10,10 +10,8 @@ const logger = new Logger('http-agent:express/routes/v1/Device');
  * Routes to Devices
  *
  * @param {string} mountPoint be used as a route prefix
- * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByField
- *                               A promise that returns a result and a totalItems inside that result
- * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByMeasurement
- *                               A promise that returns a result and a totalItems inside that result
+ *
+ * @param {ProducerMessages} producerMessages Instance of ProducerMessages
  */
 module.exports = ({ mountPoint, producerMessages }) => {
   /**
@@ -55,10 +53,7 @@ module.exports = ({ mountPoint, producerMessages }) => {
                   deviceId,
                 );
 
-                res.status(HttpStatus.OK).json({
-                  success: true,
-                  message: 'Successfully published!',
-                });
+                res.status(HttpStatus.NO_CONTENT).send();
               } catch (e) {
                 logger.error('incoming-messages.post:', e);
                 res.status(HttpStatus.BAD_REQUEST).json({
@@ -115,10 +110,7 @@ module.exports = ({ mountPoint, producerMessages }) => {
                   throw new Error(JSON.stringify(errors));
                 }
 
-                res.status(HttpStatus.OK).json({
-                  success: true,
-                  message: 'Successfully published!',
-                });
+                res.status(HttpStatus.NO_CONTENT).send();
               } catch (e) {
                 logger.error('incoming-messages.post:', e);
                 res.status(HttpStatus.BAD_REQUEST).json({

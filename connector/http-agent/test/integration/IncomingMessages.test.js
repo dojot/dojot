@@ -110,13 +110,8 @@ describe('HTTPS', () => {
           .key(key)
           .cert(cert)
           .ca(ca)
-          .expect('Content-Type', /json/)
-          .expect(200)
           .then((response) => {
-            expect(response.body).toStrictEqual({
-              success: true,
-              message: 'Successfully published!',
-            });
+            expect(response.statusCode).toStrictEqual(204);
           });
       });
 
@@ -135,13 +130,8 @@ describe('HTTPS', () => {
           .key(key)
           .cert(cert)
           .ca(ca)
-          .expect('Content-Type', /json/)
-          .expect(200)
           .then((response) => {
-            expect(response.body).toStrictEqual({
-              success: true,
-              message: 'Successfully published!',
-            });
+            expect(response.statusCode).toStrictEqual(204);
             expect(mockCache.set).toHaveBeenCalled();
           });
       });
@@ -162,11 +152,10 @@ describe('HTTPS', () => {
           .cert(cert)
           .ca(ca)
           .expect('Content-Type', /json/)
-          .expect(401)
+          .expect(403)
           .then((response) => {
             expect(response.body).toStrictEqual({
-              error:
-                'Error trying to get tenant and deviceId in certificate-acl.',
+              error: 'Client certificate is invalid: resp.data.split is not a function',
             });
           });
       });
@@ -191,13 +180,8 @@ describe('HTTPS', () => {
           .key(keyCN)
           .cert(certCN)
           .ca(ca)
-          .expect('Content-Type', /json/)
-          .expect(200)
           .then((response) => {
-            expect(response.body).toStrictEqual({
-              success: true,
-              message: 'Successfully published!',
-            });
+            expect(response.statusCode).toStrictEqual(204);
           });
       });
     });
@@ -248,13 +232,8 @@ describe('HTTPS', () => {
         .key(keyCN)
         .cert(certCN)
         .ca(ca)
-        .expect('Content-Type', /json/)
-        .expect(200)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: true,
-            message: 'Successfully published!',
-          });
+          expect(response.statusCode).toStrictEqual(204);
         });
     });
 
@@ -303,13 +282,8 @@ describe('HTTP', () => {
             temperature: 25.79,
           },
         })
-        .expect('Content-Type', /json/)
-        .expect(200)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: true,
-            message: 'Successfully published!',
-          });
+          expect(response.statusCode).toStrictEqual(204);
         });
     });
 
@@ -354,13 +328,8 @@ describe('HTTP', () => {
             },
           },
         ])
-        .expect('Content-Type', /json/)
-        .expect(200)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: true,
-            message: 'Successfully published!',
-          });
+          expect(response.statusCode).toStrictEqual(204);
         });
     });
   });
@@ -407,10 +376,10 @@ describe('Unauthorized', () => {
         },
       })
       .expect('Content-Type', /json/)
-      .expect(401)
+      .expect(400)
       .then((response) => {
         expect(response.body).toStrictEqual({
-          error: 'Missing client certificate',
+          error: 'Unable to authenticate',
         });
       });
   });
@@ -427,10 +396,10 @@ describe('Unauthorized', () => {
       })
       .ca(ca)
       .expect('Content-Type', /json/)
-      .expect(401)
+      .expect(400)
       .then((response) => {
         expect(response.body).toStrictEqual({
-          error: 'Client certificate is invalid',
+          error: 'Unable to authenticate',
         });
       });
   });
