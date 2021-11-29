@@ -12,7 +12,7 @@
     "start": "node index.js",
     "dev": "nodemon --inspect=0.0.0.0 ./index.js",
     "debug": "node --inspect=0.0.0.0 index.js",
-    "test": "jest",
+    "test": "jest --verbose --coverage",
     "clear_jest": "jest --clearCache",
     "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
     "lint": "eslint --ext .js .",
