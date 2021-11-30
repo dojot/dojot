@@ -42,7 +42,7 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           # Created when 'npm test' was executed
-          directory: iam/device-basic-authentication/coverage
+          directory: iam/device-basic-authentication/test/coverage
           # file: iam/device-basic-authentication/coverage/lcov.info # create when run npm test
           flags: device-basic-authentication # Flags allow you to isolate coverage reports for different tests
           name: device-basic-authentication # Custom defined name for the upload
