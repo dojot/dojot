@@ -317,7 +317,7 @@ services:
       X509IDMGMT_MONGO_CONN_URI: 'mongodb://mongodb:27017/x509-identity-mgmt'
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: 'http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth'
       X509IDMGMT_EJBCA_WSDL: 'https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl'
-      # X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: 'true'
+      X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: 'true'
       X509IDMGMT_EJBCA_FORCECRLRENEW: 'true'
       # ROARR_LOG: "true" # healthcheck is using 'Roarr' to implement logging.
     healthcheck:
@@ -457,6 +457,7 @@ services:
     ports:
       - 8080:3000
       - 8081:3001
+      - 9229:9229
     restart: always
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
@@ -466,6 +467,7 @@ services:
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
       HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
+      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'cn'
     volumes:
       - http-agent-cert-side-volume:/certs
     logging:

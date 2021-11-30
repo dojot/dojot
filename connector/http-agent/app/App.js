@@ -6,7 +6,10 @@ const {
 
 const camelCase = require('lodash.camelcase');
 
-const { lightship: configLightship } = getConfig('HTTP_AGENT');
+const {
+  lightship: configLightship,
+  url: configURL,
+} = getConfig('HTTP_AGENT');
 
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
@@ -20,9 +23,11 @@ const logger = new Logger('http-agent:App');
 const Server = require('./Server');
 const ProducerMessages = require('./ProducerMessages');
 const Cache = require('./Cache');
+const CertificateAclService = require('./axios/CertificateAclService');
 
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
+const axios = require('./axios/createAxios');
 
 /**
  * Wrapper to initialize the service
@@ -38,6 +43,7 @@ class App {
       this.server = new Server(serviceState);
       this.producerMessages = new ProducerMessages(serviceState);
       this.cache = new Cache(serviceState);
+      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], axios);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
@@ -50,8 +56,8 @@ class App {
   async init() {
     logger.info('init: Initializing the http-agent...');
     try {
-      this.cache.init();
       await this.producerMessages.init();
+      this.cache.init();
       this.server.registerShutdown();
 
       this.server.init(
@@ -64,6 +70,7 @@ class App {
           ],
           serviceState,
           this.cache,
+          this.certificateAclService,
         ),
       );
     } catch (e) {

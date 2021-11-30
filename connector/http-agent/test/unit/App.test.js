@@ -2,6 +2,7 @@
 /* eslint-disable jest/no-try-expect */
 const mockConfig = {
   lightship: { a: 'abc' },
+  url: {},
 };
 const mockSdk = {
   ConfigManager: {
