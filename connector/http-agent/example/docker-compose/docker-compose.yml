@@ -467,7 +467,6 @@ services:
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
       HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
-      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'cn'
     volumes:
       - http-agent-cert-side-volume:/certs
     logging:
