@@ -95,8 +95,8 @@ describe('Authentication', () => {
     it('should successfully execute the request', async () => {
       mockDeviceService.validDevice.mockReturnValue(true);
       mockBasicCredentialsCtrl.create.mockReturnValue({
-        mockUsername,
-        mockPassword,
+        username: mockUsername,
+        password: mockPassword,
       });
 
       await request(app)
@@ -106,8 +106,8 @@ describe('Authentication', () => {
           expect(response.statusCode).toBe(200);
           expect(response.body).toStrictEqual({
             credentials: {
-              mockUsername,
-              mockPassword,
+              username: mockUsername,
+              password: mockPassword,
             },
             basicAuth: 'Basic dGVuYW50MUAxMjNhYmM6QU94UmchdjFoZUd1UTBZ',
           });
@@ -117,8 +117,8 @@ describe('Authentication', () => {
     it('should unsuccessfully execute the request', async () => {
       mockDeviceService.validDevice.mockReturnValue(true);
       mockBasicCredentialsCtrl.create.mockReturnValue({
-        mockUsername,
-        mockPassword,
+        username: mockUsername,
+        password: mockPassword,
       });
       await request(app)
         .post(urlBasicCredentials)
@@ -174,8 +174,8 @@ describe('Authentication', () => {
       await request(app)
         .post(urlInternalAuthentication)
         .send({
-          mockUsername,
-          mockPassword,
+          username: mockUsername,
+          password: mockPassword,
         })
         .then((response) => {
           expect(response.statusCode).toBe(200);
@@ -189,8 +189,8 @@ describe('Authentication', () => {
       await request(app)
         .post(urlInternalAuthentication)
         .send({
-          mockUsername,
-          mockPassword,
+          username: mockUsername,
+          password: mockPassword,
         })
         .then((response) => {
           expect(response.statusCode).toBe(401);
@@ -204,8 +204,8 @@ describe('Authentication', () => {
       await request(app)
         .post(urlInternalAuthentication)
         .send({
-          mockUsername: 1,
-          mockPassword,
+          username: 1,
+          password: mockPassword,
         })
         .then((response) => {
           expect(response.statusCode).toBe(401);
@@ -222,8 +222,8 @@ describe('Authentication', () => {
       await request(app)
         .post(urlInternalAuthentication)
         .send({
-          mockUsername,
-          mockPassword,
+          username: mockUsername,
+          password: mockPassword,
         })
         .then((response) => {
           expect(response.statusCode).toBe(500);
