@@ -90,7 +90,10 @@ class ConsumerMessages {
     logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with regex ${configSubscribe['topics.regex.tenants']}`);
     const topic = RegExp(configSubscribe['topics.regex.tenants']);
 
-    this.idCallbackTenant = this.consumer.registerCallback(topic, this.getCallbackForTenantEvents(),);
+    this.idCallbackTenant = this.consumer.registerCallback(
+      topic, 
+      this.getCallbackForTenantEvents(),
+    );
     logger.debug('registerCallback: Registered Callback');
   }
 
