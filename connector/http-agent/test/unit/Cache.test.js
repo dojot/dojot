@@ -137,6 +137,21 @@ describe('Cache', () => {
       expect(signalNotReady).toHaveBeenCalled();
     });
 
+    it('should signal as not ready - getStatus returns error', async () => {
+      cache.myCache.getStats.mockImplementationOnce(() => {
+        throw new Error('Test');
+      });
+
+      cache.createHealthChecker();
+
+      const callback = mockAddHealthChecker.mock.calls[0][1];
+      await callback(signalReady, signalNotReady);
+
+      expect(mockAddHealthChecker).toHaveBeenCalled();
+      expect(signalReady).not.toHaveBeenCalled();
+      expect(signalNotReady).toHaveBeenCalled();
+    });
+
     it('should signal as not ready - a new Cache instance is not correctly created', async () => {
       cache.createHealthChecker();
 

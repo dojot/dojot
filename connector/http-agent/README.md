@@ -156,12 +156,12 @@ These are the environment variables used by iotagent-http
 
 ### Secure Context
 
-| Key                         | Default Value | Valid Values | Environment variable                   |
-| --------------------------- | ------------- | ------------ | -------------------------------------- |
-| security.crl                | /certs/ca.crl | string       | HTTP_AGENT_SECURITY_CRL                |
-| security.cert.directory     | /certs        | string       | HTTP_AGENT_SECURITY_CERT_DIRECTORY     |
-| security.unsecure.mode      | true          | boolean      | HTTP_AGENT_SECURITY_UNSECURE_MODE      |
-| security.authorization.mode | fingerprint   | string       | HTTP_AGENT_SECURITY_AUTHORIZATION_MODE |
+| Key                         | Default Value | Valid Values    | Environment variable                   |
+| --------------------------- | ------------- | --------------- | -------------------------------------- |
+| security.crl                | /certs/ca.crl | string          | HTTP_AGENT_SECURITY_CRL                |
+| security.cert.directory     | /certs        | string          | HTTP_AGENT_SECURITY_CERT_DIRECTORY     |
+| security.unsecure.mode      | true          | boolean         | HTTP_AGENT_SECURITY_UNSECURE_MODE      |
+| security.authorization.mode | fingerprint   | fingerprint, cn | HTTP_AGENT_SECURITY_AUTHORIZATION_MODE |
 
 ### Reload
 

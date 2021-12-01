@@ -1,16 +1,11 @@
 const fs = require('fs');
 
 const mockConfig = {
+  https: { 'request.cert': true },
   express: { trustproxy: true, 'parsing.limit': 256000 },
   security: { 'unsecure.mode': true, 'authorization.mode': 'fingerprint' },
   cache: { 'set.tll': 30000 },
 };
-
-const mockAxiosGet = jest.fn();
-const mockAxios = {
-  get: mockAxiosGet,
-};
-jest.mock('axios', () => mockAxios);
 
 const { WebUtils } = jest.requireActual('@dojot/microservice-sdk');
 
@@ -49,6 +44,10 @@ const serviceStateMock = {
   })),
 };
 
+const urlIncomingMessages = '/http-agent/v1/incoming-messages';
+const urlUnsecureIncomingMessages = '/http-agent/v1/unsecure/incoming-messages';
+const urlCreateMany = '/http-agent/v1/incoming-messages/create-many';
+
 const cert = fs.readFileSync('test/certs/client/client_cert.pem');
 const key = fs.readFileSync('test/certs/client/client_key.pem');
 const certCN = fs.readFileSync('test/certs/client/client_cn_cert.pem');
@@ -64,6 +63,12 @@ const mockCache = {
   set: mockCacheSet,
 };
 jest.mock('../../app/Cache', () => mockCache);
+
+const mockgetAclEntries = jest.fn();
+const mockCertificateAclService = {
+  getAclEntries: mockgetAclEntries,
+};
+jest.mock('../../app/axios/CertificateAclService.js', () => mockCertificateAclService);
 
 const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
@@ -86,6 +91,7 @@ beforeEach(() => {
     ],
     serviceStateMock,
     mockCache,
+    mockCertificateAclService,
   );
 });
 
@@ -96,10 +102,10 @@ describe('HTTPS', () => {
         jest.clearAllMocks();
       });
 
-      it('should successfully execute the request with tenant and deviceId from cache', async () => {
-        mockCache.get.mockReturnValue(['test', 'abc123']);
+      it('should successfully execute the request with tenant and deviceId from redis', async () => {
+        mockCache.get.mockReturnValue('test:abc123');
         await requestHttps(app)
-          .post('/http-agent/v1/incoming-messages')
+          .post(urlIncomingMessages)
           .set('Content-Type', 'application/json')
           .send({
             ts: '2021-07-12T09:31:01.683000Z',
@@ -117,9 +123,9 @@ describe('HTTPS', () => {
 
       it('should successfully execute the request with tenant and deviceId from certificate-acl', async () => {
         mockCache.get.mockReturnValue(undefined);
-        mockAxios.get.mockResolvedValue({ data: 'test:abc123' });
+        mockCertificateAclService.getAclEntries.mockReturnValue('test:abc123');
         await requestHttps(app)
-          .post('/http-agent/v1/incoming-messages')
+          .post(urlIncomingMessages)
           .set('Content-Type', 'application/json')
           .send({
             ts: '2021-07-12T09:31:01.683000Z',
@@ -138,9 +144,11 @@ describe('HTTPS', () => {
 
       it('should unsuccessfully execute the request with tenant and deviceId from certificate-acl', async () => {
         mockCache.get.mockReturnValue(undefined);
-        mockAxios.get.mockResolvedValue({ data: {} });
+        mockCertificateAclService.getAclEntries.mockImplementationOnce(() => {
+          throw new Error('Test');
+        });
         await requestHttps(app)
-          .post('/http-agent/v1/incoming-messages')
+          .post(urlIncomingMessages)
           .set('Content-Type', 'application/json')
           .send({
             ts: '2021-07-12T09:31:01.683000Z',
@@ -153,11 +161,7 @@ describe('HTTPS', () => {
           .ca(ca)
           .expect('Content-Type', /json/)
           .expect(403)
-          .then((response) => {
-            expect(response.body).toStrictEqual({
-              error: 'Client certificate is invalid: resp.data.split is not a function',
-            });
-          });
+          .then((response) => expect(response.body).toStrictEqual({ error: 'Client certificate is invalid' }));
       });
     });
 
@@ -169,7 +173,7 @@ describe('HTTPS', () => {
 
       it('should successfully execute the request with tenant and deviceId from CN', async () => {
         await requestHttps(app)
-          .post('/http-agent/v1/incoming-messages')
+          .post(urlIncomingMessages)
           .set('Content-Type', 'application/json')
           .send({
             ts: '2021-07-12T09:31:01.683000Z',
@@ -188,7 +192,7 @@ describe('HTTPS', () => {
 
     it('should return bad request error', async () => {
       await requestHttps(app)
-        .post('/http-agent/v1/incoming-messages')
+        .post(urlIncomingMessages)
         .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
@@ -198,12 +202,7 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(400)
-        .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: false,
-            message: '"attrs" is required',
-          });
-        });
+        .then((response) => expect(response.body).toStrictEqual({ message: '"data" is required' }));
     });
   });
 
@@ -213,7 +212,7 @@ describe('HTTPS', () => {
     });
     it('should successfully execute the request', async () => {
       await requestHttps(app)
-        .post('/http-agent/v1/incoming-messages/create-many')
+        .post(urlCreateMany)
         .set('Content-Type', 'application/json')
         .send([
           {
@@ -239,7 +238,7 @@ describe('HTTPS', () => {
 
     it('should return bad request error', async () => {
       await requestHttps(app)
-        .post('/http-agent/v1/incoming-messages/create-many')
+        .post(urlCreateMany)
         .set('Content-Type', 'application/json')
         .send([
           {
@@ -254,12 +253,7 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(400)
-        .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: false,
-            message: { 0: '"attrs" is required', 1: '"attrs" is required' },
-          });
-        });
+        .then((response) => expect(response.body).toStrictEqual({ message: { 0: '"data" is required', 1: '"data" is required' } }));
     });
   });
 });
@@ -272,9 +266,7 @@ describe('HTTP', () => {
   describe('unsecure-single-message', () => {
     it('should successfully execute the request', async () => {
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123',
-        )
+        .post(`${urlUnsecureIncomingMessages}?tenant=test&deviceId=abc123`)
         .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
@@ -289,9 +281,7 @@ describe('HTTP', () => {
 
     it('should return bad request error', async () => {
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123',
-        )
+        .post(`${urlUnsecureIncomingMessages}?tenant=test&deviceId=abc123`)
         .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
@@ -299,63 +289,9 @@ describe('HTTP', () => {
         .expect('Content-Type', /json/)
         .expect(400)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            success: false,
-            message: '"attrs" is required',
-          });
+          expect(response.body).toStrictEqual({ message: '"data" is required' });
         });
     });
-  });
-
-  describe('unsecure-many-messages', () => {
-    it('should successfully execute the request', async () => {
-      await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123',
-        )
-        .set('Content-Type', 'application/json')
-        .send([
-          {
-            ts: '2021-07-12T09:31:01.683000Z',
-            data: {
-              temperature: 25.79,
-            },
-          },
-          {
-            ts: '2021-07-12T09:31:01.683000Z',
-            data: {
-              temperature: 25.79,
-            },
-          },
-        ])
-        .then((response) => {
-          expect(response.statusCode).toStrictEqual(204);
-        });
-    });
-  });
-
-  it('should return bad request error', async () => {
-    await requestHttp(app)
-      .post(
-        '/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123',
-      )
-      .set('Content-Type', 'application/json')
-      .send([
-        {
-          ts: '2021-07-12T09:31:01.683000Z',
-        },
-        {
-          ts: '2021-07-12T09:31:01.683000Z',
-        },
-      ])
-      .expect('Content-Type', /json/)
-      .expect(400)
-      .then((response) => {
-        expect(response.body).toStrictEqual({
-          success: false,
-          message: { 0: '"attrs" is required', 1: '"attrs" is required' },
-        });
-      });
   });
 });
 
@@ -396,10 +332,10 @@ describe('Unauthorized', () => {
       })
       .ca(ca)
       .expect('Content-Type', /json/)
-      .expect(400)
+      .expect(403)
       .then((response) => {
         expect(response.body).toStrictEqual({
-          error: 'Unable to authenticate',
+          error: 'Client certificate is invalid',
         });
       });
   });
