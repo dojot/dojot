@@ -2,6 +2,7 @@ const {
   ServiceStateManager, ConfigManager,
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
+const KeycloakApiAdapter = require('../keycloak/keycloak-api-adapter');
 
 const Server = require('./server');
 const TenantListingController = require('./web/controllers/tenant-listing-controller');
@@ -23,10 +24,12 @@ module.exports = (config, logger) => {
 
   // Techs
   const httpServer = new Server(serviceState, configServerCamelCase, logger, config);
-  const tenantListingController = new TenantListingController(logger);
+  const keycloakApiAdapter = new KeycloakApiAdapter(logger);
+  const tenantListingController = new TenantListingController(keycloakApiAdapter, logger);
 
   return {
     httpServer,
+    keycloakApiAdapter,
     controllers: {
       tenantListingController,
     },

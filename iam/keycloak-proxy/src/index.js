@@ -6,10 +6,11 @@ const {
 const App = require('./app/app');
 
 // External dependencies
-const logger = new Logger('file-mgmt:Server');
 const openApiPath = path.join(__dirname, '../docs/v1.yml');
 ConfigManager.loadSettings('KEYCLOAKPROXY', 'default.conf');
 const config = ConfigManager.getConfig('KEYCLOAKPROXY');
+Logger.setLevel('console', 'debug');
+const logger = new Logger('keycloak-proxy:Server');
 
 // Init Application
 const app = new App(config, logger, openApiPath);

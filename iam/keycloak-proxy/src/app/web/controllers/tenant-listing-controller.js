@@ -1,5 +1,6 @@
 module.exports = class TenantListingController {
-  constructor(logger) {
+  constructor(kafkaApiAdapter, logger) {
+    this.kafkaApiAdapter = kafkaApiAdapter;
     this.logger = logger;
   }
 
@@ -11,5 +12,8 @@ module.exports = class TenantListingController {
    *
    * @returns an http response
    */
-  get = async (req, res) => res.status(200).json({})
+  get = async (req, res) => {
+    const tenants = await this.kafkaApiAdapter.getTenant();
+    return res.status(200).json({ tenants });
+  }
 };

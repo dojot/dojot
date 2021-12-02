@@ -24,11 +24,13 @@ module.exports = class App {
     // Initialize internal dependencies
     const web = Dependencies(this.config, this.logger);
     this.server = web.httpServer;
+    await web.keycloakApiAdapter.init();
+    await web.keycloakApiAdapter.auth();
 
     try {
       // Adapts express to the application and manages the routes
       this.express = ExpressAdapter.adapt(
-        routesV1('/api/v1', web.controllers, web.interceptors),
+        routesV1('/api/v1', web.controllers),
         this.server.serviceState,
         this.openApiPath,
         this.logger,

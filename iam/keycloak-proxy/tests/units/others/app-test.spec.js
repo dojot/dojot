@@ -3,12 +3,17 @@ jest.mock('../../../src/app/web/express-adapter', () => ({
 }));
 jest.mock('../../../src/app/web/routesV1', () => jest.fn());
 
+
 const mockHttpServer = {
   init: jest.fn(),
 };
 
 jest.mock('../../../src/app/dependencies', () => () => ({
   httpServer: mockHttpServer,
+  keycloakApiAdapter: {
+    init: jest.fn(),
+    auth: jest.fn(),
+  },
 }));
 
 const App = require('../../../src/app/app');

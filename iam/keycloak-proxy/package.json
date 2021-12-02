@@ -34,11 +34,15 @@
   "homepage": "https://github.com/dojot",
   "dependencies": {
     "@dojot/microservice-sdk": "^0.1.15",
+    "@keycloak/keycloak-admin-client": "^15.0.2",
     "express": "^4.17.1",
     "express-openapi-validator": "^4.13.4",
     "http-terminator": "^3.0.4",
+    "i": "^0.3.7",
     "js-yaml": "^3.14.1",
     "lodash.camelcase": "^4.3.0",
+    "npm": "^8.1.4",
+    "openid-client": "^5.0.2",
     "swagger-ui-express": "^4.1.6"
   },
   "devDependencies": {
