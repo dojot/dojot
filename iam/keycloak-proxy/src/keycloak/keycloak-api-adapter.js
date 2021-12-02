@@ -1,16 +1,10 @@
 const KeycloakAdmin = require('@keycloak/keycloak-admin-client').default;
 const { Issuer } = require('openid-client');
 
-const KEYCLOAK_URL = 'http://127.0.0.1:8082/auth';
-const KEYCLOAK_REALM_NAME = 'master';
-const PROXY_ID = 'proxy';
-const PROXY_SECRET = 'f26266fd-0cca-4d3f-be46-320449a52659';
-const PROXY_USER_NAME = 'proxy';
-const PROXY_USER_PASSWORD = 'fbc369f048391459ed70776f0416175f';
-
 module.exports = class KeycloakApiAdapter {
-  constructor(logger) {
+  constructor(config, logger) {
     this.logger = logger;
+    this.config = config;
   }
 
   async init() {
@@ -19,21 +13,21 @@ module.exports = class KeycloakApiAdapter {
       this.logger.debug('Configuring keycloak realm on the keycloak admin client');
       this.keycloakAdmin = new KeycloakAdmin(
         {
-          baseUrl: KEYCLOAK_URL,
-          realmName: KEYCLOAK_REALM_NAME,
+          baseUrl: this.config.keycloak.url,
+          realmName: this.config.keycloak.realm,
         },
       );
 
       this.logger.debug('Configuring keycloak realm on the openid client');
       const keycloakIssuer = await Issuer.discover(
-        `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM_NAME}`,
+        `${this.config.keycloak.url}/realms/${this.config.keycloak.realm}`,
       );
 
       this.logger.debug('Configuring keycloak client on the openid client');
       this.client = new keycloakIssuer.Client({
-        client_id: PROXY_ID,
+        client_id: this.config.proxy.id,
         token_endpoint_auth_method: '',
-        client_secret: PROXY_SECRET,
+        client_secret: this.config.proxy.secret,
       });
     } catch (error) {
       this.logger.error(error);
@@ -45,8 +39,8 @@ module.exports = class KeycloakApiAdapter {
     this.logger.debug('Signing in keycloak');
     this.tokenSet = await this.client.grant({
       grant_type: 'password',
-      username: PROXY_USER_NAME,
-      password: PROXY_USER_PASSWORD,      
+      username: this.config.proxy.username,
+      password: this.config.proxy.password,      
     });
     this.logger.debug('Signed in keycloak');
     this.keycloakAdmin.setAccessToken(this.tokenSet.access_token);

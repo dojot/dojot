@@ -24,7 +24,7 @@ module.exports = (config, logger) => {
 
   // Techs
   const httpServer = new Server(serviceState, configServerCamelCase, logger, config);
-  const keycloakApiAdapter = new KeycloakApiAdapter(logger);
+  const keycloakApiAdapter = new KeycloakApiAdapter(config, logger);
   const tenantListingController = new TenantListingController(keycloakApiAdapter, logger);
 
   return {
