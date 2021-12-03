@@ -1,12 +1,10 @@
 const Joi = require('joi');
 
 const joiSchema = Joi.object({
-  metadata: Joi.object({
-    timestamp: Joi.number().optional(),
-    tenant: Joi.string().required(),
-    deviceid: Joi.string().required(),
-  }),
-  attrs: Joi.object().required(),
+  tenant: Joi.string().required(),
+  deviceId: Joi.string().required(),
+  ts: Joi.any().optional(),
+  data: Joi.object().required(),
 });
 
 module.exports = joiSchema;

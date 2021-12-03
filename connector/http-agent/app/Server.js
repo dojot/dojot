@@ -2,7 +2,7 @@
 const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
-const fs = require('fs');
+const { watch, readFileSync } = require('fs');
 const { killApplication } = require('./Utils');
 
 const logger = new Logger('http-agent:Server');
@@ -33,10 +33,12 @@ class Server {
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
-    this.httpsServer = !allowUnsecuredModeOnly && WebUtils.createServer({
-      config: configHttpsServerCamelCase,
-      logger,
-    });
+    this.httpsServer =
+      !allowUnsecuredModeOnly &&
+      WebUtils.createServer({
+        config: configHttpsServerCamelCase,
+        logger,
+      });
     this.httpServer =
       (allowUnsecuredMode || allowUnsecuredModeOnly) &&
       WebUtils.createServer({
@@ -70,7 +72,7 @@ class Server {
       });
       this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
-      fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
+      watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
         logger.debug(`${eventType}: The ${filename} was modified!`);
         const interval = setInterval(() => {
           this.reloadCertificates(interval);
@@ -98,10 +100,10 @@ class Server {
   reloadCertificates(interval) {
     try {
       this.httpsServer.setSecureContext({
-        cert: fs.readFileSync(`${configHttpsServer.cert}`),
-        key: fs.readFileSync(`${configHttpsServer.key}`),
-        ca: fs.readFileSync(`${configHttpsServer.ca}`),
-        crl: fs.readFileSync(`${configSecurity.crl}`),
+        cert: readFileSync(`${configHttpsServer.cert}`),
+        key: readFileSync(`${configHttpsServer.key}`),
+        ca: readFileSync(`${configHttpsServer.ca}`),
+        crl: readFileSync(`${configSecurity.crl}`),
       });
       logger.debug('Seted new secure context!');
       clearInterval(interval);
@@ -119,8 +121,10 @@ class Server {
    *  Register a shutdown to the http server
    */
   async registerShutdown() {
-    const httpsTerminator = this.httpsServer && createHttpTerminator({ server: this.httpsServer });
-    const httpTerminator = this.httpServer && createHttpTerminator({ server: this.httpServer });
+    const httpsTerminator =
+      this.httpsServer && createHttpTerminator({ server: this.httpsServer });
+    const httpTerminator =
+      this.httpServer && createHttpTerminator({ server: this.httpServer });
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('Stopping the server from accepting new connections...');
       if (httpsTerminator) {
