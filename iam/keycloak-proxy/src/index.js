@@ -4,6 +4,7 @@ const {
 } = require('@dojot/microservice-sdk');
 
 const App = require('./app/app');
+const SecretHandler = require('./utils/secret-handler');
 
 // External dependencies
 const openApiPath = path.join(__dirname, '../docs/v1.yml');
@@ -12,11 +13,14 @@ const config = ConfigManager.getConfig('KEYCLOAKPROXY');
 Logger.setLevel('console', 'debug');
 const logger = new Logger('keycloak-proxy:Server');
 
-// Init Application
-const app = new App(config, logger, openApiPath);
+const secretHandler = new SecretHandler(config, logger);
 
-app.init().then(() => {
-  logger.info('Server started..');
-}).catch((error) => {
-  logger.error(error);
+secretHandler.handleCollection(['proxy.secret', 'proxy.password']).then(async () => {
+  try {
+    const app = new App(config, logger, openApiPath);
+    await app.init();
+    logger.info('Server started..');
+  } catch (error) {
+    logger.error(error);
+  }
 });
