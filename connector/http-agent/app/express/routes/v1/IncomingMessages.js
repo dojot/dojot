@@ -38,7 +38,7 @@ module.exports = ({ mountPoint, producerMessages }) => [
               }
 
               await producerMessages.send(
-                generateDeviceDataMessage(body, body.tenant, body.deviceId),
+                generateDeviceDataMessage(body),
                 body.tenant,
                 body.deviceId,
               );
@@ -92,12 +92,14 @@ module.exports = ({ mountPoint, producerMessages }) => [
               }
 
               body.forEach(async (message) => {
+                const generatedDeviceDataMessage = generateDeviceDataMessage(
+                  message,
+                  body.tenant,
+                  body.deviceId,
+                );
+
                 await producerMessages.send(
-                  generateDeviceDataMessage(
-                    message,
-                    body.tenant,
-                    body.deviceId,
-                  ),
+                  generatedDeviceDataMessage,
                   body.tenant,
                   body.deviceId,
                 );
