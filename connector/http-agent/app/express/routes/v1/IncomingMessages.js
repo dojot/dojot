@@ -13,7 +13,7 @@ const logger = new Logger('http-agent:express/routes/v1/Device');
  *
  * @param {ProducerMessages} producerMessages Instance of ProducerMessages
  */
-module.exports = ({ mountPoint, producerMessages }) => ([
+module.exports = ({ mountPoint, producerMessages }) => [
   /**
    * Sending messages from the device
    * for a Dojot is done via HTTPS POST
@@ -30,18 +30,15 @@ module.exports = ({ mountPoint, producerMessages }) => ([
             try {
               const { body } = req;
 
-              const { error } = messageSchema.validate(
-                body,
-                {
-                  abortEarly: false,
-                },
-              );
+              const { error } = messageSchema.validate(body, {
+                abortEarly: false,
+              });
               if (error) {
                 throw new Error(error.message);
               }
 
               await producerMessages.send(
-                generateDeviceDataMessage(body),
+                generateDeviceDataMessage(body, body.tenant, body.deviceId),
                 body.tenant,
                 body.deviceId,
               );
@@ -95,14 +92,12 @@ module.exports = ({ mountPoint, producerMessages }) => ([
               }
 
               body.forEach(async (message) => {
-                const generatedDeviceDataMessage = generateDeviceDataMessage(
-                  message,
-                  body.tenant,
-                  body.deviceId,
-                );
-
                 await producerMessages.send(
-                  generatedDeviceDataMessage,
+                  generateDeviceDataMessage(
+                    message,
+                    body.tenant,
+                    body.deviceId,
+                  ),
                   body.tenant,
                   body.deviceId,
                 );
@@ -120,4 +115,4 @@ module.exports = ({ mountPoint, producerMessages }) => ([
       },
     ],
   },
-]);
+];
