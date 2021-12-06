@@ -37,7 +37,7 @@ class CommonModel {
 
     const filterField = candidates.split(',').reduce((e, i) => {
       const keyVal = i.split(/[=:|]/);
-      e[keyVal[0]] = keyVal[1] == 'null' ? '!' : keyVal[1];
+      e[keyVal[0]] = keyVal[1] === 'null' ? '!' : keyVal[1];
       return e;
     }, {});
 
