@@ -24,7 +24,7 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
       createdAt: d,
     };
     const result = certificateModel.parseConditionFields(conditionFields);
-    expect(result).toEqual({...conditionFields, createdAt: d.toString()});
+    expect(result).toEqual({ ...conditionFields, createdAt: d.toString() });
   });
 
   it('should parse param keyVal', () => {
