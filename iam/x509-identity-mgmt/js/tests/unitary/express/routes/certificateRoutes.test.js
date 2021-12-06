@@ -74,103 +74,102 @@ const request = supertest(framework);
 
 describe("Testing 'certificateRoutes.js' Script Routes", () => {
   it(
-'should post a CSR and receive a certificate',
+    'should post a CSR and receive a certificate',
     () => request.post('/api/v1/certificates')
       .send({ csr: util.p256CSR })
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
-      })
+      });
 );
 
-  it(
-'should post a external certificate and receive its fingerprint',
-    () => request.post('/api/v1/certificates')
-      .send({
-        certificateChain: util.certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2'),
-      })
-      .expect(201)
-      .then((res) => {
-        expect(res.body).toEqual(externalCertFingerprint);
-      })
+it(
+  'should post a external certificate and receive its fingerprint',
+  () => request.post('/api/v1/certificates')
+    .send({
+      certificateChain: util.certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2'),
+    })
+    .expect(201)
+    .then((res) => {
+      expect(res.body).toEqual(externalCertFingerprint);
+    });
 );
 
-  it(
-'should list the certificates',
-    () => request.get('/api/v1/certificates?fields=fingerprint')
-      .expect(200)
-      .then((res) => {
-        expect(res.body).toEqual({
-          paging: {
-            previous: null,
-            current: {
-              number: 1,
-              url: '/api/v1/certificates?fields=fingerprint&page=1&limit=25',
-            },
-            next: null,
-            totalItems: 3,
-            totalPages: 1,
-            limitPerPage: 25,
+it(
+  'should list the certificates',
+  () => request.get('/api/v1/certificates?fields=fingerprint')
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual({
+        paging: {
+          previous: null,
+          current: {
+            number: 1,
+            url: '/api/v1/certificates?fields=fingerprint&page=1&limit=25',
           },
-          certificates: certList,
-        });
-      })
-);
-
-  it(
-'should get a certificate',
-    () => request.get(`/api/v1/certificates/${certQueryFingerprint}?fields=fingerprint,belongsTo`)
-      .expect(200)
-      .then((res) => {
-        expect(res.body).toEqual(certQueryResult);
-      })
-);
-
-  it(
-'should change ownership',
-    () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
-      .send({
-        belongsTo: {
-          device: 'abc123',
+          next: null,
+          totalItems: 3,
+          totalPages: 1,
+          limitPerPage: 25,
         },
-      })
-      .expect(204)
-      .then((res) => {
-        expect(res.body).toEqual({});
-      })
+        certificates: certList,
+      });
+    });
 );
 
-  it(
-'should deny the change of ownership in the case of owner = application',
-    () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
-      .send({
-        belongsTo: {
-          application: 'kafka-consumer',
-        },
-      })
-      .expect(403)
-      .then((res) => {
-        expect(res.body).toEqual({
-          error: 'Operations on certificates for applications are not authorized through this endpoint.',
-        });
-      })
+it(
+  'should get a certificate',
+  () => request.get(`/api/v1/certificates/${certQueryFingerprint}?fields=fingerprint,belongsTo`)
+    .expect(200)
+    .then((res) => {
+      expect(res.body).toEqual(certQueryResult);
+    });
 );
 
-  it(
-'should delete certificate',
-    () => request.delete(`/api/v1/certificates/${certQueryFingerprint}`)
-      .expect(204)
-      .then((res) => {
-        expect(res.body).toEqual({});
-      })
+it(
+  'should change ownership',
+  () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
+    .send({
+      belongsTo: {
+        device: 'abc123',
+      },
+    })
+    .expect(204)
+    .then((res) => {
+      expect(res.body).toEqual({});
+    });
 );
 
-  it(
-'should delete the ownership of a certificate',
+it(
+  'should deny the change of ownership in the case of owner = application',
+  () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
+    .send({
+      belongsTo: {
+        application: 'kafka-consumer',
+      },
+    })
+    .expect(403)
+    .then((res) => {
+      expect(res.body).toEqual({
+        error: 'Operations on certificates for applications are not authorized through this endpoint.',
+      });
+    });
+);
+
+it(
+  'should delete certificate',
+  () => request.delete(`/api/v1/certificates/${certQueryFingerprint}`)
+    .expect(204)
+    .then((res) => {
+      expect(res.body).toEqual({});
+    });
+);
+
+  it('should delete the ownership of a certificate',
     () => request.delete(`/api/v1/certificates/${certQueryFingerprint}/belongsto`)
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      })
+      });
 );
 });
