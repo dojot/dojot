@@ -24,26 +24,18 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
       createdAt: d,
     };
     const result = certificateModel.parseConditionFields(conditionFields);
-    expect(result).toEqual({
-      fingerprint: {
-        $options: 'i',
-        $regex: '^AB:CD',
-      },
-      caFingerprint: {
-        $options: 'i',
-        $regex: 'AB:CD$',
-      },
-      createdAt: d.toString(),
-    });
+    expect(result).toEqual({...conditionFields, createdAt: d.toString()});
   });
 
-  it('should parse filter for param', () => {
+  it('should parse param keyVal', () => {
     const conditionFilterFields = "belongsTo.device=null,belongsTo.application=!";
     const result = certificateModel.handleFilterField(conditionFilterFields);
+    const result_null = certificateModel.handleFilterField(null);
     expect(result).toEqual({
       "belongsTo.device": { '$exists': false },
       "belongsTo.application": { '$exists': false },
     });
+    expect(result_null).toEqual({});
   });
 
   it('should parse projection fields', () => {

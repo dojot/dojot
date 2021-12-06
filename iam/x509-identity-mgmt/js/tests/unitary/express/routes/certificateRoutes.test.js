@@ -48,6 +48,7 @@ const framework = WebUtils.framework.createExpress({
               return {
                 parseProjectionFields: jest.fn(),
                 parseConditionFields: jest.fn(),
+                handleFilterField: jest.fn(),
                 sanitizeFields: jest.fn(),
               };
             }
