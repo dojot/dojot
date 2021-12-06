@@ -41,9 +41,8 @@ class CommonModel {
       return e;
     }, {});
 
-    return this.parseConditionFields(filterField)
+    return this.parseConditionFields(filterField);
   }
-
 }
 
 module.exports = CommonModel;
