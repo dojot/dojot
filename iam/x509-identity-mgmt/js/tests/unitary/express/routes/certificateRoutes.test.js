@@ -162,7 +162,7 @@ it(
     .expect(204)
     .then((res) => {
       expect(res.body).toEqual({});
-    });
+    })
 );
 
   it('should delete the ownership of a certificate',
