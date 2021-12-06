@@ -31,6 +31,19 @@ class CommonModel {
   sanitizeFields(cert) {
     return this.mongoClient.sanitizeFields(cert, this.projectableFields);
   }
+
+  handleFilterField(candidates) {
+    if (!candidates) return {};
+
+    const filterField = candidates.split(',').reduce((e, i) => {
+      const keyVal = i.split(/[=:|]/);
+      e[keyVal[0]] = (/[null]/ig).test(keyVal[1]) ? '!' : keyVal[1];
+      return e;
+    }, {});
+
+    return this.parseConditionFields(filterField)
+  }
+
 }
 
 module.exports = CommonModel;

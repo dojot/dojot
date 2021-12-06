@@ -34,7 +34,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             const service = req.scope.resolve(CERT_SERVICE);
 
             const queryFields = model.parseProjectionFields(req.query.fields);
-            const filterFields = model.parseConditionFields(req.query);
+            const filterFields = model.handleFilterField(req.query.keyVal);
 
             const { itemCount, results } = await service.listCertificates(
               queryFields, filterFields, req.query.limit, req.offset,

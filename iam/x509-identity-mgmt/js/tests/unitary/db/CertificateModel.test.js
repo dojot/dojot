@@ -37,6 +37,13 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
     });
   });
 
+  const conditionFilterFields = "belongsTo.device=null,belongsTo.application=!";
+  const result = certificateModel.handleFilterField(conditionFilterFields);
+  expect(result).toEqual({
+    'belongsTo.device': { '$exists': false },
+    'belongsTo.application': { '$exists': false }
+  });
+
   it('should parse projection fields', () => {
     const commaSeparatedFields = 'validity,belongsTo';
     certificateModel.parseProjectionFields(commaSeparatedFields);
