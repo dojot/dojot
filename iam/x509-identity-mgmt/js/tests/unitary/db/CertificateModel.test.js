@@ -44,7 +44,7 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
       "belongsTo.device": { '$exists': false },
       "belongsTo.application": { '$exists': false },
     });
-  })
+  });
 
   it('should parse projection fields', () => {
     const commaSeparatedFields = 'validity,belongsTo';

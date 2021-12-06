@@ -38,7 +38,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             const { itemCount, results } = await service
               .listCertificates(queryFields, filterFields, req.query.limit, req.offset);
-            
+
             results.forEach((cert) => model.sanitizeFields(cert));
 
             const paging = req.getPaging(itemCount);
