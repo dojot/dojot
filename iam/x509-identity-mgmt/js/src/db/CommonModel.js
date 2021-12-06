@@ -33,7 +33,9 @@ class CommonModel {
   }
 
   handleFilterField(candidates) {
-    if (!candidates) return {};
+    if (!candidates) {
+      return {};
+    }
 
     const filterField = candidates.split(',').reduce((e, i) => {
       const keyVal = i.split(/[=:|]/);
