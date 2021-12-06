@@ -80,7 +80,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
-      });
+      })
 );
 
 it(
