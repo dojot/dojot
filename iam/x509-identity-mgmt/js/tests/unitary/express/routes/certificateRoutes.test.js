@@ -72,15 +72,18 @@ const framework = WebUtils.framework.createExpress({
 const request = supertest(framework);
 
 describe("Testing 'certificateRoutes.js' Script Routes", () => {
-  it('should post a CSR and receive a certificate',
+  it(
+'should post a CSR and receive a certificate',
     () => request.post('/api/v1/certificates')
       .send({ csr: util.p256CSR })
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
-      }));
+      })
+);
 
-  it('should post a external certificate and receive its fingerprint',
+  it(
+'should post a external certificate and receive its fingerprint',
     () => request.post('/api/v1/certificates')
       .send({
         certificateChain: util.certChain.join('\n').replace(/^(\s*)(.*)(\s*$)/gm, '$2'),
@@ -88,9 +91,11 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(externalCertFingerprint);
-      }));
+      })
+);
 
-  it('should list the certificates',
+  it(
+'should list the certificates',
     () => request.get('/api/v1/certificates?fields=fingerprint')
       .expect(200)
       .then((res) => {
@@ -108,16 +113,20 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
           },
           certificates: certList,
         });
-      }));
+      })
+);
 
-  it('should get a certificate',
+  it(
+'should get a certificate',
     () => request.get(`/api/v1/certificates/${certQueryFingerprint}?fields=fingerprint,belongsTo`)
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(certQueryResult);
-      }));
+      })
+);
 
-  it('should change ownership',
+  it(
+'should change ownership',
     () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
       .send({
         belongsTo: {
@@ -127,9 +136,11 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      }));
+      })
+);
 
-  it('should deny the change of ownership in the case of owner = application',
+  it(
+'should deny the change of ownership in the case of owner = application',
     () => request.patch(`/api/v1/certificates/${certQueryFingerprint}`)
       .send({
         belongsTo: {
@@ -141,19 +152,24 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
         expect(res.body).toEqual({
           error: 'Operations on certificates for applications are not authorized through this endpoint.',
         });
-      }));
+      })
+);
 
-  it('should delete certificate',
+  it(
+'should delete certificate',
     () => request.delete(`/api/v1/certificates/${certQueryFingerprint}`)
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      }));
+      })
+);
 
-  it('should delete the ownership of a certificate',
+  it(
+'should delete the ownership of a certificate',
     () => request.delete(`/api/v1/certificates/${certQueryFingerprint}/belongsto`)
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      }));
+      })
+);
 });
