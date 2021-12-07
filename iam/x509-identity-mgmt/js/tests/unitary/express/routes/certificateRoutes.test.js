@@ -80,7 +80,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
-      })
+      }),
 );
 
   it(
@@ -92,7 +92,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(externalCertFingerprint);
-      })
+      }),
 );
 
   it(
@@ -114,7 +114,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
           },
           certificates: certList,
         });
-      })
+      }),
 );
 
   it(
@@ -123,7 +123,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(certQueryResult);
-      })
+      }),
 );
 
   it(
@@ -137,7 +137,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      })
+      }),
 );
 
   it(
@@ -153,7 +153,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
         expect(res.body).toEqual({
           error: 'Operations on certificates for applications are not authorized through this endpoint.',
         });
-      })
+      }),
 );
 
   it(
@@ -162,7 +162,7 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      })
+      }),
 );
 
   it(
@@ -171,6 +171,6 @@ describe("Testing 'certificateRoutes.js' Script Routes", () => {
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      })
+      }),
 );
 });
