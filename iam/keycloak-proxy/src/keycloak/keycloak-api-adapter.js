@@ -36,21 +36,25 @@ module.exports = class KeycloakApiAdapter {
   }
 
   async auth() {
-    this.logger.debug('Signing in keycloak');
-    this.tokenSet = await this.client.grant({
-      grant_type: 'password',
-      username: this.config.proxy.username,
-      password: this.config.proxy.password,      
-    });
-    this.logger.debug('Signed in keycloak');
-    this.keycloakAdmin.setAccessToken(this.tokenSet.access_token);
-    this.initAutoRefresh(60);
+    try {
+      this.logger.debug('Signing in keycloak');
+      this.tokenSet = await this.client.grant({
+        grant_type: 'password',
+        username: this.config.proxy.username,
+        password: this.config.proxy.password,      
+      });
+      this.logger.debug('Signed in keycloak');
+      this.keycloakAdmin.setAccessToken(this.tokenSet.access_token);
+      this.setTimeRefresh(this.config.keycloak.timespan);
+    } catch (error) {
+      setTimeout(this.auth.bind(this), 3000);
+    }
   }
 
-  initAutoRefresh(timelifeAccessToken) {
+  setTimeRefresh(timelifeAccessToken) {
     try {
       this.logger.debug('Starting refresh routine');
-      setInterval(this.refresh.bind(this), (timelifeAccessToken * 0.8) * 1000);
+      setTimeout(this.refresh.bind(this), (timelifeAccessToken * 0.9) * 1000);
     } catch (error) {
       this.logger.error('Unable to start refresh routine');
     }
@@ -61,9 +65,11 @@ module.exports = class KeycloakApiAdapter {
       this.logger.debug('Starting authentication refresh');
       this.tokenSet = await this.client.refresh(this.tokenSet.refresh_token);
       this.keycloakAdmin.setAccessToken(this.tokenSet.access_token);
+      this.setTimeRefresh(this.config.keycloak.timespan);
       this.logger.debug('Authentication refresh successfully');
     } catch (refreshError) {
       this.logger.error(refreshError);
+      this.auth();
     }
   }
 

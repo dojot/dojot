@@ -107,7 +107,9 @@ module.exports = class SecretHandler {
     if (source.length === 1) {
       this.config[`${source[0]}`] = value;
     } else if (source.length === 2) {
-      this.config[`${source[0]}`] = {};
+      if (!this.config[`${source[0]}`]) {
+        this.config[`${source[0]}`] = {};
+      }
       this.config[`${source[0]}`][`${source[1]}`] = value;
     }   
   }
