@@ -56,7 +56,7 @@ function createRootCACert() {
   if [ ! -f "${CA_CERT}" ] && [ ! -f "${CA_KEY}" ]; then
 
     echo 'Creating the CA cert Private/Public Keys...'
-    openssl ecparam -genkey -name 'secp521r1' -noout -out "${CA_KEY}"
+    openssl genrsa  -out "${CA_KEY}" 4096
 
     echo 'Creating a self-signed certificate for the root CA...'
     openssl req -x509 -new -nodes -key "${CA_KEY}" -sha256 -days "${CA_VALIDITY}" -out "${CA_CERT}" \
@@ -130,7 +130,7 @@ ${SAN_EXT}
 EOF
 
     echo 'Creating the host cert public/private Keys...'
-    openssl ecparam -genkey -name 'secp521r1' -noout -out "${HOST_KEY}"
+    openssl genrsa  -out "${HOST_KEY}" 4096
 
     echo "Creating a CSR for the host '${HOST_CNAME}'..."
     openssl req -new -key "${HOST_KEY}" -out "${HOST_CSR}" -sha256 -subj "/CN=${HOST_CNAME}" \

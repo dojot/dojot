@@ -1,4 +1,6 @@
-FROM alpine:3.10 as basis
+FROM alpine:3.14 as python-build
+# This stage is a copy of python official image, tag 3.6-alpine, and modified to support more connections using one
+# worker instance of Locust.
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -6,15 +8,17 @@ ENV PATH /usr/local/bin:$PATH
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
-# https://github.com/docker-library/python/issues/147
-ENV PYTHONIOENCODING UTF-8
 
+# runtime dependencies
+RUN set -eux; \
+	apk add --no-cache \
 # install ca-certificates so that HTTPS works consistently
+		ca-certificates \
+	;
 # other runtime dependencies for Python are installed later
-RUN apk add --no-cache ca-certificates
 
 ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
-ENV PYTHON_VERSION 3.6.8
+ENV PYTHON_VERSION 3.6.14
 
 RUN set -ex \
 	&& apk add --no-cache --virtual .fetch-deps \
@@ -25,7 +29,7 @@ RUN set -ex \
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
-	&& gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$GPG_KEY" \
+	&& gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$GPG_KEY" \
 	&& gpg --batch --verify python.tar.xz.asc python.tar.xz \
 	&& { command -v gpgconf > /dev/null && gpgconf --kill all || :; } \
 	&& rm -rf "$GNUPGHOME" python.tar.xz.asc \
@@ -33,8 +37,8 @@ RUN set -ex \
 	&& tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz \
 	&& rm python.tar.xz \
 	\
-	#&& apk add --no-cache --virtual .build-deps  \
-	&& apk add --no-cache \
+	&& apk add --no-cache --virtual .build-deps  \
+		bluez-dev \
 		bzip2-dev \
 		coreutils \
 		dpkg-dev dpkg \
@@ -56,52 +60,105 @@ RUN set -ex \
 		tcl-dev \
 		tk \
 		tk-dev \
+		xz-dev \
 		zlib-dev \
-    && apk add --no-cache sed \
+    # WARNING: the following three lines makes possible to connect more devices per worker instance of Locust
+	&& apk add --no-cache sed \
     && sed -i '/#define __FD_SETSIZE/c\#define __FD_SETSIZE 65536' /usr/include/linux/posix_types.h \
     && sed -i '/#define FD_SETSIZE/c\#define FD_SETSIZE 65536' /usr/include/sys/select.h \
 # add build deps before removing fetch deps in case there's overlap
-	&& apk del .fetch-deps \
+	&& apk del --no-network .fetch-deps \
 	\
 	&& cd /usr/src/python \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
 	&& ./configure \
 		--build="$gnuArch" \
+		--enable-loadable-sqlite-extensions \
+		--enable-optimizations \
+		--enable-option-checking=fatal \
 		--enable-shared \
-		--enable-unicode=ucs4 \
 		--with-system-expat \
 		--with-system-ffi \
+		--without-ensurepip \
 	&& make -j "$(nproc)" \
 # set thread stack size to 1MB so we don't segfault before we hit sys.getrecursionlimit()
 # https://github.com/alpinelinux/aports/commit/2026e1259422d4e0cf92391ca2d3844356c649d0
-		EXTRA_CFLAGS="-DTHREAD_STACK_SIZE=0x100000 -DFD_SETSIZE=65536" \
+		EXTRA_CFLAGS="-DTHREAD_STACK_SIZE=0x100000" \
+		LDFLAGS="-Wl,--strip-all" \
+# setting PROFILE_TASK makes "--enable-optimizations" reasonable: https://bugs.python.org/issue36044 / https://github.com/docker-library/python/issues/160#issuecomment-509426916
+		PROFILE_TASK='-m test.regrtest --pgo \
+			test_array \
+			test_base64 \
+			test_binascii \
+			test_binhex \
+			test_binop \
+			test_bytes \
+			test_c_locale_coercion \
+			test_class \
+			test_cmath \
+			test_codecs \
+			test_compile \
+			test_complex \
+			test_csv \
+			test_decimal \
+			test_dict \
+			test_float \
+			test_fstring \
+			test_hashlib \
+			test_io \
+			test_iter \
+			test_json \
+			test_long \
+			test_math \
+			test_memoryview \
+			test_pickle \
+			test_re \
+			test_set \
+			test_slice \
+			test_struct \
+			test_threading \
+			test_time \
+			test_traceback \
+			test_unicode \
+		' \
 	&& make install \
+	&& rm -rf /usr/src/python \
+	\
+	&& find /usr/local -depth \
+		\( \
+			\( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
+			-o \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.a' \) \) \
+			-o \( -type f -a -name 'wininst-*.exe' \) \
+		\) -exec rm -rf '{}' + \
 	\
 	&& find /usr/local -type f -executable -not \( -name '*tkinter*' \) -exec scanelf --needed --nobanner --format '%n#p' '{}' ';' \
 		| tr ',' '\n' \
 		| sort -u \
 		| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 		| xargs -rt apk add --no-cache --virtual .python-rundeps \
-	#&& apk del .build-deps \
-	\
-	&& find /usr/local -depth \
-		\( \
-			\( -type d -a \( -name test -o -name tests \) \) \
-			-o \
-			\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
-		\) -exec rm -rf '{}' + \
-	&& rm -rf /usr/src/python \
+	&& apk del --no-network .build-deps \
 	\
 	&& python3 --version
 
+# make some useful symlinks that are expected to exist
+RUN cd /usr/local/bin \
+	&& ln -s idle3 idle \
+	&& ln -s pydoc3 pydoc \
+	&& ln -s python3 python \
+	&& ln -s python3-config python-config
+
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 19.1.1
+ENV PYTHON_PIP_VERSION 21.1.3
+# https://github.com/pypa/get-pip
+ENV PYTHON_GET_PIP_URL https://github.com/pypa/get-pip/raw/a1675ab6c2bd898ed82b1f58c486097f763c74a9/public/get-pip.py
+ENV PYTHON_GET_PIP_SHA256 6665659241292b2147b58922b9ffe11dda66b39d52d8a6f3aa310bc1d60ea6f7
 
 RUN set -ex; \
 	\
-	wget -O get-pip.py 'https://bootstrap.pypa.io/get-pip.py'; \
+	wget -O get-pip.py "$PYTHON_GET_PIP_URL"; \
+	echo "$PYTHON_GET_PIP_SHA256 *get-pip.py" | sha256sum -c -; \
 	\
-	python3 get-pip.py \
+	python get-pip.py \
 		--disable-pip-version-check \
 		--no-cache-dir \
 		"pip==$PYTHON_PIP_VERSION" \
@@ -110,13 +167,13 @@ RUN set -ex; \
 	\
 	find /usr/local -depth \
 		\( \
-			\( -type d -a \( -name test -o -name tests \) \) \
+			\( -type d -a \( -name test -o -name tests -o -name idle_test \) \) \
 			-o \
 			\( -type f -a \( -name '*.pyc' -o -name '*.pyo' \) \) \
 		\) -exec rm -rf '{}' +; \
 	rm -f get-pip.py
 
-FROM basis
+FROM python-build as build
 
 # build time dependencies
 RUN apk update && \
@@ -125,14 +182,55 @@ RUN apk update && \
         g++ \
         musl-dev \
         zeromq-dev \
-        bash \
         libzmq \
-				redis \
-				jq \
-				curl \
-				netcat-openbsd
+        openssl-dev \
+        libffi-dev
 
 WORKDIR /usr/src/app
 ENV PYTHONPATH="/usr/src/app"
-COPY . /usr/src/app
+COPY requirements/prod.txt requirements/prod.txt
 RUN pip3 install -r requirements/prod.txt
+
+
+FROM python-build as basis
+
+COPY --from=build /usr/local/lib/python3.6/site-packages/ /usr/local/lib/python3.6/site-packages/
+COPY --from=build /usr/local/bin/ /usr/local/bin/
+
+RUN apk update && \
+        apk add --no-cache \
+            bash \
+            redis \
+            jq \
+            curl \
+            netcat-openbsd \
+            libzmq
+
+WORKDIR /usr/src/app
+ENV PYTHONPATH="/usr/src/app"
+
+RUN touch ~/.bashrc
+RUN echo "alias generate_certs='python3 -m src.scripts.generate_certs'" >> ~/.bashrc
+
+# This command will do nothing and prevent the container from exiting from lack of commands
+CMD tail -f /dev/null
+
+FROM basis as development
+
+COPY requirements requirements
+
+RUN apk update && \
+        apk add --no-cache --virtual .build-deps  \
+            musl-dev \
+            gcc && \
+    \
+    pip3 install -r requirements/dev.txt && \
+    apk del --no-network .build-deps
+
+RUN echo "alias run_cov='coverage run -m pytest tests && coverage html'" >> ~/.bashrc && \
+    echo "alias run_lint='pylint src --rcfile=.pylintrc tests --rcfile=.pylintrc'" >> ~/.bashrc
+
+
+FROM basis
+
+COPY . /usr/src/app/

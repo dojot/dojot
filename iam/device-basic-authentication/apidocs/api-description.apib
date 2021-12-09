@@ -1,0 +1,83 @@
+FORMAT: 1A
+HOST: https://localhost:3000/basic-auth/v1
+# Device Authentication
+
+API documentation for Device Basic Authentication
+
+# Group basic-auth
+
+API to provide credentials for authentication of
+devices that communicate with the dojot IoT platform.
+
+## Endpoint issuing credentials[ [/devices/{deviceId}/basic-credentials]
+
+### generates username and password for use in devices' authentication [POST]
+
+
+The endpoint will return a username and password, plus the Base64 encoding of username and password joined by a single colon.
+
+If deviceId does not have a valid structure or if any of the above conditions are
+not met, a response status of 400 (Bad Request) will be returned, containing a
+message detailing the cause of the error.
+
++ Request issued credential to device (application/json)
+
+    + Headers
+
+            Authorization: Bearer [JWT]
+
++ Response 200 (application/json)
+            
+    + Attributes (object)
+        - credentials:  (object)
+          - username: tenant1@123abc (string)
+          - password: AOxRg!v1heGuQ0Y (string)
+        - basicAuth: Basic dGVuYW50MUAxMjNhYmM6QU94UmchdjFoZUd1UTBZ (string)
+
++ Response 400 (application/json)
+
+    + Attributes (object)
+        - message: Device is not valid. (string)
+
+            Device is not valid.
+
++ Response 500 (application/json)
+
+    + Attributes (object)
+        - message: A message describing the cause of the error (string)
+
+            A message describing the cause of the error
+
+
+## Endpoint for authentication[ [/internal/authentication]
+
+### authenticate device [POST]
+
+Positive validation message is returned
+
++ Request issued credential to device (application/json)
+
+    + Headers
+
+            Authorization: Basic base64encode(username:password)
+
++ Response 200 (application/json)
+            
+    + Attributes (object)
+        - message: The credential is valid. (string)
+
+          validation
+
++ Response 401 (application/json)
+
+    + Attributes (object)
+        - message: A message describing the cause of the error (string)
+
+            A message describing the cause of the error
+
++ Response 500 (application/json)
+
+    + Attributes (object)
+        - message: A message describing the cause of the error (string)
+
+            A message describing the cause of the error

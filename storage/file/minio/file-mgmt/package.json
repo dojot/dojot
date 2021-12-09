@@ -1,0 +1,60 @@
+{
+  "name": "file-mgmt",
+  "version": "1.0.0",
+  "description": "The file-mgmt is responsible for managing MinIO resources on the dojot platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev-debug": "node --inspect=0.0.0.0 src/index.js",
+    "test": "jest --verbose --coverage",
+    "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
+    "unit-test": "jest ./tests/units --no-cache --coverage",
+    "check-licenses": "apache2-license-checker"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot/tree/master/storage/file/minio/file-mgmt"
+  },
+  "keywords": [
+    "Dojot",
+    "minio",
+    "file-mgmt.",
+    "IoT"
+  ],
+  "author": "Rodrigo Aparecido Silva Maia",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "homepage": "https://github.com/dojot",
+  "dependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "@dojot/microservice-sdk": "^0.1.15",
+    "babel-eslint": "^10.1.0",
+    "busboy": "^0.3.1",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-openapi-validator": "^4.13.1",
+    "http-errors": "^1.8.0",
+    "http-terminator": "^3.0.3",
+    "js-yaml": "^4.1.0",
+    "jwt-decode": "^3.1.2",
+    "jwt-encode": "^1.0.1",
+    "lodash.camelcase": "^4.3.0",
+    "minio": "^7.0.19",
+    "supertest": "^6.1.6",
+    "swagger-ui-express": "^4.1.6",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-security-node": "^1.0.14",
+    "jest": "^27.2.4"
+  }
+}
