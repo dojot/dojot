@@ -6,6 +6,7 @@ jest.mock('../../../src/app/web/routesV1', () => jest.fn());
 
 const mockHttpServer = {
   init: jest.fn(),
+  on: jest.fn(),
 };
 
 jest.mock('../../../src/app/dependencies', () => () => ({
@@ -13,6 +14,10 @@ jest.mock('../../../src/app/dependencies', () => () => ({
   keycloakApiAdapter: {
     init: jest.fn(),
     auth: jest.fn(),
+  },
+  keycloakAdminSession: {
+    start: jest.fn(),
+    close: jest.fn(),
   },
 }));
 

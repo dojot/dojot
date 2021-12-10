@@ -24,8 +24,9 @@ module.exports = class App {
     // Initialize internal dependencies
     const web = Dependencies(this.config, this.logger);
     this.server = web.httpServer;
+    this.keycloakSession = web.keycloakAdminSession;
+    await web.keycloakAdminSession.start();
     await web.keycloakApiAdapter.init();
-    await web.keycloakApiAdapter.auth();
 
     try {
       // Adapts express to the application and manages the routes
@@ -37,9 +38,18 @@ module.exports = class App {
         this.config,
       );
       this.server.init(this.express);
+      this.server.on('close', this.finish);
     } catch (error) {
       this.logger.error(error);
+      this.finish();
       throw error;
     }
+  }
+
+  /**
+   * Finished application
+   */
+  finish() {
+    this.keycloakSession.close();
   }
 };

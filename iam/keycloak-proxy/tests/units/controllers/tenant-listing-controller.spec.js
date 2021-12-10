@@ -4,8 +4,8 @@ const loggerMock = require('../../mocks/logger-mock');
 const ResponseMock = require('../../mocks/express-response-mock');
 
 const mockTenantApiAdapter = {
-  getTenant: jest.fn(() => [
-    'tenant1', 'tenant2',
+  getRealms: jest.fn(() => [
+    { id: 'tenant1', keys: {} }, { id: 'tenant2', keys: {} },
   ]),
 };
 
@@ -23,11 +23,11 @@ describe('TenantListingController', () => {
     await tenantListingController.get(request, response);
 
     expect(response.code).toEqual(200);
-    expect(response.body).toEqual({ tenants: ['tenant1', 'tenant2'] });
+    expect(response.body).toEqual({ tenants: [{ id: 'tenant1', keys: {} }, { id: 'tenant2', keys: {} }] });
   });
 
   it('Should throw an error when the fetch fails ', async () => {
-    mockTenantApiAdapter.getTenant.mockImplementationOnce(() => {
+    mockTenantApiAdapter.getRealms.mockImplementationOnce(() => {
       throw new Error('Fetch error');
     });
 

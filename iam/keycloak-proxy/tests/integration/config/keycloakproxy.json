@@ -1,1 +1,1 @@
-{"lightship":{"detect.kubernetes":false},"server":{"host":"0.0.0.0","port":8081},"log":{"console.level":"debug"},"express":{"trustproxy":true}}
+{"lightship":{"detect.kubernetes":false},"server":{"host":"0.0.0.0","port":8081},"keycloak":{"uri":"http://127.0.0.1:8083","realm":"master","proxy.id":"keycloak-proxy","proxy.username":"proxy","proxy.admin.password":"proxy"},"log":{"console.level":"debug"},"express":{"trustproxy":true}}

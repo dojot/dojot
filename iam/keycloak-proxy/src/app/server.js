@@ -17,6 +17,10 @@ class Server {
     this.config = config.server;
   }
 
+  on = (event, fn) => {
+    this.server.on(event, fn);
+  }
+
   onListening = () => {
     this.logger.info('Server ready to accept connections!');
     this.logger.info(this.server.address());

@@ -37,17 +37,13 @@ const mockDojot = {
 
 jest.mock('@dojot/microservice-sdk', () => mockDojot);
 
-jest.mock('openid-client', () => ({
-  Issuer: {
-    discover: jest.fn(() => ({
-      Client: jest.fn().mockImplementation(() => ({
-        grant: () => ({
-          access_token: '',
-        }),
-      })),
-    })),
-  },
-}));
+jest.mock('../../lib/KeycloakClientSession', () => jest.fn().mockImplementation(() => ({
+  start: jest.fn(),
+  close: jest.fn(),
+  getTokenSet: jest.fn(() => ({
+    access_token: 'access_token',
+  })),
+})));
 
 const { mockKeycloakClient, mockfunctions } = require('../mocks/keycloak-admin-client-mock');
 
@@ -55,6 +51,7 @@ jest.mock('@keycloak/keycloak-admin-client', () => mockKeycloakClient);
 
 const mockServer = jest.fn().mockImplementation(() => ({
   init: jest.fn(),
+  on: jest.fn(),
   registerShutdown: jest.fn(),
 }));
 

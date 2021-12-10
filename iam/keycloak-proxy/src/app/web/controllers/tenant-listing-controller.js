@@ -13,7 +13,7 @@ module.exports = class TenantListingController {
    * @returns an http response
    */
   get = async (req, res) => {
-    const tenants = await this.kafkaApiAdapter.getTenant();
+    const tenants = await this.kafkaApiAdapter.getRealms();
     return res.status(200).json({ tenants });
   }
 };

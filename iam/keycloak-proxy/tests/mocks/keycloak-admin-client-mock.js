@@ -11,12 +11,25 @@ const tenants = [{
   realm: 'tenant2',
 }];
 
+const keys = {
+  keys: [
+    {
+      algorithm: 'RS256',
+      publicKey: 'public_key',
+      certificate: 'certificate',
+      use: 'SIG',
+    },
+  ],
+};
+
 const find = jest.fn(() => tenants);
+const getKeys = jest.fn(() => keys);
 
 class KeycloakClientMock {
   constructor() {
     this.realms = {
       find,
+      getKeys,
     };
   }
 
@@ -31,5 +44,6 @@ module.exports = {
   },
   mockfunctions: {
     find,
+    getKeys,
   },
 };
