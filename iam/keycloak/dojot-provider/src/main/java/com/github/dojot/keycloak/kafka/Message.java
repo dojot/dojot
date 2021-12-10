@@ -11,11 +11,19 @@ class Message {
     private Map<String, Object> metadata;
     private String type;
     private String tenant;
+    private String certificate;
 
     public Message(Map<String, Object> metadata, String type, String tenant) {
         this.metadata = metadata;
         this.type = type;
         this.tenant = tenant;
+    }
+
+    public Message(Map<String, Object> metadata, String type, String tenant, String certificate) {
+        this.metadata = metadata;
+        this.type = type;
+        this.tenant = tenant;
+        this.certificate = certificate;
     }
 
     public Map<String, Object> getMetadata() {
@@ -42,5 +50,11 @@ class Message {
         this.tenant = tenant;
     }
 
+    public void setCertificate(String certificate) {
+        this.certificate = certificate;
+    }
 
+    public String getCertificate() {
+        return certificate;
+    }
 }

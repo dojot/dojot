@@ -64,8 +64,12 @@ public class DojotkafkaProducer {
         producer.close();
     }
 
+    public void send(Event event, RealmModel realm, String certificate) {
+        produce(generateTenantMessageWithCertificate(event, realm.getName(), certificate));
+    }
+
     public void send(Event event, RealmModel realm) {
-        produce(generateTenantMessage(event, realm.getName()));
+            produce(generateTenantMessage(event, realm.getName()));
     }
 
     private void produce(Message message) {
@@ -95,5 +99,10 @@ public class DojotkafkaProducer {
     private Message generateTenantMessage(Event event, String tenant) {
         Map<String, Object> metadata = generateMetadata();
         return new Message(metadata,  event.toString(), tenant);
+    }
+
+    private Message generateTenantMessageWithCertificate(Event event, String tenant, String certificate) {
+        Map<String, Object> metadata = generateMetadata();
+        return new Message(metadata,  event.toString(), tenant, certificate);
     }
 }

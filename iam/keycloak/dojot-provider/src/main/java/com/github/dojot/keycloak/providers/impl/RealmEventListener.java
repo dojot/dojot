@@ -2,6 +2,7 @@ package com.github.dojot.keycloak.providers.impl;
 
 import com.github.dojot.keycloak.providers.DojotProvider;
 import com.github.dojot.keycloak.providers.EventListener;
+import org.keycloak.crypto.KeyUse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmModel.RealmPostCreateEvent;
@@ -30,6 +31,8 @@ public class RealmEventListener implements EventListener {
                 provider.validateRealm(realm);
                 provider.customizeRealm(realm);
                 provider.publishRealmCreated(realm);
+
+                session.keys().getActiveKey(realm,KeyUse.SIG,"RS256");
             }
         }
 

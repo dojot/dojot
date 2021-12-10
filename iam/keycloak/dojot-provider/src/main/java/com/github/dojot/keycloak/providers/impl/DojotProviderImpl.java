@@ -6,6 +6,8 @@ import com.github.dojot.keycloak.kafka.DojotkafkaProducer;
 import com.github.dojot.keycloak.kafka.Event;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import org.jboss.logging.Logger;
+import org.keycloak.crypto.KeyUse;
+import org.keycloak.models.KeyManager;
 import org.keycloak.models.RealmModel;
 import org.keycloak.policy.PasswordPolicyNotMetException;
 
@@ -60,7 +62,8 @@ public class DojotProviderImpl implements DojotProvider {
 
     @Override
     public void publishRealmCreated(RealmModel realm) {
-        kafkaProducer.send(Event.CREATE, realm);
+        KeyManager keys =  context.getKeycloakSession().keys();
+        kafkaProducer.send(Event.CREATE, realm, keys.getActiveKey(realm, KeyUse.SIG,"RS256").getCertificate().toString());
     }
 
     @Override
