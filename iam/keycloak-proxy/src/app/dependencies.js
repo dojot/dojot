@@ -1,8 +1,7 @@
 const {
-  ServiceStateManager, ConfigManager,
+  ServiceStateManager, ConfigManager, WebUtils: { KeycloakClientSession },
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
-const KeycloakClientSession = require('../../lib/KeycloakClientSession');
 const KeycloakApiAdapter = require('../keycloak/keycloak-api-adapter');
 
 const Server = require('./server');

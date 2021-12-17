@@ -19,6 +19,13 @@ const mockDojot = {
   })),
   WebUtils: {
     ...WebUtils,
+    KeycloakClientSession: jest.fn().mockImplementation(() => ({
+      start: jest.fn(),
+      close: jest.fn(),
+      getTokenSet: jest.fn(() => ({
+        access_token: 'access_token',
+      })),
+    })),
     framework: {
       ...WebUtils.framework,
       interceptors: {
@@ -36,14 +43,6 @@ const mockDojot = {
 };
 
 jest.mock('@dojot/microservice-sdk', () => mockDojot);
-
-jest.mock('../../lib/KeycloakClientSession', () => jest.fn().mockImplementation(() => ({
-  start: jest.fn(),
-  close: jest.fn(),
-  getTokenSet: jest.fn(() => ({
-    access_token: 'access_token',
-  })),
-})));
 
 const { mockKeycloakClient, mockfunctions } = require('../mocks/keycloak-admin-client-mock');
 

@@ -26,6 +26,7 @@ COPY package-lock.json package-lock.json
 
 RUN npm install --only=prod
 
+COPY lib ./lib
 COPY src ./src
 COPY docs ./docs
 
