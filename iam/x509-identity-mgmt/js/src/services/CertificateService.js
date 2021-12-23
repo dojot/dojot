@@ -146,9 +146,7 @@ class CertificateService {
     // Checks on the certificate owner
     await this.checkBelongsTo(belongsTo);
 
-    const certificatePem = await this.ejbcaFacade.generateCertificate(
-      subjectDN, this.certValidity, csrPem,
-    );
+    const certificatePem = await this.ejbcaFacade.generateCertificate(subjectDN, this.certValidity, csrPem,);
 
     const cert = this.pkiUtils.parseCert(certificatePem);
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
@@ -294,9 +292,7 @@ class CertificateService {
     await this.checkBelongsTo(belongsTo);
 
     // By default, findOneAndUpdate() returns the document as it was before update was applied.
-    const certRecord = await this.CertificateModel.findOneAndUpdate(
-      filterFields, { belongsTo, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).lean().exec();
+    const certRecord = await this.CertificateModel.findOneAndUpdate(filterFields, { belongsTo, modifiedAt: new Date() },).maxTimeMS(this.queryMaxTimeMS).lean().exec();
 
     if (!certRecord) {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
@@ -433,9 +429,7 @@ class CertificateService {
 
     const subjectDN = this.dnUtils.from(csr.subject).stringify();
 
-    const certificatePem = await this.ejbcaFacade.generateCertificate(
-      subjectDN, this.certValidity, csrPem,
-    );
+    const certificatePem = await this.ejbcaFacade.generateCertificate(subjectDN, this.certValidity, csrPem,);
 
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
 
