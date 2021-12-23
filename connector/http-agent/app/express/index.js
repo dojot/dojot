@@ -34,7 +34,9 @@ const {
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, cache) => {
+module.exports = (
+  routes, serviceState, cache,
+) => {
   const {
     responseCompressInterceptor,
     requestIdInterceptor,

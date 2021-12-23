@@ -20,21 +20,21 @@ function requestTest(app) {
   let newApp;
 
   if (typeof app === 'function') {
-    newApp = https.createServer(
-      {
-        cert: fs.readFileSync('test/certs/server/server_cert.pem'),
-        key: fs.readFileSync('test/certs/server/server_key.pem'),
-        ca: fs.readFileSync('test/certs/ca/ca_cert.pem'),
-        rejectUnauthorized: false,
-        requestCert: true,
-      },
-      app,
-    );
+    newApp = https.createServer({
+      cert: fs.readFileSync('test/certs/server/server_cert.pem'),
+      key: fs.readFileSync('test/certs/server/server_key.pem'),
+      ca: fs.readFileSync('test/certs/ca/ca_cert.pem'),
+      rejectUnauthorized: false,
+      requestCert: true,
+    },
+    app);
   }
 
   methods.forEach((method) => {
     // eslint-disable-next-line security/detect-object-injection
-    obj[method] = (url) => new Test(newApp, method, url);
+    obj[method] = (url) => new Test(
+      newApp, method, url,
+    );
   });
 
   // Support previous use of del

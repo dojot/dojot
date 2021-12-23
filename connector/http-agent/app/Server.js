@@ -12,14 +12,10 @@ const {
   reload: configReload,
   security: configSecurity,
 } = ConfigManager.getConfig('HTTP_AGENT');
-const configHttpsServerCamelCase = ConfigManager.transformObjectKeys(
-  configHttpsServer,
-  camelCase,
-);
-const configHttpServerCamelCase = ConfigManager.transformObjectKeys(
-  configHttpServer,
-  camelCase,
-);
+const configHttpsServerCamelCase = ConfigManager.transformObjectKeys(configHttpsServer,
+  camelCase);
+const configHttpServerCamelCase = ConfigManager.transformObjectKeys(configHttpServer,
+  camelCase);
 const allowUnsecuredMode = configSecurity['unsecure.mode'];
 
 /**
@@ -39,9 +35,7 @@ class Server {
     this.httpServer =
       allowUnsecuredMode &&
       WebUtils.createServer({
-        config: (({ host, port }) => ({ host, port }))(
-          configHttpServerCamelCase,
-        ),
+        config: (({ host, port }) => ({ host, port }))(configHttpServerCamelCase),
         logger,
       });
     this.serviceState = serviceState;

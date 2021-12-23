@@ -32,7 +32,9 @@ const parseTimestamp = (ts) => {
  *
  * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
  */
-const generateDeviceDataMessage = (payload, tenant, deviceid) => {
+const generateDeviceDataMessage = (
+  payload, tenant, deviceid,
+) => {
   const formattedMessage = {
     metadata: {
       deviceid,

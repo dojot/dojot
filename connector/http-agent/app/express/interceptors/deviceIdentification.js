@@ -13,7 +13,9 @@ const tls = require('tls');
  * */
 module.exports = ({ cache, config }) => ({
   name: 'device-identification-interceptor',
-  middleware: async (req, res, next) => {
+  middleware: async (
+    req, res, next,
+  ) => {
     const err = new createError.Unauthorized();
 
     if (req.socket instanceof tls.TLSSocket) {
@@ -47,12 +49,12 @@ module.exports = ({ cache, config }) => ({
         }
         try {
           messageKey = await axios
-            .get(
-              `http://certificate-acl:3000/internal/api/v1/acl-entries/${fingerprint256}`,
-            )
+            .get(`http://certificate-acl:3000/internal/api/v1/acl-entries/${fingerprint256}`)
             .then((resp) => resp.data.split(':'));
           [req.tenant, req.deviceId] = messageKey;
-          cache.set(fingerprint256, messageKey, config.setTll);
+          cache.set(
+            fingerprint256, messageKey, config.setTll,
+          );
           return next();
         } catch (e) {
           err.message =

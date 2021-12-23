@@ -23,9 +23,9 @@ if (configLog.file) {
 
 const logger = new Logger('http-agent:index');
 
-logger.info(
-  `The current configuration is:\n${util.inspect(config, false, 5, true)}`,
-);
+logger.info(`The current configuration is:\n${util.inspect(
+  config, false, 5, true,
+)}`);
 
 const App = require('./app/App');
 
@@ -40,11 +40,9 @@ process.on('unhandledRejection', async (reason) => {
 process.on('uncaughtException', async (ex) => {
   // The 'uncaughtException' event is emitted when an uncaught JavaScript
   // exception bubbles all the way back to the event loop.
-  logger.error(
-    `uncaughtException: Unhandled Exception at: ${
-      ex.stack || ex
-    }. Bailing out!!`,
-  );
+  logger.error(`uncaughtException: Unhandled Exception at: ${
+    ex.stack || ex
+  }. Bailing out!!`);
 
   killApplication();
 });

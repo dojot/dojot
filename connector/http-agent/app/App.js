@@ -54,18 +54,16 @@ class App {
       await this.producerMessages.init();
       this.server.registerShutdown();
 
-      this.server.init(
-        express(
-          [
-            incomingMessagesRoutes({
-              mountPoint: '/http-agent/v1',
-              producerMessages: this.producerMessages,
-            }),
-          ],
-          serviceState,
-          this.cache,
-        ),
-      );
+      this.server.init(express(
+        [
+          incomingMessagesRoutes({
+            mountPoint: '/http-agent/v1',
+            producerMessages: this.producerMessages,
+          }),
+        ],
+        serviceState,
+        this.cache,
+      ));
     } catch (e) {
       logger.error('init:', e);
       throw e;

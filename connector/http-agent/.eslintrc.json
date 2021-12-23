@@ -30,6 +30,7 @@
     expected behavior for the rule 'no-multiple-empty-lines' according
     to airbnb-base version v14.x.x.
     It should be removed when we upgrade to v18.2.0 */
+    "function-paren-newline": ["error", { "minItems": 3 }],
     "no-multiple-empty-lines": [
       "error",
       {

@@ -49,9 +49,7 @@ class ProducerMessages {
       this.registerShutdown();
       logger.info('... Kafka Producer was initialized');
     } catch (error) {
-      logger.error(
-        'An error occurred while initializing the Kafka Producer. Bailing out!',
-      );
+      logger.error('An error occurred while initializing the Kafka Producer. Bailing out!');
       logger.error(error.stack || error);
       killApplication();
     }
@@ -60,7 +58,9 @@ class ProducerMessages {
   /**
    *  Publish message
    */
-  async send(message, tenant, deviceId) {
+  async send(
+    message, tenant, deviceId,
+  ) {
     const topicSuffix = configMessenger['produce.topic.suffix'];
     try {
       // publish
@@ -70,17 +70,15 @@ class ProducerMessages {
 
       logger.debug(`Trying to send message to kafka topic ${kafkaTopic}...`);
 
-      await this.producer.produce(kafkaTopic, stringMessage, messageKey);
+      await this.producer.produce(
+        kafkaTopic, stringMessage, messageKey,
+      );
 
       logger.debug(`Successfully sent message to Kafka in ${kafkaTopic}`);
-      logger.debug(
-        `Published message ${stringMessage} to ${tenant}/${topicSuffix}`,
-      );
+      logger.debug(`Published message ${stringMessage} to ${tenant}/${topicSuffix}`);
       return;
     } catch (error) {
-      logger.error(
-        `Failed to publish message to ${tenant}/${topicSuffix} (${error}).`,
-      );
+      logger.error(`Failed to publish message to ${tenant}/${topicSuffix} (${error}).`);
     }
   }
 

@@ -10,24 +10,22 @@ const mockProducer = {
   disconnect: jest.fn(),
   getStatus: jest.fn(),
   // eslint-disable-next-line no-unused-vars
-  produce: jest.fn(
-    () =>
-      // eslint-disable-next-line implicit-arrow-linebreak
-      new Promise((resolve, reject) => {
-        // eslint-disable-next-line no-param-reassign
-        resolve = jest.fn(resolve);
-        // eslint-disable-next-line no-param-reassign
-        reject = jest.fn(reject);
-        resolveMock = resolve;
-        rejectMock = reject;
+  produce: jest.fn(() =>
+  // eslint-disable-next-line implicit-arrow-linebreak
+    new Promise((resolve, reject) => {
+      // eslint-disable-next-line no-param-reassign
+      resolve = jest.fn(resolve);
+      // eslint-disable-next-line no-param-reassign
+      reject = jest.fn(reject);
+      resolveMock = resolve;
+      rejectMock = reject;
 
-        if (mockShouldResolve) {
-          resolve();
-        } else {
-          reject(new Error('testError'));
-        }
-      }),
-  ),
+      if (mockShouldResolve) {
+        resolve();
+      } else {
+        reject(new Error('testError'));
+      }
+    })),
 };
 
 const mockAddHealthChecker = jest.fn();
@@ -133,7 +131,9 @@ describe('ProducerMessages', () => {
 
       await producerMessages.init();
 
-      producerMessages.send(fakeMessage, 'test', '123abc');
+      producerMessages.send(
+        fakeMessage, 'test', '123abc',
+      );
 
       expect(producerMessages.producer.produce).toHaveBeenCalled();
       expect(resolveMock).toHaveBeenCalled();
@@ -143,7 +143,9 @@ describe('ProducerMessages', () => {
       mockShouldResolve = false;
 
       await producerMessages.init();
-      producerMessages.send(fakeMessage, 'test', '123abc');
+      producerMessages.send(
+        fakeMessage, 'test', '123abc',
+      );
 
       expect(producerMessages.producer.produce).toHaveBeenCalled();
       expect(rejectMock).toHaveBeenCalled();
@@ -163,9 +165,7 @@ describe('ProducerMessages', () => {
     });
 
     it('should signal as ready - is connected to Kafka', async () => {
-      mockProducer.getStatus.mockReturnValue(
-        Promise.resolve({ connected: true }),
-      );
+      mockProducer.getStatus.mockReturnValue(Promise.resolve({ connected: true }));
 
       producerMessages.createHealthChecker();
 
@@ -178,9 +178,7 @@ describe('ProducerMessages', () => {
     });
 
     it('should signal as not ready - is not connected to Kafka', async () => {
-      mockProducer.getStatus.mockReturnValue(
-        Promise.resolve({ connected: false }),
-      );
+      mockProducer.getStatus.mockReturnValue(Promise.resolve({ connected: false }));
 
       producerMessages.createHealthChecker();
 

@@ -102,25 +102,19 @@ describe('Server', () => {
 
       it('should emit the listening', () => {
         reqEventMapMock.https.listening();
-        expect(serviceStateMock.signalReady).toHaveBeenCalledWith(
-          'http-server',
-        );
+        expect(serviceStateMock.signalReady).toHaveBeenCalledWith('http-server');
       });
 
       it('should emit the close', () => {
         reqEventMapMock.https.close();
-        expect(serviceStateMock.signalNotReady).toHaveBeenCalledWith(
-          'http-server',
-        );
+        expect(serviceStateMock.signalNotReady).toHaveBeenCalledWith('http-server');
       });
 
       it('should emit the error', () => {
         const e = new Error('test');
         reqEventMapMock.https.error(e);
-        expect(mockLogError).toHaveBeenCalledWith(
-          'HTTPS server experienced an error:',
-          e,
-        );
+        expect(mockLogError).toHaveBeenCalledWith('HTTPS server experienced an error:',
+          e);
       });
     });
 
@@ -131,25 +125,19 @@ describe('Server', () => {
 
       it('check when listening was emitted', () => {
         reqEventMapMock.http.listening();
-        expect(serviceStateMock.signalReady).toHaveBeenCalledWith(
-          'http-server',
-        );
+        expect(serviceStateMock.signalReady).toHaveBeenCalledWith('http-server');
       });
 
       it('check when close was emitted', () => {
         reqEventMapMock.http.close();
-        expect(serviceStateMock.signalNotReady).toHaveBeenCalledWith(
-          'http-server',
-        );
+        expect(serviceStateMock.signalNotReady).toHaveBeenCalledWith('http-server');
       });
 
       it('check when error was emitted - init', () => {
         const e = new Error('test');
         reqEventMapMock.http.error(e);
-        expect(mockLogError).toHaveBeenCalledWith(
-          'HTTP server experienced an error:',
-          e,
-        );
+        expect(mockLogError).toHaveBeenCalledWith('HTTP server experienced an error:',
+          e);
       });
     });
   });

@@ -52,8 +52,12 @@ class Cache {
     return this.myCache.get(key);
   }
 
-  set(key, val, ttl) {
-    return this.myCache.set(key, val, ttl);
+  set(
+    key, val, ttl,
+  ) {
+    return this.myCache.set(
+      key, val, ttl,
+    );
   }
 
   /**
@@ -88,9 +92,7 @@ class Cache {
    */
   registerShutdown() {
     this.serviceState.registerShutdownHandler(async () => {
-      logger.warn(
-        'Clearing the time interval that is set in the check period option...',
-      );
+      logger.warn('Clearing the time interval that is set in the check period option...');
       return this.myCache.close();
     });
   }

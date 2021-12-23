@@ -293,9 +293,7 @@ describe('HTTP', () => {
   describe('unsecure-single-message', () => {
     it('should successfully execute the request', async () => {
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123',
-        )
+        .post('/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123')
         .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
@@ -315,9 +313,7 @@ describe('HTTP', () => {
 
     it('should return bad request error', async () => {
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123',
-        )
+        .post('/http-agent/v1/unsecure/incoming-messages?tenant=test&deviceId=abc123')
         .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
@@ -336,9 +332,7 @@ describe('HTTP', () => {
   describe('unsecure-many-messages', () => {
     it('should successfully execute the request', async () => {
       await requestHttp(app)
-        .post(
-          '/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123',
-        )
+        .post('/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123')
         .set('Content-Type', 'application/json')
         .send([
           {
@@ -367,9 +361,7 @@ describe('HTTP', () => {
 
   it('should return bad request error', async () => {
     await requestHttp(app)
-      .post(
-        '/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123',
-      )
+      .post('/http-agent/v1/unsecure/incoming-messages/create-many?tenant=test&deviceId=abc123')
       .set('Content-Type', 'application/json')
       .send([
         {
