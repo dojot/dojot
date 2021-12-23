@@ -1,6 +1,8 @@
 class InspectMethod {
   constructor({ logger }) {
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   decorate({

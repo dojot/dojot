@@ -60,18 +60,32 @@ class EjbcaSoapClient {
   constructor({
     wsdl, pkcs12, pkcs12secret, trustedCA, logger,
   }) {
-    Object.defineProperty(this, 'wsdl', { value: wsdl });
-    Object.defineProperty(this, 'pkcs12', { value: pkcs12 });
-    Object.defineProperty(this, 'pkcs12secret', { value: pkcs12secret });
-    Object.defineProperty(this, 'trustedCA', { value: trustedCA });
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'wsdl', { value: wsdl },
+    );
+    Object.defineProperty(
+      this, 'pkcs12', { value: pkcs12 },
+    );
+    Object.defineProperty(
+      this, 'pkcs12secret', { value: pkcs12secret },
+    );
+    Object.defineProperty(
+      this, 'trustedCA', { value: trustedCA },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
 
     // SOAP client responsible for communicating with the EJBCA server
-    Object.defineProperty(this, 'client', { value: null, writable: true });
+    Object.defineProperty(
+      this, 'client', { value: null, writable: true },
+    );
 
     // State to control whether the SOAP client is being created or not
     // (required due to asynchronous execution).
-    Object.defineProperty(this, 'inactive', { value: false, writable: true });
+    Object.defineProperty(
+      this, 'inactive', { value: false, writable: true },
+    );
   }
 
   async getClient() {

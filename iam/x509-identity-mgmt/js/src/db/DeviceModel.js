@@ -12,7 +12,9 @@ const mongooseModel = mongoose.model('Device', deviceSchema);
 
 class DeviceModel {
   constructor() {
-    Object.defineProperty(this, 'model', { value: mongooseModel });
+    Object.defineProperty(
+      this, 'model', { value: mongooseModel },
+    );
   }
 
   /**

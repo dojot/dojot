@@ -13,11 +13,11 @@ const TRUSTED_CA_SERVICE = 'trustedCAService';
 const accepts = [ContentType.pem, ContentType.json];
 const contentDispositionHeader = 'Content-Disposition';
 
-function servePem(res, status, filename, content) {
+function servePem(
+  res, status, filename, content,
+) {
   res.set(contentDispositionHeader, `attachment; filename="${filename}"`);
-  res.status(status).send(
-    Buffer.from(content),
-  );
+  res.status(status).send(Buffer.from(content));
 }
 
 module.exports = ({
@@ -26,7 +26,9 @@ module.exports = ({
   const { validateRegOrGenCert } = schemaValidator;
   const { BadRequest, Forbidden } = errorTemplate;
 
-  function denyCertForDeviceMiddleware(req, res, next) {
+  function denyCertForDeviceMiddleware(
+    req, res, next,
+  ) {
     const belongsTo = req.body.belongsTo || {};
     if (Object.prototype.hasOwnProperty.call(belongsTo, 'device')) {
       // Issuing certificates to devices through this endpoint is not allowed,
@@ -37,7 +39,9 @@ module.exports = ({
     return next();
   }
 
-  function belongsToAppMiddleware(req, res, next) {
+  function belongsToAppMiddleware(
+    req, res, next,
+  ) {
     const belongsTo = req.body.belongsTo || {};
     if (Object.prototype.hasOwnProperty.call(belongsTo, 'application')
       && !validApplications.includes(belongsTo.application)) {
@@ -74,7 +78,9 @@ module.exports = ({
             }
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => servePem(res, HttpStatus.CREATED, 'cert.pem', res.result.certificatePem),
+            'application/x-pem-file': (res) => servePem(
+              res, HttpStatus.CREATED, 'cert.pem', res.result.certificatePem,
+            ),
             'application/json': (res) => {
               res.status(HttpStatus.CREATED).json(res.result);
             },
@@ -100,7 +106,9 @@ module.exports = ({
             next();
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'ca.pem', res.result.caPem),
+            'application/x-pem-file': (res) => servePem(
+              res, HttpStatus.OK, 'ca.pem', res.result.caPem,
+            ),
             'application/json': (res) => {
               res.status(HttpStatus.OK).json(res.result);
             },
@@ -133,7 +141,9 @@ module.exports = ({
             next();
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'cabundle.pem', res.bundle.join('\n')),
+            'application/x-pem-file': (res) => servePem(
+              res, HttpStatus.OK, 'cabundle.pem', res.bundle.join('\n'),
+            ),
             'application/json': (res) => {
               res.status(HttpStatus.OK).json(res.bundle);
             },
@@ -159,7 +169,9 @@ module.exports = ({
             next();
           },
           contentNegotiation(accepts, {
-            'application/x-pem-file': (res) => servePem(res, HttpStatus.OK, 'crl.pem', res.result.crl),
+            'application/x-pem-file': (res) => servePem(
+              res, HttpStatus.OK, 'crl.pem', res.result.crl,
+            ),
             'application/json': (res) => {
               res.status(HttpStatus.OK).json(res.result);
             },

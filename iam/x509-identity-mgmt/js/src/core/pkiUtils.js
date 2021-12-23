@@ -53,9 +53,7 @@ function createObject(logger, errorTemplate) {
     /* An Array is created from a Uint8Array holding the buffer data.
      * All the Uint8Array items (8-bit unsigned integers [0-255]) are mapped
      * to their hexadecimal representation and padded with 0 characters. */
-    return [...new Uint8Array(arrayBuffer)].map(
-      (uInt) => uInt.toString(16).padStart(2, '0'),
-    );
+    return [...new Uint8Array(arrayBuffer)].map((uInt) => uInt.toString(16).padStart(2, '0'));
   }
 
   /**
@@ -178,7 +176,9 @@ function createObject(logger, errorTemplate) {
    * @throws an exception if the certificate has expired.
    * @throws an exception if the certificate does not have a minimum validity days.
    */
-  function checkRemainingDays(certificate, minimumValidityDays = 0, instant = new Date()) {
+  function checkRemainingDays(
+    certificate, minimumValidityDays = 0, instant = new Date(),
+  ) {
     const difference = certificate.notAfter.value - instant;
     const remainingDays = Math.floor(difference / TOTAL_MILLISECONDS_IN_A_DAY);
     if (remainingDays < 0) {

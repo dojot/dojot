@@ -10,22 +10,48 @@ class TrustedCAService {
     rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
     errorTemplate, trustedCANotifier,
   }) {
-    Object.defineProperty(this, 'tenant', { value: tenant });
-    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
-    Object.defineProperty(this, 'dnUtils', { value: dnUtils });
-    Object.defineProperty(this, 'rootCA', { value: rootCA });
-    Object.defineProperty(this, 'queryMaxTimeMS', { value: queryMaxTimeMS });
-    Object.defineProperty(this, 'externalCaCertMinimumValidityDays', { value: externalCaCertMinimumValidityDays });
+    Object.defineProperty(
+      this, 'tenant', { value: tenant },
+    );
+    Object.defineProperty(
+      this, 'pkiUtils', { value: pkiUtils },
+    );
+    Object.defineProperty(
+      this, 'dnUtils', { value: dnUtils },
+    );
+    Object.defineProperty(
+      this, 'rootCA', { value: rootCA },
+    );
+    Object.defineProperty(
+      this, 'queryMaxTimeMS', { value: queryMaxTimeMS },
+    );
+    Object.defineProperty(
+      this, 'externalCaCertMinimumValidityDays', { value: externalCaCertMinimumValidityDays },
+    );
 
-    Object.defineProperty(this, 'TrustedCAModel', { value: trustedCAModel.model });
-    Object.defineProperty(this, 'parseTrustedCACndtFlds', { value: trustedCAModel.parseConditionFields.bind(trustedCAModel) });
+    Object.defineProperty(
+      this, 'TrustedCAModel', { value: trustedCAModel.model },
+    );
+    Object.defineProperty(
+      this, 'parseTrustedCACndtFlds', { value: trustedCAModel.parseConditionFields.bind(trustedCAModel) },
+    );
 
-    Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
-    Object.defineProperty(this, 'parseCertCndtFlds', { value: certificateModel.parseConditionFields.bind(certificateModel) });
-    Object.defineProperty(this, 'caCertLimit', { value: caCertLimit });
+    Object.defineProperty(
+      this, 'CertificateModel', { value: certificateModel.model },
+    );
+    Object.defineProperty(
+      this, 'parseCertCndtFlds', { value: certificateModel.parseConditionFields.bind(certificateModel) },
+    );
+    Object.defineProperty(
+      this, 'caCertLimit', { value: caCertLimit },
+    );
 
-    Object.defineProperty(this, 'error', { value: errorTemplate });
-    Object.defineProperty(this, 'trustedCANotifier', { value: trustedCANotifier });
+    Object.defineProperty(
+      this, 'error', { value: errorTemplate },
+    );
+    Object.defineProperty(
+      this, 'trustedCANotifier', { value: trustedCANotifier },
+    );
   }
 
   /**
@@ -63,7 +89,9 @@ class TrustedCAService {
    *
    * @returns a set of certificates that meet the search criteria.
    */
-  async listCertificates(queryFields, filterFields, limit, offset) {
+  async listCertificates(
+    queryFields, filterFields, limit, offset,
+  ) {
     Object.assign(filterFields, { tenant: this.tenant });
 
     /* Executes the query and converts the results to JSON */
@@ -148,10 +176,10 @@ class TrustedCAService {
    */
   async changeAutoRegistration(filterFields, allowAutoRegistration) {
     Object.assign(filterFields, { tenant: this.tenant });
-
-    const result = await this.TrustedCAModel.findOneAndUpdate(
-      filterFields, { allowAutoRegistration, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).exec();
+    const result = await this.TrustedCAModel
+      .findOneAndUpdate(filterFields, { allowAutoRegistration, modifiedAt: new Date() })
+      .maxTimeMS(this.queryMaxTimeMS)
+      .exec();
 
     if (!result) {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);

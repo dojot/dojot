@@ -9,7 +9,9 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
-function createObject(config, healthCheck, logger, errorTemplate) {
+function createObject(
+  config, healthCheck, logger, errorTemplate,
+) {
   const { BadRequest } = errorTemplate;
 
   function parseProjectionFields(commaSeparatedFields, projectableFields) {
@@ -30,9 +32,7 @@ function createObject(config, healthCheck, logger, errorTemplate) {
 
     // you cannot specify an embedded document and a field
     // within that document embedded in the same projection
-    fields = fields.filter(
-      (fname) => !fields.some((other) => other.startsWith(`${fname}.`)),
-    );
+    fields = fields.filter((fname) => !fields.some((other) => other.startsWith(`${fname}.`)));
 
     return fields;
   }
@@ -166,4 +166,6 @@ function createObject(config, healthCheck, logger, errorTemplate) {
 
 module.exports = ({
   config, healthCheck, logger, errorTemplate,
-}) => createObject(config, healthCheck, logger, errorTemplate);
+}) => createObject(
+  config, healthCheck, logger, errorTemplate,
+);

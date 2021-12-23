@@ -21,11 +21,21 @@ class DeviceMgrEventEngine {
     stateManager,
     DIContainer,
   }) {
-    Object.defineProperty(this, 'kafkaConsumer', { value: deviceMgrKafkaConsumer });
-    Object.defineProperty(this, 'kafkaTopics', { value: deviceMgrKafkaTopics });
-    Object.defineProperty(this, 'logger', { value: logger });
-    Object.defineProperty(this, 'stateManager', { value: stateManager });
-    Object.defineProperty(this, 'container', { value: DIContainer });
+    Object.defineProperty(
+      this, 'kafkaConsumer', { value: deviceMgrKafkaConsumer },
+    );
+    Object.defineProperty(
+      this, 'kafkaTopics', { value: deviceMgrKafkaTopics },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
+    Object.defineProperty(
+      this, 'stateManager', { value: stateManager },
+    );
+    Object.defineProperty(
+      this, 'container', { value: DIContainer },
+    );
   }
 
   /**

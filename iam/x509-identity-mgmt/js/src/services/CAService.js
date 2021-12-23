@@ -8,9 +8,15 @@ class CAService {
   constructor({
     ejbcaFacade, rootCA, pkiUtils,
   }) {
-    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
-    Object.defineProperty(this, 'rootCA', { value: rootCA });
-    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
+    Object.defineProperty(
+      this, 'ejbcaFacade', { value: ejbcaFacade },
+    );
+    Object.defineProperty(
+      this, 'rootCA', { value: rootCA },
+    );
+    Object.defineProperty(
+      this, 'pkiUtils', { value: pkiUtils },
+    );
   }
 
   /**

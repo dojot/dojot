@@ -14,13 +14,27 @@ class DeviceMgrProvider {
     errorTemplate,
     logger,
   }) {
-    Object.defineProperty(this, 'httpAgent', { value: httpAgent });
-    Object.defineProperty(this, 'deviceMgrUrl', { value: deviceMgrUrl });
-    Object.defineProperty(this, 'deviceMgrTimeout', { value: deviceMgrTimeout });
-    Object.defineProperty(this, 'deviceModel', { value: deviceModel });
-    Object.defineProperty(this, 'tokenGen', { value: tokenGen });
-    Object.defineProperty(this, 'error', { value: errorTemplate });
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'httpAgent', { value: httpAgent },
+    );
+    Object.defineProperty(
+      this, 'deviceMgrUrl', { value: deviceMgrUrl },
+    );
+    Object.defineProperty(
+      this, 'deviceMgrTimeout', { value: deviceMgrTimeout },
+    );
+    Object.defineProperty(
+      this, 'deviceModel', { value: deviceModel },
+    );
+    Object.defineProperty(
+      this, 'tokenGen', { value: tokenGen },
+    );
+    Object.defineProperty(
+      this, 'error', { value: errorTemplate },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   /**

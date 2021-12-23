@@ -58,29 +58,65 @@ class CertificateService {
     checkPublicKey, checkSubjectDN, checkDeviceExists, queryMaxTimeMS, certMinimumValidityDays,
     caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier,
   }) {
-    Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
-    Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
-    Object.defineProperty(this, 'tenant', { value: tenant });
-    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
-    Object.defineProperty(this, 'dnUtils', { value: dnUtils });
-    Object.defineProperty(this, 'certValidity', { value: certValidity });
-    Object.defineProperty(this, 'checkPublicKey', { value: checkPublicKey });
-    Object.defineProperty(this, 'checkSubjectDN', { value: checkSubjectDN });
-    Object.defineProperty(this, 'checkDeviceExists', { value: checkDeviceExists });
-    Object.defineProperty(this, 'queryMaxTimeMS', { value: queryMaxTimeMS });
-    Object.defineProperty(this, 'certMinimumValidityDays', { value: certMinimumValidityDays });
-    Object.defineProperty(this, 'caCertAutoRegistration', { value: caCertAutoRegistration });
-    Object.defineProperty(this, 'logger', { value: logger });
-    Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
-    Object.defineProperty(this, 'error', { value: errorTemplate });
-    Object.defineProperty(this, 'deviceMgrProvider', { value: deviceMgrProvider });
-    Object.defineProperty(this, 'ownershipNotifier', { value: ownershipNotifier });
+    Object.defineProperty(
+      this, 'trustedCAService', { value: trustedCAService },
+    );
+    Object.defineProperty(
+      this, 'ejbcaFacade', { value: ejbcaFacade },
+    );
+    Object.defineProperty(
+      this, 'tenant', { value: tenant },
+    );
+    Object.defineProperty(
+      this, 'pkiUtils', { value: pkiUtils },
+    );
+    Object.defineProperty(
+      this, 'dnUtils', { value: dnUtils },
+    );
+    Object.defineProperty(
+      this, 'certValidity', { value: certValidity },
+    );
+    Object.defineProperty(
+      this, 'checkPublicKey', { value: checkPublicKey },
+    );
+    Object.defineProperty(
+      this, 'checkSubjectDN', { value: checkSubjectDN },
+    );
+    Object.defineProperty(
+      this, 'checkDeviceExists', { value: checkDeviceExists },
+    );
+    Object.defineProperty(
+      this, 'queryMaxTimeMS', { value: queryMaxTimeMS },
+    );
+    Object.defineProperty(
+      this, 'certMinimumValidityDays', { value: certMinimumValidityDays },
+    );
+    Object.defineProperty(
+      this, 'caCertAutoRegistration', { value: caCertAutoRegistration },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
+    Object.defineProperty(
+      this, 'CertificateModel', { value: certificateModel.model },
+    );
+    Object.defineProperty(
+      this, 'error', { value: errorTemplate },
+    );
+    Object.defineProperty(
+      this, 'deviceMgrProvider', { value: deviceMgrProvider },
+    );
+    Object.defineProperty(
+      this, 'ownershipNotifier', { value: ownershipNotifier },
+    );
 
     // Flag used to determine the privilege of an operation.
     // An operation performed with elevated privileges bypasses some access restrictions
     // Avoid changing the value of this flag directly.
     // To make the code more readable, use the specific methods.
-    Object.defineProperty(this, 'elevatedPrivileges', { value: false, writable: true });
+    Object.defineProperty(
+      this, 'elevatedPrivileges', { value: false, writable: true },
+    );
   }
 
   /**
@@ -293,9 +329,11 @@ class CertificateService {
     await this.checkBelongsTo(belongsTo);
 
     // By default, findOneAndUpdate() returns the document as it was before update was applied.
-    const certRecord = await this.CertificateModel.findOneAndUpdate(
-      filterFields, { belongsTo, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).lean().exec();
+    const certRecord = await this.CertificateModel
+      .findOneAndUpdate(filterFields, { belongsTo, modifiedAt: new Date() })
+      .maxTimeMS(this.queryMaxTimeMS)
+      .lean()
+      .exec();
 
     if (!certRecord) {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
@@ -309,7 +347,9 @@ class CertificateService {
           await this.ownershipNotifier.creation(certRecord, belongsTo);
           break;
         case 'change':
-          await this.ownershipNotifier.change(certRecord, previousBelongsTo, belongsTo);
+          await this.ownershipNotifier.change(
+            certRecord, previousBelongsTo, belongsTo,
+          );
           break;
         case 'removal':
           await this.ownershipNotifier.removal(certRecord, previousBelongsTo);
@@ -359,7 +399,9 @@ class CertificateService {
    *
    * @returns a set of certificates that meet the search criteria
    */
-  async listCertificates(queryFields, filterFields, limit = 0, offset = 0) {
+  async listCertificates(
+    queryFields, filterFields, limit = 0, offset = 0,
+  ) {
     // If there are no elevated privileges, we must overwrite
     // the tenant according to the scope of the service...
     if (!this.elevatedPrivileges) {

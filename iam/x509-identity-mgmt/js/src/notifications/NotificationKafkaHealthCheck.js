@@ -9,8 +9,12 @@ class NotificationKafkaHealthCheck {
     notificationKafkaProducer,
     logger,
   }) {
-    Object.defineProperty(this, 'kafkaProducer', { value: notificationKafkaProducer });
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'kafkaProducer', { value: notificationKafkaProducer },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   /**

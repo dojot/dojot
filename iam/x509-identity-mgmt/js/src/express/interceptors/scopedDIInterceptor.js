@@ -8,7 +8,9 @@ const { Logger } = require('@dojot/microservice-sdk');
 // https://github.com/jeffijoe/awilix#containercreatescope
 module.exports = ({ DIContainer }) => ({
   name: 'scoped-di-interceptor',
-  middleware: (req, res, next) => {
+  middleware: (
+    req, res, next,
+  ) => {
     req.scope = DIContainer.createScope();
 
     // register some request-specific data..

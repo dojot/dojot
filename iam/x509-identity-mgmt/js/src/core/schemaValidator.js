@@ -34,7 +34,9 @@ function createObject(schemas, errorTemplate) {
  * @return {Object} response
  */
   function schemaValidationMiddleware(schemaId) {
-    return (req, res, next) => {
+    return (
+      req, res, next,
+    ) => {
       const valid = ajv.validate(schemaId, req.body);
       if (!valid) {
         return next(errorResponse(schemaId, ajv.errors));

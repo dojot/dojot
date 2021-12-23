@@ -8,7 +8,9 @@ module.exports = ({ levelDebug }) => {
    * @param {Array} methods that will be decorated.
    * @param {Array} decorators decorators with the logic to be applied on the original methods.
    */
-  function decorate(target, methods, decorators) {
+  function decorate(
+    target, methods, decorators,
+  ) {
     // For the order of execution of the decorators to follow the same order
     // in which they were declared in the list, it is necessary to apply the
     // decoration starting with the last decorator of the list and thus until
@@ -44,17 +46,21 @@ module.exports = ({ levelDebug }) => {
             + ' are divergent, one is synchronous and the other is asynchronous!');
         }
 
-        Reflect.defineProperty(target, methodName, {
-          configurable: true,
-          writable: false,
-          enumerable: false,
-          value: interceptor,
-        });
+        Reflect.defineProperty(
+          target, methodName, {
+            configurable: true,
+            writable: false,
+            enumerable: false,
+            value: interceptor,
+          },
+        );
       });
     });
   }
 
-  const decorateToDebug = (target, methods, asyncMethods, containerCradle) => {
+  const decorateToDebug = (
+    target, methods, asyncMethods, containerCradle,
+  ) => {
     if (levelDebug === true || (typeof levelDebug === 'function' && levelDebug())) {
       // Decorates synchronous methods
       if (methods.length) {
@@ -62,7 +68,9 @@ module.exports = ({ levelDebug }) => {
           containerCradle.logExecutionTimeDecorator,
           containerCradle.inspectMethodDecorator,
         ];
-        decorate(target, methods, decorators);
+        decorate(
+          target, methods, decorators,
+        );
       }
 
       // Decorate asynchronous methods
@@ -71,7 +79,9 @@ module.exports = ({ levelDebug }) => {
           containerCradle.logExecutionTimeAsyncDecorator,
           containerCradle.inspectMethodAsyncDecorator,
         ];
-        decorate(target, asyncMethods, asyncDecorators);
+        decorate(
+          target, asyncMethods, asyncDecorators,
+        );
       }
     }
   };
@@ -79,36 +89,32 @@ module.exports = ({ levelDebug }) => {
   const fromDecoratedClass = (clazz) => (containerCradle) => {
     const instance = Reflect.construct(clazz, [containerCradle]);
 
-    const methods = Reflect.ownKeys(clazz.prototype).filter(
-      ((key) => key !== 'constructor'
+    const methods = Reflect.ownKeys(clazz.prototype).filter(((key) => key !== 'constructor'
       && typeof Reflect.get(clazz.prototype, key) === 'function'
-      && Reflect.get(clazz.prototype, key).constructor.name !== 'AsyncFunction'),
-    );
+      && Reflect.get(clazz.prototype, key).constructor.name !== 'AsyncFunction'));
 
-    const asyncMethods = Reflect.ownKeys(clazz.prototype).filter(
-      ((key) => key !== 'constructor'
+    const asyncMethods = Reflect.ownKeys(clazz.prototype).filter(((key) => key !== 'constructor'
       && typeof Reflect.get(clazz.prototype, key) === 'function'
-      && Reflect.get(clazz.prototype, key).constructor.name === 'AsyncFunction'),
-    );
+      && Reflect.get(clazz.prototype, key).constructor.name === 'AsyncFunction'));
 
-    decorateToDebug(instance, methods, asyncMethods, containerCradle);
+    decorateToDebug(
+      instance, methods, asyncMethods, containerCradle,
+    );
     return instance;
   };
 
   const fromDecoratedFactory = (factory) => (containerCradle) => {
     const instance = factory(containerCradle);
 
-    const methods = Reflect.ownKeys(instance).filter(
-      ((key) => typeof Reflect.get(instance, key) === 'function'
-      && Reflect.get(instance, key).constructor.name !== 'AsyncFunction'),
-    );
+    const methods = Reflect.ownKeys(instance).filter(((key) => typeof Reflect.get(instance, key) === 'function'
+      && Reflect.get(instance, key).constructor.name !== 'AsyncFunction'));
 
-    const asyncMethods = Reflect.ownKeys(instance).filter(
-      ((key) => typeof Reflect.get(instance, key) === 'function'
-      && Reflect.get(instance, key).constructor.name === 'AsyncFunction'),
-    );
+    const asyncMethods = Reflect.ownKeys(instance).filter(((key) => typeof Reflect.get(instance, key) === 'function'
+      && Reflect.get(instance, key).constructor.name === 'AsyncFunction'));
 
-    decorateToDebug(instance, methods, asyncMethods, containerCradle);
+    decorateToDebug(
+      instance, methods, asyncMethods, containerCradle,
+    );
     return instance;
   };
 

@@ -15,7 +15,9 @@ const parseAllowedAttrsRegex = (arr) => arr.reduce((obj, attr) => {
   // eslint-disable-next-line security/detect-non-literal-regexp
   const value = new RegExp(keyValue[1]);
   if (!Reflect.has(obj, key)) {
-    Reflect.set(obj, key, value);
+    Reflect.set(
+      obj, key, value,
+    );
   }
   return obj;
 }, {});
@@ -107,14 +109,10 @@ function createObject(config, errorTemplate) {
    * @throws exceptions if this does not pass the validations.
    */
   function verify() {
-    const attributes = Object.keys(this).filter(
-      ((attr) => typeof Reflect.get(this, attr) !== 'function'),
-    );
+    const attributes = Object.keys(this).filter(((attr) => typeof Reflect.get(this, attr) !== 'function'));
     checkAllowedAttributes(attributes);
     checkMandatoryAttributes(attributes);
-    checkAttributeValues(attributes.map(
-      (attr) => ({ attr, value: Reflect.get(this, attr) }),
-    ));
+    checkAttributeValues(attributes.map((attr) => ({ attr, value: Reflect.get(this, attr) })));
     return this;
   }
 
@@ -122,11 +120,7 @@ function createObject(config, errorTemplate) {
    * Converts SubjectDN fields to a string
    */
   function stringify() {
-    return Object.keys(this).filter(
-      ((attr) => typeof Reflect.get(this, attr) !== 'function'),
-    ).map(
-      ((attr) => [attr, Reflect.get(this, attr)].join('=')),
-    ).join(', ');
+    return Object.keys(this).filter(((attr) => typeof Reflect.get(this, attr) !== 'function')).map(((attr) => [attr, Reflect.get(this, attr)].join('='))).join(', ');
   }
 
   /**
@@ -136,7 +130,9 @@ function createObject(config, errorTemplate) {
   function cnamePrefix(prefix) {
     if (typeof prefix === 'string' && Reflect.has(this, 'CN')) {
       const cname = Reflect.get(this, 'CN');
-      Reflect.set(this, 'CN', `${prefix}:${cname}`);
+      Reflect.set(
+        this, 'CN', `${prefix}:${cname}`,
+      );
     }
     return this;
   }
@@ -153,42 +149,50 @@ function createObject(config, errorTemplate) {
 
     // defines the object's methods using the default values for the Property Descriptor
     // therefore, the methods will NOT be enumerable, configurable, or writable
-    Reflect.defineProperty($, 'verify', { value: verify });
-    Reflect.defineProperty($, 'stringify', { value: stringify });
-    Reflect.defineProperty($, 'cnamePrefix', { value: cnamePrefix });
+    Reflect.defineProperty(
+      $, 'verify', { value: verify },
+    );
+    Reflect.defineProperty(
+      $, 'stringify', { value: stringify },
+    );
+    Reflect.defineProperty(
+      $, 'cnamePrefix', { value: cnamePrefix },
+    );
 
     // reduce the RelativeDNs to a complete DistinguishedName (subjectDN|issuerDN)
     // and yet maintaining the order of the RDNs (through enumerable properties)
-    $ = relativeDNs.typesAndValues.reduce(
-      (obj, attr) => {
-        const rdn = RelativeDistinguishedNamesCatalog.find((el) => el.OID === attr.type);
-        const key = (rdn) ? (rdn.shortName || rdn.name) : attr.type;
-        if (!Reflect.has(obj, key)) {
-          // defines the object's properties as enumerable and writable
-          Reflect.defineProperty(obj, key, {
+    $ = relativeDNs.typesAndValues.reduce((obj, attr) => {
+      const rdn = RelativeDistinguishedNamesCatalog.find((el) => el.OID === attr.type);
+      const key = (rdn) ? (rdn.shortName || rdn.name) : attr.type;
+      if (!Reflect.has(obj, key)) {
+        // defines the object's properties as enumerable and writable
+        Reflect.defineProperty(
+          obj, key, {
             writable: true,
             enumerable: true,
             value: attr.value.valueBlock.value,
-          });
-        }
-        return obj;
-      }, $,
-    );
+          },
+        );
+      }
+      return obj;
+    }, $);
 
     if (includeConstantAttrs) {
       // it is important to keep the same Property Descriptor
       // configuration used for previous RelativeDNs...
-      Object.entries(constantAttrs).forEach(
-        ([key, value]) => (
-          (Reflect.has($, key))
-            ? Reflect.set($, key, value)
-            : Reflect.defineProperty($, key, {
+      Object.entries(constantAttrs).forEach(([key, value]) => (
+        (Reflect.has($, key))
+          ? Reflect.set(
+            $, key, value,
+          )
+          : Reflect.defineProperty(
+            $, key, {
               writable: true,
               enumerable: true,
               value,
-            })
-        ),
-      );
+            },
+          )
+      ));
     }
     return $;
   }

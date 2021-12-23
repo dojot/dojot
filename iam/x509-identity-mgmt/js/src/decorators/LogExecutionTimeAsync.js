@@ -1,7 +1,9 @@
 
 class LogExecutionTimeAsync {
   constructor({ logger }) {
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   async decorate({

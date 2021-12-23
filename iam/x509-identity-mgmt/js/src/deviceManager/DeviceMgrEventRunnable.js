@@ -13,12 +13,24 @@ class DeviceMgrEventRunnable {
     certificateModel,
     certificateService,
   }) {
-    Object.defineProperty(this, 'event', { value: event });
-    Object.defineProperty(this, 'tenant', { value: tenant });
-    Object.defineProperty(this, 'device', { value: device });
-    Object.defineProperty(this, 'deviceModel', { value: deviceModel });
-    Object.defineProperty(this, 'certificateModel', { value: certificateModel });
-    Object.defineProperty(this, 'certificateService', { value: certificateService });
+    Object.defineProperty(
+      this, 'event', { value: event },
+    );
+    Object.defineProperty(
+      this, 'tenant', { value: tenant },
+    );
+    Object.defineProperty(
+      this, 'device', { value: device },
+    );
+    Object.defineProperty(
+      this, 'deviceModel', { value: deviceModel },
+    );
+    Object.defineProperty(
+      this, 'certificateModel', { value: certificateModel },
+    );
+    Object.defineProperty(
+      this, 'certificateService', { value: certificateService },
+    );
   }
 
   async run() {

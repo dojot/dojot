@@ -1,7 +1,9 @@
 
 class LogExecutionTime {
   constructor({ logger }) {
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   decorate({

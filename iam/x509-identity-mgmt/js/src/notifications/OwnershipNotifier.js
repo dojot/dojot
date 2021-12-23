@@ -32,10 +32,18 @@ class OwnershipNotifier {
   constructor({
     tenant = '', kafkaTopicSuffix, notificationEngine, logger,
   }) {
-    Object.defineProperty(this, 'tenant', { value: tenant });
-    Object.defineProperty(this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });
-    Object.defineProperty(this, 'notificationEngine', { value: notificationEngine });
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'tenant', { value: tenant },
+    );
+    Object.defineProperty(
+      this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` },
+    );
+    Object.defineProperty(
+      this, 'notificationEngine', { value: notificationEngine },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   /**
@@ -94,7 +102,9 @@ class OwnershipNotifier {
     * @param {object} previousOwner to which the certificate belonged before.
     * @param {object} currentOwner to which the certificate now belongs.
     */
-  async change(certRecord, previousOwner = {}, currentOwner = {}) {
+  async change(
+    certRecord, previousOwner = {}, currentOwner = {},
+  ) {
     const eventType = UPDATE_EVENT;
 
     // checks who the certificate belonged to before...

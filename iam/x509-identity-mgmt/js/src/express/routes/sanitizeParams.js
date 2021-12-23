@@ -26,8 +26,12 @@ function sanitizeLineBreaks(pem) {
   return pem.replace(/\r\n|\r/g, '\n').replace(/\n+$/, '');
 }
 
-function fingerprintHandler(req, res, next, value, param) {
-  Reflect.set(req.params, param, sanitizeFingerprint(value));
+function fingerprintHandler(
+  req, res, next, value, param,
+) {
+  Reflect.set(
+    req.params, param, sanitizeFingerprint(value),
+  );
   next();
 }
 

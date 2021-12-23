@@ -35,8 +35,12 @@ class EjbcaFacade {
    *                       which is how everything gets wired up (Dependency Injection).
    */
   constructor({ ejbcaSoap, forceCRLRenew }) {
-    Object.defineProperty(this, 'ejbcaSoap', { value: ejbcaSoap });
-    Object.defineProperty(this, 'forceCRLRenew', { value: forceCRLRenew });
+    Object.defineProperty(
+      this, 'ejbcaSoap', { value: ejbcaSoap },
+    );
+    Object.defineProperty(
+      this, 'forceCRLRenew', { value: forceCRLRenew },
+    );
   }
 
   /**
@@ -46,7 +50,9 @@ class EjbcaFacade {
    * @param {number} validity of the certificate to be generated.
    * @param {string} csrPem encoded with request for certificate signing.
    */
-  async generateCertificate(subjectDN, validity, csrPem) {
+  async generateCertificate(
+    subjectDN, validity, csrPem,
+  ) {
     let startTime = null;
     let endTime = null;
     if (validity) {
@@ -247,7 +253,9 @@ class EjbcaFacade {
    * @param {*} renew indicates whether a new CRL should be forced to be generated.
    * @param {*} deltaCRL indicates whether to obtain a delta or complete CRL.
    */
-  async getCRL(caName, renew = false, deltaCRL = false) {
+  async getCRL(
+    caName, renew = false, deltaCRL = false,
+  ) {
     // Retrieves the SOAP communication channel with the EJBCA
     const ejbcaClient = await this.ejbcaSoap.getClient();
 

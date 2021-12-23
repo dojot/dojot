@@ -9,7 +9,9 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
   const { validateRegOrGenCert, validateChangeOwnerCert } = schemaValidator;
   const { Forbidden } = errorTemplate;
 
-  function denyCertForApplMiddleware(req, res, next) {
+  function denyCertForApplMiddleware(
+    req, res, next,
+  ) {
     const belongsTo = req.body.belongsTo || {};
     if (Object.prototype.hasOwnProperty.call(belongsTo, 'application')) {
       // For now it is not permitted to issue certificates

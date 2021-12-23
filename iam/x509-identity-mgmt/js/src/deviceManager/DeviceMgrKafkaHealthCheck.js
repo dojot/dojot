@@ -9,8 +9,12 @@ class DeviceMgrKafkaHealthCheck {
     deviceMgrKafkaConsumer,
     logger,
   }) {
-    Object.defineProperty(this, 'kafkaConsumer', { value: deviceMgrKafkaConsumer });
-    Object.defineProperty(this, 'logger', { value: logger });
+    Object.defineProperty(
+      this, 'kafkaConsumer', { value: deviceMgrKafkaConsumer },
+    );
+    Object.defineProperty(
+      this, 'logger', { value: logger },
+    );
   }
 
   /**
