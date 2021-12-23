@@ -68,3 +68,16 @@ The services developed by the dojot team to integrate these open-source software
 CPQD <www.cpqd.com.br> and till release v0.5.1 were licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html). From release v0.5.2 onwards, these services are being licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
 
 You can use and/or modify the software for free (no license costs apply).
+
+## Services
+
+* connector/http-agent
+* connector/kafka2ftp
+* connector/mqtt
+* iam/certificate-acl
+* iam/ejbca
+* iam/x509-identity-mgmt
+* storage/file-mgmt
+* storage/retriever
+* storage/storer
+* subscription-engine/kafka-ws
