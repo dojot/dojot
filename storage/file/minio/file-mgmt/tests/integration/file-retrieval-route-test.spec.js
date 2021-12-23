@@ -34,9 +34,10 @@ describe('GET /files/download', () => {
       .get(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .query({ path, alt: 'media' })
-      .expect(400)
+      .expect(401)
       .then((response) => {
-        expect(response.body.error).toEqual('Tenant does not exist.');
+        expect(response.body.error).toEqual('Unauthorized access');
+        expect(response.body.detail).toEqual('Tenant not found or invalid');
         done();
       })
       .catch((error) => {
@@ -44,31 +45,28 @@ describe('GET /files/download', () => {
       });
   });
 
-  it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
+  it.only('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
     request(app.express)
       .get(route)
       .set('Authorization', `Bearer ${jwt}`)
       .query({ path, alt: 'media' })
       .expect(200)
-      .expect()
+      .buffer()
       .parse((response, next) => {
         response.setEncoding('ascii');
-        response.data = '';
+        let data = '';
         response.on('data', (chunk) => {
-          response.data += chunk;
-          next(null, { file: true });
+          data += chunk;
         });
-        response.on('error', () => {
-          next(null, { file: false });
+        response.on('end', () => {
+          next(null, { data });
         });
       })
-      .buffer()
-      .then((response) => {
-        expect(response.body.file).toBeTruthy();
+      .end((err, response) => {
+        expect(err).toBeUndefined();
+        expect(response.body.data).toBeDefined();
+        
         done();
-      })
-      .catch((error) => {
-        done(error);
       });
   });
 

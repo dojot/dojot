@@ -21,8 +21,8 @@ class KafkaController {
     try {
       const data = KafkaPayloadUtil.getValue(payload);
       const operation = {
-        CREATE: this.tenantService.create,
-        DELETE: this.tenantService.remove,
+        CREATE: this.handleCreate.bind(this),
+        DELETE: this.handleDelete.bind(this),
       };
 
       this.logger.info(`${data.type} bucket for ${data.tenant} tenant`);
@@ -32,6 +32,19 @@ class KafkaController {
       this.logger.error(error);
       ack(error);
     }
+  }
+
+  async handleCreate(payload) {
+    await this.tenantService.create({
+      id: payload.tenant,
+      sigKey: {
+        certificate: payload.certificate,
+      },
+    });
+  }
+
+  async handleDelete(payload) {
+    await this.tenantService.remove(payload.tenant);
   }
 }
 

@@ -30,7 +30,7 @@ module.exports = class FileController {
     } = req.body;
 
     const fileInfo = await this.uploadFileService.handle(
-      req.tenant, uploadedFile, path, md5,
+      req.tenant.id, uploadedFile, path, md5,
     );
     return res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
   }
@@ -46,7 +46,7 @@ module.exports = class FileController {
   get = async (req, res) => {
     const { path, alt } = req.query;
 
-    const data = await this.retrieverFileService.handle(req.tenant, path, alt);
+    const data = await this.retrieverFileService.handle(req.tenant.id, path, alt);
     if (alt === 'media') {
       res.setHeader('Content-Type', data.info.contentType);
       res.setHeader('Content-Length', data.info.size);
@@ -71,7 +71,7 @@ module.exports = class FileController {
       path,
     } = req.query;
 
-    const statFile = await this.removeFileService.handle(req.tenant, path);
+    const statFile = await this.removeFileService.handle(req.tenant.id, path);
 
     return res.status(200).json({ message: `File ${path} removed successfully.`, info: statFile });
   }

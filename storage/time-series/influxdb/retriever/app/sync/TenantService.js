@@ -1,4 +1,4 @@
-const createAxios = require('./createAxios');
+const { WebUtils: { KeycloakClientSession } } = require('@dojot/microservice-sdk');
 
 class TenantService {
   /**
@@ -6,8 +6,10 @@ class TenantService {
    *
    * @param {string} tenantsRouteUrl Url for api that returns data about tenants
    */
-  constructor(tenantsRouteUrl) {
+  constructor(tenantsRouteUrl, dojotClientHttp, keycloakConfig) {
     this.tenantsRouteUrl = tenantsRouteUrl;
+    this.dojotClientHttp = dojotClientHttp;
+    this.keycloakConfig = keycloakConfig;
   }
 
   /**
@@ -18,10 +20,34 @@ class TenantService {
    * @returns a list of tenants
    */
   async getTenants() {
-    const axios = createAxios();
-    const tenants = await axios.get(this.tenantsRouteUrl);
+    const response = await this.dojotClientHttp.request({
+      url: this.tenantsRouteUrl,
+      method: 'GET',
+      timeout: 12000,
+    });
 
-    return tenants.data.tenants;
+    // Authenticating to all tenants
+    const tenantsPromises = response.data.map(async (tenant) => {
+      this.listTenants = response.data;
+      const keycloakSession = new KeycloakClientSession(
+        this.keycloakConfig.uri,
+        tenant.id,
+        {
+          grant_type: 'client_credentials',
+          client_id: this.keycloakConfig['client.id'],
+          client_secret: this.keycloakConfig['client.secret'],
+        },
+      );
+      await keycloakSession.start();
+
+      return {
+        ...tenant,
+        session: keycloakSession,
+      };
+    });
+
+    // Waiting for all sessions to start
+    return Promise.all(tenantsPromises);
   }
 }
 

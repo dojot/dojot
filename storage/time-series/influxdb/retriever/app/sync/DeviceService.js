@@ -1,33 +1,28 @@
-const {
-  WebUtils: { createTokenGen },
-} = require('@dojot/microservice-sdk');
-
-const createAxios = require('./createAxios');
-
-
 class DeviceService {
   /**
    * Consumes api that returns devices data
    *
    * @param {string} deviceRouteUrl Url for api that returns data about devices
    */
-  constructor(deviceRouteUrl) {
+  constructor(deviceRouteUrl, dojotClientHttp) {
     this.deviceRouteUrl = deviceRouteUrl;
+    this.dojotClientHttp = dojotClientHttp;
   }
 
   /**
    * Requires devices data from a tenant for API
    *
-   * @param {string} tenant the tenant name
+   * @param {object} tenant the tenant name
    *
    * @return a list of devices
    */
   async getDevices(tenant) {
-    const tokenGen = createTokenGen();
-    const token = await tokenGen.generate({ payload: {}, tenant });
+    const token = tenant.getTokenSet().access_token;
 
-    const axios = createAxios();
-    const devices = await axios.get(this.deviceRouteUrl, {
+    const devices = await this.dojotClientHttp.request({
+      url: this.deviceRouteUrl,
+      method: 'GET',
+      timeout: 12000,
       params: {
         idsOnly: true,
       },

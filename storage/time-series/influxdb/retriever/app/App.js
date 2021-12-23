@@ -5,6 +5,9 @@ const {
   LocalPersistence: {
     LocalPersistenceManager,
   },
+  WebUtils: {
+    DojotClientHttp,
+  },
 } = require('@dojot/microservice-sdk');
 
 
@@ -34,7 +37,6 @@ const TenantService = require('./sync/TenantService');
 
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
-
 /**
 * Wrapper to initialize the service
 */
@@ -48,10 +50,11 @@ class App {
     try {
       this.server = new Server(serviceState);
       this.influxDB = new InfluxDB(serviceState);
+      this.dojotClientHttp = new DojotClientHttp({ logger, defaultClientOptions: {} });
       this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
       this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
-      this.authService = new TenantService(sync.tenants);
-      this.deviceService = new DeviceService(sync.devices);
+      this.authService = new TenantService(sync.tenants, this.dojotClientHttp);
+      this.deviceService = new DeviceService(sync.devices, this.dojotClientHttp);
       this.syncLoader = new SyncLoader(
         this.localPersistence, this.authService, this.deviceService, this.retrieverConsumer,
       );
@@ -78,7 +81,6 @@ class App {
       const boundQueryDataUsingGraphql = this
         .influxDB.getInfluxDataQueryInstance()
         .queryUsingGraphql.bind(this.influxDB.getInfluxDataQueryInstance());
-
 
       const boundQueryDataByField = this
         .influxDB.getInfluxDataQueryInstance()
