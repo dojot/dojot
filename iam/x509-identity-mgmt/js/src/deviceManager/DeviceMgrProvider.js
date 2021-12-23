@@ -28,10 +28,11 @@ class DeviceMgrProvider {
    *
    * @param {string} tenant
    * @param {string} deviceId
+   * @param {string} xRequestId
    *
    * @return {boolean} True if the device exists and belongs to the tenant, otherwise, false.
    */
-  async checkDeviceExists(tenant, deviceId) {
+  async checkDeviceExists(tenant, deviceId, xRequestId) {
     const cacheHit = await this.deviceModel.contains(tenant, deviceId);
     if (cacheHit) {
       return true;
@@ -40,7 +41,7 @@ class DeviceMgrProvider {
     let device = null;
     try {
       // recover device from original storage location (DeviceManager microservice)
-      device = await this.getDevice(tenant, deviceId);
+      device = await this.getDevice(tenant, deviceId, xRequestId);
     } catch (ex) {
       throw this.error.BadGateway('Could not connect to the Device Manager service to validate the device identifier.');
     }
@@ -59,8 +60,9 @@ class DeviceMgrProvider {
    *
    * @param {string} tenant
    * @param {string} deviceId
+   * @param {string} xRequestId
    */
-  async getDevice(tenant, deviceId) {
+  async getDevice(tenant, deviceId, xRequestId) {
     const token = await this.tokenGen.generate({ tenant });
 
     const options = {
@@ -68,7 +70,7 @@ class DeviceMgrProvider {
       host: this.deviceMgrUrl.hostname,
       port: this.deviceMgrUrl.port,
       path: `${this.deviceMgrUrl.pathname}/${encodeURIComponent(deviceId)}`,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, 'X-Request-Id': xRequestId },
       timeout: this.deviceMgrTimeout,
     };
 
