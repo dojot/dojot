@@ -10,7 +10,9 @@ class Server {
  *          with register service 'server'} serviceState
  *          Manages the services' states, providing health check and shutdown utilities.
    */
-  constructor(serviceState, configServerCamelCase, logger, config) {
+  constructor(
+    serviceState, configServerCamelCase, logger, config,
+  ) {
     this.server = WebUtils.createServer({ config: configServerCamelCase, logger });
     this.serviceState = serviceState;
     this.logger = logger;

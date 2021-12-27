@@ -12,7 +12,9 @@ module.exports = class MinIoRepository {
     return bucketName === 'test';
   }
 
-  async listObjects(tenant, pathPrefix, limit, startAfter) {
+  async listObjects(
+    tenant, pathPrefix, limit, startAfter,
+  ) {
     return [
       {
         name: 'test/test_sample_1',

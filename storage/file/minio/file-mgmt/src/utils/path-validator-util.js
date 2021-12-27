@@ -11,7 +11,9 @@ const {
  * @param {*} logger the logger
  * @param {*} errorCallback a function that will be called before an error is thrown.
  */
-async function validate(path, logger, errorCallback) {
+async function validate(
+  path, logger, errorCallback,
+) {
   if (!path) {
     logger.debug('The "path" field is required.');
     if (errorCallback) {

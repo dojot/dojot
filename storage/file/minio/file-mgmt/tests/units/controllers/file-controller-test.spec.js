@@ -5,8 +5,11 @@ const loggerMock = require('../../mocks/logger-mock');
 const ResponseMock = require('../../mocks/express-response-mock');
 
 const uploadFileService = {
-  // eslint-disable-next-line no-unused-vars
-  handle: jest.fn((tenant, uploadedFile, path, md5) => ({
+  
+  handle: jest.fn((
+    // eslint-disable-next-line no-unused-vars
+    tenant, uploadedFile, path, md5,
+  ) => ({
     transactionCode: '7ddececb-9ed3-40c8-b8de-5a15f4adf290',
     info: {
       etag: '1ee7206fa35053e7d503afa58866bb9f',
@@ -103,7 +106,9 @@ describe('FileController', () => {
       },
     };
     const responseMock = Writable({
-      write(chunk, encoding, next) {
+      write(
+        chunk, encoding, next,
+      ) {
         this.body = this.body ? this.body + chunk.toString() : chunk.toString();
         next();
       },
@@ -145,7 +150,9 @@ describe('FileController', () => {
       },
     };
     const responseMock = Writable({
-      write(chunk, encoding, next) {
+      write(
+        chunk, encoding, next,
+      ) {
         next();
       },
     });

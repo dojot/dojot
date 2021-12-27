@@ -9,6 +9,8 @@
     "test": "jest --verbose --coverage",
     "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
     "unit-test": "jest ./tests/units --no-cache --coverage",
+    "lint": "eslint --ext .js .",
+    "lint:fix": "eslint --fix --ext .js .",
     "check-licenses": "apache2-license-checker"
   },
   "repository": {
@@ -31,6 +33,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
+    "@babel/helper-environment-visitor": "^7.16.5",
     "@bbc/apache2-license-checker": "^1.1.4",
     "@dojot/microservice-sdk": "^0.1.15",
     "babel-eslint": "^10.1.0",

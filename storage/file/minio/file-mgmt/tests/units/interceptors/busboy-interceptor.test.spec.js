@@ -21,9 +21,15 @@ const pipeErrorMock = (busboy) => {
     throw new Error('error');
   });
 
-  busboy.emit('field', 'path', '/test/');
-  busboy.emit('field', 'md5', 'md5');
-  busboy.emit('file', 'file', fileStreamMock, '', '', '');
+  busboy.emit(
+    'field', 'path', '/test/',
+  );
+  busboy.emit(
+    'field', 'md5', 'md5',
+  );
+  busboy.emit(
+    'file', 'file', fileStreamMock, '', '', '',
+  );
 };
 
 describe('BusboyInterceptor', () => {
@@ -48,9 +54,15 @@ describe('BusboyInterceptor', () => {
         busboy.emit('finish');
       });
 
-      busboy.emit('field', 'path', '/test/');
-      busboy.emit('field', 'md5', 'md5');
-      busboy.emit('file', 'file', fileStreamMock, filename, encoding, mimetype);
+      busboy.emit(
+        'field', 'path', '/test/',
+      );
+      busboy.emit(
+        'field', 'md5', 'md5',
+      );
+      busboy.emit(
+        'file', 'file', fileStreamMock, filename, encoding, mimetype,
+      );
     };
     const request = {
       pipe: pipeMock,
@@ -58,24 +70,26 @@ describe('BusboyInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    busboyInterceptor.middleware(request, response, (error) => {
-      expect(error).toBeUndefined();
-      expect(request.body).toEqual({
-        path: '/test/',
-        md5: 'md5',
-        uploadedFile: {
-          transactionCode: 'transcation-code',
-          info: {
-            etag: 'md5',
-            versionId: null,
+    busboyInterceptor.middleware(
+      request, response, (error) => {
+        expect(error).toBeUndefined();
+        expect(request.body).toEqual({
+          path: '/test/',
+          md5: 'md5',
+          uploadedFile: {
+            transactionCode: 'transcation-code',
+            info: {
+              etag: 'md5',
+              versionId: null,
+            },
+            filename,
+            encoding,
+            mimetype,
           },
-          filename,
-          encoding,
-          mimetype,
-        },
-      });
-      done();
-    });
+        });
+        done();
+      },
+    );
   });
 
   it('Should return a too large http response, when the file size is greater than the limit ', (done) => {
@@ -85,9 +99,15 @@ describe('BusboyInterceptor', () => {
         busboy.removeAllListeners('loaded-meta');
       });
 
-      busboy.emit('field', 'path', '/test/');
-      busboy.emit('field', 'md5', 'md5');
-      busboy.emit('file', 'file', fileStreamMock, '', '', '');
+      busboy.emit(
+        'field', 'path', '/test/',
+      );
+      busboy.emit(
+        'field', 'md5', 'md5',
+      );
+      busboy.emit(
+        'file', 'file', fileStreamMock, '', '', '',
+      );
       fileStreamMock.emit('limit');
     };
     const request = {
@@ -96,15 +116,17 @@ describe('BusboyInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    busboyInterceptor.middleware(request, response, (error) => {
-      try {
-        expect(error.responseJSON.error).toEqual('The file is too large');
-        expect(error.responseJSON.detail).toEqual(`The file exceeds the maximum size of ${config.minio['upload.size.limit']}`);
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
+    busboyInterceptor.middleware(
+      request, response, (error) => {
+        try {
+          expect(error.responseJSON.error).toEqual('The file is too large');
+          expect(error.responseJSON.detail).toEqual(`The file exceeds the maximum size of ${config.minio['upload.size.limit']}`);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      },
+    );
   });
 
   it('Should return a internal server http response response, when there is an error ', (done) => {
@@ -114,14 +136,16 @@ describe('BusboyInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    busboyInterceptor.middleware(request, response, (error) => {
-      try {
-        expect(error).toBeDefined();
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
+    busboyInterceptor.middleware(
+      request, response, (error) => {
+        try {
+          expect(error).toBeDefined();
+          done();
+        } catch (e) {
+          done(e);
+        }
+      },
+    );
   });
 
   it('Should return a Not found http response, when the tenant was not found ', (done) => {
@@ -131,14 +155,16 @@ describe('BusboyInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    busboyInterceptor.middleware(request, response, (error) => {
-      try {
-        expect(error.responseJSON.error).toEqual('Tenant does not exist.');
-        expect(error.responseJSON.detail).toEqual('There is no bucket for this tenant.');
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
+    busboyInterceptor.middleware(
+      request, response, (error) => {
+        try {
+          expect(error.responseJSON.error).toEqual('Tenant does not exist.');
+          expect(error.responseJSON.detail).toEqual('There is no bucket for this tenant.');
+          done();
+        } catch (e) {
+          done(e);
+        }
+      },
+    );
   });
 });

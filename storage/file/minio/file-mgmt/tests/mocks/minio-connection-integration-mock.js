@@ -20,8 +20,11 @@ module.exports = (configMinio) => {
 
   };
 
-  // eslint-disable-next-line no-unused-vars
-  minioClient.listObjects = (bucketName, pathPrefix, recursive) => Readable({
+  
+  minioClient.listObjects = (
+    // eslint-disable-next-line no-unused-vars
+    bucketName, pathPrefix, recursive,
+  ) => Readable({
     read() {
       this.emit('end');
     },
@@ -29,9 +32,13 @@ module.exports = (configMinio) => {
 
   minioClient.bucketExists = async (bucketName) => minioClient.buckets.has(bucketName);
 
-  minioClient.putObject = async (bucketName, path, fileStream) => {
+  minioClient.putObject = async (
+    bucketName, path, fileStream,
+  ) => {
     await pipelineAsync(fileStream, Writable({
-      write(chunk, encoding, cb) {
+      write(
+        chunk, encoding, cb,
+      ) {
         cb();
       },
     }));

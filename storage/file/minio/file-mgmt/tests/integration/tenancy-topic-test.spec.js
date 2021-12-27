@@ -10,27 +10,33 @@ describe('TOPIC *.dojot.tenancy', () => {
   it('Should create tenant when the message type is CREATE', (done) => {
     const message = '{ "type": "CREATE", "tenant": "test" }';
 
-    sendFakePayload('dojot.tenancy', message, (error) => {
-      expect(error).toBeUndefined();
-      done();
-    });
+    sendFakePayload(
+      'dojot.tenancy', message, (error) => {
+        expect(error).toBeUndefined();
+        done();
+      },
+    );
   });
 
   it('Should remove tenant when the message type is DELETE ', (done) => {
     const message = '{ "type": "DELETE", "tenant": "test" }';
 
-    sendFakePayload('dojot.tenancy', message, (error) => {
-      expect(error).toBeUndefined();
-      done();
-    });
+    sendFakePayload(
+      'dojot.tenancy', message, (error) => {
+        expect(error).toBeUndefined();
+        done();
+      },
+    );
   });
 
   it('Should return an error ', (done) => {
     const message = '{ "type": "ERROR", "tenant": "test" }';
 
-    sendFakePayload('dojot.tenancy', message, (error) => {
-      expect(error).toBeDefined();
-      done();
-    });
+    sendFakePayload(
+      'dojot.tenancy', message, (error) => {
+        expect(error).toBeDefined();
+        done();
+      },
+    );
   });
 });

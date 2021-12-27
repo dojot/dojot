@@ -17,7 +17,9 @@ module.exports = class ExpressAdapter {
    *
    * @returns the express server
    */
-  static adapt(routes, serviceState, openApiPath, logger, config) {
+  static adapt(
+    routes, serviceState, openApiPath, logger, config,
+  ) {
     let openApiJson = null;
     try {
       // It is a system necessity get the yaml file dynamically

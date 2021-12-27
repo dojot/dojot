@@ -70,7 +70,9 @@ describe('FileRetrievalService', () => {
     fileRetrievalService.download = jest.fn(() => ({ stream: '' }));
     fileRetrievalService.getUrl = jest.fn(() => ({ url: 'url' }));
 
-    const file = await fileRetrievalService.handle('test', 'path', 'media');
+    const file = await fileRetrievalService.handle(
+      'test', 'path', 'media',
+    );
     expect(file).toEqual({
       stream: '',
     });
@@ -80,7 +82,9 @@ describe('FileRetrievalService', () => {
     fileRetrievalService.download = jest.fn(() => ({ stream: '' }));
     fileRetrievalService.getUrl = jest.fn(() => ({ url: 'url' }));
 
-    const file = await fileRetrievalService.handle('test', 'path', 'url');
+    const file = await fileRetrievalService.handle(
+      'test', 'path', 'url',
+    );
     expect(file).toEqual({
       url: 'url',
     });
@@ -89,7 +93,9 @@ describe('FileRetrievalService', () => {
   it('Should return an error, when the alt is not entered', async () => {
     let error;
     try {
-      await fileRetrievalService.handle('test', 'path', undefined);
+      await fileRetrievalService.handle(
+        'test', 'path', undefined,
+      );
     } catch (e) {
       error = e;
     }
@@ -103,7 +109,9 @@ describe('FileRetrievalService', () => {
   it('Should return an error, when the value of the alt is invalid', async () => {
     let error;
     try {
-      await fileRetrievalService.handle('test', 'path', 'invalid');
+      await fileRetrievalService.handle(
+        'test', 'path', 'invalid',
+      );
     } catch (e) {
       error = e;
     }
@@ -121,7 +129,9 @@ describe('FileRetrievalService', () => {
 
     let error;
     try {
-      await fileRetrievalService.handle('test', 'path', 'media');
+      await fileRetrievalService.handle(
+        'test', 'path', 'media',
+      );
     } catch (e) {
       error = e;
     }

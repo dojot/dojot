@@ -5,14 +5,18 @@ const loggerMock = require('../../mocks/logger-mock');
 
 describe('PathValidatorUtil', () => {
   it('Should pass validation', async () => {
-    PathValidatorUtil.validate('/path/file', loggerMock, () => {});
+    PathValidatorUtil.validate(
+      '/path/file', loggerMock, () => {},
+    );
     expect.assertions(0);
   });
 
   it('Should throw an error, when the path field is undefined', async () => {
     let error;
     try {
-      await PathValidatorUtil.validate(undefined, loggerMock, () => {});
+      await PathValidatorUtil.validate(
+        undefined, loggerMock, () => {},
+      );
     } catch (e) {
       error = e;
     }
@@ -24,7 +28,9 @@ describe('PathValidatorUtil', () => {
   it('Should throw an error, when the length of the "path" field is less than 3 characters', async () => {
     let error;
     try {
-      await PathValidatorUtil.validate('12', loggerMock, () => {});
+      await PathValidatorUtil.validate(
+        '12', loggerMock, () => {},
+      );
     } catch (e) {
       error = e;
     }
@@ -52,7 +58,9 @@ describe('PathValidatorUtil', () => {
   it('Should throw an error, when the value of the "path" field is "/.tmp/" ', async () => {
     let error;
     try {
-      await PathValidatorUtil.validate('/.tmp/', loggerMock, () => {});
+      await PathValidatorUtil.validate(
+        '/.tmp/', loggerMock, () => {},
+      );
     } catch (e) {
       error = e;
     }

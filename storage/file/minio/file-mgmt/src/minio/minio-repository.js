@@ -14,7 +14,9 @@ module.exports = class MinIoRepository {
    * @param {object} configMinio MinIO settings
    * @param {object} logger Dojot logger
    */
-  constructor(minioConnection, configMinio, logger) {
+  constructor(
+    minioConnection, configMinio, logger,
+  ) {
     this.client = minioConnection;
     this.suffixBucket = configMinio['bucket.suffix'];
     this.presignedExpiry = configMinio['presigned.expiry'];
@@ -41,7 +43,9 @@ module.exports = class MinIoRepository {
     const outerThis = this;
     const objectsList = [];
     // List all object paths
-    const objectsStream = this.client.listObjects(outerThis.suffixBucket + bucketName, '', true);
+    const objectsStream = this.client.listObjects(
+      outerThis.suffixBucket + bucketName, '', true,
+    );
 
     objectsStream.on('data', (obj) => {
       objectsList.push(obj.name);
@@ -88,7 +92,9 @@ module.exports = class MinIoRepository {
    *
    * @returns the metadata of the operation
    */
-  async putObject(bucketName, path, fileStream) {
+  async putObject(
+    bucketName, path, fileStream,
+  ) {
     this.logger.debug(`Putting object ${path}`);
     const info = await this.client.putObject(
       this.suffixBucket + bucketName, path, fileStream,
@@ -132,9 +138,13 @@ module.exports = class MinIoRepository {
    * @param {string} fileStream the transaction code
    *
    */
-  async commitObject(bucketName, path, transactionCode) {
+  async commitObject(
+    bucketName, path, transactionCode,
+  ) {
     this.logger.debug(`Commit file transaction ${transactionCode}`);
-    await this.client.copyObject(`${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}${bucketName}/.tmp/${transactionCode}`);
+    await this.client.copyObject(
+      `${this.suffixBucket}${bucketName}`, path, `${this.suffixBucket}${bucketName}/.tmp/${transactionCode}`,
+    );
     await this.client.removeObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`);
   }
 
@@ -146,9 +156,7 @@ module.exports = class MinIoRepository {
    */
   async rollbackObject(bucketName, transactionCode) {
     this.logger.debug(`Rollback file transaction ${transactionCode}`);
-    return this.client.removeObject(
-      `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`,
-    );
+    return this.client.removeObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`);
   }
 
   /**
@@ -189,7 +197,9 @@ module.exports = class MinIoRepository {
   async getObjectUrl(bucketName, path) {
     try {
       const info = await this.client.statObject(this.suffixBucket + bucketName, path);
-      const url = await this.client.presignedGetObject(`${this.suffixBucket}${bucketName}`, path, this.presignedExpiry);
+      const url = await this.client.presignedGetObject(
+        `${this.suffixBucket}${bucketName}`, path, this.presignedExpiry,
+      );
 
       return {
         url,
@@ -224,9 +234,7 @@ module.exports = class MinIoRepository {
       return null;
     }
 
-    await this.client.removeObject(
-      this.suffixBucket + bucketName, path,
-    );
+    await this.client.removeObject(this.suffixBucket + bucketName, path);
 
     return stat;
   }
@@ -241,7 +249,9 @@ module.exports = class MinIoRepository {
    *
    * @returns a list of files
    */
-  async listObjects(bucketName, pathPrefix, limit, startAfter) {
+  async listObjects(
+    bucketName, pathPrefix, limit, startAfter,
+  ) {
     let error;
     const result = {
       files: [],
@@ -249,7 +259,9 @@ module.exports = class MinIoRepository {
     };
 
     const writebleStream = Writable({
-      async write(data, encoding, cb) {
+      async write(
+        data, encoding, cb,
+      ) {
         cb();
       },
     });

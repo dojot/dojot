@@ -33,12 +33,16 @@ module.exports = (config, logger) => {
   });
 
   // Techs
-  const httpServer = new Server(serviceState, configServerCamelCase, logger, config);
+  const httpServer = new Server(
+    serviceState, configServerCamelCase, logger, config,
+  );
   const kafkaConsumer = new KafkaConsumer(config, logger);
 
   // Repositories
   const minioConnection = createMinIOConnection(config.minio);
-  const minioRepository = new MinIoRepository(minioConnection, config.minio, logger);
+  const minioRepository = new MinIoRepository(
+    minioConnection, config.minio, logger,
+  );
 
   // Services
   const tenantService = new TenantService(minioRepository);

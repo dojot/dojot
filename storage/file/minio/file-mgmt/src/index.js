@@ -16,7 +16,9 @@ const config = ConfigManager.getConfig('FILEMGMT');
 logger.debug('Loading secrets');
 LoadSecretsUtil.loadSecrets(config).then(() => {
   // Init Application
-  const app = new App(config, logger, openApiPath);
+  const app = new App(
+    config, logger, openApiPath,
+  );
 
   app.init().then(() => {
     logger.info('Server started..');

@@ -28,7 +28,9 @@ const loggerMock = require('../../mocks/logger-mock');
 describe('App', () => {
   let app;
   beforeEach(() => {
-    app = new App({}, loggerMock, openApiValidator);
+    app = new App(
+      {}, loggerMock, openApiValidator,
+    );
   });
 
   it('Should init application', async () => {

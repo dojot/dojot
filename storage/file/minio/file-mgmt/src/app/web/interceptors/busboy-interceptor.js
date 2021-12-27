@@ -15,9 +15,13 @@ const {
  *
  * @returns an instance of busboy interceptor
  */
-module.exports = (logger, minioRepository, config) => ({
+module.exports = (
+  logger, minioRepository, config,
+) => ({
   name: 'dojot-busboy-interceptor',
-  middleware: async (req, res, next) => {
+  middleware: async (
+    req, res, next,
+  ) => {
     const busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: config.minio['upload.size.limit'] } });
     req.body = {};
     let loadedFile = false;
@@ -30,7 +34,9 @@ module.exports = (logger, minioRepository, config) => ({
 
     // Gets the file
     // eslint-disable-next-line no-unused-vars
-    busboy.on('file', async (fieldname, fileStream, filename, encoding, mimetype) => {
+    busboy.on('file', async (
+      fieldname, fileStream, filename, encoding, mimetype,
+    ) => {
       try {
         logger.debug('Gets file stream..');
         // If the file exceeds the size limit

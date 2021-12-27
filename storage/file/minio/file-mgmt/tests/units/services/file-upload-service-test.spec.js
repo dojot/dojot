@@ -2,7 +2,9 @@ const MinIoRepositoryMock = require('../../mocks/minio-repository-mock');
 const LoggerMock = require('../../mocks/logger-mock');
 
 const mockValidator = {
-  validate: jest.fn((path, logger, fn) => {
+  validate: jest.fn((
+    path, logger, fn,
+  ) => {
     fn();
   }),
 };
@@ -25,7 +27,9 @@ describe('FileUploadService', () => {
       },
     };
 
-    const fileStat = await fileUploadService.handle('test', file, '', 'md5');
+    const fileStat = await fileUploadService.handle(
+      'test', file, '', 'md5',
+    );
 
     expect(fileStat).toEqual(file);
   });
@@ -40,7 +44,9 @@ describe('FileUploadService', () => {
     };
 
     try {
-      await fileUploadService.handle('test', file, '', 'md5error');
+      await fileUploadService.handle(
+        'test', file, '', 'md5error',
+      );
     } catch (e) {
       error = e;
     }

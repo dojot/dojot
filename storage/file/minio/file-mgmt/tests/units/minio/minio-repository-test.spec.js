@@ -30,7 +30,9 @@ describe('MinIoRepository', () => {
       presignedGetObject: jest.fn((bucketName, path) => `http://url:7000/object?bucket=${bucketName}&path=${path}`),
     };
 
-    minioRepository = new MinIoRepository(minioConnection, configMinio, loggerMock);
+    minioRepository = new MinIoRepository(
+      minioConnection, configMinio, loggerMock,
+    );
   });
 
   it('Should make a bucket', async () => {
@@ -72,12 +74,16 @@ describe('MinIoRepository', () => {
 
   it('Should add file and return a file creation log', async () => {
     // eslint-disable-next-line no-unused-vars
-    minioConnection.putObject = jest.fn((bucketName, path, fileStream) => ({
+    minioConnection.putObject = jest.fn((
+      bucketName, path, fileStream,
+    ) => ({
       etag: 'md5',
       versionId: null,
     }));
 
-    const info = await minioRepository.putObject('test', '/test/', {});
+    const info = await minioRepository.putObject(
+      'test', '/test/', {},
+    );
     expect(info).toEqual({
       etag: 'md5',
       versionId: null,
@@ -86,9 +92,13 @@ describe('MinIoRepository', () => {
 
   it('Should add file and return a normalized file creation log, when there is no availability for version control ', async () => {
     // eslint-disable-next-line no-unused-vars
-    minioConnection.putObject = jest.fn((bucketName, path, fileStream) => 'md5');
+    minioConnection.putObject = jest.fn((
+      bucketName, path, fileStream,
+    ) => 'md5');
 
-    const info = await minioRepository.putObject('test', '/test/', {});
+    const info = await minioRepository.putObject(
+      'test', '/test/', {},
+    );
     expect(info).toEqual({
       etag: 'md5',
       versionId: null,
@@ -97,12 +107,16 @@ describe('MinIoRepository', () => {
 
   it('Should add temporary file and return a file creation log', async () => {
     // eslint-disable-next-line no-unused-vars
-    minioConnection.putObject = jest.fn((bucketName, path, fileStream) => ({
+    minioConnection.putObject = jest.fn((
+      bucketName, path, fileStream,
+    ) => ({
       etag: 'md5',
       versionId: null,
     }));
 
-    const meta = await minioRepository.putTmpObject('test', '/test/', {});
+    const meta = await minioRepository.putTmpObject(
+      'test', '/test/', {},
+    );
     expect(meta.transactionCode).toBeDefined();
     expect(meta.info).toEqual({
       etag: 'md5',
@@ -112,9 +126,13 @@ describe('MinIoRepository', () => {
 
   it('Should add temporary file and return a file normalized creation log, when there is no availability for version control', async () => {
     // eslint-disable-next-line no-unused-vars
-    minioConnection.putObject = jest.fn((bucketName, path, fileStream) => ('md5'));
+    minioConnection.putObject = jest.fn((
+      bucketName, path, fileStream,
+    ) => ('md5'));
 
-    const meta = await minioRepository.putTmpObject('test', '/test/', {});
+    const meta = await minioRepository.putTmpObject(
+      'test', '/test/', {},
+    );
     expect(meta.transactionCode).toBeDefined();
     expect(meta.info).toEqual({
       etag: 'md5',
@@ -123,7 +141,9 @@ describe('MinIoRepository', () => {
   });
 
   it('Should commit a temporary file', async () => {
-    await minioRepository.commitObject('test', '/test/', 'uuid');
+    await minioRepository.commitObject(
+      'test', '/test/', 'uuid',
+    );
     expect.anything();
   });
 
@@ -173,7 +193,9 @@ describe('MinIoRepository', () => {
       },
     }));
 
-    const result = await minioRepository.listObjects('test', '/path/file/', 2, '');
+    const result = await minioRepository.listObjects(
+      'test', '/path/file/', 2, '',
+    );
     expect(result.files).toEqual([
       { file: 1 },
       { file: 2 },
@@ -193,7 +215,9 @@ describe('MinIoRepository', () => {
       },
     }));
 
-    const result = await minioRepository.listObjects('test', '/path/file/', undefined, '');
+    const result = await minioRepository.listObjects(
+      'test', '/path/file/', undefined, '',
+    );
     expect(result.files).toEqual([
       { file: 1 },
       { file: 2 },
@@ -273,7 +297,9 @@ describe('MinIoRepository', () => {
 
     let error;
     try {
-      await minioRepository.listObjects('test', '/path/file/', undefined, '');
+      await minioRepository.listObjects(
+        'test', '/path/file/', undefined, '',
+      );
     } catch (e) {
       error = e;
     }

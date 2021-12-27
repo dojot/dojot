@@ -48,7 +48,9 @@ const routes = [
 
 describe('ExpressAdapter', () => {
   it('Should run adapter process', () => {
-    ExpressAdapter.adapt(routes, {}, {}, loggerMock, config);
+    ExpressAdapter.adapt(
+      routes, {}, {}, loggerMock, config,
+    );
     expect.anything();
   });
 
@@ -59,7 +61,9 @@ describe('ExpressAdapter', () => {
 
     let error;
     try {
-      ExpressAdapter.adapt(routes, {}, {}, loggerMock, config);
+      ExpressAdapter.adapt(
+        routes, {}, {}, loggerMock, config,
+      );
     } catch (e) {
       error = e;
     }

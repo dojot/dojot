@@ -7,7 +7,9 @@
  *
  * @returns the http routes
  */
-const routesV1 = (mountPoint, controllers, interceptors) => {
+const routesV1 = (
+  mountPoint, controllers, interceptors,
+) => {
   const fileUploadRoute = {
     mountPoint,
     name: 'files',

@@ -65,7 +65,9 @@ module.exports = class FileRetrievalService {
    * @returns an object with the MinIO URL to the file or a file stream associated
    *  with the file's metadata.
    */
-  handle = async (tenant, path, alt) => {
+  handle = async (
+    tenant, path, alt,
+  ) => {
     if (!(await this.minioRepository.bucketExists(tenant))) {
       this.logger.debug('Tenant does not exist.');
       throw framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.');

@@ -25,19 +25,21 @@ module.exports = class FileListingService {
    *
    * @returns a list of files
    */
-  async list(tenant, pathPrefix, limit, startAfter) {
+  async list(
+    tenant, pathPrefix, limit, startAfter,
+  ) {
     if (!(await this.minioRepository.bucketExists(tenant))) {
       this.logger.debug('Tenant does not exist.');
       throw framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.');
     }
 
     if (!(limit && Math.sign(limit) === 1 && Number.isInteger(limit))) {
-      throw framework.errorTemplate.BadRequest(
-        'The limit param is invalid or undefined.',
-        'The limit param is required and must be a positive integer.',
-      );
+      throw framework.errorTemplate.BadRequest('The limit param is invalid or undefined.',
+        'The limit param is required and must be a positive integer.');
     }
 
-    return this.minioRepository.listObjects(tenant, pathPrefix, limit, startAfter);
+    return this.minioRepository.listObjects(
+      tenant, pathPrefix, limit, startAfter,
+    );
   }
 };

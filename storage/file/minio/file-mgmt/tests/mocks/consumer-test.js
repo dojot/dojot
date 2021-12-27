@@ -1,7 +1,9 @@
 /* eslint-disable class-methods-use-this */
 const listeners = new Map();
 
-const sendFakePayload = (topic, message, ack) => {
+const sendFakePayload = (
+  topic, message, ack,
+) => {
   const payload = {
     value: Buffer.from(message),
   };

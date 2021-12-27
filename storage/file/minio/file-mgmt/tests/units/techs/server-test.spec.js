@@ -30,7 +30,9 @@ const serviceStateMock = {
 describe('Server', () => {
   let server;
   beforeEach(() => {
-    server = new Server(serviceStateMock, {}, loggerMock, { server: {} });
+    server = new Server(
+      serviceStateMock, {}, loggerMock, { server: {} },
+    );
   });
 
   it('Should init server', async () => {

@@ -27,10 +27,14 @@ module.exports = class FileUploadService {
    * @returns the upload operation metadata
    */
   // eslint-disable-next-line no-unused-vars
-  handle = async (tenant, file, path, md5) => {
-    await PathValidatorUtil.validate(path, this.logger, async () => {
-      await this.minioRepository.rollbackObject(tenant, file.transactionCode);
-    });
+  handle = async (
+    tenant, file, path, md5,
+  ) => {
+    await PathValidatorUtil.validate(
+      path, this.logger, async () => {
+        await this.minioRepository.rollbackObject(tenant, file.transactionCode);
+      },
+    );
 
     if (md5) {
       if (md5 !== file.info.etag) {
@@ -40,7 +44,9 @@ module.exports = class FileUploadService {
       }
     }
 
-    await this.minioRepository.commitObject(tenant, path, file.transactionCode);
+    await this.minioRepository.commitObject(
+      tenant, path, file.transactionCode,
+    );
 
     return file;
   }

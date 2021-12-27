@@ -28,11 +28,13 @@ describe('DojotTenantJwtParseInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    middleware(request, response, (err) => {
-      expect(err).toBeUndefined();
-      expect(request.tenant).toEqual('test');
-      done();
-    });
+    middleware(
+      request, response, (err) => {
+        expect(err).toBeUndefined();
+        expect(request.tenant).toEqual('test');
+        done();
+      },
+    );
   });
 
   it('Should call the next middleware reporting an error, when jwt token is not entered', (done) => {
@@ -42,10 +44,12 @@ describe('DojotTenantJwtParseInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    middleware(request, response, (err) => {
-      expect(err.message).toEqual('Missing JWT token');
-      done();
-    });
+    middleware(
+      request, response, (err) => {
+        expect(err.message).toEqual('Missing JWT token');
+        done();
+      },
+    );
   });
 
   it('Should call the next middleware reporting an error, when the JWT token entered is invalid', (done) => {
@@ -56,10 +60,12 @@ describe('DojotTenantJwtParseInterceptor', () => {
     };
     const response = new ResponseMock();
 
-    middleware(request, response, (err) => {
-      expect(err.message).toEqual('Invalid JWT token');
-      done();
-    });
+    middleware(
+      request, response, (err) => {
+        expect(err.message).toEqual('Invalid JWT token');
+        done();
+      },
+    );
   });
 
   it('Should call the next middleware reporting an error, when jwt decoding fails', (done) => {
@@ -73,9 +79,11 @@ describe('DojotTenantJwtParseInterceptor', () => {
       throw Error('JWT decoding fails');
     });
 
-    middleware(request, response, (err) => {
-      expect(err.message).toEqual('JWT decoding fails');
-      done();
-    });
+    middleware(
+      request, response, (err) => {
+        expect(err.message).toEqual('JWT decoding fails');
+        done();
+      },
+    );
   });
 });

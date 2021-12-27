@@ -36,7 +36,9 @@ const mockDojot = {
         beaconInterceptor: () => ({
           path: '/',
           name: 'beacon-interceptor',
-          middleware: (req, res, next) => {
+          middleware: (
+            req, res, next,
+          ) => {
             next();
           },
         }),
@@ -63,7 +65,9 @@ function generateApp() {
   ConfigManager.loadSettings('FILE-MGMT', 'default.conf');
   const config = ConfigManager.getConfig('FILE-MGMT');
 
-  const app = new App(config, loggerMock, openApiPath);
+  const app = new App(
+    config, loggerMock, openApiPath,
+  );
   return app;
 }
 

@@ -9,7 +9,9 @@ const pipelineAsync = promisify(pipeline);
  * @class
  */
 module.exports = class FileController {
-  constructor(uploadFileService, retrieverFileService, removeFileService, logger) {
+  constructor(
+    uploadFileService, retrieverFileService, removeFileService, logger,
+  ) {
     this.removeFileService = removeFileService;
     this.retrieverFileService = retrieverFileService;
     this.uploadFileService = uploadFileService;
@@ -46,7 +48,9 @@ module.exports = class FileController {
   get = async (req, res) => {
     const { path, alt } = req.query;
 
-    const data = await this.retrieverFileService.handle(req.tenant, path, alt);
+    const data = await this.retrieverFileService.handle(
+      req.tenant, path, alt,
+    );
     if (alt === 'media') {
       res.setHeader('Content-Type', data.info.contentType);
       res.setHeader('Content-Length', data.info.size);
