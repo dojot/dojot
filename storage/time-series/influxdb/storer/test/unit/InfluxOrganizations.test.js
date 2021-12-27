@@ -61,7 +61,9 @@ describe('Test Influx Orgs', () => {
   });
 
   test('Instantiate class', () => {
-    orgs = new Organizations('url', 'token', 'orgDefault', 'defaultBucket', 100);
+    orgs = new Organizations(
+      'url', 'token', 'orgDefault', 'defaultBucket', 100,
+    );
   });
 
   test('createOrgWithDefaultBucket - org and bucket doest exist test ok ', async () => {

@@ -106,9 +106,8 @@ class DojotConsumer {
    * @param {async function(string, string)} handleDeviceRemoveEvent=null Receive tenant,
    *                                         deviceid (default = null)
    */
-  registerCallbacksForDeviceMgmtEvents(
-    handleDeviceConfigurationEvent, handleDeviceRemoveEvent = null,
-  ) {
+  registerCallbacksForDeviceMgmtEvents(handleDeviceConfigurationEvent,
+    handleDeviceRemoveEvent = null) {
     const topicSuffix = config.subscribe['topics.suffix.device.manager'];
     logger.debug(`registerCallbacksForDeviceMgmtEvents: Register Callback for topics with suffix ${topicSuffix}`);
     // TODO: better understand why this regex is unsafe and change it
@@ -178,7 +177,9 @@ class DojotConsumer {
           { deviceid, tenant, timestamp },
           attrs,
         } = JSON.parse(payload);
-        await DojotConsumer.handleData(deviceid, tenant, timestamp, attrs, handleDeviceData);
+        await DojotConsumer.handleData(
+          deviceid, tenant, timestamp, attrs, handleDeviceData,
+        );
       } catch (e) {
         logger.error(`registerCallbacksForDeviceDataEvents (Received data - ${util.inspect(data)} - value:  ${data.value ? data.value.toString() : ''}): `, e);
       }
@@ -213,7 +214,9 @@ class DojotConsumer {
    *                              or RFC3339,
    *                              attrs (key:value)
    */
-  static async handleData(deviceid, tenant, timestamp, attrs, callback) {
+  static async handleData(
+    deviceid, tenant, timestamp, attrs, callback,
+  ) {
     const attrsCopy = { ...attrs };
     if (!tenant) {
       logger.warn(`handleData: missing tenant. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
@@ -227,7 +230,9 @@ class DojotConsumer {
       logger.warn(`handleData: attrs is a empty object. Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     } else if (DojotConsumer.checkIfShouldPersist(attrsCopy)) {
       delete attrsCopy.shouldPersist;
-      await callback(tenant, deviceid, timestamp, attrsCopy);
+      await callback(
+        tenant, deviceid, timestamp, attrsCopy,
+      );
     } else {
       logger.debug(`handleData: shouldPersist is false.  Msg info: timestamp=${timestamp} tenant=${tenant} deviceid=${deviceid} attrs=${JSON.stringify(attrs)}`);
     }

@@ -129,14 +129,22 @@ describe('App', () => {
     expect(mockCloseOne).toBeCalledWith('tenant1');
 
     const callbackWriteData = mockKafkaSetCallbacksConsumerDevice.mock.calls[0][0];
-    await callbackWriteData('tenant1', 'deviceid', 'attrs', 'timestamp');
-    expect(mockWrite).toBeCalledWith('tenant1', 'deviceid', 'timestamp', 'attrs');
+    await callbackWriteData(
+      'tenant1', 'deviceid', 'attrs', 'timestamp',
+    );
+    expect(mockWrite).toBeCalledWith(
+      'tenant1', 'deviceid', 'timestamp', 'attrs',
+    );
 
     const callbackWriteData2 = mockKafkaSetCallbacksConsumerDevice.mock.calls[0][0];
     const callbackDeleteMeasurement = mockKafkaSetCallbacksConsumerDevice
       .mock.calls[0][1];
-    await callbackWriteData2('tenant2', 'deviceid2', 'attrs2', 'timestamp2');
-    expect(mockWrite).toBeCalledWith('tenant2', 'deviceid2', 'timestamp2', 'attrs2');
+    await callbackWriteData2(
+      'tenant2', 'deviceid2', 'attrs2', 'timestamp2',
+    );
+    expect(mockWrite).toBeCalledWith(
+      'tenant2', 'deviceid2', 'timestamp2', 'attrs2',
+    );
 
     await callbackDeleteMeasurement('tenant2', 'deviceId2');
     expect(mockDeleteMeasurement).toBeCalledWith('tenant2', 'deviceId2');

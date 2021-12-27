@@ -79,18 +79,13 @@ class DojotKafka {
   * and setCallbacksConsumerTenant
   */
   registerCallbacksConsumer() {
-    this.kafkaConsumer.registerCallbacksForDeviceDataEvents(
-      this.callbacksConsumerDevice.dataDevice,
-    );
+    this.kafkaConsumer
+      .registerCallbacksForDeviceDataEvents(this.callbacksConsumerDevice.dataDevice);
 
-    this.kafkaConsumer.registerCallbacksForDeviceMgmtEvents(
-      this.callbacksConsumerDevice.dataDevice,
-      this.callbacksConsumerDevice.deleteDevice,
-    );
-    this.kafkaConsumer.registerCallbackForTenantEvents(
-      this.callbacksConsumerTenant.createTenant,
-      this.callbacksConsumerTenant.deleteTenant,
-    );
+    this.kafkaConsumer.registerCallbacksForDeviceMgmtEvents(this.callbacksConsumerDevice.dataDevice,
+      this.callbacksConsumerDevice.deleteDevice);
+    this.kafkaConsumer.registerCallbackForTenantEvents(this.callbacksConsumerTenant.createTenant,
+      this.callbacksConsumerTenant.deleteTenant);
   }
 
   /**
@@ -115,7 +110,9 @@ class DojotKafka {
         signalNotReady();
       }
     };
-    this.serviceState.addHealthChecker('kafka', kafkaHealthChecker, configKafka['heathcheck.ms']);
+    this.serviceState.addHealthChecker(
+      'kafka', kafkaHealthChecker, configKafka['heathcheck.ms'],
+    );
   }
 
 

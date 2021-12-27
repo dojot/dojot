@@ -49,9 +49,7 @@ class InfluxDB {
       configInflux['default.token'],
       configInflux['default.bucket'],
     );
-    this.influxState = new InfluxState(
-      configInflux.url,
-    );
+    this.influxState = new InfluxState(configInflux.url);
     this.serviceState = serviceState;
     this.isHealth = null;
   }
@@ -119,7 +117,9 @@ class InfluxDB {
         signalNotReady();
       }
     };
-    this.serviceState.addHealthChecker('influxdb', influxdbHealthChecker, configInflux['heathcheck.ms']);
+    this.serviceState.addHealthChecker(
+      'influxdb', influxdbHealthChecker, configInflux['heathcheck.ms'],
+    );
   }
 
 

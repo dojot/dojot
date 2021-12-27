@@ -151,7 +151,9 @@ describe('App', () => {
       }),
     });
     expect(mockConsumer.registerCallback.mock.calls[0][0]).toStrictEqual(/^.+123/);
-    expect(handleTenantCreateEvent).toHaveBeenCalledWith('tenant1', '1234', 'ts', { a: 'a' });
+    expect(handleTenantCreateEvent).toHaveBeenCalledWith(
+      'tenant1', '1234', 'ts', { a: 'a' },
+    );
     expect(mockLogDebug).toHaveBeenCalledWith('registerCallbacksForDeviceMgmtEvents: handleDeviceRemoveEvent not enable. Received data: {"event":"remove","meta":{"service":"tenant1","timestamp":"ts"},"data":{"id":"1234","attrs":{"a":"a"}}}');
   });
 
@@ -217,7 +219,9 @@ describe('App', () => {
         attrs: { a: 'a', shouldPersist: true },
       }),
     });
-    expect(handleDataEvent).toHaveBeenCalledWith('tenant1', '1234', 'ts', { a: 'a' });
+    expect(handleDataEvent).toHaveBeenCalledWith(
+      'tenant1', '1234', 'ts', { a: 'a' },
+    );
     callback({
       value: JSON.stringify({
         metadata: {

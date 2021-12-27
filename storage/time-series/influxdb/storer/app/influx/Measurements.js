@@ -16,7 +16,9 @@ class Measurements {
    * @param {String} token A token with deletion permission in all orgs
    * @param {String} defaultBucket The default bucket to be using with all orgs
    */
-  constructor(url, token, defaultBucket) {
+  constructor(
+    url, token, defaultBucket,
+  ) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);

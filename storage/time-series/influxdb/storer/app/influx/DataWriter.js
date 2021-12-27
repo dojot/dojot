@@ -19,7 +19,9 @@ class DataWriter {
    *
    * @throws If the value for `writeOptions.flushInterval` must be greater than 0
    */
-  constructor(url, token, defaultBucket, writeOptions = {}) {
+  constructor(
+    url, token, defaultBucket, writeOptions = {},
+  ) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
@@ -40,7 +42,9 @@ class DataWriter {
     //  attempts - a number of failed attempts to write the lines
     //  returns a Promise to force the API to use it as a result of the flush operation,
     //  void/undefined to continue with default retry mechanism
-    this.writeOptions.writeFailed = (error, lines, attempts) => {
+    this.writeOptions.writeFailed = (
+      error, lines, attempts,
+    ) => {
       logger.debug(`writeFailed: lines: ${lines.toString()} attempts:${attempts}`, error);
     };
 
@@ -75,15 +79,13 @@ class DataWriter {
     logger.debug(`getWriter:  Getting witter for ${org} org..`);
     try {
       if (!this.writers.has(org)) {
-        this.writers.set(
-          org,
+        this.writers.set(org,
           this.influxDB.getWriteApi(
             org,
             this.bucket,
             this.precision,
             this.writeOptions,
-          ),
-        );
+          ));
       }
       return this.writers.get(org);
     } catch (e) {
@@ -112,7 +114,9 @@ class DataWriter {
    * something that can be used to confirm the data is not returned.
    * WriteSuccess and writeFailed could be used for this.
    */
-  async write(org, measurement, attrs, timestamp) {
+  async write(
+    org, measurement, attrs, timestamp,
+  ) {
     logger.debug(`writer: Pushing  data to ${org} org, ${measurement} measurement and ${timestamp} timestamp and attrs=${JSON.stringify(attrs)}`);
     if (typeof attrs === 'object') {
       try {

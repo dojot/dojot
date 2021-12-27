@@ -68,10 +68,8 @@ class App {
       // when the influxdb service is unhealthy the kafka consumer
       // callbacks will be unregistered and when the service becomes healthy
       // they will be registered again.
-      this.influxDB.createHealthChecker(
-        boundKafkaRegisterCallbacksConsumer,
-        boundKafkaUnregisterCallbacksConsumer,
-      );
+      this.influxDB.createHealthChecker(boundKafkaRegisterCallbacksConsumer,
+        boundKafkaUnregisterCallbacksConsumer);
       // defines shutdown behavior for influx
       // All registered shutdown handlers are
       // executed in the order they have been registered.
@@ -98,7 +96,9 @@ class App {
    */
   setCallbacksKafkaConsumerDevice() {
     // create callback to handle receive data
-    const callbackWriteData = async (tenant, deviceid, timestamp, attrs) => {
+    const callbackWriteData = async (
+      tenant, deviceid, timestamp, attrs,
+    ) => {
       logger.debug('callbackWriteData: init');
       logger.debug(`callbackWriteData: tenant=${tenant}`);
       logger.debug(`callbackWriteData: deviceid=${deviceid}`);
@@ -106,7 +106,9 @@ class App {
       logger.debug(`callbackWriteData: attrs=${JSON.stringify(attrs)}`);
       try {
         await this.influxDB
-          .getInfluxDataWriterInstance().write(tenant, deviceid, attrs, timestamp);
+          .getInfluxDataWriterInstance().write(
+            tenant, deviceid, attrs, timestamp,
+          );
       } catch (e) {
         // TODO: We need to think in a strategy when something like this happen.
         // One possibility would be to report some statistics like ratio of
@@ -176,10 +178,8 @@ class App {
       }
     };
 
-    this.kafka.setCallbacksConsumerTenant(
-      callbackCreateTenant,
-      configDelete['tenant.data.enable'] ? callbackDeleteTenant : null,
-    );
+    this.kafka.setCallbacksConsumerTenant(callbackCreateTenant,
+      configDelete['tenant.data.enable'] ? callbackDeleteTenant : null);
   }
 }
 

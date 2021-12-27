@@ -20,11 +20,13 @@ class Organizations {
    * @param {Number} retentionPeriodHrs Retention Period in hours
    *                                    for all buckets created (zero is infinite retention)
    */
-  constructor(url,
+  constructor(
+    url,
     defaultToken,
     defaultOrg,
     defaultBucket,
-    retentionPeriodHrs) {
+    retentionPeriodHrs,
+  ) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: defaultToken=${defaultToken}`);

@@ -59,12 +59,16 @@ describe('Test Influx Data Writer', () => {
   });
 
   test('Instantiate class', () => {
-    dataQuery = new DataWriter('url', 'token', 'defaultBucket');
+    dataQuery = new DataWriter(
+      'url', 'token', 'defaultBucket',
+    );
   });
 
   test('write - test ok iso date', async () => {
     mockParseDateTimeToUnixNs.mockReturnValueOnce('timestamp');
-    await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
+    await dataQuery.write(
+      'org', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp',
+    );
 
     expect(mockPointString).toHaveBeenCalledTimes(3);
     expect(mockPointString).toHaveBeenCalledWith('dojot.a', '1');
@@ -77,7 +81,9 @@ describe('Test Influx Data Writer', () => {
   });
 
   test('write - test ok ts int', async () => {
-    await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 123);
+    await dataQuery.write(
+      'org', 'measurement', { a: 1, b: false, c: 'c' }, 123,
+    );
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
 
     expect(mockPointString).toHaveBeenCalledTimes(3);
@@ -93,7 +99,9 @@ describe('Test Influx Data Writer', () => {
     mockParseDateTimeToUnixNs.mockImplementationOnce(() => {
       throw new Error('Invalid date');
     });
-    await dataQuery.write('org2', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
+    await dataQuery.write(
+      'org2', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp',
+    );
 
     expect(mockPointString).toHaveBeenCalledTimes(3);
     expect(mockPointString).toHaveBeenCalledWith('dojot.a', '1');
@@ -108,7 +116,9 @@ describe('Test Influx Data Writer', () => {
 
   test('write - test not ok -  attr is not a object', async () => {
     expect.assertions(1);
-    await dataQuery.write('org2', 'measurement2', '123', 'timestamp2');
+    await dataQuery.write(
+      'org2', 'measurement2', '123', 'timestamp2',
+    );
     expect(mockWarn).toHaveBeenCalledWith('writer: The attrs param is not a object');
   });
 
@@ -118,7 +128,9 @@ describe('Test Influx Data Writer', () => {
   });
 
   test('closeOne - ok ', async () => {
-    await dataQuery.write('org3', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
+    await dataQuery.write(
+      'org3', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp',
+    );
     await dataQuery.closeOne('org3');
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
