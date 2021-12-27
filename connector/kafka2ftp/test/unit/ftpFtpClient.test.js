@@ -119,7 +119,9 @@ describe('Testing FTPClient', () => {
     ftpClient2.uploadRetry = jest.fn();
 
     try {
-      await ftpClient2.upload('', 'file.txt', true);
+      await ftpClient2.upload(
+        '', 'file.txt', true,
+      );
     } catch (e) {
       expect(e.message).toBe('upload: Not uploaded');
     }

@@ -113,7 +113,9 @@ class FTPClient {
  * @param {string} filename remotePath
  * @param {ReadStream} stream readableStream
  */
-  async upload(filename, stream, isRetry = false) {
+  async upload(
+    filename, stream, isRetry = false,
+  ) {
     try {
       if (!this.isConnected()) {
         this.logger.debug('upload: Reconnect...');

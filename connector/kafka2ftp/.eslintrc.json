@@ -9,6 +9,7 @@
     ],
     "rules": {
         "import/no-unresolved": "off",
+        "function-paren-newline": ["error", { "minItems": 3 }],
         /* Workaround:
            Codefactor is using a newer version of airbnb-base, and it is not
            availabe at NPM yet. So this line forces codefactor to keep the
