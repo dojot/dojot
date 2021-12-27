@@ -458,42 +458,42 @@ describe('Test Devices Routes', () => {
   test('Test graphQl endpoint - valid graphql query', (done) => {
     expect.assertions(7);
 
-    mockQueryDataUsingGraphql.mockImplementationOnce(
-      (tenant, devices, filters, page, order) => {
-        const queryDevices = [
-          { id: 'RANDID1', attributes: ['temperature', 'gps'] },
-          { id: 'RANDID2', attributes: ['temperature'] }];
-        const queryFilters = { dateFrom: '-4h', dateTo: '' };
-        const queryPage = { limit: '1' };
-        const inputDevices = JSON.parse(JSON.stringify(devices));
-        const inputFilters = JSON.parse(JSON.stringify(filters));
+    mockQueryDataUsingGraphql.mockImplementationOnce((
+      tenant, devices, filters, page, order,
+    ) => {
+      const queryDevices = [
+        { id: 'RANDID1', attributes: ['temperature', 'gps'] },
+        { id: 'RANDID2', attributes: ['temperature'] }];
+      const queryFilters = { dateFrom: '-4h', dateTo: '' };
+      const queryPage = { limit: '1' };
+      const inputDevices = JSON.parse(JSON.stringify(devices));
+      const inputFilters = JSON.parse(JSON.stringify(filters));
 
-        expect(tenant).toBe('tenant1');
-        expect(inputDevices).toStrictEqual(queryDevices);
-        expect(page.limit.toString()).toBe(queryPage.limit);
-        expect(inputFilters).toStrictEqual(queryFilters);
-        expect(order).toBe('asc');
+      expect(tenant).toBe('tenant1');
+      expect(inputDevices).toStrictEqual(queryDevices);
+      expect(page.limit.toString()).toBe(queryPage.limit);
+      expect(inputFilters).toStrictEqual(queryFilters);
+      expect(order).toBe('asc');
 
-        return new Promise((resolve) => resolve({
-          data: [{
-            attr: 'temperature',
-            id: 'RANDID1',
-            ts: '2021-06-17T20:00:00.000Z',
-            value: '36.2',
-          }, {
-            attr: 'gps',
-            id: 'RANDID1',
-            ts: '2021-06-17T20:30:00.000Z',
-            value: '-18,-23',
-          }, {
-            attr: 'temperature',
-            id: 'RANDID2',
-            ts: '2021-06-17T20:30:00.000Z',
-            value: '42.1',
-          }],
-        }));
-      },
-    );
+      return new Promise((resolve) => resolve({
+        data: [{
+          attr: 'temperature',
+          id: 'RANDID1',
+          ts: '2021-06-17T20:00:00.000Z',
+          value: '36.2',
+        }, {
+          attr: 'gps',
+          id: 'RANDID1',
+          ts: '2021-06-17T20:30:00.000Z',
+          value: '-18,-23',
+        }, {
+          attr: 'temperature',
+          id: 'RANDID2',
+          ts: '2021-06-17T20:30:00.000Z',
+          value: '42.1',
+        }],
+      }));
+    });
 
     request(app)
       .get('/tss/v1/devices/graphql')
@@ -502,21 +502,19 @@ describe('Test Devices Routes', () => {
       .set('Authorization', `Bearer ${validToken}`)
       .then((response) => {
         expect(response.statusCode).toBe(200);
-        expect(response.body).toStrictEqual(
-          {
-            data: {
-              getData: {
-                data: [{
-                  attr: 'temperature', id: 'RANDID1', ts: '2021-06-17T20:00:00.000Z', value: '36.2',
-                }, {
-                  attr: 'gps', id: 'RANDID1', ts: '2021-06-17T20:30:00.000Z', value: '-18,-23',
-                }, {
-                  attr: 'temperature', id: 'RANDID2', ts: '2021-06-17T20:30:00.000Z', value: '42.1',
-                }],
-              },
+        expect(response.body).toStrictEqual({
+          data: {
+            getData: {
+              data: [{
+                attr: 'temperature', id: 'RANDID1', ts: '2021-06-17T20:00:00.000Z', value: '36.2',
+              }, {
+                attr: 'gps', id: 'RANDID1', ts: '2021-06-17T20:30:00.000Z', value: '-18,-23',
+              }, {
+                attr: 'temperature', id: 'RANDID2', ts: '2021-06-17T20:30:00.000Z', value: '42.1',
+              }],
             },
           },
-        );
+        });
         done();
       });
   });
@@ -524,16 +522,14 @@ describe('Test Devices Routes', () => {
 
   test('Test graphQl endpoint - valid graphql query - 2', (done) => {
     expect.assertions(2);
-    mockQueryDataUsingGraphql.mockImplementationOnce(
-      () => new Promise((resolve) => resolve({
-        data: [{
-          attr: 'temperature',
-          id: 'RANDID1',
-          ts: '2021-06-17T20:00:00.000Z',
-          value: '36.2',
-        }],
-      })),
-    );
+    mockQueryDataUsingGraphql.mockImplementationOnce(() => new Promise((resolve) => resolve({
+      data: [{
+        attr: 'temperature',
+        id: 'RANDID1',
+        ts: '2021-06-17T20:00:00.000Z',
+        value: '36.2',
+      }],
+    })));
 
     request(app)
       .get('/tss/v1/devices/graphql')
@@ -542,17 +538,15 @@ describe('Test Devices Routes', () => {
       .set('Authorization', `Bearer ${validToken}`)
       .then((response) => {
         expect(response.statusCode).toBe(200);
-        expect(response.body).toStrictEqual(
-          {
-            data: {
-              getData: {
-                data: [{
-                  attr: 'temperature', id: 'RANDID1', ts: '2021-06-17T20:00:00.000Z', value: '36.2',
-                }],
-              },
+        expect(response.body).toStrictEqual({
+          data: {
+            getData: {
+              data: [{
+                attr: 'temperature', id: 'RANDID1', ts: '2021-06-17T20:00:00.000Z', value: '36.2',
+              }],
             },
           },
-        );
+        });
         done();
       });
   });
@@ -579,9 +573,7 @@ describe('Test Devices Routes', () => {
 
   test('Test graphQl endpoint - error handling influx data', (done) => {
     expect.assertions(2);
-    mockQueryDataUsingGraphql.mockImplementationOnce(
-      () => Promise.reject(new Error('Error inside flux data')),
-    );
+    mockQueryDataUsingGraphql.mockImplementationOnce(() => Promise.reject(new Error('Error inside flux data')));
 
     request(app)
       .get('/tss/v1/devices/graphql')

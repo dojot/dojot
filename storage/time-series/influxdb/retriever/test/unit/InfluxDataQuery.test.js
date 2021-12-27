@@ -59,29 +59,27 @@ describe('Test Influx Data Query', () => {
 
   /* auxiliary functions */
   const mockError500onGetQueryRows = () => {
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error }) => {
-        const error2 = {
-          body: JSON.stringify({ message: 'message' }),
-          statusMessage: 'statusMessage',
-          statusCode: 500,
-        };
-        error2.prototype = Error.prototype;
-        error(error2);
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error }) => {
+      const error2 = {
+        body: JSON.stringify({ message: 'message' }),
+        statusMessage: 'statusMessage',
+        statusCode: 500,
+      };
+      error2.prototype = Error.prototype;
+      error(error2);
+    });
   };
   const mockThrowErrorInGetQueryApi = () => {
-    mockGetQueryApi.mockImplementationOnce(
-      () => {
-        throw new Error('Error during GetQueryApi instantiation.');
-      },
-    );
+    mockGetQueryApi.mockImplementationOnce(() => {
+      throw new Error('Error during GetQueryApi instantiation.');
+    });
   };
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('url', 'token', 'defaultBucket');
+    dataQuery = new DataQuery(
+      'url', 'token', 'defaultBucket',
+    );
   });
 
   test('queryByField - test ok 1', async () => {
@@ -89,16 +87,16 @@ describe('Test Influx Data Query', () => {
     const tableMeta2 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: '10' })) };
     const tableMeta3 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'true' })) };
     const tableMeta4 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'null' })) };
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error, complete }) => {
-        next('x1', tableMeta1);
-        next('x2', tableMeta2);
-        next('x3', tableMeta3);
-        next('x4', tableMeta4);
-        complete();
-      },
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error, complete }) => {
+      next('x1', tableMeta1);
+      next('x2', tableMeta2);
+      next('x3', tableMeta3);
+      next('x4', tableMeta4);
+      complete();
+    });
+    const x = await dataQuery.queryByField(
+      'org', 'measurement', 'field', {}, {}, 'desc',
     );
-    const x = await dataQuery.queryByField('org', 'measurement', 'field', {}, {}, 'desc');
     expect(x).toStrictEqual({
       result: [{ ts: 'ts-time', value: 'value' }, {
         ts: 'ts-time',
@@ -117,14 +115,14 @@ describe('Test Influx Data Query', () => {
 
   test('queryByField - test ok 2', async () => {
     const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: '"value"' })) };
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error, complete }) => {
-        next('x1', tableMeta1);
-        complete();
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error, complete }) => {
+      next('x1', tableMeta1);
+      complete();
+    });
 
-    const x = await dataQuery.queryByField('org', 'measurement', 'field', { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc');
+    const x = await dataQuery.queryByField(
+      'org', 'measurement', 'field', { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc',
+    );
     expect(x).toStrictEqual({
       result: [{ ts: 'ts-time', value: 'value' }],
       totalItems: 1,
@@ -136,7 +134,9 @@ describe('Test Influx Data Query', () => {
     mockError500onGetQueryRows();
 
     try {
-      await dataQuery.queryByField('org', 'measurement', 'field');
+      await dataQuery.queryByField(
+        'org', 'measurement', 'field',
+      );
     } catch (e) {
       expect(e.statusCode).toBe(500);
       expect(e.message).toBe('InfluxDB: statusMessage -> message');
@@ -145,14 +145,14 @@ describe('Test Influx Data Query', () => {
 
   test('queryByField - error 2', async () => {
     expect.assertions(1);
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error }) => {
-        error(new Error('Generic error'));
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error }) => {
+      error(new Error('Generic error'));
+    });
 
     try {
-      await dataQuery.queryByField('org', 'measurement', 'field', {}, {}, 'desc');
+      await dataQuery.queryByField(
+        'org', 'measurement', 'field', {}, {}, 'desc',
+      );
     } catch (e) {
       expect(e.message).toBe('Generic error');
     }
@@ -199,16 +199,16 @@ describe('Test Influx Data Query', () => {
         })),
     };
 
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error, complete }) => {
-        next('x1', tableMeta1);
-        next('x2', tableMeta2);
-        next('x3', tableMeta3);
-        complete();
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error, complete }) => {
+      next('x1', tableMeta1);
+      next('x2', tableMeta2);
+      next('x3', tableMeta3);
+      complete();
+    });
 
-    const x = await dataQuery.queryByMeasurement('org', 'measurement', {}, {}, 'desc');
+    const x = await dataQuery.queryByMeasurement(
+      'org', 'measurement', {}, {}, 'desc',
+    );
     expect(x).toStrictEqual({
       result: [
         {
@@ -280,14 +280,14 @@ describe('Test Influx Data Query', () => {
           'dojot.string': '"value"',
         })),
     };
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error, complete }) => {
-        next('x1', tableMeta1);
-        complete();
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error, complete }) => {
+      next('x1', tableMeta1);
+      complete();
+    });
 
-    const x = await dataQuery.queryByMeasurement('org', 'measurement', { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc');
+    const x = await dataQuery.queryByMeasurement(
+      'org', 'measurement', { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc',
+    );
     expect(x).toStrictEqual({
       result: [{
         ts: 'ts-time-1',
@@ -325,14 +325,14 @@ describe('Test Influx Data Query', () => {
 
   test('queryByMeasurement - error 2', async () => {
     expect.assertions(1);
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error }) => {
-        error(new Error('Generic error'));
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error }) => {
+      error(new Error('Generic error'));
+    });
 
     try {
-      await dataQuery.queryByMeasurement('org', 'measurement', {}, {}, 'desc');
+      await dataQuery.queryByMeasurement(
+        'org', 'measurement', {}, {}, 'desc',
+      );
     } catch (e) {
       expect(e.message).toBe('Generic error');
     }
@@ -383,20 +383,20 @@ describe('Test Influx Data Query', () => {
           _field: 'dojot.gps',
         })),
     }];
-    mockGetQueryRows.mockImplementationOnce(
-      (fluxQuery, { next, error, complete }) => {
-        next('l0', mockResInflux[0]);
-        next('l1', mockResInflux[1]);
-        next('l2', mockResInflux[2]);
-        next('l3', mockResInflux[3]);
-        complete();
-      },
-    );
+    mockGetQueryRows.mockImplementationOnce((fluxQuery, { next, error, complete }) => {
+      next('l0', mockResInflux[0]);
+      next('l1', mockResInflux[1]);
+      next('l2', mockResInflux[2]);
+      next('l3', mockResInflux[3]);
+      complete();
+    });
 
     const devices = [
       { id: 'RANDID1', attributes: ['temperature', 'gps'] }];
 
-    const res = await dataQuery.queryUsingGraphql('org', devices, { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc');
+    const res = await dataQuery.queryUsingGraphql(
+      'org', devices, { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc',
+    );
 
     expect(res).toStrictEqual({
       data: [{

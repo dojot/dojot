@@ -16,7 +16,9 @@ const logger = new Logger('influxdb-retriever:express/interceptors/CustomPaginat
  */
 module.exports = ({ defaultLimit, maxLimit }) => ({
   name: 'custom-paginator-interceptor',
-  middleware: [(req, res, next) => {
+  middleware: [(
+    req, res, next,
+  ) => {
     // check if was passed a value greater than the configured maximum limit
     logger.debug(`CustomPaginator1: req.params=${util.inspect(req.params)}`);
     logger.debug(`CustomPaginator1: req.query=${util.inspect(req.query)}`);
@@ -26,7 +28,9 @@ module.exports = ({ defaultLimit, maxLimit }) => ({
     next();
   },
   paginate.middleware(defaultLimit, maxLimit),
-  (req, res, next) => {
+  (
+    req, res, next,
+  ) => {
     logger.debug(`CustomPaginator2: req.params=${util.inspect(req.params)}`);
     logger.debug(`CustomPaginator2: req.query=${util.inspect(req.query)}`);
 

@@ -48,7 +48,9 @@ class App {
     try {
       this.server = new Server(serviceState);
       this.influxDB = new InfluxDB(serviceState);
-      this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
+      this.localPersistence = new LocalPersistenceManager(
+        logger, true, sync['database.path'],
+      );
       this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
       this.authService = new TenantService(sync.tenants);
       this.deviceService = new DeviceService(sync.devices);

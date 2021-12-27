@@ -72,7 +72,9 @@ const kafkaConsumer = {
 describe('SyncLoader', () => {
   let loader;
   beforeEach(() => {
-    loader = new SyncLoader(localPersistence, tenantService, deviceService, kafkaConsumer);
+    loader = new SyncLoader(
+      localPersistence, tenantService, deviceService, kafkaConsumer,
+    );
   });
 
   it('Should load tenants successfully', async () => {

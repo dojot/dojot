@@ -78,7 +78,9 @@ class SyncLoader {
    * @param {*} tenantService the tenant service object
    * @param {*} deviceService the device service object
    */
-  constructor(localPersistence, tenantService, deviceService, retrieverConsumer) {
+  constructor(
+    localPersistence, tenantService, deviceService, retrieverConsumer,
+  ) {
     this.localPersistence = localPersistence;
     this.tenantService = tenantService;
     this.deviceService = deviceService;
@@ -150,7 +152,9 @@ class SyncLoader {
         // Processing of data obtained from the database
         const outerThis = this;
         const tenantWritableStream = Writable({
-          async write(key, encoding, cb) {
+          async write(
+            key, encoding, cb,
+          ) {
             await outerThis.loadDevices(key);
             cb();
           },
@@ -158,10 +162,8 @@ class SyncLoader {
 
         // Get data and pipe
         const tenantReadableStream = await this.localPersistence.createKeyStream('tenants');
-        await pipelineAsync(
-          tenantReadableStream,
-          tenantWritableStream,
-        );
+        await pipelineAsync(tenantReadableStream,
+          tenantWritableStream);
       } catch (deviceManagerSyncError) {
         logger.debug('It was not possible to retrieve some devices with device manager.');
         logger.error(deviceManagerSyncError);
@@ -212,9 +214,8 @@ class SyncLoader {
     // eslint-disable-next-line no-restricted-syntax
     for (const device of devices) {
       // Write devices
-      await this.inputPersister.dispatch(
-        { device, service: tenant }, InputPersisterArgs.INSERT_OPERATION,
-      );
+      await this.inputPersister
+        .dispatch({ device, service: tenant }, InputPersisterArgs.INSERT_OPERATION);
     }
   }
 }

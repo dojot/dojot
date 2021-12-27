@@ -26,13 +26,17 @@ module.exports = class DevicesService {
    * @param {*} getPaging paging metadata formatting method
    * @returns the device dataset
    */
-  async getDeviceData(tenant, deviceId, dateFrom, dateTo, limit, page, order, getPaging) {
+  async getDeviceData(
+    tenant, deviceId, dateFrom, dateTo, limit, page, order, getPaging,
+  ) {
     const filters = { dateFrom, dateTo };
     const pagination = { limit, page };
 
     const {
       result, totalItems,
-    } = await this.queryDataByMeasurement(tenant, deviceId, filters, pagination, order);
+    } = await this.queryDataByMeasurement(
+      tenant, deviceId, filters, pagination, order,
+    );
     const paging = getPaging(totalItems);
 
     return [result, paging];
@@ -82,7 +86,9 @@ module.exports = class DevicesService {
 
     const {
       result, totalItems,
-    } = await this.queryDataByField(tenant, deviceId, attr, filters, pagination, order);
+    } = await this.queryDataByField(
+      tenant, deviceId, attr, filters, pagination, order,
+    );
     const paging = getPaging(totalItems);
 
     return [result, paging];

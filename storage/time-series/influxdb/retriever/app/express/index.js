@@ -37,7 +37,9 @@ const { express: configExpress, paginate: configPaginate } = ConfigManager.getCo
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, openApiPath) => {
+module.exports = (
+  routes, serviceState, openApiPath,
+) => {
   let openApiJson = null;
   try {
     // eslint-disable-next-line security/detect-non-literal-fs-filename

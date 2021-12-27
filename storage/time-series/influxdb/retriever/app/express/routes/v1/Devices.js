@@ -38,7 +38,9 @@ module.exports = ({
    * the pagination makes sense even
    * if new values are to be inserted
    */
-  const checkDateTo = (req, res, next) => {
+  const checkDateTo = (
+    req, res, next,
+  ) => {
     if (!req.query.dateTo) {
       req.query.dateTo = new Date().toISOString();
     }
@@ -131,9 +133,8 @@ module.exports = ({
               );
 
               if (accept === 'csv') {
-                return res.status(HttpStatus.OK).send(
-                  DeviceDataServ.parseDeviceAttrDataToCsv(result),
-                );
+                return res.status(HttpStatus.OK)
+                  .send(DeviceDataServ.parseDeviceAttrDataToCsv(result));
               }
 
               return res.status(HttpStatus.OK).json({ data: result, paging });
@@ -163,10 +164,8 @@ module.exports = ({
             schema: rootSchema,
             graphiql,
             rootValue: {
-              async getData(
-                root,
-                params,
-              ) {
+              async getData(root,
+                params) {
                 // param 'context' won't be used
                 logger.debug(`graphql-route.get: graphql query=${util.inspect(root)}`);
                 const {

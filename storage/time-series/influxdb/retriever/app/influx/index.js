@@ -27,9 +27,7 @@ class InfluxDB {
       configInflux['default.bucket'],
       configInflux['max.timeout.ms'],
     );
-    this.influxState = new InfluxState(
-      configInflux.url,
-    );
+    this.influxState = new InfluxState(configInflux.url);
     this.serviceState = serviceState;
   }
 
@@ -63,7 +61,9 @@ class InfluxDB {
         signalNotReady();
       }
     };
-    this.serviceState.addHealthChecker('influxdb', influxdbHealthChecker, configInflux['heathcheck.ms']);
+    this.serviceState.addHealthChecker(
+      'influxdb', influxdbHealthChecker, configInflux['heathcheck.ms'],
+    );
   }
 }
 

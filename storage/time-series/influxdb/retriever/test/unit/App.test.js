@@ -120,11 +120,9 @@ describe('App', () => {
   });
 
   test('instantiate class with  error in constructor', async () => {
-    mockServer.mockImplementationOnce(
-      () => {
-        throw new Error('Error in Server instantiation.');
-      },
-    );
+    mockServer.mockImplementationOnce(() => {
+      throw new Error('Error in Server instantiation.');
+    });
     try {
       app = new App();
     } catch (e) {

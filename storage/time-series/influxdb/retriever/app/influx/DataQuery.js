@@ -33,7 +33,9 @@ class DataQuery {
    * @param {Number} timeout  Request timeout in the communication with the influxdb
    *                          in milliseconds.
    */
-  constructor(url, token, defaultBucket, timeout) {
+  constructor(
+    url, token, defaultBucket, timeout,
+  ) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
@@ -66,7 +68,9 @@ class DataQuery {
  *                            totalItems: number}| error>}
  *                            A promise that returns a result e a totalItems
  */
-  async queryByMeasurement(org, measurement, filters = {}, page = {}, order = 'desc') {
+  async queryByMeasurement(
+    org, measurement, filters = {}, page = {}, order = 'desc',
+  ) {
     try {
       logger.debug('queryByMeasurement:');
       logger.debug(`queryByMeasurement: org=${org}`);
@@ -99,7 +103,9 @@ class DataQuery {
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            logger.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(
+              o, null, 2,
+            )}`);
             const point = {
               ts: o._time,
               attrs: [],
@@ -126,7 +132,9 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByMeasurement: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            logger.debug(`queryByMeasurement: result=${JSON.stringify(
+              result, null, 2,
+            )} totalItems=${result.length}`);
             return resolve({ result, totalItems: result.length });
           },
         });
@@ -160,7 +168,9 @@ class DataQuery {
  *                                attr: string }]}| error>}
  *           A promise that returns a list of points from influxDB
  */
-  async queryUsingGraphql(org, devices, filters = {}, page = {}, order = 'desc') {
+  async queryUsingGraphql(
+    org, devices, filters = {}, page = {}, order = 'desc',
+  ) {
     try {
       logger.debug('queryUsingGraphql: Handling query created using Graphql.');
       logger.debug(`queryUsingGraphql: org=${org}`);
@@ -191,7 +201,9 @@ class DataQuery {
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryUsingGraphql: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            logger.debug(`queryUsingGraphql: queryRows.next=${JSON.stringify(
+              o, null, 2,
+            )}`);
             result.push({
               id: o._measurement,
               ts: o._time,
@@ -203,7 +215,9 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryUsingGraphql: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            logger.debug(`queryUsingGraphql: result=${JSON.stringify(
+              result, null, 2,
+            )} totalItems=${result.length}`);
             return resolve({ data: result });
           },
         });
@@ -237,7 +251,9 @@ class DataQuery {
  *                            totalItems: number}| error>}
  *                            A promise that returns a result e a totalItems
  */
-  async queryByField(org, measurement, field, filters = {}, page = {}, order = 'desc') {
+  async queryByField(
+    org, measurement, field, filters = {}, page = {}, order = 'desc',
+  ) {
     try {
       logger.debug('queryByField:');
       logger.debug(`queryByField: org=${org}`);
@@ -268,7 +284,9 @@ class DataQuery {
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryByField: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            logger.debug(`queryByField: queryRows.next=${JSON.stringify(
+              o, null, 2,
+            )}`);
             // when storer write the data it just check if is a number or a boolean
             // the others types are writer as string with json stringify
             result.push({
@@ -280,7 +298,9 @@ class DataQuery {
             return reject(DataQuery.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            logger.debug(`queryByField: result=${JSON.stringify(
+              result, null, 2,
+            )} totalItems=${result.length}`);
             return resolve({ result, totalItems: result.length });
           },
         });
