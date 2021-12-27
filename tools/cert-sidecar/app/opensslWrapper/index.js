@@ -2,7 +2,7 @@ const {
   ConfigManager: { getConfig },
   Logger,
 } = require('@dojot/microservice-sdk');
-const OpenSSLUtils = require('./OpensslUtils.js');
+const OpenSSLUtils = require('./OpensslUtils');
 
 const {
   app: configApp,

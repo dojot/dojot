@@ -36,5 +36,5 @@ module.exports = class FileListingController {
       ...data,
       nextPageStartsAfter,
     });
-  }
+  };
 };

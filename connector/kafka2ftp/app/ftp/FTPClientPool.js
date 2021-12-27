@@ -1,6 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
 const util = require('util');
-const FTPClient = require('./FTPClient.js');
+const FTPClient = require('./FTPClient');
 const { sleep } = require('../Utils');
 
 /**

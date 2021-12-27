@@ -49,5 +49,5 @@ module.exports = class FileUploadService {
     );
 
     return file;
-  }
+  };
 };

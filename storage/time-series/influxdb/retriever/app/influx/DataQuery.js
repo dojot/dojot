@@ -346,7 +346,7 @@ class DataQuery {
         or 1567029600.
     */
 
-    const re = new RegExp('^(-)([0-9]+)(w|d|h|(m)(s)?|s)$');
+    const re = /^(-)([0-9]+)(w|d|h|(m)(s)?|s)$/;
     const isRelative = (str) => re.exec(str);
     let start = 0;
     let stop = fluxExpression('now()');

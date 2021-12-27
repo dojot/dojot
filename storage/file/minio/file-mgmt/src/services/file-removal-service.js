@@ -40,5 +40,5 @@ module.exports = class FileRemovalService {
     }
 
     return statFile;
-  }
+  };
 };

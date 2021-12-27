@@ -8,7 +8,7 @@ class ProcessingRuleManager {
   constructor() {
     this.rules = {};
 
-    return Object.seal(this);
+    Object.seal(this);
   }
 
   /**

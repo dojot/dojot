@@ -76,7 +76,7 @@ class RedisManager {
       this.redisClient, serviceName, StateManager, logger,
     );
 
-    return Object.seal(this);
+    Object.seal(this);
   }
 
   retryStrategy(options) {
@@ -111,7 +111,7 @@ class RedisManager {
       });
     });
 
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((resolve) => { setImmediate(resolve); });
   }
 
   /**

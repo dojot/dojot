@@ -94,7 +94,7 @@ class EjbcaSoapClient {
     if (this.inactive) {
       // sleeps for 5 seconds to allow time to establish communication with
       // the EJBCA server and create a channel for the remote procedure call
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
+      await new Promise((resolve) => { setTimeout(resolve, 1000 * 5); });
 
       // If after letting the EventLoop run for 5 seconds and communication
       // with the EJBCA server has not yet been established, an error returns.

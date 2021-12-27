@@ -84,7 +84,7 @@ class Tarball {
     this.kafkaTopicsCallbacksMgmt = new KafkaTopicsCallbacksMgmt();
     this.redisExpirationMgmt = new RedisExpirationMgmt();
     logger.info('Websocket Tarball singleton creation complete!');
-    return Object.seal(this);
+    Object.seal(this);
   }
 
   /**

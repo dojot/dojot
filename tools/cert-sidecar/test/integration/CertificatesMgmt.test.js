@@ -145,7 +145,8 @@ describe('CertificatesMgmt', () => {
     // generateCertificate
     expect(mockGenerateCsr).toHaveBeenCalledWith(
       'PrivateKey',
-      mockConfig.certs['common.name'], mockConfig.certs.hostnames,
+      mockConfig.certs['common.name'],
+      mockConfig.certs.hostnames,
     );
     expect(mockCreateCertificateByCSR)
       .toHaveBeenCalledWith('CSR', { application: mockConfig.app['sidecar.to'] });

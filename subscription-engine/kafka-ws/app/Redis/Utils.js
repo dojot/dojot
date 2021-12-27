@@ -45,7 +45,8 @@ const createRedisHealthChecker = (
   };
   stateManager.addHealthChecker(
     serviceName,
-    healthChecker, configRedis['healthcheck.ms'],
+    healthChecker,
+    configRedis['healthcheck.ms'],
   );
 };
 

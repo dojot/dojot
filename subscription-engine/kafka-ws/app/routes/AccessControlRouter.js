@@ -18,7 +18,9 @@ module.exports = () => {
   const router = express.Router();
 
   /* Rips the "one-time" ticket, so it won't be used again */
-  const ticketRipperMiddleware = async (req, res, next) => {
+  const ticketRipperMiddleware = async (
+    req, res, next,
+  ) => {
     /* If the component is configured to require tickets,
      * it must be informed via QueryString */
     if (!req.query.ticket) {

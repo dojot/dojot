@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 const {
   WebUtils: {
     framework,
@@ -23,7 +24,7 @@ module.exports = class FileRetrievalService {
     if (!file) {
       throw framework.errorTemplate.NotFound('The file does not exist.', 'The file does not exist.');
     }
-  }
+  };
 
   /**
    * Retrieves a file.
@@ -38,7 +39,7 @@ module.exports = class FileRetrievalService {
     this.checkFile(file);
 
     return file;
-  }
+  };
 
   /**
    * Gets a url to download the file directly from the MinIo.
@@ -53,7 +54,7 @@ module.exports = class FileRetrievalService {
     this.checkFile(fileData);
 
     return fileData;
-  }
+  };
 
   /**
    * Operation handler.
@@ -87,5 +88,5 @@ module.exports = class FileRetrievalService {
     }
 
     throw framework.errorTemplate.BadRequest('The "alt" param is invalid', 'The value of the "alt" parameter must be "media" or "url".');
-  }
+  };
 };
