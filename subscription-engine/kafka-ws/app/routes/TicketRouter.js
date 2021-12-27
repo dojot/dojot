@@ -22,7 +22,9 @@ module.exports = () => {
      * This middleware decodes the access token that must be sent
      * with the request. The token validation is not performed,
      * as it is expected to be validated by the API Gateway. */
-    .all((req, res, next) => {
+    .all((
+      req, res, next,
+    ) => {
       const err = new createError.Unauthorized();
       if (req.headers.authorization) {
         const authHeader = req.headers.authorization.split(' ');

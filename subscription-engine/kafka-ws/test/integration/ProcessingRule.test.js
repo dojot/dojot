@@ -43,7 +43,9 @@ describe('Testing ProcessingRuleManager', () => {
     const {
       rule: filter1,
       fingerprint: fingerprint1,
-    } = processingRuleManager.addRule(topic, fields, conditions);
+    } = processingRuleManager.addRule(
+      topic, fields, conditions,
+    );
 
     expect(processingRuleManager.rules[fingerprint1].count).toBe(1);
 
@@ -53,7 +55,9 @@ describe('Testing ProcessingRuleManager', () => {
     const {
       rule: filter2,
       fingerprint: fingerprint2,
-    } = processingRuleManager.addRule(topic2, fields2, conditions2);
+    } = processingRuleManager.addRule(
+      topic2, fields2, conditions2,
+    );
 
     expect(processingRuleManager.rules[fingerprint2].count).toBe(2);
 

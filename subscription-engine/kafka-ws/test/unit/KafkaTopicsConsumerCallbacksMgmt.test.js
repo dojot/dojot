@@ -24,7 +24,9 @@ const mockMicroServiceSdk = {
     registerService: jest.fn(),
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
-    addHealthChecker: jest.fn((service, callback, timeout) => callback(service, timeout)),
+    addHealthChecker: jest.fn((
+      service, callback, timeout,
+    ) => callback(service, timeout)),
     registerShutdownHandler: jest.fn(),
   })),
   Logger: jest.fn(() => ({
@@ -68,12 +70,16 @@ describe('Testing KafkaTopicsConsumerCallbacksMgmt - works fine', () => {
     kafkaTopicsCallbacksMgmt.kafka.registerCallback = jest.fn();
 
     const callbackA = jest.fn();
-    kafkaTopicsCallbacksMgmt.addCallback('topic1', '1', callbackA);
+    kafkaTopicsCallbacksMgmt.addCallback(
+      'topic1', '1', callbackA,
+    );
 
     kafkaTopicsCallbacksMgmt.kafka.registeredCallbacks.set('topic1', 'x1');
 
     const callbackB = jest.fn();
-    kafkaTopicsCallbacksMgmt.addCallback('topic1', '2', callbackB);
+    kafkaTopicsCallbacksMgmt.addCallback(
+      'topic1', '2', callbackB,
+    );
 
     expect(kafkaTopicsCallbacksMgmt.kafka.registerCallback).toHaveBeenCalledTimes(1);
 

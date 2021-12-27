@@ -88,16 +88,20 @@ async function retrieveEncodedToken(ticket) {
  * @returns {String} A single-use ticket that makes it possible to establish a websocket connection
  */
 async function issueTicket({ tenant, expiration }) {
-  const token = await jwtSignAsync({ tenant, remainingTime: expiration },
+  const token = await jwtSignAsync(
+    { tenant, remainingTime: expiration },
     config.secret,
-    { expiresIn: config['expiration.sec'] });
+    { expiresIn: config['expiration.sec'] },
+  );
 
   const redis = RedisManager.getClient();
   const ticket = generateTicket(token);
 
   /* Defines an entry in Redis with a certain expiration time. */
   const setExAsync = promisify(redis.setex).bind(redis);
-  await setExAsync(getRedisKey(ticket), config['expiration.sec'], token);
+  await setExAsync(
+    getRedisKey(ticket), config['expiration.sec'], token,
+  );
 
   return ticket;
 }

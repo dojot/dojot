@@ -9,7 +9,9 @@ const Utils = require('../Utils');
  *
  * @returns {object} filtered data.
  */
-const applyGt = (parameter, value, data) => {
+const applyGt = (
+  parameter, value, data,
+) => {
   if (data[parameter] !== null
     && Number.isFinite(Number(data[parameter]))
     && Number(data[parameter]) > Number(value)) {
@@ -27,7 +29,9 @@ const applyGt = (parameter, value, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyGte = (parameter, value, data) => {
+const applyGte = (
+  parameter, value, data,
+) => {
   if (data[parameter] !== null
     && Number.isFinite(Number(data[parameter]))
     && Number(data[parameter]) >= Number(value)) {
@@ -45,7 +49,9 @@ const applyGte = (parameter, value, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyLt = (parameter, value, data) => {
+const applyLt = (
+  parameter, value, data,
+) => {
   if (data[parameter] !== null
     && Number.isFinite(Number(data[parameter]))
     && Number(data[parameter]) < Number(value)) {
@@ -63,7 +69,9 @@ const applyLt = (parameter, value, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyLte = (parameter, value, data) => {
+const applyLte = (
+  parameter, value, data,
+) => {
   if (data[parameter] !== null
     && Number.isFinite(Number(data[parameter]))
     && Number(data[parameter]) <= Number(value)) {
@@ -81,7 +89,9 @@ const applyLte = (parameter, value, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyEq = (parameter, value, data) => {
+const applyEq = (
+  parameter, value, data,
+) => {
   if (data[parameter] !== null
     && Number.isFinite(Number(data[parameter]))
     && Number(data[parameter]) === Number(value)) {
@@ -99,7 +109,9 @@ const applyEq = (parameter, value, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyNeq = (parameter, value, data) => {
+const applyNeq = (
+  parameter, value, data,
+) => {
   if (data[parameter] !== null
     && Number.isFinite(Number(data[parameter]))
     && Number(data[parameter]) !== Number(value)) {
@@ -117,7 +129,9 @@ const applyNeq = (parameter, value, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyIn = (parameter, values, data) => {
+const applyIn = (
+  parameter, values, data,
+) => {
   for (let i = 0; i < values.length; i += 1) {
     if (data[parameter] && data[parameter].toString().match(values[i])) {
       return data;
@@ -135,7 +149,9 @@ const applyIn = (parameter, values, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyNin = (parameter, values, data) => {
+const applyNin = (
+  parameter, values, data,
+) => {
   let i = 0;
   for (i = 0; i < values.length; i += 1) {
     if (data[parameter] && data[parameter].toString().match(values[i])) {
@@ -158,7 +174,9 @@ const applyNin = (parameter, values, data) => {
  *
  * @returns {object} filtered data.
  */
-const applyBool = (parameter, value, data) => {
+const applyBool = (
+  parameter, value, data,
+) => {
   if (Utils.parseBoolean(data[parameter]) === Utils.parseBoolean(value)) {
     return data;
   }

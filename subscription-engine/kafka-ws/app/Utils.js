@@ -47,16 +47,16 @@ function convertConditionToString(condition) {
  *
  * @returns {string}
  */
-function createFingerprint(topic, fields, conditions) {
+function createFingerprint(
+  topic, fields, conditions,
+) {
   let sortedFields;
 
   if (fields) {
     sortedFields = fields.split(',').sort().toString();
   }
 
-  const sortedConditions = conditions.map(
-    (condition) => convertConditionToString(condition),
-  ).sort().join('');
+  const sortedConditions = conditions.map((condition) => convertConditionToString(condition)).sort().join('');
 
   let processingRule = topic;
 

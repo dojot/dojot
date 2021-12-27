@@ -9,7 +9,9 @@ describe('Testing Conditions', () => {
 
   describe('in', () => {
     it('with data', () => {
-      const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
+      const filter = ConditionApplier(
+        'sensor.status', 'in', ['failed', 'stopped'],
+      );
       const object = { sensor: { status: 'failed' }, temperature: 35 };
       const filterData = filter(object);
 
@@ -17,7 +19,9 @@ describe('Testing Conditions', () => {
     });
 
     it('without data', () => {
-      const filter = ConditionApplier('sensor.status', 'in', ['failed', 'stopped']);
+      const filter = ConditionApplier(
+        'sensor.status', 'in', ['failed', 'stopped'],
+      );
       const object = { sensor: { status: 'started' }, temperature: 35 };
       const filterData = filter(object);
 
@@ -27,7 +31,9 @@ describe('Testing Conditions', () => {
 
   describe('nin', () => {
     it('with data', () => {
-      const filter = ConditionApplier('sensor.status', 'nin', ['failed', 'stopped']);
+      const filter = ConditionApplier(
+        'sensor.status', 'nin', ['failed', 'stopped'],
+      );
       const object = { sensor: { status: 'failed' }, temperature: 35 };
       const filterData = filter(object);
 
@@ -35,7 +41,9 @@ describe('Testing Conditions', () => {
     });
 
     it('without data', () => {
-      const filter = ConditionApplier('sensor.status', 'nin', ['failed', 'stopped']);
+      const filter = ConditionApplier(
+        'sensor.status', 'nin', ['failed', 'stopped'],
+      );
       const object = { sensor: { status: 'started' }, temperature: 35 };
       const filterData = filter(object);
 
@@ -46,7 +54,9 @@ describe('Testing Conditions', () => {
   describe('gte', () => {
     describe('limits - 0.001 precision', () => {
       it('in the limit border', () => {
-        const filter = ConditionApplier('temperature', 'gte', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'gte', [0],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -54,7 +64,9 @@ describe('Testing Conditions', () => {
       });
 
       it('inferior limit', () => {
-        const filter = ConditionApplier('temperature', 'gte', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'gte', [0],
+        );
         const object = { location: 'x', temperature: -0.001 };
         const filterData = filter(object);
 
@@ -62,7 +74,9 @@ describe('Testing Conditions', () => {
       });
 
       it('superior limit', () => {
-        const filter = ConditionApplier('temperature', 'gte', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'gte', [0],
+        );
         const object = { location: 'x', temperature: 0.001 };
         const filterData = filter(object);
 
@@ -72,7 +86,9 @@ describe('Testing Conditions', () => {
 
     describe('special values', () => {
       it('value: NaN', () => {
-        const filter = ConditionApplier('temperature', 'gte', [NaN]);
+        const filter = ConditionApplier(
+          'temperature', 'gte', [NaN],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -80,7 +96,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: undefined', () => {
-        const filter = ConditionApplier('temperature', 'gte', [undefined]);
+        const filter = ConditionApplier(
+          'temperature', 'gte', [undefined],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -88,7 +106,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: null', () => {
-        const filter = ConditionApplier('temperature', 'gte', [null]);
+        const filter = ConditionApplier(
+          'temperature', 'gte', [null],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -101,7 +121,9 @@ describe('Testing Conditions', () => {
   describe('gt', () => {
     describe('limits - 0.001 precision', () => {
       it('in the limit border', () => {
-        const filter = ConditionApplier('temperature', 'gt', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'gt', [0],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -109,7 +131,9 @@ describe('Testing Conditions', () => {
       });
 
       it('inferior limit', () => {
-        const filter = ConditionApplier('temperature', 'gt', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'gt', [0],
+        );
         const object = { location: 'x', temperature: -0.001 };
         const filterData = filter(object);
 
@@ -117,7 +141,9 @@ describe('Testing Conditions', () => {
       });
 
       it('superior limit', () => {
-        const filter = ConditionApplier('temperature', 'gt', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'gt', [0],
+        );
         const object = { location: 'x', temperature: 0.001 };
         const filterData = filter(object);
 
@@ -127,7 +153,9 @@ describe('Testing Conditions', () => {
 
     describe('special values', () => {
       it('value: NaN', () => {
-        const filter = ConditionApplier('temperature', 'gt', [NaN]);
+        const filter = ConditionApplier(
+          'temperature', 'gt', [NaN],
+        );
         const object = { location: 'x', temperature: 1 };
         const filterData = filter(object);
 
@@ -135,7 +163,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: undefined', () => {
-        const filter = ConditionApplier('temperature', 'gt', [undefined]);
+        const filter = ConditionApplier(
+          'temperature', 'gt', [undefined],
+        );
         const object = { location: 'x', temperature: 1 };
         const filterData = filter(object);
 
@@ -143,7 +173,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: null', () => {
-        const filter = ConditionApplier('temperature', 'gt', [null]);
+        const filter = ConditionApplier(
+          'temperature', 'gt', [null],
+        );
         const object = { location: 'x', temperature: 1 };
         const filterData = filter(object);
 
@@ -156,7 +188,9 @@ describe('Testing Conditions', () => {
   describe('lte', () => {
     describe('limits - 0.001 precision', () => {
       it('in the limit border', () => {
-        const filter = ConditionApplier('temperature', 'lte', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'lte', [0],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -164,7 +198,9 @@ describe('Testing Conditions', () => {
       });
 
       it('inferior limit', () => {
-        const filter = ConditionApplier('temperature', 'lte', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'lte', [0],
+        );
         const object = { location: 'x', temperature: -0.001 };
         const filterData = filter(object);
 
@@ -172,7 +208,9 @@ describe('Testing Conditions', () => {
       });
 
       it('superior limit', () => {
-        const filter = ConditionApplier('temperature', 'lte', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'lte', [0],
+        );
         const object = { location: 'x', temperature: 0.001 };
         const filterData = filter(object);
 
@@ -182,7 +220,9 @@ describe('Testing Conditions', () => {
 
     describe('special values', () => {
       it('value: NaN', () => {
-        const filter = ConditionApplier('temperature', 'lte', [NaN]);
+        const filter = ConditionApplier(
+          'temperature', 'lte', [NaN],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -190,7 +230,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: undefined', () => {
-        const filter = ConditionApplier('temperature', 'lte', [undefined]);
+        const filter = ConditionApplier(
+          'temperature', 'lte', [undefined],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -198,7 +240,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: null', () => {
-        const filter = ConditionApplier('temperature', 'lte', [null]);
+        const filter = ConditionApplier(
+          'temperature', 'lte', [null],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -211,7 +255,9 @@ describe('Testing Conditions', () => {
   describe('lt', () => {
     describe('limits - 0.001 precision', () => {
       it('in the limit border', () => {
-        const filter = ConditionApplier('temperature', 'lt', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'lt', [0],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -219,7 +265,9 @@ describe('Testing Conditions', () => {
       });
 
       it('inferior limit', () => {
-        const filter = ConditionApplier('temperature', 'lt', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'lt', [0],
+        );
         const object = { location: 'x', temperature: -0.001 };
         const filterData = filter(object);
 
@@ -227,7 +275,9 @@ describe('Testing Conditions', () => {
       });
 
       it('superior limit', () => {
-        const filter = ConditionApplier('temperature', 'lt', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'lt', [0],
+        );
         const object = { location: 'x', temperature: 0.001 };
         const filterData = filter(object);
 
@@ -237,7 +287,9 @@ describe('Testing Conditions', () => {
 
     describe('special values', () => {
       it('value: NaN', () => {
-        const filter = ConditionApplier('temperature', 'lt', [NaN]);
+        const filter = ConditionApplier(
+          'temperature', 'lt', [NaN],
+        );
         const object = { location: 'x', temperature: -1 };
         const filterData = filter(object);
 
@@ -245,7 +297,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: undefined', () => {
-        const filter = ConditionApplier('temperature', 'lt', [undefined]);
+        const filter = ConditionApplier(
+          'temperature', 'lt', [undefined],
+        );
         const object = { location: 'x', temperature: -1 };
         const filterData = filter(object);
 
@@ -253,7 +307,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: null', () => {
-        const filter = ConditionApplier('temperature', 'lt', [null]);
+        const filter = ConditionApplier(
+          'temperature', 'lt', [null],
+        );
         const object = { location: 'x', temperature: -1 };
         const filterData = filter(object);
 
@@ -266,7 +322,9 @@ describe('Testing Conditions', () => {
   describe('eq', () => {
     describe('limits - 0.001 precision', () => {
       it('in the limit border', () => {
-        const filter = ConditionApplier('temperature', 'eq', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'eq', [0],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -274,7 +332,9 @@ describe('Testing Conditions', () => {
       });
 
       it('inferior limit', () => {
-        const filter = ConditionApplier('temperature', 'eq', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'eq', [0],
+        );
         const object = { location: 'x', temperature: -0.001 };
         const filterData = filter(object);
 
@@ -282,7 +342,9 @@ describe('Testing Conditions', () => {
       });
 
       it('superior limit', () => {
-        const filter = ConditionApplier('temperature', 'eq', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'eq', [0],
+        );
         const object = { location: 'x', temperature: 0.001 };
         const filterData = filter(object);
 
@@ -292,7 +354,9 @@ describe('Testing Conditions', () => {
 
     describe('special values', () => {
       it('value: NaN', () => {
-        const filter = ConditionApplier('temperature', 'eq', [NaN]);
+        const filter = ConditionApplier(
+          'temperature', 'eq', [NaN],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -300,7 +364,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: undefined', () => {
-        const filter = ConditionApplier('temperature', 'eq', [undefined]);
+        const filter = ConditionApplier(
+          'temperature', 'eq', [undefined],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -308,7 +374,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: null', () => {
-        const filter = ConditionApplier('temperature', 'eq', [null]);
+        const filter = ConditionApplier(
+          'temperature', 'eq', [null],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -321,7 +389,9 @@ describe('Testing Conditions', () => {
   describe('neq', () => {
     describe('limits - 0.001 precision', () => {
       it('in the limit border', () => {
-        const filter = ConditionApplier('temperature', 'neq', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'neq', [0],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -329,7 +399,9 @@ describe('Testing Conditions', () => {
       });
 
       it('inferior limit', () => {
-        const filter = ConditionApplier('temperature', 'neq', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'neq', [0],
+        );
         const object = { location: 'x', temperature: -0.001 };
         const filterData = filter(object);
 
@@ -337,7 +409,9 @@ describe('Testing Conditions', () => {
       });
 
       it('superior limit', () => {
-        const filter = ConditionApplier('temperature', 'neq', [0]);
+        const filter = ConditionApplier(
+          'temperature', 'neq', [0],
+        );
         const object = { location: 'x', temperature: 0.001 };
         const filterData = filter(object);
 
@@ -347,7 +421,9 @@ describe('Testing Conditions', () => {
 
     describe('special values', () => {
       it('value: NaN', () => {
-        const filter = ConditionApplier('temperature', 'neq', [NaN]);
+        const filter = ConditionApplier(
+          'temperature', 'neq', [NaN],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -355,7 +431,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: undefined', () => {
-        const filter = ConditionApplier('temperature', 'neq', [undefined]);
+        const filter = ConditionApplier(
+          'temperature', 'neq', [undefined],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -363,7 +441,9 @@ describe('Testing Conditions', () => {
       });
 
       it('value: null', () => {
-        const filter = ConditionApplier('temperature', 'neq', [null]);
+        const filter = ConditionApplier(
+          'temperature', 'neq', [null],
+        );
         const object = { location: 'x', temperature: 0 };
         const filterData = filter(object);
 
@@ -377,7 +457,9 @@ describe('Testing Conditions', () => {
     describe('true', () => {
       describe('should match', () => {
         it('true === true', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['true'],
+          );
           const object = { location: 'x', enabled: true };
           const filterData = filter(object);
 
@@ -385,7 +467,9 @@ describe('Testing Conditions', () => {
         });
 
         it('true === 1', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['true'],
+          );
           const object = { location: 'x', enabled: 1 };
           const filterData = filter(object);
 
@@ -393,7 +477,9 @@ describe('Testing Conditions', () => {
         });
 
         it('1 === true', () => {
-          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [1],
+          );
           const object = { location: 'x', enabled: true };
           const filterData = filter(object);
 
@@ -401,7 +487,9 @@ describe('Testing Conditions', () => {
         });
 
         it('1 === 1', () => {
-          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [1],
+          );
           const object = { location: 'x', enabled: 1 };
           const filterData = filter(object);
 
@@ -411,7 +499,9 @@ describe('Testing Conditions', () => {
 
       describe('should not match', () => {
         it('true !== false', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['true'],
+          );
           const object = { location: 'x', enabled: false };
           const filterData = filter(object);
 
@@ -419,7 +509,9 @@ describe('Testing Conditions', () => {
         });
 
         it('true !== 0', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['true']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['true'],
+          );
           const object = { location: 'x', enabled: 0 };
           const filterData = filter(object);
 
@@ -427,7 +519,9 @@ describe('Testing Conditions', () => {
         });
 
         it('1 !== false', () => {
-          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [1],
+          );
           const object = { location: 'x', enabled: false };
           const filterData = filter(object);
 
@@ -435,7 +529,9 @@ describe('Testing Conditions', () => {
         });
 
         it('1 !== 0', () => {
-          const filter = ConditionApplier('enabled', 'bool', [1]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [1],
+          );
           const object = { location: 'x', enabled: 0 };
           const filterData = filter(object);
 
@@ -447,7 +543,9 @@ describe('Testing Conditions', () => {
     describe('false', () => {
       describe('should match', () => {
         it('false === false', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['false'],
+          );
           const object = { location: 'x', enabled: false };
           const filterData = filter(object);
 
@@ -455,7 +553,9 @@ describe('Testing Conditions', () => {
         });
 
         it('false === 0', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['false'],
+          );
           const object = { location: 'x', enabled: 0 };
           const filterData = filter(object);
 
@@ -463,7 +563,9 @@ describe('Testing Conditions', () => {
         });
 
         it('0 === false', () => {
-          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [0],
+          );
           const object = { location: 'x', enabled: false };
           const filterData = filter(object);
 
@@ -471,7 +573,9 @@ describe('Testing Conditions', () => {
         });
 
         it('0 === 0', () => {
-          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [0],
+          );
           const object = { location: 'x', enabled: 0 };
           const filterData = filter(object);
 
@@ -481,7 +585,9 @@ describe('Testing Conditions', () => {
 
       describe('should not match', () => {
         it('false !== true', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['false'],
+          );
           const object = { location: 'x', enabled: true };
           const filterData = filter(object);
 
@@ -489,7 +595,9 @@ describe('Testing Conditions', () => {
         });
 
         it('false !== 1', () => {
-          const filter = ConditionApplier('enabled', 'bool', ['false']);
+          const filter = ConditionApplier(
+            'enabled', 'bool', ['false'],
+          );
           const object = { location: 'x', enabled: 1 };
           const filterData = filter(object);
 
@@ -497,7 +605,9 @@ describe('Testing Conditions', () => {
         });
 
         it('0 !== true', () => {
-          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [0],
+          );
           const object = { location: 'x', enabled: true };
           const filterData = filter(object);
 
@@ -505,7 +615,9 @@ describe('Testing Conditions', () => {
         });
 
         it('0 !== 1', () => {
-          const filter = ConditionApplier('enabled', 'bool', [0]);
+          const filter = ConditionApplier(
+            'enabled', 'bool', [0],
+          );
           const object = { location: 'x', enabled: 1 };
           const filterData = filter(object);
 

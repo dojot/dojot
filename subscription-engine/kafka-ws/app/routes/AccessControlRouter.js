@@ -60,10 +60,8 @@ module.exports = () => {
     requestProperty: 'token',
   });
 
-  router.use(
-    ticketRipperMiddleware.unless(skipWhen),
-    tokenIntrospectionMiddleware.unless(skipWhen),
-  );
+  router.use(ticketRipperMiddleware.unless(skipWhen),
+    tokenIntrospectionMiddleware.unless(skipWhen));
 
   return router;
 };

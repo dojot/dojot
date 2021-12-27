@@ -16,7 +16,9 @@ const processRule = (fields, conditions) => {
   const filters = [];
 
   conditions.forEach((condition) => {
-    filters.push(ConditionApplier(condition.parameter, condition.operator, condition.values));
+    filters.push(ConditionApplier(
+      condition.parameter, condition.operator, condition.values,
+    ));
   });
 
   /* A filter must be a function that follows the pattern:

@@ -12,7 +12,9 @@ const configRedis = ConfigManager.getConfig(KAFKA_WS_CONFIG_LABEL).redis;
  *                                                  with serviceName registered  *} stateManager
  * @param {instance of @dojot/microservice-sdk.Logger} logger
  */
-const createRedisHealthChecker = (client, serviceName, stateManager, logger) => {
+const createRedisHealthChecker = (
+  client, serviceName, stateManager, logger,
+) => {
   const healthChecker = async (signalReady, signalNotReady) => {
     try {
       logger.debug(`Checking if ${serviceName} is health...`);
@@ -41,8 +43,10 @@ const createRedisHealthChecker = (client, serviceName, stateManager, logger) => 
       logger.error(`There was a problem trying to check if the ${serviceName} is healthy. e=`, e);
     }
   };
-  stateManager.addHealthChecker(serviceName,
-    healthChecker, configRedis['healthcheck.ms']);
+  stateManager.addHealthChecker(
+    serviceName,
+    healthChecker, configRedis['healthcheck.ms'],
+  );
 };
 
 /**
@@ -53,7 +57,9 @@ const createRedisHealthChecker = (client, serviceName, stateManager, logger) => 
  *                                                  with serviceName registered  *} stateManager
  * @param {instance of @dojot/microservice-sdk.Logger} logger
  */
-const redisHandleOnError = (error, stateManager, logger) => {
+const redisHandleOnError = (
+  error, stateManager, logger,
+) => {
   logger.error('Redis has an error:', error);
   if (error.code === 'CONNECTION_BROKEN') {
     logger.warn('The service will be shutdown for exceeding attempts to reconnect with Redis');

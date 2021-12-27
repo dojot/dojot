@@ -28,19 +28,19 @@ function configure(server) {
   /**
  * Interceptor to allow requests only when the application is ready
  */
-  app.use(
-    (req, res, next) => {
-      if (process.env.NODE_ENV === 'development') {
-        logger.debug('The application might be not ready, but the request will be handled in a development environment', StateManager.isReady());
-        next();
-      } else if (StateManager.isReady()) {
-        next();
-      } else {
-        logger.error('The application is not in a ready state, the request cannot be handled');
-        next(new createError.ServiceUnavailable());
-      }
-    },
-  );
+  app.use((
+    req, res, next,
+  ) => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('The application might be not ready, but the request will be handled in a development environment', StateManager.isReady());
+      next();
+    } else if (StateManager.isReady()) {
+      next();
+    } else {
+      logger.error('The application is not in a ready state, the request cannot be handled');
+      next(new createError.ServiceUnavailable());
+    }
+  });
 
   /* Generate UUID for request and add it to X-Request-Id header.
    * In case request contains X-Request-Id header, uses its value instead. */
@@ -62,18 +62,24 @@ function configure(server) {
   /* Open API - Routes available through the API Gateway
    * First the request goes through the ticket router,
    * then it goes through the topic router. */
-  app.use('/kafka-ws/v1',
+  app.use(
+    '/kafka-ws/v1',
     accessControlRouter(),
     ticketRouter(),
-    topicsRouter());
+    topicsRouter(),
+  );
 
   /* catch 404 and forward to error handler */
-  app.use((req, res, next) => {
+  app.use((
+    req, res, next,
+  ) => {
     next(new createError.NotFound());
   });
 
   /* default error handler */
-  app.use((err, req, res, next) => {
+  app.use((
+    err, req, res, next,
+  ) => {
     logger.debug(err);
     if (res.headersSent) {
       return next(err);

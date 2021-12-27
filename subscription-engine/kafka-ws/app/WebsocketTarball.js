@@ -57,7 +57,9 @@ const getMaxLifetime = (expirationTimestampJWT) => {
  * @param {string} tenant
  * @param  {funcion} cbError callback if error occurs
  */
-const checkTenantCanAccessTopic = (kafkaTopic, tenant, cbError) => {
+const checkTenantCanAccessTopic = (
+  kafkaTopic, tenant, cbError,
+) => {
   if (!checkTopicBelongsTenant(kafkaTopic, tenant)) {
     logger.error(`Tenant ${tenant} can't access topic ${kafkaTopic}`);
     cbError();
@@ -107,9 +109,7 @@ class Tarball {
   onConnection({
     ws, connection, token, topic, fields, where,
   }) {
-    logger.debug(
-      `Received connection from ${connection.remoteAddress}:${connection.remotePort}`,
-    );
+    logger.debug(`Received connection from ${connection.remoteAddress}:${connection.remotePort}`);
     // create a unique ID for this instance of connection
     const idWsConnection = uuidv4();
 
@@ -127,24 +127,24 @@ class Tarball {
     if (token) {
       const { tenant, remainingTime } = token;
       expirationTimestamp = remainingTime;
-      checkTenantCanAccessTopic(kafkaTopic, tenant, () => {
-        ws.close(ErrorCodes.FORBIDDEN_TOPIC, 'Tenant can\'t access this topic');
-      });
+      checkTenantCanAccessTopic(
+        kafkaTopic, tenant, () => {
+          ws.close(ErrorCodes.FORBIDDEN_TOPIC, 'Tenant can\'t access this topic');
+        },
+      );
     }
 
-    this.setExpiration(ws, expirationTimestamp, idWsConnection);
+    this.setExpiration(
+      ws, expirationTimestamp, idWsConnection,
+    );
 
     let conditions;
     try {
       conditions = this.whereParser(where);
     } catch (error) {
       if (error instanceof WSError) {
-        logger.debug(
-          `Closing connection ${connection.remoteAddress}:${connection.remotePort}`,
-        );
-        logger.error(
-          `Error while parsing, code: ${error.ws_code}, reason: ${error.ws_reason}`,
-        );
+        logger.debug(`Closing connection ${connection.remoteAddress}:${connection.remotePort}`);
+        logger.error(`Error while parsing, code: ${error.ws_code}, reason: ${error.ws_reason}`);
         ws.close(error.ws_code, error.ws_reason);
       } else {
         logger.error(error);
@@ -156,13 +156,19 @@ class Tarball {
     const {
       rule: filter,
       fingerprint,
-    } = this.processingRuleManager.addRule(kafkaTopic, fields, conditions);
+    } = this.processingRuleManager.addRule(
+      kafkaTopic, fields, conditions,
+    );
 
     // create callback to call the filter and send the message via ws
-    this.createCallbackSendMessage(ws, kafkaTopic, idWsConnection, filter);
+    this.createCallbackSendMessage(
+      ws, kafkaTopic, idWsConnection, filter,
+    );
 
     ws.on('close', (code, reason) => {
-      this.onClose(code, reason, kafkaTopic, fingerprint, idWsConnection);
+      this.onClose(
+        code, reason, kafkaTopic, fingerprint, idWsConnection,
+      );
     });
   }
 
@@ -173,7 +179,9 @@ class Tarball {
    * @param {*} expirationTimestampFromJWT
    * @param {*} idWsConnection
    */
-  setExpiration(ws, expirationTimestampFromJWT, idWsConnection) {
+  setExpiration(
+    ws, expirationTimestampFromJWT, idWsConnection,
+  ) {
     if (serverConfig['jwt.exp.time'] || serverConfig['connection.max.life.time'] > 0) {
       const boundClose = ws.close.bind(ws);
       // TODO: add something like refresh tokens instead of maximum lifetime
@@ -181,14 +189,16 @@ class Tarball {
       // with customized expiration date
       const expirationMax = getMaxLifetime(expirationTimestampFromJWT);
       logger.debug(`Setting expiration connection to ${expirationMax} sec`);
-      this.redisExpirationMgmt.addConnection(idWsConnection, expirationMax, () => {
-        try {
-          logger.debug('Closing');
-          boundClose(ErrorCodes.EXPIRED_CONNECTION, 'Connection lifetime');
-        } catch (error) {
-          logger.error(`Caught ${error.stack}`);
-        }
-      });
+      this.redisExpirationMgmt.addConnection(
+        idWsConnection, expirationMax, () => {
+          try {
+            logger.debug('Closing');
+            boundClose(ErrorCodes.EXPIRED_CONNECTION, 'Connection lifetime');
+          } catch (error) {
+            logger.error(`Caught ${error.stack}`);
+          }
+        },
+      );
     }
   }
 
@@ -200,21 +210,25 @@ class Tarball {
    * @param {*} idWsConnection
    * @param {*} filter
    */
-  createCallbackSendMessage(ws, kafkaTopic, idWsConnection, filter) {
+  createCallbackSendMessage(
+    ws, kafkaTopic, idWsConnection, filter,
+  ) {
     const boundSend = ws.send.bind(ws);
-    this.kafkaTopicsCallbacksMgmt.addCallback(kafkaTopic, idWsConnection, (data) => {
-      try {
-        const objectFiltered = filter(data);
-        // If the filtered object is empty,
-        // it does not send a message to ws
-        if (!isObjectEmpty(objectFiltered)) {
-          boundSend(JSON.stringify(objectFiltered));
-          logger.debug(`Sending ${JSON.stringify(objectFiltered)}`);
+    this.kafkaTopicsCallbacksMgmt.addCallback(
+      kafkaTopic, idWsConnection, (data) => {
+        try {
+          const objectFiltered = filter(data);
+          // If the filtered object is empty,
+          // it does not send a message to ws
+          if (!isObjectEmpty(objectFiltered)) {
+            boundSend(JSON.stringify(objectFiltered));
+            logger.debug(`Sending ${JSON.stringify(objectFiltered)}`);
+          }
+        } catch (error) {
+          logger.error(`Caught ${error.stack}`);
         }
-      } catch (error) {
-        logger.error(`Caught ${error.stack}`);
-      }
-    });
+      },
+    );
   }
 
   /**
@@ -225,7 +239,9 @@ class Tarball {
    * @param {string} kafkaTopic
    * @param {string} idWs
    */
-  onClose(code, reason, kafkaTopic, fingerprint, idWsConnection) {
+  onClose(
+    code, reason, kafkaTopic, fingerprint, idWsConnection,
+  ) {
     logger.debug('Closed connection.');
     logger.debug(`Code: ${code}\nReason: ${reason}`);
 

@@ -28,7 +28,9 @@ Logger.setVerbose(config.log.verbose);
 const logger = new Logger('app');
 const stateService = 'http';
 
-logger.debug(`Configuration:\n${util.inspect(config, false, 5, true)}`);
+logger.debug(`Configuration:\n${util.inspect(
+  config, false, 5, true,
+)}`);
 
 let server = null;
 
@@ -60,19 +62,21 @@ StateManager.registerShutdownHandler(async () => {
 /* Configures the application's HTTP and WS routes */
 application.configure(server);
 
-server.listen(config.server.port, config.server.host, async () => {
-  logger.info('HTTP server is ready to accept connections!');
-  logger.info(server.address());
+server.listen(
+  config.server.port, config.server.host, async () => {
+    logger.info('HTTP server is ready to accept connections!');
+    logger.info(server.address());
 
-  StateManager.signalReady(stateService);
-  // Initializes the sticky tarball
-  try {
-    await websocketTarball.init();
-  } catch (err) {
-    logger.error('Unexpected service startup error!', err);
-    process.kill(process.pid);
-  }
-});
+    StateManager.signalReady(stateService);
+    // Initializes the sticky tarball
+    try {
+      await websocketTarball.init();
+    } catch (err) {
+      logger.error('Unexpected service startup error!', err);
+      process.kill(process.pid);
+    }
+  },
+);
 
 server.on('close', () => {
   StateManager.signalNotReady(stateService);

@@ -42,8 +42,12 @@ class RedisExpireMgmt {
 
     StateManager.registerShutdownHandler(this.end.bind(this));
 
-    createRedisHealthChecker(this.clients.pub, this.nameServicePub, StateManager, logger);
-    createRedisHealthChecker(this.clients.sub, this.nameServiceSub, StateManager, logger);
+    createRedisHealthChecker(
+      this.clients.pub, this.nameServicePub, StateManager, logger,
+    );
+    createRedisHealthChecker(
+      this.clients.sub, this.nameServiceSub, StateManager, logger,
+    );
   }
 
   retryStrategy(options) {
@@ -62,7 +66,9 @@ class RedisExpireMgmt {
 
     this.clients.pub.on('error', (error) => {
       logger.error(`pub: onError: ${error}`);
-      redisHandleOnError(error, StateManager, logger);
+      redisHandleOnError(
+        error, StateManager, logger,
+      );
     });
 
     this.clients.pub.on('end', () => {
@@ -110,7 +116,9 @@ class RedisExpireMgmt {
 
     this.clients.sub.on('error', (error) => {
       logger.error(`sub: onError: ${error}`);
-      redisHandleOnError(error, StateManager, logger);
+      redisHandleOnError(
+        error, StateManager, logger,
+      );
     });
 
     this.clients.sub.on('warning', (error) => {
@@ -186,13 +194,17 @@ class RedisExpireMgmt {
    * @param {number} timestampSec unix timestamp in seconds
    * @param {function} callback  callback to be called when the lifetime is over
    */
-  addConnection(idConnection, timestampSec, callback) {
+  addConnection(
+    idConnection, timestampSec, callback,
+  ) {
     if (this.clients.sub.connected && this.clients.pub.connected) {
       logger.debug(`addConnection: ${idConnection}  ${timestampSec}`);
       if (!this.expirationMap.has(idConnection)) {
         this.expirationMap.set(idConnection, callback);
         // NX = SET if Not eXists
-        this.clients.pub.set(idConnection, '', 'NX');
+        this.clients.pub.set(
+          idConnection, '', 'NX',
+        );
         // Set a timeout on key, unix timestamp in seconds
         this.clients.pub.expireat(idConnection, timestampSec);
       } else {

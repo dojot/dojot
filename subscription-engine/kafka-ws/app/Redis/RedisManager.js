@@ -61,7 +61,9 @@ class RedisManager {
      * the service is unhealthy
      */
     this.redisClient.on('error', (error) => {
-      redisHandleOnError(error, StateManager, logger);
+      redisHandleOnError(
+        error, StateManager, logger,
+      );
     });
     this.redisClient.on('end', () => {
       logger.info('end');
@@ -70,14 +72,18 @@ class RedisManager {
     });
     StateManager.registerShutdownHandler(this.shutdownProcess.bind(this));
 
-    createRedisHealthChecker(this.redisClient, serviceName, StateManager, logger);
+    createRedisHealthChecker(
+      this.redisClient, serviceName, StateManager, logger,
+    );
 
     return Object.seal(this);
   }
 
   retryStrategy(options) {
     // reconnect after
-    logger.debug(`Retry strategy options ${util.inspect(options, false, 5, true)}`);
+    logger.debug(`Retry strategy options ${util.inspect(
+      options, false, 5, true,
+    )}`);
 
     // return timeout to reconnect after
     return this.config['strategy.connect.after'];

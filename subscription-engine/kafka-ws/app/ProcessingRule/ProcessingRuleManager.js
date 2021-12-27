@@ -21,13 +21,16 @@ class ProcessingRuleManager {
    * @returns {{rule: (data: JSON) => JSON, fingerprint: string}}
    * function to process the data and its identification.
    */
-  addRule(kafkaTopic, fields, conditions) {
-    const fingerprint = createFingerprint(kafkaTopic, fields, conditions);
+  addRule(
+    kafkaTopic, fields, conditions,
+  ) {
+    const fingerprint = createFingerprint(
+      kafkaTopic, fields, conditions,
+    );
 
     if (this.hasRule(fingerprint)) {
-      this.rules[fingerprint] = Object.assign(
-        this.rules[fingerprint], { count: this.rules[fingerprint].count + 1 },
-      );
+      this.rules[fingerprint] = Object
+        .assign(this.rules[fingerprint], { count: this.rules[fingerprint].count + 1 });
       return { rule: this.rules[fingerprint].rule, fingerprint };
     }
 
@@ -46,9 +49,8 @@ class ProcessingRuleManager {
   removeRule(fingerprint) {
     if (this.hasRule(fingerprint)) {
       if (this.rules[fingerprint].count > 1) {
-        this.rules[fingerprint] = Object.assign(
-          this.rules[fingerprint], { count: this.rules[fingerprint].count - 1 },
-        );
+        this.rules[fingerprint] = Object
+          .assign(this.rules[fingerprint], { count: this.rules[fingerprint].count - 1 });
       } else {
         delete this.rules[fingerprint];
       }

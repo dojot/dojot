@@ -72,14 +72,18 @@ describe('Testing RedisExpireMgmt everything ok', () => {
   });
 
   it('Should Add a connection  ', () => {
-    redisExpireMgmt.addConnection('xxx', 123, callbackTestXXX);
+    redisExpireMgmt.addConnection(
+      'xxx', 123, callbackTestXXX,
+    );
     expect(redisExpireMgmt.expirationMap.has('xxx')).toBe(true);
     expect(redisExpireMgmt.expirationMap.size).toBe(1);
   });
 
   it('Shouldnt add a connection that already exist  ', () => {
     expect(redisExpireMgmt.expirationMap.size).toBe(1);
-    redisExpireMgmt.addConnection('xxx', 123, () => { });
+    redisExpireMgmt.addConnection(
+      'xxx', 123, () => { },
+    );
     expect(redisExpireMgmt.expirationMap.has('xxx')).toBe(true);
     expect(redisExpireMgmt.expirationMap.size).toBe(1);
   });
@@ -137,7 +141,9 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
   });
 
   it('Shouldnt add a connection to test remove with connectin with redis', () => {
-    redisExpireMgmt.addConnection('xxx', 123, callbackTestXXX);
+    redisExpireMgmt.addConnection(
+      'xxx', 123, callbackTestXXX,
+    );
     expect(redisExpireMgmt.expirationMap.has('xxx')).toBe(true);
     expect(redisExpireMgmt.expirationMap.size).toBe(1);
   });
@@ -177,7 +183,9 @@ describe('Testing RedisExpireMgmt connect but has emit error', () => {
   });
 
   it('Shouldnt add a connection  when redis is not connect ', () => {
-    redisExpireMgmt.addConnection('xxx2', 123, callbackTestXXX);
+    redisExpireMgmt.addConnection(
+      'xxx2', 123, callbackTestXXX,
+    );
     expect(redisExpireMgmt.expirationMap.has('xxx2')).toBe(false);
   });
 

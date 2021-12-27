@@ -37,7 +37,9 @@ function getTenant(option) {
 async function generateAccessToken(tenant) {
   console.info('Generating a dummy JWT Access Token...');
   const expirationSec = 60;
-  const token = await jwtSignAsync({ service: tenant }, 'a dummy secret', { expiresIn: expirationSec });
+  const token = await jwtSignAsync(
+    { service: tenant }, 'a dummy secret', { expiresIn: expirationSec },
+  );
   console.info(`Generated token. It will expire in ${expirationSec} seconds`);
   return token;
 }

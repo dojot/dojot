@@ -8,7 +8,9 @@ jest.mock('redis', () => ({
       }
     }
     const redisClient = {
-      setex(key, expires, value, cb) {
+      setex(
+        key, expires, value, cb,
+      ) {
         redisDB[key] = value;
         cb(null, true);
       },

@@ -28,7 +28,9 @@ class KafkaTopicsConsumerCallbacksMgmt {
       logger.debug('init: Starting KafkaTopicsCallbacksMgmt');
       await this.kafka.init();
       const healthCheckerInterval = getConfig('KAFKA_WS').healthcheck['kafka.interval.ms'];
-      StateManager.addHealthChecker('kafka', this.kafka.checkHealth.bind(this.kafka), healthCheckerInterval);
+      StateManager.addHealthChecker(
+        'kafka', this.kafka.checkHealth.bind(this.kafka), healthCheckerInterval,
+      );
       StateManager.registerShutdownHandler(this.kafka.shutdownProcess.bind(this.kafka));
     } catch (error) {
       logger.error(`init: Error starting KafkaTopicsCallbacksMgmt ${error.stack}`);
@@ -43,7 +45,9 @@ class KafkaTopicsConsumerCallbacksMgmt {
    * @param {string} idCallback This id must be unique within a topic's callback list.
    * @param {function} callback
    */
-  addCallback(topic, idCallback, callback) {
+  addCallback(
+    topic, idCallback, callback,
+  ) {
     logger.debug(`addCallbackToTopic: Topic=${topic} idCallback=${idCallback}`);
 
     if (this.topic.has(topic)) {
