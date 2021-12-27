@@ -46,15 +46,11 @@ function queryOwnerByFingerprintFromService(fingerprint, serviceConfig) {
           if (owner) {
             resolve(owner);
           } else {
-            reject(errorTemplate.NotFound(
-              `The fingerprint ${fingerprint} is not associated with anything.`,
-            ));
+            reject(errorTemplate.NotFound(`The fingerprint ${fingerprint} is not associated with anything.`));
           }
         });
       } else if (res.statusCode === HTTPStatus.NOT_FOUND) {
-        reject(errorTemplate.NotFound(
-          `The fingerprint ${fingerprint} doesn't exist.`,
-        ));
+        reject(errorTemplate.NotFound(`The fingerprint ${fingerprint} doesn't exist.`));
       } else {
         reject(new Error(`Failed to get fingerprint ${fingerprint} from service`
         + ` (HTTP Status = ${res.statusCode})`));
@@ -76,7 +72,9 @@ function queryOwnerByFingerprintFromService(fingerprint, serviceConfig) {
   });
 }
 
-function updateFingerprintEntryOnCache(redisManager, fingerprint, value) {
+function updateFingerprintEntryOnCache(
+  redisManager, fingerprint, value,
+) {
   return redisManager.setAsync(fingerprint, value);
 }
 
@@ -88,9 +86,7 @@ module.exports = (redisManager, serviceConfig) => (fingerprint) => {
       return value;
     }).catch((errorCacheGet) => {
       logger.warn(errorCacheGet);
-      logger.debug(
-        `Getting data for fingerprint ${fingerprint} from service.`,
-      );
+      logger.debug(`Getting data for fingerprint ${fingerprint} from service.`);
 
       return queryOwnerByFingerprintFromService(fingerprint, serviceConfig)
         .then((value) => {
@@ -107,11 +103,11 @@ module.exports = (redisManager, serviceConfig) => (fingerprint) => {
           // associated with applications can't expire because this information is
           // not persisted at X.509 service.
           logger.debug(`Updating Cache: ${fingerprint} -> ${value}.`);
-          updateFingerprintEntryOnCache(redisManager, fingerprint, value)
+          updateFingerprintEntryOnCache(
+            redisManager, fingerprint, value,
+          )
             .then(() => logger.debug(`Updated Cache: ${fingerprint} -> ${value}.`))
-            .catch((errorCacheUpdate) => logger.warn(
-              `Failed to update cache: ${fingerprint} -> ${value}. ${errorCacheUpdate}`,
-            ));
+            .catch((errorCacheUpdate) => logger.warn(`Failed to update cache: ${fingerprint} -> ${value}. ${errorCacheUpdate}`));
 
           return value;
         }).catch((errServiceGet) => {

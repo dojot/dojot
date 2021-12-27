@@ -37,7 +37,9 @@ MockRedisClient.prototype.get = function get(key, cb) {
   const value = this.table.get(key);
   cb(null, value);
 };
-MockRedisClient.prototype.set = function set(key, value, cb) {
+MockRedisClient.prototype.set = function set(
+  key, value, cb,
+) {
   this.table.set(key, value);
   cb(null, 'OK');
 };

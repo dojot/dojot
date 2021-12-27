@@ -63,7 +63,9 @@ module.exports = ({
           validateRegOrGenCert(),
           denyCertForDeviceMiddleware,
           belongsToAppMiddleware,
-          async (req, res, next) => {
+          async (
+            req, res, next,
+          ) => {
             if (req.body.csr) {
               const csr = sanitizeParams.sanitizeLineBreaks(req.body.csr);
               const belongsTo = req.body.belongsTo || {};
@@ -100,7 +102,9 @@ module.exports = ({
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res, next) => {
+          async (
+            req, res, next,
+          ) => {
             const caService = req.scope.resolve(CA_SERVICE);
             res.result = await caService.getRootCertificate();
             next();
@@ -129,7 +133,9 @@ module.exports = ({
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res, next) => {
+          async (
+            req, res, next,
+          ) => {
             const caService = req.scope.resolve(CA_SERVICE);
             const trustedCaService = req.scope.resolve(TRUSTED_CA_SERVICE);
 
@@ -163,7 +169,9 @@ module.exports = ({
          * Used only by services behind the API gateway */
         method: 'get',
         middleware: [
-          async (req, res, next) => {
+          async (
+            req, res, next,
+          ) => {
             const caService = req.scope.resolve(CA_SERVICE);
             res.result = await caService.getRootCRL(req.query.update === 'true');
             next();

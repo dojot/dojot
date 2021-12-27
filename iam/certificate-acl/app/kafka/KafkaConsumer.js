@@ -36,8 +36,10 @@ class kafkaConsumer {
     this.healthy = false;
     this.serviceStateManager = serviceStateManager;
     this.serviceStateManager.registerService('kafka');
-    this.serviceStateManager.addHealthChecker('kafka',
-      this.checkHealth.bind(this), config.healthcheck['kafka.interval.ms']);
+    this.serviceStateManager.addHealthChecker(
+      'kafka',
+      this.checkHealth.bind(this), config.healthcheck['kafka.interval.ms'],
+    );
     this.serviceStateManager.registerShutdownHandler(this.shutdown.bind(this));
     Object.seal(this);
 

@@ -24,7 +24,9 @@ Logger.setVerbose(config.logger.verbose);
 Logger.setTransport('console', { level: config.logger['console.level'] });
 const logger = new Logger('certificate-acl:index');
 
-logger.info(`Configuration: \n${util.inspect(config, false, 5, true)}`);
+logger.info(`Configuration: \n${util.inspect(
+  config, false, 5, true,
+)}`);
 if (config.logger['file.enable']) {
   const fileLoggerConfig = { level: config.logger['file.level'], filename: config.logger['file.filename'] };
   Logger.setTransport('file', fileLoggerConfig);

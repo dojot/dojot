@@ -25,9 +25,9 @@ class Application {
     this.config = getConfig('CERTIFICATE_ACL');
 
     // instantiate Service State Manager
-    this.serviceStateManager = new ServiceStateManager(
-      { lightship: transformObjectKeys(this.config.lightship, camelCase) },
-    );
+    this.serviceStateManager = new ServiceStateManager({
+      lightship: transformObjectKeys(this.config.lightship, camelCase),
+    });
 
     // instantiate Kafka Consumer
     this.kafkaConsumer = new KafkaConsumer(this.serviceStateManager);
@@ -77,9 +77,7 @@ class Application {
         case CERTIFICATE_ACL_CREATE_EVENT_TYPE:
         case CERTIFICATE_ACL_UPDATE_EVENT_TYPE:
           if (!fingerprint || (!(tenant && device) && !application)) {
-            terminate(
-              `Missing mandatory attributes in processing event: ${eventType}`,
-            );
+            terminate(`Missing mandatory attributes in processing event: ${eventType}`);
             return;
           }
           // if returns here, will make sync because of an 'await' in the
@@ -88,15 +86,11 @@ class Application {
           this.redisManager.setAsync(fingerprint, owner).then(() => {
             logger.debug(`Added to Redis: ${fingerprint} -> ${owner}`);
             ack();
-          }).catch((error) => terminate(
-            `Failed to add to Redis ${fingerprint} -> ${owner} (${error}).`,
-          ));
+          }).catch((error) => terminate(`Failed to add to Redis ${fingerprint} -> ${owner} (${error}).`));
           break;
         case CERTIFICATE_ACL_DELETE_EVENT_TYPE:
           if (!fingerprint) {
-            terminate(
-              `Missing mandatory attributes in processing event: ${eventType}`,
-            );
+            terminate(`Missing mandatory attributes in processing event: ${eventType}`);
             return;
           }
           // if returns here, will make sync because of an 'await' in the
@@ -104,9 +98,7 @@ class Application {
           this.redisManager.delAsync(fingerprint).then(() => {
             logger.debug(`Removed from Redis: ${fingerprint}`);
             ack();
-          }).catch((error) => terminate(
-            `Failed to remove from Redis ${fingerprint} -> ${owner} (${error}).`,
-          ));
+          }).catch((error) => terminate(`Failed to remove from Redis ${fingerprint} -> ${owner} (${error}).`));
           break;
         default:
           logger.warn(`Unexpected eventType: ${eventType} (discarded)`);
@@ -116,10 +108,8 @@ class Application {
       // if you get here, it's because the message cannot be processed anyway
       // so, it's better to terminate the service
       // another approach would be discard this message, calling ack()
-      terminate(
-        `Failed to process message ${util.inspect(data)}. `
-        + `Error: ${error}`,
-      );
+      terminate(`Failed to process message ${util.inspect(data)}. `
+        + `Error: ${error}`);
     }
   }
 
@@ -136,10 +126,8 @@ class Application {
     // start kafka consumer
     return this.kafkaConsumer.init().then(() => {
       // register processing callback
-      this.kafkaConsumer.registerCallback(
-        new RegExp(this.config.app['kafka.consumer.topic.regex']),
-        this.processData.bind(this),
-      );
+      this.kafkaConsumer.registerCallback(new RegExp(this.config.app['kafka.consumer.topic.regex']),
+        this.processData.bind(this));
     });
   }
 }

@@ -55,12 +55,10 @@ describe('Register Callbacks', () => {
     kconsumer.registerCallback(topic, cb);
 
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: null,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: null,
+      cb,
+    });
   });
 
   it('Register when Kafka Consumer is not suspended', () => {
@@ -76,12 +74,10 @@ describe('Register Callbacks', () => {
     expect(kconsumer.consumer.registerCallback)
       .toBeCalledWith(topic, cb);
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: cbId,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: cbId,
+      cb,
+    });
   });
 
   it('Register callback twice', () => {
@@ -96,12 +92,10 @@ describe('Register Callbacks', () => {
     expect(() => kconsumer.registerCallback(topic, cb)).toThrow();
 
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: cbId,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: cbId,
+      cb,
+    });
   });
 });
 
@@ -124,12 +118,10 @@ describe('Suspend and Resume Processing Callbacks', () => {
     expect(kconsumer.consumer.unregisterCallback)
       .toHaveBeenCalledWith(cbId);
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: null,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: null,
+      cb,
+    });
     expect(kconsumer.suspended).toBeTruthy();
   });
 
@@ -140,12 +132,10 @@ describe('Suspend and Resume Processing Callbacks', () => {
     expect(kconsumer.consumer.unregisterCallback)
       .toHaveBeenCalledTimes(1);
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: null,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: null,
+      cb,
+    });
     expect(kconsumer.suspended).toBeTruthy();
   });
 
@@ -158,12 +148,10 @@ describe('Suspend and Resume Processing Callbacks', () => {
     expect(kconsumer.consumer.registerCallback)
       .toHaveBeenCalledWith(topic, cb);
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: cbId,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: cbId,
+      cb,
+    });
     expect(kconsumer.suspended).toBeFalsy();
   });
 
@@ -173,12 +161,10 @@ describe('Suspend and Resume Processing Callbacks', () => {
     expect(kconsumer.consumer.unregisterCallback)
       .not.toHaveBeenCalled();
     expect(kconsumer.registeredCallbacks.size).toBe(1);
-    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject(
-      {
-        id: cbId,
-        cb,
-      },
-    );
+    expect(kconsumer.registeredCallbacks.get(topic)).toMatchObject({
+      id: cbId,
+      cb,
+    });
     expect(kconsumer.suspended).toBeFalsy();
   });
 });

@@ -103,10 +103,8 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.setAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-      `${msg.metadata.tenant}:${msg.data.eventData.belongsTo.device}`,
-    );
+    expect(app.redisManager.setAsync).toBeCalledWith(msg.data.eventData.fingerprint,
+      `${msg.metadata.tenant}:${msg.data.eventData.belongsTo.device}`);
     expect(ack).toBeCalled();
   });
 
@@ -127,10 +125,8 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.setAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-      `${msg.metadata.tenant}:${msg.data.eventData.belongsTo.device}`,
-    );
+    expect(app.redisManager.setAsync).toBeCalledWith(msg.data.eventData.fingerprint,
+      `${msg.metadata.tenant}:${msg.data.eventData.belongsTo.device}`);
     expect(ack).toBeCalled();
   });
 
@@ -151,10 +147,8 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.setAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-      `${msg.metadata.tenant}:${msg.data.eventData.belongsTo.device}`,
-    );
+    expect(app.redisManager.setAsync).toBeCalledWith(msg.data.eventData.fingerprint,
+      `${msg.metadata.tenant}:${msg.data.eventData.belongsTo.device}`);
     expect(ack).toBeCalled();
   });
 
@@ -172,9 +166,7 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.delAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-    );
+    expect(app.redisManager.delAsync).toBeCalledWith(msg.data.eventData.fingerprint);
     expect(ack).toBeCalled();
   });
 
@@ -194,10 +186,8 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.setAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-      `${msg.data.eventData.belongsTo.application}`,
-    );
+    expect(app.redisManager.setAsync).toBeCalledWith(msg.data.eventData.fingerprint,
+      `${msg.data.eventData.belongsTo.application}`);
     expect(ack).toBeCalled();
   });
 
@@ -217,10 +207,8 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.setAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-      `${msg.data.eventData.belongsTo.application}`,
-    );
+    expect(app.redisManager.setAsync).toBeCalledWith(msg.data.eventData.fingerprint,
+      `${msg.data.eventData.belongsTo.application}`);
     expect(ack).toBeCalled();
   });
 
@@ -237,9 +225,7 @@ describe('Processing Data', () => {
     const ack = jest.fn();
     await app.processData({ value: JSON.stringify(msg) }, ack);
 
-    expect(app.redisManager.delAsync).toBeCalledWith(
-      msg.data.eventData.fingerprint,
-    );
+    expect(app.redisManager.delAsync).toBeCalledWith(msg.data.eventData.fingerprint);
     expect(ack).toBeCalled();
   });
 

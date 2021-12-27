@@ -80,9 +80,7 @@ class RedisManager {
     });
 
     // graceful shutdown
-    this.serviceStateManager.registerShutdownHandler(
-      this.shutdown.bind(this),
-    );
+    this.serviceStateManager.registerShutdownHandler(this.shutdown.bind(this));
 
     Object.seal(this);
 

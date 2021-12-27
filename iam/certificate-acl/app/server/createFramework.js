@@ -12,26 +12,24 @@ const {
   readinessInterceptor,
 } = WebUtils.framework.interceptors;
 
-module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExpress(
-  {
-    interceptors: [
-      readinessInterceptor({
-        stateManager: serviceStateManager,
-        logger,
-      }),
-      beaconInterceptor({
-        stateManager: serviceStateManager,
-        logger,
-      }),
-      requestIdInterceptor(),
-      requestLogInterceptor({
-        logger,
-      }),
-      responseCompressInterceptor(),
-    ],
-    routes: ([
-      aclRoute,
-    ]),
-    logger,
-  },
-);
+module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExpress({
+  interceptors: [
+    readinessInterceptor({
+      stateManager: serviceStateManager,
+      logger,
+    }),
+    beaconInterceptor({
+      stateManager: serviceStateManager,
+      logger,
+    }),
+    requestIdInterceptor(),
+    requestLogInterceptor({
+      logger,
+    }),
+    responseCompressInterceptor(),
+  ],
+  routes: ([
+    aclRoute,
+  ]),
+  logger,
+});

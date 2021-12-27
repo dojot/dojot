@@ -56,9 +56,7 @@ describe('HTTP Server Initialization', () => {
       new RedisManager());
     httpServer.init();
 
-    expect(httpServer.server.listen).toBeCalledWith(
-      mockConfig.server.port, mockConfig.server.host,
-    );
+    expect(httpServer.server.listen).toBeCalledWith(mockConfig.server.port, mockConfig.server.host);
   });
 });
 

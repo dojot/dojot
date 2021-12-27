@@ -8,6 +8,7 @@
         "airbnb-base"
     ],
     "rules": {
-        "import/no-unresolved": "off"
+        "import/no-unresolved": "off",
+        "function-paren-newline": ["error", { "minItems": 3 }]
     }
 }
