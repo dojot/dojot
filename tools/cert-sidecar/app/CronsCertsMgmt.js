@@ -77,18 +77,16 @@ class CronsCertsMgmt {
    */
   cronCertHasRevoked() {
     this.logger.info('cronCertHasRevoked: Creating cron to check revoking...');
-    cronJob(
-      async () => {
-        await this.certHasRevoked()
-          .catch(async (e) => {
-            this.logger.error('cronCertHasRevoked:', e);
-            if (this.errorHandle) {
-              await this.errorHandle();
-            }
-          });
-      },
-      configCron['revoke.time'],
-    );
+    cronJob(async () => {
+      await this.certHasRevoked()
+        .catch(async (e) => {
+          this.logger.error('cronCertHasRevoked:', e);
+          if (this.errorHandle) {
+            await this.errorHandle();
+          }
+        });
+    },
+    configCron['revoke.time']);
     this.logger.info('cronCertHasRevoked: ...ending create cron to check revoking...');
   }
 
@@ -97,18 +95,16 @@ class CronsCertsMgmt {
    */
   cronCertsWillExpire() {
     this.logger.info('cronCertsWillExpire: Creating cron to check expiration...');
-    cronJob(
-      async () => {
-        await this.certsWillExpire()
-          .catch(async (e) => {
-            this.logger.error('cronCertsWillExpire:', e);
-            if (this.errorHandle) {
-              await this.errorHandle();
-            }
-          });
-      },
-      configCron['expiration.time'],
-    );
+    cronJob(async () => {
+      await this.certsWillExpire()
+        .catch(async (e) => {
+          this.logger.error('cronCertsWillExpire:', e);
+          if (this.errorHandle) {
+            await this.errorHandle();
+          }
+        });
+    },
+    configCron['expiration.time']);
     this.logger.info('cronCertsWillExpire: ...ending create cron to check expiration...');
   }
 
@@ -117,19 +113,17 @@ class CronsCertsMgmt {
    */
   cronUpdateCRL() {
     this.logger.info('cronRetrieveCRL: Creating cron to retrieve CRL...');
-    cronJob(
-      async () => {
-        await this.retrieveCRL()
-          .catch(async (e) => {
-            this.logger.error('cronUpdateCRL:', e);
+    cronJob(async () => {
+      await this.retrieveCRL()
+        .catch(async (e) => {
+          this.logger.error('cronUpdateCRL:', e);
 
-            if (this.errorHandle) {
-              await this.errorHandle();
-            }
-          });
-      },
-      configCron['crl.time'],
-    );
+          if (this.errorHandle) {
+            await this.errorHandle();
+          }
+        });
+    },
+    configCron['crl.time']);
     this.logger.info('cronRetrieveCRL: ...ending create  cron to retrieve CRL.');
   }
 
@@ -138,18 +132,16 @@ class CronsCertsMgmt {
    */
   cronUpdateCaBundle() {
     this.logger.info('cronUpdateCaBundle: Creating cron to update the CA bundle...');
-    cronJob(
-      async () => {
-        await this.retrieveCaBundle()
-          .catch(async (e) => {
-            this.logger.error('cronUpdateCaBundle:', e);
-            if (this.errorHandle) {
-              await this.errorHandle();
-            }
-          });
-      },
-      configCron['cabundle.time'],
-    );
+    cronJob(async () => {
+      await this.retrieveCaBundle()
+        .catch(async (e) => {
+          this.logger.error('cronUpdateCaBundle:', e);
+          if (this.errorHandle) {
+            await this.errorHandle();
+          }
+        });
+    },
+    configCron['cabundle.time']);
     this.logger.info('cronUpdateCaBundle: ...ending create cron to update the CA bundle.');
   }
 }

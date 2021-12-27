@@ -69,11 +69,13 @@ describe('CronsCertsMgmt', () => {
   afterEach(() => {
   });
   test('instantiate class', () => {
-    cronsCertsMgmt = new CronsCertsMgmt(mockRetrieveCRL,
+    cronsCertsMgmt = new CronsCertsMgmt(
+      mockRetrieveCRL,
       mockCertsWillExpire,
       mockCertHasRevoked,
       mockRetrieveCaBundle,
-      mockErrorHandle);
+      mockErrorHandle,
+    );
 
     expect(cronsCertsMgmt.retrieveCRL).toBeDefined();
     expect(cronsCertsMgmt.certHasRevoked).toBeDefined();

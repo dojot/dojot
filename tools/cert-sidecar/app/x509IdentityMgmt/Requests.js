@@ -29,10 +29,12 @@ class Requests {
    * @param {*} paths.ca
    * @param {*} paths.caBundle
    */
-  constructor(url,
+  constructor(
+    url,
     timeout,
     retries,
-    paths) {
+    paths,
+  ) {
     this.axiosX509 = axios.create({
       baseURL: url,
       timeout,
@@ -65,7 +67,9 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.post(this.paths.sign, { csr, belongsTo }, axiosCfg);
+      } = await this.axiosX509.post(
+        this.paths.sign, { csr, belongsTo }, axiosCfg,
+      );
 
       if (status === 201) {
         return data;

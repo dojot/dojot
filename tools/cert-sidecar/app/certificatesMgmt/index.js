@@ -24,7 +24,9 @@ class CertificatesMgmt {
     *          with register service 'x509IdentityMgmt'} serviceState
     *          Manages the services' states, providing health check and shutdown utilities.
   */
-  constructor(opensslWrapper, x509IdentityMgmt, serviceState) {
+  constructor(
+    opensslWrapper, x509IdentityMgmt, serviceState,
+  ) {
     this.serviceState = serviceState;
     const filenameInCertFolder = (filename) => (createFilename(filename, configCerts['files.basepath']));
     const paths = {

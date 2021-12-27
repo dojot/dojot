@@ -27,7 +27,9 @@ class Certificates {
  * @param {String} paths.cert  Path to certificate
  * @param {String} paths.key Path to privatekey
  */
-  constructor(opensslWrapper, x509IdentityMgmt, paths) {
+  constructor(
+    opensslWrapper, x509IdentityMgmt, paths,
+  ) {
     this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:CertificatesMgmt`);
 
     this.logger.debug('constructor: Certificates');
@@ -120,10 +122,8 @@ class Certificates {
   async certsWillExpire() {
     this.logger.info('certsWillExpire: Checking if broker\'s certificates are expired...');
     try {
-      if (await this.openssl.getOpenSSL().isCertExpiredInSec(
-        this.ca,
-        configCerts['expiration.checkend.sec'],
-      )) {
+      if (await this.openssl.getOpenSSL().isCertExpiredInSec(this.ca,
+        configCerts['expiration.checkend.sec'])) {
         this.logger.info('certsWillExpire: Getting new ca certificate');
         // Checks whether file deletion is active
         if (configApp['delete.certificates']) {
@@ -135,10 +135,8 @@ class Certificates {
         this.logger.info('certsWillExpire: ca certificate ok ');
       }
 
-      if (await this.openssl.getOpenSSL().isCertExpiredInSec(
-        this.cert,
-        configCerts['expiration.checkend.sec'],
-      )) {
+      if (await this.openssl.getOpenSSL().isCertExpiredInSec(this.cert,
+        configCerts['expiration.checkend.sec'])) {
         this.logger.info('certsWillExpire: Getting new certificate');
         // Checks whether file deletion is active
         if (configApp['delete.certificates']) {

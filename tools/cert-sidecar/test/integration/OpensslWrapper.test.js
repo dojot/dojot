@@ -82,9 +82,11 @@ describe('X509Utils', () => {
 
   test('generateCsr: ok', async () => {
     mockCreateCSR.mockResolvedValueOnce({ csr: 'CSR' });
-    const newCsr = await openssl.getOpenSSL().generateCsr('privateKey',
+    const newCsr = await openssl.getOpenSSL().generateCsr(
+      'privateKey',
       'commonName',
-      ['altname']);
+      ['altname'],
+    );
 
     expect(mockCreateCSR).toHaveBeenCalled();
     expect(newCsr).toBe('CSR');
@@ -213,14 +215,18 @@ describe('X509Utils', () => {
 
 
   test('certHasRevoked: ok', async () => {
-    const certInfo = await openssl.getOpenSSL().certHasRevoked('cert', 'crl', 'ca');
+    const certInfo = await openssl.getOpenSSL().certHasRevoked(
+      'cert', 'crl', 'ca',
+    );
     expect(mockOpensslExec).toHaveBeenCalled();
     expect(certInfo).toBe(false);
   });
 
 
   test('certHasRevoked: is revoked', async () => {
-    const certInfo = await openssl.getOpenSSL().certHasRevoked('cert', 'crl', 'ca');
+    const certInfo = await openssl.getOpenSSL().certHasRevoked(
+      'cert', 'crl', 'ca',
+    );
     expect(mockOpensslExec).toHaveBeenCalled();
     expect(certInfo).toBe(true);
   });
@@ -228,7 +234,9 @@ describe('X509Utils', () => {
   test('certHasRevoked: reject', async () => {
     expect.assertions(2);
     try {
-      await openssl.getOpenSSL().certHasRevoked('cert', 'crl', 'ca');
+      await openssl.getOpenSSL().certHasRevoked(
+        'cert', 'crl', 'ca',
+      );
     } catch (e) {
       expect(mockOpensslExec).toHaveBeenCalled();
       expect(e.message).toBe('Cannot check if certificate has revoked');

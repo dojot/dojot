@@ -25,7 +25,9 @@ const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:Utils`);
  *
  * @returns {cron.CronJob}
  */
-const cronJob = (cb, cronTime, runOnInit = false) => {
+const cronJob = (
+  cb, cronTime, runOnInit = false,
+) => {
   logger.debug(`cronJob: Creating a cronJob cronTime=${cronTime}`);
   try {
     const job = new CronJob({

@@ -27,7 +27,9 @@ if (configLog.file) {
 }
 const logger = new Logger(`cert-sc-${configApp['sidecar.to']}:index`);
 
-logger.info(`The final configuration:\n${util.inspect(config, false, 5, true)}`);
+logger.info(`The final configuration:\n${util.inspect(
+  config, false, 5, true,
+)}`);
 
 const App = require('./app/App');
 

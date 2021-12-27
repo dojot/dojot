@@ -29,11 +29,13 @@ class OpensslUtils {
    *
    * @returns {String} new CSR
    */
-  async generateCsr(privateKey,
+  async generateCsr(
+    privateKey,
     commonName,
     altNames = [],
     hash = 'sha256',
-    options = {}) {
+    options = {},
+  ) {
     const csrOptions = {
       clientKey: privateKey,
       hash,
@@ -204,7 +206,9 @@ class OpensslUtils {
    * @throws Will throw an error if cannot check if certificate has revoked
    * @returns {Boolean} a boolean valid
    */
-  async certHasRevoked(cert, crl, ca) {
+  async certHasRevoked(
+    cert, crl, ca,
+  ) {
     this.logger.debug('certHasRevoked: Checking if certificate has revoked...');
     try {
       const msgOpenSSL = await new Promise((resolve, reject) => {
