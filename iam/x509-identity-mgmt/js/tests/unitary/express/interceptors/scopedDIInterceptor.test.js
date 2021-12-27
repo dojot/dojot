@@ -48,7 +48,9 @@ describe("Unit tests of script 'scopedDIInterceptor.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    expect(scopedDIInterceptor.middleware(req, res, next)).toBeUndefined();
+    expect(scopedDIInterceptor.middleware(
+      req, res, next,
+    )).toBeUndefined();
 
     expect(DIContainer.createScope).toHaveBeenCalledTimes(1);
     expect(DIContainer.scope.register).toHaveBeenCalledTimes(2);

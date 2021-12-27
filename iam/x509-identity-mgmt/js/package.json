@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "app": "NODE_ENV=production node --unhandled-rejections=strict index.js",
-        "lint": "eslint src/**",
+        "lint": "eslint --ext .js .",
         "test": "cross-env NODE_ENV=test jest --verbose",
         "debugtest": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
         "check-licenses": "apache2-license-checker"

@@ -9,7 +9,9 @@ const pemCSRFooter = '-----END CERTIFICATE REQUEST-----';
 
 const pemLineMaxLength = 64 + 1; /* +1 = line feed character */
 
-function generatePemDummy(pemHeader, pemFooter, maxLength = 65536) {
+function generatePemDummy(
+  pemHeader, pemFooter, maxLength = 65536,
+) {
   const payloadLength = maxLength - (pemHeader.length + '\n'.length + pemFooter.length);
   const lastLineLength = payloadLength % pemLineMaxLength;
   const payloadLines = (payloadLength - lastLineLength) / pemLineMaxLength;
@@ -24,11 +26,15 @@ function generatePemDummy(pemHeader, pemFooter, maxLength = 65536) {
 }
 
 function generateCert(maxLength) {
-  return generatePemDummy(pemCertHeader, pemCertFooter, maxLength);
+  return generatePemDummy(
+    pemCertHeader, pemCertFooter, maxLength,
+  );
 }
 
 function generateCSR(maxLength) {
-  return generatePemDummy(pemCSRHeader, pemCSRFooter, maxLength);
+  return generatePemDummy(
+    pemCSRHeader, pemCSRFooter, maxLength,
+  );
 }
 
 const ed25519CSR = `-----BEGIN CERTIFICATE REQUEST-----

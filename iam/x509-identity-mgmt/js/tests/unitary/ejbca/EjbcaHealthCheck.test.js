@@ -29,7 +29,9 @@ describe("Unit tests of script 'EjbcaHealthCheck.js'", () => {
     request = new EventEmitter();
     response = new EventEmitter();
     request.abort = jest.fn();
-    http.get.mockImplementation((url, options, callback) => {
+    http.get.mockImplementation((
+      url, options, callback,
+    ) => {
       callback(response);
       return request;
     });

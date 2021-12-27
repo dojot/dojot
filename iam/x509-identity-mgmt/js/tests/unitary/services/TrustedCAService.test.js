@@ -305,7 +305,9 @@ describe("Unit tests of script 'TrustedCAService.js'", () => {
 
       const trustedCAService = new TrustedCAService(containerCradle);
 
-      await expect(trustedCAService.listCertificates([], {}, 1, 0))
+      await expect(trustedCAService.listCertificates(
+        [], {}, 1, 0,
+      ))
         .resolves.toEqual({ itemCount, results });
 
       expect(containerCradle.trustedCAModel.model.find).toHaveBeenCalledTimes(1);

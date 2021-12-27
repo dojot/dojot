@@ -34,7 +34,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeUndefined();
@@ -50,7 +52,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeUndefined();
@@ -67,7 +71,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeUndefined();
@@ -81,7 +87,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeUndefined();
@@ -99,7 +107,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeUndefined();
@@ -117,7 +127,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeUndefined();
@@ -130,7 +142,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeInstanceOf(Error);
@@ -142,7 +156,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeInstanceOf(Error);
@@ -154,7 +170,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeInstanceOf(Error);
@@ -166,7 +184,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeInstanceOf(Error);
@@ -178,7 +198,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeInstanceOf(Error);
@@ -190,7 +212,9 @@ describe("Unit tests of script 'schemaValidator.js'", () => {
     const res = {};
     const next = jest.fn();
 
-    validationMiddleware(req, res, next);
+    validationMiddleware(
+      req, res, next,
+    );
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next.mock.calls[0][0]).toBeInstanceOf(Error);

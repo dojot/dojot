@@ -391,9 +391,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
         .mockImplementationOnce(() => util.certChainHostFingerprint)
         .mockImplementationOnce(() => util.certChainRootCAFingerprint);
 
-      containerCradle.trustedCAService.getPEM = jest.fn(
-        () => util.certChain[util.certChain.length - 1],
-      );
+      containerCradle.trustedCAService.getPEM = jest
+        .fn(() => util.certChain[util.certChain.length - 1]);
 
       const certificateService = new CertificateService(containerCradle);
 
@@ -421,9 +420,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
       containerCradle.pkiUtils.getFingerprint = jest.fn()
         .mockImplementationOnce(() => util.certChainHostFingerprint);
 
-      containerCradle.trustedCAService.getPEM = jest.fn(
-        () => util.certChain[util.certChain.length - 1],
-      );
+      containerCradle.trustedCAService.getPEM = jest
+        .fn(() => util.certChain[util.certChain.length - 1]);
 
       const certificateService = new CertificateService(containerCradle);
 
@@ -554,9 +552,8 @@ describe("Unit tests of script 'CertificateService.js'", () => {
         .mockImplementationOnce(() => util.certChainHostFingerprint)
         .mockImplementationOnce(() => util.certChainRootCAFingerprint);
 
-      containerCradle.trustedCAService.getPEM = jest.fn(
-        () => util.certChain[util.certChain.length - 1],
-      );
+      containerCradle.trustedCAService.getPEM = jest
+        .fn(() => util.certChain[util.certChain.length - 1]);
 
       const certificateService = new CertificateService(containerCradle);
 
@@ -863,7 +860,9 @@ describe("Unit tests of script 'CertificateService.js'", () => {
 
       const certificateService = new CertificateService(containerCradle);
 
-      await expect(certificateService.listCertificates([], {}, 1, 1))
+      await expect(certificateService.listCertificates(
+        [], {}, 1, 1,
+      ))
         .resolves.toEqual({ itemCount, results });
 
       expect(containerCradle.certificateModel.model.find).toHaveBeenCalledTimes(1);

@@ -88,19 +88,25 @@ deviceMgrEventEngine.start();
 notificationEngine.start();
 
 // The EJBCA health-check is done at intervals directly in the Event Loop
-stateManager.addHealthChecker('ejbca',
+stateManager.addHealthChecker(
+  'ejbca',
   ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
-  config.ejbca.healthcheck.delayms);
+  config.ejbca.healthcheck.delayms,
+);
 
 // The DeviceManager (Kafka Consumer) health-check is done at intervals directly in the Event Loop
-stateManager.addHealthChecker('deviceMgrKafka',
+stateManager.addHealthChecker(
+  'deviceMgrKafka',
   deviceMgrKafkaHealthCheck.readiness.bind(deviceMgrKafkaHealthCheck),
-  config.kafka.consumer.healthcheck.ms);
+  config.kafka.consumer.healthcheck.ms,
+);
 
 // The Notifications (Kafka Producer) health-check is done at intervals directly in the Event Loop
-stateManager.addHealthChecker('notificationKafka',
+stateManager.addHealthChecker(
+  'notificationKafka',
   notificationKafkaHealthCheck.readiness.bind(notificationKafkaHealthCheck),
-  config.kafka.producer.healthcheck.ms);
+  config.kafka.producer.healthcheck.ms,
+);
 
 // create an instance of http-terminator and instead of
 // using server.close(), use httpTerminator.terminate()

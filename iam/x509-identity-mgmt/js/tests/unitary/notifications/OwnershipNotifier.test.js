@@ -76,28 +76,36 @@ describe("Unit tests of script 'OwnershipNotifier.js'", () => {
   });
 
   it('should notify the change of ownership (device to device)', async () => {
-    await ownershipNotifier.change(certRecord, { device: 'abc123' }, { device: 'xyz789' });
+    await ownershipNotifier.change(
+      certRecord, { device: 'abc123' }, { device: 'xyz789' },
+    );
 
     expect(ownershipNotifier.notificationEngine.notify).toHaveBeenCalledTimes(1);
     expect(ownershipNotifier.logger.info).toHaveBeenCalledTimes(1);
   });
 
   it('should notify the change of ownership (application to application)', async () => {
-    await ownershipNotifier.change(certRecord, { application: 'k2v' }, { application: 'v2k' });
+    await ownershipNotifier.change(
+      certRecord, { application: 'k2v' }, { application: 'v2k' },
+    );
 
     expect(ownershipNotifier.notificationEngine.notify).toHaveBeenCalledTimes(1);
     expect(ownershipNotifier.logger.info).toHaveBeenCalledTimes(1);
   });
 
   it('should notify the change of ownership (device to application)', async () => {
-    await ownershipNotifier.change(certRecord, { device: 'abc123' }, { application: 'kafka-consumer' });
+    await ownershipNotifier.change(
+      certRecord, { device: 'abc123' }, { application: 'kafka-consumer' },
+    );
 
     expect(ownershipNotifier.notificationEngine.notify).toHaveBeenCalledTimes(1);
     expect(ownershipNotifier.logger.info).toHaveBeenCalledTimes(1);
   });
 
   it('should notify the change of ownership (application to device)', async () => {
-    await ownershipNotifier.change(certRecord, { application: 'kafka-consumer' }, { device: 'abc123' });
+    await ownershipNotifier.change(
+      certRecord, { application: 'kafka-consumer' }, { device: 'abc123' },
+    );
 
     expect(ownershipNotifier.notificationEngine.notify).toHaveBeenCalledTimes(1);
     expect(ownershipNotifier.logger.info).toHaveBeenCalledTimes(1);
@@ -122,7 +130,9 @@ describe("Unit tests of script 'OwnershipNotifier.js'", () => {
   });
 
   it("should not notify the change of ownership (missing 'previousOwner')", async () => {
-    await ownershipNotifier.change(certRecord, null, { device: 'abc123' });
+    await ownershipNotifier.change(
+      certRecord, null, { device: 'abc123' },
+    );
 
     expect(ownershipNotifier.logger.warn).toHaveBeenCalledTimes(1);
 
@@ -131,7 +141,9 @@ describe("Unit tests of script 'OwnershipNotifier.js'", () => {
   });
 
   it("should not notify the change of ownership (missing 'currentOwner')", async () => {
-    await ownershipNotifier.change(certRecord, { device: 'abc123' }, null);
+    await ownershipNotifier.change(
+      certRecord, { device: 'abc123' }, null,
+    );
 
     expect(ownershipNotifier.logger.warn).toHaveBeenCalledTimes(1);
 

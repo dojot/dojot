@@ -147,9 +147,9 @@ describe("Unit tests of script 'EjbcaFacade.js'", () => {
     const validity = 365;
     const csrPem = csr;
 
-    await expect(
-      ejbcaFacade.generateCertificate(subjectDN, validity, csrPem),
-    ).resolves.toBe(`-----BEGIN CERTIFICATE-----\n${certEjbcaResp}\n-----END CERTIFICATE-----`);
+    await expect(ejbcaFacade.generateCertificate(
+      subjectDN, validity, csrPem,
+    )).resolves.toBe(`-----BEGIN CERTIFICATE-----\n${certEjbcaResp}\n-----END CERTIFICATE-----`);
 
     const client = await ejbcaSoapClient.getClient();
 
@@ -164,9 +164,7 @@ describe("Unit tests of script 'EjbcaFacade.js'", () => {
 
     const issuerDN = 'CN=X509 Identity CA, OU=Certificate Issuer, O=dojot IoT Platform';
     const certificateSN = '2568F0806E90FA655CC1898227E8560D5CC51A21';
-    await expect(
-      ejbcaFacade.revokeCertificate(issuerDN, certificateSN),
-    ).resolves.toBeUndefined();
+    await expect(ejbcaFacade.revokeCertificate(issuerDN, certificateSN)).resolves.toBeUndefined();
 
     const client = await ejbcaSoapClient.getClient();
 
@@ -180,9 +178,7 @@ describe("Unit tests of script 'EjbcaFacade.js'", () => {
     });
     const caName = global.config.ejbca.rootca;
 
-    await expect(
-      ejbcaFacade.getRootCertificate(caName),
-    ).resolves.toBe(`-----BEGIN CERTIFICATE-----\n${caEjbcaResp}\n-----END CERTIFICATE-----`);
+    await expect(ejbcaFacade.getRootCertificate(caName)).resolves.toBe(`-----BEGIN CERTIFICATE-----\n${caEjbcaResp}\n-----END CERTIFICATE-----`);
 
     const client = await ejbcaSoapClient.getClient();
 
@@ -196,9 +192,7 @@ describe("Unit tests of script 'EjbcaFacade.js'", () => {
     });
     const caName = global.config.ejbca.rootca;
 
-    await expect(
-      ejbcaFacade.getCRL(caName),
-    ).resolves.toBe(`-----BEGIN X509 CRL-----\n${crlEjbcaSoapResp}\n-----END X509 CRL-----`);
+    await expect(ejbcaFacade.getCRL(caName)).resolves.toBe(`-----BEGIN X509 CRL-----\n${crlEjbcaSoapResp}\n-----END X509 CRL-----`);
 
     const client = await ejbcaSoapClient.getClient();
 
@@ -213,9 +207,7 @@ describe("Unit tests of script 'EjbcaFacade.js'", () => {
     });
     const caName = global.config.ejbca.rootca;
 
-    await expect(
-      ejbcaFacade.getCRL(caName),
-    ).resolves.toBe(`-----BEGIN X509 CRL-----\n${crlEjbcaSoapResp}\n-----END X509 CRL-----`);
+    await expect(ejbcaFacade.getCRL(caName)).resolves.toBe(`-----BEGIN X509 CRL-----\n${crlEjbcaSoapResp}\n-----END X509 CRL-----`);
 
     const client = await ejbcaSoapClient.getClient();
 

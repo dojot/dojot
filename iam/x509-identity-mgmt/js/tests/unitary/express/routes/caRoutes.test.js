@@ -20,7 +20,9 @@ const framework = WebUtils.framework.createExpress({
     global.jsonBodyParsingInterceptor,
     {
       name: 'test-interceptor',
-      middleware: (req, res, next) => {
+      middleware: (
+        req, res, next,
+      ) => {
         req.scope = {
           resolve: jest.fn(() => ({
             getRootCertificate,
