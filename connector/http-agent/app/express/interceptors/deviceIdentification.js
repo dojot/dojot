@@ -26,35 +26,6 @@ module.exports = ({ config, identificationService }) => ({
       } catch (err) {
         return next(err);
       }
-
-      if (
-        config.authorizationMode === 'fingerprint' &&
-        Object.prototype.hasOwnProperty.call(clientCert, 'fingerprint256')
-      ) {
-        const { fingerprint256 } = clientCert;
-        let messageKey = cache.get(fingerprint256);
-        if (messageKey) {
-          [req.tenant, req.deviceId] = messageKey;
-          return next();
-        }
-        try {
-          messageKey = await axios
-            .get(`http://certificate-acl:3000/internal/api/v1/acl-entries/${fingerprint256}`)
-            .then((resp) => resp.data.split(':'));
-          [req.tenant, req.deviceId] = messageKey;
-          cache.set(
-            fingerprint256, messageKey, config.setTll,
-          );
-          return next();
-        } catch (e) {
-          err.message =
-            'Error trying to get tenant and deviceId in certificate-acl.';
-          return next(err);
-        }
-      }
-
-      err.message = 'Client certificate is invalid';
-      return next(err);
     }
 
     const reqType = req.path.split('/');

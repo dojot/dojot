@@ -541,7 +541,9 @@ class CertificateService {
   async ensureDeviceExists(deviceId) {
     if (this.checkDeviceExists) {
       const isOwner = await this.deviceMgrProvider
-        .checkDeviceExists(this.tenant, deviceId, this.xRequestId);
+        .checkDeviceExists(
+          this.tenant, deviceId, this.xRequestId,
+        );
       if (!isOwner) {
         throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
       }

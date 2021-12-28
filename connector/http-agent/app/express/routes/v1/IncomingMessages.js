@@ -36,12 +36,10 @@ module.exports = ({ mountPoint, producerMessages }) => ([
                 deviceId,
               );
 
-              const { error } = messageSchema.validate(
-                generatedDeviceDataMessage,
+              const { error } = messageSchema.validate(generatedDeviceDataMessage,
                 {
                   abortEarly: false,
-                },
-              );
+                });
               if (error) {
                 throw new Error(error.message);
               }
@@ -90,8 +88,7 @@ module.exports = ({ mountPoint, producerMessages }) => ([
                 const { error } = messageSchema.validate(generatedDeviceDataMessage,
                   {
                     abortEarly: false,
-                  },
-                );
+                  });
 
                 // eslint-disable-next-line security/detect-object-injection
                 if (error) errors[index] = error.message;

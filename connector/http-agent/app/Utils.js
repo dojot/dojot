@@ -54,6 +54,8 @@ const generateDeviceDataMessage = (
     },
     attrs: payload.data,
   };
+
+  return formattedMessage;
 };
 
 /**

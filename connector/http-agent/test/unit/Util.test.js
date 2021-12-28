@@ -8,12 +8,6 @@ const fakeMessageWithTimestamp = {
     temperature: 25.79,
   },
 };
-const fakeMessageWithUnixTimestamp = {
-  ts: '1626082261683',
-  data: {
-    temperature: 25.79,
-  },
-};
 const fakeMessageWithoutTimestamp = {
   data: {
     temperature: 25.79,

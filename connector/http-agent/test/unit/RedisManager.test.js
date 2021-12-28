@@ -20,7 +20,9 @@ MockRedisClient.prototype.get = function get(key, cb) {
   const value = this.table.get(key);
   cb(null, value);
 };
-MockRedisClient.prototype.set = function set(key, value, cb) {
+MockRedisClient.prototype.set = function set(
+  key, value, cb,
+) {
   this.table.set(key, value);
   cb(null, 'OK');
 };
@@ -110,17 +112,13 @@ describe('RedisManager', () => {
     it('connect', () => {
       redisManager.redisClient.eventListener.connect();
 
-      expect(serviceStateMock.signalReady).toHaveBeenCalledWith(
-        'http-redis',
-      );
+      expect(serviceStateMock.signalReady).toHaveBeenCalledWith('http-redis');
     });
 
     it('reconnecting', () => {
       redisManager.redisClient.eventListener.reconnecting();
 
-      expect(serviceStateMock.signalNotReady).toHaveBeenCalledWith(
-        'http-redis',
-      );
+      expect(serviceStateMock.signalNotReady).toHaveBeenCalledWith('http-redis');
     });
 
     it('error - exhausted retries', () => {

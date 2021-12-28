@@ -62,20 +62,18 @@ class App {
       this.redisManager.init();
       this.server.registerShutdown();
 
-      this.server.init(
-        express(
-          [
-            incomingMessagesRoutes({
-              mountPoint: '/http-agent/v1',
-              producerMessages: this.producerMessages,
-            }),
-          ],
-          serviceState,
-          this.redisManager,
-          this.deviceAuthService,
-          this.certificateAclService,
-        ),
-      );
+      this.server.init(express(
+        [
+          incomingMessagesRoutes({
+            mountPoint: '/http-agent/v1',
+            producerMessages: this.producerMessages,
+          }),
+        ],
+        serviceState,
+        this.redisManager,
+        this.deviceAuthService,
+        this.certificateAclService,
+      ));
     } catch (e) {
       logger.error('init:', e);
       throw e;

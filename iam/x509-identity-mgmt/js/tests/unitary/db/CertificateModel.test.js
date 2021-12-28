@@ -28,12 +28,12 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
   });
 
   it('should parse param keyVal', () => {
-    const conditionFilterFields = "belongsTo.device=null,belongsTo.application=!";
+    const conditionFilterFields = 'belongsTo.device=null,belongsTo.application=!';
     const result = certificateModel.handleFilterField(conditionFilterFields);
     const resultNull = certificateModel.handleFilterField(null);
     expect(result).toEqual({
-      "belongsTo.device": { '$exists': false },
-      "belongsTo.application": { '$exists': false },
+      'belongsTo.device': { $exists: false },
+      'belongsTo.application': { $exists: false },
     });
     expect(resultNull).toEqual({});
   });
