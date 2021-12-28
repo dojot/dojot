@@ -82,7 +82,7 @@ describe('Testing RedisExpireMgmt everything ok', () => {
   it('Shouldnt add a connection that already exist  ', () => {
     expect(redisExpireMgmt.expirationMap.size).toBe(1);
     redisExpireMgmt.addConnection(
-      'xxx', 123, () => { },
+      'xxx', 123, () => {},
     );
     expect(redisExpireMgmt.expirationMap.has('xxx')).toBe(true);
     expect(redisExpireMgmt.expirationMap.size).toBe(1);

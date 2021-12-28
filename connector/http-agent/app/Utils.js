@@ -45,18 +45,14 @@ const parseTimestamp = (ts) => {
  */
 const generateDeviceDataMessage = (
   payload, tenant, deviceid,
-) => {
-  const formattedMessage = {
-    metadata: {
-      deviceid,
-      tenant,
-      timestamp: parseTimestamp(payload.ts),
-    },
-    attrs: payload.data,
-  };
-
-  return formattedMessage;
-};
+) => ({
+  metadata: {
+    deviceid,
+    tenant,
+    timestamp: parseTimestamp(payload.ts),
+  },
+  attrs: payload.data,
+});
 
 /**
  * Kills the program process.

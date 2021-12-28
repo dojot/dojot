@@ -111,7 +111,9 @@ class RedisManager {
       });
     });
 
-    await new Promise((resolve) => { setImmediate(resolve); });
+    await new Promise((resolve) => {
+      setImmediate(resolve);
+    });
   }
 
   /**

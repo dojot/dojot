@@ -106,6 +106,8 @@ describe('Unit tests for methods in Utils', () => {
 
 
   afterAll(async () => {
-    await new Promise((resolve) => { setTimeout(() => resolve(), 500); });
+    await new Promise((resolve) => { 
+      setTimeout(() => resolve(), 500); 
+    });
   });
 });

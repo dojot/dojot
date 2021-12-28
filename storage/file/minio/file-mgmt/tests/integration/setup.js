@@ -65,10 +65,9 @@ function generateApp() {
   ConfigManager.loadSettings('FILE-MGMT', 'default.conf');
   const config = ConfigManager.getConfig('FILE-MGMT');
 
-  const app = new App(
+  return new App(
     config, loggerMock, openApiPath,
   );
-  return app;
 }
 
 function generateJWT(tenant = 'admin') {

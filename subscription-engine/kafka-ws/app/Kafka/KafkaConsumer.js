@@ -82,7 +82,9 @@ class KafkaConsumer {
       });
     });
 
-    await new Promise((resolve) => { setImmediate(resolve); });
+    await new Promise((resolve) => { 
+      setImmediate(resolve);
+    });
   }
 
   /**

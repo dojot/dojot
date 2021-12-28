@@ -5,7 +5,6 @@ const loggerMock = require('../../mocks/logger-mock');
 const ResponseMock = require('../../mocks/express-response-mock');
 
 const uploadFileService = {
-  
   handle: jest.fn((
     // eslint-disable-next-line no-unused-vars
     tenant, uploadedFile, path, md5,
