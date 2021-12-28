@@ -6,10 +6,13 @@ const DELETE_EVENT = 'trustedca.delete';
  */
 class TrustedCANotifier {
   constructor({
-    tenant = '', kafkaTopicSuffix, notificationEngine, logger,
+    tenant = '', xRequestId = '', kafkaTopicSuffix, notificationEngine, logger,
   }) {
     Object.defineProperty(
       this, 'tenant', { value: tenant },
+    );
+    Object.defineProperty(
+      this, 'xRequestId', { value: xRequestId },
     );
     Object.defineProperty(
       this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` },
@@ -46,6 +49,7 @@ class TrustedCANotifier {
       eventType,
       eventData,
       partitionKey: `${this.tenant}:${caCertRecord.caFingerprint}`,
+      xRequestId: this.xRequestId,
     });
 
     this.logger.info(`Notification issued: '${eventType}'. `
@@ -76,6 +80,7 @@ class TrustedCANotifier {
       eventType,
       eventData,
       partitionKey: `${this.tenant}:${caCertRecord.caFingerprint}`,
+      xRequestId: this.xRequestId,
     });
 
     this.logger.info(`Notification issued: '${eventType}'. `

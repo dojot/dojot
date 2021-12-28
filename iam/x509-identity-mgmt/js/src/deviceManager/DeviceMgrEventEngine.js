@@ -82,6 +82,7 @@ class DeviceMgrEventEngine {
           lifetime: Lifetime.SCOPED,
         }),
         event: asValue(event),
+        xRequestId: asValue(requestId),
         tenant: asValue(tenant),
         device: asValue(device),
       });

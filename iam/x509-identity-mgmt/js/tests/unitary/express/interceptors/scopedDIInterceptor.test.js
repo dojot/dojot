@@ -53,7 +53,7 @@ describe("Unit tests of script 'scopedDIInterceptor.js'", () => {
     )).toBeUndefined();
 
     expect(DIContainer.createScope).toHaveBeenCalledTimes(1);
-    expect(DIContainer.scope.register).toHaveBeenCalledTimes(2);
+    expect(DIContainer.scope.register).toHaveBeenCalledTimes(3);
     expect(DIContainer.scope.resolve).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledTimes(1);
   });

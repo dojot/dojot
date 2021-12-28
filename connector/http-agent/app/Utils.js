@@ -1,3 +1,7 @@
+const createError = require('http-errors');
+
+const err = new createError.BadRequest();
+
 /**
  * A module with helper functions
  * @module utils
@@ -13,12 +17,19 @@
  * @returns {number}
  */
 const parseTimestamp = (ts) => {
-  if (ts) {
-    const parsedTimestamp = Date.parse(ts);
-    if (Number.isNaN(parsedTimestamp)) return new Date().getTime();
-    return parsedTimestamp;
+  // if wasn't received ts value, return the current timestamp;
+  if (!ts) {
+    return new Date().getTime();
   }
-  return new Date().getTime();
+  if (!isNaN(ts)) {
+    const unix = parseInt(ts, 10);
+    return new Date(unix).getTime();
+  }
+  if ((new Date(ts)).getTime() > 0) {
+    return new Date(ts).getTime();
+  }
+  err.message = 'Invalid timestamp';
+  throw err;
 };
 
 /**
@@ -26,9 +37,9 @@ const parseTimestamp = (ts) => {
  *
  * Generates a payload for device-data topic for Dojot
  *
- * @param {string} payload
+ * @param {object} payload
  * @param {string} tenant
- * @param {Object} deviceid
+ * @param {string} deviceid
  *
  * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
  */
@@ -43,8 +54,6 @@ const generateDeviceDataMessage = (
     },
     attrs: payload.data,
   };
-
-  return formattedMessage;
 };
 
 /**

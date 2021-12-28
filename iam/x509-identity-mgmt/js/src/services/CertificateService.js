@@ -56,7 +56,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils, certValidity,
     checkPublicKey, checkSubjectDN, checkDeviceExists, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier,
+    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier, xRequestId,
   }) {
     Object.defineProperty(
       this, 'trustedCAService', { value: trustedCAService },
@@ -108,6 +108,9 @@ class CertificateService {
     );
     Object.defineProperty(
       this, 'ownershipNotifier', { value: ownershipNotifier },
+    );
+    Object.defineProperty(
+      this, 'xRequestId', { value: xRequestId },
     );
 
     // Flag used to determine the privilege of an operation.
@@ -537,7 +540,8 @@ class CertificateService {
    */
   async ensureDeviceExists(deviceId) {
     if (this.checkDeviceExists) {
-      const isOwner = await this.deviceMgrProvider.checkDeviceExists(this.tenant, deviceId);
+      const isOwner = await this.deviceMgrProvider
+        .checkDeviceExists(this.tenant, deviceId, this.xRequestId);
       if (!isOwner) {
         throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
       }

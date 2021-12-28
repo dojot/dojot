@@ -47,6 +47,7 @@ describe("Unit tests of script 'NotificationEngine.js'", () => {
       eventType: 'create',
       eventData: {},
       partitionKey: 'admin:abc123',
+      xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
     };
     await expect(notificationEngine.notify(payload)).resolves.toBeUndefined();
 

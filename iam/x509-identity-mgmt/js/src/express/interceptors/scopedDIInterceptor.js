@@ -18,9 +18,12 @@ module.exports = ({ DIContainer }) => ({
       tenant: asValue(req.tenant),
     });
     req.scope.register({
+      xRequestId: asValue(req.id),
+    });
+    req.scope.register({
       logger: asClass(Logger, {
         injectionMode: InjectionMode.CLASSIC,
-        injector: () => ({ sid: `X509-Identity-Mgmt - Request-Id:${req.id}` }),
+        injector: () => ({ sid: `X509-Identity-Mgmt - Tenant:${req.tenant} -Request-Id:${req.id}` }),
         lifetime: Lifetime.SCOPED,
       }),
     });

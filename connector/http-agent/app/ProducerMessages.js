@@ -79,6 +79,7 @@ class ProducerMessages {
       return;
     } catch (error) {
       logger.error(`Failed to publish message to ${tenant}/${topicSuffix} (${error}).`);
+      throw new Error(`Failed to publish message to ${tenant}/${topicSuffix} (${error}).`);
     }
   }
 
