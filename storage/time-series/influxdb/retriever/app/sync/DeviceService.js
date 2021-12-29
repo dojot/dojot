@@ -1,3 +1,5 @@
+const { WebUtils: { createTokenGen } } = require('@dojot/microservice-sdk');
+
 class DeviceService {
   /**
    * Consumes api that returns devices data
@@ -17,7 +19,9 @@ class DeviceService {
    * @return a list of devices
    */
   async getDevices(tenant) {
-    const token = tenant.getTokenSet().access_token;
+    // const token = tenant.session.getTokenSet().access_token;
+    const tokenGen = createTokenGen();
+    const token = await tokenGen.generate({ payload: {}, tenant: tenant.id });
 
     const devices = await this.dojotClientHttp.request({
       url: this.deviceRouteUrl,

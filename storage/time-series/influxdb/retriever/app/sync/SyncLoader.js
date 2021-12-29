@@ -11,7 +11,6 @@ const { sync } = getConfig('RETRIEVER');
 
 const {
   Logger,
-
 } = require('@dojot/microservice-sdk');
 
 
@@ -28,7 +27,7 @@ const INPUT_CONFIG = {
       name: 'tenants',
       options: {
         keyEncoding: 'utf8',
-        valueEncoding: 'Bool',
+        valueEncoding: 'json',
       },
     },
     {
@@ -36,7 +35,7 @@ const INPUT_CONFIG = {
       source: 'service',
       options: {
         keyEncoding: 'utf8',
-        valueEncoding: 'Bool',
+        valueEncoding: 'bool',
       },
     },
   ],
@@ -46,11 +45,11 @@ const INPUT_CONFIG = {
       pair: {
         key: {
           type: 'dynamic',
-          source: 'tenant',
+          source: 'tenant.id',
         },
         value: {
-          type: 'static',
-          source: true,
+          type: 'dynamic',
+          source: 'tenant',
         },
       },
     },
@@ -98,7 +97,7 @@ class SyncLoader {
       await this.load();
       // Kafka
       try {
-        await this.retrieverConsumer.init();
+        // await this.retrieverConsumer.init();
       } catch (error) {
         logger.debug('It was not possible to init kafka');
         logger.error(error);
@@ -107,10 +106,10 @@ class SyncLoader {
       try {
         logger.info('Data sync scheduled');
         cron.schedule(sync['cron.expression'], () => {
-          this.retrieverConsumer.unregisterCallbacks();
+          // this.retrieverConsumer.unregisterCallbacks();
           logger.debug('Start data synchronization with other services');
           this.load().finally(() => {
-            this.retrieverConsumer.resume();
+            // this.retrieverConsumer.resume();
           });
         });
       } catch (error) {
@@ -151,7 +150,8 @@ class SyncLoader {
         const outerThis = this;
         const tenantWritableStream = Writable({
           async write(key, encoding, cb) {
-            await outerThis.loadDevices(key);
+            const tenant = await outerThis.localPersistence.get('tenants', key.toString());
+            await outerThis.loadDevices(tenant);
             cb();
           },
         });
@@ -176,7 +176,7 @@ class SyncLoader {
    */
   async loadTenants() {
     logger.info('Sync Auth.');
-    const tenants = await this.tenantService.getTenants();
+    const tenants = await this.tenantService.loadTenants();
 
     try {
       logger.debug('Clean up tenants sublevel');
@@ -187,8 +187,13 @@ class SyncLoader {
 
     // eslint-disable-next-line no-restricted-syntax
     for (const tenant of tenants) {
-      // Write devices
-      await this.inputPersister.dispatch({ tenant }, InputPersisterArgs.INSERT_OPERATION);
+      // Write tenants
+      await this.inputPersister.dispatch({
+        tenant: {
+          id: tenant.id,
+          sigKey: tenant.sigKey,
+        },
+      }, InputPersisterArgs.INSERT_OPERATION);
     }
 
     return tenants;
@@ -203,8 +208,8 @@ class SyncLoader {
     const devices = await this.deviceService.getDevices(tenant);
 
     try {
-      logger.debug(`Clean up ${tenant} sublevel`);
-      await this.localPersistence.clear(tenant);
+      logger.debug(`Clean up ${tenant.id} sublevel`);
+      await this.localPersistence.clear(tenant.id);
     } catch (error) {
       logger.error(error);
     }
@@ -213,7 +218,7 @@ class SyncLoader {
     for (const device of devices) {
       // Write devices
       await this.inputPersister.dispatch(
-        { device, service: tenant }, InputPersisterArgs.INSERT_OPERATION,
+        { device, service: tenant.id }, InputPersisterArgs.INSERT_OPERATION,
       );
     }
   }

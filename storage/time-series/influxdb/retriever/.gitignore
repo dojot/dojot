@@ -28,4 +28,4 @@ node_modules/
 config/*.json
 
 
-data/level
+data

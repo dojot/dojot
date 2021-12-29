@@ -6,10 +6,12 @@ class TenantService {
    *
    * @param {string} tenantsRouteUrl Url for api that returns data about tenants
    */
-  constructor(tenantsRouteUrl, dojotClientHttp, keycloakConfig) {
+  constructor(tenantsRouteUrl, dojotClientHttp, keycloakConfig, logger) {
     this.tenantsRouteUrl = tenantsRouteUrl;
     this.dojotClientHttp = dojotClientHttp;
     this.keycloakConfig = keycloakConfig;
+    this.logger = logger;
+    this.tenants = [];
   }
 
   /**
@@ -19,7 +21,7 @@ class TenantService {
    *
    * @returns a list of tenants
    */
-  async getTenants() {
+  async loadTenants() {
     const response = await this.dojotClientHttp.request({
       url: this.tenantsRouteUrl,
       method: 'GET',
@@ -27,8 +29,7 @@ class TenantService {
     });
 
     // Authenticating to all tenants
-    const tenantsPromises = response.data.map(async (tenant) => {
-      this.listTenants = response.data;
+    const tenantsPromises = response.data.tenants.map(async (tenant) => {
       const keycloakSession = new KeycloakClientSession(
         this.keycloakConfig.uri,
         tenant.id,
@@ -37,6 +38,8 @@ class TenantService {
           client_id: this.keycloakConfig['client.id'],
           client_secret: this.keycloakConfig['client.secret'],
         },
+        this.logger,
+        {},
       );
       await keycloakSession.start();
 
@@ -47,7 +50,8 @@ class TenantService {
     });
 
     // Waiting for all sessions to start
-    return Promise.all(tenantsPromises);
+    this.tenants = await Promise.all(tenantsPromises);
+    return this.tenants;
   }
 }
 

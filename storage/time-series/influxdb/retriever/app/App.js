@@ -15,7 +15,7 @@ const path = require('path');
 
 const camelCase = require('lodash.camelcase');
 
-const { lightship: configLightship, sync } = getConfig('RETRIEVER');
+const { lightship: configLightship, sync, keycloak } = getConfig('RETRIEVER');
 
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
@@ -27,7 +27,7 @@ const logger = new Logger('influxdb-retriever:App');
 
 const Server = require('./Server');
 const InfluxDB = require('./influx');
-const RetrieverConsumer = require('./sync/RetrieverConsumer');
+// const RetrieverConsumer = require('./sync/RetrieverConsumer');
 
 const express = require('./express');
 const devicesRoutes = require('./express/routes/v1/Devices');
@@ -52,11 +52,14 @@ class App {
       this.influxDB = new InfluxDB(serviceState);
       this.dojotClientHttp = new DojotClientHttp({ logger, defaultClientOptions: {} });
       this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
-      this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
-      this.authService = new TenantService(sync.tenants, this.dojotClientHttp);
+      // this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
+      this.authService = new TenantService(sync.tenants, this.dojotClientHttp, keycloak, logger);
       this.deviceService = new DeviceService(sync.devices, this.dojotClientHttp);
       this.syncLoader = new SyncLoader(
-        this.localPersistence, this.authService, this.deviceService, this.retrieverConsumer,
+        this.localPersistence,
+        this.authService,
+        this.deviceService,
+        this.retrieverConsumer,
       );
     } catch (e) {
       logger.error('constructor:', e);
