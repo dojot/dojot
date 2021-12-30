@@ -53,11 +53,17 @@ class App {
       this.dojotClientHttp = new DojotClientHttp({ logger, defaultClientOptions: {} });
       this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
       // this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
-      this.authService = new TenantService(sync.tenants, this.dojotClientHttp, keycloak, logger);
+      this.tenantService = new TenantService(
+        this.localPersistence,
+        sync.tenants,
+        this.dojotClientHttp,
+        keycloak,
+        logger,
+      );
       this.deviceService = new DeviceService(sync.devices, this.dojotClientHttp);
       this.syncLoader = new SyncLoader(
         this.localPersistence,
-        this.authService,
+        this.tenantService,
         this.deviceService,
         this.retrieverConsumer,
       );

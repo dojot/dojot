@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const cron = require('node-cron');
-const util = require('util');
-const { pipeline, Writable } = require('stream');
+
 const {
   ConfigManager: { getConfig },
   LocalPersistence: { InputPersister, InputPersisterArgs },
@@ -15,7 +14,7 @@ const {
 
 
 // Promissify functions.
-const pipelineAsync = util.promisify(pipeline);
+
 
 const logger = new Logger('influxdb-retriever:sync');
 
@@ -128,10 +127,10 @@ class SyncLoader {
     // Search for data in an API
     try {
       logger.info('Synchronizing tenant and device data with other services.');
-      const tenants = await this.loadTenants();
+      await this.tenantService.loadTenants();
 
       // eslint-disable-next-line no-restricted-syntax
-      for (const tenant of tenants) {
+      for (const tenant of this.tenantService.tenants) {
         // Sync and load devices
         try {
           await this.loadDevices(tenant);
@@ -141,62 +140,9 @@ class SyncLoader {
         }
       }
     // Search for data in the database
-    } catch (authSyncError) {
-      logger.debug('It was not possible to sync with Tenant service.');
-      logger.error(authSyncError);
-
-      try {
-        // Processing of data obtained from the database
-        const outerThis = this;
-        const tenantWritableStream = Writable({
-          async write(key, encoding, cb) {
-            const tenant = await outerThis.localPersistence.get('tenants', key.toString());
-            await outerThis.loadDevices(tenant);
-            cb();
-          },
-        });
-
-        // Get data and pipe
-        const tenantReadableStream = await this.localPersistence.createKeyStream('tenants');
-        await pipelineAsync(
-          tenantReadableStream,
-          tenantWritableStream,
-        );
-      } catch (deviceManagerSyncError) {
-        logger.debug('It was not possible to retrieve some devices with device manager.');
-        logger.error(deviceManagerSyncError);
-      }
+    } catch (tenantServiceError) {
+      logger.error(tenantServiceError);
     }
-  }
-
-  /**
-   * Syncronizes and loads tenants
-   *
-   * @returns a list of tenants
-   */
-  async loadTenants() {
-    logger.info('Sync Auth.');
-    const tenants = await this.tenantService.loadTenants();
-
-    try {
-      logger.debug('Clean up tenants sublevel');
-      await this.localPersistence.clear('tenants');
-    } catch (error) {
-      logger.error(error);
-    }
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const tenant of tenants) {
-      // Write tenants
-      await this.inputPersister.dispatch({
-        tenant: {
-          id: tenant.id,
-          sigKey: tenant.sigKey,
-        },
-      }, InputPersisterArgs.INSERT_OPERATION);
-    }
-
-    return tenants;
   }
 
   /**
