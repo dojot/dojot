@@ -426,13 +426,16 @@ services:
     environment:
       CERT_SC_APP_SIDECAR_TO: 'http-agent'
       CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
-      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "localhost"]'
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}"]'
       HOSTNAME: http-agent
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: http-agent.crt
       CERT_SC_CERTS_FILES_KEY: http-agent.key
       CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
+      CERT_SC_CRON_CABUNDLE_TIME: '0 */1 * * * *'
+      CERT_SC_CRON_CABUNDLE: "true"
       CERT_SC_CRON_CRL_TIME: '0 */1 * * * *'
     volumes:
       - http-agent-cert-side-volume:/certs
@@ -457,19 +460,19 @@ services:
       - basic-auth
       - http-agent-redis
     ports:
-      - 8080:3000
+      - 9876:3000
       - 8081:3001
       - 9229:9229
     restart: always
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
       HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
-      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_HTTPS_CA: '/certs/cabundle.crt'
       HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
       # HTTP_AGENT_HTTPS_REQUEST_CERT: 'false'
       # HTTP_AGENT_SECURITY_UNSECURE_MODE_ONLY: 'true'
-      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
+      # HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
       HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'fingerprint'
       HTTP_AGENT_LOG_CONSOLE_LEVEL: 'debug'
     volumes:
@@ -491,7 +494,7 @@ services:
         max-file: '5'
 
   basic-auth:
-    image: basic-auth:latest
+    image: dojot/device-basic-authentication:development
     depends_on:
       - kafka
       - data-broker
