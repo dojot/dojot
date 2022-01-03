@@ -119,9 +119,7 @@ class RetrieverConsumer {
         const payloadObject = JSON.parse(payload.toString());
         if (payloadObject.type === 'CREATE') {
           logger.info('New tenant event received');
-          this.inputPersister.dispatch(
-            payloadObject, InputPersisterArgs.INSERT_OPERATION,
-          ).then(() => {
+          this.inputPersister.dispatch(payloadObject, InputPersisterArgs.INSERT_OPERATION,).then(() => {
             ack();
           }).catch((error) => {
             logger.error(`Dispatch failed. ${error.message}`);
@@ -144,9 +142,7 @@ class RetrieverConsumer {
     logger.debug(`initCallbackForTenantEvents: Register Callbacks for topics with regex ${config.subscribe['topics.regex.tenants']}`);
     const topic = new RegExp(config.subscribe['topics.regex.tenants']);
 
-    this.idCallbackTenant = this.consumer.registerCallback(
-      topic, this.getCallbackForNewTenantEvents(),
-    );
+    this.idCallbackTenant = this.consumer.registerCallback(topic, this.getCallbackForNewTenantEvents(),);
     logger.debug('registerCallback: Registered Callback');
   }
 
@@ -171,8 +167,7 @@ class RetrieverConsumer {
           logger.info(`${payloadObject.event} device event received`);
           this.inputPersister.dispatch(
             // write data to database
-            payloadObject, opTypes[payloadObject.event],
-          ).then(() => {
+            payloadObject, opTypes[payloadObject.event],).then(() => {
             ack();
           }).catch((error) => {
             logger.error(`Dispatch failed. ${error.message}`);

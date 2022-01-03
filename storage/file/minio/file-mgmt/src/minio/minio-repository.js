@@ -90,9 +90,7 @@ module.exports = class MinIoRepository {
    */
   async putObject(bucketName, path, fileStream) {
     this.logger.debug(`Putting object ${path}`);
-    const info = await this.client.putObject(
-      this.suffixBucket + bucketName, path, fileStream,
-    );
+    const info = await this.client.putObject(this.suffixBucket + bucketName, path, fileStream,);
 
     return {
       etag: typeof info === 'string' ? info : info.etag,
@@ -111,9 +109,7 @@ module.exports = class MinIoRepository {
   async putTmpObject(bucketName, fileStream) {
     const transactionCode = uuidv4();
     this.logger.debug(`Start file transaction ${transactionCode}`);
-    const info = await this.client.putObject(
-      `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`, fileStream,
-    );
+    const info = await this.client.putObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`, fileStream,);
 
     return {
       transactionCode,
@@ -146,9 +142,7 @@ module.exports = class MinIoRepository {
    */
   async rollbackObject(bucketName, transactionCode) {
     this.logger.debug(`Rollback file transaction ${transactionCode}`);
-    return this.client.removeObject(
-      `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`,
-    );
+    return this.client.removeObject(`${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`,);
   }
 
   /**
@@ -224,9 +218,7 @@ module.exports = class MinIoRepository {
       return null;
     }
 
-    await this.client.removeObject(
-      this.suffixBucket + bucketName, path,
-    );
+    await this.client.removeObject(this.suffixBucket + bucketName, path,);
 
     return stat;
   }
@@ -263,9 +255,7 @@ module.exports = class MinIoRepository {
       },
     });
 
-    const minioReadableStream = this.client.listObjectsV2(
-      this.suffixBucket + bucketName, pathPrefix, true, startAfter,
-    );
+    const minioReadableStream = this.client.listObjectsV2(this.suffixBucket + bucketName, pathPrefix, true, startAfter,);
 
     minioReadableStream.on('data', (obj) => {
       if (limit && result.length >= limit) {

@@ -43,5 +43,5 @@ module.exports = class FileUploadService {
     await this.minioRepository.commitObject(tenant, path, file.transactionCode);
 
     return file;
-  }
+  };
 };

@@ -61,9 +61,7 @@ module.exports = (configMinio) => {
     return stat;
   };
 
-  minioClient.listObjectsV2 = (
-    bucketName, pathPrefix, _recursive, startAfter,
-  ) => Readable({
+  minioClient.listObjectsV2 = (bucketName, pathPrefix, _recursive, startAfter,) => Readable({
     read() {
       let emit = false;
       minioClient.buckets.get(bucketName).forEach((file, index) => {

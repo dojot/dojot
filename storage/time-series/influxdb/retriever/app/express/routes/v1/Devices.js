@@ -76,9 +76,7 @@ module.exports = ({
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const [result, paging] = await deviceDataService.getDeviceData(
-                req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
-              );
+              const [result, paging] = await deviceDataService.getDeviceData(req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,);
 
               res.type(accept);
               if (accept === 'csv') {
@@ -128,9 +126,7 @@ module.exports = ({
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const [result, paging] = await deviceDataService.getDeviceAttrData(
-                req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
-              );
+              const [result, paging] = await deviceDataService.getDeviceAttrData(req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,);
 
               res.type(accept);
               if (accept === 'csv') {

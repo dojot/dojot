@@ -212,9 +212,7 @@ class SyncLoader {
     // eslint-disable-next-line no-restricted-syntax
     for (const device of devices) {
       // Write devices
-      await this.inputPersister.dispatch(
-        { device, service: tenant }, InputPersisterArgs.INSERT_OPERATION,
-      );
+      await this.inputPersister.dispatch({ device, service: tenant }, InputPersisterArgs.INSERT_OPERATION,);
     }
   }
 }

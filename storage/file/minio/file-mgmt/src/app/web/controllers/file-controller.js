@@ -29,11 +29,9 @@ module.exports = class FileController {
       uploadedFile, path, md5,
     } = req.body;
 
-    const fileInfo = await this.uploadFileService.handle(
-      req.tenant, uploadedFile, path, md5,
-    );
+    const fileInfo = await this.uploadFileService.handle(req.tenant, uploadedFile, path, md5,);
     return res.status(201).json({ message: `File ${path} uploaded successfully.`, details: fileInfo });
-  }
+  };
 
   /**
    * File retrieval route
@@ -56,7 +54,7 @@ module.exports = class FileController {
     }
 
     return res.status(200).json(data);
-  }
+  };
 
   /**
    * File removal route.
@@ -74,5 +72,5 @@ module.exports = class FileController {
     const statFile = await this.removeFileService.handle(req.tenant, path);
 
     return res.status(200).json({ message: `File ${path} removed successfully.`, info: statFile });
-  }
+  };
 };

@@ -69,9 +69,7 @@ class App {
       this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
       this.authService = new TenantService(sync.tenants);
       this.deviceManagerService = new DeviceManagerService(sync.devices);
-      this.syncLoader = new SyncLoader(
-        this.localPersistence, this.authService, this.deviceManagerService, this.retrieverConsumer,
-      );
+      this.syncLoader = new SyncLoader(this.localPersistence, this.authService, this.deviceManagerService, this.retrieverConsumer,);
     } catch (e) {
       logger.error('constructor:', e);
       const er = new Error(e);

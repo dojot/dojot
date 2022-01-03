@@ -41,8 +41,7 @@ describe('MinIoRepository', () => {
   it('Should remove a bucket', async () => {
     minioConnection.listObjects = jest.fn((
       // eslint-disable-next-line no-unused-vars
-      bucketName, pathPrefix, recursive,
-    ) => Readable({
+      bucketName, pathPrefix, recursive,) => Readable({
       read() {
         this.emit('end');
       },
@@ -163,8 +162,7 @@ describe('MinIoRepository', () => {
   it('Should return two files, when the limit field is 2', async () => {
     minioConnection.listObjectsV2 = jest.fn((
       // eslint-disable-next-line no-unused-vars
-      bucketName, pathPrefix, recursive, startAfter,
-    ) => Readable({
+      bucketName, pathPrefix, recursive, startAfter,) => Readable({
       read() {
         this.emit('data', { file: 1 });
         this.emit('data', { file: 2 });
@@ -183,8 +181,7 @@ describe('MinIoRepository', () => {
   it('Should return all files, when the limit field is undefined', async () => {
     minioConnection.listObjectsV2 = jest.fn((
       // eslint-disable-next-line no-unused-vars
-      bucketName, pathPrefix, recursive, startAfter,
-    ) => Readable({
+      bucketName, pathPrefix, recursive, startAfter,) => Readable({
       read() {
         this.emit('data', { file: 1 });
         this.emit('data', { file: 2 });
@@ -262,8 +259,7 @@ describe('MinIoRepository', () => {
   it('Should throw an error', async () => {
     minioConnection.listObjectsV2 = jest.fn((
       // eslint-disable-next-line no-unused-vars
-      bucketName, pathPrefix, recursive, startAfter,
-    ) => Readable({
+      bucketName, pathPrefix, recursive, startAfter,) => Readable({
       read() {
         this.emit('data', { file: 1 });
         this.emit('error', new Error('Error test'));

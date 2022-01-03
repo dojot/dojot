@@ -32,7 +32,7 @@ class KafkaController {
       this.logger.error(error);
       ack(error);
     }
-  }
+  };
 }
 
 module.exports = KafkaController;

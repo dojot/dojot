@@ -40,9 +40,7 @@ describe('FileController', () => {
   jest.setTimeout(10000000);
   let fileController;
   beforeEach(() => {
-    fileController = new FileController(
-      uploadFileService, retrievalFileService, removeFileService, loggerMock,
-    );
+    fileController = new FileController(uploadFileService, retrievalFileService, removeFileService, loggerMock,);
   });
 
   it('Should return a success message when the upload is successful.', async () => {

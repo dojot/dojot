@@ -29,9 +29,7 @@ const pipeErrorMock = (busboy) => {
 describe('BusboyInterceptor', () => {
   let busboyInterceptor;
   beforeEach(() => {
-    busboyInterceptor = BusboyInterceptor(
-      loggerMock, new MinIoRepositoryMock(config.minio), config,
-    );
+    busboyInterceptor = BusboyInterceptor(loggerMock, new MinIoRepositoryMock(config.minio), config,);
   });
 
   afterEach(() => {
