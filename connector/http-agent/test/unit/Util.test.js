@@ -44,7 +44,7 @@ describe('Util', () => {
 
   it('should format the message correctly with unix timestamp', async () => {
     const deviceDataMessage = generateDeviceDataMessage(
-      fakeMessageWithoutTimestamp, tenant, deviceid,
+      fakeMessageWithTimestamp, tenant, deviceid,
     );
 
     const formattedMessage = {
@@ -61,7 +61,7 @@ describe('Util', () => {
 
   it('should format the message correctly without timestamp', async () => {
     const deviceDataMessage = generateDeviceDataMessage(
-      fakeMessageWithInvalidTimestamp, tenant, deviceid,
+      fakeMessageWithoutTimestamp, tenant, deviceid,
     );
 
     const formattedMessage = {

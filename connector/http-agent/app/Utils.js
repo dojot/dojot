@@ -1,6 +1,6 @@
 const createError = require('http-errors');
 
-const err = new createError.BadRequest();
+const err = createError.BadRequest();
 
 /**
  * A module with helper functions
