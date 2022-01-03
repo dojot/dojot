@@ -1,10 +1,11 @@
+/** @format */
+
 const fs = require('fs');
 
 const mockConfig = {
   https: { 'request.cert': true },
   express: { trustproxy: true, 'parsing.limit': 256000 },
   security: { 'unsecure.mode': true, 'authorization.mode': 'fingerprint' },
-  redis: { 'set.tll': 30000 },
 };
 
 const { WebUtils } = jest.requireActual('@dojot/microservice-sdk');
@@ -54,7 +55,6 @@ const certCN = fs.readFileSync('test/certs/client/client_cn_cert.pem');
 const keyCN = fs.readFileSync('test/certs/client/client_cn_key.pem');
 const ca = fs.readFileSync('test/certs/ca/ca_cert.pem');
 
-
 const validBasic = 'dGVzdEBhYmMxMjM6UGFzc1dvckQvMTIz';
 
 const mockRedisInit = jest.fn();
@@ -81,7 +81,10 @@ const mockgetAclEntries = jest.fn();
 const mockCertificateAclService = {
   getAclEntries: mockgetAclEntries,
 };
-jest.mock('../../app/axios/CertificateAclService.js', () => mockCertificateAclService);
+jest.mock(
+  '../../app/axios/CertificateAclService.js',
+  () => mockCertificateAclService,
+);
 
 const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
@@ -175,7 +178,11 @@ describe('HTTPS', () => {
           .ca(ca)
           .expect('Content-Type', /json/)
           .expect(403)
-          .then((response) => expect(response.body).toStrictEqual({ error: 'Client certificate is invalid' }));
+          .then((response) => {
+            expect(response.body).toStrictEqual({
+              error: 'Client certificate is invalid',
+            });
+          });
       });
     });
 
@@ -216,7 +223,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(400)
-        .then((response) => expect(response.body).toStrictEqual({ message: '"attrs" is required' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            message: '"data" is required',
+          });
+        });
     });
   });
 
@@ -267,7 +278,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(400)
-        .then((response) => expect(response.body).toStrictEqual({ message: { 0: '"attrs" is required', 1: '"attrs" is required' } }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            message: { 0: '"data" is required', 1: '"data" is required' },
+          });
+        });
     });
   });
 
@@ -285,7 +300,7 @@ describe('HTTPS', () => {
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
           data: {
-            temperature: 25.70,
+            temperature: 25.7,
           },
         })
         .ca(ca)
@@ -328,7 +343,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid credentials.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid credentials.',
+          });
+        });
     });
 
     it('execute the request without success due to Missing Basic', async () => {
@@ -345,7 +364,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid Basic token.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid Basic token.',
+          });
+        });
     });
 
     it('execute the request without success due to Invalid Basic', async () => {
@@ -363,14 +386,20 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid Basic token.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid Basic token.',
+          });
+        });
     });
 
     it('should unsuccessfully execute the request with error in basic-auth', async () => {
       mockRedis.getSecurity.mockReturnValue(false);
-      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(() => {
-        throw new Error('Test');
-      });
+      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(
+        () => {
+          throw new Error('Test');
+        },
+      );
       await requestHttps(app)
         .post(urlIncomingMessages)
         .set('Authorization', `Basic ${validBasic}`)
@@ -383,7 +412,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid credentials.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid credentials.',
+          });
+        });
     });
   });
 });
@@ -412,7 +445,7 @@ describe('HTTP', () => {
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
           data: {
-            temperature: 25.70,
+            temperature: 25.7,
           },
         })
         .then((response) => {
@@ -452,7 +485,11 @@ describe('HTTP', () => {
         })
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid credentials.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid credentials.',
+          });
+        });
     });
 
     it('execute the request without success due to Missing Basic', async () => {
@@ -468,7 +505,11 @@ describe('HTTP', () => {
         })
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid Basic token.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid Basic token.',
+          });
+        });
     });
 
     it('execute the request without success due to Invalid Basic', async () => {
@@ -485,14 +526,20 @@ describe('HTTP', () => {
         })
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid Basic token.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid Basic token.',
+          });
+        });
     });
 
     it('should unsuccessfully execute the request with error in basic-auth', async () => {
       mockRedis.getSecurity.mockReturnValue(false);
-      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(() => {
-        throw new Error('Test');
-      });
+      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(
+        () => {
+          throw new Error('Test');
+        },
+      );
       await requestHttp(app)
         .post(urlUnsecureIncomingMessages)
         .set('Authorization', `Basic ${validBasic}`)
@@ -504,7 +551,11 @@ describe('HTTP', () => {
         })
         .expect('Content-Type', /json/)
         .expect(401)
-        .then((response) => expect(response.body).toStrictEqual({ error: 'Invalid credentials.' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: 'Invalid credentials.',
+          });
+        });
     });
   });
 });
@@ -527,6 +578,10 @@ describe('Unauthorized', () => {
       })
       .expect('Content-Type', /json/)
       .expect(400)
-      .then((response) => expect(response.body).toStrictEqual({ error: 'Unable to authenticate' }));
+      .then((response) => {
+        expect(response.body).toStrictEqual({
+          error: 'Unable to authenticate',
+        });
+      });
   });
 });
