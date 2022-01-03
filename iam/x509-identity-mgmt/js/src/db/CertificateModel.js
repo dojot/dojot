@@ -50,6 +50,7 @@ const projectableFields = [
 const mongoQS = Object.freeze(new MongoQS({
   keyRegex: /^[a-zA-Z0-9-_.]+$/i,
   arrRegex: /^[a-zA-Z0-9-_.]+(\[])?$/i,
+  ops: ['!'],
   whitelist: Object.freeze({
     fingerprint: true,
     caFingerprint: true,
