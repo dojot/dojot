@@ -20,8 +20,11 @@ module.exports = ({ config, identificationService }) => ({
         'basic-auth': identificationService.basicAuth,
       };
       try {
-        const arg = config.authorizationMode === 'basic-auth' ? req : clientCert;
-        [req.tenant, req.deviceId] = await identification[config.authorizationMode](arg);
+        const arg =
+          config.authorizationMode === 'basic-auth' ? req : clientCert;
+        [req.body.tenant, req.body.deviceId] = await identification[
+          config.authorizationMode
+        ](arg);
         return next();
       } catch (err) {
         return next(err);
@@ -30,9 +33,13 @@ module.exports = ({ config, identificationService }) => ({
 
     const reqType = req.path.split('/');
 
-    if (config.authorizationMode === 'basic-auth' && reqType[3] === 'unsecure') {
+    if (
+      config.authorizationMode === 'basic-auth' &&
+      reqType[3] === 'unsecure'
+    ) {
       try {
-        [req.tenant, req.deviceId] = await identificationService.basicAuth(req);
+        [req.body.tenant, req.body.deviceId] =
+          await identificationService.basicAuth(req);
         return next();
       } catch (err) {
         return next(err);
