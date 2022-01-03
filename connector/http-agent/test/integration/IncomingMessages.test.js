@@ -81,10 +81,8 @@ const mockgetAclEntries = jest.fn();
 const mockCertificateAclService = {
   getAclEntries: mockgetAclEntries,
 };
-jest.mock(
-  '../../app/axios/CertificateAclService.js',
-  () => mockCertificateAclService,
-);
+jest.mock('../../app/axios/CertificateAclService.js',
+  () => mockCertificateAclService);
 
 const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
@@ -395,11 +393,9 @@ describe('HTTPS', () => {
 
     it('should unsuccessfully execute the request with error in basic-auth', async () => {
       mockRedis.getSecurity.mockReturnValue(false);
-      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(
-        () => {
-          throw new Error('Test');
-        },
-      );
+      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(() => {
+        throw new Error('Test');
+      });
       await requestHttps(app)
         .post(urlIncomingMessages)
         .set('Authorization', `Basic ${validBasic}`)
@@ -535,11 +531,9 @@ describe('HTTP', () => {
 
     it('should unsuccessfully execute the request with error in basic-auth', async () => {
       mockRedis.getSecurity.mockReturnValue(false);
-      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(
-        () => {
-          throw new Error('Test');
-        },
-      );
+      mockDeviceAuthService.getAuthenticationStatus.mockImplementationOnce(() => {
+        throw new Error('Test');
+      });
       await requestHttp(app)
         .post(urlUnsecureIncomingMessages)
         .set('Authorization', `Basic ${validBasic}`)
