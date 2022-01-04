@@ -70,7 +70,7 @@ class RedisManager {
       });
 
       this.redisClient.on(
-'error',
+        'error',
         (error) => {
           logger.warn(`${error}`);
           // connection timeout, retry won't work anymore
@@ -78,8 +78,8 @@ class RedisManager {
             logger.error('Exhausted all attempts to connect to Redis.');
             this.serviceState.shutdown();
           }
-        }
-);
+        },
+      );
 
       this.redisClient.on('end', () => {
         this.serviceState.signalNotReady(this.serviceName);
@@ -103,9 +103,9 @@ class RedisManager {
    */
   async getAsync(...args) {
     return timeout(
-this.redisClient.getAsync(...args),
-      configRedis['operation.timeout.ms']
-);
+      this.redisClient.getAsync(...args),
+      configRedis['operation.timeout.ms'],
+    );
   }
 
   /**
@@ -116,9 +116,9 @@ this.redisClient.getAsync(...args),
    */
   setAsync(...args) {
     return timeout(
-this.redisClient.setAsync(...args),
-      configRedis['operation.timeout.ms']
-);
+      this.redisClient.setAsync(...args),
+      configRedis['operation.timeout.ms'],
+    );
   }
 
   /**
@@ -129,9 +129,9 @@ this.redisClient.setAsync(...args),
    */
   async getSecurity(username, password) {
     const result = await timeout(
-this.redisClient.getAsync(username),
-      configRedis['operation.timeout.ms']
-);
+      this.redisClient.getAsync(username),
+      configRedis['operation.timeout.ms'],
+    );
     if (result) {
       return RedisManager.comparePassword(password, result);
     }
@@ -148,9 +148,9 @@ this.redisClient.getAsync(username),
     const newArgs = args;
     newArgs[1] = RedisManager.generateHash(args[1]);
     return timeout(
-this.redisClient.setAsync(...newArgs),
-      configRedis['operation.timeout.ms']
-);
+      this.redisClient.setAsync(...newArgs),
+      configRedis['operation.timeout.ms'],
+    );
   }
 
   // Hash the user's password before saving it
@@ -172,9 +172,9 @@ this.redisClient.setAsync(...newArgs),
    */
   quitAsync(...args) {
     return timeout(
-this.redisClient.quitAsync(...args),
-      configRedis['operation.timeout.ms']
-);
+      this.redisClient.quitAsync(...args),
+      configRedis['operation.timeout.ms'],
+    );
   }
 
   /**
