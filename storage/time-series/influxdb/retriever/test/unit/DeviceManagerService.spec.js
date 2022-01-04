@@ -16,7 +16,7 @@ const mockAxios = {
 };
 jest.mock('axios', () => mockAxios);
 
-const DeviceService = require('../../app/sync/DeviceService');
+const DeviceService = require('../../app/sync/DeviceManagerService');
 
 
 describe('DeviceService', () => {

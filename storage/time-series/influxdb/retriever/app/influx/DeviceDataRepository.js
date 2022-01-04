@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const createError = require('http-errors');
 const {
-  InfluxDB,
   flux,
   fluxExpression,
   fluxInteger,
@@ -12,7 +11,7 @@ const {
 const util = require('util');
 const { Logger } = require('@dojot/microservice-sdk');
 
-const logger = new Logger('influxdb-retriever:influx/DataQuery');
+const logger = new Logger('influxdb-retriever:influx/DeviceDataRepository');
 
 /**
  * This class handle with query data in a specific bucket.
@@ -24,23 +23,18 @@ const logger = new Logger('influxdb-retriever:influx/DataQuery');
  *
  * @class
  */
-class DataQuery {
+class DeviceDataRepository {
   /**
    *
-   * @param {String} url   Url to access influxdb
-   * @param {String} token  A token with write permission in all orgs
    * @param {String} defaultBucket  Bucket Name for all data write
-   * @param {Number} timeout  Request timeout in the communication with the influxdb
-   *                          in milliseconds.
+   * @param {@influxdata/influxdb-client/InfluxDB} influxDBConnection  Request timeout in
+   *  the communication with the influxdb
+   *
    */
-  constructor(url, token, defaultBucket, timeout) {
+  constructor(defaultBucket, influxDBConnection) {
     logger.debug('constructor:');
-    logger.debug(`constructor: url=${url}`);
-    logger.debug(`constructor: token=${token}`);
-    logger.debug(`constructor: defaultBucket=${defaultBucket}`);
-    logger.debug(`constructor: timeout=${timeout}`);
 
-    this.influxDB = new InfluxDB({ url, token, timeout });
+    this.influxDB = influxDBConnection;
     this.defaultBucket = defaultBucket;
     // prefix adds to all fields to be written
     this.prefixFields = 'dojot.';
@@ -76,10 +70,10 @@ class DataQuery {
 
       const {
         start, stop, limit, offset,
-      } = DataQuery.commonQueryParams(page, filters);
+      } = DeviceDataRepository.commonQueryParams(page, filters);
 
-      const orderExp = DataQuery.commonQueryOrderExpression(order);
-      const limitExp = DataQuery.commonLimitExpression(limit, offset);
+      const orderExp = DeviceDataRepository.commonQueryOrderExpression(order);
+      const limitExp = DeviceDataRepository.commonLimitExpression(limit, offset);
 
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
       |> range(start: ${start} , stop: ${stop})
@@ -123,7 +117,7 @@ class DataQuery {
             result.push(point);
           },
           error(error) {
-            return reject(DataQuery.commonHandleError(error));
+            return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
             logger.debug(`queryByMeasurement: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
@@ -171,14 +165,14 @@ class DataQuery {
 
       const {
         start, stop, limit, offset,
-      } = DataQuery.commonQueryParams(page, filters);
+      } = DeviceDataRepository.commonQueryParams(page, filters);
 
-      const orderExp = DataQuery.commonQueryOrderExpression(order);
-      const limitExp = DataQuery.commonLimitExpression(limit, offset);
+      const orderExp = DeviceDataRepository.commonQueryOrderExpression(order);
+      const limitExp = DeviceDataRepository.commonLimitExpression(limit, offset);
 
       const fluxQuery = `from(bucket:${fluxString(this.defaultBucket)})
         |> range(start: ${start} , stop: ${stop})
-        ${DataQuery.createFluxFilter(devices)}
+        ${DeviceDataRepository.createFluxFilter(devices)}
         ${fluxExpression(orderExp)}
         ${fluxExpression(limitExp)}`;
 
@@ -200,7 +194,7 @@ class DataQuery {
             });
           },
           error(error) {
-            return reject(DataQuery.commonHandleError(error));
+            return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
             logger.debug(`queryUsingGraphql: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
@@ -248,10 +242,10 @@ class DataQuery {
 
       const {
         start, stop, limit, offset,
-      } = DataQuery.commonQueryParams(page, filters);
+      } = DeviceDataRepository.commonQueryParams(page, filters);
 
-      const orderExp = DataQuery.commonQueryOrderExpression(order);
-      const limitExp = DataQuery.commonLimitExpression(limit, offset);
+      const orderExp = DeviceDataRepository.commonQueryOrderExpression(order);
+      const limitExp = DeviceDataRepository.commonLimitExpression(limit, offset);
 
       const fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)})
         |> range(start: ${start} , stop: ${stop})
@@ -277,7 +271,7 @@ class DataQuery {
             });
           },
           error(error) {
-            return reject(DataQuery.commonHandleError(error));
+            return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
             logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
@@ -287,6 +281,36 @@ class DataQuery {
       });
     } catch (e) {
       logger.error('queryByField:', e);
+      throw e;
+    }
+  }
+
+  async runGenericQuery(org, query) {
+    try {
+      let fluxQuery = flux`from(bucket:${fluxString(this.defaultBucket)}) \n |>`;
+      fluxQuery += query;
+
+      const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
+
+      return new Promise((resolve, reject) => {
+        const result = [];
+        queryApi.queryRows(fluxQuery, {
+          next(row, tableMeta) {
+            const o = tableMeta.toObject(row);
+            logger.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            result.push(o);
+          },
+          error(error) {
+            return reject(DeviceDataRepository.commonHandleError(error));
+          },
+          complete() {
+            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)}`);
+            return resolve(result);
+          },
+        });
+      });
+    } catch (e) {
+      logger.error('GenericQuery:', e);
       throw e;
     }
   }
@@ -396,4 +420,4 @@ class DataQuery {
   }
 }
 
-module.exports = DataQuery;
+module.exports = DeviceDataRepository;
