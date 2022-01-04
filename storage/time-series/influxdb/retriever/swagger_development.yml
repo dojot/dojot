@@ -173,6 +173,54 @@ paths:
                     type: string
         default:
           description: Unexpected error
+  "/tss/v1/query":
+    post:
+      tags:
+        - generic-query
+      parameters:
+        - in: header
+          name: Accept
+          schema:
+            type: string
+          description:
+            The content-type accepted in response
+      summary: query
+      description: |
+        This endpoint allows you to run a generic query using the Flux script.
+      operationId: query-route
+      x-allow-unknown-query-parameters: true
+      responses:
+        "200":
+          description: The query was executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+            text/csv:
+              schema:
+                type: string
+        "400":
+          description: An error occurred while executing the query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "500":
+          description: Intern error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
 externalDocs:
   description: Find out more about Dojot
   url: https://dojotdocs.readthedocs.io/
