@@ -2,6 +2,35 @@ const DeviceDataService = require('../../app/express/services/v1/DeviceDataServi
 
 describe('DeviceDataService', () => {
   const values = Array.from({ length: 3 }, (_, i) => i + 1);
+  const deviceDataRepository = {
+    async queryByMeasurement() {
+      return { result: 'result', totalItems: 0 };
+    },
+    async queryByField() {
+      return { result: 'result', totalItems: 0 };
+    },
+  };
+  let deviceDataService;
+
+  beforeEach(() => {
+    deviceDataService = new DeviceDataService(deviceDataRepository);
+  });
+
+  test('should return all device data', async () => {
+    const returnData = await deviceDataService.getDeviceData('test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }));
+    expect(returnData).toEqual([
+      'result',
+      { current: 'url' },
+    ]);
+  });
+
+  test('should return only selected attributes', async () => {
+    const returnData = await deviceDataService.getDeviceAttrData('test', 'test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }));
+    expect(returnData).toEqual([
+      'result',
+      { current: 'url' },
+    ]);
+  });
 
   test('should transform device data object to a spreadsheet in csv', () => {
     const deviceData = [
@@ -44,31 +73,6 @@ describe('DeviceDataService', () => {
     const correctValue = '';
 
     const sheet = DeviceDataService.parseDeviceDataToCsv(deviceData);
-    expect(sheet).toBe(correctValue);
-  });
-
-  test('should transform the device attr data object to a spreadsheet in csv', () => {
-    const deviceData = [
-      {
-        ts: '2021-07-28T11:47:53.365Z',
-        value: 10,
-      },
-      {
-        ts: '2021-07-29T11:47:53.365Z',
-        value: 20,
-      },
-    ];
-
-    const correctValue = '"ts","value"\n"2021-07-28T11:47:53.365Z",10\n"2021-07-29T11:47:53.365Z",20';
-    const sheet = DeviceDataService.parseDeviceAttrDataToCsv(deviceData);
-    expect(sheet).toBe(correctValue);
-  });
-
-  test('should transform the device attr data object to empty string, when device attr data object is empty', () => {
-    const deviceData = [];
-
-    const correctValue = '';
-    const sheet = DeviceDataService.parseDeviceAttrDataToCsv(deviceData);
     expect(sheet).toBe(correctValue);
   });
 });

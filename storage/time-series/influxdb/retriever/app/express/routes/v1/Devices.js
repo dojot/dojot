@@ -7,13 +7,14 @@ const { graphqlHTTP } = require('express-graphql');
 const HttpStatus = require('http-status-codes');
 
 const util = require('util');
-const DeviceDataServ = require('../../services/v1/DeviceDataService');
 const AcceptHeaderHelper = require('../../helpers/AcceptHeaderHelper');
 
 const logger = new Logger('influxdb-retriever:express/routes/v1/Devices');
 
 const { graphql: { graphiql } } = getConfig('RETRIEVER');
 const rootSchema = require('../../../graphql/Schema');
+const DeviceDataService = require('../../services/v1/DeviceDataService');
+const { parseCSV } = require('../../helpers/SimpleCSVParser');
 
 
 /**
@@ -30,9 +31,8 @@ const rootSchema = require('../../../graphql/Schema');
  *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({
-  localPersistence, mountPoint, queryDataUsingGraphql, queryDataByField, queryDataByMeasurement,
+  localPersistence, mountPoint, deviceDataService, genericQueryService, deviceDataRepository,
 }) => {
-  const deviceDataServ = new DeviceDataServ(queryDataByField, queryDataByMeasurement);
   /**
    * if there is no dateTo, add dateTo to
    * the pagination makes sense even
@@ -76,14 +76,16 @@ module.exports = ({
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const [result, paging] = await deviceDataServ.getDeviceData(
+              const [result, paging] = await deviceDataService.getDeviceData(
                 req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
+              res.type(accept);
               if (accept === 'csv') {
-                return res.status(HttpStatus.OK).send(DeviceDataServ.parseDeviceDataToCsv(result));
+                return res.status(HttpStatus.OK).send(
+                  DeviceDataService.parseDeviceDataToCsv(result),
+                );
               }
-
               return res.status(HttpStatus.OK).json({ data: result, paging });
             } catch (e) {
               logger.error('device-route-attr.get:', e);
@@ -126,13 +128,14 @@ module.exports = ({
                 dateFrom, dateTo, limit, page, order,
               } = req.query;
 
-              const [result, paging] = await deviceDataServ.getDeviceAttrData(
+              const [result, paging] = await deviceDataService.getDeviceAttrData(
                 req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
               );
 
+              res.type(accept);
               if (accept === 'csv') {
                 return res.status(HttpStatus.OK).send(
-                  DeviceDataServ.parseDeviceAttrDataToCsv(result),
+                  parseCSV(result),
                 );
               }
 
@@ -189,7 +192,7 @@ module.exports = ({
 
                 // request data
                 try {
-                  const res = await queryDataUsingGraphql(
+                  const res = await deviceDataRepository.queryUsingGraphql(
                     params.tenant,
                     devices,
                     filters,
@@ -211,5 +214,40 @@ module.exports = ({
     ],
   };
 
-  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute];
+  const queryRoute = {
+    mountPoint,
+    name: 'query-route',
+    path: ['/query'],
+    handlers: [
+      {
+        method: 'post',
+        middleware: [
+          // eslint-disable-next-line consistent-return
+          async (req, res) => {
+            try {
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              const { query } = req.body;
+              const result = await genericQueryService.runQuery(req.tenant, query);
+
+              res.type(accept);
+              if (accept === 'csv') {
+                return res.status(HttpStatus.OK).send(
+                  parseCSV(result),
+                );
+              }
+
+              res.status(200).json({ result });
+            } catch (error) {
+              logger.error('query-route', error);
+              error.message = `query-route: ${error.message}`;
+              throw error;
+            }
+          },
+        ],
+      },
+    ],
+  };
+
+  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute, queryRoute];
 };

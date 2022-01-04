@@ -317,7 +317,7 @@ services:
       X509IDMGMT_MONGO_CONN_URI: 'mongodb://mongodb:27017/x509-identity-mgmt'
       X509IDMGMT_EJBCA_HEALTHCHECK_URL: 'http://x509-ejbca:8080/ejbca/publicweb/healthcheck/ejbcahealth'
       X509IDMGMT_EJBCA_WSDL: 'https://x509-ejbca:8443/ejbca/ejbcaws/ejbcaws?wsdl'
-      # X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: 'true'
+      X509IDMGMT_CERTIFICATE_CHECK_SUBJECTDN: 'true'
       X509IDMGMT_EJBCA_FORCECRLRENEW: 'true'
       # ROARR_LOG: "true" # healthcheck is using 'Roarr' to implement logging.
     healthcheck:
@@ -426,13 +426,16 @@ services:
     environment:
       CERT_SC_APP_SIDECAR_TO: 'http-agent'
       CERT_SC_LOG_CONSOLE_LEVEL: 'debug'
-      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "localhost"]'
+      CERT_SC_CERTS_HOSTNAMES: '["http-agent", "${DOJOT_DOMAIN_NAME:-localhost}"]'
       HOSTNAME: http-agent
       CERT_SC_CERTS_FILES_BASEPATH: /certs
       CERT_SC_CERTS_FILES_CA: ca.crt
       CERT_SC_CERTS_FILES_CERT: http-agent.crt
       CERT_SC_CERTS_FILES_KEY: http-agent.key
       CERT_SC_CERTS_FILES_CRL: ca.crl
+      CERT_SC_CERTS_FILES_CABUNDLE: cabundle.crt
+      CERT_SC_CRON_CABUNDLE_TIME: '0 */1 * * * *'
+      CERT_SC_CRON_CABUNDLE: "true"
       CERT_SC_CRON_CRL_TIME: '0 */1 * * * *'
     volumes:
       - http-agent-cert-side-volume:/certs
@@ -454,20 +457,55 @@ services:
       - http-agent-cert-sidecar
       - device-manager
       - certificate-acl
+      - basic-auth
+      - http-agent-redis
     ports:
-      - 8080:3000
+      - 9876:3000
       - 8081:3001
+      - 9229:9229
     restart: always
     environment:
       HTTP_AGENT_HTTPS_CERT: '/certs/http-agent.crt'
       HTTP_AGENT_HTTPS_KEY: '/certs/http-agent.key'
-      HTTP_AGENT_HTTPS_CA: '/certs/ca.crt'
+      HTTP_AGENT_HTTPS_CA: '/certs/cabundle.crt'
       HTTP_AGENT_SECURITY_CRL: '/certs/ca.crl'
       HTTP_AGENT_SECURITY_CERT_DIRECTORY: '/certs'
-      HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
-      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'info'
+      # HTTP_AGENT_HTTPS_REQUEST_CERT: 'false'
+      # HTTP_AGENT_SECURITY_UNSECURE_MODE_ONLY: 'true'
+      # HTTP_AGENT_SECURITY_UNSECURE_MODE: 'true'
+      HTTP_AGENT_SECURITY_AUTHORIZATION_MODE: 'fingerprint'
+      HTTP_AGENT_LOG_CONSOLE_LEVEL: 'debug'
     volumes:
       - http-agent-cert-side-volume:/certs
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  http-agent-redis:
+    image: dojot/redis:6.0.4-alpine3.11
+    restart: always
+    volumes:
+      - http-agent-redis-volume:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  basic-auth:
+    image: dojot/device-basic-authentication:development
+    depends_on:
+      - kafka
+      - data-broker
+      - mongodb
+      - auth
+      - device-manager
+    ports:
+      - 3000:3000
+    restart: always
+    environment:
+      BASIC_AUTH_LOG_CONSOLE_LEVEL: 'debug'
     logging:
       driver: json-file
       options:
@@ -489,3 +527,4 @@ volumes:
   device-manager-redis-volume:
   http-agent-cert-side-volume:
   acl-redis-volume:
+  http-agent-redis-volume:

@@ -1,5 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
-
 class NotificationEngine {
   constructor({
     notificationKafkaProducer, logger, service, contentType,
@@ -25,16 +23,16 @@ class NotificationEngine {
   }
 
   async notify({
-    tenant, topic, eventType, eventData, partitionKey,
+    tenant, topic, eventType, eventData, partitionKey, xRequestId,
   }) {
-    const message = this.generateMessage(tenant, eventType, eventData);
+    const message = this.generateMessage(tenant, eventType, eventData, xRequestId);
     const msgStr = JSON.stringify(message);
     await this.producer.produce(topic, msgStr, partitionKey);
   }
 
-  generateMessage(tenant, eventType, eventData) {
+  generateMessage(tenant, eventType, eventData, xRequestId) {
     return {
-      metadata: this.generateMetadata(tenant),
+      metadata: this.generateMetadata(tenant, xRequestId),
       data: {
         eventType,
         eventData,
@@ -42,9 +40,9 @@ class NotificationEngine {
     };
   }
 
-  generateMetadata(tenant) {
+  generateMetadata(tenant, xRequestId) {
     return {
-      msgid: uuidv4(),
+      msgid: xRequestId,
       timestamp: Date.now(),
       service: this.service,
       tenant,
