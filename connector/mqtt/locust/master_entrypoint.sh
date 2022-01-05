@@ -34,7 +34,11 @@ echo "Waiting for Redis fully start. Host '${REDIS_HOST}', '${REDIS_PORT}'..."
 while [ "${PONG}" != "PONG" ]; do
     sleep 3
     echo "Ping Redis... "
-    PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" ping | grep PONG)
+    if [[ -z "$REDIS_PASSWD" ]] ;  then
+        PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" ping | grep PONG)
+    else
+        PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" ping | grep PONG)
+    fi
 
     ELAPSED_TIME=$(($(date +'%s') - ${START_TIME}))
     if [ "${ELAPSED_TIME}" -gt "${REDIS_CONN_TIMEOUT}" ]
