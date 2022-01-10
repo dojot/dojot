@@ -6,18 +6,23 @@ const {
 const App = require('./app/app');
 
 // External dependencies
-const logger = new Logger('file-mgmt:Server');
 const openApiPath = path.join(__dirname, '../docs/v1.yml');
 ConfigManager.loadSettings('FILEMGMT', 'default.conf');
 const config = ConfigManager.getConfig('FILEMGMT');
+
+const logger = new Logger('file-mgmt:Server');
+Logger.setTransport('console', {
+  level: config.logger['console.level'],
+});
+Logger.setVerbose(config.logger.verbose);
 
 logger.debug('Loading secrets');
 const secretHandler = new SecretFileHandler(config, logger);
 secretHandler.handleCollection([
   'minio.access.key',
-  'minio.access.secret',
+  'minio.secret.key',
   'keycloak.client.secret',
-], '/secret/').then(() => {
+], '/secrets/').then(() => {
   // Init Application
   const app = new App(config, logger, openApiPath);
 
