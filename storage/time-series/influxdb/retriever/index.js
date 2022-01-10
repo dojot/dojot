@@ -29,6 +29,7 @@ const logger = new Logger('influxdb-retriever:index');
 logger.info(`The current configuration is:\n${util.inspect(config, false, 5, true)}`);
 
 const App = require('./app/App');
+const dependeciesContainerFactory = require('./app/DependencyContainer');
 
 process.on('unhandledRejection', async (reason) => {
   // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
@@ -51,7 +52,8 @@ process.on('uncaughtException', async (ex) => {
 (async () => {
   try {
     logger.info('Initializing...');
-    const app = new App();
+    const dependencyContainer = dependeciesContainerFactory(config, logger);
+    const app = new App(dependencyContainer, logger, config.influx);
     await app.init();
   } catch (err) {
     logger.error('Service will be closed', err);
