@@ -66,7 +66,9 @@ class InfluxState {
         signalNotReady();
       }
     };
-    this.serviceState.addHealthChecker('influxdb', influxdbHealthChecker, configInflux['heathcheck.ms']);
+    this.serviceState.addHealthChecker(
+      'influxdb', influxdbHealthChecker, configInflux['heathcheck.ms'],
+    );
   }
 }
 module.exports = InfluxState;

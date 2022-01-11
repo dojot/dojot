@@ -69,17 +69,14 @@ class RedisManager {
         this.eventEmitter.emit('unhealthy');
       });
 
-      this.redisClient.on(
-        'error',
-        (error) => {
-          logger.warn(`${error}`);
-          // connection timeout, retry won't work anymore
-          if (error.code === 'CONNECTION_BROKEN') {
-            logger.error('Exhausted all attempts to connect to Redis.');
-            this.serviceState.shutdown();
-          }
-        },
-      );
+      this.redisClient.on('error', (error) => {
+        logger.warn(`${error}`);
+        // connection timeout, retry won't work anymore
+        if (error.code === 'CONNECTION_BROKEN') {
+          logger.error('Exhausted all attempts to connect to Redis.');
+          this.serviceState.shutdown();
+        }
+      });
 
       this.redisClient.on('end', () => {
         this.serviceState.signalNotReady(this.serviceName);
@@ -102,10 +99,7 @@ class RedisManager {
    * @returns Promise
    */
   async getAsync(...args) {
-    return timeout(
-      this.redisClient.getAsync(...args),
-      configRedis['operation.timeout.ms'],
-    );
+    return timeout(this.redisClient.getAsync(...args), configRedis['operation.timeout.ms']);
   }
 
   /**
@@ -115,10 +109,7 @@ class RedisManager {
    * @returns Promise
    */
   setAsync(...args) {
-    return timeout(
-      this.redisClient.setAsync(...args),
-      configRedis['operation.timeout.ms'],
-    );
+    return timeout(this.redisClient.setAsync(...args), configRedis['operation.timeout.ms']);
   }
 
   /**
@@ -128,10 +119,7 @@ class RedisManager {
    * @returns {Boolean} result
    */
   async getSecurity(username, password) {
-    const result = await timeout(
-      this.redisClient.getAsync(username),
-      configRedis['operation.timeout.ms'],
-    );
+    const result = await timeout(this.redisClient.getAsync(username), configRedis['operation.timeout.ms']);
     if (result) {
       return RedisManager.comparePassword(password, result);
     }
@@ -147,10 +135,7 @@ class RedisManager {
   setSecurity(...args) {
     const newArgs = args;
     newArgs[1] = RedisManager.generateHash(args[1]);
-    return timeout(
-      this.redisClient.setAsync(...newArgs),
-      configRedis['operation.timeout.ms'],
-    );
+    return timeout(this.redisClient.setAsync(...newArgs), configRedis['operation.timeout.ms']);
   }
 
   // Hash the user's password before saving it
@@ -171,10 +156,7 @@ class RedisManager {
    * @returns Promise
    */
   quitAsync(...args) {
-    return timeout(
-      this.redisClient.quitAsync(...args),
-      configRedis['operation.timeout.ms'],
-    );
+    return timeout(this.redisClient.quitAsync(...args), configRedis['operation.timeout.ms']);
   }
 
   /**

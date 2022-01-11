@@ -17,7 +17,9 @@ describe('DeviceDataService', () => {
   });
 
   test('should return all device data', async () => {
-    const returnData = await deviceDataService.getDeviceData('test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }));
+    const returnData = await deviceDataService.getDeviceData(
+      'test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }),
+    );
     expect(returnData).toEqual([
       'result',
       { current: 'url' },
@@ -25,7 +27,9 @@ describe('DeviceDataService', () => {
   });
 
   test('should return only selected attributes', async () => {
-    const returnData = await deviceDataService.getDeviceAttrData('test', 'test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }));
+    const returnData = await deviceDataService.getDeviceAttrData(
+      'test', 'test', 'test', '', '', 10, 0, 'asc', () => ({ current: 'url' }),
+    );
     expect(returnData).toEqual([
       'result',
       { current: 'url' },
