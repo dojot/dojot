@@ -5,7 +5,7 @@ const {
 const createAxios = require('./createAxios');
 
 
-class DeviceService {
+class DeviceManagerService {
   /**
    * Consumes api that returns devices data
    *
@@ -39,4 +39,4 @@ class DeviceService {
   }
 }
 
-module.exports = DeviceService;
+module.exports = DeviceManagerService;

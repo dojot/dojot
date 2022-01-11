@@ -76,14 +76,14 @@ class SyncLoader {
    *
    * @param {*} localPersistence the persister manager object
    * @param {*} tenantService the tenant service object
-   * @param {*} deviceService the device service object
+   * @param {*} deviceDataRepository the device service object
    */
   constructor(
-    localPersistence, tenantService, deviceService, retrieverConsumer,
+    localPersistence, tenantService, deviceDataRepository, retrieverConsumer,
   ) {
     this.localPersistence = localPersistence;
     this.tenantService = tenantService;
-    this.deviceService = deviceService;
+    this.deviceDataRepository = deviceDataRepository;
     this.inputPersister = new InputPersister(localPersistence, INPUT_CONFIG);
     this.retrieverConsumer = retrieverConsumer;
   }
@@ -202,7 +202,7 @@ class SyncLoader {
    */
   async loadDevices(tenant) {
     logger.info('Sync device-manager.');
-    const devices = await this.deviceService.getDevices(tenant);
+    const devices = await this.deviceDataRepository.getDevices(tenant);
 
     try {
       logger.debug(`Clean up ${tenant} sublevel`);

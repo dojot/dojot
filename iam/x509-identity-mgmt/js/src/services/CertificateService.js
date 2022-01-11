@@ -184,9 +184,8 @@ class CertificateService {
     // Checks on the certificate owner
     await this.checkBelongsTo(belongsTo);
 
-    const certificatePem = await this.ejbcaFacade.generateCertificate(
-      subjectDN, this.certValidity, csrPem,
-    );
+    const certificatePem = await this.ejbcaFacade
+      .generateCertificate(subjectDN, this.certValidity, csrPem);
 
     const cert = this.pkiUtils.parseCert(certificatePem);
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
@@ -477,9 +476,8 @@ class CertificateService {
 
     const subjectDN = this.dnUtils.from(csr.subject).stringify();
 
-    const certificatePem = await this.ejbcaFacade.generateCertificate(
-      subjectDN, this.certValidity, csrPem,
-    );
+    const certificatePem = await this.ejbcaFacade
+      .generateCertificate(subjectDN, this.certValidity, csrPem);
 
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
 
