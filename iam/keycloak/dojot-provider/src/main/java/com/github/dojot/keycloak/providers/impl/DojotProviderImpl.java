@@ -1,13 +1,12 @@
 package com.github.dojot.keycloak.providers.impl;
 
+import com.github.dojot.keycloak.custom.DojotRealmCertificate;
 import com.github.dojot.keycloak.custom.DojotRealmManager;
 import com.github.dojot.keycloak.error.DojotProviderException;
 import com.github.dojot.keycloak.kafka.DojotkafkaProducer;
 import com.github.dojot.keycloak.kafka.Event;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import org.jboss.logging.Logger;
-import org.keycloak.crypto.KeyUse;
-import org.keycloak.models.KeyManager;
 import org.keycloak.models.RealmModel;
 import org.keycloak.policy.PasswordPolicyNotMetException;
 
@@ -61,9 +60,13 @@ public class DojotProviderImpl implements DojotProvider {
     }
 
     @Override
+    public void publishRealmCreated(RealmModel realm, DojotRealmCertificate certificate) {
+        kafkaProducer.send(Event.CREATE, realm, certificate);
+    }
+
+    @Override
     public void publishRealmCreated(RealmModel realm) {
-        KeyManager keys =  context.getKeycloakSession().keys();
-        kafkaProducer.send(Event.CREATE, realm, keys.getActiveKey(realm, KeyUse.SIG,"RS256").getCertificate().toString());
+        kafkaProducer.send(Event.CREATE, realm);
     }
 
     @Override

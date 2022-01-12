@@ -1,6 +1,6 @@
 package com.github.dojot.keycloak.providers;
 
-import org.keycloak.models.KeycloakSession;
+import com.github.dojot.keycloak.custom.DojotRealmCertificate;
 import org.keycloak.models.RealmModel;
 import org.keycloak.provider.Provider;
 
@@ -22,6 +22,13 @@ public interface DojotProvider extends Provider {
      * @param realm   Realm created
      */
     void customizeRealm(RealmModel realm);
+
+    /**
+     * Publishes the Realm post creation event on Kafka
+     *
+     * @param realm Realm created
+     */
+    void publishRealmCreated(RealmModel realm, DojotRealmCertificate certificate);
 
     /**
      * Publishes the Realm post creation event on Kafka

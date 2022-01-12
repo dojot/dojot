@@ -2,6 +2,7 @@ package com.github.dojot.keycloak.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dojot.keycloak.custom.DojotRealmCertificate;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -64,8 +65,8 @@ public class DojotkafkaProducer {
         producer.close();
     }
 
-    public void send(Event event, RealmModel realm, String certificate) {
-        produce(generateTenantMessageWithCertificate(event, realm.getName(), certificate));
+    public void send(Event event, RealmModel realm, DojotRealmCertificate certificate) {
+        produce(generateTenantMessageWithCertificate(event, realm.getName(), certificate.getCertificateString()));
     }
 
     public void send(Event event, RealmModel realm) {

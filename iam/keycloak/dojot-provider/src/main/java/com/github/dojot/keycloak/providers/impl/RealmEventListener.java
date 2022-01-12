@@ -1,8 +1,8 @@
 package com.github.dojot.keycloak.providers.impl;
 
+import com.github.dojot.keycloak.custom.DojotRealmCertificate;
 import com.github.dojot.keycloak.providers.DojotProvider;
 import com.github.dojot.keycloak.providers.EventListener;
-import org.keycloak.crypto.KeyUse;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.RealmModel.RealmPostCreateEvent;
@@ -27,12 +27,12 @@ public class RealmEventListener implements EventListener {
             RealmModel realm = creationEvent.getCreatedRealm();
             if (!"master".equals(realm.getName())) {
                 KeycloakSession session = creationEvent.getKeycloakSession();
+                DojotRealmCertificate realmCertificate = new DojotRealmCertificate(realm, session);
+                realmCertificate.parseCertificateToString();
                 DojotProvider provider = session.getProvider(DojotProvider.class);
                 provider.validateRealm(realm);
                 provider.customizeRealm(realm);
-                provider.publishRealmCreated(realm);
-
-                session.keys().getActiveKey(realm,KeyUse.SIG,"RS256");
+                provider.publishRealmCreated(realm, realmCertificate);
             }
         }
 
