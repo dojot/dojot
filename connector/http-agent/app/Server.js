@@ -32,10 +32,49 @@ class Server {
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
+    // this.httpsServer = WebUtils.createServer({
+    //   config: {cert: '/certs/http-agent.crt',
+    //     key: '/certs/http-agent.key',
+    //     ca: '/certs/cabundle.pem'},
+    //   logger,
+    // });
+
     this.httpsServer = WebUtils.createServer({
       config: configHttpsServerCamelCase,
       logger,
     });
+
+    // this.httpsServer = https.createServer({
+    //   cert: fs.readFileSync('/certs/http-agent.crt'),
+    //   key: fs.readFileSync('/certs/http-agent.key'),
+    //   ca: fs.readFileSync('/certs/ca.crt'),
+    //   crl: fs.readFileSync(`${configSecurity.crl}`),
+    // });
+
+    // this.httpsServer = https.createServer({
+    //   SNICallback: (servername, cb) => {
+    //     var ctx = {
+    //       cert: fs.readFileSync('/certs/http-agent.crt'),
+    //       key: fs.readFileSync('/certs/http-agent.key'),
+    //       ca: this.sslCADecode(fs.readFileSync('/certs/cabundle.pem',"utf8")),
+    //       crl: fs.readFileSync(`${configSecurity.crl}`),
+    //     };
+
+    //     if (!ctx) {
+    //       console.log(`Not found SSL certificate for host: ${servername}`);
+    //     } else {
+    //       console.log(
+    //         `SSL certificate has been found and assigned to ${servername}`,
+    //       );
+    //     }
+
+    //     if (cb) {
+    //       cb(null, ctx);
+    //     } else {
+    //       return ctx;
+    //     }
+    //   },
+    // });
     this.httpServer =
       allowUnsecuredMode &&
       WebUtils.createServer({
@@ -68,10 +107,8 @@ class Server {
     this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
     fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
-      logger.debug(`${eventType}: The ${filename} was modified!`);
-      const interval = setInterval(() => {
-        this.reloadCertificates(interval);
-      }, configReload['interval.ms']);
+      logger.info(`File changed ${filename}`);
+      this.reloadCertificates();
     });
 
     if (this.httpServer) {
@@ -91,16 +128,45 @@ class Server {
     }
   }
 
-  reloadCertificates(interval) {
+  sslCADecode(source) {
+    if (!source || typeof source !== 'string') {
+      return [];
+    }
+
+    const sourceArray = source
+      .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
+      .map((value, index, array) => {
+        if (index) {
+          value = `-----BEGIN CERTIFICATE-----${value}`;
+        }
+        if (index !== array.length - 1) {
+          value += '-----END CERTIFICATE-----';
+        }
+        value = value.replace(/^\n+/, '').replace(/\n+$/, '');
+        return value;
+      });
+
+    let allCAs = '';
+
+    sourceArray.forEach((sourceArray) => {
+      allCAs += `${sourceArray}\n`;
+    });
+    return allCAs;
+  }
+
+  reloadCertificates() {
     try {
+      logger.debug('Reloading secure context');
       this.httpsServer.setSecureContext({
         cert: fs.readFileSync(`${configHttpsServer.cert}`),
         key: fs.readFileSync(`${configHttpsServer.key}`),
-        ca: fs.readFileSync(`${configHttpsServer.ca}`),
-        crl: fs.readFileSync(`${configSecurity.crl}`),
+        ca: this.sslCADecode(
+          fs.readFileSync(`${configHttpsServer.ca}`, 'utf8'),
+        ),
+        crl: fs.readFileSync(`${configHttpsServer.crl}`),
       });
       logger.debug('Seted new secure context!');
-      clearInterval(interval);
+      // clearInterval(interval);
     } catch (err) {
       if (this.attempts < configReload.attempts) {
         this.attempts += 1;

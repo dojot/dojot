@@ -1,4 +1,4 @@
-FROM node:12.22.0-alpine AS base
+FROM node:14-alpine AS base
 
 WORKDIR /opt/http-agent
 
@@ -31,7 +31,7 @@ COPY app ./app
 COPY config ./config
 COPY index.js ./index.js
 
-FROM node:12.22.0-alpine
+FROM node:14-alpine
 
 WORKDIR /opt/http-agent
 
