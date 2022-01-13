@@ -3,7 +3,7 @@ const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
 const fs = require('fs');
-const { killApplication } = require('./Utils');
+const { killApplication, sslCADecode } = require('./Utils');
 
 const logger = new Logger('http-agent:Server');
 const {
@@ -128,40 +128,13 @@ class Server {
     }
   }
 
-  sslCADecode(source) {
-    if (!source || typeof source !== 'string') {
-      return [];
-    }
-
-    const sourceArray = source
-      .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
-      .map((value, index, array) => {
-        let certificate = '';
-        if (index) {
-          certificate = `-----BEGIN CERTIFICATE-----${value}`;
-        }
-        if (index !== array.length - 1) {
-          certificate += '-----END CERTIFICATE-----';
-        }
-        certificate = certificate.replace(/^\n+/, '').replace(/\n+$/, '');
-        return certificate;
-      });
-
-    let allCAs = '';
-
-    sourceArray.forEach((sourceArray) => {
-      allCAs += `${sourceArray}\n`;
-    });
-    return allCAs;
-  }
-
   reloadCertificates() {
     try {
       logger.debug('Reloading secure context');
       this.httpsServer.setSecureContext({
         cert: fs.readFileSync(`${configHttpsServer.cert}`),
         key: fs.readFileSync(`${configHttpsServer.key}`),
-        ca: this.sslCADecode(
+        ca: sslCADecode(
           fs.readFileSync(`${configHttpsServer.ca}`, 'utf8'),
         ),
         crl: fs.readFileSync(`${configHttpsServer.crl}`),
