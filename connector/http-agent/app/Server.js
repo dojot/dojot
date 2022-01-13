@@ -136,7 +136,7 @@ class Server {
     const sourceArray = source
       .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
       .map((value, index, array) => {
-        let certificate = ''
+        let certificate = '';
         if (index) {
           certificate = `-----BEGIN CERTIFICATE-----${value}`;
         }
