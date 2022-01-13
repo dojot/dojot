@@ -32,7 +32,7 @@ const sslCADecode = (source) => {
     allCAs += `${caSource}\n`;
   });
   return allCAs;
-}
+};
 
 /**
  * @function parseTimestamp
