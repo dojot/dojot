@@ -136,14 +136,15 @@ class Server {
     const sourceArray = source
       .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
       .map((value, index, array) => {
+        let certificate = ''
         if (index) {
-          value = `-----BEGIN CERTIFICATE-----${value}`;
+          certificate = `-----BEGIN CERTIFICATE-----${value}`;
         }
         if (index !== array.length - 1) {
-          value += '-----END CERTIFICATE-----';
+          certificate += '-----END CERTIFICATE-----';
         }
-        value = value.replace(/^\n+/, '').replace(/\n+$/, '');
-        return value;
+        certificate = certificate.replace(/^\n+/, '').replace(/\n+$/, '');
+        return certificate;
       });
 
     let allCAs = '';
