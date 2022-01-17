@@ -128,6 +128,7 @@ class Server {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   sslCADecode(source) {
     if (!source || typeof source !== 'string') {
       return [];
@@ -136,20 +137,21 @@ class Server {
     const sourceArray = source
       .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
       .map((value, index, array) => {
+        let cert = value;
         if (index) {
-          value = `-----BEGIN CERTIFICATE-----${value}`;
+          cert = `-----BEGIN CERTIFICATE-----${value}`;
         }
         if (index !== array.length - 1) {
-          value += '-----END CERTIFICATE-----';
+          cert += '-----END CERTIFICATE-----';
         }
-        value = value.replace(/^\n+/, '').replace(/\n+$/, '');
-        return value;
+        cert = value.replace(/^\n+/, '').replace(/\n+$/, '');
+        return cert;
       });
 
     let allCAs = '';
 
-    sourceArray.forEach((sourceArray) => {
-      allCAs += `${sourceArray}\n`;
+    sourceArray.forEach((item) => {
+      allCAs += `${item}\n`;
     });
     return allCAs;
   }
