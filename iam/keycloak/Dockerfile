@@ -1,6 +1,6 @@
 FROM maven:3.6.3-openjdk-11 AS base
 
-ENV KEYCLOAK_VERSION=13.0.0
+ENV KEYCLOAK_VERSION=16.1.0
 ENV KAFKA_VERSION=2.8.0
 
 WORKDIR /opt/dojot/dojot-provider
@@ -20,7 +20,7 @@ RUN mvn "-Dmaven.compiler.release=11" \
         "-Dkafka.version=$KAFKA_VERSION" \
         clean package
 
-FROM jboss/keycloak:13.0.0
+FROM jboss/keycloak:16.1.0
 
 # Copies the "dojot-provider" into the wildfly module structure
 COPY --from=base \
