@@ -15,7 +15,7 @@ const logger = new Logger('keycloak-proxy:Server');
 
 const secretHandler = new SecretFileHandler(config, logger);
 
-secretHandler.handleCollection(['keycloak.proxy.secret', 'keycloak.proxy.password']).then(async () => {
+secretHandler.handleCollection(['keycloak.proxy.secret', 'keycloak.proxy.password'], '/secrets/').then(async () => {
   try {
     const app = new App(config, logger, openApiPath);
     await app.init();

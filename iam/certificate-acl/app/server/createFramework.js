@@ -10,11 +10,13 @@ const {
   beaconInterceptor,
   requestLogInterceptor,
   readinessInterceptor,
+  createKeycloakAuthInterceptor,
 } = WebUtils.framework.interceptors;
 
-module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExpress(
+module.exports = (aclRoute, serviceStateManager, tenantService) => WebUtils.framework.createExpress(
   {
     interceptors: [
+      createKeycloakAuthInterceptor(tenantService.tenants, logger),
       readinessInterceptor({
         stateManager: serviceStateManager,
         logger,

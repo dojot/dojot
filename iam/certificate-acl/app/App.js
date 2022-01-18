@@ -9,6 +9,7 @@ const {
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
 const HTTPServer = require('./server/HTTPServer');
+const TenantService = require('./service/tenantService');
 
 const logger = new Logger('certificate-acl:app');
 
@@ -31,6 +32,7 @@ class Application {
 
     // instantiate Kafka Consumer
     this.kafkaConsumer = new KafkaConsumer(this.serviceStateManager);
+    this.tenantService = new TenantService(this.config['keycloak.tenants.url']);
 
     // instantiate Redis Manager
     this.redisManager = new RedisManager(this.serviceStateManager);
@@ -38,7 +40,7 @@ class Application {
     this.redisManager.on('unhealthy', () => this.kafkaConsumer.suspend());
 
     // instantiate HTTP server
-    this.server = new HTTPServer(this.serviceStateManager, this.redisManager);
+    this.server = new HTTPServer(this.serviceStateManager, this.redisManager, this.tenantService);
   }
 
   /**
