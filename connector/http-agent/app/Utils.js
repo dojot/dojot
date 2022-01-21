@@ -7,6 +7,33 @@ const err = new createError.BadRequest();
  * @module utils
  */
 
+const sslCADecode = (source) => {
+  if (!source || typeof source !== 'string') {
+    return [];
+  }
+
+  const sourceArray = source
+    .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
+    .map((value, index, array) => {
+      let certificate = '';
+      if (index) {
+        certificate = `-----BEGIN CERTIFICATE-----${value}`;
+      }
+      if (index !== array.length - 1) {
+        certificate += '-----END CERTIFICATE-----';
+      }
+      certificate = certificate.replace(/^\n+/, '').replace(/\n+$/, '');
+      return certificate;
+    });
+
+  let allCAs = '';
+
+  sourceArray.forEach((caSource) => {
+    allCAs += `${caSource}\n`;
+  });
+  return allCAs;
+};
+
 /**
  * @function parseTimestamp
  *
@@ -59,6 +86,7 @@ const generateDeviceDataMessage = (payload, tenant, deviceid) => ({
 const killApplication = () => process.kill(process.pid);
 
 module.exports = {
+  sslCADecode,
   generateDeviceDataMessage,
   killApplication,
 };

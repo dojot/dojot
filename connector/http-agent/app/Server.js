@@ -3,7 +3,7 @@ const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
 const fs = require('fs');
-const { killApplication } = require('./Utils');
+const { killApplication, sslCADecode } = require('./Utils');
 
 const logger = new Logger('http-agent:Server');
 const {
@@ -32,49 +32,11 @@ class Server {
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
-    // this.httpsServer = WebUtils.createServer({
-    //   config: {cert: '/certs/http-agent.crt',
-    //     key: '/certs/http-agent.key',
-    //     ca: '/certs/cabundle.pem'},
-    //   logger,
-    // });
-
     this.httpsServer = WebUtils.createServer({
       config: configHttpsServerCamelCase,
       logger,
     });
 
-    // this.httpsServer = https.createServer({
-    //   cert: fs.readFileSync('/certs/http-agent.crt'),
-    //   key: fs.readFileSync('/certs/http-agent.key'),
-    //   ca: fs.readFileSync('/certs/ca.crt'),
-    //   crl: fs.readFileSync(`${configSecurity.crl}`),
-    // });
-
-    // this.httpsServer = https.createServer({
-    //   SNICallback: (servername, cb) => {
-    //     var ctx = {
-    //       cert: fs.readFileSync('/certs/http-agent.crt'),
-    //       key: fs.readFileSync('/certs/http-agent.key'),
-    //       ca: this.sslCADecode(fs.readFileSync('/certs/cabundle.pem',"utf8")),
-    //       crl: fs.readFileSync(`${configSecurity.crl}`),
-    //     };
-
-    //     if (!ctx) {
-    //       console.log(`Not found SSL certificate for host: ${servername}`);
-    //     } else {
-    //       console.log(
-    //         `SSL certificate has been found and assigned to ${servername}`,
-    //       );
-    //     }
-
-    //     if (cb) {
-    //       cb(null, ctx);
-    //     } else {
-    //       return ctx;
-    //     }
-    //   },
-    // });
     this.httpServer =
       allowUnsecuredMode &&
       WebUtils.createServer({
@@ -128,41 +90,13 @@ class Server {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  sslCADecode(source) {
-    if (!source || typeof source !== 'string') {
-      return [];
-    }
-
-    const sourceArray = source
-      .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
-      .map((value, index, array) => {
-        let cert = value;
-        if (index) {
-          cert = `-----BEGIN CERTIFICATE-----${value}`;
-        }
-        if (index !== array.length - 1) {
-          cert += '-----END CERTIFICATE-----';
-        }
-        cert = value.replace(/^\n+/, '').replace(/\n+$/, '');
-        return cert;
-      });
-
-    let allCAs = '';
-
-    sourceArray.forEach((item) => {
-      allCAs += `${item}\n`;
-    });
-    return allCAs;
-  }
-
   reloadCertificates() {
     try {
       logger.debug('Reloading secure context');
       this.httpsServer.setSecureContext({
         cert: fs.readFileSync(`${configHttpsServer.cert}`),
         key: fs.readFileSync(`${configHttpsServer.key}`),
-        ca: this.sslCADecode(
+        ca: sslCADecode(
           fs.readFileSync(`${configHttpsServer.ca}`, 'utf8'),
         ),
         crl: fs.readFileSync(`${configHttpsServer.crl}`),
