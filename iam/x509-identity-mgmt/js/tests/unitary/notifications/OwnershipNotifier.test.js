@@ -18,6 +18,7 @@ describe("Unit tests of script 'OwnershipNotifier.js'", () => {
   beforeAll(() => {
     ownershipNotifier = new OwnershipNotifier({
       tenant: 'admin',
+      xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
       kafkaTopicSuffix: global.config.notifications.kafka.producer.ownership.topic.suffix,
       notificationEngine: notificationEngineMock(),
       logger: new Logger('OwnershipNotifier.test.js'),
@@ -39,6 +40,7 @@ describe("Unit tests of script 'OwnershipNotifier.js'", () => {
 
   it('should create an OwnershipNotifier whose topic does not contain the tenant', () => {
     const ownershipNotifierWithoutTenant = new OwnershipNotifier({
+      xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
       kafkaTopicSuffix: global.config.notifications.kafka.producer.ownership.topic.suffix,
       notificationEngine: notificationEngineMock(),
       logger: new Logger('OwnershipNotifier.test.js'),
