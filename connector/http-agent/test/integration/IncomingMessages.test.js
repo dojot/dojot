@@ -86,6 +86,12 @@ jest.mock(
   () => mockCertificateAclService,
 );
 
+const mockgetAclEntries = jest.fn();
+const mockCertificateAclService = {
+  getAclEntries: mockgetAclEntries,
+};
+jest.mock('../../app/axios/CertificateAclService.js', () => mockCertificateAclService);
+
 const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
   send: mockProducerMessagesSend,
@@ -496,7 +502,8 @@ describe('HTTP', () => {
       mockRedis.getSecurity.mockReturnValue(false);
       mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
       await requestHttp(app)
-        .post(urlUnsecureIncomingMessages)
+        .post(`${urlUnsecureIncomingMessages}?tenant=test&deviceId=abc123`)
+        .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
           data: {
@@ -578,6 +585,26 @@ describe('Unauthorized', () => {
       })
       .expect('Content-Type', /json/)
       .expect(400)
+      .then((response) => {
+        expect(response.body).toStrictEqual({
+          error: 'Unable to authenticate',
+        });
+      });
+  });
+
+  it('should return unauthorized error: Client certificate is invalid', async () => {
+    await requestHttps(app)
+      .post('/http-agent/v1/incoming-messages')
+      .set('Content-Type', 'application/json')
+      .send({
+        ts: '2021-07-12T09:31:01.683000Z',
+        data: {
+          temperature: 25.79,
+        },
+      })
+      .ca(ca)
+      .expect('Content-Type', /json/)
+      .expect(403)
       .then((response) => {
         expect(response.body).toStrictEqual({
           error: 'Unable to authenticate',
