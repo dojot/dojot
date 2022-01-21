@@ -7,6 +7,15 @@ const err = new createError.BadRequest();
  * @module utils
  */
 
+/**
+ * @function sslCADecode
+ *
+ * Return certificates separated by line breaks
+ *
+ * @param {string} source
+ *
+ * @returns {string}
+ */
 const sslCADecode = (source) => {
   if (!source || typeof source !== 'string') {
     return [];
@@ -15,7 +24,7 @@ const sslCADecode = (source) => {
   const sourceArray = source
     .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
     .map((value, index, array) => {
-      let certificate = '';
+      let certificate = value;
       if (index) {
         certificate = `-----BEGIN CERTIFICATE-----${value}`;
       }
