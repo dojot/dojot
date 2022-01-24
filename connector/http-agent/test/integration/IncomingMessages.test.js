@@ -68,7 +68,10 @@ const mockgetAclEntries = jest.fn();
 const mockCertificateAclService = {
   getAclEntries: mockgetAclEntries,
 };
-jest.mock('../../app/axios/CertificateAclService.js', () => mockCertificateAclService);
+jest.mock(
+  '../../app/axios/CertificateAclService.js',
+  () => mockCertificateAclService,
+);
 
 const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
@@ -161,7 +164,11 @@ describe('HTTPS', () => {
           .ca(ca)
           .expect('Content-Type', /json/)
           .expect(403)
-          .then((response) => expect(response.body).toStrictEqual({ error: 'Client certificate is invalid' }));
+          .then((response) => {
+            expect(response.body).toStrictEqual({
+              error: 'Client certificate is invalid',
+            });
+          });
       });
     });
 
@@ -202,7 +209,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(400)
-        .then((response) => expect(response.body).toStrictEqual({ message: '"data" is required' }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: '"data" is required',
+          });
+        });
     });
   });
 
@@ -253,7 +264,11 @@ describe('HTTPS', () => {
         .ca(ca)
         .expect('Content-Type', /json/)
         .expect(400)
-        .then((response) => expect(response.body).toStrictEqual({ message: { 0: '"data" is required', 1: '"data" is required' } }));
+        .then((response) => {
+          expect(response.body).toStrictEqual({
+            error: { 0: '"data" is required', 1: '"data" is required' },
+          });
+        });
     });
   });
 });
@@ -289,7 +304,7 @@ describe('HTTP', () => {
         .expect('Content-Type', /json/)
         .expect(400)
         .then((response) => {
-          expect(response.body).toStrictEqual({ message: '"data" is required' });
+          expect(response.body).toStrictEqual({ error: '"data" is required' });
         });
     });
   });
