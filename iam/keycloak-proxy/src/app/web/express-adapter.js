@@ -18,16 +18,16 @@ module.exports = class ExpressAdapter {
    * @returns the express server
    */
   static adapt(routes, serviceState, openApiPath, logger, config) {
-    // let openApiJson = null;
-    try {
-      // It is a system necessity get the yaml file dynamically
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
-      // openApiJson = yaml.load(fs.readFileSync(openApiPath, 'utf8'));
-      // logger.debug(`OpenApi Json load: ${JSON.stringify(openApiJson)}`);
-    } catch (e) {
-      logger.error('Some error when try load open api in yaml', e);
-      throw e;
-    }
+    // // let openApiJson = null;
+    // try {
+    //   // It is a system necessity get the yaml file dynamically
+    //   // eslint-disable-next-line security/detect-non-literal-fs-filename
+    //   // openApiJson = yaml.load(fs.readFileSync(openApiPath, 'utf8'));
+    //   // logger.debug(`OpenApi Json load: ${JSON.stringify(openApiJson)}`);
+    // } catch (e) {
+    //   logger.error('Some error when try load open api in yaml', e);
+    //   throw e;
+    // }
 
     const {
       responseCompressInterceptor,

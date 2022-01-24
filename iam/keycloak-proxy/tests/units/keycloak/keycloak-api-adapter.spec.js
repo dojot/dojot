@@ -29,20 +29,16 @@ describe('KeycloakApiAdapter', () => {
     expect(tenants).toEqual([
       {
         id: 'tenant1',
-        sigKey: {
+        signatureKey: {
           algorithm: 'RS256',
-          publicKey: 'public_key',
           certificate: 'certificate',
-          use: 'SIG',
         },
       },
       {
         id: 'tenant2',
-        sigKey: {
+        signatureKey: {
           algorithm: 'RS256',
-          publicKey: 'public_key',
           certificate: 'certificate',
-          use: 'SIG',
         },
       },
     ]);

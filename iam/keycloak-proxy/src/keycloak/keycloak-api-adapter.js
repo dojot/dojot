@@ -34,10 +34,14 @@ module.exports = class KeycloakApiAdapter {
       .filter((realm) => realm.id !== 'master')
       .map(async (realm) => {
         const payload = await this.keycloakAdmin.realms.getKeys({ realm: realm.realm });
+        const tmpSignatureKey = payload.keys.find((key) => key.use === 'SIG' && key.certificate);
 
         return {
           id: realm.realm,
-          sigKey: payload.keys.find((key) => key.use === 'SIG' && key.certificate),
+          signatureKey: {
+            certificate: tmpSignatureKey.certificate,
+            algorithm: tmpSignatureKey.algorithm,
+          },
         };        
       });
 

@@ -21,20 +21,16 @@ describe('GET /tenant', () => {
         expect(response.body.tenants).toEqual([
           {
             id: 'tenant1',
-            sigKey: {
+            signatureKey: {
               algorithm: 'RS256',
               certificate: 'certificate',
-              publicKey: 'public_key',
-              use: 'SIG',
             },
           },
           {
             id: 'tenant2',
-            sigKey: {
+            signatureKey: {
               algorithm: 'RS256',
               certificate: 'certificate',
-              publicKey: 'public_key',
-              use: 'SIG',
             },
           },
         ]);
