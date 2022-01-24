@@ -3,6 +3,8 @@ package com.github.dojot.keycloak.kafka;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.github.dojot.keycloak.custom.DojotSignatureKey;
+
 /**
  * Message to be published on Kafka
  */
@@ -11,7 +13,7 @@ class Message {
     private Map<String, Object> metadata;
     private String type;
     private String tenant;
-    private String certificate;
+    private DojotSignatureKey signatureKey;
 
     public Message(Map<String, Object> metadata, String type, String tenant) {
         this.metadata = metadata;
@@ -19,11 +21,11 @@ class Message {
         this.tenant = tenant;
     }
 
-    public Message(Map<String, Object> metadata, String type, String tenant, String certificate) {
+    public Message(Map<String, Object> metadata, String type, String tenant, DojotSignatureKey signatureKey) {
         this.metadata = metadata;
         this.type = type;
         this.tenant = tenant;
-        this.certificate = certificate;
+        this.signatureKey = signatureKey;
     }
 
     public Map<String, Object> getMetadata() {
@@ -50,11 +52,11 @@ class Message {
         this.tenant = tenant;
     }
 
-    public void setCertificate(String certificate) {
-        this.certificate = certificate;
+    public DojotSignatureKey getSignatureKey() {
+        return this.signatureKey;
     }
 
-    public String getCertificate() {
-        return certificate;
+    public void setSignatureKey(DojotSignatureKey signatureKey) {
+        this.signatureKey = signatureKey;
     }
 }

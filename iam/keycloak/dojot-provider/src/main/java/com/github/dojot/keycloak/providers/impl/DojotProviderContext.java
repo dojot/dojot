@@ -18,6 +18,7 @@ public class DojotProviderContext {
     private String rootUrl;
     private String adminPassword;
     private String kafkaTopic;
+    private String secretsPath;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
     private RealmRepresentation customRealmRepresentation;
@@ -154,5 +155,13 @@ public class DojotProviderContext {
         public Map<String, String> map() {
             return config;
         }
+    }
+
+    public String getSecretsPath() {
+        return secretsPath;
+    }
+
+    public void setSecretsPath(String secretsPath) {
+        this.secretsPath = secretsPath;
     }
 }

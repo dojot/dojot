@@ -25,6 +25,10 @@ import org.keycloak.representations.idm.RolesRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.managers.RealmManager;
 
+import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.BufferedReader;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +48,7 @@ public class DojotRealmManager extends RealmManager {
     private final RealmRepresentation realmRepresentation;
     private final RealmModel realm;
     private final String dojotRootUrl;
+    private final String dojotSecretsPath;
     private final String adminPassword;
     private final SslRequired sslMode;
     private final boolean isResetPasswordAllowed;
@@ -55,6 +60,7 @@ public class DojotRealmManager extends RealmManager {
         dojotRootUrl = context.getRootUrl();
         adminPassword = context.getAdminPassword();
         sslMode = context.getSslMode();
+        dojotSecretsPath = context.getSecretsPath();
         this.realm = realm;
 
         // Resetting the password depends on the SMTP server settings
@@ -234,6 +240,27 @@ public class DojotRealmManager extends RealmManager {
             // replace Client Root URL
             if (dojotRootUrl != null) {
                 client.setRootUrl(dojotRootUrl);
+            }
+
+            // load dojot client secret
+            if(client.getClientId().startsWith("dojot")) {
+                FileReader secretFile = null;
+                try {
+                    secretFile = new FileReader(dojotSecretsPath + client.getClientId());
+                    BufferedReader bufferedReader = new BufferedReader(secretFile);
+                    String secret = bufferedReader.readLine();
+                    client.setSecret(secret);
+                    bufferedReader.close();
+                    secretFile.close();
+                } catch (FileNotFoundException ex) {
+                    String err = client.getClientId() + " secret not found";
+                    LOG.error(err);
+                    throw new IllegalStateException(err);
+                } catch (IOException ex) {
+                    String err = "Error loading " + client.getClientId() + " secret";
+                    LOG.error(err);
+                    throw new IllegalStateException(err);
+                }
             }
         }
     }

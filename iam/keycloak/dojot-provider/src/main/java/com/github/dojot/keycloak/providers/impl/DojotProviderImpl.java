@@ -2,6 +2,7 @@ package com.github.dojot.keycloak.providers.impl;
 
 import com.github.dojot.keycloak.custom.DojotRealmCertificate;
 import com.github.dojot.keycloak.custom.DojotRealmManager;
+import com.github.dojot.keycloak.custom.DojotSignatureKey;
 import com.github.dojot.keycloak.error.DojotProviderException;
 import com.github.dojot.keycloak.kafka.DojotkafkaProducer;
 import com.github.dojot.keycloak.kafka.Event;
@@ -26,6 +27,7 @@ public class DojotProviderImpl implements DojotProvider {
         this.context = context;
         this.kafkaProducer = new DojotkafkaProducer(context.getKafkaTopic(), context.getKafkaProducerProps());
         LOG.info("Dojot Provider instance created!");
+        LOG.info("Kafka topic: " + context.getKafkaTopic());
     }
 
     @Override
@@ -61,7 +63,8 @@ public class DojotProviderImpl implements DojotProvider {
 
     @Override
     public void publishRealmCreated(RealmModel realm, DojotRealmCertificate certificate) {
-        kafkaProducer.send(Event.CREATE, realm, certificate);
+        DojotSignatureKey signatureKey = new DojotSignatureKey(certificate.getCertificateString(), DojotRealmCertificate.ALGORITHM);
+        kafkaProducer.send(Event.CREATE, realm, signatureKey);
     }
 
     @Override

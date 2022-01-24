@@ -41,6 +41,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
     private String adminPassword;
     private SslRequired sslMode;
     private String kafkaTopic;
+    private String secretsPath;
     private Properties kafkaProducerProps;
     private Pattern validRealmName;
     private String customRealmRepFileName;
@@ -52,6 +53,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
         LOG.info("Init DojotProviderFactory...");
         DojotProviderFactory.super.init(scope);
         rootUrl = scope.get("rootUrl");
+        secretsPath = scope.get("secretsPath", "/secrets/");
         initAdminPasswordConfig(scope);
         initRealmValidationConfig(scope);
         initKafkaProducerConfig(scope);
@@ -197,6 +199,7 @@ public class DojotProviderFactoryImpl implements DojotProviderFactory {
             context.setCustomRealmRepresentation(customRealmRepClone);
             context.setSmtpServerConfig(smtpServerConfig);
             context.setSslMode(sslMode);
+            context.setSecretsPath(this.secretsPath);
             return new DojotProviderImpl(context);
         } catch (IOException ex) {
             String err = "Error creating DojotProvider. Json file " + customRealmRepFileName + " is invalid";

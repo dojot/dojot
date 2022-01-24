@@ -3,6 +3,7 @@ package com.github.dojot.keycloak.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dojot.keycloak.custom.DojotRealmCertificate;
+import com.github.dojot.keycloak.custom.DojotSignatureKey;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -17,6 +18,7 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 
 /**
  * Specialized Kafka producer for events known for the dojot platform
@@ -65,8 +67,8 @@ public class DojotkafkaProducer {
         producer.close();
     }
 
-    public void send(Event event, RealmModel realm, DojotRealmCertificate certificate) {
-        produce(generateTenantMessageWithCertificate(event, realm.getName(), certificate.getCertificateString()));
+    public void send(Event event, RealmModel realm, DojotSignatureKey signatureKey) {
+        produce(generateTenantMessageWithCertificate(event, realm.getName(), signatureKey));
     }
 
     public void send(Event event, RealmModel realm) {
@@ -102,8 +104,8 @@ public class DojotkafkaProducer {
         return new Message(metadata,  event.toString(), tenant);
     }
 
-    private Message generateTenantMessageWithCertificate(Event event, String tenant, String certificate) {
+    private Message generateTenantMessageWithCertificate(Event event, String tenant, DojotSignatureKey signatureKey) {
         Map<String, Object> metadata = generateMetadata();
-        return new Message(metadata,  event.toString(), tenant, certificate);
+        return new Message(metadata,  event.toString(), tenant, signatureKey);
     }
 }
