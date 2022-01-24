@@ -15,7 +15,6 @@ const mockAxios = {
     })),
   },
 };
-
 jest.mock('axios', () => mockAxios);
 
 const axios = require('../../app/axios/createAxios');

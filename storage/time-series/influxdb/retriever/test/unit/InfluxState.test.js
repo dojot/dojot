@@ -4,8 +4,14 @@ const mockSdk = {
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-
   })),
+  ConfigManager: {
+    getConfig: jest.fn(() => ({
+      influx: {
+        'heathcheck.ms': 3000,
+      },
+    })),
+  },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 jest.mock('@influxdata/influxdb-client');
@@ -22,6 +28,12 @@ const mockInfluxApi = {
 };
 jest.mock('@influxdata/influxdb-client-apis', () => mockInfluxApi);
 
+const mockAddHealthChecker = jest.fn();
+const serviceStateMock = {
+  addHealthChecker: mockAddHealthChecker,
+};
+
+
 const State = require('../../app/influx/State');
 
 describe('Test influx state', () => {
@@ -32,6 +44,7 @@ describe('Test influx state', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    state = new State({}, serviceStateMock);
   });
 
   afterAll(() => {
@@ -39,10 +52,6 @@ describe('Test influx state', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  test('instantiate class', () => {
-    state = new State('url');
   });
 
   test('Heath - true', async () => {
@@ -71,5 +80,33 @@ describe('Test influx state', () => {
   test('Ready - true - reject', async () => {
     mockGetReady.mockRejectedValueOnce(new Error());
     expect(await state.isReady()).toBe(false);
+  });
+
+  test('createInfluxHealthChecker - heath', async () => {
+    state.createInfluxHealthChecker();
+    state.isHealth = jest.fn(() => true);
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).toHaveBeenCalled();
+    expect(notReady).not.toHaveBeenCalled();
+  });
+
+  test('createInfluxHealthChecker - not heath', async () => {
+    state.createInfluxHealthChecker();
+    state.isHealth = jest.fn(() => false);
+    const callback = mockAddHealthChecker.mock.calls[0][1];
+
+    const ready = jest.fn();
+    const notReady = jest.fn();
+    await callback(ready, notReady);
+
+    expect(mockAddHealthChecker).toHaveBeenCalled();
+    expect(ready).not.toHaveBeenCalled();
+    expect(notReady).toHaveBeenCalled();
   });
 });

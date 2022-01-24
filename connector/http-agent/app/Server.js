@@ -21,6 +21,7 @@ const configHttpServerCamelCase = ConfigManager.transformObjectKeys(
   camelCase,
 );
 const allowUnsecuredMode = configSecurity['unsecure.mode'];
+const allowUnsecuredModeOnly = configSecurity['unsecure.mode.only'];
 
 /**
  * Wrapper to initialize the Server
@@ -32,13 +33,14 @@ class Server {
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
-    this.httpsServer = WebUtils.createServer({
-      config: configHttpsServerCamelCase,
-      logger,
-    });
-
+    this.httpsServer =
+      !allowUnsecuredModeOnly &&
+      WebUtils.createServer({
+        config: configHttpsServerCamelCase,
+        logger,
+      });
     this.httpServer =
-      allowUnsecuredMode &&
+      (allowUnsecuredMode || allowUnsecuredModeOnly) &&
       WebUtils.createServer({
         config: (({ host, port }) => ({ host, port }))(
           configHttpServerCamelCase,
@@ -46,6 +48,7 @@ class Server {
         logger,
       });
     this.serviceState = serviceState;
+    this.ServiceName = 'http-server';
     this.attempts = 0;
   }
 
@@ -54,19 +57,21 @@ class Server {
    * @param {Express} express  instance of express
    */
   init(express) {
-    this.httpsServer.on('request', express);
-    this.httpsServer.on('listening', () => {
-      logger.info('HTTPS server ready to accept connections!');
-      logger.info(this.httpsServer.address());
-      this.serviceState.signalReady('http-server');
-    });
-    this.httpsServer.on('close', () => {
-      this.serviceState.signalNotReady('http-server');
-    });
-    this.httpsServer.on('error', (e) => {
-      logger.error('HTTPS server experienced an error:', e);
-    });
-    this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
+
+    if (this.httpsServer) {
+      this.httpsServer.on('request', express);
+      this.httpsServer.on('listening', () => {
+        logger.info('HTTPS server ready to accept connections!');
+        logger.info(this.httpsServer.address());
+        this.serviceState.signalReady(this.ServiceName);
+      });
+      this.httpsServer.on('close', () => {
+        this.serviceState.signalNotReady(this.ServiceName);
+      });
+      this.httpsServer.on('error', (e) => {
+        logger.error('HTTPS server experienced an error:', e);
+      });
+      this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
     fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
       logger.info(`File changed ${filename}`);
@@ -78,10 +83,10 @@ class Server {
       this.httpServer.on('listening', () => {
         logger.info('HTTP server ready to accept connections!');
         logger.info(this.httpServer.address());
-        this.serviceState.signalReady('http-server');
+        this.serviceState.signalReady(this.ServiceName);
       });
       this.httpServer.on('close', () => {
-        this.serviceState.signalNotReady('http-server');
+        this.serviceState.signalNotReady(this.ServiceName);
       });
       this.httpServer.on('error', (e) => {
         logger.error('HTTP server experienced an error:', e);
@@ -89,6 +94,8 @@ class Server {
       this.httpServer.listen(configHttpServer.port, configHttpServer.host);
     }
   }
+}
+
 
   reloadCertificates() {
     try {
@@ -117,10 +124,18 @@ class Server {
    *  Register a shutdown to the http server
    */
   async registerShutdown() {
-    const httpTerminator = createHttpTerminator({ server: this.httpsServer });
+    const httpsTerminator =
+      this.httpsServer && createHttpTerminator({ server: this.httpsServer });
+    const httpTerminator =
+      this.httpServer && createHttpTerminator({ server: this.httpServer });
     this.serviceState.registerShutdownHandler(async () => {
       logger.debug('Stopping the server from accepting new connections...');
-      await httpTerminator.terminate();
+      if (httpsTerminator) {
+        await httpsTerminator.terminate();
+      }
+      if (httpTerminator) {
+        await httpTerminator.terminate();
+      }
       logger.warn('The server no longer accepts connections!');
     });
   }

@@ -1,4 +1,6 @@
-const ApplicationError = require('../errors/ApplicationError');
+const {
+  WebUtils: { framework },
+} = require('@dojot/microservice-sdk');
 
 /**
  * Returns the type informed in the accept header
@@ -9,7 +11,12 @@ const ApplicationError = require('../errors/ApplicationError');
 const getAcceptableType = (req) => {
   const allowedTypes = ['json', 'csv'];
   const accept = req.accepts(allowedTypes);
-  if (!accept) throw new ApplicationError('request not acceptable', 406);
+  if (!accept) {
+    throw framework.errorTemplate.NotAcceptable(
+      `This server does not support ${req.headers.accept}`,
+      'Not Acceptable',
+    );
+  }
   return accept;
 };
 
