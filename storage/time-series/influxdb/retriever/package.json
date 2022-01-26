@@ -42,7 +42,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
-    "@dojot/microservice-sdk": "0.2.0-beta.0",
+    "@dojot/microservice-sdk": "0.2.0-beta.1",
     "@google-cloud/precise-date": "^2.0.3",
     "@influxdata/influxdb-client": "^1.9.0",
     "@influxdata/influxdb-client-apis": "^1.9.0",
@@ -60,6 +60,7 @@
     "http-terminator": "^2.0.3",
     "js-yaml": "^3.14.0",
     "json2csv": "^5.0.6",
+    "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
     "lodash.camelcase": "^4.3.0",
     "node-cron": "^3.0.0",

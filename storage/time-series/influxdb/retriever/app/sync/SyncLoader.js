@@ -11,10 +11,7 @@ const {
   Logger,
 } = require('@dojot/microservice-sdk');
 
-
 // Promissify functions.
-
-
 const logger = new Logger('influxdb-retriever:sync');
 
 class SyncLoader {

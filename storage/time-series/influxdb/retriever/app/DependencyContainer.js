@@ -18,7 +18,12 @@ const DeviceManagerService = require('./sync/DeviceManagerService');
 const SyncLoader = require('./sync/SyncLoader');
 
 function dependencyContainerFactory(config, logger) {
-  const dojotClientHttp = new DojotClientHttp({ logger, defaultClientOptions: {} });
+  const dojotClientHttp = new DojotClientHttp({
+    logger,
+    defaultClientOptions: {},
+    defaultRetryDelay: 15000,
+    defaultMaxNumberAttempts: 3,
+  });
   const influxDBConnection = new InfluxDB({
     url: config.influx.url,
     token: config.influx['default.token'],
@@ -32,7 +37,6 @@ function dependencyContainerFactory(config, logger) {
 
   // Sync Dependencies
   const localPersistence = new LocalPersistenceManager(logger, true, config.sync['database.path']);
-  const retrieverConsumer = new RetrieverConsumer(localPersistence);
   const tenantService = new TenantService(
     localPersistence,
     config.sync.tenants,
@@ -46,6 +50,10 @@ function dependencyContainerFactory(config, logger) {
     localPersistence,
     logger,
   );
+  const retrieverConsumer = new RetrieverConsumer(
+    localPersistence, tenantService, deviceManagerService,
+  );
+
   const syncLoader = new SyncLoader(
     localPersistence,
     tenantService,

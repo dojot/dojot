@@ -80,7 +80,11 @@ class TenantService {
         const tenantWritableStream = Writable({
           async write(key, encoding, cb) {
             const tenant = await outerThis.db.get('tenants', key.toString());
-            outerThis.tenants.push(tenant);
+            const keycloakSession = await outerThis.initKeycloakSession(tenant);
+            outerThis.tenants.push({
+              ...tenant,
+              session: keycloakSession,
+            });
             cb();
           },
         });
@@ -98,6 +102,30 @@ class TenantService {
     }
   }
 
+  async addNewTenant(tenant) {
+    await this.inputPersister.dispatch({
+      tenant: {
+        id: tenant.id,
+        signatureKey: tenant.signatureKey,
+      },
+    }, InputPersisterArgs.INSERT_OPERATION);
+    const keycloakSession = await this.initKeycloakSession(tenant);
+    this.tenants.push({
+      ...tenant,
+      session: keycloakSession,
+    });
+  }
+
+  async deleteTenant(tenant) {
+    await this.inputPersister.dispatch({
+      tenant: {
+        id: tenant.id,
+        signatureKey: tenant.signatureKey,
+      },
+    }, InputPersisterArgs.DELETE_OPERATION);
+    this.tenants = this.tenants.filter((tenantItem) => tenantItem.id !== tenant.id);
+  }
+
   async saveTenants() {
     try {
       this.logger.debug('Clean up tenants sublevel');
@@ -113,33 +141,24 @@ class TenantService {
       await this.inputPersister.dispatch({
         tenant: {
           id: tenant.id,
-          sigKey: tenant.sigKey,
+          signatureKey: tenant.signatureKey,
         },
       }, InputPersisterArgs.INSERT_OPERATION);
     }
   }
 
   async requestTenants() {
-    const response = await this.dojotClientHttp.request({
-      url: this.tenantsRouteUrl,
-      method: 'GET',
-      timeout: 12000,
-    });
+    const response = await this.dojotClientHttp.request(
+      {
+        url: this.tenantsRouteUrl,
+        method: 'GET',
+        timeout: 12000,
+      },
+    );
 
     // Authenticating to all tenants
     const tenantsPromises = response.data.tenants.map(async (tenant) => {
-      const keycloakSession = new KeycloakClientSession(
-        this.keycloakConfig.uri,
-        tenant.id,
-        {
-          grant_type: 'client_credentials',
-          client_id: this.keycloakConfig['client.id'],
-          client_secret: this.keycloakConfig['client.secret'],
-        },
-        this.logger,
-        {},
-      );
-      await keycloakSession.start();
+      const keycloakSession = await this.initKeycloakSession(tenant);
 
       return {
         ...tenant,
@@ -149,6 +168,22 @@ class TenantService {
 
     // Waiting for all sessions to start
     this.tenants = await Promise.all(tenantsPromises);
+  }
+
+  async initKeycloakSession(tenant) {
+    const keycloakSession = new KeycloakClientSession(
+      this.keycloakConfig.uri,
+      tenant.id,
+      {
+        grant_type: 'client_credentials',
+        client_id: this.keycloakConfig['client.id'],
+        client_secret: this.keycloakConfig['client.secret'],
+      },
+      this.logger,
+      {},
+    );
+    await keycloakSession.start();
+    return keycloakSession;
   }
 }
 

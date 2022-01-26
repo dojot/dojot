@@ -4,63 +4,11 @@ const {
   ConfigManager,
   Kafka: { Consumer },
   Logger,
-  LocalPersistence: {
-    InputPersister, InputPersisterArgs,
-  },
 } = require('@dojot/microservice-sdk');
 
 
 const config = ConfigManager.getConfig('RETRIEVER');
 const logger = new Logger('influxdb-retriever:kafka/DojotConsumer');
-
-const INPUT_PERSISTER_CONFIG = {
-  levels: [
-    {
-      type: 'static',
-      name: 'tenants',
-      options: {
-        keyEncoding: 'utf8',
-        valueEncoding: 'Bool',
-      },
-    },
-    {
-      type: 'dynamic',
-      source: 'meta.service',
-      options: {
-        keyEncoding: 'utf8',
-        valueEncoding: 'Bool',
-      },
-    },
-  ],
-  frames: [
-    {
-      level: 0,
-      pair: {
-        key: {
-          type: 'dynamic',
-          source: 'tenant',
-        },
-        value: {
-          type: 'static',
-          source: true,
-        },
-      },
-    },
-    {
-      level: 1,
-      pair: {
-        key: {
-          type: 'dynamic',
-          source: 'data.id',
-        },
-        value: {
-          type: 'static',
-          source: true,
-        },
-      },
-    },
-  ],
-};
 
 /**
    * This class handles messages from dojot topics on kafka
@@ -70,7 +18,7 @@ class RetrieverConsumer {
   /**
    * Create an instance
    */
-  constructor(localPersistence) {
+  constructor(localPersistence, tenantService, deviceManagerService) {
     logger.debug('constructor: Instantiating a Kafka Consumer for Retrieve');
 
     this.consumer = new Consumer({
@@ -84,7 +32,8 @@ class RetrieverConsumer {
     });
 
     this.localPersistence = localPersistence;
-    this.inputPersister = new InputPersister(localPersistence, INPUT_PERSISTER_CONFIG);
+    this.tenantService = tenantService;
+    this.deviceManagerService = deviceManagerService;
 
     this.idCallbackTenant = null;
     this.idCallbackDeviceManager = null;
@@ -113,21 +62,26 @@ class RetrieverConsumer {
    * @returns callback
    */
   getCallbackForNewTenantEvents() {
+    const operations = {
+      CREATE: this.tenantService.addNewTenant.bind(this.tenantService),
+      DELETE: this.tenantService.deleteTenant.bind(this.tenantService),
+    };
+
     return (data, ack) => {
       try {
         const { value: payload } = data;
         const payloadObject = JSON.parse(payload.toString());
-        if (payloadObject.type === 'CREATE') {
-          logger.info('New tenant event received');
-          this.inputPersister.dispatch(
-            payloadObject, InputPersisterArgs.INSERT_OPERATION,
-          ).then(() => {
-            ack();
-          }).catch((error) => {
-            logger.error(`Dispatch failed. ${error.message}`);
-            ack();
-          });
-        }
+
+        logger.info('New tenant event received');
+        operations[payloadObject.type]({
+          id: payloadObject.tenant,
+          signatureKey: payloadObject.signatureKey,
+        }).then(() => {
+          ack();
+        }).catch((error) => {
+          logger.error(`Dispatch failed. ${error.message}`);
+          ack();
+        });
       } catch (error) {
         logger.error(error);
         ack();
@@ -162,16 +116,16 @@ class RetrieverConsumer {
         const payloadObject = JSON.parse(payload.toString());
 
         // Mapping the operations
-        const opTypes = {
-          create: InputPersisterArgs.INSERT_OPERATION,
-          remove: InputPersisterArgs.DELETE_OPERATION,
+        const operations = {
+          create: this.deviceManagerService.addNewDevice.bind(this.deviceManagerService),
+          remove: this.deviceManagerService.deleteDevice.bind(this.deviceManagerService),
         };
 
         if (payloadObject.event === 'create' || payloadObject.event === 'remove') {
           logger.info(`${payloadObject.event} device event received`);
-          this.inputPersister.dispatch(
+          operations[payloadObject.event](
             // write data to database
-            payloadObject, opTypes[payloadObject.event],
+            payloadObject,
           ).then(() => {
             ack();
           }).catch((error) => {

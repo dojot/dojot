@@ -23,7 +23,6 @@ const devicesRoutes = require('./express/routes/v1/Devices');
 
 const InfluxState = require('./influx/State');
 
-
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
 /**

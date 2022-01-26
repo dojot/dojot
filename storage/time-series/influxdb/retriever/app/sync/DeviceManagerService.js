@@ -57,10 +57,8 @@ class DeviceManagerService {
    */
   async getDevices(tenant) {
     const token = tenant.session.getTokenSet().access_token;
-    // const tokenGen = createTokenGen();
-    // const token = await tokenGen.generate({ payload: {}, tenant: tenant.id });
 
-    const devices = await this.dojotClientHttp.request({
+    const response = await this.dojotClientHttp.request({
       url: this.deviceRouteUrl,
       method: 'GET',
       timeout: 12000,
@@ -71,7 +69,21 @@ class DeviceManagerService {
         Authorization: `Bearer ${token}`,
       },
     });
-    return devices.data;
+    return response.data;
+  }
+
+  async addNewDevice(devicePayload) {
+    await this.inputPersister.dispatch(
+      // write data to database
+      devicePayload, InputPersisterArgs.INSERT_OPERATION,
+    );
+  }
+
+  async deleteDevice(device) {
+    await this.inputPersister.dispatch(
+      // write data to database
+      device, InputPersisterArgs.DELETE_OPERATION,
+    );
   }
 
   /**

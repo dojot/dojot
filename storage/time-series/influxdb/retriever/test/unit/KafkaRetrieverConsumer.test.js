@@ -44,6 +44,15 @@ const mockSdk = {
 
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
+const mockTenantService = {
+  addNewTenant: jest.fn(),
+  deleteTenant: jest.fn(),
+};
+
+const mockDeviceManagerService = {
+  addNewDevice: jest.fn(),
+  deleteDevice: jest.fn(),
+};
 
 const RetrieverConsumer = require('../../app/sync/RetrieverConsumer');
 
@@ -51,7 +60,9 @@ describe('RetrieverConsumer', () => {
   let retrieverConsumer;
   beforeEach(() => {
     const mockLocalPersistence = {};
-    retrieverConsumer = new RetrieverConsumer(mockLocalPersistence);
+    retrieverConsumer = new RetrieverConsumer(
+      mockLocalPersistence, mockTenantService, mockDeviceManagerService,
+    );
   });
 
   it('Should init the consumer ', async () => {

@@ -75,44 +75,6 @@ describe('SyncLoader', () => {
     loader = new SyncLoader(localPersistence, tenantService, deviceService, kafkaConsumer);
   });
 
-  it('Should load tenants successfully', async () => {
-    const tenants = [];
-    // eslint-disable-next-line no-unused-vars
-    loader.inputPersister.dispatch = jest.fn((payload, config) => {
-      tenants.push(payload.tenant);
-    });
-
-    await loader.loadTenants();
-
-    expect(tenants).toEqual(['tenant1', 'tenant2']);
-  });
-
-  it('Should load devices successfully', async () => {
-    const devices = [];
-    // eslint-disable-next-line no-unused-vars
-    loader.inputPersister.dispatch = jest.fn((payload, config) => {
-      devices.push(payload.device);
-    });
-
-    await loader.loadDevices('tenant1');
-
-    expect(devices).toEqual(['device1', 'device2']);
-  });
-
-  it('Should fetch devices using data from tenant route, when the API consumption was executed successfully ', async () => {
-    let error;
-    loader.loadTenants = jest.fn(() => ['test1', 'test2']);
-    loader.loadDevices = jest.fn();
-
-    try {
-      await loader.load();
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).toBeUndefined();
-  });
-
   it('Should fetch devices using data from database, when the API consumption failed', async () => {
     let error;
     loader.loadTenants = jest.fn(() => {
@@ -129,7 +91,7 @@ describe('SyncLoader', () => {
     expect(error).toBeUndefined();
   });
 
-  it('Should  ', async () => {
+  it('Should throw an error ', async () => {
     let error;
     loader.load = jest.fn();
 

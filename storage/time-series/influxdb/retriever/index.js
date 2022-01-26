@@ -1,6 +1,9 @@
 const {
   ConfigManager,
   Logger,
+  WebUtils: {
+    SecretFileHandler,
+  },
 } = require('@dojot/microservice-sdk');
 
 const util = require('util');
@@ -49,7 +52,9 @@ process.on('uncaughtException', async (ex) => {
 });
 
 // Initializing the service...
-(async () => {
+const secretFileHandler = new SecretFileHandler(config, logger);
+
+secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
   try {
     logger.info('Initializing...');
     const dependencyContainer = dependeciesContainerFactory(config, logger);
@@ -59,4 +64,6 @@ process.on('uncaughtException', async (ex) => {
     logger.error('Service will be closed', err);
     process.kill(process.pid, 'SIGTERM');
   }
-})();
+}).catch(() => {
+  logger.debug('Obtaining the secrets failed!');
+});
