@@ -52,7 +52,7 @@ module.exports = class FileController {
       res.setHeader('Content-Length', data.info.size);
 
       await pipelineAsync(data.stream, res);
-      return res;
+      return res.end();
     }
 
     return res.status(200).json(data);

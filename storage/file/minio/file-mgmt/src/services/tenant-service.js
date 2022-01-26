@@ -32,7 +32,7 @@ module.exports = class TenantService {
     const createTenantsPromises = response.data.tenants.map(async (tenant) => this.create(tenant));
 
     // Waiting for all sessions to start
-    this.listTenants = await Promise.all(createTenantsPromises);
+    await Promise.all(createTenantsPromises);
     return this.listTenants;
   }
 
@@ -60,19 +60,20 @@ module.exports = class TenantService {
         await this.minioRepository.createBucket(tenant.id, 'us-east-1');
       }
 
-      return {
+      this.listTenants.push({
         ...tenant,
         session: keycloakSession,
-      };
+      });
     }
-    return createdTenant;
   }
 
   remove = async (bucketName) => {
     await this.minioRepository.removeBucket(bucketName);
     const removedTenant = this.listTenants.find((tenant) => tenant.id === bucketName); 
     if (removedTenant) {
-      removedTenant.session.close();
+      if (removedTenant.session) {
+        removedTenant.session.close();
+      }
       this.listTenants = this.listTenants.filter((tenant) => tenant.id !== bucketName); 
     }   
   }

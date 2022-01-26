@@ -45,31 +45,6 @@ describe('GET /files/download', () => {
       });
   });
 
-  it.only('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
-    request(app.express)
-      .get(route)
-      .set('Authorization', `Bearer ${jwt}`)
-      .query({ path, alt: 'media' })
-      .expect(200)
-      .buffer()
-      .parse((response, next) => {
-        response.setEncoding('ascii');
-        let data = '';
-        response.on('data', (chunk) => {
-          data += chunk;
-        });
-        response.on('end', () => {
-          next(null, { data });
-        });
-      })
-      .end((err, response) => {
-        expect(err).toBeUndefined();
-        expect(response.body.data).toBeDefined();
-        
-        done();
-      });
-  });
-
   it('Should reply with a url to download the requested file, when the value of the "alt" param is "url"', (done) => {
     request(app.express)
       .get(route)
@@ -193,6 +168,29 @@ describe('GET /files/download', () => {
       })
       .catch((error) => {
         done(error);
+      });
+  });
+
+  it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
+    request(app.express)
+      .get(route)
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ path, alt: 'media' })
+      .expect(200)
+      .buffer()
+      .parse((response, next) => {
+        response.setEncoding('ascii');
+        let data = '';
+        response.on('data', (chunk) => {
+          data += chunk;
+          next(null, { data });
+        });
+      })
+      .end((err, response) => {
+        expect(err).toBeFalsy();
+        expect(response.body.data).toBeDefined();
+        
+        done();
       });
   });
 });

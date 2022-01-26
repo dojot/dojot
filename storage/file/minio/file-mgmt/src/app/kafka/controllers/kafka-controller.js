@@ -26,7 +26,7 @@ class KafkaController {
       };
 
       this.logger.info(`${data.type} bucket for ${data.tenant} tenant`);
-      await operation[data.type](data.tenant);
+      await operation[data.type](data);
       ack();
     } catch (error) {
       this.logger.error(error);
@@ -35,11 +35,9 @@ class KafkaController {
   }
 
   async handleCreate(payload) {
-    await this.tenantService.create({
+    await this.tenantService.create({      
       id: payload.tenant,
-      sigKey: {
-        certificate: payload.certificate,
-      },
+      signatureKey: payload.signatureKey,
     });
   }
 

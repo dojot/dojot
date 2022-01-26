@@ -64,7 +64,7 @@ const mockDojot = {
           tenants: [
             {
               id: 'admin',
-              sigKey: {
+              signatureKey: {
                 providerId: 'providerId',
                 providerPriority: 100,
                 kid: 'kid',
@@ -83,6 +83,7 @@ const mockDojot = {
     KeycloakClientSession: jest.fn().mockImplementation(() => ({
       start: jest.fn(),
       getTokenSet: () => 'token',
+      close: () => {},
     })),
     framework: {
       ...WebUtils.framework,

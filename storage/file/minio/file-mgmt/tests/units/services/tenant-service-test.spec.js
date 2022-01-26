@@ -36,9 +36,9 @@ describe('TenantService', () => {
   });
   
   it('Should create a bucket', async () => {
-    const tenant = await tenantService.create({
+    await tenantService.create({
       id: 'test',
-      sigKey: {
+      signatureKey: {
         providerId: 'providerId',
         providerPriority: 100,
         kid: 'kid',
@@ -51,8 +51,9 @@ describe('TenantService', () => {
       },
     });
 
-    expect(tenant.id).toEqual('test');
-    expect(tenant.sigKey).toEqual({
+    const tenantTest = tenantService.listTenants.find((tenant) => tenant.id === 'test');
+
+    expect(tenantTest.signatureKey).toEqual({
       algorithm: 'RS256',
       certificate: 'certificate',
       kid: 'kid',
@@ -76,10 +77,10 @@ describe('TenantService', () => {
       },
     });
     minioRepository.listBuckets.mockReturnValueOnce([]);
-    tenantService.create = (tenant) => tenant;
+    tenantService.create = (tenant) => tenantService.listTenants.push(tenant);
 
-    const listTenants = await tenantService.updateListTenants();
-    expect(listTenants).toEqual([
+    await tenantService.updateListTenants();
+    expect(tenantService.listTenants).toEqual([
       {
         id: 'admin',
       },
@@ -99,7 +100,7 @@ describe('TenantService', () => {
     minioRepository.listBuckets.mockReturnValueOnce([{
       name: 'test',
     }]);
-    tenantService.create = (tenant) => tenant;
+    tenantService.create = (tenant) => tenantService.listTenants.push(tenant);
     tenantService.remove = async (bucketName) => {
       expect(bucketName).toEqual('test');
     };
