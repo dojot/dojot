@@ -57,7 +57,6 @@ class Server {
    * @param {Express} express  instance of express
    */
   init(express) {
-
     if (this.httpsServer) {
       this.httpsServer.on('request', express);
       this.httpsServer.on('listening', () => {
