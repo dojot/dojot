@@ -58,6 +58,22 @@ describe('DeviceService', () => {
     expect(devices).toEqual(['device1', 'device2']);
   });
 
+  it('Should return a list of device in multiple requests when there are more than 100 devices', async () => {
+    mockDojotClientHttp.request.mockImplementation(() => ({
+      data: Array.from({ length: 203 }, () => 'device'),
+    }));
+
+    const devices = await deviceService.getDevices({
+      session: {
+        getTokenSet: () => ({
+          access_token: 'JWT',
+        }),
+      },
+    });
+
+    expect(devices.length).toEqual(203);
+  });
+
   it('Should throw an error, when the request failed ', async () => {
     let error;
     try {

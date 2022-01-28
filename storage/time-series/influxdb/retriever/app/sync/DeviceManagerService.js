@@ -5,6 +5,8 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
+const PAGE_SIZE = 100;
+
 // Config InputPersister
 const INPUT_CONFIG = {
   levels: [
@@ -58,18 +60,30 @@ class DeviceManagerService {
   async getDevices(tenant) {
     const token = tenant.session.getTokenSet().access_token;
 
-    const response = await this.dojotClientHttp.request({
-      url: this.deviceRouteUrl,
-      method: 'GET',
-      timeout: 12000,
-      params: {
-        idsOnly: true,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
+    let listDevices = [];
+    let pageNum = 1;
+    let response;
+    do {
+      this.logger.debug(`requesting page ${pageNum}`);
+      // eslint-disable-next-line no-await-in-loop
+      response = await this.dojotClientHttp.request({
+        url: this.deviceRouteUrl,
+        method: 'GET',
+        timeout: 12000,
+        params: {
+          idsOnly: true,
+          page_size: PAGE_SIZE,
+          page_num: pageNum,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      pageNum += 1;
+      listDevices = listDevices.concat(response.data);
+    } while (response.data.length === PAGE_SIZE);
+
+    return listDevices;
   }
 
   async addNewDevice(devicePayload) {
