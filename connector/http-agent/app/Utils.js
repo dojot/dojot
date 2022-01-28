@@ -8,6 +8,42 @@ const err = new createError.BadRequest();
  */
 
 /**
+ * @function sslCADecode
+ *
+ * Return certificates separated by line breaks
+ *
+ * @param {string} source
+ *
+ * @returns {string}
+ */
+const sslCADecode = (source) => {
+  if (!source || typeof source !== 'string') {
+    return [];
+  }
+
+  const sourceArray = source
+    .split('-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----')
+    .map((value, index, array) => {
+      let certificate = value;
+      if (index) {
+        certificate = `-----BEGIN CERTIFICATE-----${value}`;
+      }
+      if (index !== array.length - 1) {
+        certificate += '-----END CERTIFICATE-----';
+      }
+      certificate = certificate.replace(/^\n+/, '').replace(/\n+$/, '');
+      return certificate;
+    });
+
+  let allCAs = '';
+
+  sourceArray.forEach((caSource) => {
+    allCAs += `${caSource}\n`;
+  });
+  return allCAs;
+};
+
+/**
  * @function parseTimestamp
  *
  * Return timestamp in proper format
@@ -25,7 +61,7 @@ const parseTimestamp = (ts) => {
     const unix = parseInt(ts, 10);
     return new Date(unix).getTime();
   }
-  if (new Date(ts).getTime() > 0) {
+  if ((new Date(ts)).getTime() > 0) {
     return new Date(ts).getTime();
   }
   err.message = 'Invalid timestamp';
@@ -59,6 +95,7 @@ const generateDeviceDataMessage = (payload, tenant, deviceid) => ({
 const killApplication = () => process.kill(process.pid);
 
 module.exports = {
+  sslCADecode,
   generateDeviceDataMessage,
   killApplication,
 };

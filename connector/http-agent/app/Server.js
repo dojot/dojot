@@ -2,8 +2,8 @@
 const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
-const { watch, readFileSync } = require('fs');
-const { killApplication } = require('./Utils');
+const fs = require('fs');
+const { killApplication, sslCADecode } = require('./Utils');
 
 const logger = new Logger('http-agent:Server');
 const {
@@ -57,6 +57,7 @@ class Server {
    * @param {Express} express  instance of express
    */
   init(express) {
+
     if (this.httpsServer) {
       this.httpsServer.on('request', express);
       this.httpsServer.on('listening', () => {
@@ -72,13 +73,10 @@ class Server {
       });
       this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
-      watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
-        logger.debug(`${eventType}: The ${filename} was modified!`);
-        const interval = setInterval(() => {
-          this.reloadCertificates(interval);
-        }, configReload['interval.ms']);
-      });
-    }
+    fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
+      logger.info(`File changed ${filename}`);
+      this.reloadCertificates();
+    });
 
     if (this.httpServer) {
       this.httpServer.on('request', express);
@@ -96,17 +94,22 @@ class Server {
       this.httpServer.listen(configHttpServer.port, configHttpServer.host);
     }
   }
+}
 
-  reloadCertificates(interval) {
+
+  reloadCertificates() {
     try {
+      logger.debug('Reloading secure context');
       this.httpsServer.setSecureContext({
-        cert: readFileSync(`${configHttpsServer.cert}`),
-        key: readFileSync(`${configHttpsServer.key}`),
-        ca: readFileSync(`${configHttpsServer.ca}`),
-        crl: readFileSync(`${configSecurity.crl}`),
+        cert: fs.readFileSync(`${configHttpsServer.cert}`),
+        key: fs.readFileSync(`${configHttpsServer.key}`),
+        ca: sslCADecode(
+          fs.readFileSync(`${configHttpsServer.ca}`, 'utf8'),
+        ),
+        crl: fs.readFileSync(`${configHttpsServer.crl}`),
       });
       logger.debug('Seted new secure context!');
-      clearInterval(interval);
+      // clearInterval(interval);
     } catch (err) {
       if (this.attempts < configReload.attempts) {
         this.attempts += 1;
