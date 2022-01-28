@@ -47,11 +47,13 @@ const localPersistence = {
 };
 
 const tenantService = {
-  getTenants: jest.fn(() => ['tenant1', 'tenant2']),
+  loadTenants: () => {
+    tenantService.tenants = ['tenant1', 'tenant2'];
+  },
 };
 
 const deviceService = {
-  getDevices: jest.fn((tenant) => {
+  loadDevices: jest.fn((tenant) => {
     const fakedata = {
       tenant1: ['device1', 'device2'],
       tenant2: ['device3', 'device4'],
@@ -75,13 +77,36 @@ describe('SyncLoader', () => {
     loader = new SyncLoader(localPersistence, tenantService, deviceService, kafkaConsumer);
   });
 
-  it('Should fetch devices using data from database, when the API consumption failed', async () => {
+  it('Should run the init method successfully', async () => {
     let error;
-    loader.loadTenants = jest.fn(() => {
-      throw new Error('');
-    });
-    loader.loadDevices = jest.fn();
+    loader.load = jest.fn();
 
+    try {
+      await loader.init();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+  it('Should run the init method successfully even when kafkaconsumer initialization error', async () => {
+    let error;
+    kafkaConsumer.init.mockRejectedValueOnce(new Error('Error'));
+    loader.load = jest.fn();
+
+    try {
+      await loader.init();
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+
+  it('Should run the load method successfully', async () => {
+    let error;
     try {
       await loader.load();
     } catch (e) {
@@ -91,12 +116,12 @@ describe('SyncLoader', () => {
     expect(error).toBeUndefined();
   });
 
-  it('Should throw an error ', async () => {
+  it('Should run the load method successfully even when the request fails', async () => {
     let error;
-    loader.load = jest.fn();
+    deviceService.loadDevices.mockRejectedValueOnce(new Error('Error'));
 
     try {
-      await loader.init();
+      await loader.load();
     } catch (e) {
       error = e;
     }
