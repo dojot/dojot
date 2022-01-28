@@ -47,7 +47,7 @@ module.exports = ({ mountPoint, producerMessages }) => [
             } catch (e) {
               logger.error('incoming-messages.post:', e);
               res.status(HttpStatus.BAD_REQUEST).json({
-                message: e.message,
+                error: e.message,
               });
             }
           },
@@ -83,31 +83,34 @@ module.exports = ({ mountPoint, producerMessages }) => [
                   },
                 );
 
-                // eslint-disable-next-line security/detect-object-injection
-                if (error) errors[index] = error.message;
+                if (error) {
+                  errors[+index] = error.message;
+                } else {
+                  try {
+                    await producerMessages.send(
+                      generateDeviceDataMessage(
+                        message,
+                        body.tenant,
+                        body.deviceId,
+                      ),
+                      body.tenant,
+                      body.deviceId,
+                    );
+                  } catch (e) {
+                    errors[+index] = e.message;
+                  }
+                }
               });
 
               if (Object.keys(errors).length) {
                 throw new Error(JSON.stringify(errors));
               }
 
-              body.forEach(async (message) => {
-                await producerMessages.send(
-                  generateDeviceDataMessage(
-                    message,
-                    body.tenant,
-                    body.deviceId,
-                  ),
-                  body.tenant,
-                  body.deviceId,
-                );
-              });
-
               res.status(HttpStatus.NO_CONTENT).send();
             } catch (e) {
               logger.error('incoming-messages.post:', e);
               res.status(HttpStatus.BAD_REQUEST).json({
-                message: JSON.parse(e.message),
+                error: JSON.parse(e.message),
               });
             }
           },
