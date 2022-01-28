@@ -29,6 +29,20 @@ describe('DeviceService', () => {
     expect(devices).toEqual(['device1', 'device2']);
   });
 
+  it('Should return a list of device in multiple requests when there are more than 100 devices', async () => {
+    deviceService = new DeviceService('apidevice');
+    mockAxios.default.create.mockImplementationOnce(() => ({
+      // eslint-disable-next-line no-unused-vars
+      get: jest.fn((url, options) => ({
+        data: Array.from({ length: 203 }, () => 'device'),
+      })),
+    }));
+
+    const devices = await deviceService.getDevices('tenant1');
+
+    expect(devices.length).toEqual(203);
+  });
+
   it('Should throw a error, when the request failed ', async () => {
     let error;
     deviceService = new DeviceService(null);
