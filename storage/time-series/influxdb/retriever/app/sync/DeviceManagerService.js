@@ -1,9 +1,11 @@
 const {
-  WebUtils: { createTokenGen },
+  WebUtils: { createTokenGen }, Logger,
 } = require('@dojot/microservice-sdk');
 
+const PAGE_SIZE = 100;
 const createAxios = require('./createAxios');
 
+const logger = new Logger('influxdb-retriever:DeviceManagerService');
 
 class DeviceManagerService {
   /**
@@ -25,17 +27,29 @@ class DeviceManagerService {
   async getDevices(tenant) {
     const tokenGen = createTokenGen();
     const token = await tokenGen.generate({ payload: {}, tenant });
+    let listDevices = [];
 
     const axios = createAxios();
-    const devices = await axios.get(this.deviceRouteUrl, {
-      params: {
-        idsOnly: true,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return devices.data;
+    let pageNum = 1;
+    let response;
+    do {
+      logger.debug(`requesting page ${pageNum}`);
+      // eslint-disable-next-line no-await-in-loop
+      response = await axios.get(this.deviceRouteUrl, {
+        params: {
+          idsOnly: true,
+          page_size: PAGE_SIZE,
+          page_num: pageNum,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      pageNum += 1;
+      listDevices = listDevices.concat(response.data);
+    } while (response.data.length === PAGE_SIZE);
+
+    return listDevices;
   }
 }
 
