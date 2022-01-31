@@ -159,6 +159,7 @@ These are the environment variables used by iotagent-http
 | Key                         | Default Value | Valid Values    | Environment variable                   |
 | --------------------------- | ------------- | --------------- | -------------------------------------- |
 | security.crl                | /certs/ca.crl | string          | HTTP_AGENT_SECURITY_CRL                |
+| security.enable.crl         | false         | string          | HTTP_AGENT_SECURITY_ENABLE_CRL         |
 | security.cert.directory     | /certs        | string          | HTTP_AGENT_SECURITY_CERT_DIRECTORY     |
 | security.unsecure.mode      | true          | boolean         | HTTP_AGENT_SECURITY_UNSECURE_MODE      |
 | security.authorization.mode | fingerprint   | fingerprint, cn | HTTP_AGENT_SECURITY_AUTHORIZATION_MODE |
@@ -181,9 +182,9 @@ These are the environment variables used by iotagent-http
 
 | Key               | Default Value | Valid Values | Environment variable         |
 | ----------------- | ------------- | ------------ | ---------------------------- |
-| cache.std.tll     | 100           | integer      | HTTP_AGENT_CACHE_STD_TLL     |
-| cache.checkperiod | 120           | integer      | HTTP_AGENT_CACHE_CHECKPERIOD |
-| cache.set.tll     | 30000         | integer      | HTTP_AGENT_CACHE_SET_TLL     |
+| cache.std.tll     | 90            | integer      | HTTP_AGENT_CACHE_STD_TLL     |
+| cache.checkperiod | 60            | integer      | HTTP_AGENT_CACHE_CHECKPERIOD |
+| cache.set.tll     | 90            | integer      | HTTP_AGENT_CACHE_SET_TLL     |
 
 ## Notes
 
@@ -203,6 +204,6 @@ If you found a problem or need help, leave an issue in the main
 
 # **License**
 
-The Cron source code is released under Apache License 2.0.
+The IoTAgentHTTP source code is released under Apache License 2.0.
 
 Check NOTICE and LICENSE files for more information.

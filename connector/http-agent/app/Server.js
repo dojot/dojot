@@ -3,7 +3,7 @@ const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
 const fs = require('fs');
-const { killApplication, sslCADecode } = require('./Utils');
+const { killApplication } = require('./Utils');
 
 const logger = new Logger('http-agent:Server');
 const {
@@ -32,6 +32,12 @@ class Server {
    *          Manages the services' states, providing health check and shutdown utilities.
    */
   constructor(serviceState) {
+    if (configSecurity['enable.crl']) {
+      // The WebUtils is not prepared to load  a CRL file,
+      // so the workaround is to load the file before calling it.
+      configHttpsServerCamelCase.crl = fs.readFileSync(configSecurity.crl);
+    }
+
     this.httpsServer = WebUtils.createServer({
       config: configHttpsServerCamelCase,
       logger,
@@ -47,6 +53,7 @@ class Server {
       });
     this.serviceState = serviceState;
     this.attempts = 0;
+    this.retryTimer = null;
   }
 
   /**
@@ -68,8 +75,15 @@ class Server {
     });
     this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
+    // TODO: It is necessary to improve this once more than one file can be
+    // changed "simultaneously"
     fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
-      logger.info(`File changed ${filename}`);
+      logger.debug(`File changed ${filename} (event: ${eventType})`);
+      if (this.retryTimer) {
+        clearTimeout(this.retryTime);
+        this.retryTimer = null;
+        this.attempts = 0;
+      }
       this.reloadCertificates();
     });
 
@@ -92,22 +106,31 @@ class Server {
 
   reloadCertificates() {
     try {
-      logger.debug('Reloading secure context');
-      this.httpsServer.setSecureContext({
-        cert: fs.readFileSync(`${configHttpsServer.cert}`),
-        key: fs.readFileSync(`${configHttpsServer.key}`),
-        ca: sslCADecode(
-          fs.readFileSync(`${configHttpsServer.ca}`, 'utf8'),
-        ),
-        crl: fs.readFileSync(`${configHttpsServer.crl}`),
-      });
-      logger.debug('Seted new secure context!');
-      // clearInterval(interval);
+      logger.info('Reloading secure context...');
+
+      const options = {
+        ca: fs.readFileSync(`${configHttpsServer.ca}`), // Buffer
+        cert: fs.readFileSync(`${configHttpsServer.cert}`), // Buffer
+        key: fs.readFileSync(`${configHttpsServer.key}`), // Buffer
+      };
+
+      if (configSecurity['enable.crl']) {
+        options.crl = fs.readFileSync(`${configSecurity.crl}`); // Buffer
+      }
+
+      this.httpsServer.setSecureContext(options);
+
+      this.attempts = 0;
+      this.retryTimer = null;
+      logger.info('Reloading secure context succeeded!');
     } catch (err) {
+      logger.warn('Reloading secure context failed: ', err);
       if (this.attempts < configReload.attempts) {
         this.attempts += 1;
+        logger.info(`It will retry to reload the secure context (${this.attempts})`);
+        this.retryTimer = setTimeout(this.reloadCertificates.bind(this), configReload['interval.ms']);
       } else {
-        logger.error('New secure context cannot be Seted!', err);
+        logger.error('The maximum number of retries were achieved! The service will terminate!');
         killApplication();
       }
     }
