@@ -128,7 +128,7 @@ class Server {
       if (this.attempts < configReload.attempts) {
         this.attempts += 1;
         logger.info(`It will retry to reload the secure context (${this.attempts})`);
-        this.retryTimer = setTimeout(this.reloadCertificates.bind(this), configReload['interval.ms'],);
+        this.retryTimer = setTimeout(this.reloadCertificates.bind(this), configReload['interval.ms']);
       } else {
         logger.error('The maximum number of retries were achieved! The service will terminate!');
         killApplication();
