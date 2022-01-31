@@ -1,0 +1,362 @@
+---
+openapi: 3.0.0
+info:
+  description: "Dojot device attribute data recovery service"
+  version: 0.0.1 #Version from package.json
+  title: "InfluxDB-Retriever:  Dojot Time Series Service"
+tags:
+  - name: devices
+    description: Device data
+paths:
+  "/tss/v1/devices/{deviceId}/attrs/{attr}/data": #TODO /tss/v1/ must be part of servers, but OpenApiValidator doest work
+    get:
+      tags:
+        - devices
+      security:
+        - bearerAuth: []
+      summary: "Retrieve data from attribute on a device"
+      description: |
+        Retrieve data from an attribute on a device in the dojot time series service.
+
+        Any date-time value is RFC3339 compliant.
+
+      operationId: findDataFromAttrInDevice
+      parameters:
+        - $ref: "#/components/parameters/deviceId"
+        - $ref: "#/components/parameters/attr"
+        - $ref: "#/components/parameters/dateFrom"
+        - $ref: "#/components/parameters/dateTo"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          description: Recovered data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceAttrResponse"
+            text/csv:
+              schema:
+                type: "string"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "406":
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        default:
+          description: Unexpected error
+  "/tss/v1/devices/{deviceId}/data": #TODO /tss/v1/ must be part of servers, but OpenApiValidator doest work
+    get:
+      tags:
+        - devices
+      security:
+        - bearerAuth: []
+      summary: "Retrieve data from a device"
+      description: |
+        Retrieve data from a device in the dojot time series service.
+
+        Any date-time value is RFC3339 compliant.
+
+        `NOTE THAT`: We recommend using the endpoint (/tss/v1/devices/{deviceId}/attrs/{attr}/data) to search for data attributes of a device instead of this. It will be more efficient in most cases considering the nature of a time series database.
+      operationId: findDataFromDevice
+      parameters:
+        - $ref: "#/components/parameters/deviceId"
+        - $ref: "#/components/parameters/dateFrom"
+        - $ref: "#/components/parameters/dateTo"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/order"
+      responses:
+        "200":
+          description: Recovered data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceResponse"
+            text/csv:
+              schema:
+                type: "string"
+
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+        "406":
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+        default:
+          description: Unexpected error
+  "/tss/v1/devices/graphql":
+    get:
+      tags:
+        - graphql
+      summary: "graphql"
+      description: |
+        This endpoint is to be used with graphql, if graphiql (graphql graphical interface) is active, it is possible to access this endpoint via get via browser, containing documentation of queries and mutations available for graphql.
+      operationId: graphqlGet
+      x-allow-unknown-query-parameters: true
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        default:
+          description: Unexpected error
+externalDocs:
+  description: Find out more about Dojot
+  url: https://dojotdocs.readthedocs.io/
+servers:
+  - url: "{url}"
+    description: URL for Time Series Service
+    variables:
+      url:
+        default: "http://localhost:8000/"
+components:
+  securitySchemes:
+    bearerAuth:
+      description: Bearer JWT
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    dateFrom:
+      name: dateFrom
+      in: query
+      description: |
+        Start time of a time-based query results.
+
+        Default is `1970-01-01T00:00:00.000Z`.
+
+        It must be `greater` than or `equal` to `1970-01-01T00:00:00.000Z`
+      required: false
+      allowReserved: true
+      examples:
+        init:
+          summary: Minimum possible date-time
+          value: "1970-01-01T00:00:00.000Z"
+        past:
+          summary: An example of a date-time in the past
+          value: "2020-10-01T20:40:44.000123456Z"
+      schema:
+        type: string
+        format: date-time
+    dateTo:
+      name: dateTo
+      in: query
+      description: |
+        End time of a time-based query results.
+
+        Default is `current` date-time.
+
+        It must be `greater` than the `dateFrom`.
+      required: false
+      allowReserved: true
+      examples:
+        future:
+          summary: An example of a date-time in the future
+          value: "2025-10-01T20:40:44.000123456Z"
+      schema:
+        type: string
+        format: date-time
+    limit:
+      name: limit
+      in: query
+      description: |
+        Limits the number of returned results by page.
+
+        `Note that`: The default and maximum values may vary according to the service settings.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 256
+    page:
+      name: page
+      in: query
+      description: Page to retrieve
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    order:
+      in: query
+      name: order
+      description: |
+        order by time:
+        * `asc` - Ascending, from oldest to newest
+        * `desc` - Descending, from newest to oldest
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+    deviceId:
+      name: deviceId
+      in: path
+      description: Device identifier
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 8
+        pattern: ^[0-9a-fA-F]*$
+    attr:
+      name: attr
+      in: path
+      description: Device attribute to be requested.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+        pattern: ^[a-zA-Z0-9_-]+$
+  schemas:
+    paging:
+      type: object
+      properties:
+        previous:
+          anyOf:
+            - type: object
+              default: null
+              nullable: true
+            - $ref: "#/components/schemas/Page"
+        current:
+          anyOf:
+            - $ref: "#/components/schemas/Page"
+            - type: object
+              properties:
+                number:
+                  default: 1
+                url:
+                  default: "/tss/v1/devices..."
+        next:
+          description: |
+            `Note that:` It can happen that the next is filled even when there is no data for a next page to avoid unnecessary counts. But don't worry, as the next one will be accessible and with next null.
+          anyOf:
+            - type: object
+              default: null
+              nullable: true
+              properties:
+                number:
+                  default: 2
+                url:
+                  default: "/tss/v1/devices..."
+            - $ref: "#/components/schemas/Page"
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+          minimum: 0
+          exclusiveMinimum: true
+          default: 1
+        url:
+          type: string
+    DeviceResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              ts:
+                type: string
+                format: date-time
+              attrs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    label:
+                      type: string
+                      minLength: 1
+                      maxLength: 128
+                      pattern: ^[a-zA-Z0-9_-]+$
+                    value:
+                      anyOf:
+                        - type: string
+                          nullable: true
+                        - type: number
+                        - type: integer
+                        - type: boolean
+                        - type: array
+                          items: {}
+                        - type: object
+        paging:
+          $ref: "#/components/schemas/paging"
+    DeviceAttrResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              ts:
+                type: string
+                format: date-time
+              value:
+                anyOf:
+                  - type: string
+                    nullable: true
+                  - type: number
+                  - type: integer
+                  - type: boolean
+                  - type: array
+                    items: {}
+                  - type: object
+        paging:
+          $ref: "#/components/schemas/paging"
