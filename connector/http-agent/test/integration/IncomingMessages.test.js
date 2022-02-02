@@ -77,14 +77,6 @@ const mockDeviceAuthService = {
 };
 jest.mock('../../app/axios/DeviceAuthService.js', () => mockDeviceAuthService);
 
-const mockgetAclEntries = jest.fn();
-const mockCertificateAclService = {
-  getAclEntries: mockgetAclEntries,
-};
-jest.mock(
-  '../../app/axios/CertificateAclService.js',
-  () => mockCertificateAclService,
-);
 
 const mockgetAclEntries = jest.fn();
 const mockCertificateAclService = {
@@ -562,7 +554,7 @@ describe('HTTP', () => {
         .expect('Content-Type', /json/)
         .expect(401)
         .then((response) => {
-          expect(response.body).toStrictEqual({ error: '"data" is required' });
+          expect(response.body).toStrictEqual({ error: 'Invalid credentials.' });
         });
     });
   });
@@ -605,10 +597,10 @@ describe('Unauthorized', () => {
       })
       .ca(ca)
       .expect('Content-Type', /json/)
-      .expect(403)
+      .expect(401)
       .then((response) => {
         expect(response.body).toStrictEqual({
-          error: 'Unable to authenticate',
+          error: 'Invalid Basic token.',
         });
       });
   });

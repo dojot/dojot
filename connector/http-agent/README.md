@@ -160,6 +160,7 @@ These are the environment variables used by iotagent-http
 | security.unsecure.mode      | false         | boolean                     | HTTP_AGENT_SECURITY_UNSECURE_MODE      |
 | security.unsecure.mode.only | false         | boolean                     | HTTP_AGENT_SECURITY_UNSECURE_MODE_ONLY |
 | security.authorization.mode | fingerprint   | fingerprint, cn, basic-auth | HTTP_AGENT_SECURITY_AUTHORIZATION_MODE |
+| security.enable.crl         | false         | string                      | HTTP_AGENT_SECURITY_ENABLE_CRL         |
 
 ### Reload
 
