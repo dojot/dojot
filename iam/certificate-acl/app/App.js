@@ -5,6 +5,9 @@ const {
   ConfigManager: { getConfig, transformObjectKeys },
   Logger,
   ServiceStateManager,
+  WebUtils: {
+    DojotClientHttp,
+  },
 } = require('@dojot/microservice-sdk');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
@@ -32,7 +35,14 @@ class Application {
 
     // instantiate Kafka Consumer
     this.kafkaConsumer = new KafkaConsumer(this.serviceStateManager);
-    this.tenantService = new TenantService(this.config['keycloak.tenants.url']);
+    this.dojotClientHttp = new DojotClientHttp({
+      defaultClientOptions: { timeout: 12000 },
+      logger,
+      defaultRetryDelay: 15000,
+      defaultMaxNumberAttempts: 0,
+    });
+
+    this.tenantService = new TenantService(this.config.keycloak, this.dojotClientHttp, logger);
 
     // instantiate Redis Manager
     this.redisManager = new RedisManager(this.serviceStateManager);
