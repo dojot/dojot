@@ -7,6 +7,7 @@ const err = new createError.BadRequest();
  * @module utils
  */
 
+
 /**
  * @function parseTimestamp
  *
@@ -25,7 +26,7 @@ const parseTimestamp = (ts) => {
     const unix = parseInt(ts, 10);
     return new Date(unix).getTime();
   }
-  if (new Date(ts).getTime() > 0) {
+  if ((new Date(ts)).getTime() > 0) {
     return new Date(ts).getTime();
   }
   err.message = 'Invalid timestamp';

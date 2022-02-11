@@ -77,6 +77,7 @@ const mockDeviceAuthService = {
 };
 jest.mock('../../app/axios/DeviceAuthService.js', () => mockDeviceAuthService);
 
+
 const mockgetAclEntries = jest.fn();
 const mockCertificateAclService = {
   getAclEntries: mockgetAclEntries,
@@ -225,7 +226,7 @@ describe('HTTPS', () => {
         .expect(400)
         .then((response) => {
           expect(response.body).toStrictEqual({
-            message: '"data" is required',
+            error: '"data" is required',
           });
         });
     });
@@ -280,7 +281,7 @@ describe('HTTPS', () => {
         .expect(400)
         .then((response) => {
           expect(response.body).toStrictEqual({
-            message: { 0: '"data" is required', 1: '"data" is required' },
+            error: { 0: '"data" is required', 1: '"data" is required' },
           });
         });
     });
@@ -496,7 +497,8 @@ describe('HTTP', () => {
       mockRedis.getSecurity.mockReturnValue(false);
       mockDeviceAuthService.getAuthenticationStatus.mockReturnValue(false);
       await requestHttp(app)
-        .post(urlUnsecureIncomingMessages)
+        .post(`${urlUnsecureIncomingMessages}?tenant=test&deviceId=abc123`)
+        .set('Content-Type', 'application/json')
         .send({
           ts: '2021-07-12T09:31:01.683000Z',
           data: {
@@ -552,9 +554,7 @@ describe('HTTP', () => {
         .expect('Content-Type', /json/)
         .expect(401)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            error: 'Invalid credentials.',
-          });
+          expect(response.body).toStrictEqual({ error: 'Invalid credentials.' });
         });
     });
   });
@@ -581,6 +581,26 @@ describe('Unauthorized', () => {
       .then((response) => {
         expect(response.body).toStrictEqual({
           error: 'Unable to authenticate',
+        });
+      });
+  });
+
+  it('should return unauthorized error: Client certificate is invalid', async () => {
+    await requestHttps(app)
+      .post('/http-agent/v1/incoming-messages')
+      .set('Content-Type', 'application/json')
+      .send({
+        ts: '2021-07-12T09:31:01.683000Z',
+        data: {
+          temperature: 25.79,
+        },
+      })
+      .ca(ca)
+      .expect('Content-Type', /json/)
+      .expect(401)
+      .then((response) => {
+        expect(response.body).toStrictEqual({
+          error: 'Invalid Basic token.',
         });
       });
   });

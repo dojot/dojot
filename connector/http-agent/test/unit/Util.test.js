@@ -1,4 +1,4 @@
-const { generateDeviceDataMessage } = require('../../app/Utils');
+const { generateDeviceDataMessage, sslCADecode } = require('../../app/Utils');
 
 const tenant = 'test';
 const deviceid = 'abc123';
