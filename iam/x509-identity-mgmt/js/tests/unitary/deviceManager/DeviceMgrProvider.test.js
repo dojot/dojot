@@ -32,7 +32,13 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       deviceMgrUrl: URL.parse(global.config.devicemgr.device.url),
       deviceMgrTimeout: global.config.devicemgr.device.timeout.ms,
       deviceModel: deviceModelMock(),
-      tokenGen: createTokenGen(),
+      tenantManager: {
+        findTenant: (tenant) => ({
+          session: {
+            getTokenSet: () => 'access_token',
+          }
+        }),
+      },
       errorTemplate: global.errorTemplate,
       logger: new Logger('DeviceMgrProvider.test.js'),
     });

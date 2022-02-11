@@ -5,24 +5,24 @@ const {
 } = require('awilix');
 
 // Identifier used by the DI Container
-const RUNNABLE = 'deviceMgrEventRunnable';
+const RUNNABLE = 'tenantManagerEventRunnable';
 
 /**
  * Device Manager Event Engine
  */
-class DeviceMgrEventEngine {
+class TenantManagerEventEngine {
   /**
    * The dependencies are injected through the constructor
    */
   constructor({
     kafkaConsumer,
-    deviceMgrKafkaTopics,
+    tenantManagerKafkaTopics,
     logger,
     stateManager,
     DIContainer,
   }) {
     Object.defineProperty(this, 'kafkaConsumer', { value: kafkaConsumer });
-    Object.defineProperty(this, 'kafkaTopics', { value: deviceMgrKafkaTopics });
+    Object.defineProperty(this, 'kafkaTopics', { value: tenantManagerKafkaTopics });
     Object.defineProperty(this, 'logger', { value: logger });
     Object.defineProperty(this, 'stateManager', { value: stateManager });
     Object.defineProperty(this, 'container', { value: DIContainer });
@@ -54,8 +54,7 @@ class DeviceMgrEventEngine {
 
     try {
       const obj = JSON.parse(data.value.toString());
-      const tenant = obj.meta.service;
-      const { event, data: device } = obj;
+      const { type: event, tenant, signatureKey } = obj;
 
       // create a scoped DI container
       // https://github.com/jeffijoe/awilix#containercreatescope
@@ -73,8 +72,10 @@ class DeviceMgrEventEngine {
         }),
         event: asValue(event),
         xRequestId: asValue(requestId),
-        tenant: asValue(tenant),
-        device: asValue(device),
+        tenant: asValue({
+          id: tenant,
+          signatureKey: signatureKey
+        })
       });
 
       // Performs the DeviceMgrEventRunnable with specific scope data,
@@ -93,4 +94,4 @@ class DeviceMgrEventEngine {
   }
 }
 
-module.exports = DeviceMgrEventEngine;
+module.exports = TenantManagerEventEngine;

@@ -11,7 +11,7 @@ describe("Unit tests of script 'DeviceMgrKafkaHealthCheck.js'", () => {
     signalReady = jest.fn();
     signalNotReady = jest.fn();
     deviceMgrKafkaHealthCheck = new DeviceMgrKafkaHealthCheck({
-      deviceMgrKafkaConsumer: {
+      kafkaConsumer: {
         getStatus: jest.fn(),
       },
       logger: new Logger('DeviceMgrKafkaHealthCheck.test.js'),
