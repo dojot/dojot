@@ -1,8 +1,9 @@
 const HTTPStatus = require('http-status-codes');
 
-const { Logger } = require('@dojot/microservice-sdk');
+const DIContainer = require('../../DIContainer');
 
-const logger = new Logger('certificate-acl:express/routes');
+const container = DIContainer();
+const logger = container.resolve('logger');
 
 /**
  * Routes to ACL
