@@ -1,28 +1,7 @@
-const mockAxios = {
-  default: {
-    create: jest.fn(() => ({
-      // eslint-disable-next-line no-unused-vars
-      get: jest.fn((url, options) => {
-        if (url === 'apidevices') {
-          return {
-            data: ['device1', 'device2'],
-          };
-        }
-
-        const deviceId = url.split('/')[1];
-
-        if (deviceId === '123abc') {
-          return {
-            data: true,
-          };
-        }
-
-        throw new Error('Error');
-      }),
-    })),
-  },
+/* eslint-disable jest/no-focused-tests */
+const mockDojotClientHttp = {
+  request: jest.fn(),
 };
-jest.mock('axios', () => mockAxios);
 
 const DeviceService = require('../../app/axios/DeviceService');
 
@@ -36,21 +15,38 @@ describe('DeviceService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    deviceService = new DeviceService(deviceRouteUrls);
+    deviceService = new DeviceService(deviceRouteUrls, mockDojotClientHttp);
   });
 
   describe('getDevices', () => {
     it('should return a list of device', async () => {
-      const devices = await deviceService.getDevices('tenant1');
+      mockDojotClientHttp.request = jest.fn().mockReturnValue({
+        data: ['device1', 'device2'],
+      });
+      const devices = await deviceService.getDevices({
+        id: 'tenant1',
+        session: {
+          getTokenSet: () => ({
+            access_token: 'access_token',
+          }),
+        },
+      });
 
       expect(devices).toEqual(['device1', 'device2']);
     });
 
     it('should throw a error, when the request failed', async () => {
       let error;
-      deviceService = new DeviceService(null);
+      deviceService = new DeviceService(null, mockDojotClientHttp);
       try {
-        await deviceService.getDevices('tenant1');
+        await deviceService.getDevices({
+          id: 'tenant1',
+          session: {
+            getTokenSet: () => ({
+              access_token: 'access_token',
+            }),
+          },
+        });
       } catch (e) {
         error = e;
       }
@@ -61,7 +57,14 @@ describe('DeviceService', () => {
 
   describe('validDevice', () => {
     it('should return true', async () => {
-      const isValid = await deviceService.validDevice('tenant1', '123abc');
+      const isValid = await deviceService.validDevice({
+        id: 'tenant1',
+        session: {
+          getTokenSet: () => ({
+            access_token: 'access_token',
+          }),
+        },
+      }, '123abc');
       expect(isValid).toEqual(true);
     });
 

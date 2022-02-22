@@ -32,19 +32,19 @@ const {
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, deviceService) => {
+module.exports = (routes, serviceState, deviceService, tenantService) => {
   const {
-    tokenParsingInterceptor,
     responseCompressInterceptor,
     requestIdInterceptor,
     beaconInterceptor,
     requestLogInterceptor,
     jsonBodyParsingInterceptor,
+    createKeycloakAuthInterceptor,
   } = WebUtils.framework.interceptors;
 
   return WebUtils.framework.createExpress({
     interceptors: [
-      tokenParsingInterceptor({ ignoredPaths: ['/internal/authentication'] }),
+      createKeycloakAuthInterceptor(tenantService.tenants, logger),
       deviceValidationInterceptor({ deviceService }),
       requestIdInterceptor(),
       beaconInterceptor({

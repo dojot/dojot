@@ -1,28 +1,105 @@
-const createAxios = require('./createAxios');
+const {
+  WebUtils: { KeycloakClientSession },
+} = require('@dojot/microservice-sdk');
 
-class TenantService {
-  /**
-   * Consumes api that returns tenants data
-   *
-   * @param {string} tenantsRouteUrl Url for api that returns data about tenants
-   */
-  constructor(tenantsRouteUrl) {
-    this.tenantsRouteUrl = tenantsRouteUrl;
+module.exports = class TenantService {
+  constructor(config, dojotClientHttp, logger) {
+    this.config = config;
+    this.dojotClientHttp = dojotClientHttp;
+    this.logger = logger;
+    this.tenants = [];
   }
 
   /**
-   * Requires tenant data for API
+   * This method loads all tenants by another service
    *
-   * @param {string} tenant the tenant name
-   *
-   * @returns a list of tenants
    */
-  async getTenants() {
-    const axios = createAxios();
-    const tenants = await axios.get(this.tenantsRouteUrl);
+  async loadTenants() {
+    const response = await this.dojotClientHttp.request({
+      url: this.config.url.tenants,
+      method: 'GET',
+      timeout: 15000,
+    });
 
-    return tenants.data.tenants;
+    // authentic in each of the tenants
+    const tenantPromises = response.data.tenants.map(async (tenant) => {
+      const session = new KeycloakClientSession(
+        this.config.keycloak.url,
+        tenant.id,
+        {
+          grant_type: 'client_credentials',
+          client_id: this.config.keycloak['client.id'],
+          client_secret: this.config.keycloak['client.secret'],
+        },
+        this.logger,
+      );
+      await session.start();
+
+      return {
+        ...tenant,
+        session,
+      };
+    });
+
+    // Waits for all authentications to complete
+    this.tenants = await Promise.all(tenantPromises);
   }
-}
 
-module.exports = TenantService;
+  /**
+   * This method search a tenant
+   *
+   */
+  findTenant(tenantId) {
+    return this.tenants.find((tenant) => tenantId === tenant.id);
+  }
+
+  /**
+   * Creates a tenant
+   *
+   * @param {
+   *  Object {
+   *    id: string,
+   *    signatureKey: Object {
+   *      certificate: string,
+   *      algorithm: string,
+   *    }
+   *  }
+   * } tenant tenant object
+   */
+  async create(tenant) {
+    const createdTenant = this.tenants.find((item) => item.id === tenant.id);
+    if (!createdTenant) {
+      const keycloakSession = new KeycloakClientSession(
+        this.keycloakConfig.url,
+        tenant.id,
+        {
+          grant_type: 'client_credentials',
+          client_id: this.keycloakConfig['client.id'],
+          client_secret: this.keycloakConfig['client.secret'],
+        },
+        this.logger,
+      );
+      await keycloakSession.start();
+
+      this.tenants.push({
+        ...tenant,
+        session: keycloakSession,
+      });
+    }
+  }
+
+  /**
+   * Removes a tenant
+   *
+   * @param {string} tenantId tenant id
+   */
+  async remove(tenantId) {
+    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId);
+    if (removedTenant) {
+      if (removedTenant.session) {
+        removedTenant.session.close();
+      }
+      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId);
+    }
+  }
+};

@@ -1,22 +1,17 @@
-const mockAxios = {
-  default: {
-    create: jest.fn(() => ({
-      // eslint-disable-next-line no-unused-vars
-      get: jest.fn((url, options) => {
-        if (url) {
-          return {
-            data: {
-              tenants: ['tenant1', 'tenant2'],
-            },
-          };
-        }
+const mockDojotClientHttp = {
+  request: jest.fn(),
+};
 
-        throw new Error('Error');
+jest.mock('@dojot/microservice-sdk', () => ({
+  WebUtils: {
+    KeycloakClientSession: jest.fn().mockImplementation(() => ({
+      start: jest.fn(),
+      getTokenSet: () => ({
+        access_token: 'access_token',
       }),
     })),
   },
-};
-jest.mock('axios', () => mockAxios);
+}));
 
 const TenantService = require('../../app/axios/TenantService');
 
@@ -25,17 +20,45 @@ describe('TenantService', () => {
   let tenantService;
 
   it('should return a list of tenant', async () => {
-    tenantService = new TenantService('apitenant');
-    const tenants = await tenantService.getTenants('tenant1');
+    mockDojotClientHttp.request.mockReturnValue({
+      data: {
+        tenants: [{
+          id: 'tenant1',
+        }],
+      },
+    });
+    tenantService = new TenantService({
+      url: {
+        tenants: 'apitenant',
+      },
+      keycloak: {
+        url: 'apitenant',
+      },
+    }, mockDojotClientHttp);
 
-    expect(tenants).toEqual(['tenant1', 'tenant2']);
+    await tenantService.loadTenants('tenant1');
+
+    expect(tenantService.tenants[0].id).toEqual('tenant1');
+    expect(tenantService.tenants[0].session.getTokenSet()).toEqual({
+      access_token: 'access_token',
+    });
   });
 
   it('should throw a error, when the request failed', async () => {
+    mockDojotClientHttp.request.mockImplementationOnce(() => {
+      throw new Error('Error');
+    });
     let error;
-    tenantService = new TenantService(null);
+    tenantService = new TenantService({
+      url: {
+        tenants: 'apitenant',
+      },
+      keycloak: {
+        url: 'apitenant',
+      },
+    }, mockDojotClientHttp);
     try {
-      await tenantService.getTenants();
+      await tenantService.loadTenants();
     } catch (e) {
       error = e;
     }
