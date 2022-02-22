@@ -34,7 +34,7 @@ function diContainerMock() {
     register: jest.fn((entries) => {
       scope.cradle = { ...scope.cradle, ...entries };
     }),
-    resolve: jest.fn((entry) => ({
+    resolve: jest.fn(() => ({
       run: jest.fn(),
     })),
   };
@@ -48,7 +48,7 @@ function diContainerMock() {
 }
 
 describe("Unit tests of script 'TenantManagerEventEngine.js'", () => {
-  let deviceMgrEventEngine = null;
+  let tenantManagerEventEngine = null;
 
   beforeAll(() => {
     tenantManagerEventEngine = new TenantManagerEventEngine({

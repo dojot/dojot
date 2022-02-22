@@ -58,7 +58,7 @@ describe('TenantManager', () => {
       }, 
       {
         id: 'test2',
-      }
+      },
     ]
 
     const tenant = await tenantManager.findTenant('test1');
@@ -75,7 +75,7 @@ describe('TenantManager', () => {
       }, 
       {
         id: 'test2',
-      }
+      },
     ]
 
     const tenant = await tenantManager.findTenant('test1');
@@ -86,7 +86,7 @@ describe('TenantManager', () => {
   });
 
   it('Should add a tenant when the tenant does not exist ', async () => {
-    const tenant = await tenantManager.create({
+    await tenantManager.create({
       id: 'test1',
     });
     

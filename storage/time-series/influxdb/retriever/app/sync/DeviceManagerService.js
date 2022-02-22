@@ -87,17 +87,11 @@ class DeviceManagerService {
   }
 
   async addNewDevice(devicePayload) {
-    await this.inputPersister.dispatch(
-      // write data to database
-      devicePayload, InputPersisterArgs.INSERT_OPERATION,
-    );
+    await this.inputPersister.dispatch(devicePayload, InputPersisterArgs.INSERT_OPERATION);
   }
 
   async deleteDevice(device) {
-    await this.inputPersister.dispatch(
-      // write data to database
-      device, InputPersisterArgs.DELETE_OPERATION,
-    );
+    await this.inputPersister.dispatch(device, InputPersisterArgs.DELETE_OPERATION);
   }
 
   /**

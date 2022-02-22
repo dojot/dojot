@@ -4,23 +4,17 @@ const util = require('util');
 const {
   ConfigManager: { getConfig, transformObjectKeys },
   ServiceStateManager,
-<<<<<<< HEAD
   WebUtils: {
     DojotClientHttp,
   },
-=======
   Logger,
->>>>>>> upstream/feature/keycloak-v2
 } = require('@dojot/microservice-sdk');
 const { asClass, InjectionMode, Lifetime } = require('awilix');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
 const HTTPServer = require('./server/HTTPServer');
-<<<<<<< HEAD
 const TenantService = require('./service/tenantService');
-=======
 const DIContainer = require('./DIContainer');
->>>>>>> upstream/feature/keycloak-v2
 
 const container = DIContainer();
 const CERTIFICATE_ACL_CREATE_EVENT_TYPE = 'ownership.create';
@@ -45,12 +39,12 @@ class Application {
     this.kafkaConsumer = new KafkaConsumer(this.serviceStateManager);
     this.dojotClientHttp = new DojotClientHttp({
       defaultClientOptions: { timeout: 12000 },
-      logger,
+      logger: this.logger,
       defaultRetryDelay: 15000,
       defaultMaxNumberAttempts: 0,
     });
 
-    this.tenantService = new TenantService(this.config.keycloak, this.dojotClientHttp, logger);
+    this.tenantService = new TenantService(this.config.keycloak, this.dojotClientHttp, this.logger);
 
     // instantiate Redis Manager
     this.redisManager = new RedisManager(this.serviceStateManager);

@@ -77,8 +77,8 @@ const mockDojotClientHttp = {
         }],
       },
     });
-    response.set('http://device-manager:5000/device');
-    response.set('http://device-manager:5000/internal/device');
+    response.set('http://device-manager:5000/device', undefined);
+    response.set('http://device-manager:5000/internal/device', undefined);
 
     return response.get(options.url);
   },

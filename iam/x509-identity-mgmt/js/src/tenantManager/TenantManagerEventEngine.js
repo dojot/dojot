@@ -74,8 +74,8 @@ class TenantManagerEventEngine {
         xRequestId: asValue(requestId),
         tenant: asValue({
           id: tenant,
-          signatureKey: signatureKey
-        })
+          signatureKey: signatureKey,
+        }),
       });
 
       // Performs the DeviceMgrEventRunnable with specific scope data,

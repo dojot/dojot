@@ -66,7 +66,7 @@ module.exports = class TenantManager {
    *  }
    * } tenant tenant object
    */
-  create = async (tenant) => {
+  async create (tenant) {
     const createdTenant = this.tenants.find((item) => item.id === tenant.id);
     if (!createdTenant) {
       const keycloakSession = new KeycloakClientSession(
@@ -93,7 +93,7 @@ module.exports = class TenantManager {
    * 
    * @param {string} tenantId tenant id
    */
-  remove = async (tenantId) => {
+  async remove(tenantId) {
     const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId); 
     if (removedTenant) {
       if (removedTenant.session) {

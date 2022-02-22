@@ -17,8 +17,7 @@ const {
     SecretFileHandler,
     DojotClientHttp,
     framework,
-  }
-  
+  },  
 } = require('@dojot/microservice-sdk');
 
 const pkiUtils = require('./core/pkiUtils');
@@ -123,7 +122,7 @@ function createObject(rawConfig) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    secretFileHandler: asClass(SecretFileHandler,{
+    secretFileHandler: asClass(SecretFileHandler, {
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({ 
         config: rawConfig,
@@ -560,15 +559,18 @@ function createObject(rawConfig) {
       lifetime: Lifetime.SCOPED,
     }),
 
-    keycloakAuthInterceptor: asFunction(framework.interceptors.createKeycloakAuthInterceptorWithFilter,{
-      injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({
-        filter: (tenantId) => { 
-          return DIContainer.resolve('tenantManager').findTenant(tenantId);
-        },
-      }),
-      lifetime: Lifetime.SCOPED,
-    }),
+    keycloakAuthInterceptor: asFunction(
+      framework.interceptors.createKeycloakAuthInterceptorWithFilter,
+      {
+        injectionMode: InjectionMode.CLASSIC,
+        injector: () => ({
+          filter: (tenantId) => { 
+            return DIContainer.resolve('tenantManager').findTenant(tenantId);
+          },
+        }),
+        lifetime: Lifetime.SCOPED,
+      },
+    ),
 
     deviceMgrProvider: asFunction(fromDecoratedClass(DeviceMgrProvider), {
       injector: () => {

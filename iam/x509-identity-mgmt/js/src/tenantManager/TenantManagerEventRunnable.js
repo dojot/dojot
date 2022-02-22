@@ -1,7 +1,7 @@
 /**
  * Scoped-runnable to handle events of the DeviceManager service
  */
- class TenantManagerEventRunnable {
+class TenantManagerEventRunnable {
   /**
    * The dependencies are injected through the constructor
    */
