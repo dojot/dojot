@@ -20,20 +20,13 @@ module.exports = class App {
    */
   async init() {
     // Initialize internal dependencies
-    const { web, tenantService, stateManager,primaryAppHealthCheck } = Dependencies(
-      this.config,
-      this.logger,
-    );
+    const {
+      web,
+      tenantService,
+    } = Dependencies(this.config, this.logger);
     this.server = web.httpServer;
 
     try {
-      // The Primary app health-check is done at intervals directly in the Event Loop
-      stateManager.addHealthChecker(
-        'primatyapp',
-        primaryAppHealthCheck.run.bind(primaryAppHealthCheck),
-        config.primaryapp.healthcheck.delay,
-      );
-
       const listTenants = await tenantService.updateListTenants();
       // Adapts express to the application and manages the routes
       this.express = ExpressAdapter.xadapt(

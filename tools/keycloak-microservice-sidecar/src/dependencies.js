@@ -5,7 +5,6 @@ const {
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
 const PrimaryAppController = require('./app/controller/primary-app-controller');
-const PrimaryHealthCheck = require('./app/primaryAppHealthCheck');
 
 const Server = require('./Server');
 const TenantService = require('./services/tenant-services');
@@ -23,15 +22,10 @@ module.exports = (config, logger) => {
     config.server,
     camelCase,
   );
+
   const serviceState = new ServiceStateManager({
     lightship: ConfigManager.transformObjectKeys(config.lightship, camelCase),
   });
-
-  const primaryAppHealthCheck = new PrimaryHealthCheck(
-    config.primaryapp.healthcheck.url,
-    config.primaryapp.healthcheck.delay,
-    logger,
-  );
 
   const httpServer = new Server(
     serviceState,
@@ -59,7 +53,7 @@ module.exports = (config, logger) => {
 
   return {
     tenantService,
-    primaryAppHealthCheck,
+    serviceState,
     web: {
       httpServer,
       controllers: {

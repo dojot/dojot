@@ -1,6 +1,6 @@
 FROM node:12.18-alpine AS base
 
-WORKDIR /opt/keycloaksidear
+WORKDIR /opt/keycloaksidecar
 
 RUN apk --no-cache add \
     bash \
@@ -31,7 +31,7 @@ COPY src ./src
 
 FROM node:12.18-alpine
 
-WORKDIR /opt/keycloaksidear
+WORKDIR /opt/keycloaksidecar
 
 RUN apk --no-cache add \
     libsasl \
@@ -40,7 +40,7 @@ RUN apk --no-cache add \
     tini \
     curl
 
-COPY --from=base /opt/keycloaksidear /opt/keycloaksidear
+COPY --from=base /opt/keycloaksidecar /opt/keycloaksidecar
 
 CMD ["npm", "run", "dev-debug"]
 

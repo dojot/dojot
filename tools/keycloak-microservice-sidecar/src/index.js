@@ -31,7 +31,6 @@ secretHandler
   .then(() => {
     // Init Application
     const app = new App(config, logger);
-
     app
       .init()
       .then(() => {
@@ -40,4 +39,5 @@ secretHandler
       .catch((error) => {
         logger.error(error);
       });
+    
   });
