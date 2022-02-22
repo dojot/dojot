@@ -40,17 +40,26 @@ const {
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, redisManager, deviceAuthService, certificateAclService) => {
+module.exports = (
+  routes,
+  serviceState,
+  redisManager,
+  deviceAuthService,
+  certificateAclService,
+  tenantService,
+) => {
   const {
     responseCompressInterceptor,
     requestIdInterceptor,
     beaconInterceptor,
     requestLogInterceptor,
     jsonBodyParsingInterceptor,
+    createKeycloakAuthInterceptor,
   } = WebUtils.framework.interceptors;
 
   return WebUtils.framework.createExpress({
     interceptors: [
+      createKeycloakAuthInterceptor(tenantService.tenants, logger),
       jsonBodyParsingInterceptor({ config: configExpress['parsing.limit'] }),
       requestIdInterceptor(),
       beaconInterceptor({

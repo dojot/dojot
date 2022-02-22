@@ -5,9 +5,9 @@ class DeviceAuthService {
    *
    * @param {string} tenantsRouteUrl Url for api that returns authentication status
    */
-  constructor(deviceAuthRouteUrl, axios) {
+  constructor(deviceAuthRouteUrl, dojotClientHttp) {
     this.deviceAuthRouteUrl = deviceAuthRouteUrl;
-    this.axios = axios();
+    this.dojotClientHttp = dojotClientHttp;
   }
 
   /**
@@ -21,7 +21,7 @@ class DeviceAuthService {
    */
   async getAuthenticationStatus(username, password) {
     try {
-      await this.axios.post(this.deviceAuthRouteUrl, {
+      await this.dojotClientHttp.request(this.deviceAuthRouteUrl, {
         username,
         password,
       });

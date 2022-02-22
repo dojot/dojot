@@ -57,7 +57,6 @@ class Server {
    * @param {Express} express  instance of express
    */
   init(express) {
-
     if (this.httpsServer) {
       this.httpsServer.on('request', express);
       this.httpsServer.on('listening', () => {
@@ -73,28 +72,28 @@ class Server {
       });
       this.httpsServer.listen(configHttpsServer.port, configHttpsServer.host);
 
-    fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
-      logger.info(`File changed ${filename}`);
-      this.reloadCertificates();
-    });
+      fs.watch(`${configSecurity['cert.directory']}`, (eventType, filename) => {
+        logger.info(`File changed ${filename}`);
+        this.reloadCertificates();
+      });
 
-    if (this.httpServer) {
-      this.httpServer.on('request', express);
-      this.httpServer.on('listening', () => {
-        logger.info('HTTP server ready to accept connections!');
-        logger.info(this.httpServer.address());
-        this.serviceState.signalReady(this.ServiceName);
-      });
-      this.httpServer.on('close', () => {
-        this.serviceState.signalNotReady(this.ServiceName);
-      });
-      this.httpServer.on('error', (e) => {
-        logger.error('HTTP server experienced an error:', e);
-      });
-      this.httpServer.listen(configHttpServer.port, configHttpServer.host);
+      if (this.httpServer) {
+        this.httpServer.on('request', express);
+        this.httpServer.on('listening', () => {
+          logger.info('HTTP server ready to accept connections!');
+          logger.info(this.httpServer.address());
+          this.serviceState.signalReady(this.ServiceName);
+        });
+        this.httpServer.on('close', () => {
+          this.serviceState.signalNotReady(this.ServiceName);
+        });
+        this.httpServer.on('error', (e) => {
+          logger.error('HTTP server experienced an error:', e);
+        });
+        this.httpServer.listen(configHttpServer.port, configHttpServer.host);
+      }
     }
   }
-}
 
 
   reloadCertificates() {
