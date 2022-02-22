@@ -25,23 +25,10 @@ const fakeMessageWithInvalidTimestamp = {
     temperature: 25.79,
   },
 };
-const fakeListCAsString = '-----BEGIN CERTIFICATE-----CA_CONTENT_1-----END CERTIFICATE-----\n-----BEGIN CERTIFICATE-----CA_CONTENT_2-----END CERTIFICATE-----';
 
 describe('Util', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should format CA correctly with line break separation', async () => {
-    const sslCAData = sslCADecode(fakeListCAsString);
-
-    const formatedSSLCAString = `-----BEGIN CERTIFICATE-----CA_CONTENT_1-----END CERTIFICATE-----
------BEGIN CERTIFICATE-----CA_CONTENT_2-----END CERTIFICATE-----
-`;
-
-    expect(sslCAData).toEqual(
-      formatedSSLCAString,
-    );
   });
 
   it('should format the message correctly with timestamp', async () => {

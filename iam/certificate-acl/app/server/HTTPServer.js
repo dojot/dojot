@@ -2,15 +2,17 @@ const { createHttpTerminator } = require('http-terminator');
 
 const {
   ConfigManager: { getConfig },
-  Logger,
   WebUtils,
 } = require('@dojot/microservice-sdk');
 
 const createFramework = require('./createFramework');
 const aclRoute = require('./express/aclRoute');
 const queryOwnerByFingerprint = require('./handlers/queryOwnerByFingerprint');
+const DIContainer = require('../DIContainer');
 
-const logger = new Logger('certificate-acl:server');
+const container = DIContainer();
+
+const logger = container.resolve('logger');
 
 const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
 

@@ -9,6 +9,7 @@ const {
   Logger,
   WebUtils: { SecretFileHandler },
 } = require('@dojot/microservice-sdk');
+const DIContainer = require('./app/DIContainer');
 
 const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
 
@@ -17,13 +18,14 @@ const userConfigFile = process.env.CERTIFICATE_ACL_USER_CONFIG_FILE || 'producti
 loadSettings(CERTIFICATE_ACL_CONFIG_LABEL, userConfigFile);
 
 const config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL);
+const container = DIContainer();
 
 /**
  * Log configuration
  */
 Logger.setVerbose(config.logger.verbose);
 Logger.setTransport('console', { level: config.logger['console.level'] });
-const logger = new Logger('certificate-acl:index');
+const logger = container.resolve('logger');
 
 logger.info(`Configuration: \n${util.inspect(config, false, 5, true)}`);
 if (config.logger['file.enable']) {
