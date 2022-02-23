@@ -50,9 +50,7 @@ function dependencyContainerFactory(config, logger) {
     localPersistence,
     logger,
   );
-  const retrieverConsumer = new RetrieverConsumer(
-    localPersistence, tenantService, deviceManagerService,
-  );
+  const retrieverConsumer = new RetrieverConsumer(localPersistence, tenantService, deviceManagerService,);
 
   const syncLoader = new SyncLoader(
     localPersistence,

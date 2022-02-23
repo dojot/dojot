@@ -34,7 +34,7 @@ module.exports = class TenantService {
     // Waiting for all sessions to start
     await Promise.all(createTenantsPromises);
     return this.listTenants;
-  }
+  };
 
   /**
    * Creates a bucket for the new tenant.
@@ -65,7 +65,7 @@ module.exports = class TenantService {
         session: keycloakSession,
       });
     }
-  }
+  };
 
   remove = async (bucketName) => {
     await this.minioRepository.removeBucket(bucketName);
@@ -76,5 +76,5 @@ module.exports = class TenantService {
       }
       this.listTenants = this.listTenants.filter((tenant) => tenant.id !== bucketName); 
     }   
-  }
+  };
 };

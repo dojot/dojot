@@ -14,7 +14,7 @@ const DIContainer = require('./src/DIContainer');
 const userConfigFile = process.env.X509IDMGMT_USER_CONFIG_FILE || 'production.conf';
 ConfigManager.loadSettings('X509IDMGMT', userConfigFile);
 
-const rawConfig = ConfigManager.getConfig('x509idmgmt')
+const rawConfig = ConfigManager.getConfig('x509idmgmt');
 const config = unflatten(rawConfig);
 
 Logger.setTransport('console', {
@@ -50,7 +50,8 @@ const notificationKafkaHealthCheck = container.resolve('notificationKafkaHealthC
 const secretFileHandler = container.resolve('secretFileHandler');
 const tenantManager = container.resolve('tenantManager');
 
-setTimeout(() => { secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
+setTimeout(() => {
+ secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
   // Emitted each time there is a request. Note that there may be multiple
   // requests per connection (in the case of keep-alive connections).
   server.on('request', framework);
@@ -98,9 +99,11 @@ setTimeout(() => { secretFileHandler.handle('keycloak.client.secret', '/secrets/
   await tenantManager.loadTenants();
 
   // The EJBCA health-check is done at intervals directly in the Event Loop
-  stateManager.addHealthChecker('ejbca',
+  stateManager.addHealthChecker(
+'ejbca',
     ejbcaHealthCheck.run.bind(ejbcaHealthCheck),
-    config.ejbca.healthcheck.delayms);
+    config.ejbca.healthcheck.delayms
+);
 
   // The DeviceManager (Kafka Consumer) health-check is done at intervals directly in the Event Loop
   stateManager.addHealthChecker(
@@ -160,4 +163,5 @@ setTimeout(() => { secretFileHandler.handle('keycloak.client.secret', '/secrets/
 }).catch((error) => {
   logger.error(error);
   process.exit(1);
-})}, 10000);
+});
+}, 10000);

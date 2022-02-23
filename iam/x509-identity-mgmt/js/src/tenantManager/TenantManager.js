@@ -3,7 +3,7 @@ const {
 } = require('@dojot/microservice-sdk');
 
 module.exports = class TenantManager {
-  constructor({keycloakConfig, dojotClientHttp, logger}) {
+  constructor({ keycloakConfig, dojotClientHttp, logger }) {
     this.keycloakConfig = keycloakConfig;
     this.dojotClientHttp = dojotClientHttp;
     this.logger = logger;
@@ -12,7 +12,7 @@ module.exports = class TenantManager {
 
   /**
    * This method loads all tenants by another service
-   * 
+   *
    */
   async loadTenants() {
     const response = await this.dojotClientHttp.request({
@@ -47,16 +47,16 @@ module.exports = class TenantManager {
 
   /**
    * This method search a tenant
-   * 
+   *
    */
   findTenant(tenantId) {
-    return this.tenants.find((tenant) => tenantId === tenant.id );
+    return this.tenants.find((tenant) => tenantId === tenant.id);
   }
 
   /**
    * Creates a tenant
    *
-   * @param { 
+   * @param {
    *  Object {
    *    id: string,
    *    signatureKey: Object {
@@ -66,7 +66,7 @@ module.exports = class TenantManager {
    *  }
    * } tenant tenant object
    */
-  async create (tenant) {
+  async create(tenant) {
     const createdTenant = this.tenants.find((item) => item.id === tenant.id);
     if (!createdTenant) {
       const keycloakSession = new KeycloakClientSession(
@@ -90,16 +90,16 @@ module.exports = class TenantManager {
 
   /**
    * Removes a tenant
-   * 
+   *
    * @param {string} tenantId tenant id
    */
   async remove(tenantId) {
-    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId); 
+    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId);
     if (removedTenant) {
       if (removedTenant.session) {
         removedTenant.session.close();
       }
-      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId); 
-    }   
+      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId);
+    }
   }
 };

@@ -60,9 +60,7 @@ describe('RetrieverConsumer', () => {
   let retrieverConsumer;
   beforeEach(() => {
     const mockLocalPersistence = {};
-    retrieverConsumer = new RetrieverConsumer(
-      mockLocalPersistence, mockTenantService, mockDeviceManagerService,
-    );
+    retrieverConsumer = new RetrieverConsumer(mockLocalPersistence, mockTenantService, mockDeviceManagerService,);
   });
 
   it('Should init the consumer ', async () => {

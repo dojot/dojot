@@ -33,4 +33,3 @@ class TenantManagerEventRunnable {
 }
 
 module.exports = TenantManagerEventRunnable;
-
