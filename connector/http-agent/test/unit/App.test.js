@@ -4,7 +4,11 @@ const mockConfig = {
   lightship: { a: 'abc' },
   url: {},
 };
+
 const mockSdk = {
+  WebUtils: {
+    DojotClientHttp: jest.fn().mockImplementation(() => ({})),
+  },
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
     transformObjectKeys: jest.fn((obj) => obj),
@@ -46,11 +50,15 @@ jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
 
 const App = require('../../app/App');
 
+jest.mock('../../app/axios/TenantService', () => jest.fn().mockImplementation(() => ({
+  loadTenants: jest.fn(),
+})));
+
 describe('App', () => {
   let app;
 
   beforeEach(async () => {
-    app = new App();
+    app = new App(mockConfig);
   });
 
   afterAll(() => {

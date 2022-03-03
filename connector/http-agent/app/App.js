@@ -87,7 +87,6 @@ class App {
           this.redisManager,
           this.deviceAuthService,
           this.certificateAclService,
-          this.tenantService,
         ),
       );
     } catch (e) {

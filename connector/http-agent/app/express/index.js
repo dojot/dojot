@@ -46,7 +46,6 @@ module.exports = (
   redisManager,
   deviceAuthService,
   certificateAclService,
-  tenantService,
 ) => {
   const {
     responseCompressInterceptor,
@@ -54,12 +53,10 @@ module.exports = (
     beaconInterceptor,
     requestLogInterceptor,
     jsonBodyParsingInterceptor,
-    createKeycloakAuthInterceptor,
   } = WebUtils.framework.interceptors;
 
   return WebUtils.framework.createExpress({
     interceptors: [
-      createKeycloakAuthInterceptor(tenantService.tenants, logger),
       jsonBodyParsingInterceptor({ config: configExpress['parsing.limit'] }),
       requestIdInterceptor(),
       beaconInterceptor({
