@@ -65,3 +65,39 @@ jobs:
           workdir: storage/file/minio/file-mgmt
           buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
           tag_names: true # tag will be based in branch name or tag name
+
+  gh-pages:
+    needs:
+    name: (storage/file/minio/file-mgmt) Generate documentation and Publish in gh-pages
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Version Doc
+        id: version_doc
+        env:
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
+          echo Documentation Version $TAG_VERSION
+          echo ::set-output name=version::$TAG_VERSION
+      # I need to improve this, find another way to do
+      - name: Generate docs
+        env:
+          FOLDER_TO_GH_PAGES: storage/file/minio/file-mgmt
+          PATH_SWAGGER_YML: ./storage/file/minio/file-mgmt/docs/v1.yml
+          VERSION_NAME: ${{ steps.version_doc.outputs.version }}
+        run: |
+          sh .github/workflows/scripts/swagger.sh
+      - name: Publish Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./swagger-docs
+          destination_dir: storage/file/minio/file-mgmt
+          keep_files: true
+          allow_empty_commit: false
