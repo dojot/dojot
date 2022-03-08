@@ -67,7 +67,7 @@ jobs:
           tag_names: true # tag will be based in branch name or tag name
 
   gh-pages:
-    needs:
+    needs: unit-test
     name: (storage/file/minio/file-mgmt) Generate documentation and Publish in gh-pages
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
