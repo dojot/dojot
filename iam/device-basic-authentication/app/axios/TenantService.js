@@ -67,15 +67,15 @@ module.exports = class TenantService {
    * } tenant tenant object
    */
   async create(tenant) {
-    const createdTenant = this.tenants.find((item) => item.id === tenant.id);
+    const createdTenant = this.findTenant(tenant.id);
     if (!createdTenant) {
       const keycloakSession = new KeycloakClientSession(
-        this.keycloakConfig.url,
+        this.config.keycloak.url,
         tenant.id,
         {
           grant_type: 'client_credentials',
-          client_id: this.keycloakConfig['client.id'],
-          client_secret: this.keycloakConfig['client.secret'],
+          client_id: this.config.keycloak['client.id'],
+          client_secret: this.config.keycloak['client.secret'],
         },
         this.logger,
       );
@@ -94,7 +94,7 @@ module.exports = class TenantService {
    * @param {string} tenantId tenant id
    */
   async remove(tenantId) {
-    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId);
+    const removedTenant = this.findTenant(tenantId);
     if (removedTenant) {
       if (removedTenant.session) {
         removedTenant.session.close();
