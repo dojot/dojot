@@ -74,9 +74,7 @@ module.exports = class DevicesService {
    * @param {*} getPaging paging metadata formatting method
    * @returns the device attribute dataset
    */
-  async getDeviceAttrData(
-    tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, getPaging,
-  ) {
+  async getDeviceAttrData(tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, getPaging,) {
     const filters = { dateFrom, dateTo };
     const pagination = { limit, page };
 
