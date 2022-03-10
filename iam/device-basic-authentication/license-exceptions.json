@@ -41,6 +41,15 @@
     },
     "json-schema@0.4.0": {
       "reason": "AFL-2.1 OR BSD-3-Clause are compatible with Apache-2.0"
+    },
+    "colors@0.6.2": {
+      "reason": "MIT are compatible with Apache-2.0"
+    },
+    "cycle@1.0.3": {
+      "reason": "Unlicense and/or Apache-2 are compatible with Apache-2.0"
+    },
+    "modelling@0.0.3": {
+      "reason": "Unlicense and/or Apache-2 are compatible with Apache-2.0"
     }
   }
 }
