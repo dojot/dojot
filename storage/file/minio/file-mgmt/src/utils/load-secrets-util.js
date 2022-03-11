@@ -77,6 +77,7 @@ module.exports = class SecretFileHandler {
       if (secretfile) {
         outerThis.logger.debug(`Loading secret to ${keyPath} from a file.`);
 
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         fs.promises.readFile(`${dirPath}${secretfile}`, 'utf-8').then((raw) => {
           outerThis.logger.debug('Secret file found');
 
@@ -85,21 +86,23 @@ module.exports = class SecretFileHandler {
         }).catch(() => {
           outerThis.logger.debug('Waiting for secret file');
           try {
+            // eslint-disable-next-line security/detect-non-literal-fs-filename
             const watcher = fs.watch(`${dirPath}`, { interval: 60 }, async (type, filename) => {
-                try {
-                  if (type === 'rename' && filename === secretfile) {
-                    outerThis.logger.debug('Secret file found');
+              try {
+                if (type === 'rename' && filename === secretfile) {
+                  outerThis.logger.debug('Secret file found');
 
-                    const raw = await fs.promises.readFile(`${dirPath}${secretfile}`, 'utf-8');
-                    outerThis.setEnv(keyPath, raw.replace('\n', ''));
-                    watcher.close();
+                  // eslint-disable-next-line security/detect-non-literal-fs-filename
+                  const raw = await fs.promises.readFile(`${dirPath}${secretfile}`, 'utf-8');
+                  outerThis.setEnv(keyPath, raw.replace('\n', ''));
+                  watcher.close();
 
-                    success();
-                  }
-                } catch (error) {
-                  fails(error);
+                  success();
                 }
-              },);
+              } catch (error) {
+                fails(error);
+              }
+            });
           } catch (error) {
             fails(error);
           }
@@ -123,7 +126,7 @@ module.exports = class SecretFileHandler {
   static splitPath(field) {
     const sources = field.split('.');
     return sources.length === 1 ? sources : sources
-      .reduce((previousValue, currentValue, index,) => (
+      .reduce((previousValue, currentValue, index) => (
         index === 1 ? [previousValue, currentValue] : [previousValue[0], `${previousValue[1]}.${currentValue}`]
       ));
   }

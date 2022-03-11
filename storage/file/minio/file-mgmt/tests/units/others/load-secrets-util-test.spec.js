@@ -116,7 +116,7 @@ describe('SecretHandler', () => {
 
   it('Should return the secret after watching', (done) => {
     mockFs.promises.readFile.mockRejectedValueOnce(new Error('File not found'));
-    mockFs.watch.mockImplementationOnce((path, options, cb,) => {
+    mockFs.watch.mockImplementationOnce((path, options, cb) => {
       mockFs.promises.readFile.mockResolvedValueOnce('secret_key\n');
       cb('rename', 'secret_key');
       return {
@@ -158,7 +158,7 @@ describe('SecretHandler', () => {
 
   it('Should throw an error when the secret file is not found after watching', (done) => {
     mockFs.promises.readFile.mockRejectedValueOnce(new Error('File not found'));
-    mockFs.watch.mockImplementationOnce((path, options, cb,) => {
+    mockFs.watch.mockImplementationOnce((path, options, cb) => {
       mockFs.promises.readFile.mockRejectedValueOnce(new Error('File not found'));
       cb('rename', 'secret_key');
       return {
