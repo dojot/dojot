@@ -85,8 +85,7 @@ module.exports = class SecretFileHandler {
         }).catch(() => {
           outerThis.logger.debug('Waiting for secret file');
           try {
-            const watcher = fs.watch(
-              `${dirPath}`, { interval: 60 }, async (type, filename) => {
+            const watcher = fs.watch(`${dirPath}`, { interval: 60 }, async (type, filename) => {
                 try {
                   if (type === 'rename' && filename === secretfile) {
                     outerThis.logger.debug('Secret file found');
@@ -100,8 +99,7 @@ module.exports = class SecretFileHandler {
                 } catch (error) {
                   fails(error);
                 }
-              },
-            );
+              },);
           } catch (error) {
             fails(error);
           }
@@ -125,9 +123,7 @@ module.exports = class SecretFileHandler {
   static splitPath(field) {
     const sources = field.split('.');
     return sources.length === 1 ? sources : sources
-      .reduce((
-        previousValue, currentValue, index,
-      ) => (
+      .reduce((previousValue, currentValue, index,) => (
         index === 1 ? [previousValue, currentValue] : [previousValue[0], `${previousValue[1]}.${currentValue}`]
       ));
   }
