@@ -53,6 +53,7 @@ module.exports = (routes, serviceState, openApiPath) => {
     requestIdInterceptor,
     beaconInterceptor,
     requestLogInterceptor,
+    jsonBodyParsingInterceptor,
   } = WebUtils.framework.interceptors;
 
   return WebUtils.framework.createExpress({
@@ -63,6 +64,7 @@ module.exports = (routes, serviceState, openApiPath) => {
         middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
       dojotTenantJwtParseInterceptor(),
+      jsonBodyParsingInterceptor({ config: { limit: '100kb' } }),
       paginateInterceptor({
         defaultLimit: configPaginate['default.max.limit'],
         maxLimit: configPaginate['default.max.limit'],

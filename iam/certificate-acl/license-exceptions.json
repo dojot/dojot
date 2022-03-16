@@ -17,6 +17,12 @@
       },
       "caniuse-lite@1.0.30001214": {
         "reason": "CC BY 4.0 is used without any changes and credit was given"
+      },
+      "tslib@1.14.1": {
+        "reason": "0BSD are compatible with Apache-2.0"
+      },
+      "tslib@2.3.1": {
+        "reason": "0BSD are compatible with Apache-2.0"
       }
     }
   }

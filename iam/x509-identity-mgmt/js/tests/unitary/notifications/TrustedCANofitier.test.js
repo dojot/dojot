@@ -18,6 +18,7 @@ describe("Unit tests of script 'TrustedCANofitier.js'", () => {
   beforeAll(() => {
     trustedCANofitier = new TrustedCANofitier({
       tenant: 'admin',
+      xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
       kafkaTopicSuffix: global.config.notifications.kafka.producer.trustedca.topic.suffix,
       notificationEngine: notificationEngineMock(),
       logger: new Logger('TrustedCANofitier.test.js'),
@@ -37,6 +38,7 @@ describe("Unit tests of script 'TrustedCANofitier.js'", () => {
 
   it('should create a TrustedCANofitier whose topic does not contain the tenant', () => {
     const trustedCANofitierWithoutTenant = new TrustedCANofitier({
+      xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
       kafkaTopicSuffix: global.config.notifications.kafka.producer.trustedca.topic.suffix,
       notificationEngine: notificationEngineMock(),
       logger: new Logger('TrustedCANofitier.test.js'),
