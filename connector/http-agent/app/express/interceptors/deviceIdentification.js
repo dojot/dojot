@@ -15,10 +15,14 @@ module.exports = ({ config, identificationService }) => ({
       const identification = {
         cn: identificationService.cn,
         fingerprint: identificationService.fingerprint,
+        'basic-auth': identificationService.basicAuth,
       };
       try {
-        [req.body.tenant, req.body.deviceId] =
-          await identification[config.authorizationMode](clientCert);
+        const arg =
+          config.authorizationMode === 'basic-auth' ? req : clientCert;
+        [req.body.tenant, req.body.deviceId] = await identification[
+          config.authorizationMode
+        ](arg);
         return next();
       } catch (err) {
         return next(err);
@@ -27,12 +31,17 @@ module.exports = ({ config, identificationService }) => ({
 
     const reqType = req.path.split('/');
 
-    if (config.unsecureMode && reqType[3] === 'unsecure') {
-      const {
-        query: { tenant, deviceId },
-      } = req;
-      [req.body.tenant, req.body.deviceId] = [tenant, deviceId];
-      return next();
+    if (
+      config.authorizationMode === 'basic-auth' &&
+      reqType[3] === 'unsecure'
+    ) {
+      try {
+        [req.body.tenant, req.body.deviceId] =
+          await identificationService.basicAuth(req);
+        return next();
+      } catch (err) {
+        return next(err);
+      }
     }
 
     BadRequest.message = 'Unable to authenticate';

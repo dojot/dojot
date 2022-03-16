@@ -1,8 +1,10 @@
 const {
-  WebUtils, Logger,
+  WebUtils,
 } = require('@dojot/microservice-sdk');
+const DIContainer = require('../DIContainer');
 
-const logger = new Logger('certificate-acl:express');
+const container = DIContainer();
+const logger = container.resolve('logger');
 
 const {
   responseCompressInterceptor,
@@ -11,6 +13,8 @@ const {
   requestLogInterceptor,
   readinessInterceptor,
 } = WebUtils.framework.interceptors;
+
+const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
 
 module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExpress(
   {
@@ -28,6 +32,7 @@ module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExp
         logger,
       }),
       responseCompressInterceptor(),
+      scopedDIInterceptor(container),
     ],
     routes: ([
       aclRoute,

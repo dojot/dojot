@@ -70,10 +70,7 @@ or
 HTTPS response:
 
 ```HTTP
-  HTTP/1.1 200 OK
-  Content-type: application/json
-
-  { message: "Successfully published" }
+  HTTP/1.1 204 No Content
 ```
 
 ## General Configurations
@@ -83,13 +80,13 @@ These are the environment variables used by iotagent-http
 ### Lightship
 
 | Key                         | Default Value | Valid Values | Environment variable                   |
-| --------------------------- | ------------- | ------------ | -------------------------------------- |
+|-----------------------------|---------------|--------------|----------------------------------------|
 | lightship.detect.kubernetes | false         | boolean      | HTTP_AGENT_LIGHTSHIP_DETECT_KUBERNETES |
 
 ### Logger config
 
 | Key               | Default Value                            | Valid Values             | Environment variable         |
-| ----------------- | ---------------------------------------- | ------------------------ | ---------------------------- |
+|-------------------|------------------------------------------|--------------------------|------------------------------|
 | log.verbose       | false                                    | boolean                  | HTTP_AGENT_LOG_VERBOSE       |
 | log.console.level | info                                     | info, debug, error, warn | HTTP_AGENT_LOG_CONSOLE_LEVEL |
 | log.file          | false                                    | boolean                  | HTTP_AGENT_LOG_FILE          |
@@ -99,7 +96,7 @@ These are the environment variables used by iotagent-http
 ### Kafka Producer
 
 | Key                                            | Default Value | Valid Values                                                       | Environment variable                             |
-| ---------------------------------------------- | ------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
+|------------------------------------------------|---------------|--------------------------------------------------------------------|--------------------------------------------------|
 | producer.metadata.broker.list                  | kafka:9092    | Initial list of brokers as a CSV list of broker host or host:port. | HTTP_AGENT_PRODUCER_METADATA_BROKER_LIST         |
 | producer.compression.codec                     | gzip          | string                                                             | HTTP_AGENT_COMPRESSION_CODE                      |
 | producer.retry.backoff.ms                      | 200           | integer                                                            | HTTP_AGENT_RETRY_BACKOFF_MS                      |
@@ -115,7 +112,7 @@ These are the environment variables used by iotagent-http
 ### Kafka SDK
 
 | Key                       | Default Value | Valid Values | Environment variable             |
-| ------------------------- | ------------- | ------------ | -------------------------------- |
+|---------------------------|---------------|--------------|----------------------------------|
 | sdk.connect.timeout.ms    | 5000          | integer      | HTTP_AGENT_CONNECT_TIMEOUT_MS    |
 | sdk.disconnect.timeout.ms | 10000         | integer      | HTTP_AGENT_DISCONNECT_TIMEOUT_MS |
 | sdk.flush.timeout.ms      | 2000          | integer      | HTTP_AGENT_FLUSH_TIMEOUT_MS      |
@@ -123,14 +120,14 @@ These are the environment variables used by iotagent-http
 ### Kafka Topic
 
 | Key                     | Default Value | Valid Values                                               | Environment variable               |
-| ----------------------- | ------------- | ---------------------------------------------------------- | ---------------------------------- |
+|-------------------------|---------------|------------------------------------------------------------|------------------------------------|
 | topic.auto.offset.reset | earliest      | smallest, earliest, beginning, largest, latest, end, error | HTTP_AGENT_TOPIC_AUTO_OFFSET_RESET |
 | topic.acks              | -1            | integer                                                    | HTTP_AGENT_TOPIC_ACKS              |
 
 ### Kafka Messenger
 
 | Key                            | Default Value | Valid Values | Environment variable                      |
-| ------------------------------ | ------------- | ------------ | ----------------------------------------- |
+|--------------------------------|---------------|--------------|-------------------------------------------|
 | messenger.produce.topic.suffix | device-data   | string       | HTTP_AGENT_MESSENGER_PRODUCE_TOPIC_SUFFIX |
 
 ### Server
@@ -138,7 +135,7 @@ These are the environment variables used by iotagent-http
 #### HTTPS
 
 | Key                       | Default Value         | Valid Values | Environment variable                 |
-| ------------------------- | --------------------- | ------------ | ------------------------------------ |
+|---------------------------|-----------------------|--------------|--------------------------------------|
 | https.host                | 0.0.0.0               | string       | HTTP_AGENT_HTTPS_HOST                |
 | https.port                | 3000                  | integer      | HTTP_AGENT_HTTPS_PORT                |
 | https.ca                  | /certs/ca.crt         | string       | HTTP_AGENT_HTTPS_CA                  |
@@ -150,40 +147,51 @@ These are the environment variables used by iotagent-http
 #### HTTP
 
 | Key       | Default Value | Valid Values | Environment variable |
-| --------- | ------------- | ------------ | -------------------- |
+|-----------|---------------|--------------|----------------------|
 | http.host | 0.0.0.0       | string       | HTTP_AGENT_HTTP_HOST |
 | http.port | 3001          | integer      | HTTP_AGENT_HTTP_PORT |
 
 ### Secure Context
 
-| Key                         | Default Value | Valid Values    | Environment variable                   |
-| --------------------------- | ------------- | --------------- | -------------------------------------- |
-| security.crl                | /certs/ca.crl | string          | HTTP_AGENT_SECURITY_CRL                |
-| security.cert.directory     | /certs        | string          | HTTP_AGENT_SECURITY_CERT_DIRECTORY     |
-| security.unsecure.mode      | true          | boolean         | HTTP_AGENT_SECURITY_UNSECURE_MODE      |
-| security.authorization.mode | fingerprint   | fingerprint, cn | HTTP_AGENT_SECURITY_AUTHORIZATION_MODE |
+| Key                         | Default Value | Valid Values                | Environment variable                   |
+|-----------------------------|---------------|-----------------------------|----------------------------------------|
+| security.crl                | /certs/ca.crl | string                      | HTTP_AGENT_SECURITY_CRL                |
+| security.cert.directory     | /certs        | string                      | HTTP_AGENT_SECURITY_CERT_DIRECTORY     |
+| security.unsecure.mode      | false         | boolean                     | HTTP_AGENT_SECURITY_UNSECURE_MODE      |
+| security.unsecure.mode.only | false         | boolean                     | HTTP_AGENT_SECURITY_UNSECURE_MODE_ONLY |
+| security.authorization.mode | fingerprint   | fingerprint, cn, basic-auth | HTTP_AGENT_SECURITY_AUTHORIZATION_MODE |
+| security.enable.crl         | false         | string                      | HTTP_AGENT_SECURITY_ENABLE_CRL         |
 
 ### Reload
 
 | Key                | Default Value | Valid Values | Environment variable          |
-| ------------------ | ------------- | ------------ | ----------------------------- |
+|--------------------|---------------|--------------|-------------------------------|
 | reload.attempts    | 10            | integer      | HTTP_AGENT_RELOAD_ATTEMPTS    |
 | reload.interval.ms | 1000          | integer      | HTTP_AGENT_RELOAD_INTERVAL_MS |
 
 ### Express
 
 | Key                   | Default Value | Valid Values | Environment variable             |
-| --------------------- | ------------- | ------------ | -------------------------------- |
+|-----------------------|---------------|--------------|----------------------------------|
 | express.trustproxy    | true          | boolean      | HTTP_AGENT_EXPRESS_TRUSTPROXY    |
 | express.parsing.limit | 256000        | integer      | HTTP_AGENT_EXPRESS_PARSING.LIMIT |
 
-### Cache
+### Redis
 
-| Key               | Default Value | Valid Values | Environment variable         |
-| ----------------- | ------------- | ------------ | ---------------------------- |
-| cache.std.tll     | 100           | integer      | HTTP_AGENT_CACHE_STD_TLL     |
-| cache.checkperiod | 120           | integer      | HTTP_AGENT_CACHE_CHECKPERIOD |
-| cache.set.tll     | 30000         | integer      | HTTP_AGENT_CACHE_SET_TLL     |
+| Key                        | Default Value    | Valid Values | Environment variable                  |
+|----------------------------|------------------|--------------|---------------------------------------|
+| redis.host                 | http-agent-redis | string       | HTTP_AGENT_REDIS_HOST                 |
+| redis.port                 | 6379             | integer      | HTTP_AGENT_REDIS_PORT                 |
+| redis.db                   | 0                | integer      | HTTP_AGENT_REDIS_DB                   |
+| redis.reconnect.after.ms   | 5000             | integer      | HTTP_AGENT_REDIS_RECONNECT_AFTER_MS   |
+| redis.operation.timeout.ms | 1000             | integer      | HTTP_AGENT_REDIS_OPERATION_TIMEOUT_MS |
+
+### URL
+
+| Key                 | Default Value                                                | Valid Values | Environment variable           |
+|---------------------|--------------------------------------------------------------|--------------|--------------------------------|
+| url.device.auth     | http://basic-auth:3000/basic-auth/v1/internal/authentication | string       | HTTP_AGENT_URL_BASIC_AUTH      |
+| url.certificate.acl | http://certificate-acl:3000/internal/api/v1/acl-entries      | string       | HTTP_AGENT_URL_CERTIFICATE_ACL |
 
 ## Notes
 
@@ -203,6 +211,6 @@ If you found a problem or need help, leave an issue in the main
 
 # **License**
 
-The Cron source code is released under Apache License 2.0.
+The http-agent source code is released under Apache License 2.0.
 
 Check NOTICE and LICENSE files for more information.

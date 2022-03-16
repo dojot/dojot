@@ -1,7 +1,24 @@
 const mockConfig = {
   lightship: { a: 'abc' },
   graphql: { graphiql: true },
+  sync: {
+    tenants: 'apigettenants',
+    devices: 'apigetdevices',
+  },
+  influx: {
+    url: 'url',
+    'default.token': 'default.token',
+    'max.timeout.ms': 1000,
+    'default.bucket': 'default_bucket',
+  },
 };
+
+const mockInfluxDB = {
+  InfluxDB: jest.fn().mockImplementation(() => {
+  }),
+};
+
+jest.mock('@influxdata/influxdb-client', () => mockInfluxDB);
 
 const mockSdk = {
   ConfigManager: {
@@ -18,11 +35,39 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils: {
+    framework: {
+      errorTemplate: jest.fn(),
+    },
+  },
+  LocalPersistence: {
+    LocalPersistenceManager: jest.fn().mockImplementation(() => ({
+      init: jest.fn(),
+    })),
+  },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 jest.mock('../../app/express');
 jest.mock('../../app/express/routes/v1/Devices');
+
+const mockConsumer = jest.fn().mockImplementation(() => ({
+  init: jest.fn(),
+  initCallbackForNewTenantEvents: jest.fn(),
+  initCallbackForDeviceEvents: jest.fn(),
+}));
+
+const mockSyncLoader = jest.fn().mockImplementation(() => ({
+  init: jest.fn(),
+}));
+
+const mockTenantService = jest.fn().mockImplementation();
+const mockDeviceManager = jest.fn().mockImplementation();
+
+jest.mock('../../app/sync/RetrieverConsumer', () => mockConsumer);
+jest.mock('../../app/sync/TenantService', () => mockTenantService);
+jest.mock('../../app/sync/DeviceManagerService', () => mockDeviceManager);
+jest.mock('../../app/sync/SyncLoader', () => mockSyncLoader);
 
 const mockServerRegisterShutdown = jest.fn();
 const mockServerInit = jest.fn();
@@ -34,18 +79,11 @@ jest.mock('../../app/Server', () => mockServer);
 
 const mockStateIsReady = jest.fn();
 const mockCreateInfluxHealthChecker = jest.fn();
-const mockInflux = jest.fn().mockImplementation(() => ({
+
+jest.mock('../../app/influx/State', () => jest.fn().mockImplementation(() => ({
+  isReady: mockStateIsReady,
   createInfluxHealthChecker: mockCreateInfluxHealthChecker,
-  getInfluxStateInstance: jest.fn().mockImplementation(() => ({
-    isReady: mockStateIsReady,
-  })),
-  getInfluxDataQueryInstance: jest.fn().mockImplementation(() => ({
-    queryByField: jest.fn(),
-    queryByMeasurement: jest.fn(),
-    queryUsingGraphql: jest.fn(),
-  })),
-}));
-jest.mock('../../app/influx', () => mockInflux);
+})));
 
 const App = require('../../app/App');
 

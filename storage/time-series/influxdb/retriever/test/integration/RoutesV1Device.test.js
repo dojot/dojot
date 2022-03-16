@@ -1,4 +1,3 @@
-
 const mockConfig = {
   paginate: { 'default.max.limit': 20 },
   express: { trustproxy: true },
@@ -47,17 +46,46 @@ const serviceStateMock = {
   })),
 };
 
-const mockQueryDataByField = jest.fn();
-const mockQueryDataByMeasurement = jest.fn();
-const mockQueryDataUsingGraphql = jest.fn();
+const mockLocalPersistenceManager = {
+  // eslint-disable-next-line no-unused-vars
+  get: jest.fn((level, key) => true),
+};
+
+const mockData = jest.fn();
+const mockQueryApi = jest.fn(() => ({
+  queryRows(fluxQuery, consumer) {
+    const data = mockData();
+    data.forEach((mockRow) => {
+      consumer.next(mockRow, {
+        toObject(row) {
+          return row;
+        },
+      });
+    });
+    consumer.complete();
+  },
+}));
+
+const mockInfluxDBConnection = {
+  getQueryApi: mockQueryApi,
+};
+
+const DeviceDataService = require('../../app/express/services/v1/DeviceDataService');
+const DeviceDataRepository = require('../../app/influx/DeviceDataRepository');
+const GenericQueryService = require('../../app/express/services/v1/GenericQueryService');
+
+const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection);
+const deviceDataService = new DeviceDataService(deviceDataRepository);
+const genericQueryService = new GenericQueryService(deviceDataRepository);
 
 const app = express(
   [
     devicesRoutes({
+      localPersistence: mockLocalPersistenceManager,
       mountPoint: '/tss/v1',
-      queryDataByField: mockQueryDataByField,
-      queryDataByMeasurement: mockQueryDataByMeasurement,
-      queryDataUsingGraphql: mockQueryDataUsingGraphql,
+      genericQueryService,
+      deviceDataService,
+      deviceDataRepository,
     }),
   ],
   serviceStateMock,
@@ -78,20 +106,12 @@ describe('Test Devices Routes', () => {
 
 
   test('Data from device in json - Test endpoint', (done) => {
-    mockQueryDataByMeasurement.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          attrs: [
-            {
-              label: 'string',
-              value: 'string',
-            },
-          ],
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        'dojot.string': '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -123,20 +143,12 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from device in csv - Test endpoint', (done) => {
-    mockQueryDataByMeasurement.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          attrs: [
-            {
-              label: 'string',
-              value: 'string',
-            },
-          ],
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        'dojot.string': '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -144,12 +156,15 @@ describe('Test Devices Routes', () => {
       .then((response) => {
         expect(response.statusCode).toBe(200);
         expect(response.text).toStrictEqual('"ts","string"\n"2020-11-25T16:37:10.590Z","string"');
+        expect(response.type).toEqual('text/csv');
         done();
       });
   });
 
   test('Data from device - Error query data', (done) => {
-    mockQueryDataByMeasurement.mockRejectedValueOnce(new Error());
+    mockData.mockImplementationOnce(() => {
+      throw new Error();
+    });
     request(app)
       .get('/tss/v1/devices/1234/data')
       .set('Authorization', `Bearer ${validToken}`)
@@ -160,7 +175,6 @@ describe('Test Devices Routes', () => {
   });
 
   test('should respond with code 406 - Data from device - Test endpoint', (done) => {
-    mockQueryDataByMeasurement.mockResolvedValueOnce();
     request(app)
       .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -172,15 +186,12 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in json -  Test endpoint  1', (done) => {
-    mockQueryDataByField.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          value: 'string',
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        _value: '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -202,15 +213,12 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in csv -  Test endpoint  1', (done) => {
-    mockQueryDataByField.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          value: 'string',
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        _value: '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -218,20 +226,18 @@ describe('Test Devices Routes', () => {
       .then((response) => {
         expect(response.statusCode).toBe(200);
         expect(response.text).toStrictEqual('"ts","value"\n"2020-11-25T16:37:10.590Z","string"');
+        expect(response.type).toEqual('text/csv');
         done();
       });
   });
 
   test('Data from attr on a device -  More results then limit and page 2', (done) => {
-    mockQueryDataByField.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          value: 'string',
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        _value: '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -259,28 +265,25 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in csv -  More results then limit and page 2', (done) => {
-    mockQueryDataByField.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          value: 'string',
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        _value: '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
-      .set('accept', 'Text/csv')
+      .set('accept', 'text/csv')
       .then((response) => {
         expect(response.statusCode).toBe(200);
         expect(response.text).toStrictEqual('"ts","value"\n"2020-11-25T16:37:10.590Z","string"');
+        expect(response.type).toEqual('text/csv');
         done();
       });
   });
 
   test('should respond with code 406 - Data from attr on a device - Test endpoint', (done) => {
-    mockQueryDataByMeasurement.mockResolvedValueOnce({});
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -293,15 +296,12 @@ describe('Test Devices Routes', () => {
 
 
   test('Data from attr on a device -  Test endpoint 2', (done) => {
-    mockQueryDataByField.mockResolvedValueOnce({
-      result: [
-        {
-          ts: '2020-11-25T16:37:10.590Z',
-          value: 'string',
-        },
-      ],
-      totalItems: 1,
-    });
+    mockData.mockReturnValueOnce([
+      {
+        _time: '2020-11-25T16:37:10.590Z',
+        _value: '"string"',
+      },
+    ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=0')
       .set('Authorization', `Bearer ${validToken}`)
@@ -323,7 +323,9 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device - Error query data', (done) => {
-    mockQueryDataByField.mockRejectedValueOnce(new Error());
+    mockData.mockImplementationOnce(() => {
+      throw new Error();
+    });
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data')
       .set('Authorization', `Bearer ${validToken}`)
@@ -362,7 +364,6 @@ describe('Test Devices Routes', () => {
       });
   });
 
-
   test('Non-standard JWT Token', (done) => {
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data')
@@ -372,7 +373,6 @@ describe('Test Devices Routes', () => {
         done();
       });
   });
-
 
   test('Test with a valid token without tenant', (done) => {
     request(app)
@@ -394,7 +394,6 @@ describe('Test Devices Routes', () => {
         done();
       });
   });
-
 
   const graphqlQuery = `query {
         getData(filter: {
@@ -432,7 +431,6 @@ describe('Test Devices Routes', () => {
         }
       }`;
 
-
   const graphqlInvalidQuery = `query {
         getData(filter: {
           devices: [{
@@ -451,44 +449,22 @@ describe('Test Devices Routes', () => {
 
 
   test('Test graphQl endpoint - valid graphql query', (done) => {
-    expect.assertions(7);
-
-    mockQueryDataUsingGraphql.mockImplementationOnce(
-      (tenant, devices, filters, page, order) => {
-        const queryDevices = [
-          { id: 'RANDID1', attributes: ['temperature', 'gps'] },
-          { id: 'RANDID2', attributes: ['temperature'] }];
-        const queryFilters = { dateFrom: '-4h', dateTo: '' };
-        const queryPage = { limit: '1' };
-        const inputDevices = JSON.parse(JSON.stringify(devices));
-        const inputFilters = JSON.parse(JSON.stringify(filters));
-
-        expect(tenant).toBe('tenant1');
-        expect(inputDevices).toStrictEqual(queryDevices);
-        expect(page.limit.toString()).toBe(queryPage.limit);
-        expect(inputFilters).toStrictEqual(queryFilters);
-        expect(order).toBe('asc');
-
-        return new Promise((resolve) => resolve({
-          data: [{
-            attr: 'temperature',
-            id: 'RANDID1',
-            ts: '2021-06-17T20:00:00.000Z',
-            value: '36.2',
-          }, {
-            attr: 'gps',
-            id: 'RANDID1',
-            ts: '2021-06-17T20:30:00.000Z',
-            value: '-18,-23',
-          }, {
-            attr: 'temperature',
-            id: 'RANDID2',
-            ts: '2021-06-17T20:30:00.000Z',
-            value: '42.1',
-          }],
-        }));
-      },
-    );
+    mockData.mockReturnValueOnce([{
+      _field: 'dojot.temperature',
+      _measurement: 'RANDID1',
+      _time: '2021-06-17T20:00:00.000Z',
+      _value: '36.2',
+    }, {
+      _field: 'dojot.gps',
+      _measurement: 'RANDID1',
+      _time: '2021-06-17T20:30:00.000Z',
+      _value: '-18,-23',
+    }, {
+      _field: 'dojot.temperature',
+      _measurement: 'RANDID2',
+      _time: '2021-06-17T20:30:00.000Z',
+      _value: '42.1',
+    }]);
 
     request(app)
       .get('/tss/v1/devices/graphql')
@@ -501,13 +477,15 @@ describe('Test Devices Routes', () => {
           {
             data: {
               getData: {
-                data: [{
-                  attr: 'temperature', id: 'RANDID1', ts: '2021-06-17T20:00:00.000Z', value: '36.2',
-                }, {
-                  attr: 'gps', id: 'RANDID1', ts: '2021-06-17T20:30:00.000Z', value: '-18,-23',
-                }, {
-                  attr: 'temperature', id: 'RANDID2', ts: '2021-06-17T20:30:00.000Z', value: '42.1',
-                }],
+                data: [
+                  {
+                    attr: 'temperature', id: 'RANDID1', ts: '2021-06-17T20:00:00.000Z', value: '36.2',
+                  }, {
+                    attr: 'gps', id: 'RANDID1', ts: '2021-06-17T20:30:00.000Z', value: '-18,-23',
+                  }, {
+                    attr: 'temperature', id: 'RANDID2', ts: '2021-06-17T20:30:00.000Z', value: '42.1',
+                  },
+                ],
               },
             },
           },
@@ -519,15 +497,13 @@ describe('Test Devices Routes', () => {
 
   test('Test graphQl endpoint - valid graphql query - 2', (done) => {
     expect.assertions(2);
-    mockQueryDataUsingGraphql.mockImplementationOnce(
-      () => new Promise((resolve) => resolve({
-        data: [{
-          attr: 'temperature',
-          id: 'RANDID1',
-          ts: '2021-06-17T20:00:00.000Z',
-          value: '36.2',
-        }],
-      })),
+    mockData.mockReturnValueOnce(
+      [{
+        _field: 'temperature',
+        _measurement: 'RANDID1',
+        _time: '2021-06-17T20:00:00.000Z',
+        _value: '36.2',
+      }],
     );
 
     request(app)
@@ -554,7 +530,6 @@ describe('Test Devices Routes', () => {
 
 
   test('Test graphQl endpoint - invalid graphql query', (done) => {
-    expect.assertions(2);
     request(app)
       .get('/tss/v1/devices/graphql')
       .send({ query: graphqlInvalidQuery })
@@ -573,10 +548,9 @@ describe('Test Devices Routes', () => {
   });
 
   test('Test graphQl endpoint - error handling influx data', (done) => {
-    expect.assertions(2);
-    mockQueryDataUsingGraphql.mockImplementationOnce(
-      () => Promise.reject(new Error('Error inside flux data')),
-    );
+    mockData.mockImplementationOnce(() => {
+      throw new Error();
+    });
 
     request(app)
       .get('/tss/v1/devices/graphql')
@@ -585,14 +559,123 @@ describe('Test Devices Routes', () => {
       .set('Authorization', `Bearer ${validToken}`)
       .then((response) => {
         expect(response.statusCode).toBe(200);
-        expect(response.body).toStrictEqual({
-          data: { getData: null },
-          errors: [{
-            locations: [{ column: 9, line: 2 }],
-            message: 'graphql-route.get: Error inside flux data',
-            path: ['getData'],
-          }],
+        expect(response.body.data).toStrictEqual({
+          getData: null,
         });
+        expect(response.body.errors.length).toEqual(1);
+        done();
+      });
+  });
+
+  test('Test Generic Route - should return data in json', (done) => {
+    mockData.mockReturnValueOnce(
+      [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ],
+    );
+
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'query' })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.body.result).toStrictEqual([
+          {
+            result: '_result',
+            table: 0,
+            _value: '_value',
+          },
+          {
+            result: '_result',
+            table: 0,
+            _value: '_value',
+          },
+        ]);
+        expect(response.body.result.length).toEqual(2);
+        done();
+      });
+  });
+
+  test('Test Generic Route - should return data in csv', (done) => {
+    mockData.mockReturnValueOnce(
+      [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ],
+    );
+
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'query' })
+      .set('Accept', 'text/csv')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toStrictEqual('"result","table","_value"\n"_result",0,"_value"\n"_result",0,"_value"');
+        expect(response.type).toEqual('text/csv');
+        done();
+      });
+  });
+
+  test('Test Generic Route - should throw an error when the influxdb throws a query error', (done) => {
+    mockQueryApi.mockReturnValueOnce({
+      queryRows: (fluxQuery, consumer) => {
+        consumer.error({ statusMessage: 'BadRequest', body: '{ "message": "Error" }', statusCode: 400 });
+      },
+    });
+
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'query' })
+      .set('Accept', 'text/csv')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+        done();
+      });
+  });
+
+  test('Test Generic Route - should throw an error, when the query has a from operation', (done) => {
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'from(bucket:"default")' })
+      .set('Accept', 'Application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+        expect(response.body.error).toEqual('The "from" function is determined by dojot');
+        done();
+      });
+  });
+
+  test('Test Generic Route - should throw an error, when the accept header is not acceptable', (done) => {
+    request(app)
+      .post('/tss/v1/query')
+      .send({ query: 'from(bucket:\'default\')' })
+      .set('Accept', 'Application/xml')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        expect(response.body.error).toEqual('This server does not support Application/xml');
         done();
       });
   });

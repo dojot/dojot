@@ -30,9 +30,10 @@ function belongsToWhom(owner) {
  */
 class OwnershipNotifier {
   constructor({
-    tenant = '', kafkaTopicSuffix, notificationEngine, logger,
+    tenant = '', xRequestId = '', kafkaTopicSuffix, notificationEngine, logger,
   }) {
     Object.defineProperty(this, 'tenant', { value: tenant });
+    Object.defineProperty(this, 'xRequestId', { value: xRequestId });
     Object.defineProperty(this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });
     Object.defineProperty(this, 'notificationEngine', { value: notificationEngine });
     Object.defineProperty(this, 'logger', { value: logger });
@@ -75,6 +76,7 @@ class OwnershipNotifier {
       eventType,
       eventData,
       partitionKey: `${this.tenant}:${ownerIdentifier}`,
+      xRequestId: this.xRequestId,
     });
 
     const ownerKey = `${this.tenant}:${ownerIdentifier}`;
@@ -135,6 +137,7 @@ class OwnershipNotifier {
       eventType,
       eventData,
       partitionKey: `${this.tenant}:${ownerIdentifier}`,
+      xRequestId: this.xRequestId,
     });
 
     const prevOwnerKey = `${this.tenant}:${previousOwnerIdentifier}`;
@@ -186,6 +189,7 @@ class OwnershipNotifier {
       eventType,
       eventData,
       partitionKey: `${this.tenant}:${previousOwnerIdentifier}`,
+      xRequestId: this.xRequestId,
     });
 
     const prevOwnerKey = `${this.tenant}:${previousOwnerIdentifier}`;

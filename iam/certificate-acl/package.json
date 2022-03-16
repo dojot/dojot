@@ -36,6 +36,7 @@
   ],
   "dependencies": {
     "@dojot/microservice-sdk": "^0.1.11",
+    "awilix": "^6.1.0",
     "lodash.camelcase": "^4.3.0",
     "redis": "^3.0.2",
     "http-terminator": "^3.0.0",

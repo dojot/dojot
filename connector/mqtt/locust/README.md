@@ -1,6 +1,8 @@
 # **Dojot Load Test**
 The Dojot Load Test tool is an implementation using the open-source load testing tool Locust to generate traffic from/to Dojot. Tested in Dojot's development images.
 
+If you want to run it against a specific Dojot image or don't want to develop this tool you can use the 
+[docker-compose-locust repository](https://github.com/dojot/docker-compose-locust)
 
 # **How to use**
 
