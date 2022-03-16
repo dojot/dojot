@@ -3,7 +3,7 @@ const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
 const { createHttpTerminator } = require('http-terminator');
 const camelCase = require('lodash.camelcase');
 const fs = require('fs');
-const { killApplication, sslCADecode } = require('./Utils');
+const { killApplication } = require('./Utils');
 
 const logger = new Logger('http-agent:Server');
 const {
