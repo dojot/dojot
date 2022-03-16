@@ -8,7 +8,6 @@ const deviceIdentificationInterceptor = require('./interceptors/deviceIdentifica
 const {
   express: configExpress,
   security: configSecurity,
-  cache: ConfigCache,
 } = ConfigManager.getConfig('HTTP_AGENT');
 
 /**
@@ -28,8 +27,11 @@ const {
  * @param {an instance of @dojot/microservice-sdk.ServiceStateManager} serviceState
  *          Manages the services' states, providing health check and shutdown utilities.
  *
- * @param {an instance of Cache} Cache
- *          Provisions functions to get and set data in Node Cache.
+ * @param {an instance of RedisManager} redisManager
+ *          Provisions functions to get and set data in redis.
+ *
+ * @param {an instance of DeviceAuthService} deviceAuthService
+ *          Provides query to basic-auth to verify the validity of credentials.
  *
  * @param {an instance of CertificateAclService} certificateAclService
  *          Provides query to certificate-acl to verify certificate.
@@ -38,7 +40,7 @@ const {
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, cache, certificateAclService) => {
+module.exports = (routes, serviceState, redisManager, deviceAuthService, certificateAclService) => {
   const {
     responseCompressInterceptor,
     requestIdInterceptor,
@@ -65,10 +67,8 @@ module.exports = (routes, serviceState, cache, certificateAclService) => {
           authorizationMode: configSecurity['authorization.mode'],
         },
         identificationService: identificationService({
-          cache,
-          config: {
-            setTll: ConfigCache['set.tll'],
-          },
+          redisManager,
+          deviceAuthService,
           certificateAclService,
         }),
       }),

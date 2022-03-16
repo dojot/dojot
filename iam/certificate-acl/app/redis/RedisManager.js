@@ -11,10 +11,11 @@ redis.RedisClient.prototype.quitAsync = promisify(redis.RedisClient.prototype.qu
 
 const {
   ConfigManager: { getConfig },
-  Logger,
 } = require('@dojot/microservice-sdk');
+const DIContainer = require('../DIContainer');
 
-const logger = new Logger('certificate-acl:redis-manager');
+const container = DIContainer();
+const logger = container.resolve('logger');
 
 const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
 

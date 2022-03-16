@@ -3,15 +3,16 @@ const util = require('util');
 
 const {
   ConfigManager: { getConfig, transformObjectKeys },
-  Logger,
   ServiceStateManager,
+  Logger,
 } = require('@dojot/microservice-sdk');
+const { asClass, InjectionMode, Lifetime } = require('awilix');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
 const HTTPServer = require('./server/HTTPServer');
+const DIContainer = require('./DIContainer');
 
-const logger = new Logger('certificate-acl:app');
-
+const container = DIContainer();
 const CERTIFICATE_ACL_CREATE_EVENT_TYPE = 'ownership.create';
 const CERTIFICATE_ACL_DELETE_EVENT_TYPE = 'ownership.delete';
 const CERTIFICATE_ACL_UPDATE_EVENT_TYPE = 'ownership.update';
@@ -21,6 +22,7 @@ class Application {
    * Instantiates the application
    */
   constructor() {
+    this.logger = container.resolve('logger');
     // configuration
     this.config = getConfig('CERTIFICATE_ACL');
 
@@ -53,16 +55,15 @@ class Application {
     const terminate = (error) => {
       // if you get here, it's because the message cannot be processed anyway
       // so, it's better to terminate the service
-      logger.error('Service will be closed: ', error);
+      this.logger.error('Service will be closed: ', error);
       process.kill(process.pid, 'SIGTERM');
     };
 
     try {
       const jsonData = JSON.parse(data.value);
-      logger.debug(`Processing event: ${util.inspect(jsonData, { depth: 3 })}`);
 
       const {
-        metadata: { tenant } = {},
+        metadata: { tenant, msgid } = {},
         data: {
           eventType,
           eventData: {
@@ -72,6 +73,19 @@ class Application {
         } = {},
       } = jsonData;
       const owner = ((tenant) ? `${tenant}:${device}` : application);
+
+      const scope = container.createScope();
+
+      scope.register({
+        logger: asClass(Logger, {
+          injectionMode: InjectionMode.CLASSIC,
+          injector: () => ({ sid: `Certificate-ACL - Tenant:${tenant} - Request-Id:${msgid}` }),
+          lifetime: Lifetime.SCOPED,
+        }),
+      });
+      this.logger = scope.resolve('logger');
+
+      this.logger.debug(`Processing event: ${util.inspect(jsonData, { depth: 3 })}`);
 
       switch (eventType) {
         case CERTIFICATE_ACL_CREATE_EVENT_TYPE:
@@ -86,7 +100,7 @@ class Application {
           // kafka-consumer ...
           // Maybe would be interesting to have a nack callback too
           this.redisManager.setAsync(fingerprint, owner).then(() => {
-            logger.debug(`Added to Redis: ${fingerprint} -> ${owner}`);
+            this.logger.debug(`Added to Redis: ${fingerprint} -> ${owner}`);
             ack();
           }).catch((error) => terminate(
             `Failed to add to Redis ${fingerprint} -> ${owner} (${error}).`,
@@ -102,14 +116,14 @@ class Application {
           // if returns here, will make sync because of an 'await' in the
           // kafka-consumer ..
           this.redisManager.delAsync(fingerprint).then(() => {
-            logger.debug(`Removed from Redis: ${fingerprint}`);
+            this.logger.debug(`Removed from Redis: ${fingerprint}`);
             ack();
           }).catch((error) => terminate(
             `Failed to remove from Redis ${fingerprint} -> ${owner} (${error}).`,
           ));
           break;
         default:
-          logger.warn(`Unexpected eventType: ${eventType} (discarded)`);
+          this.logger.warn(`Unexpected eventType: ${eventType} (discarded)`);
           ack();
       }
     } catch (error) {

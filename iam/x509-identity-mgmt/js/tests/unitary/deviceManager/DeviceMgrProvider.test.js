@@ -63,7 +63,7 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       return request;
     });
 
-    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123')).resolves.toBeTruthy();
+    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123', 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32')).resolves.toBeTruthy();
 
     expect(deviceMgrProvider.deviceModel.contains).toHaveBeenCalledTimes(1);
     expect(deviceMgrProvider.deviceModel.insert).toHaveBeenCalledTimes(1);
@@ -72,7 +72,7 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
   it('should check that the device belongs to the tenant (via the cache)', async () => {
     deviceMgrProvider.deviceModel.contains = jest.fn().mockResolvedValue(true);
 
-    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123')).resolves.toBeTruthy();
+    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123', 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32')).resolves.toBeTruthy();
 
     expect(deviceMgrProvider.deviceModel.contains).toHaveBeenCalledTimes(1);
     expect(deviceMgrProvider.deviceModel.insert).toHaveBeenCalledTimes(0);
@@ -87,7 +87,7 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       return request;
     });
 
-    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123')).resolves.toBeFalsy();
+    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123', 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32')).resolves.toBeFalsy();
 
     expect(deviceMgrProvider.deviceModel.contains).toHaveBeenCalledTimes(1);
     expect(deviceMgrProvider.deviceModel.insert).toHaveBeenCalledTimes(0);
@@ -102,7 +102,7 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       return request;
     });
 
-    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123')).rejects.toThrow();
+    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123', 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32')).rejects.toThrow();
     expect(deviceMgrProvider.deviceModel.contains).toHaveBeenCalledTimes(1);
     expect(deviceMgrProvider.deviceModel.insert).toHaveBeenCalledTimes(0);
   });
@@ -122,7 +122,7 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       };
     });
 
-    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123')).rejects.toThrow();
+    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123', 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32')).rejects.toThrow();
     expect(deviceMgrProvider.deviceModel.contains).toHaveBeenCalledTimes(1);
     expect(deviceMgrProvider.deviceModel.insert).toHaveBeenCalledTimes(0);
   });
@@ -144,7 +144,7 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       return requestAlt;
     });
 
-    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123')).rejects.toThrow();
+    await expect(deviceMgrProvider.checkDeviceExists('admin', 'abc123', 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32')).rejects.toThrow();
     expect(deviceMgrProvider.deviceModel.contains).toHaveBeenCalledTimes(1);
     expect(deviceMgrProvider.deviceModel.insert).toHaveBeenCalledTimes(0);
     expect(requestAlt.abort).toHaveBeenCalledTimes(1);
