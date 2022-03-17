@@ -80,6 +80,7 @@ module.exports = class TenantService {
       );
       await keycloakSession.start();
 
+      this.logger.debug(`Tenant ${tenant.id} was created`);
       this.tenants.push({
         ...tenant,
         session: keycloakSession,
@@ -96,9 +97,11 @@ module.exports = class TenantService {
     const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId);
     if (removedTenant) {
       if (removedTenant.session) {
+        this.logger.debug(`${tenantId} tenant session closed`);
         removedTenant.session.close();
       }
       this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId);
+      this.logger.debug(`Tenant ${tenantId} was deleted`);
     }
   }
 };

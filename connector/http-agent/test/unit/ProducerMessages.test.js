@@ -48,7 +48,7 @@ const mockUtils = {
 };
 jest.mock('../../app/Utils', () => mockUtils);
 
-const ProducerMessages = require('../../app/ProducerMessages');
+const ProducerMessages = require('../../app/kafka/ProducerMessages');
 
 describe('ProducerMessages', () => {
   let producerMessages;

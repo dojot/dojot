@@ -46,7 +46,7 @@ const mockProducerMessagesInit = jest.fn();
 const mockProducerMessages = jest.fn().mockImplementation(() => ({
   init: mockProducerMessagesInit,
 }));
-jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
+jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
 const App = require('../../app/App');
 

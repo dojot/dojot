@@ -19,11 +19,21 @@ class DeviceAuthService {
    *
    * @returns authentication status
    */
-  async getAuthenticationStatus(username, password) {
+  async getAuthenticationStatus(tenant, username, password) {
+    const token = tenant.session.getTokenSet().access_token;
+
     try {
-      await this.dojotClientHttp.request(this.deviceAuthRouteUrl, {
-        username,
-        password,
+      await this.dojotClientHttp.request({
+        url: this.deviceAuthRouteUrl,
+        method: 'GET',
+        timeout: 15000,
+        body: {
+          username,
+          password,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       return true;
     } catch (err) {

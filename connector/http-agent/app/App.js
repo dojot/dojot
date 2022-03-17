@@ -12,7 +12,8 @@ const camelCase = require('lodash.camelcase');
 const logger = new Logger('http-agent:App');
 
 const Server = require('./Server');
-const ProducerMessages = require('./ProducerMessages');
+const ProducerMessages = require('./kafka/ProducerMessages');
+const ConsumerMessages = require('./kafka/ConsumerMessages');
 const RedisManager = require('./redis/RedisManager');
 const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
@@ -55,6 +56,7 @@ class App {
         dojotClientHttp,
         logger,
       });
+      this.consumerMessages = new ConsumerMessages(this.tenantService, config, logger);
       this.deviceAuthService = new DeviceAuthService(config.url['device.auth'], dojotClientHttp);
       this.certificateAclService =
         new CertificateAclService(config.url['certificate.acl'], dojotClientHttp);
@@ -72,6 +74,7 @@ class App {
     logger.info('init: Initializing the http-agent...');
     try {
       await this.producerMessages.init();
+      await this.consumerMessages.init();
       this.redisManager.init();
       this.server.registerShutdown();
 
