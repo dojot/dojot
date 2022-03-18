@@ -5,7 +5,7 @@ const {
 } = require('@dojot/microservice-sdk');
 const App = require('./app/app');
 
-const LoadSecretsUtil = require('./utils/load-secrets-util');
+const SecretsLoader = require('./utils/load-secrets-util');
 
 // External dependencies
 const logger = new Logger('file-mgmt:Server');
@@ -14,7 +14,14 @@ ConfigManager.loadSettings('FILEMGMT', 'default.conf');
 const config = ConfigManager.getConfig('FILEMGMT');
 
 logger.debug('Loading secrets');
-LoadSecretsUtil.loadSecrets(config).then(() => {
+Logger.setTransport('console', {
+  level: config.logger['console.level'],
+});
+Logger.setVerbose(config.logger.verbose);
+
+
+const secretsLoader = new SecretsLoader(config, logger);
+secretsLoader.handleCollection(['minio.access.key', 'minio.secret.key'], '/secrets/').then(() => {
   // Init Application
   const app = new App(config, logger, openApiPath);
 
