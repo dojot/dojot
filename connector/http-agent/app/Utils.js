@@ -7,7 +7,6 @@ const err = new createError.BadRequest();
  * @module utils
  */
 
-
 /**
  * @function parseTimestamp
  *

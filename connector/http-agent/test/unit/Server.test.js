@@ -238,7 +238,9 @@ describe('Server', () => {
     it('Enable CRL in HTTPS server', async () => {
       const newServer = new Server();
       const fn = mockFs.readFileSync;
-      expect(fn).toHaveBeenLastCalledWith(mockConfig.security.crl);
+      expect(fn).toHaveBeenLastCalledWith(
+        mockConfig.security.crl,
+      );
       expect(newServer.httpsServer).not.toBeNull();
     });
 
