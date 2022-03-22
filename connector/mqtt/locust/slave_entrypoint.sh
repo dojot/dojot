@@ -38,7 +38,11 @@ mkdir -p "${CERT_DIR}${REVOKE_CERT_DIR}"
 START_TIME=$(date +'%s')
 echo "Witing for Redis fully start. Host '${REDIS_HOST}', '${REDIS_PORT}'..."
 echo "Try ping Redis... "
-PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" ping | grep PONG)
+if [[ -z "$REDIS_PASSWD" ]] ;  then
+    PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" ping | grep PONG)
+else
+    PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" ping | grep PONG)
+fi
 while [ -z "${PONG}" ]; do
     sleep 3
     echo "Retry Redis ping... "
