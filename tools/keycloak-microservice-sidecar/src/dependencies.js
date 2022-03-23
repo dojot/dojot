@@ -4,10 +4,10 @@ const {
   WebUtils: { DojotClientHttp },
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
-const PrimaryAppController = require('./app/controller/primary-app-controller');
 
 const Server = require('./Server');
 const TenantService = require('./services/tenant-services');
+const KafkaConsumer = require('./app/kafka/consumer-messages');
 
 /**
  * Initializes the internal dependencies.
@@ -41,9 +41,6 @@ module.exports = (config, logger) => {
     defaultRetryDelay: 15000,
   });
 
-  // Controllers
-  const primaryAppController = new PrimaryAppController(logger, config);
-
   // Services
   const tenantService = new TenantService(
     keycloakProxyClientHttp,
@@ -51,15 +48,19 @@ module.exports = (config, logger) => {
     logger,
   );
 
+  // consumers
+  const kafkaConsumer = new KafkaConsumer(
+    tenantService,
+    config,
+    logger,
+  )
+
   return {
+    kafkaConsumer,
     tenantService,
     serviceState,
     web: {
       httpServer,
-      controllers: {
-        primaryAppController,
-      },
-      interceptors: {},
     },
   };
 };

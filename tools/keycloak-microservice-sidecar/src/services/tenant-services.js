@@ -35,7 +35,7 @@ module.exports = class TenantService {
   /**
    * Creates a bucket for the new tenant.
    *
-   * @param {*} bucketName Bucket name
+   * @param {*} tenant tenant id/name
    */
   create = async (tenant) => {
     const createdTenant = this.listTenants.find(
@@ -60,4 +60,21 @@ module.exports = class TenantService {
       });
     }
   };
+
+  /**
+   * Removes a tenant
+   *
+   * @param {string} tenantId tenant id
+   */
+     async remove(tenantId) {
+      const removedTenant = this.listTenants.find((tenant) => tenant.id === tenantId);
+      if (removedTenant) {
+        if (removedTenant.session) {
+          this.logger.debug(`${tenantId} tenant session closed`);
+          removedTenant.session.close();
+        }
+        this.listTenants = this.listTenants.filter((tenant) => tenant.id !== tenantId);
+        this.logger.debug(`Tenant ${tenantId} was deleted`);
+      }
+    }
 };

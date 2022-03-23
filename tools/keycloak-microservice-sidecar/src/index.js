@@ -4,10 +4,14 @@ const {
   WebUtils: { SecretFileHandler },
 } = require('@dojot/microservice-sdk');
 
-const App = require('./app/app');
+const App = require('./app/web/app');
 
-ConfigManager.loadSettings('MICROSERVICEKEYCLOAKSIDECAR', 'default.conf');
-const config = ConfigManager.getConfig('MICROSERVICEKEYCLOAKSIDECAR');
+ConfigManager.loadSettings('KEYCLOAKMICROSERVICESIDECAR', 'default.conf');
+const config = ConfigManager.getConfig('KEYCLOAKMICROSERVICESIDECAR');
+config.server = {
+  ...(config.server),
+  ...(config.proxy),
+};
 
 const logger = new Logger('microservice-keycloak-sidecar:Server');
 
@@ -22,8 +26,6 @@ const secretHandler = new SecretFileHandler(config, logger);
 secretHandler
   .handleCollection(
     [
-      'microservicekeycloaksiecar.access.key',
-      'microservicekeycloaksiecar.secret.key',
       'keycloak.client.secret',
     ],
     '/secrets/',
@@ -36,8 +38,9 @@ secretHandler
       .then(() => {
         logger.info('Server started..');
       })
-      .catch((error) => {
-        logger.error(error);
-      });
-    
+      .catch((appInitError) => {
+        logger.error(appInitError);
+      });  
+  }).catch((secretHandlerError) => {
+    logger.error(secretHandlerError);
   });

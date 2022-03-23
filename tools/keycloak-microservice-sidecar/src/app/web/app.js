@@ -1,6 +1,5 @@
-const ExpressAdapter = require('../web/express-adapter');
-const routesV1 = require('../web/routesV1');
-const Dependencies = require('../dependencies');
+const ExpressAdapter = require('./express-adapter');
+const Dependencies = require('../../dependencies');
 
 module.exports = class App {
   /**
@@ -23,16 +22,18 @@ module.exports = class App {
     const {
       web,
       tenantService,
+      kafkaConsumer,
     } = Dependencies(this.config, this.logger);
     this.server = web.httpServer;
+    this.kafkaConsumer = kafkaConsumer;
+    this.tenantService = tenantService;
 
     try {
       const listTenants = await tenantService.updateListTenants();
+      kafkaConsumer.init();
       // Adapts express to the application and manages the routes
       this.express = ExpressAdapter.xadapt(
-        routesV1('/', web.controllers, this.config, web.interceptors),
         listTenants,
-        this.server.serviceState,
         this.logger,
         this.config,
       );

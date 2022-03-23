@@ -1,5 +1,5 @@
 {
-  "name": "device-manager",
+  "name": "keycloak-microservice-sidecar",
   "version": "0.0.1",
   "description": "Service to manage devices on dojot",
   "engines": {
@@ -50,6 +50,7 @@
     "awilix": "^6.0.0",
     "axios": "^0.25.0",
     "express": "^4.17.1",
+    "express-http-proxy": "^1.6.3",
     "flat": "^5.0.2",
     "http-terminator": "^3.0.3",
     "jsonwebtoken": "^8.5.1",
