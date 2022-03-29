@@ -30,11 +30,11 @@ function belongsToWhom(owner) {
  */
 class OwnershipNotifier {
   constructor({
-    tenant = '', xRequestId = '', kafkaTopicSuffix, notificationEngine, logger,
+    tenant = { id:'' }, xRequestId = '', kafkaTopicSuffix, notificationEngine, logger,
   }) {
     Object.defineProperty(this, 'tenant', { value: tenant });
     Object.defineProperty(this, 'xRequestId', { value: xRequestId });
-    Object.defineProperty(this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });
+    Object.defineProperty(this, 'topic', { value: (tenant.id) ? `${tenant.id}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });
     Object.defineProperty(this, 'notificationEngine', { value: notificationEngine });
     Object.defineProperty(this, 'logger', { value: logger });
   }
@@ -71,15 +71,15 @@ class OwnershipNotifier {
 
     // Delegates to the notification engine to publish data on Kafka
     await this.notificationEngine.notify({
-      tenant: this.tenant,
+      tenant: this.tenant.id,
       topic: this.topic,
       eventType,
       eventData,
-      partitionKey: `${this.tenant}:${ownerIdentifier}`,
+      partitionKey: `${this.tenant.id}:${ownerIdentifier}`,
       xRequestId: this.xRequestId,
     });
 
-    const ownerKey = `${this.tenant}:${ownerIdentifier}`;
+    const ownerKey = `${this.tenant.id}:${ownerIdentifier}`;
 
     this.logger.info(`Notification issued: '${eventType}'. `
       + `Certificate '${certRecord.fingerprint}'. `
@@ -132,16 +132,16 @@ class OwnershipNotifier {
 
     // Delegates to the notification engine to publish data on Kafka
     await this.notificationEngine.notify({
-      tenant: this.tenant,
+      tenant: this.tenant.id,
       topic: this.topic,
       eventType,
       eventData,
-      partitionKey: `${this.tenant}:${ownerIdentifier}`,
+      partitionKey: `${this.tenant.id}:${ownerIdentifier}`,
       xRequestId: this.xRequestId,
     });
 
-    const prevOwnerKey = `${this.tenant}:${previousOwnerIdentifier}`;
-    const currOwnerKey = `${this.tenant}:${ownerIdentifier}`;
+    const prevOwnerKey = `${this.tenant.id}:${previousOwnerIdentifier}`;
+    const currOwnerKey = `${this.tenant.id}:${ownerIdentifier}`;
 
     this.logger.info(`Notification issued: '${eventType}'. `
       + `Certificate '${certRecord.fingerprint}'. `
@@ -184,15 +184,15 @@ class OwnershipNotifier {
 
     // Delegates to the notification engine to publish data on Kafka
     await this.notificationEngine.notify({
-      tenant: this.tenant,
+      tenant: this.tenant.id,
       topic: this.topic,
       eventType,
       eventData,
-      partitionKey: `${this.tenant}:${previousOwnerIdentifier}`,
+      partitionKey: `${this.tenant.id}:${previousOwnerIdentifier}`,
       xRequestId: this.xRequestId,
     });
 
-    const prevOwnerKey = `${this.tenant}:${previousOwnerIdentifier}`;
+    const prevOwnerKey = `${this.tenant.id}:${previousOwnerIdentifier}`;
     this.logger.info(`Notification issued: '${eventType}'. `
       + `Certificate '${certRecord.fingerprint}'. `
       + `Owner '${prevOwnerKey}'.`);

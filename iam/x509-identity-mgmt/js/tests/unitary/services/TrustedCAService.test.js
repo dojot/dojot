@@ -100,7 +100,7 @@ beforeAll(() => {
     trustedCANotifier,
     pkiUtils,
     dnUtils,
-    tenant: 'admin',
+    tenant: { id: 'admin' },
     rootCA: global.config.ejbca.rootca,
     caCertLimit: global.config.certificate.external.ca.limit,
     queryMaxTimeMS: global.config.mongo.query.maxtimems,

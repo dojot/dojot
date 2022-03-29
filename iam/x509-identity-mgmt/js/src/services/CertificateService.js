@@ -137,7 +137,7 @@ class CertificateService {
       await this.ensureDeviceExists(distinguishedNames.CN);
 
       // Adds the tenant as a prefix to the SubjectDN 'Common Name' field
-      distinguishedNames.cnamePrefix(this.tenant);
+      distinguishedNames.cnamePrefix(this.tenant.id);
     }
 
     // Converts SubjectDN fields to a string
@@ -161,7 +161,7 @@ class CertificateService {
         notBefore: cert.notBefore.value,
         notAfter: cert.notAfter.value,
       },
-      tenant: this.tenant,
+      tenant: this.tenant.id,
     });
     const certRecord = await model.save();
 
@@ -264,7 +264,7 @@ class CertificateService {
       },
       issuedByDojotPki: false,
       belongsTo,
-      tenant: this.tenant,
+      tenant: this.tenant.id,
     });
     const certRecord = await model.save();
 
@@ -286,7 +286,7 @@ class CertificateService {
     // If there are no elevated privileges, we must overwrite
     // the tenant according to the scope of the service...
     if (!this.elevatedPrivileges) {
-      Object.assign(filterFields, { tenant: this.tenant });
+      Object.assign(filterFields, { tenant: this.tenant.id });
     }
 
     // Checks on the certificate owner
@@ -334,7 +334,7 @@ class CertificateService {
     // If there are no elevated privileges, we must overwrite
     // the tenant according to the scope of the service...
     if (!this.elevatedPrivileges) {
-      Object.assign(filterFields, { tenant: this.tenant });
+      Object.assign(filterFields, { tenant: this.tenant.id });
     }
 
     /* Executes the query and converts the result to JSON */
@@ -365,7 +365,7 @@ class CertificateService {
     // If there are no elevated privileges, we must overwrite
     // the tenant according to the scope of the service...
     if (!this.elevatedPrivileges) {
-      Object.assign(filterFields, { tenant: this.tenant });
+      Object.assign(filterFields, { tenant: this.tenant.id });
     }
 
     const query = this.CertificateModel.find(filterFields)
@@ -497,9 +497,9 @@ class CertificateService {
   async ensureDeviceExists(deviceId) {
     if (this.checkDeviceExists) {
       const isOwner = await this.deviceMgrProvider
-        .checkDeviceExists(this.tenant, deviceId, this.xRequestId);
+        .checkDeviceExists(this.tenant.id, deviceId, this.xRequestId);
       if (!isOwner) {
-        throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
+        throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant.id}'.`);
       }
     }
   }
