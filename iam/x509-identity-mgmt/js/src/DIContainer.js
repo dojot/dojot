@@ -564,6 +564,11 @@ function createObject(rawConfig) {
         injectionMode: InjectionMode.CLASSIC,
         injector: () => ({
           filter: (tenantId) => DIContainer.resolve('tenantManager').findTenant(tenantId),
+          options: {
+            allowMasterTenant: true,
+            verifyOnline: true,
+            configKeycloak: config.keycloak,
+          },
         }),
         lifetime: Lifetime.SCOPED,
       },
