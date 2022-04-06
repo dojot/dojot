@@ -32,6 +32,11 @@ const serviceStateMock = {
   registerShutdownHandler: mockRegisterShutdownHandler,
 };
 
+const mockKeycloakSession = {
+  getTokenSet: jest.fn().mockReturnValue({
+    access_token: 'access_token',
+  }),
+};
 
 const mockAxiosGet = jest.fn();
 const mockAxiosPost = jest.fn();
@@ -65,7 +70,7 @@ describe('x509Req.getRequests().getRequests().', () => {
   });
 
   test('constructor', () => {
-    x509Req = new X509IdentityMgmt(serviceStateMock);
+    x509Req = new X509IdentityMgmt(serviceStateMock, mockKeycloakSession);
   });
 
   test('createCertificateByCSR: ok', async () => {
