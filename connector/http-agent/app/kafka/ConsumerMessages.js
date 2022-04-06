@@ -70,9 +70,7 @@ class KafkaConsumer extends Consumer {
     // eslint-disable-next-line security/detect-non-literal-regexp
     const topic = new RegExp(this.config.subscribe['topics.regex.tenants']);
 
-    this.idCallbackTenant = this.registerCallback(
-      topic, this.getCallbackForNewTenantEvents(),
-    );
+    this.idCallbackTenant = this.registerCallback(topic, this.getCallbackForNewTenantEvents());
     this.logger.debug('registerCallback: Registered Callback');
   }
 

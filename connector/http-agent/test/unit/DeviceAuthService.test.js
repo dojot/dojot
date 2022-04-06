@@ -16,9 +16,7 @@ describe('DeviceAuthService', () => {
       },
     };
     deviceAuthService = new DeviceAuthService('apideviceAuthService', mockDojotHttpClient);
-    const authenticated = await deviceAuthService.getAuthenticationStatus(
-      tenant, 'test@abc123', 'P4ssW0rd',
-    );
+    const authenticated = await deviceAuthService.getAuthenticationStatus(tenant, 'test@abc123', 'P4ssW0rd');
 
     expect(authenticated).toBeTruthy();
   });
@@ -34,9 +32,7 @@ describe('DeviceAuthService', () => {
     };
 
     deviceAuthService = new DeviceAuthService(null, mockDojotHttpClient);
-    const authenticated = await deviceAuthService.getAuthenticationStatus(
-      tenant, 'test@abc123', 'P4ssW0rd',
-    );
+    const authenticated = await deviceAuthService.getAuthenticationStatus(tenant, 'test@abc123', 'P4ssW0rd');
     expect(authenticated).toBeFalsy();
   });
 });

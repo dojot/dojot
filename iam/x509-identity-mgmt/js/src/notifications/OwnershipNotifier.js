@@ -30,7 +30,7 @@ function belongsToWhom(owner) {
  */
 class OwnershipNotifier {
   constructor({
-    tenant = { id:'' }, xRequestId = '', kafkaTopicSuffix, notificationEngine, logger,
+    tenant = { id: '' }, xRequestId = '', kafkaTopicSuffix, notificationEngine, logger,
   }) {
     Object.defineProperty(this, 'tenant', { value: tenant });
     Object.defineProperty(this, 'xRequestId', { value: xRequestId });

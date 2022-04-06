@@ -31,11 +31,13 @@ class Requests {
    * @param {*} paths.caBundle
    * @param {KeycloakClientSession} keycloakSession Keycloak Session
    */
-  constructor(url,
+  constructor(
+    url,
     timeout,
     retries,
     paths,
-    keycloakSession) {
+    keycloakSession,
+  ) {
     this.keycloakSession = keycloakSession;
     this.axiosX509 = axios.create({
       baseURL: url,
