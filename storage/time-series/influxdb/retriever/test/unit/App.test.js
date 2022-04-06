@@ -80,10 +80,23 @@ jest.mock('../../app/Server', () => mockServer);
 const mockStateIsReady = jest.fn();
 const mockCreateInfluxHealthChecker = jest.fn();
 
+const mockLogger = {
+  error: jest.fn(),
+  debug: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+};
+
 jest.mock('../../app/influx/State', () => jest.fn().mockImplementation(() => ({
   isReady: mockStateIsReady,
   createInfluxHealthChecker: mockCreateInfluxHealthChecker,
 })));
+
+const mockDependencyContainer = {
+  syncLoader: {
+    init: jest.fn(),
+  },
+};
 
 const App = require('../../app/App');
 
@@ -106,7 +119,7 @@ describe('App', () => {
 
   test('instantiate class and init with error - influx not ready', async () => {
     expect.assertions(1);
-    app = new App();
+    app = new App(mockDependencyContainer, mockLogger);
     mockStateIsReady.mockResolvedValueOnce(false);
     try {
       await app.init(() => { });
@@ -116,7 +129,7 @@ describe('App', () => {
   });
 
   test('instantiate class and init', async () => {
-    app = new App();
+    app = new App(mockDependencyContainer, mockLogger);
     mockStateIsReady.mockResolvedValueOnce(true);
     await app.init(() => { });
 
@@ -132,7 +145,7 @@ describe('App', () => {
       },
     );
     try {
-      app = new App();
+      app = new App(mockDependencyContainer, mockLogger);
     } catch (e) {
       expect(e.message).toBe('constructor: Error in Server instantiation.');
     }

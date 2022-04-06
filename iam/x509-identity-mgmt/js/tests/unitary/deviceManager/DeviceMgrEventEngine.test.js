@@ -58,7 +58,7 @@ describe("Unit tests of script 'DeviceMgrEventEngine.js'", () => {
 
   beforeAll(() => {
     deviceMgrEventEngine = new DeviceMgrEventEngine({
-      deviceMgrKafkaConsumer: deviceMgrKafkaConsumerMock(),
+      kafkaConsumer: deviceMgrKafkaConsumerMock(),
       stateManager: stateManagerMock(),
       DIContainer: diContainerMock(),
       deviceMgrKafkaTopics: global.config.devicemgr.kafka.consumer.topic.suffix,

@@ -1,41 +1,46 @@
-const {
-  WebUtils: { createTokenGen },
-} = require('@dojot/microservice-sdk');
-
-const createAxios = require('./createAxios');
-
-
 class DeviceService {
   /**
    * Consumes api that returns devices data
    *
    * @param {string} deviceRouteUrl Url for api that returns data about devices
    */
-  constructor(deviceRouteUrls) {
+  constructor(deviceRouteUrls, dojotClientHttp) {
     this.deviceRouteUrls = deviceRouteUrls;
-    this.axios = createAxios();
+    this.dojotClientHttp = dojotClientHttp;
   }
 
   /**
    * Requires devices data from a tenant for API
    *
-   * @param {string} tenant the tenant name
+   * @param {
+   *  Object {
+   *    id: string,
+   *    session,
+   *    signatureKey: Object {
+   *      certificate: string,
+   *      algorithm: string,
+   *    }
+   *  }
+   * } tenant the tenant object
    *
    * @return a list of devices
    */
   async getDevices(tenant) {
-    const tokenGen = createTokenGen();
-    const token = await tokenGen.generate({ payload: {}, tenant });
+    const token = tenant.session.getTokenSet().access_token;
 
+    const devices = await this.dojotClientHttp.request(
+      {
+        url: this.deviceRouteUrls.devices,
+        method: 'GET',
+        timeout: 15000,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+      15000,
+      0,
+    );
 
-    const devices = await this.axios.get(this.deviceRouteUrls.devices, {
-      params: {
-        idsOnly: true,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
     return devices.data;
   }
 
@@ -52,12 +57,23 @@ class DeviceService {
  */
   async validDevice(tenant, deviceId) {
     try {
-      const tokenGen = createTokenGen();
-      const token = await tokenGen.generate({ payload: {}, tenant });
+      const token = tenant.session.getTokenSet().access_token;
 
-      await this.axios.get(`${this.deviceRouteUrls.device}/${deviceId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const requestOptions = {
+        url: `${this.deviceRouteUrls.device}/${deviceId}`,
+        method: 'GET',
+        timeout: 15000,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      await this.dojotClientHttp.request(
+        requestOptions,
+        5000,
+        3,
+      );
+
       return true;
     } catch (err) {
       return false;

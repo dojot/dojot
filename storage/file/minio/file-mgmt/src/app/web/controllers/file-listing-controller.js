@@ -19,7 +19,7 @@ module.exports = class FileListingController {
 
     const nLimit = Number(limit);
 
-    const data = await this.listFilesService.list(req.tenant, pathPrefix, nLimit, startAfter);
+    const data = await this.listFilesService.list(req.tenant.id, pathPrefix, nLimit, startAfter);
     let nextPageStartsAfter = null;
 
     if (data.length > 0 && data.length === nLimit) {

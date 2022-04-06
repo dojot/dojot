@@ -19,6 +19,13 @@ module.exports = (configMinio) => {
   minioClient.removeBucket = () => {
 
   };
+  
+  minioClient.listBuckets = () => {
+    const buckets = Array.from(minioClient.buckets.keys());
+    return buckets.map((bucket) => ({
+      name: bucket.replace('dojot.cpqd.', ''),
+    }));
+  };
 
   // eslint-disable-next-line no-unused-vars
   minioClient.listObjects = (bucketName, pathPrefix, recursive) => Readable({

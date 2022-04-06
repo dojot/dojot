@@ -97,6 +97,10 @@ jest.setTimeout(30000);
 
 let app;
 
+const mockTenantService = {
+  tenants: [],
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
   app = express(
@@ -110,6 +114,7 @@ beforeEach(() => {
     mockRedis,
     mockDeviceAuthService,
     mockCertificateAclService,
+    mockTenantService,
   );
 });
 

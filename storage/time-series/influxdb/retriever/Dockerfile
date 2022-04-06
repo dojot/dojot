@@ -48,7 +48,7 @@ COPY --from=base /opt/influxdb-retriever /opt/influxdb-retriever
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD ["npm", "run", "influxdb-retriever"]
+CMD ["npm", "run", "influxdb-retriever-debug"]
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
     CMD curl -f http://localhost:9000/health || exit 1

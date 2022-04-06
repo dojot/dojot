@@ -54,7 +54,9 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
     };
     const response = new ResponseMock();
 
@@ -92,7 +94,9 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
     };
     const response = new ResponseMock();
 
@@ -110,7 +114,9 @@ describe('BusboyInterceptor', () => {
   it('Should return a internal server http response response, when there is an error ', (done) => {
     const request = {
       pipe: pipeErrorMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
     };
     const response = new ResponseMock();
 
@@ -127,7 +133,9 @@ describe('BusboyInterceptor', () => {
   it('Should return a Not found http response, when the tenant was not found ', (done) => {
     const request = {
       pipe: pipeErrorMock,
-      tenant: 'test_not_found',
+      tenant: {
+        id: 'test_not_found',
+      },
     };
     const response = new ResponseMock();
 

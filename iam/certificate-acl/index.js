@@ -7,6 +7,7 @@ const util = require('util');
 const {
   ConfigManager: { getConfig, loadSettings },
   Logger,
+  WebUtils: { SecretFileHandler },
 } = require('@dojot/microservice-sdk');
 const DIContainer = require('./app/DIContainer');
 
@@ -34,8 +35,9 @@ if (config.logger['file.enable']) {
 
 const Application = require('./app/App');
 
-// Initializing the service...
-(async () => {
+const secretFileHandler = new SecretFileHandler(config, logger);
+
+secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
   try {
     logger.info('Starting application!');
     const app = new Application();
@@ -45,4 +47,4 @@ const Application = require('./app/App');
     logger.error('Service will be closed: ', err);
     process.kill(process.pid, 'SIGTERM');
   }
-})();
+});

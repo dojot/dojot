@@ -23,11 +23,12 @@ module.exports = class App {
    */
   async init() {
     // Initialize internal dependencies
-    const { web, kafka } = Dependencies(this.config, this.logger);
+    const { web, kafka, tenantService } = Dependencies(this.config, this.logger);
     this.server = web.httpServer;
     this.kafkaConsumer = kafka.kafkaConsumer;
-
+    
     try {
+      const listTenants = await tenantService.updateListTenants();
       // Init Kafka and handles listeners
       this.kafkaConsumer.init(
         topics(this.config, kafka.controllers),
@@ -36,6 +37,7 @@ module.exports = class App {
       // Adapts express to the application and manages the routes
       this.express = ExpressAdapter.adapt(
         routesV1('/api/v1', web.controllers, web.interceptors),
+        listTenants,
         this.server.serviceState,
         this.openApiPath,
         this.logger,
