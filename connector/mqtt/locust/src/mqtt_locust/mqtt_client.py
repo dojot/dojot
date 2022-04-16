@@ -166,7 +166,6 @@ class MQTTClient:
                 request_type=REQUEST_TYPE,
                 name='connect',
                 response_time=0,
-                response_length=0,
                 exception=ConnectError("disconnected")
             )
 
@@ -406,7 +405,6 @@ class MQTTClient:
                 request_type=REQUEST_TYPE,
                 name=MESSAGE_TYPE_RENEW,
                 response_time=0,
-                response_length=0,
                 exception=CertRenovationError("failed to renew")
             )
             logging.error("An error occurred while trying to renew the certificate")
@@ -460,7 +458,6 @@ class MQTTClient:
             request_type=REQUEST_TYPE,
             name=MESSAGE_TYPE_REVOKE,
             response_time=0,
-            response_length=0,
             exception=CertRevogationError("certificate not revoked")
         )
         return False
