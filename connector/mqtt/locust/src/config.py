@@ -57,4 +57,10 @@ CONFIG = {
             'page_size':    int(os.environ.get("DOJOT_DEVICES_PAGE_SIZE", 20))
         }
     },
+    'influxdb': {
+        'host': os.environ.get("INFLUX_HOST", "127.0.0.1"),
+        'port': int(os.environ.get("INFLUX_PORT", 30001)),
+        'org': os.environ.get("INFLUX_ORG", "admin"),
+        'token': os.environ.get("INFLUX_TOKEN", "token"),
+    }
 }

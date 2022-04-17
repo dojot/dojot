@@ -23,6 +23,11 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWD: ""
       REDIS_BACKUP: "y"
+
+      "INFLUX_HOST": "127.0.0.1"
+      "INFLUX_PORT": 30001
+      "INFLUX_ORG": "admin"
+      "INFLUX_TOKEN": ""
     networks:
       - default
     depends_on:
