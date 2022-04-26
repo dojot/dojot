@@ -17,10 +17,11 @@ paths:
       summary: "Upload a file to the Dojot"
       description: "Upload a file to the Dojot"
       operationId: "uploadFile"
-      parameters:
-        - $ref: "#/components/parameters/file"
-        - $ref: "#/components/parameters/pathUpload"
-        - $ref: "#/components/parameters/md5"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/uploadRequest"
       responses:
         "201":
           description: "Uploaded File"
@@ -214,7 +215,7 @@ servers:
     description: URL for File-mgmt Service
     variables:
       url:
-        default: "http://localhost:7000/"
+        default: "http://localhost:8000/file-mgmt/"
 components:
   securitySchemes:
     authorization:
@@ -223,24 +224,12 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
-    file:
-      name: file
-      in: query
-      required: true
-      description: |
-        The file to be uploaded.
-
-        Size Limit: 25Mb
-      allowReserved: true
-      schema:
-        type: string
-        format: binary
-    pathUpload:
+    pathRetriever:
       name: path
       in: query
       required: true
       description: |
-        Path where the file will be persisted.
+        Requested file path.
 
         Minimum length: 3
 
@@ -248,21 +237,12 @@ components:
       allowReserved: true
       schema:
         $ref: "#/components/schemas/pathParamenter"
-    md5:
-      name: md5
-      in: query
-      description: |
-        MD5 hash for integrity validation.
-      allowReserved: true
-      schema:
-        type: string
-        format: md5
-    pathRetriever:
+    pathUpload:
       name: path
       in: query
       required: true
       description: |
-        Requested file path.
+        Path where the file will be persisted.
 
         Minimum length: 3
 
@@ -321,8 +301,21 @@ components:
       schema:
         type: string
         format: path
-
   schemas:
+    uploadRequest:
+      type: object
+      required: [file, path]
+      properties:
+        file:
+          type: string
+          format: binary
+        path:
+          $ref: "#/components/schemas/pathParamenter"
+        md5:
+          required:
+            - ""
+          type: string
+          format: md5
     pathParamenter:
       type: string
       minLength: 3
@@ -451,7 +444,6 @@ components:
         detail:
           anyOf:
             - type: string
-
     apiErrorUnknown:
       type: object
       properties:
