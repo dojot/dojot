@@ -59,7 +59,7 @@ services:
       - ../db/:/data
 
   locust-exporter:
-    image: containersol/locust_exporter:v0.3.0
+    image: containersol/locust_exporter:v0.4.3
     networks:
       - default
     restart: always

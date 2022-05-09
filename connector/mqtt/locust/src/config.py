@@ -28,8 +28,8 @@ CONFIG = {
     },
 
     'locust': {
-        'task_min_time':        int(os.environ.get("TASK_MIN_TIME", 29500)),
-        'task_max_time':        int(os.environ.get("TASK_MAX_TIME", 30000)),
+        'task_min_time':       float(os.environ.get("TASK_MIN_TIME", 29.5)),
+        'task_max_time':       float(os.environ.get("TASK_MAX_TIME", 30)),
         'redis': {
             'certificates_db':      int(os.environ.get("REDIS_CERTIFICATES_DB", 0)),
             'mapped_db':            int(os.environ.get("REDIS_MAPPED_DB", 1)),

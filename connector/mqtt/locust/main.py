@@ -5,11 +5,11 @@ import datetime
 import json
 import logging
 import os
+import time
 import uuid
 from itertools import chain
 import requests
 
-import gevent
 from locust import User, task, between, events, stats
 from locust.runners import MasterRunner, STATE_STOPPING, STATE_STOPPED
 
@@ -83,7 +83,7 @@ class Client(MqttLocust):
         Treats the client when Locust test has stopped.
         """
         if len(self.client.pubmmap) != 0:
-            gevent.sleep(10)
+            time.sleep(10)
         self.client.disconnect()
 
 
@@ -127,7 +127,7 @@ def locust_init(environment, **kwargs):
             try:
                 influx_points = int(get_influx_stat(test_start_time))
                 difference = publish_requests - influx_points
-            except TimeoutError or IndexError as e:
+            except (TimeoutError, IndexError) as e:
                 logging.error('Error getting influx data')
                 influx_points = 'ERROR'
 
@@ -140,13 +140,13 @@ def locust_init(environment, **kwargs):
         environment.web_ui.app.register_blueprint(extend)
 
 
-def get_influx_stat(time):
+def get_influx_stat(start_time):
     url = f"http://{CONFIG['influxdb']['host']}:{CONFIG['influxdb']['port']}/api/v2/query"
     parameters = {'org': CONFIG['influxdb']['org']}
     headers = {'Content-Type': 'application/json', 'Authorization': f"Token {CONFIG['influxdb']['token']}"}
     body = {
         "query": f"from(bucket: \"devices\")"
-                 f"    |> range(start: {time})"
+                 f"    |> range(start: {start_time})"
                  f"    |> group()"
                  f"    |> count(column: \"_value\")",
         "type": "flux"
