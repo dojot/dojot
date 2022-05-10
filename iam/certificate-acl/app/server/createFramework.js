@@ -14,7 +14,7 @@ const {
   readinessInterceptor,
 } = WebUtils.framework.interceptors;
 
-const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
+const scopedDIInterceptor = container.resolve('scopedDIInterceptor');
 
 module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExpress(
   {
@@ -32,7 +32,7 @@ module.exports = (aclRoute, serviceStateManager) => WebUtils.framework.createExp
         logger,
       }),
       responseCompressInterceptor(),
-      scopedDIInterceptor(container),
+      scopedDIInterceptor,
     ],
     routes: ([
       aclRoute,

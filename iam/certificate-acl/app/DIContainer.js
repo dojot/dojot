@@ -3,8 +3,10 @@ const awilix = require('awilix');
 const { Logger } = require('@dojot/microservice-sdk');
 
 const {
-  asClass, Lifetime, InjectionMode,
+  asClass, asFunction, Lifetime, InjectionMode,
 } = awilix;
+
+const scopedDIInterceptor = require('./server/express/interceptors/scopedDIInterceptor');
 
 function createObject() {
   const DIContainer = awilix.createContainer();
@@ -13,6 +15,10 @@ function createObject() {
     logger: asClass(Logger, {
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({ sid: 'Certificate-ACL - Main' }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+    scopedDIInterceptor: asFunction(scopedDIInterceptor, {
+      injector: () => ({ DIContainer, path: '/' }),
       lifetime: Lifetime.SINGLETON,
     }),
   };
