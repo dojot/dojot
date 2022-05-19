@@ -1,7 +1,6 @@
 """
 Locust Load Test.
 """
-import datetime
 import json
 import logging
 import os
@@ -11,14 +10,13 @@ from itertools import chain
 import requests
 
 from locust import User, task, between, events, stats
-from locust.runners import MasterRunner, STATE_STOPPING, STATE_STOPPED
+from locust.runners import STATE_STOPPING, STATE_STOPPED
+from flask import Blueprint, jsonify
 
 from src.utils import Utils
 from src.config import CONFIG
 from src.mqtt_locust.mqtt_client import MQTTClient
 from src.mqtt_locust.redis_client import RedisClient
-
-from flask import Blueprint, jsonify
 
 
 class MqttLocust(User):
@@ -87,18 +85,6 @@ class Client(MqttLocust):
         self.client.disconnect()
 
 
-test_start_time = 0
-
-
-@events.test_start.add_listener
-def _(environment, **_kwargs):
-    global test_start_time
-    # in a distributed run, the master does not typically need any test data
-    if isinstance(environment.runner, MasterRunner):
-        test_start_time = int(datetime.datetime.now().timestamp())
-        logging.info('test started at' + str(test_start_time))
-
-
 path = os.path.dirname(os.path.abspath(__file__))
 extend = Blueprint(
     "extend",
@@ -114,7 +100,8 @@ def locust_init(environment, **kwargs):
     if environment.web_ui:
         @extend.route("/influx")
         def influx_page():
-            report = {"test_start_time": test_start_time}
+            test_start_time = int(environment.stats.total.start_time)
+            report = {"test_start_time": environment.stats.total.start_time}
 
             publish_requests = 0
             influx_points = 0
@@ -127,7 +114,7 @@ def locust_init(environment, **kwargs):
             try:
                 influx_points = int(get_influx_stat(test_start_time))
                 difference = publish_requests - influx_points
-            except (TimeoutError, IndexError) as e:
+            except (TimeoutError, IndexError):
                 logging.error('Error getting influx data')
                 influx_points = 'ERROR'
 
@@ -141,6 +128,9 @@ def locust_init(environment, **kwargs):
 
 
 def get_influx_stat(start_time):
+    """
+    Get influx statistics via influx http API
+    """
     url = f"http://{CONFIG['influxdb']['host']}:{CONFIG['influxdb']['port']}/api/v2/query"
     parameters = {'org': CONFIG['influxdb']['org']}
     headers = {'Content-Type': 'application/json', 'Authorization': f"Token {CONFIG['influxdb']['token']}"}
@@ -153,6 +143,7 @@ def get_influx_stat(start_time):
     }
     try:
         response = requests.post(url, params=parameters, headers=headers, data=json.dumps(body))
+        logging.debug("influx status code %d - body response: %s", response.status_code, response.text)
         num_publication = response.text.splitlines()[1].split(',')[5]
     except IndexError:
         logging.error("Parse error: cannot get measurement number.")
