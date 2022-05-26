@@ -64,6 +64,14 @@ describe('BasicCredentialsCtrl', () => {
       expect(mockTenant.create).not.toHaveBeenCalled();
       expect(mockBasicCredentials.create).toHaveBeenCalled();
     });
+
+    it('should delete all existing credentials before saving a new credential', async () => {
+      mockBasicCredentials.find.mockReturnValue('[{tenant: tenant1, deviceId: deviceid1, password: password1}]');
+      await basicCredentialsCtrl.create('tenant1', 'deviceid1');
+      expect(mockTenant.create).not.toHaveBeenCalled();
+      expect(mockBasicCredentials.create).toHaveBeenCalled();
+      expect(mockBasicCredentials.deleteMany).toHaveBeenCalled();
+    });
   });
 
   describe('authentication', () => {
