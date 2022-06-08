@@ -65,16 +65,21 @@ class BasicCredentialsCtrl {
     if (!tenantId) {
       await this.tenant.create({ tenant });
     }
-    const credentials = await this.basicCredentials
-      .find({ tenant, deviceId });
-    if (credentials.length > 0) {
-      await this.basicCredentials.deleteMany({ tenant, deviceId });
-    }
-    this.basicCredentials.create({
-      tenant,
-      deviceId,
-      password,
-    });
+
+    const filter = { tenant, deviceId };
+    const update = { password };
+
+    const basicCredentials = await this.basicCredentials.findOneAndUpdate(
+      filter,
+      update,
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+
+    basicCredentials.save();
+
     return {
       username,
       password,

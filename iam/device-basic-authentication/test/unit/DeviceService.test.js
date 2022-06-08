@@ -55,7 +55,7 @@ describe('DeviceService', () => {
         error = e;
       }
 
-      expect(error.message).toEqual("Cannot read property 'devices' of null");
+      expect(error.message).toEqual("Cannot read properties of null (reading 'devices')");
     });
   });
 
