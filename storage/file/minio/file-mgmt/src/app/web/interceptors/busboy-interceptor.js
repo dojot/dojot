@@ -1,4 +1,6 @@
 const Busboy = require('busboy');
+const { v4: uuidv4 } = require('uuid');
+
 const {
   WebUtils: {
     framework,
@@ -19,6 +21,11 @@ module.exports = (logger, minioRepository, config) => ({
   name: 'dojot-busboy-interceptor',
   middleware: async (req, res, next) => {
     try {
+      if (!req.is('multipart/form-data')) {
+        next(framework.errorTemplate.UnsupportedMediaType('Unsupported Media Type.', 'Unsupported Media Type.'));
+        return;
+      }
+
       const busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: Number(config.minio['upload.size.limit']) } });
       req.body = {};
       let loadedFile = false;
@@ -36,9 +43,11 @@ module.exports = (logger, minioRepository, config) => ({
       // eslint-disable-next-line no-unused-vars
       busboy.on('file', async (fieldname, fileStream, filename, encoding, mimetype) => {
         try {
+          const transactionCode = uuidv4();
           logger.debug('Gets file stream..');
           // If the file exceeds the size limit
-          fileStream.on('limit', () => {
+          fileStream.on('limit', async () => {
+            await minioRepository.rollbackObject(req.tenant, transactionCode);
             next(framework.errorTemplate.PayloadTooLarge('The file is too large', `The file exceeds the maximum size of ${config.minio['upload.size.limit']}`));
           });
 
@@ -49,7 +58,9 @@ module.exports = (logger, minioRepository, config) => ({
           }
 
           // Initialize a transaction
-          const fileinfo = await minioRepository.putTmpObject(req.tenant, fileStream);
+          const fileinfo = await minioRepository.putTmpObject(
+            req.tenant, fileStream, transactionCode,
+          );
           req.body.uploadedFile = {
             ...fileinfo,
             filename,
