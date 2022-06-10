@@ -65,11 +65,21 @@ class BasicCredentialsCtrl {
     if (!tenantId) {
       await this.tenant.create({ tenant });
     }
-    this.basicCredentials.create({
-      tenant,
-      deviceId,
-      password,
-    });
+
+    const filter = { tenant, deviceId };
+    const update = { password };
+
+    const basicCredentials = await this.basicCredentials.findOneAndUpdate(
+      filter,
+      update,
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+
+    basicCredentials.save();
+
     return {
       username,
       password,
