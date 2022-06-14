@@ -78,7 +78,6 @@ class RetrieverConsumer {
       'enable.async.commit': true,
       'kafka.consumer': {
         ...config.consumer,
-        'group.id': config.consumer['group.id'] + process.env.INSTANCE_ID,
       },
       'kafka.topic': config.topic,
     });
@@ -172,13 +171,11 @@ class RetrieverConsumer {
           this.inputPersister.dispatch(
             // write data to database
             payloadObject, opTypes[payloadObject.event],
-          ).then(() => {
-            ack();
-          }).catch((error) => {
+          ).catch((error) => {
             logger.error(`Dispatch failed. ${error.message}`);
-            ack();
           });
         }
+        ack();
       } catch (error) {
         logger.error(error);
         ack();
