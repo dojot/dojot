@@ -10,6 +10,8 @@ const mockConfig = {
   },
 };
 
+const mockDispatch = jest.fn(() => Promise.resolve());
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -34,7 +36,7 @@ const mockSdk = {
   })),
   LocalPersistence: {
     InputPersister: jest.fn().mockImplementation(() => ({
-      dispatch: jest.fn(() => Promise.resolve()),
+      dispatch: mockDispatch,
     })),
     InputPersisterArgs: {
       INSERT_OPERATION: 'put',
@@ -110,9 +112,29 @@ describe('RetrieverConsumer', () => {
     expect(error).toBeUndefined();
   });
 
-  it('Should return a callback to hear the tenancy topic', () => {
+  it('Should return a callback to hear the tenancy topic and run callback sucessfully', () => {
     let error;
     retrieverConsumer.registerCallbacksForDeviceEvents = jest.fn();
+
+    const data = {
+      value: '{"type": "CREATE"}',
+    };
+    const ack = jest.fn();
+    expect.assertions(1);
+    try {
+      const callback = retrieverConsumer.getCallbackForNewTenantEvents();
+      callback(data, ack);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+  it('Should return a callback to hear the tenancy topic and run callback sucessfully even when there is dispatch error', () => {
+    let error;
+    retrieverConsumer.registerCallbacksForDeviceEvents = jest.fn();
+    mockDispatch.mockImplementationOnce(() => Promise.reject(new Error('Error test')));
 
     const data = {
       value: '{"type": "CREATE"}',
@@ -141,12 +163,67 @@ describe('RetrieverConsumer', () => {
     expect(error).toBeUndefined();
   });
 
-  it('Should return a callback to hear the devices topic', () => {
+  it('getCallbacksForDeviceEvents() - Should run callback successfully when there is a device creation event ', () => {
     let error;
     retrieverConsumer.registerCallbacksForDeviceEvents = jest.fn();
 
     const data = {
       value: '{"event": "create"}',
+    };
+    const ack = () => jest.fn();
+    expect.assertions(1);
+    try {
+      const callback = retrieverConsumer.getCallbacksForDeviceEvents();
+      callback(data, ack);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+  it('getCallbacksForDeviceEvents() - Should run callback successfully when there is a device deletion event ', () => {
+    let error;
+    retrieverConsumer.registerCallbacksForDeviceEvents = jest.fn();
+
+    const data = {
+      value: '{"event": "remove"}',
+    };
+    const ack = () => jest.fn();
+    expect.assertions(1);
+    try {
+      const callback = retrieverConsumer.getCallbacksForDeviceEvents();
+      callback(data, ack);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+  it('getCallbacksForDeviceEvents() - Should run callback successfully even when there is dispatch error', () => {
+    mockDispatch.mockImplementationOnce(() => Promise.reject(new Error('Error test')));
+
+    let error;
+    const data = {
+      value: '{"event": "create"}',
+    };
+    const ack = () => jest.fn();
+    expect.assertions(1);
+    try {
+      const callback = retrieverConsumer.getCallbacksForDeviceEvents();
+      callback(data, ack);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeUndefined();
+  });
+
+  it('getCallbacksForDeviceEvents() - Should run callback successfully even when there is another error', () => {
+    let error;
+    const data = {
+      value: undefined,
     };
     const ack = () => jest.fn();
     expect.assertions(1);
@@ -200,6 +277,17 @@ describe('RetrieverConsumer', () => {
     expect(retrieverConsumer.idCallbackDeviceManager).toBeNull();
   });
 
+  it('Should not unregister callbacks in kafka consumer when there is none', async () => {
+    retrieverConsumer.consumer.unregisterCallback = jest.fn();
+    retrieverConsumer.idCallbackTenant = null;
+    retrieverConsumer.idCallbackDeviceManager = null;
+
+    await retrieverConsumer.unregisterCallbacks();
+
+    expect(retrieverConsumer.idCallbackTenant).toBeNull();
+    expect(retrieverConsumer.idCallbackDeviceManager).toBeNull();
+  });
+
   it('Should handle the error, when an error happened', async () => {
     let error;
 
@@ -216,5 +304,15 @@ describe('RetrieverConsumer', () => {
     }
 
     expect(error).toBeDefined();
+  });
+
+  it('Should run resume sucessfully', async () => {
+    retrieverConsumer.initCallbackForDeviceEvents = jest.fn();
+    retrieverConsumer.initCallbackForNewTenantEvents = jest.fn();
+
+    retrieverConsumer.resume();
+
+    expect(retrieverConsumer.initCallbackForDeviceEvents).toHaveBeenCalled();
+    expect(retrieverConsumer.initCallbackForNewTenantEvents).toHaveBeenCalled();
   });
 });
