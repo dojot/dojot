@@ -77,4 +77,4 @@ done
 echo "dojot MQTT broker at host '${DOJOT_MQTT_HOST}', port '${DOJOT_MQTT_PORT}' fully started."
 
 echo "Starting locust slave node ..."
-locust -f main.py --slave --master-host=${LOCUST_MASTER_HOST}
+locust -f main.py --worker --master-host=${LOCUST_MASTER_HOST}
