@@ -2,13 +2,13 @@ version: '3'
 services:
   locust-master:
     build:
-      context: ../../../
+      context: ../
       dockerfile: ./Dockerfile
       target: development
     command: bash master_entrypoint.sh
     volumes:
       # If you need to change code while running the container, activate this volume:
-       - ../src:/usr/src/app/src
+      - ../src:/usr/src/app/src
       # If you only need to generate certificates, activate this volume instead:
       - ../cert:/usr/src/app/cert
     environment:

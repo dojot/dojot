@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const {
   pipeline, Writable, Readable,
 } = require('stream');
@@ -116,8 +115,7 @@ module.exports = class MinIoRepository {
    *
    * @returns the transaction code and metadata of the put operation
    */
-  async putTmpObject(bucketName, fileStream) {
-    const transactionCode = uuidv4();
+  async putTmpObject(bucketName, fileStream, transactionCode) {
     this.logger.debug(`Start file transaction ${transactionCode}`);
     const info = await this.client.putObject(
       `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`, fileStream,

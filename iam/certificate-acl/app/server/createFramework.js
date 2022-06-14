@@ -14,7 +14,7 @@ const {
   readinessInterceptor,
 } = WebUtils.framework.interceptors;
 
-const scopedDIInterceptor = require('./express/interceptors/scopedDIInterceptor');
+const scopedDIInterceptor = container.resolve('scopedDIInterceptor');
 
 // eslint-disable-next-line no-unused-vars
 module.exports = (aclRoute, serviceStateManager, tenantService) => WebUtils.framework.createExpress(
@@ -33,7 +33,7 @@ module.exports = (aclRoute, serviceStateManager, tenantService) => WebUtils.fram
         logger,
       }),
       responseCompressInterceptor(),
-      scopedDIInterceptor(container),
+      scopedDIInterceptor,
     ],
     routes: ([
       aclRoute,
