@@ -15,9 +15,9 @@ const config = ConfigManager.getConfig('FILEMGMT');
 
 logger.debug('Loading secrets');
 Logger.setTransport('console', {
-  level: config.logger['console.level'],
+  level: config.log['console.level'],
 });
-Logger.setVerbose(config.logger.verbose);
+Logger.setVerbose(config.log.verbose);
 
 
 const secretsLoader = new SecretsLoader(config, logger);
