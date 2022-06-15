@@ -109,9 +109,11 @@ describe('CertificatesMgmt', () => {
   test('instantiate class', () => {
     expect.assertions(8);
 
-    certificatesMgmt = new CertificatesMgmt(mockOpensslWrapper,
+    certificatesMgmt = new CertificatesMgmt(
+      mockOpensslWrapper,
       mockX509IdentityMgmt,
-      serviceStateMock);
+      serviceStateMock,
+    );
 
     expect(certificatesMgmt.getCertificates().pathCrl).toBeDefined();
     expect(certificatesMgmt.getCertificates().pathCA).toBeDefined();
@@ -141,8 +143,7 @@ describe('CertificatesMgmt', () => {
     expect(mockUtil.createFile).toHaveBeenCalledWith('certs/key.pem', 'PrivateKey');
 
     // generateCertificate
-    expect(mockGenerateCsr).toHaveBeenCalledWith('PrivateKey',
-      mockConfig.certs['common.name'], mockConfig.certs.hostnames);
+    expect(mockGenerateCsr).toHaveBeenCalledWith('PrivateKey', mockConfig.certs['common.name'], mockConfig.certs.hostnames);
     expect(mockCreateCertificateByCSR)
       .toHaveBeenCalledWith('CSR', { application: mockConfig.app['sidecar.to'] });
     expect(mockUtil.createFile).toHaveBeenCalledWith('certs/cert.pem', 'Cert');

@@ -82,9 +82,7 @@ describe('X509Utils', () => {
 
   test('generateCsr: ok', async () => {
     mockCreateCSR.mockResolvedValueOnce({ csr: 'CSR' });
-    const newCsr = await openssl.getOpenSSL().generateCsr('privateKey',
-      'commonName',
-      ['altname']);
+    const newCsr = await openssl.getOpenSSL().generateCsr('privateKey', 'commonName', ['altname']);
 
     expect(mockCreateCSR).toHaveBeenCalled();
     expect(newCsr).toBe('CSR');
@@ -94,8 +92,7 @@ describe('X509Utils', () => {
     expect.assertions(2);
     mockCreateCSR.mockRejectedValueOnce(new Error());
     try {
-      await openssl.getOpenSSL().generateCsr('privateKey',
-        'commonName');
+      await openssl.getOpenSSL().generateCsr('privateKey', 'commonName');
     } catch (e) {
       expect(mockCreateCSR).toHaveBeenCalled();
       expect(e.message).toBe('Cannot generate a CSR');

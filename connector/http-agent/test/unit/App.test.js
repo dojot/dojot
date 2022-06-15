@@ -28,6 +28,13 @@ jest.mock('@dojot/microservice-sdk', () => mockSdk);
 jest.mock('../../app/express');
 jest.mock('../../app/express/routes/v1/IncomingMessages');
 
+const mockConsumerMessages = {
+  init: jest.fn(),
+  getCallbackForNewTenantEvents: jest.fn().mockReturnValue(jest.fn()),
+  initCallbackForNewTenantEvents: jest.fn(),
+};
+jest.mock('../../app/kafka/ConsumerMessages', () => jest.fn().mockImplementation(() => mockConsumerMessages));
+
 const mockServerInit = jest.fn();
 const mockServerRegisterShutdown = jest.fn();
 const mockServer = jest.fn().mockImplementation(() => ({
@@ -46,7 +53,7 @@ const mockProducerMessagesInit = jest.fn();
 const mockProducerMessages = jest.fn().mockImplementation(() => ({
   init: mockProducerMessagesInit,
 }));
-jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
+jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
 const App = require('../../app/App');
 

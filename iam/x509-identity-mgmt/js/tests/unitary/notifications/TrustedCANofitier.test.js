@@ -17,7 +17,7 @@ describe("Unit tests of script 'TrustedCANofitier.js'", () => {
 
   beforeAll(() => {
     trustedCANofitier = new TrustedCANofitier({
-      tenant: 'admin',
+      tenant: { id: 'admin' },
       xRequestId: 'e5b35ba5-4ce1-4c20-a5e7-94c161c0aa32',
       kafkaTopicSuffix: global.config.notifications.kafka.producer.trustedca.topic.suffix,
       notificationEngine: notificationEngineMock(),

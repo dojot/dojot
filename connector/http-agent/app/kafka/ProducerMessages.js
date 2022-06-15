@@ -3,7 +3,7 @@ const {
   Kafka: { Producer },
   Logger,
 } = require('@dojot/microservice-sdk');
-const { killApplication } = require('./Utils');
+const { killApplication } = require('../Utils');
 
 const logger = new Logger('http-agent:Producer');
 

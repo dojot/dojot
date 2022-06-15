@@ -1,6 +1,9 @@
 const {
   ConfigManager,
   Logger,
+  WebUtils: {
+    SecretFileHandler,
+  },
 } = require('@dojot/microservice-sdk');
 
 const util = require('util');
@@ -31,27 +34,27 @@ logger.info(`The final configuration:\n${util.inspect(config, false, 5, true)}`)
 
 const App = require('./app/App');
 
-process.on('unhandledRejection', async (reason) => {
-  // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
-  // no error handler is attached to the promise within a turn of the event loop.
-  logger.error(`Unhandled Rejection at: ${reason.stack || reason}.`);
+// process.on('unhandledRejection', async (reason) => {
+//   // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
+//   // no error handler is attached to the promise within a turn of the event loop.
+//   logger.error(`Unhandled Rejection at: ${reason.stack || reason}.`);
 
-  process.kill(process.pid, 'SIGTERM');
-});
+//   process.kill(process.pid, 'SIGTERM');
+// });
 
 
-process.on('uncaughtException', async (ex) => {
-  // The 'uncaughtException' event is emitted when an uncaught JavaScript
-  // exception bubbles all the way back to the event loop.
-  logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
+// process.on('uncaughtException', async (ex) => {
+//   // The 'uncaughtException' event is emitted when an uncaught JavaScript
+//   // exception bubbles all the way back to the event loop.
+//   logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
 
-  process.kill(process.pid, 'SIGTERM');
-});
+//   process.kill(process.pid, 'SIGTERM');
+// });
 
-const app = new App();
+const secretFileHandler = new SecretFileHandler(config, logger);
 
-// Initializing the service...
-(async () => {
+secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
+  const app = new App(config);
   try {
     logger.info('Initializing...');
     await app.init();
@@ -59,4 +62,7 @@ const app = new App();
     logger.error('Service will be close ', err);
     process.kill(process.pid, 'SIGTERM');
   }
-})();
+}).catch((error) => {
+  logger.error('Service will be close ', error);
+  process.kill(process.pid, 'SIGTERM');
+});

@@ -91,7 +91,7 @@ const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
   send: mockProducerMessagesSend,
 };
-jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
+jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
 jest.setTimeout(30000);
 
