@@ -274,7 +274,6 @@ describe('HTTPS', () => {
         .cert(certCN)
         .ca(ca)
         .then((response) => {
-          console.log(JSON.stringify(response.body));
           expect(response.statusCode).toStrictEqual(204);
         });
     });
