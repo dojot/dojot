@@ -1,5 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-try-expect */
+const { WebUtils } = jest.requireActual('@dojot/microservice-sdk');
+
 const mockConfig = {
   lightship: { a: 'abc' },
   url: {},
@@ -18,6 +20,7 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils,
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
