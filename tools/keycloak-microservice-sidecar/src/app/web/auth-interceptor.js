@@ -32,10 +32,12 @@ function createAuthInterceptor(listTenants, logger, path = '/') {
           }
         }
 
+        logger.debug('Invalid JWT token');
         err.message = 'Invalid JWT token';
         return next(err);
       }
 
+      logger.debug('Missing JWT token');
       err.message = 'Missing JWT token';
       return next(err);
     },

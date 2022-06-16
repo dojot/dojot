@@ -5,7 +5,7 @@ const {
   },
 } = require('@dojot/microservice-sdk');
 
-function createProxyInterceptor(listTenants, config, logger, path = '/'){
+function createProxyInterceptor(config, logger, path = '/'){
   return {
     path,
     name: 'keycloak-microservice-sidecar',

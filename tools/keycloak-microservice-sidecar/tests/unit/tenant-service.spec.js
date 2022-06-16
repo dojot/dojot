@@ -75,22 +75,27 @@ describe('TenantService', () => {
   });
 
   it('Should remove a tenant when the tenant exists', async () => {
+    const mockCloseSession = jest.fn();
     tenantService.listTenants = [{
       id: 'test1',
+      session: {
+        close: mockCloseSession,
+      }
     }];
 
     await tenantService.remove('test1');
 
     expect(tenantService.listTenants).toHaveLength(0);
+    expect(mockCloseSession).toHaveBeenCalled();
   });
 
   it('Should not remove a tenant when the informed tenant does not exist', async () => {
     tenantService.listTenants = [{
-      id: 'test1',
+      id: 'test2',
     }];
 
     await tenantService.remove('test1');
 
-    expect(tenantService.listTenants).toHaveLength(0);
+    expect(tenantService.listTenants).toHaveLength(1);
   });
 });

@@ -12,12 +12,18 @@ jest.mock('@dojot/microservice-sdk', () => ({
   },
 }));
 
-
 const ExpressAdapter = require('../../src/app/web/express-adapter');
+const config = { express: { trustproxy: {} }, proxy: { 'auth.mode': 'keycloak' }}
 
 describe('Express-adapter', () => {
-  it('Should return an express application', () => {
-    const app = ExpressAdapter.xadapt([], {}, { express: { trustproxy: {} }});
+  it('Should return an express application with keycloak authetication', () => {
+    const app = ExpressAdapter.xadapt([], {}, config);
+
+    expect(app).toBeDefined();
+  });
+
+  it('Should return an express application with legacy authetication', () => {
+    const app = ExpressAdapter.xadapt([], {},  { express: { trustproxy: {} }, proxy: { 'auth.mode': 'legacy' }});
 
     expect(app).toBeDefined();
   });
@@ -29,7 +35,7 @@ describe('Express-adapter', () => {
     expect.assertions(1);
 
     try {
-      ExpressAdapter.xadapt([], {}, { express: { trustproxy: {} }});
+      ExpressAdapter.xadapt([], {}, config);
     } catch( error) {
       expect(error).toBeDefined();
     }   

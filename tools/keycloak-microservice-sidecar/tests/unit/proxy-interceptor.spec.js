@@ -9,7 +9,7 @@ describe('ProxyInterceptor', () => {
   let proxyInterceptor;
 
   it('Should return an interceptor', () => {
-    proxyInterceptor = createProxyInterceptor({}, mockLogger);
+    proxyInterceptor = createProxyInterceptor({ server: { url: '/url' }}, mockLogger);
 
     expect(proxyInterceptor.name).toEqual('keycloak-microservice-sidecar');
     expect(proxyInterceptor.path).toEqual('/');
@@ -43,7 +43,7 @@ describe('ProxyInterceptor', () => {
         },
         proxy: {
           'faketoken.generate': false,
-        }
+        },
       },
       mockLogger,
     );
@@ -51,7 +51,7 @@ describe('ProxyInterceptor', () => {
     await proxyInterceptor.middleware(request, response, next);
   });
 
-  it('Should redirect the request with fake access_token', async () => {
+  it('Should redirect the request with keycloak access_token', async () => {
     expect.assertions(5);
 
     const request = {
@@ -59,6 +59,11 @@ describe('ProxyInterceptor', () => {
       headers: {},
       tenant: {
         id: 'test',
+        session: {
+          getTokenSet: () => ({
+            access_token: 'access_token',
+          }),
+        }
       }
     };
     const response = {};
@@ -80,7 +85,45 @@ describe('ProxyInterceptor', () => {
           url: 'server'
         },
         proxy: {
-          'faketoken.generate': true,
+          'token.insert': 'keycloak',
+        }
+      },
+      mockLogger,
+    );
+
+    await proxyInterceptor.middleware(request, response, next);
+  });
+
+  it('Should redirect the request with legacy access_token', async () => {
+    expect.assertions(5);
+
+    const request = {
+      url: '/url',
+      headers: {},
+      tenant: {
+        id: 'test',
+      },
+    };
+    const response = {};
+    const next = jest.fn();
+
+    mockProxy.mockImplementation((path) => {
+      expect(path).toEqual('server/url');
+      return (req, res, next) => {
+        expect(req).toBeDefined();
+        expect(req.headers.authorization).toBeDefined();
+        expect(res).toBeDefined();
+        expect(next).toBeDefined();
+      }
+    });
+
+    proxyInterceptor = createProxyInterceptor(
+      {
+        server: {
+          url: 'server'
+        },
+        proxy: {
+          'token.insert': 'legacy',
         }
       },
       mockLogger,

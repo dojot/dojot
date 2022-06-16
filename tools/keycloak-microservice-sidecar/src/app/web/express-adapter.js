@@ -21,7 +21,7 @@ module.exports = class ExpressAdapter {
     return WebUtils.framework.createExpress({
       interceptors: [
         getAuthInterceptor(listTenants, logger, config),
-        createProxyInterceptor(listTenants, config, logger),
+        createProxyInterceptor(config, logger),
         requestLogInterceptor({
           logger,
         }),

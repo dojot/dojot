@@ -54,9 +54,6 @@ const mockDojotClientHttp = {
 
 const mockKeycloakClientSession = {
   start: jest.fn(),
-  getTokenSet() {
-    return this.tokenSet ? this.tokenSet : null;
-  },
   close: jest.fn(),
 };
 
@@ -72,9 +69,7 @@ const mockDojotSDK = {
     registerShutdownHandler: jest.fn(),
     shutdown: jest.fn(),
     isServerShuttingDown: jest.fn(),
-    createBeacon: jest.fn(() => ({
-      die: () => jest.fn(),
-    })),
+    createBeacon: jest.fn(),
   })),
   WebUtils: {
     ...(dojotSDK.WebUtils),
@@ -97,7 +92,7 @@ const config = {
   proxy: {
     host: '0.0.0.0',
     port: 7000,
-    'faketoken.generate': true,
+    'auth.mode': 'keycloak',
   },
   keycloak: {
     url: 'http://keycloak:8080',
