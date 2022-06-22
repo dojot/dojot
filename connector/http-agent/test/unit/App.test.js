@@ -6,7 +6,21 @@ const mockConfig = {
   lightship: { a: 'abc' },
   url: {},
 };
+
+const mockConsumer = {
+  init: jest.fn(),
+  // eslint-disable-next-line no-unused-vars
+  registerCallback: jest.fn((topic, callback) => topic),
+  getStatus: jest.fn(() => ({
+    connected: true,
+  })),
+  finish: jest.fn(),
+};
+
 const mockSdk = {
+  Kafka: jest.fn().mockImplementation(() => ({
+    Consumer: mockConsumer,
+  })),
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
     transformObjectKeys: jest.fn((obj) => obj),
@@ -47,6 +61,12 @@ const mockProducerMessages = jest.fn().mockImplementation(() => ({
 }));
 jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
 
+const mockConsumerMessagesInit = jest.fn();
+const mockConsumerMessages = jest.fn().mockImplementation(() => ({
+  init: mockConsumerMessagesInit,
+}));
+jest.mock('../../app/kafka/ConsumerMessages', () => mockConsumerMessages);
+
 const App = require('../../app/App');
 
 describe('App', () => {
@@ -79,6 +99,7 @@ describe('App', () => {
 
       expect(mockRedisInit).toHaveBeenCalled();
       await expect(mockProducerMessagesInit).toHaveBeenCalled();
+      await expect(mockConsumerMessagesInit).toHaveBeenCalled();
       expect(mockServerInit).toHaveBeenCalled();
       expect(mockServerRegisterShutdown).toHaveBeenCalled();
     });

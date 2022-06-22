@@ -128,8 +128,9 @@ class RedisManager {
    * @returns Promise
    */
   setAsync(...args) {
+    const expiration = configRedis['fingerprint.expiration'];
     return timeout(
-      this.redisClient.setAsync(...args),
+      this.redisClient.setAsync(...args, 'EX', expiration),
       configRedis['operation.timeout.ms'],
     );
   }

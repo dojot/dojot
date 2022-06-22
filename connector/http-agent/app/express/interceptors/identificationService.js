@@ -13,7 +13,7 @@ const Unauthorized = new createError[401]();
  *
  * */
 module.exports = ({
-  redisManager, redisConfig, deviceAuthService, certificateAclService,
+  redisManager, deviceAuthService, certificateAclService,
 }) => ({
   cn: async (clientCert) => {
     try {
@@ -34,8 +34,7 @@ module.exports = ({
       }
 
       messageKeyFP = await certificateAclService.getAclEntries(fingerprint256);
-      const expiration = redisConfig['fingerprint.expiration'];
-      redisManager.setAsync(fingerprint256, messageKeyFP, 'EX', expiration);
+      redisManager.setAsync(fingerprint256, messageKeyFP);
       return messageKeyFP.split(':');
     } catch (e) {
       Forbidden.message = 'Client certificate is invalid';
