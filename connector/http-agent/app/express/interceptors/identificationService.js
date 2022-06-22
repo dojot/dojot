@@ -12,7 +12,9 @@ const Unauthorized = new createError[401]();
  * and add the new tenant request (req.tenant and req.deviceId).
  *
  * */
-module.exports = ({ redisManager, deviceAuthService, certificateAclService }) => ({
+module.exports = ({
+  redisManager, redisConfig, deviceAuthService, certificateAclService,
+}) => ({
   cn: async (clientCert) => {
     try {
       const { CN } = clientCert.subject;
@@ -32,7 +34,8 @@ module.exports = ({ redisManager, deviceAuthService, certificateAclService }) =>
       }
 
       messageKeyFP = await certificateAclService.getAclEntries(fingerprint256);
-      redisManager.setAsync(fingerprint256, messageKeyFP);
+      const expiration = redisConfig['fingerprint.expiration'];
+      redisManager.setAsync(fingerprint256, messageKeyFP, 'EX', expiration);
       return messageKeyFP.split(':');
     } catch (e) {
       Forbidden.message = 'Client certificate is invalid';

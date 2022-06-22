@@ -8,6 +8,7 @@ const deviceIdentificationInterceptor = require('./interceptors/deviceIdentifica
 const {
   express: configExpress,
   security: configSecurity,
+  redis: configRedis,
 } = ConfigManager.getConfig('HTTP_AGENT');
 
 /**
@@ -68,6 +69,7 @@ module.exports = (routes, serviceState, redisManager, deviceAuthService, certifi
         },
         identificationService: identificationService({
           redisManager,
+          configRedis,
           deviceAuthService,
           certificateAclService,
         }),
