@@ -155,7 +155,6 @@ describe('HTTPS', () => {
           .cert(cert)
           .ca(ca)
           .then((response) => {
-            console.log(JSON.stringify(response.body));
             expect(response.statusCode).toStrictEqual(204);
             expect(mockRedis.setAsync).toHaveBeenCalled();
           });
