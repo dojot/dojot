@@ -12,7 +12,9 @@ const Unauthorized = new createError[401]();
  * and add the new tenant request (req.tenant and req.deviceId).
  *
  * */
-module.exports = ({ redisManager, deviceAuthService, certificateAclService }) => ({
+module.exports = ({
+  redisManager, deviceAuthService, certificateAclService,
+}) => ({
   cn: async (clientCert) => {
     try {
       const { CN } = clientCert.subject;
