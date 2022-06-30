@@ -87,10 +87,9 @@ module.exports = ({
         query: { tenant, deviceId },
       } = req;
 
-      if(!tenant || !deviceId) throw new Error('Unidentified parameters');
+      if (!tenant || !deviceId) throw new Error('Unidentified parameters');
 
       return [tenant, deviceId];
-
     } catch (error) {
       Unauthorized.message = error.message;
       throw Unauthorized;

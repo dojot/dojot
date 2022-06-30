@@ -692,7 +692,7 @@ describe('params', () => {
         },
       })
       .then((response) => {
-        console.log(JSON.stringify(response.body))
+        console.log(JSON.stringify(response.body));
         expect(response.body.error).toEqual('Unidentified parameters');
       });
   });

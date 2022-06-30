@@ -43,18 +43,18 @@ module.exports = ({ config, identificationService }) => ({
       } catch (err) {
         return next(err);
       }
-    } 
+    }
 
-    if(
+    if (
       config.authorizationMode === 'params' &&
       reqType[3] === 'unsecure'
     ) {
       try {
-        [req.body.tenant, req.body.deviceId] = 
+        [req.body.tenant, req.body.deviceId] =
           await identificationService.params(req);
-        return next();  
+        return next();
       } catch (error) {
-        return next(error)
+        return next(error);
       }
     }
 
