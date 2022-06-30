@@ -656,3 +656,44 @@ describe('Unauthorized', () => {
       });
   });
 });
+
+describe('params', () => {
+  beforeAll(() => {
+    jest.clearAllMocks();
+    mockConfig.security['authorization.mode'] = 'params';
+    mockConfig.https['request.cert'] = false;
+  });
+
+  it('should successfully execute the request with tenant and deviceId in params', async () => {
+    mockRedis.getSecurity.mockReturnValue(true);
+    await requestHttp(app)
+      .post(`${urlUnsecureIncomingMessages}?tenant=tenanttest&deviceId=devicetest`)
+      .set('Authorization', `Basic ${validBasic}`)
+      .send({
+        ts: '2021-07-12T09:31:01.683000Z',
+        data: {
+          temperature: 25.7,
+        },
+      })
+      .then((response) => {
+        expect(response.statusCode).toStrictEqual(204);
+      });
+  });
+
+  it('should return unauthorized error: Unidentified parameters', async () => {
+    mockRedis.getSecurity.mockReturnValue(true);
+    await requestHttp(app)
+      .post(`${urlUnsecureIncomingMessages}`)
+      .set('Authorization', `Basic ${validBasic}`)
+      .send({
+        ts: '2021-07-12T09:31:01.683000Z',
+        data: {
+          temperature: 25.7,
+        },
+      })
+      .then((response) => {
+        console.log(JSON.stringify(response.body))
+        expect(response.body.error).toEqual('Unidentified parameters');
+      });
+  });
+});
