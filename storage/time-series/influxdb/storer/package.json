@@ -15,7 +15,8 @@
     "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js .",
-    "check-licenses": "apache2-license-checker"
+    "check-licenses": "apache2-license-checker",
+    "debug": "node --inspect=0.0.0.0 index.js"
   },
   "repository": {
     "type": "git",
