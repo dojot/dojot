@@ -141,7 +141,7 @@ describe('Test Influx Data Writer', () => {
     expect(mockPointString).toHaveBeenCalledTimes(1);
     expect(mockPointFloat).toHaveBeenCalledWith('dojot.a', 1);
     expect(mockPointBool).toHaveBeenCalledWith('dojot.b', false);
-    expect(mockPointString).toHaveBeenCalledWith('dojot.c', "c");
+    expect(mockPointString).toHaveBeenCalledWith('dojot.c', 'c');
 
     expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
     expect(mockParseDateTimeToUnixNs).toHaveBeenCalled();

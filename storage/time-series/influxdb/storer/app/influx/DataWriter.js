@@ -126,14 +126,12 @@ class DataWriter {
           logger.debug(`writer: setting key=${newKey}, value=${value}, type=${typeof value}`);
           if (this.writeAsString) {
             point.stringField(newKey, JSON.stringify(value));
+          } else if (typeof value === 'number') {
+            point.floatField(newKey, value);
+          } else if (typeof value === 'boolean') {
+            point.booleanField(newKey, value);
           } else {
-            if (typeof value === 'number') {
-              point.floatField(newKey, value);
-            } else if (typeof value === 'boolean') {
-              point.booleanField(newKey, value);
-            } else {
-              point.stringField(newKey, value);
-            }
+            point.stringField(newKey, value);
           }
         });
         logger.debug(`writer: The point will be write is ${point.toString()} in ${org} org`);
