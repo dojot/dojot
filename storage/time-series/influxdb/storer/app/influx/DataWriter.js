@@ -15,19 +15,22 @@ class DataWriter {
    * @param {String} url   Url to access influxdb
    * @param {String} token  A token with write permission in all orgs
    * @param {String} defaultBucket  Bucket Name for all data write
+   * @param {Boolean} writeAsString
    * @param {Object} writeOptions  Default {} (See more at https://influxdata.github.io/influxdb-client-js/influxdb-client.writeoptions.html)
    *
    * @throws If the value for `writeOptions.flushInterval` must be greater than 0
    */
-  constructor(url, token, defaultBucket, writeOptions = {}) {
+  constructor(url, token, defaultBucket, writeAsString, writeOptions = {}) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
+    logger.debug(`constructor: writeAsString=${writeAsString}`);
     logger.debug(`constructor: writeOptions=${JSON.stringify(writeOptions)}`);
     this.bucket = defaultBucket;
     this.precision = 'ns';
     this.writeOptions = writeOptions;
+    this.writeAsString = writeAsString;
 
     if (this.writeOptions.flushInterval && this.writeOptions.flushInterval <= 0) {
       throw new Error('The value for `writeOptions.flushInterval` must be greater than 0');
@@ -121,7 +124,17 @@ class DataWriter {
         Object.entries(attrs).forEach(([key, value]) => {
           const newKey = `${this.prefixFields}${key}`;
           logger.debug(`writer: setting key=${newKey}, value=${value}, type=${typeof value}`);
-          point.stringField(newKey, JSON.stringify(value));
+          if (this.writeAsString) {
+            point.stringField(newKey, JSON.stringify(value));
+          } else {
+            if (typeof value === 'number') {
+              point.floatField(newKey, value);
+            } else if (typeof value === 'boolean') {
+              point.booleanField(newKey, value);
+            } else {
+              point.stringField(newKey, value);
+            }
+          }
         });
         logger.debug(`writer: The point will be write is ${point.toString()} in ${org} org`);
         this.getWriteAPI(org).writePoint(point);
