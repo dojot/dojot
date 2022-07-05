@@ -82,7 +82,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, true);
   });
 
   test('queryByField - test ok 1', async () => {
