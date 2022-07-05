@@ -81,4 +81,18 @@ module.exports = ({
       throw Unauthorized;
     }
   },
+  params: async (req) => {
+    try {
+      const {
+        query: { tenant, deviceId },
+      } = req;
+
+      if (!tenant || !deviceId) throw new Error('Unidentified parameters');
+
+      return [tenant, deviceId];
+    } catch (error) {
+      Unauthorized.message = error.message;
+      throw Unauthorized;
+    }
+  },
 });
