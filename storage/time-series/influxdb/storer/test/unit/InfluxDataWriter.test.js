@@ -59,7 +59,7 @@ describe('Test Influx Data Writer', () => {
   });
 
   test('Instantiate class', () => {
-    dataQuery = new DataWriter('url', 'token', 'defaultBucket');
+    dataQuery = new DataWriter('url', 'token', 20000, 'defaultBucket');
   });
 
   test('write - test ok iso date', async () => {

@@ -14,15 +14,17 @@ class DataWriter {
    *
    * @param {String} url   Url to access influxdb
    * @param {String} token  A token with write permission in all orgs
+   * @param {Number} timeout Connection timeout with influxdb
    * @param {String} defaultBucket  Bucket Name for all data write
    * @param {Object} writeOptions  Default {} (See more at https://influxdata.github.io/influxdb-client-js/influxdb-client.writeoptions.html)
    *
    * @throws If the value for `writeOptions.flushInterval` must be greater than 0
    */
-  constructor(url, token, defaultBucket, writeOptions = {}) {
+  constructor(url, token, timeout, defaultBucket, writeOptions = {}) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
+    logger.debug(`constructor: timeout=${timeout}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
     logger.debug(`constructor: writeOptions=${JSON.stringify(writeOptions)}`);
     this.bucket = defaultBucket;
@@ -53,7 +55,7 @@ class DataWriter {
 
     logger.debug(`final writeOptions: ${util.inspect(writeOptions)}`);
 
-    this.influxDB = new InfluxDB({ url, token });
+    this.influxDB = new InfluxDB({ url, token, timeout });
 
     /**
      * Map instances for WriteApi for each org
