@@ -12,10 +12,12 @@ const mockDependencies = ({
   },
 });
 
+jest.mock('../../src/app/web/express-adapter', () => ({
+  xadapt: jest.fn(),
+}));
+
 jest.mock('../../src/dependencies', () => jest.fn().mockReturnValue(mockDependencies));
-
 const App = require('../../src/app/web/app');
-
 const mockLogger = require('../mocks/mock-logger');
 
 describe('App Main', () => {

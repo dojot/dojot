@@ -1,6 +1,7 @@
 const { WebUtils } = require('@dojot/microservice-sdk');
 
-const createProxyInterceptor = require('./proxy-interceptor')
+const createProxyInterceptor = require('./proxy-interceptor');
+const getAuthInterceptor = require('./auth-interceptor');
 
 module.exports = class ExpressAdapter {
   /**
@@ -15,12 +16,11 @@ module.exports = class ExpressAdapter {
   static xadapt(listTenants, logger, config) {
     const {
       requestLogInterceptor,
-      createKeycloakAuthInterceptor,
     } = WebUtils.framework.interceptors;
 
     return WebUtils.framework.createExpress({
       interceptors: [
-        createKeycloakAuthInterceptor(listTenants, logger),
+        getAuthInterceptor(listTenants, logger, config),
         createProxyInterceptor(config, logger),
         requestLogInterceptor({
           logger,

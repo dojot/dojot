@@ -103,7 +103,8 @@ RUN apk add --no-cache --virtual .build-deps \
 COPY ./vernemq-${VERNEMQ_VERSION}-*.patch ./
 
 # Aplly patches
-RUN patch -p1 < vernemq-${VERNEMQ_VERSION}-fingerprint.patch \
+RUN patch -p1 < vernemq-${VERNEMQ_VERSION}-deprecate-git-protocol.patch \
+    && patch -p1 < vernemq-${VERNEMQ_VERSION}-fingerprint.patch \
     && patch -p1 < vernemq-${VERNEMQ_VERSION}-trusted-cert-refresh.patch
 
 COPY bin/build.sh build.sh

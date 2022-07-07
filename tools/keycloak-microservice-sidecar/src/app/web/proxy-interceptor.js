@@ -2,7 +2,7 @@ const proxy = require('express-http-proxy');
 const {
   WebUtils : {
     createTokenGen,
-  }
+  },
 } = require('@dojot/microservice-sdk');
 
 function createProxyInterceptor(config, logger, path = '/'){
@@ -14,12 +14,16 @@ function createProxyInterceptor(config, logger, path = '/'){
     ) => {
       const newPath = `${config.server.url}${req.url}`;
 
-      if(config.proxy['faketoken.generate']) {
+      if(config.proxy['token.insert'] === 'legacy') {
         const tokenGen = createTokenGen();
         const token = await tokenGen.generate({ payload: {}, tenant: req.tenant.id });
         req.headers.authorization = `Bearer ${token}`;
+      } else if(config.proxy['token.insert'] === 'keycloak') {
+        const token = req.tenant.session.getTokenSet().access_token ;
+        req.headers.authorization = `Bearer ${token}`;
       }
       
+      req.tenant = null;
       const redirect = proxy(newPath);
       redirect(req, res, next);
     }

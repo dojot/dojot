@@ -38,7 +38,11 @@ mkdir -p "${CERT_DIR}${REVOKE_CERT_DIR}"
 START_TIME=$(date +'%s')
 echo "Witing for Redis fully start. Host '${REDIS_HOST}', '${REDIS_PORT}'..."
 echo "Try ping Redis... "
-PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" ping | grep PONG)
+if [[ -z "$REDIS_PASSWD" ]] ;  then
+    PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" ping | grep PONG)
+else
+    PONG=$(redis-cli -h "${REDIS_HOST}" -p "${REDIS_PORT}" -a "${REDIS_PASSWD}" ping | grep PONG)
+fi
 while [ -z "${PONG}" ]; do
     sleep 3
     echo "Retry Redis ping... "
@@ -73,4 +77,4 @@ done
 echo "dojot MQTT broker at host '${DOJOT_MQTT_HOST}', port '${DOJOT_MQTT_PORT}' fully started."
 
 echo "Starting locust slave node ..."
-locust -f main.py --slave --master-host=${LOCUST_MASTER_HOST}
+locust -f main.py --worker --master-host=${LOCUST_MASTER_HOST}

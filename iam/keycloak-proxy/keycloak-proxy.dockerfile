@@ -27,7 +27,6 @@ COPY package-lock.json package-lock.json
 RUN npm install --only=prod
 
 COPY src ./src
-COPY docs ./docs
 
 FROM node:12.18-alpine
 
@@ -44,7 +43,7 @@ COPY --from=base /opt/keycloak-proxy /opt/keycloak-proxy
 
 CMD ["npm", "run", "start"]
 
-EXPOSE 7000 9229
+EXPOSE 7000
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
     CMD curl -f http://localhost:9000/health || exit 1
