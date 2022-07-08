@@ -62,6 +62,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: keycloak-proxy.dockerfile
-          workdir: keycloak-proxy
+          workdir: iam/keycloak-proxy/
           buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
           tag_names: true # tag will be based in branch name or tag name
