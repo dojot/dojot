@@ -5,13 +5,12 @@ const {
 
 const App = require('./app/app');
 
-
 // External dependencies
 const openApiPath = path.join(__dirname, '../docs/v1.yml');
 ConfigManager.loadSettings('KEYCLOAKPROXY', 'default.conf');
 const config = ConfigManager.getConfig('KEYCLOAKPROXY');
-Logger.setLevel('console', 'debug');
 const logger = new Logger('keycloak-proxy:Server');
+Logger.setLevel('console', 'debug');
 
 const secretHandler = new SecretFileHandler(config, logger);
 
