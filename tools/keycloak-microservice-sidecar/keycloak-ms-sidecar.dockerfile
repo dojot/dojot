@@ -1,6 +1,6 @@
 FROM node:12.18-alpine AS base
 
-WORKDIR /opt/filemgmt
+WORKDIR /opt/keycloaksidecar
 
 RUN apk --no-cache add \
     bash \
@@ -27,11 +27,11 @@ COPY package-lock.json package-lock.json
 RUN npm install --only=prod
 
 COPY src ./src
-COPY docs ./docs
+# COPY docs ./docs
 
 FROM node:12.18-alpine
 
-WORKDIR /opt/devicemgmt
+WORKDIR /opt/keycloaksidecar
 
 RUN apk --no-cache add \
     libsasl \
@@ -40,7 +40,7 @@ RUN apk --no-cache add \
     tini \
     curl
 
-COPY --from=base /opt/devicemgmt /opt/devicemgmt
+COPY --from=base /opt/keycloaksidecar /opt/keycloaksidecar
 
 CMD ["npm", "run", "start"]
 
