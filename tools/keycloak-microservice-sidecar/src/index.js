@@ -20,7 +20,7 @@ Logger.setTransport('console', {
 });
 Logger.setVerbose(config.logger.verbose);
 
-logger.debug('Loading secrets');
+logger.debug('Loading secrets..');
 const secretHandler = new SecretFileHandler(config, logger);
 
 secretHandler

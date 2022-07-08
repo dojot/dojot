@@ -27,7 +27,7 @@ jobs:
 
       - name: npm check-licenses and test
         run: |
-          cd iam/keycloak-proxy
+          cd iam/keycloak-proxy/
           npm ci
           npm run check-licenses
           npm run test

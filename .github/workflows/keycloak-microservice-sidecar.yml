@@ -27,7 +27,7 @@ jobs:
 
       - name: npm check-licenses and test
         run: |
-          cd tools/keycloak-microservice-sidecar
+          cd tools/keycloak-microservice-sidecar/
           npm ci
           npm run check-licenses
           npm run test
