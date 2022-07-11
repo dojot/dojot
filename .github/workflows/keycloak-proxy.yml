@@ -58,7 +58,7 @@ jobs:
       - name: Build and Push
         uses: elgohr/Publish-Docker-Github-Action@2.11
         with:
-          name: ${{ steps.get_owner.outputs.owner }}/file-mgmt
+          name: ${{ steps.get_owner.outputs.owner }}/keycloak-proxy
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           dockerfile: keycloak-proxy.dockerfile

@@ -14,13 +14,12 @@ config.server = {
 };
 
 const logger = new Logger('microservice-keycloak-sidecar:Server');
-
 Logger.setTransport('console', {
   level: config.logger['console.level'],
 });
 Logger.setVerbose(config.logger.verbose);
-
 logger.debug('Loading secrets..');
+
 const secretHandler = new SecretFileHandler(config, logger);
 
 secretHandler
