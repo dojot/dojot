@@ -9,11 +9,11 @@ const App = require('./app/app');
 const openApiPath = path.join(__dirname, '../docs/v1.yml');
 ConfigManager.loadSettings('KEYCLOAKPROXY', 'default.conf');
 const config = ConfigManager.getConfig('KEYCLOAKPROXY');
+
 const logger = new Logger('keycloak-proxy:Server');
 Logger.setLevel('console', 'debug');
 
 const secretHandler = new SecretFileHandler(config, logger);
-
 secretHandler.handleCollection(['keycloak.proxy.secret', 'keycloak.proxy.password'], '/secrets/').then(async () => {
   try {
     const app = new App(config, logger, openApiPath);
