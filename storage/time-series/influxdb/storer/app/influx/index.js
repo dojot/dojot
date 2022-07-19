@@ -42,6 +42,7 @@ class InfluxDB {
       configInflux.url,
       configInflux['default.token'],
       configInflux['default.bucket'],
+      configInflux['default.write.as.string'],
       configInfluxWriteOptionsCamelCase,
     );
     this.influxMeasurement = new InfluxMeasurement(
