@@ -12,7 +12,7 @@ const INPUT_CONFIG = {
   levels: [
     {
       type: 'dynamic',
-      source: 'service',
+      source: 'meta.service',
       options: {
         keyEncoding: 'utf8',
         valueEncoding: 'bool',
@@ -25,7 +25,7 @@ const INPUT_CONFIG = {
       pair: {
         key: {
           type: 'dynamic',
-          source: 'device',
+          source: 'data.id',
         },
         value: {
           type: 'static',
