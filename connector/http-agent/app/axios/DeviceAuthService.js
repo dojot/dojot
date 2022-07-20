@@ -5,7 +5,8 @@ class DeviceAuthService {
    *
    * @param {string} tenantsRouteUrl Url for api that returns authentication status
    */
-  constructor(deviceAuthRouteUrl, dojotClientHttp) {
+  constructor(tenantManager, deviceAuthRouteUrl, dojotClientHttp) {
+    this.tenantManager = tenantManager;
     this.deviceAuthRouteUrl = deviceAuthRouteUrl;
     this.dojotClientHttp = dojotClientHttp;
   }
@@ -19,22 +20,28 @@ class DeviceAuthService {
    *
    * @returns authentication status
    */
-  async getAuthenticationStatus(tenant, username, password) {
+  async getAuthenticationStatus(tenantId, username, password) {
+    const tenant = this.tenantManager.findTenant(tenantId);
     const token = tenant.session.getTokenSet().access_token;
 
     try {
-      await this.dojotClientHttp.request({
-        url: this.deviceAuthRouteUrl,
-        method: 'GET',
-        timeout: 15000,
-        body: {
-          username,
-          password,
+      await this.dojotClientHttp.request(
+        {
+          url: this.deviceAuthRouteUrl,
+          method: 'POST',
+          timeout: 15000,
+          data: {
+            username,
+            password,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        12000,
+        3,
+      );
       return true;
     } catch (err) {
       return false;
