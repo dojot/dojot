@@ -113,10 +113,14 @@ class DeviceManagerService {
     for (const device of devices) {
       // Write devices
       // eslint-disable-next-line no-await-in-loop
-      await this.inputPersister.dispatch(
-        { device, service: tenant.id },
-        InputPersisterArgs.INSERT_OPERATION,
-      );
+      await this.addNewDevice({
+        data: {
+          id: device,
+        },
+        meta: {
+          service: tenant.id,
+        },
+      });
     }
   }
 

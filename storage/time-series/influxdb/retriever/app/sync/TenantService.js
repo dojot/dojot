@@ -67,6 +67,7 @@ class TenantService {
    */
   async loadTenants() {
     try {
+      await this.clearTenants();
       await this.requestTenants();
       await this.saveTenants();
     } catch (requestError) {
@@ -75,7 +76,6 @@ class TenantService {
 
       try {
         // Processing of data obtained from the database
-        this.tenants = [];
         const outerThis = this;
         const tenantWritableStream = Writable({
           async write(key, encoding, cb) {
@@ -123,7 +123,15 @@ class TenantService {
         signatureKey: tenant.signatureKey,
       },
     }, InputPersisterArgs.DELETE_OPERATION);
-    this.tenants = this.tenants.filter((tenantItem) => tenantItem.id !== tenant.id);
+
+    this.tenants = this.tenants.filter((tenantItem) => {
+      if (tenantItem.id === tenant.id) {
+        tenantItem.session.close();
+        return false;
+      }
+
+      return true;
+    });
   }
 
   async saveTenants() {
@@ -184,6 +192,11 @@ class TenantService {
     );
     await keycloakSession.start();
     return keycloakSession;
+  }
+
+  async clearTenants() {
+    const tenantPromise = this.tenants.map((tenant) => this.deleteTenant(tenant));
+    await Promise.all(tenantPromise);
   }
 }
 
