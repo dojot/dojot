@@ -82,7 +82,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, true);
   });
 
   test('queryByField - test ok 1', async () => {
@@ -337,6 +337,58 @@ describe('Test Influx Data Query', () => {
     } catch (e) {
       expect(e.message).toBe('Generic error');
     }
+  });
+
+  /* Test block */
+  test('Instantiate class', () => {
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, false);
+  });
+
+  test('queryByField - test ok 1', async () => {
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
+    const tableMeta2 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 10 })) };
+    const tableMeta3 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: true })) };
+    const tableMeta4 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: null })) };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x1', tableMeta1);
+        next('x2', tableMeta2);
+        next('x3', tableMeta3);
+        next('x4', tableMeta4);
+        complete();
+      },
+    );
+    const x = await dataQuery.queryByField('org', 'measurement', 'field', {}, {}, 'desc');
+    expect(x).toStrictEqual({
+      result: [{ ts: 'ts-time', value: 'value' }, {
+        ts: 'ts-time',
+        value: 10,
+      }, {
+        ts: 'ts-time',
+        value: true,
+      }, {
+        ts: 'ts-time',
+        value: null,
+      }],
+      totalItems: 4,
+    });
+  });
+
+
+  test('queryByField - test ok 2', async () => {
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x1', tableMeta1);
+        complete();
+      },
+    );
+
+    const x = await dataQuery.queryByField('org', 'measurement', 'field', { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc');
+    expect(x).toStrictEqual({
+      result: [{ ts: 'ts-time', value: 'value' }],
+      totalItems: 1,
+    });
   });
 
 
