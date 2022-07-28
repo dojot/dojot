@@ -74,6 +74,25 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(Utils.error_message(
             101010), "101010\n")
 
+    def test_conack_error_message(self):
+        """
+        conack_error_message() should return the correct names for errors.
+        """
+        self.assertEqual(Utils.conack_error_message(
+            mqtt.CONNACK_ACCEPTED), "CONNACK_ACCEPTED")
+        self.assertEqual(Utils.conack_error_message(
+            mqtt.CONNACK_REFUSED_PROTOCOL_VERSION), "CONNACK_REFUSED_PROTOCOL_VERSION")
+        self.assertEqual(Utils.conack_error_message(
+            mqtt.CONNACK_REFUSED_IDENTIFIER_REJECTED), "CONNACK_REFUSED_IDENTIFIER_REJECTED")
+        self.assertEqual(Utils.conack_error_message(
+            mqtt.CONNACK_REFUSED_SERVER_UNAVAILABLE), "CONNACK_REFUSED_SERVER_UNAVAILABLE")
+        self.assertEqual(Utils.conack_error_message(
+            mqtt.CONNACK_REFUSED_BAD_USERNAME_PASSWORD), "CONNACK_REFUSED_BAD_USERNAME_PASSWORD")
+        self.assertEqual(Utils.conack_error_message(
+            mqtt.CONNACK_REFUSED_NOT_AUTHORIZED), "CONNACK_REFUSED_NOT_AUTHORIZED")
+        self.assertEqual(Utils.conack_error_message(
+            101010), "101010\n")
+
     def test_log_level(self):
         """"
         log_level() should return correct log level
@@ -152,7 +171,7 @@ class TestUtils(unittest.TestCase):
         fire_locust_failure() should fire a Locust event on failure
         """
         Utils.fire_locust_failure()
-        mock_events.request_failure.fire.assert_called_once()
+        mock_events.request.fire.assert_called_once()
         mock_events.reset_mock()
 
     @staticmethod
@@ -162,7 +181,7 @@ class TestUtils(unittest.TestCase):
         fire_locust_success() should fire a Locust event on success
         """
         Utils.fire_locust_success()
-        mock_events.request_success.fire.assert_called_once()
+        mock_events.request.fire.assert_called_once()
         mock_events.reset_mock()
 
     def test_seconds_to_milliseconds(self):

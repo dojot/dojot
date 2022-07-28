@@ -20,26 +20,32 @@ MESSAGE_TYPE_RECV_MESSAGE = 'recv_message'
 MESSAGE_TYPE_RENEW = 'renew'
 MESSAGE_TYPE_REVOKE = 'revoke'
 
+logger = Utils.create_logger("mqtt_client")
+
 
 class LocustError(Exception):
     """
     Locust error exception.
     """
 
+
 class ConnectError(Exception):
     """
     Connection error exception.
     """
+
 
 class DisconnectError(Exception):
     """
     Disconnection error exception.
     """
 
+
 class CertRevogationError(Exception):
     """
     Certificate revogation error exception.
     """
+
 
 class CertRenovationError(Exception):
     """
@@ -51,6 +57,7 @@ class MQTTClient:
     """
     MQTT client to load test Dojot MQTT IoTAgent.
     """
+
     def __init__(self,
                  device_id: str,
                  run_id: str,
@@ -66,8 +73,6 @@ class MQTTClient:
             should_revoke: whether this client should have its certificate revoked
             should_renew: whether this client should have its certificate renewed
         """
-        self.logger = Utils.create_logger("mqtt_client")
-
         Utils.validate_tenant(CONFIG["app"]["tenant"])
         Utils.validate_device_id(device_id)
 
@@ -151,7 +156,6 @@ class MQTTClient:
         self.mqttc.on_subscribe = self.locust_on_subscribe
         self.mqttc.on_message = self.locust_on_message
 
-
     def connect(self) -> None:
         """
         Connects to MQTT host.
@@ -162,12 +166,11 @@ class MQTTClient:
                                      keepalive=CONFIG['mqtt']['con_timeout'])
             self.mqttc.loop_start()
         except Exception as exception:
-            self.logger.error("Error while connecting to the broker: %s", str(exception))
+            logging.error("Error while connecting to the broker: %s", str(exception))
             Utils.fire_locust_failure(
                 request_type=REQUEST_TYPE,
                 name='connect',
                 response_time=0,
-                response_length=0,
                 exception=ConnectError("disconnected")
             )
 
@@ -178,15 +181,21 @@ class MQTTClient:
         self.disconnect_forever = True
         self.mqttc.disconnect()
 
-    def publish(self) -> None:
+    def publish(self, payload: dict = None, send_timestamp: bool = True) -> None:
         """
         Handles the publishing of messages to MQTT host.
         """
-
         start_time = Utils.seconds_to_milliseconds(time.time())
-        payload = {"timestamp": start_time}
-
         try:
+            if payload is None:
+                payload = dict()
+
+            if not isinstance(payload, dict):
+                raise ValueError('Payload must be a dict')
+
+            if send_timestamp:
+                payload["timestamp"] = start_time
+
             err, mid = self.mqttc.publish(
                 topic=self.topic,
                 payload=json.dumps(payload),
@@ -232,7 +241,7 @@ class MQTTClient:
 
         except Exception as exception:
             error = Utils.error_message(int(str(exception)))
-            self.logger.error("Error while subscribing: %s", error)
+            logging.error("Error while subscribing: %s", error)
 
             Utils.fire_locust_failure(
                 request_type=REQUEST_TYPE,
@@ -258,7 +267,6 @@ class MQTTClient:
             else:
                 self.mqttc.reconnect()
 
-
     ###############
     ## Callbacks ##
     ###############
@@ -274,7 +282,6 @@ class MQTTClient:
         """
         end_time = Utils.seconds_to_milliseconds(time.time())
         message = self.submmap.pop(mid, None)
-
 
         if message is None:
             Utils.fire_locust_failure(
@@ -324,7 +331,7 @@ class MQTTClient:
         """
         Connection callback function.
         """
-        if result_code == mqtt.MQTT_ERR_SUCCESS:
+        if result_code == mqtt.CONNACK_ACCEPTED:
             self.subscribe()
             self.is_connected = True
             Utils.fire_locust_success(
@@ -335,12 +342,12 @@ class MQTTClient:
             )
             self.start_time = Utils.seconds_to_milliseconds(time.time())
         else:
-            error = Utils.error_message(result_code)
+            error = Utils.conack_error_message(result_code)
             Utils.fire_locust_failure(
                 request_type=REQUEST_TYPE,
                 name=MESSAGE_TYPE_CONNECT,
                 response_time=0,
-                exception=DisconnectError(error)
+                exception=ConnectError(error)
             )
 
     def locust_on_disconnect(self, _client: mqtt.Client, _userdata, result_code: int) -> None:
@@ -367,7 +374,7 @@ class MQTTClient:
             try:
                 publish_time = float(json.loads(message.payload.decode())["timestamp"])
             except Exception as exception:
-                self.logger.error("Error while parsing the message payload: %s", str(exception))
+                logging.error("Error while parsing the message payload: %s", str(exception))
                 raise Exception(str(exception))
             else:
                 Utils.fire_locust_success(
@@ -376,7 +383,6 @@ class MQTTClient:
                     response_time=Utils.seconds_to_milliseconds(time.time()) - publish_time,
                     response_length=len(message.payload)
                 )
-
 
     #################
     ## Certificate ##
@@ -407,11 +413,10 @@ class MQTTClient:
                 request_type=REQUEST_TYPE,
                 name=MESSAGE_TYPE_RENEW,
                 response_time=0,
-                response_length=0,
                 exception=CertRenovationError("failed to renew")
             )
-            self.logger.error("An error occurred while trying to renew the certificate")
-            self.logger.error(str(exception))
+            logging.error("An error occurred while trying to renew the certificate")
+            logging.error(str(exception))
             return False
 
         else:
@@ -440,7 +445,7 @@ class MQTTClient:
         """
         try:
             if CertUtils.has_been_revoked(self.new_cert):
-                self.logger.debug("Already revoked, skipping step...")
+                logging.debug("Already revoked, skipping step...")
             else:
                 CertUtils.revoke_cert(self.new_cert)
                 Utils.fire_locust_success(
@@ -454,14 +459,13 @@ class MQTTClient:
             return True
 
         except Exception as exception:
-            self.logger.error("An error occurred while trying to revoke the certificate")
-            self.logger.error(str(exception))
+            logging.error("An error occurred while trying to revoke the certificate")
+            logging.error(str(exception))
 
         Utils.fire_locust_failure(
             request_type=REQUEST_TYPE,
             name=MESSAGE_TYPE_REVOKE,
             response_time=0,
-            response_length=0,
             exception=CertRevogationError("certificate not revoked")
         )
         return False
@@ -472,7 +476,7 @@ class MQTTClient:
         """
         end_time = Utils.seconds_to_milliseconds(time.time())
         return self.should_renew and \
-            end_time - self.start_time >= CONFIG["security"]["time_to_renew"]
+               end_time - self.start_time >= CONFIG["security"]["time_to_renew"]
 
     def should_revoke_now(self) -> bool:
         """
@@ -480,4 +484,4 @@ class MQTTClient:
         """
         end_time = Utils.seconds_to_milliseconds(time.time())
         return self.should_revoke and \
-            end_time - self.start_time >= CONFIG["security"]["time_to_revoke"]
+               end_time - self.start_time >= CONFIG["security"]["time_to_revoke"]

@@ -256,6 +256,20 @@ class MQTTClientPublish(unittest.TestCase):
         keys_len = len(client.pubmmap.keys())
         self.assertEqual(keys_len, 0)
 
+    def test_publish_error2(self, mock_utils, mock_paho, _mock_json):
+        """
+        Should not publish a message successfully when the payload is not None or dict
+        """
+        mock_paho.Client().publish.return_value = (10, MagicMock())
+        client = MQTTClient("123", "987", False, False)
+        with self.assertRaises(ValueError):
+            client.publish(payload=[1, 2, 3])
+            mock_utils.error_message.assert_called_once_with(10)
+            mock_utils.fire_locust_failure.assert_called_once()
+
+        keys_len = len(client.pubmmap.keys())
+        self.assertEqual(keys_len, 0)
+
 
 @patch('src.mqtt_locust.mqtt_client.mqtt')
 @patch('src.mqtt_locust.mqtt_client.Utils')
@@ -356,10 +370,9 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
         """
         Should fire locust success on connection callback
         """
-        mock_paho.MQTT_ERR_SUCCESS = 1
         client = MQTTClient("123", "987", False, False)
         client.subscribe = MagicMock()
-        client.locust_on_connect(client.mqttc, {}, {}, 1)
+        client.locust_on_connect(client.mqttc, {}, {}, mock_paho.CONNACK_ACCEPTED)
         client.subscribe.assert_called_once()
         mock_utils.fire_locust_success.assert_called_once()
 
@@ -367,10 +380,9 @@ class MQTTClientLocustOnConnect(unittest.TestCase):
         """
         Should fire locust failure on connection callback
         """
-        mock_paho.MQTT_ERR_SUCCESS = 1
         client = MQTTClient("123", "987", False, False)
-        client.locust_on_connect(client.mqttc, {}, {}, 101010)
-        mock_utils.error_message.assert_called_once()
+        client.locust_on_connect(client.mqttc, {}, {}, mock_paho.CONNACK_REFUSED_NOT_AUTHORIZED)
+        mock_utils.conack_error_message.assert_called_once()
         mock_utils.fire_locust_failure.assert_called_once()
 
 

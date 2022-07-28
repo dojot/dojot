@@ -3,10 +3,11 @@ const HTTPStatus = require('http-status-codes');
 
 const {
   WebUtils: { framework: { errorTemplate } },
-  Logger,
 } = require('@dojot/microservice-sdk');
+const DIContainer = require('../../DIContainer');
 
-const logger = new Logger('certificate-acl:server:handler');
+const container = DIContainer();
+const logger = container.resolve('logger');
 
 function queryOwnerByFingerprintFromCache(redisManager, fingerprint) {
   return redisManager.getAsync(fingerprint).then((reply) => {

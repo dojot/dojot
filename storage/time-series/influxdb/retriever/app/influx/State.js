@@ -1,23 +1,21 @@
-const { InfluxDB } = require('@influxdata/influxdb-client');
 const { HealthAPI, ReadyAPI } = require('@influxdata/influxdb-client-apis');
-const { Logger } = require('@dojot/microservice-sdk');
+const { Logger, ConfigManager: { getConfig } } = require('@dojot/microservice-sdk');
 
 
 const logger = new Logger('influxdb-retriever:influx/State');
+const { influx: configInflux } = getConfig('RETRIEVER');
 
 /**
  * This class handles with State (ready and heath) from InfluxDB
  * @class
  */
-class State {
+class InfluxState {
   /**
    *
    * @param {String} url Url to access influxdb
    */
-  constructor(url) {
-    logger.debug('constructor:');
-    logger.debug(`constructor: url=${url}`);
-    const influxDB = new InfluxDB({ url });
+  constructor(influxDB, serviceState) {
+    this.serviceState = serviceState;
     this.healthAPI = new HealthAPI(influxDB);
     this.readyAPI = new ReadyAPI(influxDB);
   }
@@ -53,5 +51,22 @@ class State {
       return false;
     }
   }
+
+  /**
+   * Create a 'healthCheck' for influxDB
+   */
+  createInfluxHealthChecker() {
+    const influxdbHealthChecker = async (signalReady, signalNotReady) => {
+      const isHealth = await this.isHealth();
+      if (isHealth) {
+        logger.debug('influxdbHealthChecker: InfluxDB is healthy');
+        signalReady();
+      } else {
+        logger.warn('influxdbHealthChecker: InfluxDB is not healthy');
+        signalNotReady();
+      }
+    };
+    this.serviceState.addHealthChecker('influxdb', influxdbHealthChecker, configInflux['heathcheck.ms']);
+  }
 }
-module.exports = State;
+module.exports = InfluxState;
