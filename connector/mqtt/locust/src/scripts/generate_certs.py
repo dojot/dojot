@@ -6,7 +6,7 @@ import argparse
 import glob
 from multiprocessing import Process
 import time
-import uuid
+import secrets
 import shutil
 import sys
 import os
@@ -241,7 +241,13 @@ class GenerateCerts():
                 )
                 sys.exit(1)
             # Generating the random IDs
-            ids = [str(uuid.uuid4().hex) for _ in range(self.parser_args.devices)]
+            ids = {format(secrets.randbits(32),'x') for _ in range(self.parser_args.devices)}
+            # check for duplicate ids
+            if len(ids) < self.parser_args.devices:
+                while len(ids) != self.parser_args.devices:
+                    ids.add(format(secrets.randbits(32),'x'))
+            ids = list(ids)
+
             # Begins the certificate generation for random devices IDs
             self.generate_certs(ids)
 

@@ -1,4 +1,4 @@
 [{<<"vernemq_dev">>,
-  {git,"git://github.com/erlio/vernemq_dev.git",
+  {git,"https://github.com/erlio/vernemq_dev.git",
        {ref,"741655f532ad16bb501d01230c7fb68dbae523d2"}},
   0}].

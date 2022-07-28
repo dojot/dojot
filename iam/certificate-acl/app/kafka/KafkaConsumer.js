@@ -1,10 +1,11 @@
 const {
   ConfigManager: { getConfig },
-  Logger,
   Kafka: { Consumer },
 } = require('@dojot/microservice-sdk');
+const DIContainer = require('../DIContainer');
 
-const logger = new Logger('certificate-acl:kafka-consumer');
+const container = DIContainer();
+const logger = container.resolve('logger');
 
 const CERTIFICATE_ACL_CONFIG_LABEL = 'CERTIFICATE_ACL';
 

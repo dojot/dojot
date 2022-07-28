@@ -16,13 +16,14 @@ const serviceState = new ServiceStateManager({
 });
 serviceState.registerService('http-server');
 serviceState.registerService('http-producer');
-serviceState.registerService('http-cache');
+serviceState.registerService('http-redis');
 
 const logger = new Logger('http-agent:App');
 
 const Server = require('./Server');
 const ProducerMessages = require('./ProducerMessages');
-const Cache = require('./Cache');
+const RedisManager = require('./redis/RedisManager');
+const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
 
 const express = require('./express');
@@ -42,7 +43,8 @@ class App {
     try {
       this.server = new Server(serviceState);
       this.producerMessages = new ProducerMessages(serviceState);
-      this.cache = new Cache(serviceState);
+      this.redisManager = new RedisManager(serviceState);
+      this.deviceAuthService = new DeviceAuthService(configURL['device.auth'], axios);
       this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], axios);
     } catch (e) {
       logger.error('constructor:', e);
@@ -57,7 +59,7 @@ class App {
     logger.info('init: Initializing the http-agent...');
     try {
       await this.producerMessages.init();
-      this.cache.init();
+      this.redisManager.init();
       this.server.registerShutdown();
 
       this.server.init(
@@ -69,7 +71,8 @@ class App {
             }),
           ],
           serviceState,
-          this.cache,
+          this.redisManager,
+          this.deviceAuthService,
           this.certificateAclService,
         ),
       );

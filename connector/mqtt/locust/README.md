@@ -1,6 +1,8 @@
 # **Dojot Load Test**
 The Dojot Load Test tool is an implementation using the open-source load testing tool Locust to generate traffic from/to Dojot. Tested in Dojot's development images.
 
+If you want to run it against a specific Dojot image or don't want to develop this tool you can use the 
+[docker-compose-locust repository](https://github.com/dojot/docker-compose-locust)
 
 # **How to use**
 
@@ -69,6 +71,15 @@ for the server-side configuration of Prometheus.
 
 After the configuration is done, you can access the Grafana dashboard built for Locust integration.
 It already comes embedded in the Ansible installation.
+
+## **Get InfluxDB statistic**
+
+After running a test, you can compare the performed publish number and the number of points stored in influxdb. 
+To compare them, you can access the `influx` path, e.g: `localhost:8089/influx`. 
+
+If you customize the MQTT publication by adding more attributes, for example, you must update the Flux query 
+(in the get_influx_stat method) to count these new attributes.
+
 
 # **How it works**
 
@@ -191,6 +202,17 @@ DOJOT_GATEWAY_TIMEOUT   | dojot auth API timeout               | 180            
 DOJOT_PASSWD            | dojot user's password                | admin                 | passwords          |
 DOJOT_URL               | dojot instance address               | http://127.0.0.1:8000 | hostname/IP        |
 DOJOT_USER              | dojot user                           | admin                 | usernames          |
+
+### **InfluxDB**
+
+InfluxDB integration configuration.
+
+Key                     | Purpose                              | Default Value         | Valid Values       |
+----------------------- | ------------------------------------ | --------------------- | ------------------ |
+INFLUX_HOST             | InfluxDB instance address            | 127.0.0.1             | hostname/IP        |
+INFLUX_PORT             | InfluxDB API port                    | 30001                 | integer            |
+INFLUX_ORG              | InfluxDB org                         | "admin"               | string             |
+INFLUX_TOKEN            | InfluxDB token                       |                       | string             |
 
 ## **Operating System**
 

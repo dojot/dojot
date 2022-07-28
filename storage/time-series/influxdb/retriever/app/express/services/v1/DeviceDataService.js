@@ -8,9 +8,8 @@ module.exports = class DevicesService {
   * @param {Promise<{result: object, totalItems: number}| error>>} queryDataByMeasurement
   *   A promise that returns a result and a totalItems inside that result
   */
-  constructor(queryDataByField, queryDataByMeasurement) {
-    this.queryDataByField = queryDataByField;
-    this.queryDataByMeasurement = queryDataByMeasurement;
+  constructor(deviceDataRepository) {
+    this.deviceDataRepository = deviceDataRepository;
   }
 
   /**
@@ -30,16 +29,16 @@ module.exports = class DevicesService {
     const filters = { dateFrom, dateTo };
     const pagination = { limit, page };
 
-    const {
-      result, totalItems,
-    } = await this.queryDataByMeasurement(tenant, deviceId, filters, pagination, order);
+    const { result, totalItems } = await this.deviceDataRepository.queryByMeasurement(
+      tenant, deviceId, filters, pagination, order,
+    );
     const paging = getPaging(totalItems);
 
     return [result, paging];
   }
 
   /**
-   * @param {*} deviceData device dataset
+   * @param {[*]}deviceData device dataset
    * @returns device dataset in CSV format
    */
   static parseDeviceDataToCsv(deviceData) {
@@ -57,7 +56,7 @@ module.exports = class DevicesService {
     });
 
     const csvParser = new json2csv.Parser({ defaultValue: undefined });
-    return csvParser.parse(messages);
+    return messages.length > 0 ? csvParser.parse(messages) : '';
   }
 
   /**
@@ -80,21 +79,11 @@ module.exports = class DevicesService {
     const filters = { dateFrom, dateTo };
     const pagination = { limit, page };
 
-    const {
-      result, totalItems,
-    } = await this.queryDataByField(tenant, deviceId, attr, filters, pagination, order);
+    const { result, totalItems } = await this.deviceDataRepository.queryByField(
+      tenant, deviceId, attr, filters, pagination, order,
+    );
     const paging = getPaging(totalItems);
 
     return [result, paging];
-  }
-
-  /**
-   *
-   * @param {*} attrData device attribute dataset
-   * @returns device attribute dataset in CSV format
-   */
-  static parseDeviceAttrDataToCsv(attrData) {
-    const csvParser = new json2csv.Parser({ defaultValue: undefined });
-    return csvParser.parse(attrData);
   }
 };

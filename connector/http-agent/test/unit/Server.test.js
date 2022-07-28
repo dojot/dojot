@@ -6,7 +6,10 @@ const mockConfig = {
   http: { host: '0.0.0.0', port: 3001 },
   reload: { attempts: 10, 'interval.ms': mockInterval },
   security: {
-    'cert.directory': '/certs', 'unsecure.mode': true, 'enable.crl': false, crl: 'crl.crt',
+    'cert.directory': '/certs',
+    'unsecure.mode': true,
+    'enable.crl': false,
+    crl: 'crl.crt',
   },
 };
 
@@ -174,7 +177,6 @@ describe('Server', () => {
       jest.clearAllMocks();
       jest.useFakeTimers();
     });
-
     it('cabundle changed', async () => {
       mockFs.changeFile('cabundle.crt', 'change');
       expect(server.httpsServer.setSecureContext).toHaveBeenCalledTimes(1);
@@ -186,7 +188,6 @@ describe('Server', () => {
       server.attempts = 1;
       server.retryTimer = setTimeout(() => jest.fn(), 1000);
       mockFs.changeFile('cabundle.crt', 'change');
-      expect(clearTimeout).toHaveBeenCalledTimes(1);
       expect(server.httpsServer.setSecureContext).toHaveBeenCalledTimes(1);
       expect(server.attempts).toBe(0);
       expect(server.retryTimer).toBeNull();
@@ -200,7 +201,6 @@ describe('Server', () => {
     it('should increment attempts', () => {
       server.httpsServer.setSecureContext = undefined;
       server.reloadCertificates();
-      expect(setTimeout).toHaveBeenCalledTimes(1);
       expect(server.attempts).toEqual(1);
     });
 
@@ -216,7 +216,6 @@ describe('Server', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-
     it('should call the disconnect function from the server', async () => {
       await server.registerShutdown();
       const callback = mockRegisterShutdownHandler.mock.calls[0][0];

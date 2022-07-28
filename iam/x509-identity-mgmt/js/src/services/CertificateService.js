@@ -56,7 +56,7 @@ class CertificateService {
   constructor({
     trustedCAService, certificateModel, ejbcaFacade, tenant, pkiUtils, dnUtils, certValidity,
     checkPublicKey, checkSubjectDN, checkDeviceExists, queryMaxTimeMS, certMinimumValidityDays,
-    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier,
+    caCertAutoRegistration, logger, errorTemplate, deviceMgrProvider, ownershipNotifier, xRequestId,
   }) {
     Object.defineProperty(this, 'trustedCAService', { value: trustedCAService });
     Object.defineProperty(this, 'ejbcaFacade', { value: ejbcaFacade });
@@ -75,6 +75,7 @@ class CertificateService {
     Object.defineProperty(this, 'error', { value: errorTemplate });
     Object.defineProperty(this, 'deviceMgrProvider', { value: deviceMgrProvider });
     Object.defineProperty(this, 'ownershipNotifier', { value: ownershipNotifier });
+    Object.defineProperty(this, 'xRequestId', { value: xRequestId });
 
     // Flag used to determine the privilege of an operation.
     // An operation performed with elevated privileges bypasses some access restrictions
@@ -145,9 +146,8 @@ class CertificateService {
     // Checks on the certificate owner
     await this.checkBelongsTo(belongsTo);
 
-    const certificatePem = await this.ejbcaFacade.generateCertificate(
-      subjectDN, this.certValidity, csrPem,
-    );
+    const certificatePem = await this.ejbcaFacade
+      .generateCertificate(subjectDN, this.certValidity, csrPem);
 
     const cert = this.pkiUtils.parseCert(certificatePem);
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
@@ -293,9 +293,11 @@ class CertificateService {
     await this.checkBelongsTo(belongsTo);
 
     // By default, findOneAndUpdate() returns the document as it was before update was applied.
-    const certRecord = await this.CertificateModel.findOneAndUpdate(
-      filterFields, { belongsTo, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).lean().exec();
+    const certRecord = await this.CertificateModel
+      .findOneAndUpdate(filterFields, { belongsTo, modifiedAt: new Date() })
+      .maxTimeMS(this.queryMaxTimeMS)
+      .lean()
+      .exec();
 
     if (!certRecord) {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
@@ -432,9 +434,8 @@ class CertificateService {
 
     const subjectDN = this.dnUtils.from(csr.subject).stringify();
 
-    const certificatePem = await this.ejbcaFacade.generateCertificate(
-      subjectDN, this.certValidity, csrPem,
-    );
+    const certificatePem = await this.ejbcaFacade
+      .generateCertificate(subjectDN, this.certValidity, csrPem);
 
     const certificateFingerprint = this.pkiUtils.getFingerprint(certificatePem);
 
@@ -495,7 +496,8 @@ class CertificateService {
    */
   async ensureDeviceExists(deviceId) {
     if (this.checkDeviceExists) {
-      const isOwner = await this.deviceMgrProvider.checkDeviceExists(this.tenant, deviceId);
+      const isOwner = await this.deviceMgrProvider
+        .checkDeviceExists(this.tenant, deviceId, this.xRequestId);
       if (!isOwner) {
         throw this.error.BadRequest(`Device identifier '${deviceId}' was not found for tenant '${this.tenant}'.`);
       }

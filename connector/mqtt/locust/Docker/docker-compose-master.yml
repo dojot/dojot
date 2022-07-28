@@ -1,18 +1,21 @@
 version: '3'
 services:
   locust-master:
-    image: dojot/locust:development
+    build:
+      context: ../
+      dockerfile: ./Dockerfile
+      target: development
     command: bash master_entrypoint.sh
     volumes:
       # If you need to change code while running the container, activate this volume:
-      # - ../src:/usr/src/app/src
+      - ../src:/usr/src/app/src
       # If you only need to generate certificates, activate this volume instead:
       - ../cert:/usr/src/app/cert
     environment:
       DOJOT_URL: "http://127.0.0.1:8000"
       DOJOT_MQTT_HOST: "127.0.0.1"
       # TODO: differentiate DOJOT_MQTT_PORT and DOJOT_MQTTS_PORT variables
-      DOJOT_MQTT_PORT: "1883"
+      DOJOT_MQTT_PORT: "8883"
       DOJOT_MQTT_TIMEOUT: "120"
       DOJOT_ENV: "n"
 
@@ -20,6 +23,11 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWD: ""
       REDIS_BACKUP: "y"
+
+      "INFLUX_HOST": "127.0.0.1"
+      "INFLUX_PORT": 30001
+      "INFLUX_ORG": "admin"
+      "INFLUX_TOKEN": ""
     networks:
       - default
     depends_on:
@@ -51,7 +59,7 @@ services:
       - ../db/:/data
 
   locust-exporter:
-    image: containersol/locust_exporter:v0.3.0
+    image: containersol/locust_exporter:v0.4.3
     networks:
       - default
     restart: always

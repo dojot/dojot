@@ -28,8 +28,8 @@ CONFIG = {
     },
 
     'locust': {
-        'task_min_time':        int(os.environ.get("TASK_MIN_TIME", 29500)),
-        'task_max_time':        int(os.environ.get("TASK_MAX_TIME", 30000)),
+        'task_min_time':       float(os.environ.get("TASK_MIN_TIME", 29.5)),
+        'task_max_time':       float(os.environ.get("TASK_MAX_TIME", 30)),
         'redis': {
             'certificates_db':      int(os.environ.get("REDIS_CERTIFICATES_DB", 0)),
             'mapped_db':            int(os.environ.get("REDIS_MAPPED_DB", 1)),
@@ -57,4 +57,10 @@ CONFIG = {
             'page_size':    int(os.environ.get("DOJOT_DEVICES_PAGE_SIZE", 20))
         }
     },
+    'influxdb': {
+        'host': os.environ.get("INFLUX_HOST", "127.0.0.1"),
+        'port': int(os.environ.get("INFLUX_PORT", 30001)),
+        'org': os.environ.get("INFLUX_ORG", "admin"),
+        'token': os.environ.get("INFLUX_TOKEN", "token"),
+    }
 }
