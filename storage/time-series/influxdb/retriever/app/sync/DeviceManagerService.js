@@ -100,9 +100,10 @@ class DeviceManagerService {
    */
   async loadDevices(tenant) {
     this.logger.info('Sync device-manager.');
-    const devices = await this.getDevices(tenant);
+    let devices = [];
 
     try {
+      devices = await this.getDevices(tenant);
       this.logger.debug(`Clean up ${tenant.id} sublevel`);
       await this.localPersistence.clear(tenant.id);
     } catch (error) {

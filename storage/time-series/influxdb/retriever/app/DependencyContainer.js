@@ -64,6 +64,7 @@ function dependencyContainerFactory(config, logger) {
   );
 
   return {
+    localPersistence,
     influxDBConnection,
     deviceDataRepository,
     deviceDataService,

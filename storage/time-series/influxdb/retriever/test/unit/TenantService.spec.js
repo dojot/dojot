@@ -134,7 +134,9 @@ describe('TenantService', () => {
         certificate: 'certificate',
         algorithm: 'alg',
       },
-      session: {},
+      session: {
+        close: jest.fn(),
+      },
     };
 
     tenantService.tenants = [
@@ -145,7 +147,9 @@ describe('TenantService', () => {
           certificate: 'certificate',
           algorithm: 'alg',
         },
-        session: {},
+        session: {
+          close: jest.fn(),
+        },
       },
     ];
 
