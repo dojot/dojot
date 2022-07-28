@@ -30,6 +30,14 @@ if (config.logger.file.enable) {
 }
 Logger.setVerbose(config.logger.verbose);
 
+process.on('uncaughtException', async (ex) => {
+  // The 'uncaughtException' event is emitted when an uncaught JavaScript
+  // exception bubbles all the way back to the event loop.
+  logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
+
+  process.kill(process.pid, 'SIGTERM');
+});
+
 const container = DIContainer(config);
 
 const logger = container.resolve('logger');

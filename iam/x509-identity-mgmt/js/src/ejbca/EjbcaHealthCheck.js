@@ -18,6 +18,7 @@ async function check(url, timeout, logger) {
           resolve(false);
         }
       });
+    // eslint-disable-next-line security-node/detect-unhandled-event-errors
     }).on('error', (ex) => {
       logger.debug('EjbcaHealthCheck - Connection error', ex);
       resolve(false);
