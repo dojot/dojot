@@ -62,9 +62,8 @@ class App {
       this.deviceService = new DeviceService(config.url, dojotClientHttp);
       this.tenantService = new TenantService(config, dojotClientHttp, logger);
       this.producerMessages = new ProducerMessages(this.serviceState);
-      this.consumerMessages = new ConsumerMessages(
-        this.serviceState, this.basicCredentialsCtrl, this.tenantService,
-      );
+      this.consumerMessages =
+        new ConsumerMessages(this.serviceState, this.basicCredentialsCtrl, this.tenantService);
       this.syncLoader = new SyncLoader(
         this.deviceService,
         this.tenantService,

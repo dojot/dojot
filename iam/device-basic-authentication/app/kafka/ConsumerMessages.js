@@ -78,7 +78,7 @@ class ConsumerMessages {
             id: payloadObject.tenant,
           });
         } else if (payloadObject.type === 'DELETE') {
-          await this.tenantService.remove(payloadObject.id);
+          await this.tenantService.remove(payloadObject.tenant);
           logger.info(`${payloadObject.type} tenant event received`);
           logger.debug(payloadObject);
           await this.basicCredentials.removeAllFromTenant(payloadObject.tenant);
