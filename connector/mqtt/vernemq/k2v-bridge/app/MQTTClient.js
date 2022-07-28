@@ -10,6 +10,9 @@ const mqtt = require('mqtt');
 
 const Utils = require('./Utils');
 
+// PR instrução
+
+
 /**
  * Class representing a MQTTClient
  * @class
