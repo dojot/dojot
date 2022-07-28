@@ -28,9 +28,10 @@ class ConsumerMessages {
    *          with register service 'basic-auth-consumer'} serviceState
    *          Manages the services' states, providing health check and shutdown utilities.
    */
-  constructor(serviceState, basicCredentials) {
+  constructor(serviceState, basicCredentials, tenantService) {
     this.serviceState = serviceState;
     this.basicCredentials = basicCredentials;
+    this.tenantService = tenantService;
     this.consumer = null;
     this.idCallbackTenant = null;
     this.idCallbackDeviceManager = null;
@@ -70,7 +71,14 @@ class ConsumerMessages {
       try {
         const { value: payload } = data;
         const payloadObject = JSON.parse(payload.toString());
-        if (payloadObject.type === 'DELETE') {
+
+        if (payloadObject.type === 'CREATE') {
+          await this.tenantService.create({
+            signatureKey: payloadObject.signatureKey,
+            id: payloadObject.tenant,
+          });
+        } else if (payloadObject.type === 'DELETE') {
+          await this.tenantService.remove(payloadObject.id);
           logger.info(`${payloadObject.type} tenant event received`);
           logger.debug(payloadObject);
           await this.basicCredentials.removeAllFromTenant(payloadObject.tenant);
