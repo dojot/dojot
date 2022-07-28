@@ -10,7 +10,7 @@ const mqtt = require('mqtt');
 
 const Utils = require('./Utils');
 
-// PR instrução
+// PR instrução - correção codefactor
 
 
 /**
