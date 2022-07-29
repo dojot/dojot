@@ -58,11 +58,12 @@ class App {
       this.tenantCtrl = new TenantCtrl(Tenant);
       this.basicCredentialsCtrl = new BasicCredentialsCtrl(BasicCredentials, Tenant);
       this.mongoClient = new MongoClient(this.serviceState);
-      this.producerMessages = new ProducerMessages(this.serviceState);
-      this.consumerMessages = new ConsumerMessages(this.serviceState, this.basicCredentialsCtrl);
       this.server = new HTTPServer(this.serviceState);
       this.deviceService = new DeviceService(config.url, dojotClientHttp);
       this.tenantService = new TenantService(config, dojotClientHttp, logger);
+      this.producerMessages = new ProducerMessages(this.serviceState);
+      this.consumerMessages =
+        new ConsumerMessages(this.serviceState, this.basicCredentialsCtrl, this.tenantService);
       this.syncLoader = new SyncLoader(
         this.deviceService,
         this.tenantService,

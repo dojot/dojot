@@ -77,7 +77,6 @@ describe('App', () => {
       expect(app.server).toBeDefined();
       expect(app.producerMessages).toBeDefined();
       expect(app.redisManager).toBeDefined();
-      expect(app.deviceAuthService).toBeDefined();
       expect(app.certificateAclService).toBeDefined();
     });
   });

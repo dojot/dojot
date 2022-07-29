@@ -12,7 +12,7 @@ const INPUT_CONFIG = {
   levels: [
     {
       type: 'dynamic',
-      source: 'service',
+      source: 'meta.service',
       options: {
         keyEncoding: 'utf8',
         valueEncoding: 'bool',
@@ -25,7 +25,7 @@ const INPUT_CONFIG = {
       pair: {
         key: {
           type: 'dynamic',
-          source: 'device',
+          source: 'data.id',
         },
         value: {
           type: 'static',
@@ -100,9 +100,10 @@ class DeviceManagerService {
    */
   async loadDevices(tenant) {
     this.logger.info('Sync device-manager.');
-    const devices = await this.getDevices(tenant);
+    let devices = [];
 
     try {
+      devices = await this.getDevices(tenant);
       this.logger.debug(`Clean up ${tenant.id} sublevel`);
       await this.localPersistence.clear(tenant.id);
     } catch (error) {
@@ -113,10 +114,14 @@ class DeviceManagerService {
     for (const device of devices) {
       // Write devices
       // eslint-disable-next-line no-await-in-loop
-      await this.inputPersister.dispatch(
-        { device, service: tenant.id },
-        InputPersisterArgs.INSERT_OPERATION,
-      );
+      await this.addNewDevice({
+        data: {
+          id: device,
+        },
+        meta: {
+          service: tenant.id,
+        },
+      });
     }
   }
 

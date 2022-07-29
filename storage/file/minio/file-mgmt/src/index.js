@@ -1,7 +1,7 @@
 const path = require('path');
 
 const {
-  Logger, ConfigManager, WebUtils: { SecretLoader },
+  Logger, ConfigManager, WebUtils: { SecretFileHandler },
 } = require('@dojot/microservice-sdk');
 const App = require('./app/app');
 
@@ -23,8 +23,8 @@ Logger.setTransport('console', {
 Logger.setVerbose(config.log.verbose);
 
 
-const secretsLoader = new SecretLoader(config, logger);
-secretsLoader.handleCollection(['minio.access.key', 'minio.secret.key'], '/secrets/').then(() => {
+const secretsLoader = new SecretFileHandler(config, logger);
+secretsLoader.handleCollection(['minio.access.key', 'minio.secret.key', 'keycloak.client.secret'], '/secrets/').then(() => {
   // Init Application
   const app = new App(config, logger, openApiPath);
 

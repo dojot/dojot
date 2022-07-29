@@ -58,7 +58,7 @@ module.exports = (routes, serviceState, openApiPath, tenantService) => {
     beaconInterceptor,
     requestLogInterceptor,
     jsonBodyParsingInterceptor,
-    createKeycloakAuthInterceptor,
+    createKeycloakAuthInterceptorWithFilter,
   } = WebUtils.framework.interceptors;
 
   return WebUtils.framework.createExpress({
@@ -68,7 +68,11 @@ module.exports = (routes, serviceState, openApiPath, tenantService) => {
         path: '/tss/v1/api-docs',
         middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
-      createKeycloakAuthInterceptor(tenantService.tenants, logger, '/'),
+      createKeycloakAuthInterceptorWithFilter(
+        (tenantId) => tenantService.tenants.find((tenant) => tenant.id === tenantId),
+        logger,
+        '/',
+      ),
       jsonBodyParsingInterceptor({ config: { limit: '100kb' } }),
       paginateInterceptor({
         defaultLimit: configPaginate['default.max.limit'],

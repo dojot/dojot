@@ -26,8 +26,8 @@ class KafkaConsumer extends Consumer {
     this.tenantService = tenantService;
   }
 
-  init() {
-    super.init();
+  async init() {
+    await super.init();
     this.initCallbackForNewTenantEvents();
   }
 

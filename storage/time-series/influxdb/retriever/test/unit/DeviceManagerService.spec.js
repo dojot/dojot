@@ -2,7 +2,7 @@ const mockDojot = {
   LocalPersistence: {
     InputPersister: jest.fn().mockImplementation(() => ({
       dispatch: (payload) => {
-        expect(payload.device).toEqual('device1');
+        expect(payload.data.id).toEqual('device1');
       },
     })),
     InputPersisterArgs: {},
@@ -94,14 +94,16 @@ describe('DeviceService', () => {
   it('Should add a new device', async () => {
     expect.assertions(1);
     await deviceService.addNewDevice({
-      device: 'device1',
+      data: { id: 'device1' },
     });
   });
 
   it('Should delete a device', async () => {
     expect.assertions(1);
     await deviceService.deleteDevice({
-      device: 'device1',
+      data: {
+        id: 'device1',
+      },
     });
   });
 
@@ -111,7 +113,7 @@ describe('DeviceService', () => {
     deviceService.getDevices = () => ([
       'device1',
     ]);
-    await deviceService.loadDevices('tenant');
+    await deviceService.loadDevices({ tenant: { id: 'tenant' } });
   });
 
   it('Should find the device', async () => {

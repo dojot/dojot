@@ -9,8 +9,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon --inspect ./index.js --ignore ./config -V",
+    "start": "node src/index.js",
+    "dev": "nodemon --inspect src/index.js --ignore ./config -V",
     "dev-debug": "node --inspect=0.0.0.0 src/index.js",
     "test": "jest",
     "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
@@ -45,7 +45,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
-    "@dojot/microservice-sdk": "^0.2.0-beta.1",
+    "@dojot/microservice-sdk": "^0.2.0-beta.5",
     "@types/jest": "^27.0.1",
     "awilix": "^6.0.0",
     "axios": "^0.25.0",

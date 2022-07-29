@@ -30,7 +30,7 @@ module.exports = class App {
 
     try {
       const listTenants = await tenantService.updateListTenants();
-      kafkaConsumer.init();
+      await kafkaConsumer.init();
       // Adapts express to the application and manages the routes
       this.express = ExpressAdapter.xadapt(
         listTenants,

@@ -41,6 +41,7 @@ class App {
    */
   constructor(config) {
     logger.debug('constructor: instantiate app...');
+    this.config = config;
     try {
       this.serviceState = new ServiceStateManager({
         lightship: transformObjectKeys(config.lightship, camelCase),
@@ -57,7 +58,6 @@ class App {
         logger,
       });
       this.consumerMessages = new ConsumerMessages(this.tenantService, config, logger);
-      this.deviceAuthService = new DeviceAuthService(config.url['device.auth'], dojotClientHttp);
       this.certificateAclService =
         new CertificateAclService(config.url['certificate.acl'], dojotClientHttp);
     } catch (e) {
@@ -71,6 +71,11 @@ class App {
    */
   async init() {
     await this.tenantService.loadTenants();
+    this.deviceAuthService = new DeviceAuthService(
+      this.tenantService,
+      this.config.url['device.auth'],
+      dojotClientHttp,
+    );
     logger.info('init: Initializing the http-agent...');
     try {
       await this.producerMessages.init();
