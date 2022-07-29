@@ -30,6 +30,11 @@ if (config.logger.file.enable) {
 }
 Logger.setVerbose(config.logger.verbose);
 
+const container = DIContainer(config);
+
+const logger = container.resolve('logger');
+
+// eslint-disable-next-line security-node/detect-improper-exception-handling
 process.on('uncaughtException', async (ex) => {
   // The 'uncaughtException' event is emitted when an uncaught JavaScript
   // exception bubbles all the way back to the event loop.
@@ -38,9 +43,6 @@ process.on('uncaughtException', async (ex) => {
   process.kill(process.pid, 'SIGTERM');
 });
 
-const container = DIContainer(config);
-
-const logger = container.resolve('logger');
 const stateManager = container.resolve('stateManager');
 const mongoClient = container.resolve('mongoClient');
 
