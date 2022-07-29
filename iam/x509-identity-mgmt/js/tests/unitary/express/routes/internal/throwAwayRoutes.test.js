@@ -54,13 +54,15 @@ const request = supertest(framework);
 
 describe("Testing 'internal/throwAwayRoutes.js' Script Routes", () => {
   it('should post a CSR and receive a certificate ("Accept: application/json")',
+
     () => request.post('/internal/api/v1/throw-away')
       .set('Accept', 'application/json')
       .send({ csr: util.p256CSR })
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(generatedCert);
-      }));
+      })
+    );
 
   it('should post a CSR and receive a certificate ("Accept: application/x-pem-file")',
     () => request.post('/internal/api/v1/throw-away')
