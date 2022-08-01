@@ -74,7 +74,7 @@ const DeviceDataService = require('../../app/express/services/v1/DeviceDataServi
 const DeviceDataRepository = require('../../app/influx/DeviceDataRepository');
 const GenericQueryService = require('../../app/express/services/v1/GenericQueryService');
 
-const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection);
+const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection, true);
 const deviceDataService = new DeviceDataService(deviceDataRepository);
 const genericQueryService = new GenericQueryService(deviceDataRepository);
 
