@@ -149,9 +149,9 @@ class TrustedCAService {
   async changeAutoRegistration(filterFields, allowAutoRegistration) {
     Object.assign(filterFields, { tenant: this.tenant });
 
-    const result = await this.TrustedCAModel.findOneAndUpdate(
-      filterFields, { allowAutoRegistration, modifiedAt: new Date() },
-    ).maxTimeMS(this.queryMaxTimeMS).exec();
+    const result = await this.TrustedCAModel
+      .findOneAndUpdate(filterFields, { allowAutoRegistration, modifiedAt: new Date() })
+      .maxTimeMS(this.queryMaxTimeMS).exec();
 
     if (!result) {
       throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);

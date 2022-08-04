@@ -23,7 +23,8 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
   // --------------------
   // test required fields
   // --------------------
-  it("should have required property 'caPem'",
+  it(
+    "should have required property 'caPem'",
     () => req.post('/api/v1/trusted-cas')
       .send()
       .expect(400)
@@ -45,12 +46,14 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+    );
 
   // --------------------
   // test all field types
   // --------------------
-  it("should 'caPem' be string and 'allowAutoRegistration' be boolean",
+  it(
+    "should 'caPem' be string and 'allowAutoRegistration' be boolean",
     () => req.post('/api/v1/trusted-cas')
       .send({
         caPem: null,
@@ -84,12 +87,14 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+    );
 
   // ---------------------
   // test all field limits
   // ---------------------
-  it("should 'caPem' NOT be longer than 65536 characters",
+  it(
+    "should 'caPem' NOT be longer than 65536 characters",
     () => req.post('/api/v1/trusted-cas')
       .send({
         caPem: generateCert(65536 + 1), /* (+1 to test) */
@@ -114,12 +119,14 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+    );
 
   // --------------------
   // test all field regex
   // --------------------
-  it("should 'caPem' should match the regex pattern",
+  it(
+    "should 'caPem' should match the regex pattern",
     () => req.post('/api/v1/trusted-cas')
       .send({
         caPem: '',
@@ -143,14 +150,16 @@ describe('Trusted CAs - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+    );
 });
 
 describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
   // --------------------
   // test required fields
   // --------------------
-  it("should have required property 'allowAutoRegistration'",
+  it(
+    "should have required property 'allowAutoRegistration'",
     () => req.patch(`/api/v1/trusted-cas/${faker.random.alphaNumeric(32).toString(16)}`)
       .send()
       .expect(400)
@@ -172,12 +181,14 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
             ],
           },
         });
-      }));
+      }),
+    );
 
   // --------------------
   // test all field types
   // --------------------
-  it("should 'allowAutoRegistration' be boolean",
+  it(
+    "should 'allowAutoRegistration' be boolean",
     () => req.patch(`/api/v1/trusted-cas/${faker.random.alphaNumeric(32).toString(16)}`)
       .send({
         allowAutoRegistration: null,
@@ -201,5 +212,6 @@ describe('Trusted CAs - JSON Schema validations [on http PATCH]', () => {
             ],
           },
         });
-      }));
+      }),
+    );
 });
