@@ -170,6 +170,8 @@ The results might be filtered and are paginated with a default page size of 25.
 
     + keyVal (string, optional) - Filters the returned records by the given key=val. If more than one key=val pair is set; the returned records must contain all of them.
 
+    + sortBy (string, optional) - Return records sorted by given field. You can add the prefix `asc` to sort in ascending order or `desc` for descending. If you omit the prefix the default order will be `asc`. Supported fields: `fingerprint` `asc:fingerprint` `desc:fingerprint` `subjectDN` `asc:subjectDN` `desc:subjectDN` `createdAt` `asc:createdAt` `desc:createdAt` `modifiedAt` `asc:modifiedAt` `desc:modifiedAt`.
+
 + Request (application/json)
 
     + Headers
@@ -492,6 +494,8 @@ The results might be filtered and are paginated with a default page size of 25.
     + fields (string, optional) - List of keys (comma-separated) that should be included in the result. If the fields parameter is not set, all keys will be kept in the result.
 
     + keyVal (string, optional) - Filters the returned records by the given key=val. If more than one key=val pair is set; the returned records must contain all of them.
+
+    + sortBy (string, optional) - Return records sorted by given field. You can add the prefix `asc` to sort in ascending order or `desc` for descending. If you omit the prefix the default order will be `asc`. Supported fields: `caFingerprint` `asc:caFingerprint` `desc:caFingerprint` `subjectDN` `asc:subjectDN` `desc:subjectDN` `createdAt` `asc:createdAt` `desc:createdAt` `modifiedAt` `asc:modifiedAt` `desc:modifiedAt`.
 
 + Request (application/json)
 
