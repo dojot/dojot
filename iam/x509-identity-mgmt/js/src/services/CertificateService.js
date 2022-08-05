@@ -361,7 +361,7 @@ class CertificateService {
    *
    * @returns a set of certificates that meet the search criteria
    */
-  async listCertificates(queryFields, filterFields, limit = 0, offset = 0) {
+  async listCertificates(queryFields, filterFields, limit = 0, offset = 0, sortBy = null) {
     // If there are no elevated privileges, we must overwrite
     // the tenant according to the scope of the service...
     if (!this.elevatedPrivileges) {
@@ -376,8 +376,13 @@ class CertificateService {
     if (limit > 0) {
       query.limit(limit);
     }
+
     if (offset > 0) {
       query.skip(offset);
+    }
+
+    if (sortBy) {
+      query.sort(sortBy);
     }
 
     /* Executes the query and converts the results to JSON */
