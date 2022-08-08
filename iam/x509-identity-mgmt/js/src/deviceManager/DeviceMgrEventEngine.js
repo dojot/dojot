@@ -46,7 +46,7 @@ class DeviceMgrEventEngine {
   async process(data) {
     const requestId = uuidv4();
     const idMsg = `Request-Id: ${requestId}`;
-    this.logger.info(`DeviceMgrEventEngine: Beginning data processing (${idMsg})`);
+    this.logger.debug(`DeviceMgrEventEngine: Beginning data processing (${idMsg})`);
 
     // Beacon is live upon creation. Shutdown handlers are suspended
     // until there are no live beacons
@@ -88,7 +88,7 @@ class DeviceMgrEventEngine {
       // to proceed with the shutdown routine
       beacon.die();
 
-      this.logger.info(`DeviceMgrEventEngine - Ending data processing (${idMsg})`);
+      this.logger.debug(`DeviceMgrEventEngine - Ending data processing (${idMsg})`);
     }
   }
 }
