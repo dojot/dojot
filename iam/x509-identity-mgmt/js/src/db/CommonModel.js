@@ -53,7 +53,7 @@ class CommonModel {
 
     const isSortByValid = this.sortByFields.includes(sortBy);
     if (!isSortByValid) return null;
-    
+
     if (sortBy.includes(':')) {
       const [order, field] = sortBy.split(':');
       return { [field]: order };

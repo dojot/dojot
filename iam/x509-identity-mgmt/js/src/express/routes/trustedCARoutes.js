@@ -50,7 +50,9 @@ module.exports = ({
             const filterFields = caModel.parseConditionFields(req.query);
             const sortBy = caModel.parseSortBy(req.query.sortBy);
 
-            const { itemCount, results } = await caService.listCertificates(queryFields, filterFields, req.query.limit, req.offset,  sortBy);
+            const { itemCount, results } = await caService.listCertificates(
+              queryFields, filterFields, req.query.limit, req.offset, sortBy,
+            );
 
             results.forEach((cert) => caModel.sanitizeFields(cert));
 
