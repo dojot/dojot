@@ -1,6 +1,6 @@
 class CommonModel {
   constructor({
-    mongoClient, mongooseModel, mongoQS, projectableFields, sortByFields
+    mongoClient, mongooseModel, mongoQS, projectableFields, sortByFields,
   }) {
     Object.defineProperty(this, 'mongoQS', { value: mongoQS });
     Object.defineProperty(this, 'mongoClient', { value: mongoClient });
@@ -53,12 +53,12 @@ class CommonModel {
 
     const isSortByValid = this.sortByFields.includes(sortBy);
     if (!isSortByValid) return null;
-        
+    
     if (sortBy.includes(':')) {
       const [order, field] = sortBy.split(':');
       return { [field]: order };
     }
-    
+
     return { [sortBy]: 'asc' };
   }
 }

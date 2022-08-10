@@ -70,7 +70,7 @@ const mongoQS = Object.freeze(new MongoQS({
 class TrustedCAModel extends CommonModel {
   constructor({ mongoClient }) {
     super({
-      mongoClient, mongooseModel, mongoQS, projectableFields, sortByFields
+      mongoClient, mongooseModel, mongoQS, projectableFields, sortByFields,
     });
   }
 }

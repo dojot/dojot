@@ -70,10 +70,10 @@ class TrustedCAService {
       .select(queryFields.join(' '))
       .limit(limit).skip(offset)
       .maxTimeMS(this.queryMaxTimeMS)
-      .lean()
+      .lean();
 
-    if(sortBy) {
-      query.sort(sortBy)
+    if (sortBy) {
+      query.sort(sortBy);
     }
 
     /* Executes the query and converts the results to JSON */
@@ -81,7 +81,7 @@ class TrustedCAService {
       query.exec(),
       this.TrustedCAModel.countDocuments(filterFields),
     ]);
-    
+
     return { itemCount, results };
   }
 
