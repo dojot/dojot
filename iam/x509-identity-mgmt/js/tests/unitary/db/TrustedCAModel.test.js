@@ -57,4 +57,28 @@ describe("Unit tests of script 'TrustedCAModel.js'", () => {
       trustedCAModel.parseConditionFields(conditionFields);
     }).toThrow();
   });
+
+  it('should parse sortBy fields', () => {
+    const sortByCreatedAt = 'createdAt';
+    const sortByCreatedAtAsc = 'asc:createdAt';
+    const sortByCreatedAtDesc = 'desc:createdAt';
+    
+    expect(trustedCAModel.parseSortBy(sortByCreatedAt)).toEqual({ 
+      createdAt: 'asc',
+    });
+
+    expect(trustedCAModel.parseSortBy(sortByCreatedAtAsc)).toEqual({ 
+      createdAt: 'asc',
+    });
+
+    expect(trustedCAModel.parseSortBy(sortByCreatedAtDesc)).toEqual({ 
+      createdAt: 'desc',
+    });
+  });
+  
+  it('should return null if cannot parse sortBy', () => {
+    const sortBy = 'field-that-does-not-exist';
+    expect(trustedCAModel.parseSortBy(sortBy)).toBe(null);
+    expect(trustedCAModel.parseSortBy(123456)).toBe(null);
+  });
 });

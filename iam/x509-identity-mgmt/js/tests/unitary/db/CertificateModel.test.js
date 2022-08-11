@@ -63,4 +63,28 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
       certificateModel.parseConditionFields(conditionFields);
     }).toThrow();
   });
+
+  it('should parse sortBy fields', () => {
+    const sortByCreatedAt = 'createdAt';
+    const sortByCreatedAtAsc = 'asc:createdAt';
+    const sortByCreatedAtDesc = 'desc:createdAt';
+    
+    expect(certificateModel.parseSortBy(sortByCreatedAt)).toEqual({ 
+      createdAt: 'asc',
+    });
+
+    expect(certificateModel.parseSortBy(sortByCreatedAtAsc)).toEqual({ 
+      createdAt: 'asc',
+    });
+
+    expect(certificateModel.parseSortBy(sortByCreatedAtDesc)).toEqual({ 
+      createdAt: 'desc',
+    });
+  });
+  
+  it('should return null if cannot parse sortBy', () => {
+    const sortBy = 'field-that-does-not-exist';
+    expect(certificateModel.parseSortBy(sortBy)).toBe(null);
+    expect(certificateModel.parseSortBy(123456)).toBe(null);
+  });
 });
