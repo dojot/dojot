@@ -17,7 +17,7 @@ const serviceState = new ServiceStateManager({
 serviceState.registerService('http-server');
 serviceState.registerService('http-producer');
 serviceState.registerService('http-redis');
-
+serviceState.registerService('http-agent-consumer');
 const logger = new Logger('http-agent:App');
 
 const Server = require('./Server');
@@ -26,6 +26,7 @@ const RedisManager = require('./redis/RedisManager');
 const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
 
+const ConsumerMessages = require('./kafka/ConsumerMessages');
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
 const axios = require('./axios/createAxios');
@@ -44,6 +45,7 @@ class App {
       this.server = new Server(serviceState);
       this.producerMessages = new ProducerMessages(serviceState);
       this.redisManager = new RedisManager(serviceState);
+      this.consumerMessages = new ConsumerMessages(serviceState, this.redisManager);
       this.deviceAuthService = new DeviceAuthService(configURL['device.auth'], axios);
       this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], axios);
     } catch (e) {
@@ -60,6 +62,7 @@ class App {
     try {
       await this.producerMessages.init();
       this.redisManager.init();
+      await this.consumerMessages.init();
       this.server.registerShutdown();
 
       this.server.init(
