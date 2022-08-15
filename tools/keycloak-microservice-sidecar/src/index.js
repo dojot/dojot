@@ -42,4 +42,10 @@ secretHandler
       });  
   }).catch((secretHandlerError) => {
     logger.error(secretHandlerError);
+    process.kill(process.pid, 'SIGTERM');
   });
+
+process.on('uncaughtException', async (ex) => {
+  logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
+  process.kill(process.pid, 'SIGTERM');  
+});

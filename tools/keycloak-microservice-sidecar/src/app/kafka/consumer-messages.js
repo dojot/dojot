@@ -17,7 +17,7 @@ class KafkaConsumer extends Consumer {
       ...config.sdk,
       'enable.async.commit': true,
       'kafka.consumer': config.consumer,
-      'kafka.topic': config.topic,
+      'kafka.topic': config.consumer.topic,
     });
 
     this.config = config;

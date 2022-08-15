@@ -21,30 +21,8 @@ RUN apk add --no-cache --virtual .build-deps \
     py-setuptools \
     bash
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+CMD ["tail", "-f", "/dev/null"]
 
-RUN npm install --only=prod
-
-COPY src ./src
-# COPY docs ./docs
-
-FROM node:12.18-alpine
-
-WORKDIR /opt/keycloaksidecar
-
-RUN apk --no-cache add \
-    libsasl \
-    lz4-libs \
-    openssl \
-    tini \
-    curl
-
-COPY --from=base /opt/keycloaksidecar /opt/keycloaksidecar
-
-CMD ["npm", "run", "dev-debug"]
-
-EXPOSE 7000 9229
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
     CMD curl -f http://localhost:9000/health || exit 1
