@@ -65,7 +65,8 @@
     "lodash.camelcase": "^4.3.0",
     "node-cron": "^3.0.0",
     "openid-client": "^5.1.1",
-    "swagger-ui-express": "^4.1.4"
+    "swagger-ui-express": "^4.1.4",
+    "uuid": "^8.3.2"
   },
   "jest": {
     "verbose": true,
