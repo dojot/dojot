@@ -67,8 +67,8 @@ class TenantService {
    */
   async loadTenants() {
     try {
-      await this.clearTenants();
       await this.requestTenants();
+      await this.clearTenants();
       await this.saveTenants();
     } catch (requestError) {
       this.logger.debug('It was not possible to sync with Tenant service.');
