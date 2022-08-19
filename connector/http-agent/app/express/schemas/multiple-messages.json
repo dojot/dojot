@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "65b79e1a-0c6e-4fdd-9eba-7e5f2a4373fb",
+    "title": "IoT Agent HTTP - Incoming Messages (Multiple Messages)",
+    "description": "Data gathered from a device (many points in time)",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "required": [
+            "ts",
+            "data"
+        ],
+        "properties": {
+            "ts": {
+                "description": "A timestamp when the device data are gathered (RFC3339 or Milliseconds since Unix Epoch)",
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                ]
+            },
+            "data": {
+                "description": "Device data",
+                "type": "object"
+            }
+        }
+    },
+    "minItems": 1,
+    "maxItems": 64,
+    "uniqueItems": true
+}

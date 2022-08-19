@@ -11,14 +11,13 @@ const BasicCredentialSchema = new Schema({
 });
 
 // Hash the user's password before saving it
-BasicCredentialSchema.pre('save', function (next) {
-  const credential = this;
-  if (this.isModified('password') || this.isNew) {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(credential.password, salt);
-    credential.password = hash;
-    return next();
-  }
+BasicCredentialSchema.pre('findOneAndUpdate', function (next) {
+  const { password } = this.getUpdate();
+  if (!password) next();
+
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
+  this.getUpdate().password = hash;
   next();
 });
 
