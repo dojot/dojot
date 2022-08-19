@@ -5,6 +5,9 @@ const {
   ConfigManager: { getConfig, transformObjectKeys },
   ServiceStateManager,
   Logger,
+  WebUtils: {
+    DojotClientHttp,
+  },
 } = require('@dojot/microservice-sdk');
 const { asClass, InjectionMode, Lifetime } = require('awilix');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
@@ -25,6 +28,7 @@ class Application {
     this.logger = container.resolve('logger');
     // configuration
     this.config = getConfig('CERTIFICATE_ACL');
+    const x509ServiceConfig = this.config.x509im;
 
     // instantiate Service State Manager
     this.serviceStateManager = new ServiceStateManager(
@@ -39,8 +43,24 @@ class Application {
     this.redisManager.on('healthy', () => this.kafkaConsumer.resume());
     this.redisManager.on('unhealthy', () => this.kafkaConsumer.suspend());
 
+    // Circuit with x509
+    this.dojotHttpCircuit = new DojotClientHttp({
+      serviceName: 'x509',
+      defaultClientOptions: {
+        baseURL: `http://${x509ServiceConfig.hostname}:${x509ServiceConfig.port}`,
+        timeout: x509ServiceConfig.timeout,
+      },
+      defaultMaxNumberAttempts: 3,
+      defaultRetryDelay: 3000,
+      logger: this.logger,
+    });
+
     // instantiate HTTP server
-    this.server = new HTTPServer(this.serviceStateManager, this.redisManager);
+    this.server = new HTTPServer(
+      this.serviceStateManager,
+      this.redisManager,
+      this.dojotHttpCircuit,
+    );
   }
 
   /**
