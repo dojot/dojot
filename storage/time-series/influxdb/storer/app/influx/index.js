@@ -44,6 +44,7 @@ class InfluxDB {
       configInflux['default.token'],
       configInflux['default.timeout'],
       configInflux['default.bucket'],
+      configInflux['default.write.as.string'],
       configInfluxWriteOptionsCamelCase,
     );
     this.influxMeasurement = new InfluxMeasurement(

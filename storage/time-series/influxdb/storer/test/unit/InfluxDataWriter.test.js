@@ -59,7 +59,7 @@ describe('Test Influx Data Writer', () => {
   });
 
   test('Instantiate class', () => {
-    dataQuery = new DataWriter('url', 'token', 20000, 'defaultBucket');
+    dataQuery = new DataWriter('url', 'token', 20000, 'defaultBucket', true);
   });
 
   test('write - test ok iso date', async () => {
@@ -126,5 +126,25 @@ describe('Test Influx Data Writer', () => {
   test('closeOne - not exist  ', async () => {
     await dataQuery.closeOne('org3');
     expect(mockWarn).toHaveBeenCalledWith('closeOne: The org3 orgs doest exist to Write yet');
+  });
+
+  test('Instantiate class', () => {
+    dataQuery = new DataWriter('url', 'token', 'defaultBucket', false);
+  });
+
+  test('write - test ok iso date', async () => {
+    mockParseDateTimeToUnixNs.mockReturnValueOnce('timestamp');
+    await dataQuery.write('org', 'measurement', { a: 1, b: false, c: 'c' }, 'timestamp');
+
+    expect(mockPointFloat).toHaveBeenCalledTimes(1);
+    expect(mockPointBool).toHaveBeenCalledTimes(1);
+    expect(mockPointString).toHaveBeenCalledTimes(1);
+    expect(mockPointFloat).toHaveBeenCalledWith('dojot.a', 1);
+    expect(mockPointBool).toHaveBeenCalledWith('dojot.b', false);
+    expect(mockPointString).toHaveBeenCalledWith('dojot.c', 'c');
+
+    expect(mockWritePoint).toHaveBeenCalledWith(new mockInflux.Point());
+    expect(mockParseDateTimeToUnixNs).toHaveBeenCalled();
+    expect(mockPointTs).toHaveBeenCalledWith('timestamp');
   });
 });

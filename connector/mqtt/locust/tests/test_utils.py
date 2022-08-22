@@ -171,7 +171,7 @@ class TestUtils(unittest.TestCase):
         fire_locust_failure() should fire a Locust event on failure
         """
         Utils.fire_locust_failure()
-        mock_events.request_failure.fire.assert_called_once()
+        mock_events.request.fire.assert_called_once()
         mock_events.reset_mock()
 
     @staticmethod
@@ -181,7 +181,7 @@ class TestUtils(unittest.TestCase):
         fire_locust_success() should fire a Locust event on success
         """
         Utils.fire_locust_success()
-        mock_events.request_success.fire.assert_called_once()
+        mock_events.request.fire.assert_called_once()
         mock_events.reset_mock()
 
     def test_seconds_to_milliseconds(self):
