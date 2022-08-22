@@ -43,8 +43,14 @@ const {
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, redisManager, deviceAuthService, certificateAclService,
-  deviceManagerService) => {
+module.exports = (
+  routes,
+  serviceState,
+  redisManager,
+  deviceAuthService,
+  certificateAclService,
+  deviceManagerService,
+) => {
   const {
     responseCompressInterceptor,
     requestIdInterceptor,
