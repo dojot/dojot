@@ -1,7 +1,7 @@
 const {
   ServiceStateManager,
   Logger,
-  ConfigManager: { transformObjectKeys },
+  ConfigManager: { transformObjectKeys, getConfig },
   WebUtils: {
     DojotClientHttp,
   },
@@ -30,12 +30,10 @@ const RedisManager = require('./redis/RedisManager');
 const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
 const TenantService = require('./axios/TenantService');
-
-const ConsumerMessages = require('./kafka/ConsumerMessages');
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
 
-const dojotClientHttp = new DojotClientHttp({
+const dojotHttpclient = new DojotClientHttp({
   defaultClientOptions: {
     timeout: 15000,
   },
@@ -60,8 +58,12 @@ class App {
       this.producerMessages = new ProducerMessages(serviceState);
       this.redisManager = new RedisManager(serviceState);
       this.consumerMessages = new ConsumerMessages(serviceState, this.redisManager);
-      this.deviceAuthService = new DeviceAuthService(configURL['device.auth'], axios);
-      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], axios);
+      this.tenantService = new TenantService({
+        keycloakConfig: config.keycloak,
+        dojotHttpclient,
+        logger,
+      });
+      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpclient);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
@@ -76,7 +78,7 @@ class App {
     this.deviceAuthService = new DeviceAuthService(
       this.tenantService,
       this.config.url['device.auth'],
-      dojotClientHttp,
+      dojotHttpclient,
     );
     logger.info('init: Initializing the http-agent...');
     try {
