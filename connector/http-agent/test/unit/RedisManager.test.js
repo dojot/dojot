@@ -7,6 +7,7 @@ function MockRedisClient() {
   this.setAsync = jest.fn();
   this.quitAsync = jest.fn();
   this.quitAsync = jest.fn();
+  this.delAsync = jest.fn();
 }
 MockRedisClient.prototype.emit = function emit(event, data) {
   this.eventListener[event](data);

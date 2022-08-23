@@ -9,6 +9,18 @@ const {
 
 const camelCase = require('lodash.camelcase');
 
+const {
+  lightship: configLightship,
+  url: configURL,
+} = getConfig('HTTP_AGENT');
+
+const serviceState = new ServiceStateManager({
+  lightship: transformObjectKeys(configLightship, camelCase),
+});
+serviceState.registerService('http-server');
+serviceState.registerService('http-producer');
+serviceState.registerService('http-redis');
+serviceState.registerService('http-agent-consumer');
 const logger = new Logger('http-agent:App');
 
 const Server = require('./Server');
@@ -19,6 +31,7 @@ const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
 const TenantService = require('./axios/TenantService');
 
+const ConsumerMessages = require('./kafka/ConsumerMessages');
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
 
@@ -43,23 +56,12 @@ class App {
     logger.debug('constructor: instantiate app...');
     this.config = config;
     try {
-      this.serviceState = new ServiceStateManager({
-        lightship: transformObjectKeys(config.lightship, camelCase),
-      });
-      this.serviceState.registerService('http-server');
-      this.serviceState.registerService('http-producer');
-      this.serviceState.registerService('http-redis');
-      this.server = new Server(this.serviceState);
-      this.producerMessages = new ProducerMessages(this.serviceState);
-      this.redisManager = new RedisManager(this.serviceState);
-      this.tenantService = new TenantService({
-        keycloakConfig: config.keycloak,
-        dojotClientHttp,
-        logger,
-      });
-      this.consumerMessages = new ConsumerMessages(this.tenantService, config, logger);
-      this.certificateAclService =
-        new CertificateAclService(config.url['certificate.acl'], dojotClientHttp);
+      this.server = new Server(serviceState);
+      this.producerMessages = new ProducerMessages(serviceState);
+      this.redisManager = new RedisManager(serviceState);
+      this.consumerMessages = new ConsumerMessages(serviceState, this.redisManager);
+      this.deviceAuthService = new DeviceAuthService(configURL['device.auth'], axios);
+      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], axios);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
@@ -81,6 +83,7 @@ class App {
       await this.producerMessages.init();
       await this.consumerMessages.init();
       this.redisManager.init();
+      await this.consumerMessages.init();
       this.server.registerShutdown();
 
       this.server.init(

@@ -49,9 +49,8 @@ module.exports = ({
             const queryFields = caModel.parseProjectionFields(req.query.fields);
             const filterFields = caModel.parseConditionFields(req.query);
 
-            const { itemCount, results } = await caService.listCertificates(
-              queryFields, filterFields, req.query.limit, req.offset,
-            );
+            const { itemCount, results } = await caService
+              .listCertificates(queryFields, filterFields, req.query.limit, req.offset);
             results.forEach((cert) => caModel.sanitizeFields(cert));
 
             const paging = req.getPaging(itemCount);

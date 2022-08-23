@@ -1,112 +1,178 @@
 const {
+  ConfigManager: { getConfig },
   Kafka: { Consumer },
+  Logger,
 } = require('@dojot/microservice-sdk');
+const { killApplication } = require('../Utils');
+
+const logger = new Logger('http-agent:Consumer');
+
+const {
+  sdkconsumer: configSDK,
+  consumer: configConsumer,
+  subscribe: configSubscribe,
+  topic: configTopic,
+  healthchecker: configHealthChecker,
+} = getConfig('HTTP_AGENT');
 
 /**
- * This class handles messages from dojot topics on kafka
- * @class
- */
-class KafkaConsumer extends Consumer {
-  /**
-   * Create an instance
+   * Class representing an Consumer
+   *
+   * @class
    */
-  constructor(tenantService, config, logger) {
-    logger.debug('constructor: Instantiating a Kafka Consumer');
-
-    super({
-      ...config.sdk,
-      'enable.async.commit': true,
-      'kafka.consumer': config.consumer,
-      'kafka.topic': config.topic,
-    });
-
-    this.config = config;
-    this.idCallbackTenant = null;
-    this.logger = logger;
-    this.tenantService = tenantService;
+class ConsumerMessages {
+  /**
+     * @constructor
+     *
+     * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
+     *          with register service 'http-agent-consumer'} serviceState
+     *          Manages the services' states, providing health check and shutdown utilities.
+     */
+  constructor(serviceState, redisManager) {
+    this.serviceState = serviceState;
+    this.redisManager = redisManager;
+    this.consumer = null;
+    this.idCallbackDeviceManager = null;
+    this.isReady = false;
   }
 
-  init() {
-    super.init();
-    this.initCallbackForNewTenantEvents();
+  async init() {
+    try {
+      this.consumer = new Consumer({
+        ...configSDK,
+        'kafka.consumer': configConsumer,
+        'kafka.topic': configTopic,
+      });
+      // Establishment of communication with the kafka
+      await this.consumer.init();
+      logger.info('Initializing Kafka Consumer...');
+
+      this.createHealthChecker();
+      this.registerShutdown();
+      this.initCallbackForDeviceEvents();
+      logger.info('... Kafka Consumer was initialized');
+    } catch (error) {
+      // something unexpected happended!
+      logger.error(`Couldn't initialize the Kafka Consumer (${error}).`);
+      killApplication();
+    }
   }
 
-  getCallbackForNewTenantEvents() {
-    const operations = {
-      CREATE: this.tenantService.create.bind(this.tenantService),
-      DELETE: this.tenantService.remove.bind(this.tenantService),
-    };
-
-    return (data, ack) => {
+  /**
+         * Instantiates the consumerMessages callback for the device manager topic
+         *
+         * @returns callback
+         */
+  getCallbacksForDeviceEvents() {
+    return async (data) => {
       try {
         const { value: payload } = data;
         const payloadObject = JSON.parse(payload.toString());
-
-        this.logger.info('New tenant event received');
-        operations[payloadObject.type]({
-          id: payloadObject.tenant,
-          signatureKey: payloadObject.signatureKey,
-        }).then(() => {
-          ack();
-        }).catch((error) => {
-          this.logger.error(`Dispatch failed. ${error.message}`);
-          ack();
-        });
+        logger.info(`payloadObject: ${payload.toString()}`);
+        if (payloadObject.event === 'remove') {
+          logger.info(`${payloadObject.event} device event received`);
+          logger.info('removing registry in redis');
+          logger.debug(payloadObject);
+          const key = `${payloadObject.meta.service}@${payloadObject.data.id}`;
+          await this.redisManager.deleteAsync(key);
+        }
       } catch (error) {
-        this.logger.error(error);
-        ack();
+        logger.error(error);
       }
     };
   }
 
   /*
-  * Initializes the consumption of the tenancy topic
-  *
-  * @public
-  */
-  initCallbackForNewTenantEvents() {
-    this.logger.debug(`initCallbackForTenantEvents: Register Callbacks for
-      topics with regex ${this.config.subscribe['topics.regex.tenants']}`);
-    // eslint-disable-next-line security/detect-non-literal-regexp
-    const topic = new RegExp(this.config.subscribe['topics.regex.tenants']);
+        * Initializes the consumption of the device manager topic
+        *
+        * @public
+        */
+  // eslint-disable-next-line class-methods-use-this
+  initCallbackForDeviceEvents() {
+    const topic = RegExp(configSubscribe['topics.regex.device.manager']);
 
-    this.idCallbackTenant = this.registerCallback(topic, this.getCallbackForNewTenantEvents());
-    this.logger.debug('registerCallback: Registered Callback');
+    this.idCallbackDeviceManager = this.consumer.registerCallback(
+      topic,
+      this.getCallbacksForDeviceEvents(),
+    );
   }
 
-
   /**
-   * A function to get if kafka is connected
-   *
-   * @returns {Promise<boolean>} if kafka is connect
-   */
+       * A function to get if kafka is connected
+       *
+       * @returns {Promise<boolean>} if kafka is connect
+       */
   async isConnected() {
     try {
-      const { connected } = await this.getStatus();
+      const { connected } = await this.consumer.getStatus();
       if (connected) {
         return true;
       }
       return false;
     } catch (e) {
-      this.logger.error('isConnected:', e);
+      logger.error('isConnected:', e);
       return false;
     }
   }
 
   /**
-   * Unregister all callbacks
-   *
-   * @throws If Cannot unregister callback
-   */
+       * Unregister all callbacks
+       *
+       */
   unregisterCallbacks() {
-    if (this.idCallbackTenant) {
-      this.unregisterCallback(this.idCallbackTenant);
-      this.idCallbackTenant = null;
-      this.logger.debug('unregisterCallbacks: Unregistered callback for tenant');
+    if (this.idCallbackDeviceManager) {
+      this.consumer.unregisterCallback(this.idCallbackDeviceManager);
+      this.idCallbackDeviceManager = null;
+      logger.debug('unregisterCallbacks: Unregistered callback for tenant');
     } else {
-      this.logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for tenant');
+      logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for devices');
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  resume() {
+    this.initCallbackForDeviceEvents();
+  }
+
+  createHealthChecker() {
+    const healthChecker = async (signalReady, signalNotReady) => {
+      if (this.consumer) {
+        try {
+          const status = await this.consumer.getStatus();
+          if (status.connected && !this.isReady) {
+            signalReady();
+            this.isReady = true;
+          } else if (!status.connected && this.isReady) {
+            signalNotReady();
+            this.isReady = false;
+          }
+        } catch (error) {
+          signalNotReady();
+        }
+      } else {
+        signalNotReady();
+      }
+    };
+    this.serviceState.addHealthChecker(
+      'http-agent-consumer',
+      healthChecker,
+      configHealthChecker['kafka.interval.ms'],
+    );
+  }
+
+  registerShutdown() {
+    this.serviceState.registerShutdownHandler(async () => {
+      logger.warn('Shutting down Kafka connection...');
+      try {
+        await this.consumer.finish();
+        this.consumer = undefined;
+      } catch (error) {
+        logger.debug(
+          'Error while finishing Kafka connection, going on like nothing happened',
+        );
+      }
+    });
   }
 }
 
-module.exports = KafkaConsumer;
+module.exports = ConsumerMessages;

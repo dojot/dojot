@@ -230,9 +230,25 @@ describe('HTTPS', () => {
         .expect('Content-Type', /json/)
         .expect(400)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            error: '"data" is required',
-          });
+          expect(response.body).toStrictEqual(
+            {
+              error: 'Input data schema validation failure.',
+              detail: {
+                schemaId: '2674a775-5e93-4370-8f1f-2e6f9d102e1f',
+                schemaErrors: [
+                  {
+                    instancePath: '',
+                    schemaPath: '#/required',
+                    keyword: 'required',
+                    params: {
+                      missingProperty: 'data',
+                    },
+                    message: "must have required property 'data'",
+                  },
+                ],
+              },
+            },
+          );
         });
     });
   });
@@ -253,7 +269,7 @@ describe('HTTPS', () => {
             },
           },
           {
-            ts: '2021-07-12T09:31:01.683000Z',
+            ts: '2021-07-12T10:10:01.683000Z',
             data: {
               temperature: 25.79,
             },
@@ -285,9 +301,44 @@ describe('HTTPS', () => {
         .expect('Content-Type', /json/)
         .expect(400)
         .then((response) => {
-          expect(response.body).toStrictEqual({
-            error: { 0: '"data" is required', 1: '"data" is required' },
-          });
+          expect(response.body).toStrictEqual(
+            {
+              error: 'Input data schema validation failure.',
+              detail: {
+                schemaId: '65b79e1a-0c6e-4fdd-9eba-7e5f2a4373fb',
+                schemaErrors: [
+                  {
+                    instancePath: '/0',
+                    schemaPath: '#/items/required',
+                    keyword: 'required',
+                    params: {
+                      missingProperty: 'data',
+                    },
+                    message: "must have required property 'data'",
+                  },
+                  {
+                    instancePath: '/1',
+                    schemaPath: '#/items/required',
+                    keyword: 'required',
+                    params: {
+                      missingProperty: 'data',
+                    },
+                    message: "must have required property 'data'",
+                  },
+                  {
+                    instancePath: '',
+                    schemaPath: '#/uniqueItems',
+                    keyword: 'uniqueItems',
+                    params: {
+                      i: 1,
+                      j: 0,
+                    },
+                    message: 'must NOT have duplicate items (items ## 0 and 1 are identical)',
+                  },
+                ],
+              },
+            },
+          );
         });
     });
   });
@@ -607,6 +658,46 @@ describe('Unauthorized', () => {
         expect(response.body).toStrictEqual({
           error: 'Invalid Basic token.',
         });
+      });
+  });
+});
+
+describe('params', () => {
+  beforeAll(() => {
+    jest.clearAllMocks();
+    mockConfig.security['authorization.mode'] = 'params';
+    mockConfig.https['request.cert'] = false;
+  });
+
+  it('should successfully execute the request with tenant and deviceId in params', async () => {
+    mockRedis.getSecurity.mockReturnValue(true);
+    await requestHttp(app)
+      .post(`${urlUnsecureIncomingMessages}?tenant=tenanttest&deviceId=devicetest`)
+      .set('Authorization', `Basic ${validBasic}`)
+      .send({
+        ts: '2021-07-12T09:31:01.683000Z',
+        data: {
+          temperature: 25.7,
+        },
+      })
+      .then((response) => {
+        expect(response.statusCode).toStrictEqual(204);
+      });
+  });
+
+  it('should return unauthorized error: Unidentified parameters', async () => {
+    mockRedis.getSecurity.mockReturnValue(true);
+    await requestHttp(app)
+      .post(`${urlUnsecureIncomingMessages}`)
+      .set('Authorization', `Basic ${validBasic}`)
+      .send({
+        ts: '2021-07-12T09:31:01.683000Z',
+        data: {
+          temperature: 25.7,
+        },
+      })
+      .then((response) => {
+        expect(response.body.error).toEqual('Unidentified parameters');
       });
   });
 });
