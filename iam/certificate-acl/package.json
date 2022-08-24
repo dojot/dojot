@@ -36,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@dojot/microservice-sdk": "^0.2.1-beta.1",
+    "@dojot/microservice-sdk": "^0.2.1",
     "awilix": "^6.1.0",
     "lodash.camelcase": "^4.3.0",
     "redis": "^3.0.2",

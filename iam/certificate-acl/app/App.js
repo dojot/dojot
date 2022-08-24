@@ -6,7 +6,7 @@ const {
   ServiceStateManager,
   Logger,
   WebUtils: {
-    DojotClientHttp,
+    DojotHttpCircuit,
   },
 } = require('@dojot/microservice-sdk');
 const { asClass, InjectionMode, Lifetime } = require('awilix');
@@ -44,15 +44,14 @@ class Application {
     this.redisManager.on('unhealthy', () => this.kafkaConsumer.suspend());
 
     // Circuit with x509
-    this.dojotHttpCircuit = new DojotClientHttp({
+    this.dojotHttpCircuit = new DojotHttpCircuit({
       serviceName: 'x509',
+      logger: this.logger,
       defaultClientOptions: {
         baseURL: `http://${x509ServiceConfig.hostname}:${x509ServiceConfig.port}`,
         timeout: x509ServiceConfig.timeout,
       },
-      defaultMaxNumberAttempts: 3,
-      defaultRetryDelay: 3000,
-      logger: this.logger,
+      attemptsThreshold: 3,
     });
 
     // instantiate HTTP server
