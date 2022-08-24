@@ -64,7 +64,8 @@ describe("Testing 'internal/certificateRoutes.js' Script Routes", () => {
     jest.clearAllMocks();
   });
 
-  it('should list the certificates',
+  it(
+    'should list the certificates',
     () => request.get('/internal/api/v1/certificates?fields=fingerprint')
       .expect(200)
       .then((res) => {
@@ -85,9 +86,11 @@ describe("Testing 'internal/certificateRoutes.js' Script Routes", () => {
         expect(listCertificates).toHaveBeenCalledTimes(1);
         expect(elevatePrivileges).toHaveBeenCalledTimes(1);
         expect(dropPrivileges).toHaveBeenCalledTimes(1);
-      }));
+      }),
+    );
 
-  it('should get a certificate',
+  it(
+    'should get a certificate',
     () => request.get(`/internal/api/v1/certificates/${certQueryFingerprint}?fields=fingerprint,belongsTo`)
       .expect(200)
       .then((res) => {
@@ -95,5 +98,6 @@ describe("Testing 'internal/certificateRoutes.js' Script Routes", () => {
         expect(getCertificate).toHaveBeenCalledTimes(1);
         expect(elevatePrivileges).toHaveBeenCalledTimes(1);
         expect(dropPrivileges).toHaveBeenCalledTimes(1);
-      }));
+      }),
+    );
 });

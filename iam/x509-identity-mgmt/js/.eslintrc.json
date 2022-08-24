@@ -7,6 +7,7 @@
   "extends": [
     "airbnb-base",
     "plugin:security/recommended",
+    "plugin:security-node/recommended",
     "plugin:jest/recommended"
   ],
   "globals": {
@@ -34,6 +35,7 @@
   },
   "plugins": [
     "security",
+    "security-node",
     "jest"
   ]
 }
