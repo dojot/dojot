@@ -1,0 +1,452 @@
+---
+openapi: 3.0.0
+info:
+  description: "Dojot service for file management."
+  version: 1.0.0 #Version from package.json
+  title: "File-Mgmt"
+tags:
+  - name: files
+    description: File manager
+paths:
+  "/api/v1/files/upload":
+    put:
+      tags:
+        - files
+      security:
+        - bearerAuth: []
+      summary: "Upload a file to the Dojot"
+      description: "Upload a file to the Dojot"
+      operationId: "uploadFile"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/uploadRequest"
+      responses:
+        "201":
+          description: "Uploaded File"
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/uploadedFile"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "413":
+          description: "The file is too large"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
+  "/api/v1/files/remove":
+    delete:
+      tags:
+        - files
+      security:
+        - bearerAuth: []
+      summary: "Removes a file from Dojot"
+      description: "Removes a file from Dojot"
+      operationId: "removeFile"
+      parameters:
+        - $ref: "#/components/parameters/pathDelete"
+      responses:
+        "200":
+          description: "Removed File"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removedFile"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
+  "/api/v1/files/download?alt=media":
+    get:
+      tags:
+        - files
+      security:
+        - bearerAuth: []
+      summary: "Retrieves a file from Dojot."
+      description: "Retrieves a file from Dojot."
+      operationId: "retrieveFile"
+      parameters:
+        - $ref: "#/components/parameters/pathRetriever"
+      responses:
+        "200":
+          description: "Retrieved file"
+          content:
+            Any:
+              schema:
+               type: string
+               format: binary
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
+  "/api/v1/files/download?alt=url":
+    get:
+      tags:
+        - files
+      security:
+        - bearerAuth: []
+      summary: "Retrieves a URL to extern download"
+      description: "Retrieves a MinIo URL to extern download and file metadata."
+      operationId: "retrieveFile"
+      parameters:
+        - $ref: "#/components/parameters/pathRetriever"
+      responses:
+        "200":
+          description: "MinIo URL and file metadata"
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/retrieveUrlFile"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
+  "/api/v1/files/list":
+    get:
+      tags:
+        - files
+      security:
+        - bearerAuth: []
+      summary: "Retrieve a list of stored files."
+      description: "Retrieve a list of stored files."
+      operationId: "listFiles"
+      parameters:
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/pathPrefix"
+        - $ref: "#/components/parameters/startAfter"
+
+      responses:
+        "200":
+          description: "List of files"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listFiles"
+        "400":
+          description: "Bad Request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "401":
+          description: "Unauthorized"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiErrorUnknown"
+
+
+externalDocs:
+  description: Find out more about Dojot
+  url: https://dojotdocs.readthedocs.io/
+servers:
+  - url: "{url}"
+    description: URL for File-mgmt Service
+    variables:
+      url:
+        default: "http://localhost:8000/file-mgmt/"
+components:
+  securitySchemes:
+    authorization:
+      description: Bearer JWT
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    pathRetriever:
+      name: path
+      in: query
+      required: true
+      description: |
+        Requested file path.
+
+        Minimum length: 3
+
+        Maximum length: 100
+      allowReserved: true
+      schema:
+        $ref: "#/components/schemas/pathParamenter"
+    pathUpload:
+      name: path
+      in: query
+      required: true
+      description: |
+        Path where the file will be persisted.
+
+        Minimum length: 3
+
+        Maximum length: 100
+      allowReserved: true
+      schema:
+        $ref: "#/components/schemas/pathParamenter"
+    alt:
+      name: alt
+      in: query
+      required: true
+      description: |
+        Sets how the files will be downloaded.
+
+      allowReserved: true
+      schema:
+        type: string
+        enum: [media, url]
+    pathDelete:
+      name: path
+      in: query
+      required: true
+      description: |
+        Path of the file will be removed.
+
+        Minimum length: 3
+
+        Maximum length: 100
+      allowReserved: true
+      schema:
+        $ref: "#/components/schemas/pathParamenter"
+    limit:
+      name: limit
+      in: query
+      required: true
+      description: |
+        The limit of items to be returned.
+      allowReserved: true
+      schema:
+        type: integer
+    pathPrefix:
+      name: pathPrefix
+      in: query
+      description: |
+        Path prefix where the files will be fetched.
+      allowReserved: true
+      schema:
+        type: string
+        format: path
+    startAfter:
+      name: startAfter
+      in: query
+      description: |
+        Sets which file the list should start from.
+      allowReserved: true
+      schema:
+        type: string
+        format: path
+  schemas:
+    uploadRequest:
+      type: object
+      required: [file, path]
+      properties:
+        file:
+          type: string
+          format: binary
+        path:
+          $ref: "#/components/schemas/pathParamenter"
+        md5:
+          required:
+            - ""
+          type: string
+          format: md5
+    pathParamenter:
+      type: string
+      minLength: 3
+      maxLength: 100
+    uploadedFile:
+      type: object
+      properties:
+        message:
+          anyOf:
+            - type: string
+        details:
+          $ref: "#/components/schemas/fileDetails"
+    retrieveUrlFile:
+      type: object
+      properties:
+        url:
+          anyOf:
+            - type: string
+            - format: URL
+        info:
+          $ref: "#/components/schemas/retrieveUrlFileMetadata"
+    retrieveUrlFileMetadata:
+      type: object
+      properties:
+        contentType:
+          anyOf:
+            - type: string
+            - format: mimetype
+        etag:
+          anyOf:
+            - type: string
+            - format: MD5
+        size:
+          anyOf:
+            - type: integer
+    removedFile:
+      type: object
+      properties:
+        message:
+          anyOf:
+            - type: string
+        details:
+          $ref: "#/components/schemas/fileDetails2"
+    listFiles:
+      type: object
+      properties:
+        files:
+          anyOf:
+            - type: array
+              items:
+                $ref: "#/components/schemas/fileSummary"
+        length:
+          anyOf:
+            - type: integer
+        nextPageStartsAfter:
+          anyOf:
+            - type: string
+    fileDetails:
+      type: object
+      properties:
+        transactionCode:
+          anyOf:
+            - type: string
+        filename:
+         anyOf:
+            - type: string
+        info:
+          $ref: "#/components/schemas/minioFileInfo"
+        encoding:
+          anyOf:
+            - type: string
+        mimetype:
+          anyOf:
+            - type: string
+    fileDetails2:
+      type: object
+      properties:
+        size:
+          anyOf:
+            - type: "integer"
+        metadata:
+          anyOf:
+            - type: object
+              properties:
+                content-type:
+                  anyOf:
+                    - type: string
+        lastModified:
+          anyOf:
+            - type: string
+        versionId:
+          anyOf:
+            - type: string
+        etag:
+         anyOf:
+            - type: string
+    fileSummary:
+      properties:
+        name:
+         anyOf:
+            - type: string
+        lastModified:
+         anyOf:
+            - type: string
+        etag:
+         anyOf:
+            - type: string
+        size:
+         anyOf:
+            - type: integer
+    minioFileInfo:
+      type: object
+      properties:
+        etag:
+          anyOf:
+            - type: string
+        versionId:
+          anyOf:
+            - type: string
+    apiError:
+      type: object
+      properties:
+        error:
+          anyOf:
+            - type: string
+        detail:
+          anyOf:
+            - type: string
+    apiErrorUnknown:
+      type: object
+      properties:
+        error:
+          anyOf:
+            - type: string
