@@ -15,13 +15,25 @@
       "type-fest@0.21.3": {
         "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
       },
+      "type-fest@2.19.0": {
+        "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+      },
       "caniuse-lite@1.0.30001214": {
+        "reason": "CC BY 4.0 is used without any changes and credit was given"
+      },
+      "caniuse-lite@1.0.30001252": {
+        "reason": "CC BY 4.0 is used without any changes and credit was given"
+      },
+      "caniuse-lite@1.0.30001382": {
         "reason": "CC BY 4.0 is used without any changes and credit was given"
       },
       "tslib@1.14.1": {
         "reason": "0BSD are compatible with Apache-2.0"
       },
       "tslib@2.3.1": {
+        "reason": "0BSD are compatible with Apache-2.0"
+      },
+      "tslib@2.4.0": {
         "reason": "0BSD are compatible with Apache-2.0"
       }
     }
