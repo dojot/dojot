@@ -95,6 +95,7 @@ function createObject(config, healthCheck, logger, errorTemplate) {
   };
 
   /* Emitted when an error occurs on this connection. */
+  // eslint-disable-next-line security-node/detect-unhandled-event-errors
   mongoose.connection.on('error', (err) => {
     logger.error(err);
   });

@@ -62,7 +62,7 @@ class Utils():
             kwargs: Locust event keyword arguments.
         """
 
-        events.request_failure.fire(**kwargs)
+        events.request.fire(response_length=0, context={}, **kwargs)
 
     @staticmethod
     def fire_locust_success(**kwargs):
@@ -72,7 +72,7 @@ class Utils():
             kwargs: Locust event keyword arguments.
         """
 
-        events.request_success.fire(**kwargs)
+        events.request.fire(context={}, exception=None, **kwargs)
 
     @staticmethod
     def str_to_bool(string: str) -> bool:

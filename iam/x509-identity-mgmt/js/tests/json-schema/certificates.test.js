@@ -27,7 +27,8 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
   // --------------------
   // test required fields
   // --------------------
-  it("should have required property 'certificateChain' or 'csr'",
+  it(
+    "should have required property 'certificateChain' or 'csr'",
     () => req.post('/api/v1/certificates')
       .send()
       .expect(400)
@@ -67,9 +68,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
-  it("should match exactly one schema in oneOf ('certificateChain' or 'csr')",
+  it(
+    "should match exactly one schema in oneOf ('certificateChain' or 'csr')",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -111,9 +114,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
-  it("should match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
+  it(
+    "should match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -158,12 +163,14 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
   // --------------------
   // test all field types
   // --------------------
-  it("should 'certificateChain' be string",
+  it(
+    "should 'certificateChain' be string",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain: null,
@@ -187,9 +194,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'csr' be string",
+  it(
+    "should 'csr' be string",
     () => req.post('/api/v1/certificates')
       .send({
         csr: null,
@@ -213,9 +222,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'belongsTo.device' be string",
+  it(
+    "should 'belongsTo.device' be string",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -242,9 +253,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'belongsTo.application' be string",
+  it(
+    "should 'belongsTo.application' be string",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -271,12 +284,14 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
   // ---------------------
   // test all field limits
   // ---------------------
-  it("should 'certificateChain' NOT be longer than 65536 characters",
+  it(
+    "should 'certificateChain' NOT be longer than 65536 characters",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain: generateCert(65536 + 1), /* (+1 to test) */
@@ -298,9 +313,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'csr' NOT be longer than 65536 characters",
+  it(
+    "should 'csr' NOT be longer than 65536 characters",
     () => req.post('/api/v1/certificates')
       .send({
         csr: generateCSR(65536 + 1), /* (+1 to test) */
@@ -322,12 +339,14 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 
   // --------------------
   // test all field regex
   // --------------------
-  it("should 'certificateChain' match the regex pattern",
+  it(
+    "should 'certificateChain' match the regex pattern",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain: '',
@@ -349,9 +368,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'csr' match the regex pattern",
+  it(
+    "should 'csr' match the regex pattern",
     () => req.post('/api/v1/certificates')
       .send({
         csr: '',
@@ -373,9 +394,11 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'belongsTo.device' match the regex pattern",
+  it(
+    "should 'belongsTo.device' match the regex pattern",
     () => req.post('/api/v1/certificates')
       .send({
         certificateChain,
@@ -400,14 +423,16 @@ describe('X509 Certificates - JSON Schema validations [on http POST]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 });
 
 describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
   // --------------------
   // test required fields
   // --------------------
-  it("should have required property 'belongsTo'",
+  it(
+    "should have required property 'belongsTo'",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .send()
       .expect(400)
@@ -427,9 +452,11 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'belongsTo' match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
+  it(
+    "should 'belongsTo' match exactly one schema in oneOf ('belongsTo.device' or 'belongsTo.application')",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .send({
         belongsTo: {
@@ -491,12 +518,14 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
   // --------------------
   // test all field types
   // --------------------
-  it("should 'belongsTo' be object",
+  it(
+    "should 'belongsTo' be object",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .send({
         belongsTo: null,
@@ -532,9 +561,11 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'belongsTo.device' should be string",
+  it(
+    "should 'belongsTo.device' should be string",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .send({
         belongsTo: {
@@ -558,9 +589,11 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 
-  it("should 'belongsTo.application' be an enumerated string",
+  it(
+    "should 'belongsTo.application' be an enumerated string",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .send({
         belongsTo: {
@@ -586,12 +619,14 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
             ],
           },
         });
-      }));
+      }),
+  );
 
   // --------------------
   // test all field regex
   // --------------------
-  it("should 'belongsTo.device' match the regex pattern",
+  it(
+    "should 'belongsTo.device' match the regex pattern",
     () => req.patch(`/api/v1/certificates/${faker.random.alphaNumeric(32).toString(16)}`)
       .send({
         belongsTo: {
@@ -615,5 +650,6 @@ describe('X509 Certificates - JSON Schema validations [on http PATCH]', () => {
             }],
           },
         });
-      }));
+      }),
+  );
 });

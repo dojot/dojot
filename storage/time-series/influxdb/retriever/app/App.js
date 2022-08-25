@@ -61,7 +61,7 @@ class App {
 
       // Intern dependencies
       // API Dependencies
-      this.deviceDataRepository = new DeviceDataRepository(configInflux['default.bucket'], this.influxDBConnection);
+      this.deviceDataRepository = new DeviceDataRepository(configInflux['default.bucket'], this.influxDBConnection, configInflux['default.read.as.string']);
       this.deviceDataService = new DeviceDataService(this.deviceDataRepository);
       this.genericQueryService = new GenericQueryService(this.deviceDataRepository);
       // Sync Dependencies

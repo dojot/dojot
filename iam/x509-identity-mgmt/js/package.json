@@ -55,6 +55,7 @@
         "eslint-plugin-import": "^2.20.2",
         "eslint-plugin-jest": "^23.8.2",
         "eslint-plugin-security": "^1.4.0",
+        "eslint-plugin-security-node": "^1.1.1",
         "faker": "^4.1.0",
         "jest": "^25.2.7",
         "supertest": "^4.0.2"

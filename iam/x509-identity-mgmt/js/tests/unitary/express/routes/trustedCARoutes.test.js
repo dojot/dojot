@@ -58,7 +58,8 @@ const framework = WebUtils.framework.createExpress({
 const request = supertest(framework);
 
 describe("Testing 'trustedCARoutes.js' Script Routes", () => {
-  it('should post a trusted CA certificate and receive its fingerprint',
+  it(
+    'should post a trusted CA certificate and receive its fingerprint',
     () => request.post('/api/v1/trusted-cas')
       .send({
         caPem: util.caCert,
@@ -66,9 +67,11 @@ describe("Testing 'trustedCARoutes.js' Script Routes", () => {
       .expect(201)
       .then((res) => {
         expect(res.body).toEqual(externalCertFingerprint);
-      }));
+      }),
+    );
 
-  it('should throw an exception only one CA certificate is expected per request',
+  it(
+    'should throw an exception only one CA certificate is expected per request',
     () => request.post('/api/v1/trusted-cas')
       .send({
         caPem: `${util.caCert}\n${util.caCert}`,
@@ -78,9 +81,11 @@ describe("Testing 'trustedCARoutes.js' Script Routes", () => {
         expect(res.body).toEqual({
           error: 'Only one CA certificate is expected per request.',
         });
-      }));
+      }),
+    );
 
-  it('should list the trusted CA certificates',
+  it(
+    'should list the trusted CA certificates',
     () => request.get('/api/v1/trusted-cas?fields=caFingerprint')
       .expect(200)
       .then((res) => {
@@ -98,16 +103,20 @@ describe("Testing 'trustedCARoutes.js' Script Routes", () => {
           },
           'trusted-cas': caCertList,
         });
-      }));
+      }),
+    );
 
-  it('should get a trusted CA certificate',
+  it(
+    'should get a trusted CA certificate',
     () => request.get(`/api/v1/trusted-cas/${util.caFingerprint}?fields=caFingerprint,caPem`)
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(certQueryResult);
-      }));
+      }),
+    );
 
-  it('should change the Auto-Registration',
+  it(
+    'should change the Auto-Registration',
     () => request.patch(`/api/v1/trusted-cas/${util.caFingerprint}`)
       .send({
         allowAutoRegistration: true,
@@ -115,12 +124,15 @@ describe("Testing 'trustedCARoutes.js' Script Routes", () => {
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      }));
+      }),
+    );
 
-  it('should delete trusted CA certificate',
+  it(
+    'should delete trusted CA certificate',
     () => request.delete(`/api/v1/trusted-cas/${util.caFingerprint}`)
       .expect(204)
       .then((res) => {
         expect(res.body).toEqual({});
-      }));
+      }),
+    );
 });
