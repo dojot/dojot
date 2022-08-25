@@ -16,6 +16,7 @@ module.exports = ({ config, identificationService }) => ({
         cn: identificationService.cn,
         fingerprint: identificationService.fingerprint,
         'basic-auth': identificationService.basicAuth,
+        params: identificationService.params,
       };
       try {
         const arg =
@@ -41,6 +42,19 @@ module.exports = ({ config, identificationService }) => ({
         return next();
       } catch (err) {
         return next(err);
+      }
+    }
+
+    if (
+      config.authorizationMode === 'params' &&
+      reqType[3] === 'unsecure'
+    ) {
+      try {
+        [req.body.tenant, req.body.deviceId] =
+          await identificationService.params(req);
+        return next();
+      } catch (error) {
+        return next(error);
       }
     }
 

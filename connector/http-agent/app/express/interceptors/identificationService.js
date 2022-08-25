@@ -12,7 +12,9 @@ const Unauthorized = new createError[401]();
  * and add the new tenant request (req.tenant and req.deviceId).
  *
  * */
-module.exports = ({ redisManager, deviceAuthService, certificateAclService }) => ({
+module.exports = ({
+  redisManager, deviceAuthService, certificateAclService,
+}) => ({
   cn: async (clientCert) => {
     try {
       const { CN } = clientCert.subject;
@@ -76,6 +78,20 @@ module.exports = ({ redisManager, deviceAuthService, certificateAclService }) =>
       throw new Error('Invalid credentials.');
     } catch (err) {
       Unauthorized.message = err.message;
+      throw Unauthorized;
+    }
+  },
+  params: async (req) => {
+    try {
+      const {
+        query: { tenant, deviceId },
+      } = req;
+
+      if (!tenant || !deviceId) throw new Error('Unidentified parameters');
+
+      return [tenant, deviceId];
+    } catch (error) {
+      Unauthorized.message = error.message;
       throw Unauthorized;
     }
   },

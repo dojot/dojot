@@ -12,7 +12,7 @@ const { catalog: RelativeDistinguishedNamesCatalog } = require('./RelativeDistin
 const parseAllowedAttrsRegex = (arr) => arr.reduce((obj, attr) => {
   const keyValue = attr.split('=').map((el) => el.trim());
   const key = keyValue[0];
-  // eslint-disable-next-line security/detect-non-literal-regexp
+  // eslint-disable-next-line security/detect-non-literal-regexp, security-node/non-literal-reg-expr
   const value = new RegExp(keyValue[1]);
   if (!Reflect.has(obj, key)) {
     Reflect.set(obj, key, value);

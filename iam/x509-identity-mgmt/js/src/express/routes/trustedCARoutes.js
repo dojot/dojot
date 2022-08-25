@@ -1,38 +1,44 @@
-const HttpStatus = require('http-status-codes');
+const HttpStatus = require("http-status-codes");
 
-const sanitizeParams = require('./sanitizeParams');
+const sanitizeParams = require("./sanitizeParams");
 
-const CA_MODEL = 'trustedCAModel';
-const CA_SERVICE = 'trustedCAService';
+const CA_MODEL = "trustedCAModel";
+const CA_SERVICE = "trustedCAService";
 
-module.exports = ({
-  mountPoint, schemaValidator, errorTemplate,
-}) => {
+module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
   const { validateNewTrustedCA, validateUpdTrustedCA } = schemaValidator;
   const { BadRequest } = errorTemplate;
 
   const trustedCAsRoute = {
     mountPoint,
-    name: 'trusted-cas-route',
-    path: ['/trusted-cas'],
+    name: "trusted-cas-route",
+    path: ["/trusted-cas"],
     handlers: [
       {
         /* Register Trusted CA Certificate */
-        method: 'post',
+        method: "post",
         middleware: [
           validateNewTrustedCA(),
           async (req, res) => {
             const pemArr = req.body.caPem.match(sanitizeParams.certRegExp);
             if (!pemArr || pemArr.length > 1) {
-              throw BadRequest('Only one CA certificate is expected per request.');
+              throw BadRequest(
+                "Only one CA certificate is expected per request."
+              );
             }
 
-            const [caPem] = pemArr.map((el) => sanitizeParams.sanitizeLineBreaks(el));
-            const allowAutoRegistration = req.body.allowAutoRegistration || false;
+            const [caPem] = pemArr.map((el) =>
+              sanitizeParams.sanitizeLineBreaks(el)
+            );
+            const allowAutoRegistration =
+              req.body.allowAutoRegistration || false;
 
             const caService = req.scope.resolve(CA_SERVICE);
 
-            const result = await caService.registerCertificate({ caPem, allowAutoRegistration });
+            const result = await caService.registerCertificate({
+              caPem,
+              allowAutoRegistration,
+            });
 
             res.status(HttpStatus.CREATED).json(result);
           },
@@ -40,7 +46,7 @@ module.exports = ({
       },
       {
         /* List Trusted CA Certificates */
-        method: 'get',
+        method: "get",
         middleware: [
           async (req, res) => {
             const caModel = req.scope.resolve(CA_MODEL);
@@ -57,7 +63,7 @@ module.exports = ({
             results.forEach((cert) => caModel.sanitizeFields(cert));
 
             const paging = req.getPaging(itemCount);
-            res.status(HttpStatus.OK).json({ paging, 'trusted-cas': results });
+            res.status(HttpStatus.OK).json({ paging, "trusted-cas": results });
           },
         ],
       },
@@ -66,16 +72,18 @@ module.exports = ({
 
   const trustedCAsCAFingerprintRoute = {
     mountPoint,
-    name: 'trusted-cas-fingerprint-route',
-    path: ['/trusted-cas/:caFingerprint'],
-    params: [{
-      name: 'caFingerprint',
-      trigger: sanitizeParams.fingerprintHandler,
-    }],
+    name: "trusted-cas-fingerprint-route",
+    path: ["/trusted-cas/:caFingerprint"],
+    params: [
+      {
+        name: "caFingerprint",
+        trigger: sanitizeParams.fingerprintHandler,
+      },
+    ],
     handlers: [
       {
         /* Get Trusted CA Certificate */
-        method: 'get',
+        method: "get",
         middleware: [
           async (req, res) => {
             const caModel = req.scope.resolve(CA_MODEL);
@@ -83,9 +91,14 @@ module.exports = ({
 
             const { caFingerprint } = req.params;
             const queryFields = caModel.parseProjectionFields(req.query.fields);
-            const filterFields = caModel.parseConditionFields({ caFingerprint });
+            const filterFields = caModel.parseConditionFields({
+              caFingerprint,
+            });
 
-            const result = await caService.getCertificate(queryFields, filterFields);
+            const result = await caService.getCertificate(
+              queryFields,
+              filterFields
+            );
             caModel.sanitizeFields(result);
 
             res.status(HttpStatus.OK).json(result);
@@ -94,7 +107,7 @@ module.exports = ({
       },
       {
         /* Update Trusted CA Certificate */
-        method: 'patch',
+        method: "patch",
         middleware: [
           validateUpdTrustedCA(),
           async (req, res) => {
@@ -102,9 +115,14 @@ module.exports = ({
             const caService = req.scope.resolve(CA_SERVICE);
 
             const { caFingerprint } = req.params;
-            const filterFields = caModel.parseConditionFields({ caFingerprint });
+            const filterFields = caModel.parseConditionFields({
+              caFingerprint,
+            });
 
-            await caService.changeAutoRegistration(filterFields, req.body.allowAutoRegistration);
+            await caService.changeAutoRegistration(
+              filterFields,
+              req.body.allowAutoRegistration
+            );
 
             res.sendStatus(HttpStatus.NO_CONTENT);
           },
@@ -112,7 +130,7 @@ module.exports = ({
       },
       {
         /* Delete Trusted CA Certificate */
-        method: 'delete',
+        method: "delete",
         middleware: [
           async (req, res) => {
             const caModel = req.scope.resolve(CA_MODEL);
@@ -120,9 +138,14 @@ module.exports = ({
 
             const { caFingerprint } = req.params;
             const queryFields = caModel.parseProjectionFields(null);
-            const filterFields = caModel.parseConditionFields({ caFingerprint });
+            const filterFields = caModel.parseConditionFields({
+              caFingerprint,
+            });
 
-            const certToRemove = await caService.getCertificate(queryFields, filterFields);
+            const certToRemove = await caService.getCertificate(
+              queryFields,
+              filterFields
+            );
             await caService.deleteCertificate(certToRemove);
 
             res.sendStatus(HttpStatus.NO_CONTENT);

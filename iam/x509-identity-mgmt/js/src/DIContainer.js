@@ -1,3 +1,4 @@
+/* eslint-disable security-node/non-literal-reg-expr */
 const awilix = require('awilix');
 
 const url = require('url');

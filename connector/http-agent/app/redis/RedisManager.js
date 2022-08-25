@@ -109,14 +109,28 @@ class RedisManager {
   }
 
   /**
+   * Asynchronous delete operation for redis with timeout
+   *
+   * @param  {...any} args any argument accepted by redis delete
+   * @returns Promise
+   */
+  async deleteAsync(key) {
+    return timeout(
+      this.redisClient.delAsync(key),
+      configRedis['operation.timeout.ms'],
+    );
+  }
+
+  /**
    * Asynchronous set operation for redis with timeout
    *
    * @param  {...any} args any argument accepted by redis set
    * @returns Promise
    */
   setAsync(...args) {
+    const expiration = configRedis['fingerprint.expiration'];
     return timeout(
-      this.redisClient.setAsync(...args),
+      this.redisClient.setAsync(...args, 'EX', expiration),
       configRedis['operation.timeout.ms'],
     );
   }
@@ -147,8 +161,9 @@ class RedisManager {
   setSecurity(...args) {
     const newArgs = args;
     newArgs[1] = RedisManager.generateHash(args[1]);
+    const expiration = configRedis['credentials.expiration'];
     return timeout(
-      this.redisClient.setAsync(...newArgs),
+      this.redisClient.setAsync(...newArgs, 'EX', expiration),
       configRedis['operation.timeout.ms'],
     );
   }

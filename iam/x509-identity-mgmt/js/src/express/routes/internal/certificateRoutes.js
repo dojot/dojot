@@ -26,9 +26,8 @@ module.exports = ({ mountPoint }) => {
             // we can elevate service privileges to bypass certain restrictions.
             service.elevatePrivileges();
 
-            const { itemCount, results } = await service.listCertificates(
-              queryFields, filterFields, req.query.limit, req.offset,
-            );
+            const { itemCount, results } = await service
+              .listCertificates(queryFields, filterFields, req.query.limit, req.offset);
 
             // It is important to drop privileges right after performing the operation
             service.dropPrivileges();
