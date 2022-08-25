@@ -68,7 +68,7 @@ class TenantService {
   async loadTenants() {
     try {
       await this.requestTenants();
-      await this.clearTenants();
+      await this.clearTenantsInDB();
       await this.saveTenants();
     } catch (requestError) {
       this.logger.debug('It was not possible to sync with Tenant service.');
@@ -194,8 +194,16 @@ class TenantService {
     return keycloakSession;
   }
 
-  async clearTenants() {
-    const tenantPromise = this.tenants.map((tenant) => this.deleteTenant(tenant));
+  async clearTenantsInDB() {
+    const tenantPromise = this.tenants.map((tenant) => {
+      return this.inputPersister.dispatch({
+        tenant: {
+          id: tenant.id,
+          signatureKey: tenant.signatureKey,
+        },
+      }, InputPersisterArgs.DELETE_OPERATION);
+    });
+
     await Promise.all(tenantPromise);
   }
 }

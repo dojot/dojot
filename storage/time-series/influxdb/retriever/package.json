@@ -42,7 +42,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
-    "@dojot/microservice-sdk": "0.2.0-beta.5",
+    "@dojot/microservice-sdk": "0.2.1",
     "@google-cloud/precise-date": "^2.0.3",
     "@influxdata/influxdb-client": "^1.9.0",
     "@influxdata/influxdb-client-apis": "^1.9.0",

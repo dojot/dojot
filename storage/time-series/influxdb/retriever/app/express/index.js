@@ -15,7 +15,7 @@ const paginateInterceptor = require('./interceptors/CustomPaginator');
 
 const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
 
-const { express: configExpress, paginate: configPaginate } = ConfigManager.getConfig('RETRIEVER');
+const { express: configExpress, paginate: configPaginate, keycloak: configKeycloak } = ConfigManager.getConfig('RETRIEVER');
 
 
 /**
@@ -69,9 +69,15 @@ module.exports = (routes, serviceState, openApiPath, tenantService) => {
         middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
       createKeycloakAuthInterceptorWithFilter(
-        (tenantId) => tenantService.tenants.find((tenant) => tenant.id === tenantId),
+        (tenantId) => {
+          return tenantService.tenants.find((tenant) => tenant.id === tenantId);
+        },
         logger,
         '/',
+        {
+          verifyOnline: true,
+          configKeycloak,
+        }
       ),
       jsonBodyParsingInterceptor({ config: { limit: '100kb' } }),
       paginateInterceptor({
