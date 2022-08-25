@@ -23,15 +23,15 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             const pemArr = req.body.caPem.match(sanitizeParams.certRegExp);
             if (!pemArr || pemArr.length > 1) {
               throw BadRequest(
-                "Only one CA certificate is expected per request."
+                "Only one CA certificate is expected per request.",
               );
             }
 
-            const [caPem] = pemArr.map((el) =>
-              sanitizeParams.sanitizeLineBreaks(el)
+            const [caPem] = pemArr.map(
+              (el) => sanitizeParams.sanitizeLineBreaks(el)
             );
-            const allowAutoRegistration =
-              req.body.allowAutoRegistration || false;
+
+            const allowAutoRegistration = req.body.allowAutoRegistration || false;
 
             const caService = req.scope.resolve(CA_SERVICE);
 
@@ -97,7 +97,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             const result = await caService.getCertificate(
               queryFields,
-              filterFields
+              filterFields,
             );
             caModel.sanitizeFields(result);
 
@@ -121,7 +121,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             await caService.changeAutoRegistration(
               filterFields,
-              req.body.allowAutoRegistration
+              req.body.allowAutoRegistration,
             );
 
             res.sendStatus(HttpStatus.NO_CONTENT);
@@ -144,7 +144,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             const certToRemove = await caService.getCertificate(
               queryFields,
-              filterFields
+              filterFields,
             );
             await caService.deleteCertificate(certToRemove);
 
