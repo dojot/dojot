@@ -37,17 +37,21 @@ const framework = WebUtils.framework.createExpress({
 const request = supertest(framework);
 
 describe("Testing 'caRoutes.js' Script Routes", () => {
-  it('should get the internal Root CA',
+  it(
+    'should get the internal Root CA',
     () => request.get('/api/v1/ca')
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(caQueryResult);
-      }));
+      }),
+    );
 
-  it('should get the latest CRL issued by the internal Root CA',
+  it(
+    'should get the latest CRL issued by the internal Root CA',
     () => request.get('/api/v1/ca/crl')
       .expect(200)
       .then((res) => {
         expect(res.body).toEqual(crlQueryResult);
-      }));
+      }),
+    );
 });

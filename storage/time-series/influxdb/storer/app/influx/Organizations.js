@@ -15,6 +15,7 @@ class Organizations {
    * @param {string} defaultToken Set up initial token
    *                              (This token must have permission to write/read
    *                              in all organizations)
+   * @param {Number} defaultTimeout Connection timeout with influxdb
    * @param {string} defaultOrg Organization Name Set up initial Organization
    * @param {string} defaultBucket Bucket Name for all buckets created
    * @param {Number} retentionPeriodHrs Retention Period in hours
@@ -22,16 +23,18 @@ class Organizations {
    */
   constructor(url,
     defaultToken,
+    defaultTimeout,
     defaultOrg,
     defaultBucket,
     retentionPeriodHrs) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: defaultToken=${defaultToken}`);
+    logger.debug(`constructor: defaultTimeout=${defaultTimeout}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
     logger.debug(`constructor: retentionPeriodHrs=${retentionPeriodHrs}`);
 
-    const influxDB = new InfluxDB({ url, token: defaultToken });
+    const influxDB = new InfluxDB({ url, token: defaultToken, timeout: defaultTimeout });
     this.setupApi = new SetupAPI(influxDB);
     this.orgsApi = new OrgsAPI(influxDB);
     this.bucketsAPI = new BucketsAPI(influxDB);

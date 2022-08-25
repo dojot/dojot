@@ -45,7 +45,7 @@ describe('Test Influx Measurements', () => {
   });
 
   test('Instantiate class', () => {
-    measur = new Measurements('url', 'token', 'defaultBucket');
+    measur = new Measurements('url', 'token', 20000, 'defaultBucket');
   });
 
   test('remove - test ok ', async () => {
