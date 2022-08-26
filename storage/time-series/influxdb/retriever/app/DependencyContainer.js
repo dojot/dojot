@@ -3,7 +3,7 @@ const {
     LocalPersistenceManager,
   },
   WebUtils: {
-    DojotClientHttp,
+    DojotHttpClient,
   },
 } = require('@dojot/microservice-sdk');
 const { InfluxDB } = require('@influxdata/influxdb-client');
@@ -18,7 +18,7 @@ const DeviceManagerService = require('./sync/DeviceManagerService');
 const SyncLoader = require('./sync/SyncLoader');
 
 function dependencyContainerFactory(config, logger) {
-  const dojotClientHttp = new DojotClientHttp({
+  const dojotHttpClient = new DojotHttpClient({
     logger,
     defaultClientOptions: {},
     defaultRetryDelay: 15000,
@@ -40,13 +40,13 @@ function dependencyContainerFactory(config, logger) {
   const tenantService = new TenantService(
     localPersistence,
     config.sync.tenants,
-    dojotClientHttp,
+    dojotHttpClient,
     config.keycloak,
     logger,
   );
   const deviceManagerService = new DeviceManagerService(
     config.sync.devices,
-    dojotClientHttp,
+    dojotHttpClient,
     localPersistence,
     logger,
   );

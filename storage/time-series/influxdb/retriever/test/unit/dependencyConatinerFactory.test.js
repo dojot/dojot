@@ -3,7 +3,7 @@ const mockDojotSdk = {
     LocalPersistenceManager: jest.fn().mockImplementation(() => ({})),
   },
   WebUtils: {
-    DojotClientHttp: jest.fn().mockImplementation(() => ({})),
+    DojotHttpClient: jest.fn().mockImplementation(() => ({})),
   },
 };
 jest.mock('@dojot/microservice-sdk', () => mockDojotSdk);
