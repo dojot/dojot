@@ -69,15 +69,13 @@ module.exports = (routes, serviceState, openApiPath, tenantService) => {
         middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
       createKeycloakAuthInterceptorWithFilter(
-        (tenantId) => {
-          return tenantService.tenants.find((tenant) => tenant.id === tenantId);
-        },
+        (tenantId) => tenantService.tenants.find((tenant) => tenant.id === tenantId),
         logger,
         '/',
         {
           verifyOnline: true,
           configKeycloak,
-        }
+        },
       ),
       jsonBodyParsingInterceptor({ config: { limit: '100kb' } }),
       paginateInterceptor({

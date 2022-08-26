@@ -195,14 +195,12 @@ class TenantService {
   }
 
   async clearTenantsInDB() {
-    const tenantPromise = this.tenants.map((tenant) => {
-      return this.inputPersister.dispatch({
-        tenant: {
-          id: tenant.id,
-          signatureKey: tenant.signatureKey,
-        },
-      }, InputPersisterArgs.DELETE_OPERATION);
-    });
+    const tenantPromise = this.tenants.map((tenant) => this.inputPersister.dispatch({
+      tenant: {
+        id: tenant.id,
+        signatureKey: tenant.signatureKey,
+      },
+    }, InputPersisterArgs.DELETE_OPERATION));
 
     await Promise.all(tenantPromise);
   }
