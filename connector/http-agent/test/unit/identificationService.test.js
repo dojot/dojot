@@ -39,16 +39,16 @@ describe('identificationService', () => {
 
   it('should successfully return data from a specific device from redis, with authorization mode=CN', async () => {
     const clientCert = {
-      subject: { CN: 'admin:4b9685' },
+      subject: { CN: 'test:abc123' },
     };
     mockRedisManager.getAsync.mockReturnValue('true');
     const messageKey = await identificationService.cn(clientCert);
-    expect(messageKey).toEqual(['admin', '4b9685']);
+    expect(messageKey).toEqual(['test', 'abc123']);
   });
 
   it('should throw a error, when the CN template is invalid', async () => {
     const clientCert = {
-      subject: { CN: '4b9685' },
+      subject: { CN: 'abc123' },
     };
     let error;
     try {
@@ -61,7 +61,7 @@ describe('identificationService', () => {
 
   it('should throw a error, when the device is false in redis, with authorization mode=CN', async () => {
     const clientCert = {
-      subject: { CN: 'admin:4b9685' },
+      subject: { CN: 'test:abc123' },
     };
     mockRedisManager.getAsync.mockReturnValue('false');
     let error;
@@ -75,17 +75,17 @@ describe('identificationService', () => {
 
   it('should successfully return data from a specific device from device manager, with authorization mode=CN', async () => {
     const clientCert = {
-      subject: { CN: 'admin:4b9685' },
+      subject: { CN: 'test:abc123' },
     };
     mockRedisManager.getAsync.mockReturnValue(null);
     mockDeviceManagerService.getDevice.mockReturnValue('test:abc123');
     const messageKey = await identificationService.cn(clientCert);
-    expect(messageKey).toEqual(['admin', '4b9685']);
+    expect(messageKey).toEqual(['test', 'abc123']);
   });
 
   it('should throw a error, when the device is null in device manager, with authorization mode=CN', async () => {
     const clientCert = {
-      subject: { CN: 'admin:4b9685' },
+      subject: { CN: 'test:abc123' },
     };
     mockRedisManager.getAsync.mockReturnValue(null);
     mockDeviceManagerService.getDevice.mockReturnValue(null);
