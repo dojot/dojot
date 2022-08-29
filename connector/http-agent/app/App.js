@@ -62,9 +62,8 @@ class App {
         dojotHttpClient,
         logger,
       });
-      this.consumerMessages = new ConsumerMessages(
-        this.tenantService, serviceState, this.redisManager,
-      );
+      this.consumerMessages =
+        new ConsumerMessages(this.tenantService, serviceState, this.redisManager);
       this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpClient);
     } catch (e) {
       logger.error('constructor:', e);
