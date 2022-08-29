@@ -45,7 +45,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
-    "@dojot/microservice-sdk": "0.2.0",
+    "@dojot/microservice-sdk": "0.2.1",
     "@types/jest": "^27.0.1",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
