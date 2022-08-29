@@ -56,13 +56,15 @@ class App {
     try {
       this.server = new Server(serviceState);
       this.producerMessages = new ProducerMessages(serviceState);
-      this.redisManager = new RedisManager(serviceState);      
+      this.redisManager = new RedisManager(serviceState);
       this.tenantService = new TenantService({
         keycloakConfig: config.keycloak,
         dojotHttpClient,
         logger,
       });
-      this.consumerMessages = new ConsumerMessages(this.tenantService, serviceState, this.redisManager);
+      this.consumerMessages = new ConsumerMessages(
+        this.tenantService, serviceState, this.redisManager,
+      );
       this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpClient);
     } catch (e) {
       logger.error('constructor:', e);
