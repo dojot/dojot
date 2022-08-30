@@ -5,7 +5,9 @@ const sanitizeParams = require('./sanitizeParams');
 const CA_MODEL = 'trustedCAModel';
 const CA_SERVICE = 'trustedCAService';
 
-module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
+module.exports = ({ 
+  mountPoint, schemaValidator, errorTemplate, 
+}) => {
   const { validateNewTrustedCA, validateUpdTrustedCA } = schemaValidator;
   const { BadRequest } = errorTemplate;
 
@@ -22,23 +24,16 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
           async (req, res) => {
             const pemArr = req.body.caPem.match(sanitizeParams.certRegExp);
             if (!pemArr || pemArr.length > 1) {
-              throw BadRequest(
-                'Only one CA certificate is expected per request.',
-              );
+              throw BadRequest('Only one CA certificate is expected per request.');
             }
 
-            const [caPem] = pemArr.map(
-              (el) => sanitizeParams.sanitizeLineBreaks(el),
-            );
+            const [caPem] = pemArr.map((el) => sanitizeParams.sanitizeLineBreaks(el));
 
             const allowAutoRegistration = req.body.allowAutoRegistration || false;
 
             const caService = req.scope.resolve(CA_SERVICE);
 
-            const result = await caService.registerCertificate({
-              caPem,
-              allowAutoRegistration,
-            });
+            const result = await caService.registerCertificate({ caPem, allowAutoRegistration });
 
             res.status(HttpStatus.CREATED).json(result);
           },
@@ -74,12 +69,10 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
     mountPoint,
     name: 'trusted-cas-fingerprint-route',
     path: ['/trusted-cas/:caFingerprint'],
-    params: [
-      {
+    params: [{
         name: 'caFingerprint',
         trigger: sanitizeParams.fingerprintHandler,
-      },
-    ],
+    }],
     handlers: [
       {
         /* Get Trusted CA Certificate */
@@ -91,14 +84,9 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             const { caFingerprint } = req.params;
             const queryFields = caModel.parseProjectionFields(req.query.fields);
-            const filterFields = caModel.parseConditionFields({
-              caFingerprint,
-            });
+            const filterFields = caModel.parseConditionFields({ caFingerprint });
 
-            const result = await caService.getCertificate(
-              queryFields,
-              filterFields,
-            );
+            const result = await caService.getCertificate(queryFields, filterFields);
             caModel.sanitizeFields(result);
 
             res.status(HttpStatus.OK).json(result);
@@ -115,14 +103,9 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             const caService = req.scope.resolve(CA_SERVICE);
 
             const { caFingerprint } = req.params;
-            const filterFields = caModel.parseConditionFields({
-              caFingerprint,
-            });
+            const filterFields = caModel.parseConditionFields({ caFingerprint });
 
-            await caService.changeAutoRegistration(
-              filterFields,
-              req.body.allowAutoRegistration,
-            );
+            await caService.changeAutoRegistration(filterFields, req.body.allowAutoRegistration);
 
             res.sendStatus(HttpStatus.NO_CONTENT);
           },
@@ -138,14 +121,9 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             const { caFingerprint } = req.params;
             const queryFields = caModel.parseProjectionFields(null);
-            const filterFields = caModel.parseConditionFields({
-              caFingerprint,
-            });
+            const filterFields = caModel.parseConditionFields({ caFingerprint });
 
-            const certToRemove = await caService.getCertificate(
-              queryFields,
-              filterFields,
-            );
+            const certToRemove = await caService.getCertificate(queryFields, filterFields);
             await caService.deleteCertificate(certToRemove);
 
             res.sendStatus(HttpStatus.NO_CONTENT);
