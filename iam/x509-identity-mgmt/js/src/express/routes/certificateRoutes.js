@@ -37,9 +37,7 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
             const filterFields = model.handleFilterField(req.query.keyVal);
             const sortBy = model.parseSortBy(req.query.sortBy);
 
-            const { itemCount, results } = await service.listCertificates(
-              queryFields, filterFields, req.query.limit, req.offset, sortBy,
-            );
+            const { itemCount, results } = await service.listCertificates(queryFields, filterFields, req.query.limit, req.offset, sortBy);
 
             results.forEach((cert) => model.sanitizeFields(cert));
 

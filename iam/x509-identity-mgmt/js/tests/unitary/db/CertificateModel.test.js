@@ -68,20 +68,20 @@ describe("Unit tests of script 'CertificateModel.js'", () => {
     const sortByCreatedAt = 'createdAt';
     const sortByCreatedAtAsc = 'asc:createdAt';
     const sortByCreatedAtDesc = 'desc:createdAt';
-    
-    expect(certificateModel.parseSortBy(sortByCreatedAt)).toEqual({ 
+
+    expect(certificateModel.parseSortBy(sortByCreatedAt)).toEqual({
       createdAt: 'asc',
     });
 
-    expect(certificateModel.parseSortBy(sortByCreatedAtAsc)).toEqual({ 
+    expect(certificateModel.parseSortBy(sortByCreatedAtAsc)).toEqual({
       createdAt: 'asc',
     });
 
-    expect(certificateModel.parseSortBy(sortByCreatedAtDesc)).toEqual({ 
+    expect(certificateModel.parseSortBy(sortByCreatedAtDesc)).toEqual({
       createdAt: 'desc',
     });
   });
-  
+
   it('should return null if cannot parse sortBy', () => {
     const sortBy = 'field-that-does-not-exist';
     expect(certificateModel.parseSortBy(sortBy)).toBe(null);

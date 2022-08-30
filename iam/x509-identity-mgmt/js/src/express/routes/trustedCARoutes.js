@@ -5,8 +5,8 @@ const sanitizeParams = require('./sanitizeParams');
 const CA_MODEL = 'trustedCAModel';
 const CA_SERVICE = 'trustedCAService';
 
-module.exports = ({ 
-  mountPoint, schemaValidator, errorTemplate, 
+module.exports = ({
+  mountPoint, schemaValidator, errorTemplate,
 }) => {
   const { validateNewTrustedCA, validateUpdTrustedCA } = schemaValidator;
   const { BadRequest } = errorTemplate;
@@ -28,7 +28,6 @@ module.exports = ({
             }
 
             const [caPem] = pemArr.map((el) => sanitizeParams.sanitizeLineBreaks(el));
-
             const allowAutoRegistration = req.body.allowAutoRegistration || false;
 
             const caService = req.scope.resolve(CA_SERVICE);
@@ -51,9 +50,7 @@ module.exports = ({
             const filterFields = caModel.parseConditionFields(req.query);
             const sortBy = caModel.parseSortBy(req.query.sortBy);
 
-            const { itemCount, results } = await caService.listCertificates(
-              queryFields, filterFields, req.query.limit, req.offset, sortBy,
-            );
+            const { itemCount, results } = await caService.listCertificates(queryFields, filterFields, req.query.limit, req.offset, sortBy);
 
             results.forEach((cert) => caModel.sanitizeFields(cert));
 
@@ -70,8 +67,8 @@ module.exports = ({
     name: 'trusted-cas-fingerprint-route',
     path: ['/trusted-cas/:caFingerprint'],
     params: [{
-        name: 'caFingerprint',
-        trigger: sanitizeParams.fingerprintHandler,
+      name: 'caFingerprint',
+      trigger: sanitizeParams.fingerprintHandler,
     }],
     handlers: [
       {
