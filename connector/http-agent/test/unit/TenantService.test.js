@@ -29,7 +29,7 @@ describe('TenantService', () => {
   let tenantService;
   beforeEach(() => {
     tenantService = new TenantService({
-      keycloakConfig, dojotClientHttp: mockDojotClientHttp, logger,
+      keycloakConfig, dojotHttpClient: mockDojotClientHttp, logger,
     });
   });
 

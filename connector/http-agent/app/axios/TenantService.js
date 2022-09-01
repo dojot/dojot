@@ -3,9 +3,9 @@ const {
 } = require('@dojot/microservice-sdk');
 
 module.exports = class TenantService {
-  constructor({ keycloakConfig, dojotClientHttp, logger }) {
+  constructor({ keycloakConfig, dojotHttpClient, logger }) {
     this.keycloakConfig = keycloakConfig;
-    this.dojotClientHttp = dojotClientHttp;
+    this.dojotHttpClient = dojotHttpClient;
     this.logger = logger;
     this.tenants = [];
   }
@@ -15,7 +15,7 @@ module.exports = class TenantService {
    *
    */
   async loadTenants() {
-    const response = await this.dojotClientHttp.request({
+    const response = await this.dojotHttpClient.request({
       url: this.keycloakConfig['tenants.url'],
       method: 'GET',
       timeout: 15000,

@@ -3,7 +3,7 @@ const {
   Logger,
   ConfigManager: { transformObjectKeys, getConfig },
   WebUtils: {
-    DojotClientHttp,
+    DojotHttpClient,
   },
 } = require('@dojot/microservice-sdk');
 
@@ -33,7 +33,7 @@ const TenantService = require('./axios/TenantService');
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
 
-const dojotHttpclient = new DojotClientHttp({
+const dojotHttpClient = new DojotHttpClient({
   defaultClientOptions: {
     timeout: 15000,
   },
@@ -57,13 +57,14 @@ class App {
       this.server = new Server(serviceState);
       this.producerMessages = new ProducerMessages(serviceState);
       this.redisManager = new RedisManager(serviceState);
-      this.consumerMessages = new ConsumerMessages(serviceState, this.redisManager);
       this.tenantService = new TenantService({
         keycloakConfig: config.keycloak,
-        dojotHttpclient,
+        dojotHttpClient,
         logger,
       });
-      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpclient);
+      this.consumerMessages =
+        new ConsumerMessages(this.tenantService, serviceState, this.redisManager);
+      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpClient);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
@@ -78,16 +79,14 @@ class App {
     this.deviceAuthService = new DeviceAuthService(
       this.tenantService,
       this.config.url['device.auth'],
-      dojotHttpclient,
+      dojotHttpClient,
     );
     logger.info('init: Initializing the http-agent...');
     try {
       await this.producerMessages.init();
-      await this.consumerMessages.init();
       this.redisManager.init();
       await this.consumerMessages.init();
       this.server.registerShutdown();
-
       this.server.init(
         express(
           [
@@ -96,7 +95,7 @@ class App {
               producerMessages: this.producerMessages,
             }),
           ],
-          this.serviceState,
+          serviceState,
           this.redisManager,
           this.deviceAuthService,
           this.certificateAclService,
