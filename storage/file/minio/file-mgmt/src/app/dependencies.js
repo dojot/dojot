@@ -1,5 +1,5 @@
 const {
-  ServiceStateManager, ConfigManager,
+  ServiceStateManager, ConfigManager, WebUtils: { DojotClientHttp },
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
 
@@ -35,13 +35,24 @@ module.exports = (config, logger) => {
   // Techs
   const httpServer = new Server(serviceState, configServerCamelCase, logger, config);
   const kafkaConsumer = new KafkaConsumer(config, logger);
+  const keycloakProxyClientHttp = new DojotClientHttp({ 
+    defaultClientOptions: {},
+    logger,
+    defaultMaxNumberAttempts: 0,
+    defaultRetryDelay: 15000,
+  });
 
   // Repositories
   const minioConnection = createMinIOConnection(config.minio);
   const minioRepository = new MinIoRepository(minioConnection, config.minio, logger);
 
   // Services
-  const tenantService = new TenantService(minioRepository);
+  const tenantService = new TenantService(
+    minioRepository,
+    keycloakProxyClientHttp,
+    config.keycloak,
+    logger,
+  );
   const fileUploadService = new FileUploadService(minioRepository, logger);
   const fileListingService = new FileListingService(minioRepository, logger);
   const fileRemovalService = new FileRemoveService(minioRepository, logger);
@@ -60,6 +71,7 @@ module.exports = (config, logger) => {
   const kafkaController = new KafkaController(tenantService, logger);
 
   return {
+    tenantService,
     web: {
       httpServer,
       controllers: {

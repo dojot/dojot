@@ -89,22 +89,22 @@ class Server {
         }
         this.reloadCertificates();
       });
+    }
 
-      if (this.httpServer) {
-        this.httpServer.on('request', express);
-        this.httpServer.on('listening', () => {
-          logger.info('HTTP server ready to accept connections!');
-          logger.info(this.httpServer.address());
-          this.serviceState.signalReady(this.ServiceName);
-        });
-        this.httpServer.on('close', () => {
-          this.serviceState.signalNotReady(this.ServiceName);
-        });
-        this.httpServer.on('error', (e) => {
-          logger.error('HTTP server experienced an error:', e);
-        });
-        this.httpServer.listen(configHttpServer.port, configHttpServer.host);
-      }
+    if (this.httpServer) {
+      this.httpServer.on('request', express);
+      this.httpServer.on('listening', () => {
+        logger.info('HTTP server ready to accept connections!');
+        logger.info(this.httpServer.address());
+        this.serviceState.signalReady(this.ServiceName);
+      });
+      this.httpServer.on('close', () => {
+        this.serviceState.signalNotReady(this.ServiceName);
+      });
+      this.httpServer.on('error', (e) => {
+        logger.error('HTTP server experienced an error:', e);
+      });
+      this.httpServer.listen(configHttpServer.port, configHttpServer.host);
     }
   }
 

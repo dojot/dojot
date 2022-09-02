@@ -6,26 +6,46 @@ class TrustedCAService {
    * The dependencies are injected through the constructor
    */
   constructor({
-    trustedCAModel, certificateModel, tenant, pkiUtils, dnUtils,
-    rootCA, externalCaCertMinimumValidityDays, queryMaxTimeMS, caCertLimit,
-    errorTemplate, trustedCANotifier,
+    trustedCAModel,
+    certificateModel,
+    tenant,
+    pkiUtils,
+    dnUtils,
+    rootCA,
+    externalCaCertMinimumValidityDays,
+    queryMaxTimeMS,
+    caCertLimit,
+    errorTemplate,
+    trustedCANotifier,
   }) {
-    Object.defineProperty(this, 'tenant', { value: tenant });
-    Object.defineProperty(this, 'pkiUtils', { value: pkiUtils });
-    Object.defineProperty(this, 'dnUtils', { value: dnUtils });
-    Object.defineProperty(this, 'rootCA', { value: rootCA });
-    Object.defineProperty(this, 'queryMaxTimeMS', { value: queryMaxTimeMS });
-    Object.defineProperty(this, 'externalCaCertMinimumValidityDays', { value: externalCaCertMinimumValidityDays });
+    Object.defineProperty(this, "tenant", { value: tenant });
+    Object.defineProperty(this, "pkiUtils", { value: pkiUtils });
+    Object.defineProperty(this, "dnUtils", { value: dnUtils });
+    Object.defineProperty(this, "rootCA", { value: rootCA });
+    Object.defineProperty(this, "queryMaxTimeMS", { value: queryMaxTimeMS });
+    Object.defineProperty(this, "externalCaCertMinimumValidityDays", {
+      value: externalCaCertMinimumValidityDays,
+    });
 
-    Object.defineProperty(this, 'TrustedCAModel', { value: trustedCAModel.model });
-    Object.defineProperty(this, 'parseTrustedCACndtFlds', { value: trustedCAModel.parseConditionFields.bind(trustedCAModel) });
+    Object.defineProperty(this, "TrustedCAModel", {
+      value: trustedCAModel.model,
+    });
+    Object.defineProperty(this, "parseTrustedCACndtFlds", {
+      value: trustedCAModel.parseConditionFields.bind(trustedCAModel),
+    });
 
-    Object.defineProperty(this, 'CertificateModel', { value: certificateModel.model });
-    Object.defineProperty(this, 'parseCertCndtFlds', { value: certificateModel.parseConditionFields.bind(certificateModel) });
-    Object.defineProperty(this, 'caCertLimit', { value: caCertLimit });
+    Object.defineProperty(this, "CertificateModel", {
+      value: certificateModel.model,
+    });
+    Object.defineProperty(this, "parseCertCndtFlds", {
+      value: certificateModel.parseConditionFields.bind(certificateModel),
+    });
+    Object.defineProperty(this, "caCertLimit", { value: caCertLimit });
 
-    Object.defineProperty(this, 'error', { value: errorTemplate });
-    Object.defineProperty(this, 'trustedCANotifier', { value: trustedCANotifier });
+    Object.defineProperty(this, "error", { value: errorTemplate });
+    Object.defineProperty(this, "trustedCANotifier", {
+      value: trustedCANotifier,
+    });
   }
 
   /**
@@ -39,16 +59,20 @@ class TrustedCAService {
    * @throws an exception if no record is found with the informed filters.
    */
   async getCertificate(queryFields, filterFields) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    Object.assign(filterFields, { tenant: this.tenant.id });
 
     /* Executes the query and converts the result to JSON */
     const result = await this.TrustedCAModel.findOne(filterFields)
-      .select(queryFields.join(' '))
+      .select(queryFields.join(" "))
       .maxTimeMS(this.queryMaxTimeMS)
       .lean()
       .exec();
     if (!result) {
-      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+      throw this.error.NotFound(
+        `No records found for the following parameters: ${JSON.stringify(
+          filterFields
+        )}`
+      );
     }
     return result;
   }
@@ -64,11 +88,12 @@ class TrustedCAService {
    * @returns a set of certificates that meet the search criteria.
    */
   async listCertificates(queryFields, filterFields, limit, offset, sortBy) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    Object.assign(filterFields, { tenant: this.tenant.id });
 
     const query = this.TrustedCAModel.find(filterFields)
-      .select(queryFields.join(' '))
-      .limit(limit).skip(offset)
+      .select(queryFields.join(" "))
+      .limit(limit)
+      .skip(offset)
       .maxTimeMS(this.queryMaxTimeMS)
       .lean();
 
@@ -92,12 +117,14 @@ class TrustedCAService {
    * @returns Returns a certificate bundle (array of certificates in PEM format).
    */
   async getCertificateBundle() {
-    const result = await this.TrustedCAModel.aggregate().group({
-      _id: '$caFingerprint',
-      caPem: {
-        $first: '$caPem',
-      },
-    }).exec();
+    const result = await this.TrustedCAModel.aggregate()
+      .group({
+        _id: "$caFingerprint",
+        caPem: {
+          $first: "$caPem",
+        },
+      })
+      .exec();
 
     return result.map((el) => el.caPem);
   }
@@ -113,7 +140,10 @@ class TrustedCAService {
     const caCert = this.pkiUtils.parseCert(caPem);
     const caFingerprint = this.pkiUtils.getFingerprint(caPem);
 
-    this.pkiUtils.checkRemainingDays(caCert, this.externalCaCertMinimumValidityDays);
+    this.pkiUtils.checkRemainingDays(
+      caCert,
+      this.externalCaCertMinimumValidityDays
+    );
 
     await this.pkiUtils.assertRootCA(caCert);
 
@@ -134,7 +164,7 @@ class TrustedCAService {
         notAfter: caCert.notAfter.value,
       },
       allowAutoRegistration,
-      tenant: this.tenant,
+      tenant: this.tenant.id,
     });
     const caCertRecord = await model.save();
 
@@ -153,14 +183,21 @@ class TrustedCAService {
    * @throws an exception if no record is found with the entered filters.
    */
   async changeAutoRegistration(filterFields, allowAutoRegistration) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    Object.assign(filterFields, { tenant: this.tenant.id });
 
-    const result = await this.TrustedCAModel
-      .findOneAndUpdate(filterFields, { allowAutoRegistration, modifiedAt: new Date() })
-      .maxTimeMS(this.queryMaxTimeMS).exec();
+    const result = await this.TrustedCAModel.findOneAndUpdate(filterFields, {
+      allowAutoRegistration,
+      modifiedAt: new Date(),
+    })
+      .maxTimeMS(this.queryMaxTimeMS)
+      .exec();
 
     if (!result) {
-      throw this.error.NotFound(`No records found for the following parameters: ${JSON.stringify(filterFields)}`);
+      throw this.error.NotFound(
+        `No records found for the following parameters: ${JSON.stringify(
+          filterFields
+        )}`
+      );
     }
   }
 
@@ -174,16 +211,26 @@ class TrustedCAService {
     const { caFingerprint } = caCertRecord;
     const { tenant } = this;
 
-    const ff = this.parseCertCndtFlds({ tenant, caFingerprint, autoRegistered: false });
+    const ff = this.parseCertCndtFlds({
+      tenant,
+      caFingerprint,
+      autoRegistered: false,
+    });
     const certCount = await this.CertificateModel.countDocuments(ff);
     if (certCount > 0) {
-      throw this.error.BadRequest('There are certificates dependent on the CA to be removed, '
-      + "however these certificates are not marked as 'autoRegistered'. Therefore, "
-      + 'they must be removed manually before removing their CA certificate.');
+      throw this.error.BadRequest(
+        "There are certificates dependent on the CA to be removed, " +
+          "however these certificates are not marked as 'autoRegistered'. Therefore, " +
+          "they must be removed manually before removing their CA certificate."
+      );
     }
 
     // When we start using MongoDB >= 4.4 we can use transactions here...
-    await this.CertificateModel.deleteMany({ tenant, caFingerprint, autoRegistered: true })
+    await this.CertificateModel.deleteMany({
+      tenant,
+      caFingerprint,
+      autoRegistered: true,
+    })
       .maxTimeMS(this.queryMaxTimeMS)
       .exec();
 
@@ -204,12 +251,14 @@ class TrustedCAService {
    */
   async checkCACertLimitByTenant() {
     if (this.caCertLimit > -1) {
-      const filterFields = { tenant: this.tenant };
+      const filterFields = { tenant: this.tenant.id };
 
       const count = await this.TrustedCAModel.countDocuments(filterFields);
 
       if (count >= this.caCertLimit) {
-        throw this.error.BadRequest('The number of registered CAs has been exceeded.');
+        throw this.error.BadRequest(
+          "The number of registered CAs has been exceeded."
+        );
       }
     }
   }
@@ -226,11 +275,13 @@ class TrustedCAService {
   async checkExistingCertificate(fingerprint) {
     const filterFields = {
       caFingerprint: fingerprint,
-      tenant: this.tenant,
+      tenant: this.tenant.id,
     };
     const count = await this.TrustedCAModel.countDocuments(filterFields);
     if (count) {
-      throw this.error.Conflict(`The certificate with fingerprint '${fingerprint}' already exists.`);
+      throw this.error.Conflict(
+        `The certificate with fingerprint '${fingerprint}' already exists.`
+      );
     }
   }
 
@@ -242,15 +293,20 @@ class TrustedCAService {
    * @returns the CA certificate in PEM format.
    */
   async getPEM(caFingerprint) {
-    const ff = this.parseTrustedCACndtFlds({ tenant: this.tenant, caFingerprint });
+    const ff = this.parseTrustedCACndtFlds({
+      tenant: this.tenant.id,
+      caFingerprint,
+    });
     const result = await this.TrustedCAModel.findOne(ff)
-      .select('caPem').maxTimeMS(this.queryMaxTimeMS).lean()
+      .select("caPem")
+      .maxTimeMS(this.queryMaxTimeMS)
+      .lean()
       .exec();
     if (result) {
       const { caPem } = result;
       return caPem;
     }
-    throw new Error('No certificate found matching the provided fingerprint.');
+    throw new Error("No certificate found matching the provided fingerprint.");
   }
 }
 

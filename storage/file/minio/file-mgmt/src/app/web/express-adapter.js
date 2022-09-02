@@ -3,7 +3,6 @@ const yaml = require('js-yaml');
 const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
 
-const Interceptors = require('./interceptors');
 
 module.exports = class ExpressAdapter {
   /**
@@ -17,7 +16,7 @@ module.exports = class ExpressAdapter {
    *
    * @returns the express server
    */
-  static adapt(routes, serviceState, openApiPath, logger, config) {
+  static adapt(routes, listTenants, serviceState, openApiPath, logger, config) {
     let openApiJson = null;
     try {
       // It is a system necessity get the yaml file dynamically
@@ -34,6 +33,7 @@ module.exports = class ExpressAdapter {
       requestIdInterceptor,
       beaconInterceptor,
       requestLogInterceptor,
+      createKeycloakAuthInterceptor,
     } = WebUtils.framework.interceptors;
 
     return WebUtils.framework.createExpress({
@@ -42,8 +42,8 @@ module.exports = class ExpressAdapter {
           name: 'swagger-ui',
           path: '/tss/v1/api-docs',
           middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
-        },
-        Interceptors.dojotTenantJwtParserInterceptor(),
+        },        
+        createKeycloakAuthInterceptor(listTenants, logger),
         // Interceptors.openApiValidatorInterceptor({ openApiPath }),
         requestIdInterceptor(),
         beaconInterceptor({

@@ -183,7 +183,7 @@ describe('RedisManager', () => {
     const key = 'test@123abc';
     it('should get value', async () => {
       redisManager.redisClient.getAsync.mockReturnValue('$ioaswru9834%34r7rfnedfv');
-      redisManager.getSecurity(key);
+      redisManager.getSecurity('username', key);
       expect(redisManager.redisClient.getAsync).toHaveBeenCalled();
     });
 

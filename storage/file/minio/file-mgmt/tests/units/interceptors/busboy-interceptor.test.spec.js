@@ -54,7 +54,9 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
       is: () => true,
     };
     const response = new ResponseMock();
@@ -93,7 +95,9 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
       is: () => true,
     };
     const response = new ResponseMock();

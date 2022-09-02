@@ -19,6 +19,9 @@ jest.mock('../../../src/app/dependencies', () => () => ({
   kafka: {
     kafkaConsumer: mockKafkaConsumer,
   },
+  tenantService: {
+    updateListTenants: jest.fn(() => []),
+  },
 }));
 
 const App = require('../../../src/app/app');

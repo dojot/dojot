@@ -1,11 +1,40 @@
 const {
-  WebUtils: { createTokenGen }, Logger,
+  LocalPersistence: {
+    InputPersister,
+    InputPersisterArgs,
+  },
 } = require('@dojot/microservice-sdk');
 
 const PAGE_SIZE = 100;
-const createAxios = require('./createAxios');
 
-const logger = new Logger('influxdb-retriever:DeviceManagerService');
+// Config InputPersister
+const INPUT_CONFIG = {
+  levels: [
+    {
+      type: 'dynamic',
+      source: 'meta.service',
+      options: {
+        keyEncoding: 'utf8',
+        valueEncoding: 'bool',
+      },
+    },
+  ],
+  frames: [
+    {
+      level: 0,
+      pair: {
+        key: {
+          type: 'dynamic',
+          source: 'data.id',
+        },
+        value: {
+          type: 'static',
+          source: true,
+        },
+      },
+    },
+  ],
+};
 
 class DeviceManagerService {
   /**
@@ -13,29 +42,34 @@ class DeviceManagerService {
    *
    * @param {string} deviceRouteUrl Url for api that returns data about devices
    */
-  constructor(deviceRouteUrl) {
+  constructor(deviceRouteUrl, dojotClientHttp, localPersistence, logger) {
     this.deviceRouteUrl = deviceRouteUrl;
+    this.dojotClientHttp = dojotClientHttp;
+    this.logger = logger;
+    this.localPersistence = localPersistence;
+    this.inputPersister = new InputPersister(localPersistence, INPUT_CONFIG);
   }
 
   /**
    * Requires devices data from a tenant for API
    *
-   * @param {string} tenant the tenant name
+   * @param {object} tenant the tenant name
    *
    * @return a list of devices
    */
   async getDevices(tenant) {
-    const tokenGen = createTokenGen();
-    const token = await tokenGen.generate({ payload: {}, tenant });
-    let listDevices = [];
+    const token = tenant.session.getTokenSet().access_token;
 
-    const axios = createAxios();
+    let listDevices = [];
     let pageNum = 1;
     let response;
     do {
-      logger.debug(`requesting page ${pageNum}`);
+      this.logger.debug(`requesting page ${pageNum}`);
       // eslint-disable-next-line no-await-in-loop
-      response = await axios.get(this.deviceRouteUrl, {
+      response = await this.dojotClientHttp.request({
+        url: this.deviceRouteUrl,
+        method: 'GET',
+        timeout: 12000,
         params: {
           idsOnly: true,
           page_size: PAGE_SIZE,
@@ -50,6 +84,49 @@ class DeviceManagerService {
     } while (response.data.length === PAGE_SIZE);
 
     return listDevices;
+  }
+
+  async addNewDevice(devicePayload) {
+    await this.inputPersister.dispatch(devicePayload, InputPersisterArgs.INSERT_OPERATION);
+  }
+
+  async deleteDevice(device) {
+    await this.inputPersister.dispatch(device, InputPersisterArgs.DELETE_OPERATION);
+  }
+
+  /**
+   * Syncronizes and loads devices
+   *
+   */
+  async loadDevices(tenant) {
+    this.logger.info('Sync device-manager.');
+    let devices = [];
+
+    try {
+      devices = await this.getDevices(tenant);
+      this.logger.debug(`Clean up ${tenant.id} sublevel`);
+      await this.localPersistence.clear(tenant.id);
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const device of devices) {
+      // Write devices
+      // eslint-disable-next-line no-await-in-loop
+      await this.addNewDevice({
+        data: {
+          id: device,
+        },
+        meta: {
+          service: tenant.id,
+        },
+      });
+    }
+  }
+
+  async findDevice(tenantId, deviceId) {
+    return this.localPersistence.get(tenantId, deviceId);
   }
 }
 

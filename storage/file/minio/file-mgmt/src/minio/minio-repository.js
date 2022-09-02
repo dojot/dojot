@@ -31,6 +31,14 @@ module.exports = class MinIoRepository {
     await this.client.makeBucket(this.suffixBucket + bucketName, region);
   }
 
+  async listBuckets() {
+    const buckets = await this.client.listBuckets();
+    return buckets.map((bucket) => ({
+      ...bucket,
+      name: bucket.name.replace(this.suffixBucket, ''),
+    }));
+  }
+
   /**
    * Removes a bucket.
    *
