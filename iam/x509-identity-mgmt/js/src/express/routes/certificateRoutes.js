@@ -35,9 +35,16 @@ module.exports = ({ mountPoint, schemaValidator, errorTemplate }) => {
 
             const queryFields = model.parseProjectionFields(req.query.fields);
             const filterFields = model.handleFilterField(req.query.keyVal);
+            const sortBy = model.parseSortBy(req.query.sortBy);
 
-            const { itemCount, results } = await service
-              .listCertificates(queryFields, filterFields, req.query.limit, req.offset);
+            const { itemCount, results } = await service.listCertificates(
+              queryFields,
+              filterFields,
+              req.query.limit,
+              req.offset,
+              sortBy,
+            );
+
             results.forEach((cert) => model.sanitizeFields(cert));
 
             const paging = req.getPaging(itemCount);

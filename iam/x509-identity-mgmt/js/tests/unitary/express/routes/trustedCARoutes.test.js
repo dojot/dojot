@@ -36,6 +36,7 @@ const framework = WebUtils.framework.createExpress({
                 parseProjectionFields: jest.fn(),
                 parseConditionFields: jest.fn(),
                 sanitizeFields: jest.fn(),
+                parseSortBy: jest.fn(),
               };
             }
             // dep === 'trustedCAService'

@@ -63,19 +63,25 @@ class TrustedCAService {
    *
    * @returns a set of certificates that meet the search criteria.
    */
-  async listCertificates(queryFields, filterFields, limit, offset) {
+  async listCertificates(queryFields, filterFields, limit, offset, sortBy) {
     Object.assign(filterFields, { tenant: this.tenant.id });
+
+    const query = this.TrustedCAModel.find(filterFields)
+      .select(queryFields.join(' '))
+      .limit(limit).skip(offset)
+      .maxTimeMS(this.queryMaxTimeMS)
+      .lean();
+
+    if (sortBy) {
+      query.sort(sortBy);
+    }
 
     /* Executes the query and converts the results to JSON */
     const [results, itemCount] = await Promise.all([
-      this.TrustedCAModel.find(filterFields)
-        .select(queryFields.join(' '))
-        .limit(limit).skip(offset)
-        .maxTimeMS(this.queryMaxTimeMS)
-        .lean()
-        .exec(),
+      query.exec(),
       this.TrustedCAModel.countDocuments(filterFields),
     ]);
+
     return { itemCount, results };
   }
 
