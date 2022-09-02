@@ -6,11 +6,9 @@ const http = require('http');
 
 const EventEmitter = require('events');
 
-const { Logger, WebUtils } = require('@dojot/microservice-sdk');
+const { Logger } = require('@dojot/microservice-sdk');
 
 const DeviceMgrProvider = require('../../../src/deviceManager/DeviceMgrProvider');
-
-const { createTokenGen } = WebUtils;
 
 function deviceModelMock() {
   const deviceModel = {
@@ -32,7 +30,13 @@ describe("Unit tests of script 'DeviceMgrProvider.js'", () => {
       deviceMgrUrl: URL.parse(global.config.devicemgr.device.url),
       deviceMgrTimeout: global.config.devicemgr.device.timeout.ms,
       deviceModel: deviceModelMock(),
-      tokenGen: createTokenGen(),
+      tenantManager: {
+        findTenant: () => ({
+          session: {
+            getTokenSet: () => 'access_token',
+          },
+        }),
+      },
       errorTemplate: global.errorTemplate,
       logger: new Logger('DeviceMgrProvider.test.js'),
     });

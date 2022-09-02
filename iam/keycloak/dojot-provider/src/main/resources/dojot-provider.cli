@@ -1,0 +1,26 @@
+embed-server --server-config=standalone-ha.xml --std-out=echo
+
+batch
+/subsystem=keycloak-server/:list-add(name=providers, value="module:com.github.dojot.keycloak.providers.dojot-provider:dojot")
+/subsystem=keycloak-server/spi=dojot:add()
+/subsystem=keycloak-server/spi=dojot/provider=dojot:add(enabled=true)
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.rootUrl,value=${env.DOJOT_ROOT_URL:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.adminPassword,value=${env.DOJOT_ADMIN_PASSWORD:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.servers,value=${env.DOJOT_KAFKA_SERVERS:kafka:9092})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.clientId,value=${env.DOJOT_KAFKA_CLIENT_ID:keycloak})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.topic,value=${env.DOJOT_KAFKA_TOPIC:dojot-management.dojot.tenancy})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.validRealmNameRegex,value=${env.DOJOT_VALID_REALM_NAME_REGEX:^[a-zA-Z0-9]{1,30}$})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.customRealmRepresentationFile,value=${env.DOJOT_CUSTOM_REALM_REP_FILE:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.realmSslMode,value=${env.DOJOT_REALM_SSL_MODE:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpHost,value=${env.DOJOT_SMTP_HOST:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpPort,value=${env.DOJOT_SMTP_PORT:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpSSL,value=${env.DOJOT_SMTP_SSL:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpStartTLS,value=${env.DOJOT_SMTP_START_TLS:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpFrom,value=${env.DOJOT_SMTP_FROM:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpFromDisplayName,value=${env.DOJOT_SMTP_FROM_DISPLAY_NAME:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpAuthUsername,value=${env.DOJOT_SMTP_USERNAME:})
+/subsystem=keycloak-server/spi=dojot/provider=dojot:write-attribute(name=properties.smtpAuthPassword,value=${env.DOJOT_SMTP_PASSWORD:})
+/subsystem=transactions:write-attribute(name=default-timeout,value=300)
+run-batch
+
+stop-embedded-server

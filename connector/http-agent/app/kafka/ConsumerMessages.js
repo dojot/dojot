@@ -28,11 +28,13 @@ class ConsumerMessages {
      *          with register service 'http-agent-consumer'} serviceState
      *          Manages the services' states, providing health check and shutdown utilities.
      */
-  constructor(serviceState, redisManager) {
+  constructor(tenantService, serviceState, redisManager) {
     this.serviceState = serviceState;
     this.redisManager = redisManager;
+    this.tenantService = tenantService;
     this.consumer = null;
     this.idCallbackDeviceManager = null;
+    this.idCallbackTenancy = null;
     this.isReady = false;
   }
 
@@ -50,6 +52,7 @@ class ConsumerMessages {
       this.createHealthChecker();
       this.registerShutdown();
       this.initCallbackForDeviceEvents();
+      this.initCallbackForTenancyEvents();
       logger.info('... Kafka Consumer was initialized');
     } catch (error) {
       // something unexpected happended!
@@ -59,10 +62,10 @@ class ConsumerMessages {
   }
 
   /**
-         * Instantiates the consumerMessages callback for the device manager topic
-         *
-         * @returns callback
-         */
+   * Instantiates the consumerMessages callback for the device manager topic
+   *
+   * @returns callback
+   */
   getCallbacksForDeviceEvents() {
     return async (data) => {
       try {
@@ -83,10 +86,10 @@ class ConsumerMessages {
   }
 
   /*
-        * Initializes the consumption of the device manager topic
-        *
-        * @public
-        */
+  * Initializes the consumption of the device manager topic
+  *
+  * @public
+  */
   // eslint-disable-next-line class-methods-use-this
   initCallbackForDeviceEvents() {
     const topic = RegExp(configSubscribe['topics.regex.device.manager']);
@@ -98,10 +101,61 @@ class ConsumerMessages {
   }
 
   /**
-       * A function to get if kafka is connected
-       *
-       * @returns {Promise<boolean>} if kafka is connect
-       */
+   * Instantiates the consumerMessages callback for the tenancy topic
+   *
+   * @returns callback
+   */
+  getCallbackForTenancyEvents() {
+    const operations = {
+      CREATE: this.tenantService.create.bind(this.tenantService),
+      DELETE: this.tenantService.remove.bind(this.tenantService),
+    };
+
+    return (data, ack) => {
+      try {
+        const { value: payload } = data;
+        const payloadObject = JSON.parse(payload.toString());
+
+        logger.info('New tenant event received');
+        operations[payloadObject.type]({
+          id: payloadObject.tenant,
+          signatureKey: payloadObject.signatureKey,
+        }).then(() => {
+          ack();
+        }).catch((error) => {
+          logger.error(`Dispatch failed. ${error.message}`);
+          ack();
+        });
+      } catch (error) {
+        logger.error(error);
+        ack();
+      }
+    };
+  }
+
+  /*
+  * Initializes the consumption of the tenancy topic
+  *
+  * @public
+  */
+  initCallbackForTenancyEvents() {
+    logger.debug(`initCallbackForTenantEvents: Register Callbacks for
+      topics with regex ${configSubscribe['topics.regex.tenants']}`);
+    // eslint-disable-next-line security/detect-non-literal-regexp
+    const topic = new RegExp(configSubscribe['topics.regex.tenants']);
+
+    this.idCallbackTenant = this.consumer
+      .registerCallback(topic, this.getCallbackForTenancyEvents());
+    logger.debug('registerCallback: Registered Callback');
+  }
+
+  /**
+   * A function to get if kafka is connected
+   *
+   * @returns {Promise<boolean>} if kafka is connect
+   *
+   * @public
+   */
   async isConnected() {
     try {
       const { connected } = await this.consumer.getStatus();
@@ -116,9 +170,9 @@ class ConsumerMessages {
   }
 
   /**
-       * Unregister all callbacks
-       *
-       */
+   * Unregister all callbacks
+   *
+   */
   unregisterCallbacks() {
     if (this.idCallbackDeviceManager) {
       this.consumer.unregisterCallback(this.idCallbackDeviceManager);

@@ -68,14 +68,16 @@ class SyncLoader {
     // Search for data in an API
     logger.info('Synchronizing tenant and device data with other services.');
     const credentilsTenants = await this.tenantModel.findAll();
-    const tenants = await this.tenantService.getTenants();
+    await this.tenantService.loadTenants();
+    const { tenants } = this.tenantService;
 
     // eslint-disable-next-line no-restricted-syntax
     for (const tenant of credentilsTenants) {
       // Sync and load
       try {
-        if (tenants.includes(tenant)) {
-          await this.loadDevices(tenant);
+        const targetTenantObject = tenants.find((tenantObject) => tenantObject.id === tenant);
+        if (targetTenantObject) {
+          await this.loadDevices(targetTenantObject);
         } else {
           await this.basicCredentials.removeAllFromTenant(tenant);
         }
@@ -91,13 +93,14 @@ class SyncLoader {
    *
    */
   async loadDevices(tenant) {
-    const credentilsDevices = await this.basicCredentials.findAllDevicesFromTenant(tenant);
+    const credentilsDevices = await this.basicCredentials.findAllDevicesFromTenant(tenant.id);
     const devices = await this.deviceService.getDevices(tenant);
 
     // eslint-disable-next-line no-restricted-syntax
     for (const device of credentilsDevices) {
-      if (!devices.includes(device)) {
-        await this.basicCredentials.remove(tenant, device);
+      const targetDevice = devices.find((deviceObj) => deviceObj.id === device);
+      if (!targetDevice) {
+        await this.basicCredentials.remove(tenant.id, device);
       }
     }
   }

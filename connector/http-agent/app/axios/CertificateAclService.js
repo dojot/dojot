@@ -5,9 +5,9 @@ class CertificateAclService {
    *
    * @param {string} certificateAclUrl Url for api that returns data about acl entries
    */
-  constructor(certificateAclRouteUrl, axios) {
+  constructor(certificateAclRouteUrl, dojotHttpclient) {
     this.certificateAclRouteUrl = certificateAclRouteUrl;
-    this.axios = axios();
+    this.dojotHttpclient = dojotHttpclient;
   }
 
   /**
@@ -18,7 +18,7 @@ class CertificateAclService {
    * @return tenant and device
    */
   async getAclEntries(fingerprint256) {
-    const messageKey = await this.axios.get(`${this.certificateAclRouteUrl}/${fingerprint256}`);
+    const messageKey = await this.dojotHttpclient.request(`${this.certificateAclRouteUrl}/${fingerprint256}`);
     return messageKey.data;
   }
 }

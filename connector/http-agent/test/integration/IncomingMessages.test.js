@@ -91,11 +91,15 @@ const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
   send: mockProducerMessagesSend,
 };
-jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
+jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
 jest.setTimeout(30000);
 
 let app;
+
+const mockTenantService = {
+  tenants: [],
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -110,6 +114,7 @@ beforeEach(() => {
     mockRedis,
     mockDeviceAuthService,
     mockCertificateAclService,
+    mockTenantService,
   );
 });
 

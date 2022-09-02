@@ -1,6 +1,9 @@
 const mockConfig = {
   app: { 'sidecar.to': 'app' },
   lightship: { a: 'abc' },
+  shutdown: {
+    enable: false,
+  },
 };
 
 const mockSdk = {
@@ -11,6 +14,7 @@ const mockSdk = {
   ServiceStateManager:
   jest.fn().mockImplementation(() => ({
     registerService: jest.fn(),
+    shutdown: jest.fn(),
   })),
   Logger: jest.fn(() => ({
     debug: () => jest.fn(),
@@ -19,6 +23,11 @@ const mockSdk = {
     warn: () => jest.fn(),
   })),
 };
+
+const mockKeycloakSession = {
+
+};
+jest.mock('../../app/keycloakSessionFactory/index', () => jest.fn().mockReturnValue(mockKeycloakSession));
 
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
@@ -80,7 +89,7 @@ describe('App', () => {
   });
 
   test('instantiate class and init', async () => {
-    app = new App();
+    app = new App(mockConfig);
 
     await app.init();
 
