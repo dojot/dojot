@@ -10,9 +10,9 @@ class DeviceManagerService {
    *
    * @param {string} deviceManagerUrl Url for api that returns data from a specific device
    */
-  constructor(deviceManagerRouteUrl, axios) {
+  constructor(deviceManagerRouteUrl, dojotHttpclient) {
     this.deviceManagerRouteUrl = deviceManagerRouteUrl;
-    this.axios = axios();
+    this.dojotHttpclient = dojotHttpclient;
   }
 
   /**
@@ -26,7 +26,7 @@ class DeviceManagerService {
     const tokenGen = createTokenGen();
     const token = await tokenGen.generate({ payload: {}, tenant });
     logger.debug(`requesting device ${deviceId}`);
-    const messageKey = await this.axios.get(`${this.deviceManagerRouteUrl}/${deviceId}`, {
+    const messageKey = await this.dojotHttpclient.request(`${this.deviceManagerRouteUrl}/${deviceId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
