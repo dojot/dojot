@@ -1,33 +1,12 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-try-expect */
-let mockShouldResolve;
-let resolveMock;
-let rejectMock;
-
 // MOCKS
 const mockProducer = {
   connect: jest.fn(),
   disconnect: jest.fn(),
   getStatus: jest.fn(),
   // eslint-disable-next-line no-unused-vars
-  produce: jest.fn(
-    () =>
-      // eslint-disable-next-line implicit-arrow-linebreak
-      new Promise((resolve, reject) => {
-        // eslint-disable-next-line no-param-reassign
-        resolve = jest.fn(resolve);
-        // eslint-disable-next-line no-param-reassign
-        reject = jest.fn(reject);
-        resolveMock = resolve;
-        rejectMock = reject;
-
-        if (mockShouldResolve) {
-          resolve();
-        } else {
-          reject(new Error('testError'));
-        }
-      }),
-  ),
+  produce: jest.fn(),
 };
 
 const mockAddHealthChecker = jest.fn();
@@ -69,7 +48,7 @@ const mockUtils = {
 };
 jest.mock('../../app/Utils', () => mockUtils);
 
-const ProducerMessages = require('../../app/ProducerMessages');
+const ProducerMessages = require('../../app/kafka/ProducerMessages');
 
 describe('ProducerMessages', () => {
   let producerMessages;
@@ -129,24 +108,26 @@ describe('ProducerMessages', () => {
     };
 
     it('should send the message', async () => {
-      mockShouldResolve = true;
+      mockProducer.produce.mockReturnValueOnce();
 
       await producerMessages.init();
 
       producerMessages.send(fakeMessage, 'test', '123abc');
 
       expect(producerMessages.producer.produce).toHaveBeenCalled();
-      expect(resolveMock).toHaveBeenCalled();
     });
 
     it('should not send the message - rejected Promise', async () => {
-      mockShouldResolve = false;
+      mockProducer.produce.mockRejectedValueOnce(new Error('Error'));
 
       await producerMessages.init();
-      producerMessages.send(fakeMessage, 'test', '123abc');
+      try {
+        await producerMessages.send(fakeMessage, 'test', '123abc');
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
 
       expect(producerMessages.producer.produce).toHaveBeenCalled();
-      expect(rejectMock).toHaveBeenCalled();
     });
   });
 

@@ -89,7 +89,8 @@ module.exports = ({
       }
 
       try {
-        const authenticated = await deviceAuthService.getAuthenticationStatus(username, password);
+        const authenticated = await deviceAuthService
+          .getAuthenticationStatus(tenant, username, password);
         if (authenticated) {
           await redisManager.setSecurity(username, password);
           return [tenant, deviceId];

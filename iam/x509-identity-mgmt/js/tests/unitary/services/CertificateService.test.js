@@ -126,7 +126,7 @@ beforeAll(() => {
     ownershipNotifier,
     pkiUtils,
     dnUtils,
-    tenant: 'admin',
+    tenant: { id: 'admin' },
     certValidity: 365,
     checkPublicKey: true,
     checkSubjectDN: true,

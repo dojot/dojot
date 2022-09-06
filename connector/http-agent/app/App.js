@@ -1,7 +1,10 @@
 const {
   ServiceStateManager,
-  ConfigManager: { getConfig, transformObjectKeys },
   Logger,
+  ConfigManager: { transformObjectKeys, getConfig },
+  WebUtils: {
+    DojotHttpClient,
+  },
 } = require('@dojot/microservice-sdk');
 
 const camelCase = require('lodash.camelcase');
@@ -21,16 +24,24 @@ serviceState.registerService('http-agent-consumer');
 const logger = new Logger('http-agent:App');
 
 const Server = require('./Server');
-const ProducerMessages = require('./ProducerMessages');
+const ProducerMessages = require('./kafka/ProducerMessages');
+const ConsumerMessages = require('./kafka/ConsumerMessages');
 const RedisManager = require('./redis/RedisManager');
 const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
 const DeviceManagerService = require('./axios/DeviceManagerService');
-
-const ConsumerMessages = require('./kafka/ConsumerMessages');
+const TenantService = require('./axios/TenantService');
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
-const axios = require('./axios/createAxios');
+
+const dojotHttpClient = new DojotHttpClient({
+  defaultClientOptions: {
+    timeout: 15000,
+  },
+  logger,
+  defaultRetryDelay: 15000,
+  defaultMaxNumberAttempts: 0,
+});
 
 /**
  * Wrapper to initialize the service
@@ -40,16 +51,22 @@ class App {
    * Constructor App
    * that instantiate http-agent classes
    */
-  constructor() {
+  constructor(config) {
     logger.debug('constructor: instantiate app...');
+    this.config = config;
     try {
       this.server = new Server(serviceState);
       this.producerMessages = new ProducerMessages(serviceState);
       this.redisManager = new RedisManager(serviceState);
-      this.consumerMessages = new ConsumerMessages(serviceState, this.redisManager);
-      this.deviceAuthService = new DeviceAuthService(configURL['device.auth'], axios);
-      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], axios);
-      this.deviceManagerService = new DeviceManagerService(configURL['device.manager'], axios);
+      this.tenantService = new TenantService({
+        keycloakConfig: config.keycloak,
+        dojotHttpClient,
+        logger,
+      });
+      this.consumerMessages =
+        new ConsumerMessages(this.tenantService, serviceState, this.redisManager);
+      this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpClient);
+      this.deviceManagerService = new DeviceManagerService(configURL['device.manager'], dojotHttpClient);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
@@ -60,13 +77,18 @@ class App {
    * Initialize the server and producer
    */
   async init() {
+    await this.tenantService.loadTenants();
+    this.deviceAuthService = new DeviceAuthService(
+      this.tenantService,
+      this.config.url['device.auth'],
+      dojotHttpClient,
+    );
     logger.info('init: Initializing the http-agent...');
     try {
       await this.producerMessages.init();
       this.redisManager.init();
       await this.consumerMessages.init();
       this.server.registerShutdown();
-
       this.server.init(
         express(
           [

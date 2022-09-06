@@ -50,6 +50,7 @@ const framework = WebUtils.framework.createExpress({
                 parseConditionFields: jest.fn(),
                 handleFilterField: jest.fn(),
                 sanitizeFields: jest.fn(),
+                parseSortBy: jest.fn(),
               };
             }
             // dep === 'certificateService'

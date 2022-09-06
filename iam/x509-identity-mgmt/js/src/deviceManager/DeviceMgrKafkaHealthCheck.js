@@ -6,10 +6,10 @@ class DeviceMgrKafkaHealthCheck {
    * The dependencies are injected through the constructor
    */
   constructor({
-    deviceMgrKafkaConsumer,
+    kafkaConsumer,
     logger,
   }) {
-    Object.defineProperty(this, 'kafkaConsumer', { value: deviceMgrKafkaConsumer });
+    Object.defineProperty(this, 'kafkaConsumer', { value: kafkaConsumer });
     Object.defineProperty(this, 'logger', { value: logger });
   }
 

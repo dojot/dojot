@@ -11,6 +11,7 @@ const axiosCfg = {
     Accept: 'application/x-pem-file',
   },
   responseType: 'text',
+  transformResponse: [(data) => data],
 };
 
 /**
@@ -28,23 +29,42 @@ class Requests {
    * @param {*} paths.crl
    * @param {*} paths.ca
    * @param {*} paths.caBundle
+   * @param {KeycloakClientSession} keycloakSession Keycloak Session
    */
-  constructor(url,
+  constructor(
+    url,
     timeout,
     retries,
-    paths) {
+    paths,
+    keycloakSession,
+  ) {
+    this.keycloakSession = keycloakSession;
     this.axiosX509 = axios.create({
       baseURL: url,
       timeout,
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+      },
     });
     this.paths = paths;
+
     axiosRetry(this.axiosX509, {
       retries,
       retryDelay: axiosRetry.exponentialDelay,
     });
 
     this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509IdentityMgmt/Client`);
+  }
+
+  createAxiosOptions() {
+    const accessToken = this.keycloakSession.getTokenSet().access_token;
+
+    const axiosOptions = {
+      ...axiosCfg,
+    };
+    axiosOptions.headers.Authorization = `Bearer ${accessToken}`;
+
+    return axiosOptions;
   }
 
   /**
@@ -60,12 +80,13 @@ class Requests {
    */
   async createCertificateByCSR(csr, belongsTo) {
     this.logger.debug('createCert: Creating a certificate from a CSR...');
+
     try {
       const {
         status,
         statusText,
         data,
-      } = await this.axiosX509.post(this.paths.sign, { csr, belongsTo }, axiosCfg);
+      } = await this.axiosX509.post(this.paths.sign, { csr, belongsTo }, this.createAxiosOptions());
 
       if (status === 201) {
         return data;
@@ -95,7 +116,7 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(this.paths.crl, axiosCfg);
+      } = await this.axiosX509.get(this.paths.crl, this.createAxiosOptions());
 
       if (status === 200) {
         return data;
@@ -124,7 +145,7 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(this.paths.ca, axiosCfg);
+      } = await this.axiosX509.get(this.paths.ca, this.createAxiosOptions());
 
       if (status === 200) {
         return data;
@@ -155,7 +176,7 @@ class Requests {
         status,
         statusText,
         data,
-      } = await this.axiosX509.get(this.paths.caBundle, axiosCfg);
+      } = await this.axiosX509.get(this.paths.caBundle, this.createAxiosOptions());
 
       if (status === 200) {
         return data;

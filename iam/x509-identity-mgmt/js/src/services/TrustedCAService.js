@@ -39,7 +39,7 @@ class TrustedCAService {
    * @throws an exception if no record is found with the informed filters.
    */
   async getCertificate(queryFields, filterFields) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    Object.assign(filterFields, { tenant: this.tenant.id });
 
     /* Executes the query and converts the result to JSON */
     const result = await this.TrustedCAModel.findOne(filterFields)
@@ -63,19 +63,25 @@ class TrustedCAService {
    *
    * @returns a set of certificates that meet the search criteria.
    */
-  async listCertificates(queryFields, filterFields, limit, offset) {
-    Object.assign(filterFields, { tenant: this.tenant });
+  async listCertificates(queryFields, filterFields, limit, offset, sortBy) {
+    Object.assign(filterFields, { tenant: this.tenant.id });
+
+    const query = this.TrustedCAModel.find(filterFields)
+      .select(queryFields.join(' '))
+      .limit(limit).skip(offset)
+      .maxTimeMS(this.queryMaxTimeMS)
+      .lean();
+
+    if (sortBy) {
+      query.sort(sortBy);
+    }
 
     /* Executes the query and converts the results to JSON */
     const [results, itemCount] = await Promise.all([
-      this.TrustedCAModel.find(filterFields)
-        .select(queryFields.join(' '))
-        .limit(limit).skip(offset)
-        .maxTimeMS(this.queryMaxTimeMS)
-        .lean()
-        .exec(),
+      query.exec(),
       this.TrustedCAModel.countDocuments(filterFields),
     ]);
+
     return { itemCount, results };
   }
 
@@ -128,7 +134,7 @@ class TrustedCAService {
         notAfter: caCert.notAfter.value,
       },
       allowAutoRegistration,
-      tenant: this.tenant,
+      tenant: this.tenant.id,
     });
     const caCertRecord = await model.save();
 
@@ -147,7 +153,7 @@ class TrustedCAService {
    * @throws an exception if no record is found with the entered filters.
    */
   async changeAutoRegistration(filterFields, allowAutoRegistration) {
-    Object.assign(filterFields, { tenant: this.tenant });
+    Object.assign(filterFields, { tenant: this.tenant.id });
 
     const result = await this.TrustedCAModel
       .findOneAndUpdate(filterFields, { allowAutoRegistration, modifiedAt: new Date() })
@@ -198,7 +204,7 @@ class TrustedCAService {
    */
   async checkCACertLimitByTenant() {
     if (this.caCertLimit > -1) {
-      const filterFields = { tenant: this.tenant };
+      const filterFields = { tenant: this.tenant.id };
 
       const count = await this.TrustedCAModel.countDocuments(filterFields);
 
@@ -220,7 +226,7 @@ class TrustedCAService {
   async checkExistingCertificate(fingerprint) {
     const filterFields = {
       caFingerprint: fingerprint,
-      tenant: this.tenant,
+      tenant: this.tenant.id,
     };
     const count = await this.TrustedCAModel.countDocuments(filterFields);
     if (count) {
@@ -236,7 +242,7 @@ class TrustedCAService {
    * @returns the CA certificate in PEM format.
    */
   async getPEM(caFingerprint) {
-    const ff = this.parseTrustedCACndtFlds({ tenant: this.tenant, caFingerprint });
+    const ff = this.parseTrustedCACndtFlds({ tenant: this.tenant.id, caFingerprint });
     const result = await this.TrustedCAModel.findOne(ff)
       .select('caPem').maxTimeMS(this.queryMaxTimeMS).lean()
       .exec();

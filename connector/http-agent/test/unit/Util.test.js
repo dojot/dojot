@@ -84,14 +84,12 @@ describe('Util', () => {
       metadata: {
         deviceid,
         tenant,
-        timestamp: new Date().getTime(),
+        timestamp: expect.any(Number),
       },
       attrs: fakeMessageWithoutTimestamp.data,
     };
 
-    expect(JSON.stringify(deviceDataMessage)).toEqual(
-      JSON.stringify(formattedMessage),
-    );
+    expect(formattedMessage).toEqual(deviceDataMessage);
   });
 
   it('should format the message correctly with invalid timestamp', async () => {

@@ -34,37 +34,10 @@ describe('GET /files/download', () => {
       .get(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .query({ path, alt: 'media' })
-      .expect(400)
+      .expect(401)
       .then((response) => {
-        expect(response.body.error).toEqual('Tenant does not exist.');
-        done();
-      })
-      .catch((error) => {
-        done(error);
-      });
-  });
-
-  it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
-    request(app.express)
-      .get(route)
-      .set('Authorization', `Bearer ${jwt}`)
-      .query({ path, alt: 'media' })
-      .expect(200)
-      .expect()
-      .parse((response, next) => {
-        response.setEncoding('ascii');
-        response.data = '';
-        response.on('data', (chunk) => {
-          response.data += chunk;
-          next(null, { file: true });
-        });
-        response.on('error', () => {
-          next(null, { file: false });
-        });
-      })
-      .buffer()
-      .then((response) => {
-        expect(response.body.file).toBeTruthy();
+        expect(response.body.error).toEqual('Unauthorized access');
+        expect(response.body.detail).toEqual('Tenant not found or invalid');
         done();
       })
       .catch((error) => {
@@ -195,6 +168,29 @@ describe('GET /files/download', () => {
       })
       .catch((error) => {
         done(error);
+      });
+  });
+
+  it('Should reply with the requested file, when the value of the "alt" param is "media"', (done) => {
+    request(app.express)
+      .get(route)
+      .set('Authorization', `Bearer ${jwt}`)
+      .query({ path, alt: 'media' })
+      .expect(200)
+      .buffer()
+      .parse((response, next) => {
+        response.setEncoding('ascii');
+        let data = '';
+        response.on('data', (chunk) => {
+          data += chunk;
+          next(null, { data });
+        });
+      })
+      .end((err, response) => {
+        expect(err).toBeFalsy();
+        expect(response.body.data).toBeDefined();
+        
+        done();
       });
   });
 });

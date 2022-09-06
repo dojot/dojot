@@ -56,13 +56,19 @@ const mockUtils = {
 };
 jest.mock('../../app/Utils', () => mockUtils);
 
+const tenantServiceMock = {
+  create: jest.fn(),
+  remove: jest.fn(),
+};
+
 const ConsumerMessages = require('../../app/kafka/ConsumerMessages');
 
 describe('ConsumerMessages', () => {
   let consumerMessages;
 
   beforeEach(() => {
-    consumerMessages = new ConsumerMessages(mockServiceState, mockBasicCredentials);
+    consumerMessages =
+      new ConsumerMessages(mockServiceState, mockBasicCredentials, tenantServiceMock);
   });
 
   afterAll(() => {
@@ -157,13 +163,25 @@ describe('ConsumerMessages', () => {
       expect(consumerMessages.getCallbackForTenantEvents).toHaveBeenCalled();
     });
 
-    it('should call removeAllFromTenant', async () => {
+    it('should run the tenant creation process', async () => {
+      const payload = '{"type": "CREATE", "tenant": "tenant1"}';
+      const payloadBuf = Buffer.from(payload, 'utf8');
+      const data = { value: payloadBuf };
+
+
+      const callback = consumerMessages.getCallbackForTenantEvents();
+      await callback(data);
+      expect(tenantServiceMock.create).toHaveBeenCalled();
+    });
+
+    it('should run the tenant removal process', async () => {
       const payload = '{"type": "DELETE", "tenant": "tenant1"}';
       const payloadBuf = Buffer.from(payload, 'utf8');
       const data = { value: payloadBuf };
 
       const callback = consumerMessages.getCallbackForTenantEvents();
-      callback(data);
+      await callback(data);
+      expect(tenantServiceMock.remove).toHaveBeenCalled();
       expect(mockBasicCredentials.removeAllFromTenant).toHaveBeenCalled();
     });
   });

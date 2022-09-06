@@ -26,6 +26,12 @@ module.exports = (logger, minioRepository, config) => ({
         return;
       }
 
+      if (!(await minioRepository.bucketExists(req.tenant.id))) {
+        logger.debug('Tenant does not exist.');
+        next(framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.'));
+        return;
+      }
+
       const busboy = new Busboy({ headers: req.headers, limits: { files: 1, fileSize: Number(config.minio['upload.size.limit']) } });
       req.body = {};
       let loadedFile = false;
@@ -45,21 +51,16 @@ module.exports = (logger, minioRepository, config) => ({
         try {
           const transactionCode = uuidv4();
           logger.debug('Gets file stream..');
+
           // If the file exceeds the size limit
           fileStream.on('limit', async () => {
-            await minioRepository.rollbackObject(req.tenant, transactionCode);
+            await minioRepository.rollbackObject(req.tenant.id, transactionCode);
             next(framework.errorTemplate.PayloadTooLarge('The file is too large', `The file exceeds the maximum size of ${config.minio['upload.size.limit']}`));
           });
 
-          if (!(await minioRepository.bucketExists(req.tenant))) {
-            logger.debug('Tenant does not exist.');
-            next(framework.errorTemplate.BadRequest('Tenant does not exist.', 'There is no bucket for this tenant.'));
-            return;
-          }
-
           // Initialize a transaction
           const fileinfo = await minioRepository.putTmpObject(
-            req.tenant, fileStream, transactionCode,
+            req.tenant.id, fileStream, transactionCode,
           );
           req.body.uploadedFile = {
             ...fileinfo,
@@ -80,7 +81,6 @@ module.exports = (logger, minioRepository, config) => ({
         logger.debug('Form upload successfully');
         busboy.emit('loaded-form');
       });
-
 
       // Checks if the file and its metadata have been loaded
       busboy.on('loaded-form', () => {

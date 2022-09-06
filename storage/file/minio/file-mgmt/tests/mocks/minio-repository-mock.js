@@ -9,7 +9,7 @@ module.exports = class MinIoRepository {
   }
 
   async bucketExists(bucketName) {
-    return bucketName === 'test';
+    return bucketName === 'admin' || bucketName === 'test';
   }
 
   async listObjects(tenant, pathPrefix, limit, startAfter) {

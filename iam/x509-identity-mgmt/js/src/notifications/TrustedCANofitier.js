@@ -34,7 +34,7 @@ class TrustedCANotifier {
 
     // Delegates to the notification engine to publish data on Kafka
     await this.notificationEngine.notify({
-      tenant: this.tenant,
+      tenant: this.tenant.id,
       topic: this.topic,
       eventType,
       eventData,
@@ -65,11 +65,11 @@ class TrustedCANotifier {
 
     // Delegates to the notification engine to publish data on Kafka
     await this.notificationEngine.notify({
-      tenant: this.tenant,
+      tenant: this.tenant.id,
       topic: this.topic,
       eventType,
       eventData,
-      partitionKey: `${this.tenant}:${caCertRecord.caFingerprint}`,
+      partitionKey: `${this.tenant.id}:${caCertRecord.caFingerprint}`,
       xRequestId: this.xRequestId,
     });
 

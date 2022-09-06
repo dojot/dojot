@@ -36,15 +36,17 @@ const mockConfig = {
   healthchecker: { 'kafka.interval.ms': 30000 },
 };
 
+const mockLogger = {
+  debug: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+};
+
 const mockSdk = {
   Kafka: { Consumer: jest.fn(() => mockConsumer) },
   ConfigManager: { getConfig: jest.fn(() => mockConfig) },
-  Logger: jest.fn(() => ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  })),
+  Logger: jest.fn(() => mockLogger),
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
@@ -56,13 +58,19 @@ const mockUtils = {
 };
 jest.mock('../../app/Utils', () => mockUtils);
 
+
+const mockTenantService = {
+  create: jest.fn(() => Promise.resolve('')),
+  remove: jest.fn(() => Promise.resolve('')),
+};
+
 const ConsumerMessages = require('../../app/kafka/ConsumerMessages');
 
 describe('ConsumerMessages', () => {
   let consumerMessages;
 
   beforeEach(() => {
-    consumerMessages = new ConsumerMessages(mockServiceState, mockRedisManager);
+    consumerMessages = new ConsumerMessages(mockTenantService, mockServiceState, mockRedisManager);
   });
 
   afterAll(() => {
@@ -273,6 +281,63 @@ describe('ConsumerMessages', () => {
       const callback = mockRegisterShutdownHandler.mock.calls[0][0];
       callback();
       expect(mockRegisterShutdownHandler).toHaveBeenCalled();
+    });
+  });
+
+  describe('initCallbackForTenancyEvents', () => {
+    it('Should register callback for new tenant events', async () => {
+      consumerMessages.getCallbackForTenancyEvents = jest.fn();
+      await consumerMessages.init();
+
+      await consumerMessages.initCallbackForTenancyEvents();
+
+      expect(consumerMessages.getCallbackForTenancyEvents)
+        .toHaveBeenCalled();
+    });
+
+    it('Should return a callback for new tenant events', async () => {
+      const callback = await consumerMessages.getCallbackForTenancyEvents();
+
+      expect(callback).toBeDefined();
+    });
+
+    it('Should create a new tenant', async () => {
+      const callback = await consumerMessages.getCallbackForTenancyEvents();
+      const data = {
+        value: '{"type":"CREATE", "tenant": "test", "signatureKey": {}}',
+      };
+      const ack = jest.fn();
+      callback(data, ack);
+
+      expect(mockTenantService.create).toHaveBeenCalled();
+    });
+
+    it('Should remove a tenant', async () => {
+      const callback = await consumerMessages.getCallbackForTenancyEvents();
+      const data = {
+        value: '{"type":"DELETE"}',
+      };
+      const ack = jest.fn();
+
+      callback(data, ack);
+
+      expect(mockTenantService.remove).toHaveBeenCalled();
+    });
+
+    it('Should handle the error', async () => {
+      const callback = await consumerMessages.getCallbackForTenancyEvents();
+      expect.assertions(1);
+
+      const data = {
+        value: '{"type":"DELETE"}',
+      };
+      const ack = jest.fn();
+      mockTenantService.remove.mockRejectedValueOnce(new Error('Error'));
+      mockLogger.error.mockImplementationOnce((message) => {
+        expect(message).toBeDefined();
+      });
+
+      callback(data, ack);
     });
   });
 });
