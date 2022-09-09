@@ -170,7 +170,7 @@ class RedisManager {
 
   // Hash the user's password before saving it
   static generateHash(key) {
-    const salt = bcrypt.genSaltSync(10);
+    const salt = bcrypt.genSaltSync(configRedis.hash.salt.rounds);
     return bcrypt.hashSync(key, salt);
   }
 
