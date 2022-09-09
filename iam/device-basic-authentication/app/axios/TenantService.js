@@ -1,6 +1,11 @@
 const {
   WebUtils: { KeycloakClientSession },
+  ConfigManager: { getConfig },
 } = require('@dojot/microservice-sdk');
+
+const {
+  tenant: tenantConfig,
+} = getConfig('BASIC_AUTH');
 
 module.exports = class TenantService {
   constructor(config, dojotClientHttp, logger) {
@@ -18,7 +23,7 @@ module.exports = class TenantService {
     const response = await this.dojotClientHttp.request({
       url: this.config.url.tenants,
       method: 'GET',
-      timeout: 15000,
+      timeout: tenantConfig.request.timeout.ms,
     });
 
     // authentic in each of the tenants
