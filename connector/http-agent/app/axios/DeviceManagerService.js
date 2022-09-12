@@ -1,5 +1,5 @@
 const {
-  WebUtils: { createTokenGen }, Logger,
+  Logger,
 } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('http-agent:DeviceManagerService');
@@ -10,9 +10,10 @@ class DeviceManagerService {
    *
    * @param {string} deviceManagerUrl Url for api that returns data from a specific device
    */
-  constructor(deviceManagerRouteUrl, dojotHttpclient) {
+  constructor(deviceManagerRouteUrl, dojotHttpclient, tenantManager) {
     this.deviceManagerRouteUrl = deviceManagerRouteUrl;
     this.dojotHttpclient = dojotHttpclient;
+    this.tenantManager = tenantManager;
   }
 
   /**
@@ -22,15 +23,22 @@ class DeviceManagerService {
    *
    * @return data from a specific device
    */
-  async getDevice(tenant, deviceId) {
-    const tokenGen = createTokenGen();
-    const token = await tokenGen.generate({ payload: {}, tenant });
+  async getDevice(tenantId, deviceId) {
+    const tenant = this.tenantManager.findTenant(tenantId);
+    const token = tenant.session.getTokenSet().access_token;
     logger.debug(`requesting device ${deviceId}`);
-    const messageKey = await this.dojotHttpclient.request(`${this.deviceManagerRouteUrl}/${deviceId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const messageKey = await this.dojotHttpclient.request(
+      {
+        url: `${this.deviceManagerRouteUrl}/${deviceId}`,
+        method: 'GET',
+        timeout: 15000,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+      12000,
+      3,
+    );
     return messageKey.data;
   }
 }

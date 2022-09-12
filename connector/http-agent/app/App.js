@@ -66,7 +66,7 @@ class App {
       this.consumerMessages =
         new ConsumerMessages(this.tenantService, serviceState, this.redisManager);
       this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpClient);
-      this.deviceManagerService = new DeviceManagerService(configURL['device.manager'], dojotHttpClient);
+      this.deviceManagerService = new DeviceManagerService(configURL['device.manager'], dojotHttpClient, this.tenantService);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
