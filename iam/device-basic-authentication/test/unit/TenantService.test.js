@@ -9,9 +9,16 @@ const mockKeycloakClientSession = {
   }),
 };
 
+const mockConfig = {
+  tenant: { request: { timeout: { ms: 15000 } } },
+};
+
 jest.mock('@dojot/microservice-sdk', () => ({
   WebUtils: {
     KeycloakClientSession: jest.fn().mockImplementation(() => mockKeycloakClientSession),
+  },
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
   },
 }));
 
