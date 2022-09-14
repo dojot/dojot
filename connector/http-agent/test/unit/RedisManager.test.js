@@ -59,6 +59,7 @@ const mockConfig = {
     db: 0,
     'reconnect.after.ms': 5000,
     'operation.timeout.ms': 1000,
+    hash: { salt: { rounds: 10 } },
   },
 };
 

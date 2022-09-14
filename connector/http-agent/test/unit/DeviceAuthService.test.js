@@ -2,6 +2,18 @@ const mockDojotHttpClient = {
   request: jest.fn(),
 };
 
+const mockConfig = {
+  device_auth: { request: { timeout: { ms: 15000 } } },
+};
+
+const mockSdk = {
+  ConfigManager: {
+    getConfig: jest.fn(() => mockConfig),
+
+  },
+};
+jest.mock('@dojot/microservice-sdk', () => mockSdk);
+
 const DeviceAuthService = require('../../app/axios/DeviceAuthService');
 
 const tenantManager = {
