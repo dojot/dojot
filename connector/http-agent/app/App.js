@@ -29,6 +29,7 @@ const ConsumerMessages = require('./kafka/ConsumerMessages');
 const RedisManager = require('./redis/RedisManager');
 const DeviceAuthService = require('./axios/DeviceAuthService');
 const CertificateAclService = require('./axios/CertificateAclService');
+const DeviceManagerService = require('./axios/DeviceManagerService');
 const TenantService = require('./axios/TenantService');
 const express = require('./express');
 const incomingMessagesRoutes = require('./express/routes/v1/IncomingMessages');
@@ -65,6 +66,7 @@ class App {
       this.consumerMessages =
         new ConsumerMessages(this.tenantService, serviceState, this.redisManager);
       this.certificateAclService = new CertificateAclService(configURL['certificate.acl'], dojotHttpClient);
+      this.deviceManagerService = new DeviceManagerService(configURL['device.manager'], dojotHttpClient, this.tenantService);
     } catch (e) {
       logger.error('constructor:', e);
       throw e;
@@ -99,6 +101,7 @@ class App {
           this.redisManager,
           this.deviceAuthService,
           this.certificateAclService,
+          this.deviceManagerService,
         ),
       );
     } catch (e) {

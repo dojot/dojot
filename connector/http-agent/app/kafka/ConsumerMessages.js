@@ -78,6 +78,8 @@ class ConsumerMessages {
           logger.debug(payloadObject);
           const key = `${payloadObject.meta.service}@${payloadObject.data.id}`;
           await this.redisManager.deleteAsync(key);
+          const cnKey = `${payloadObject.meta.service}:${payloadObject.data.id}`;
+          await this.redisManager.deleteAsync(cnKey);
         }
       } catch (error) {
         logger.error(error);
