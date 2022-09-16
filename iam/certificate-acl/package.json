@@ -36,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@dojot/microservice-sdk": "^0.2.0",
+    "@dojot/microservice-sdk": "^0.2.1",
     "async": "^3.2.3",
     "awilix": "^6.1.0",
     "http-status-codes": "^2.1.4",
