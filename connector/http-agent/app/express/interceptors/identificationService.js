@@ -13,13 +13,36 @@ const Unauthorized = new createError[401]();
  *
  * */
 module.exports = ({
-  redisManager, deviceAuthService, certificateAclService,
+  redisManager, deviceAuthService, certificateAclService, deviceManagerService,
 }) => ({
   cn: async (clientCert) => {
     try {
       const { CN } = clientCert.subject;
-      return CN.split(':');
+      const array = CN.split(':');
+
+      if (array.length !== 2) {
+        throw new Error();
+      }
+
+      const deviceExistsRedis = await redisManager.getAsync(CN);
+
+      if (deviceExistsRedis === null) {
+        const deviceExistsDeviceManager = await deviceManagerService.getDevice(array[0], array[1]);
+        if (deviceExistsDeviceManager) {
+          redisManager.setAsync(CN, true);
+        } else {
+          redisManager.setAsync(CN, false);
+          throw new Error();
+        }
+      } else if (deviceExistsRedis === 'false') {
+        throw new Error();
+      }
+
+      return array;
     } catch (e) {
+      if (clientCert.subject.CN.split(':').length === 2) {
+        redisManager.setAsync(clientCert.subject.CN, false);
+      }
       Forbidden.message = 'Client certificate is invalid';
       throw Forbidden;
     }

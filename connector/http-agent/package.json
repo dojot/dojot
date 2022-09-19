@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "IoTAgent to receive messages from devices via HTTPS and forward them to the dojot messaging system.",
   "engines": {
-    "node": ">=12.22.0",
+    "node": ">=12.18.4",
     "npm": ">=6.14"
   },
   "private": true,
