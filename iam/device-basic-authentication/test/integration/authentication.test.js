@@ -13,6 +13,8 @@ const mockConfig = {
   keycloak: {
     url: 'url',
   },
+  device_manager: { request: { timeout: { ms: 15000 } } },
+  tenant: { request: { timeout: { ms: 15000 } } },
 };
 
 jest.mock('uuid');

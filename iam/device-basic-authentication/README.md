@@ -182,6 +182,24 @@ These are the environment variables used by this service
 |----------------------|---------------|--------------|---------------------------------|
 | sync.cron.expression | * */12 * * *  | string       | BASIC_AUTH_SYNC_CRON_EXPRESSION |
 
+### Credentials
+
+| Key                          | Default Value | Valid Values | Environment variable                    |
+|------------------------------|---------------|--------------|-----------------------------------------|
+| credentials.hash.salt.rounds | 10            | integer      | BASIC_AUTH_CREDENTIALS_HASH_SALT_ROUNDS |
+
+### Device manager
+
+| Key                              | Default Value | Valid Values | Environment variable                         |
+|----------------------------------|---------------|--------------|----------------------------------------------|
+|device_manager.request.timeout.ms | 15000         | integer      | BASIC_AUTH_DEVICE_MANAGER.REQUEST.TIMEOUT.MS |
+
+### Tenant service
+
+| Key                              | Default Value | Valid Values | Environment variable                         |
+|----------------------------------|---------------|--------------|----------------------------------------------|
+|tenant.request.timeout.ms         | 15000         | integer      | BASIC_AUTH_TENANT.REQUEST.TIMEOUT.MS         |
+
 
 ## Documentation
 

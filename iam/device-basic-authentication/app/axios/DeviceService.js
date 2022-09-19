@@ -1,3 +1,11 @@
+const {
+  ConfigManager: { getConfig },
+} = require('@dojot/microservice-sdk');
+
+const {
+  device_manager: deviceManagerConfig,
+} = getConfig('BASIC_AUTH');
+
 class DeviceService {
   /**
    * Consumes api that returns devices data
@@ -32,7 +40,7 @@ class DeviceService {
       {
         url: this.deviceRouteUrls.devices,
         method: 'GET',
-        timeout: 15000,
+        timeout: deviceManagerConfig.request.timeout.ms,
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -62,7 +70,7 @@ class DeviceService {
       const requestOptions = {
         url: `${this.deviceRouteUrls.device}/${deviceId}`,
         method: 'GET',
-        timeout: 15000,
+        timeout: deviceManagerConfig.request.timeout.ms,
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -1,3 +1,10 @@
+const {
+  ConfigManager: { getConfig },
+} = require('@dojot/microservice-sdk');
+
+const {
+  device_auth: deviceAuthConfig,
+} = getConfig('HTTP_AGENT');
 
 class DeviceAuthService {
   /**
@@ -39,7 +46,7 @@ class DeviceAuthService {
             'Content-Type': 'application/json',
           },
         },
-        12000,
+        deviceAuthConfig.request.timeout.ms,
         3,
       );
       return true;
