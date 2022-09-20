@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model alembic_version {
+  version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+model attrs {
+  id              Int               @id
+  label           String            @db.VarChar(128)
+  created         DateTime?         @db.Timestamp(6)
+  updated         DateTime?         @db.Timestamp(6)
+  type            String            @db.VarChar(32)
+  value_type      String            @db.VarChar(32)
+  static_value    String?           @db.VarChar(128)
+  template_id     Int?
+  parent_id       Int?
+  attrs           attrs?            @relation("attrsToattrs", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  templates       templates?        @relation(fields: [template_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_attrs     attrs[]           @relation("attrsToattrs")
+  overrides       overrides[]
+  pre_shared_keys pre_shared_keys[]
+
+  @@unique([template_id, type, label])
+}
+
+model device_template {
+  device_id   String    @db.VarChar(8)
+  template_id Int
+  devices     devices   @relation(fields: [device_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  templates   templates @relation(fields: [template_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([device_id, template_id])
+  @@index([device_id], map: "ix_device_template_device_id")
+  @@index([template_id], map: "ix_device_template_template_id")
+}
+
+model devices {
+  id              String            @id @unique @db.VarChar(8)
+  label           String            @db.VarChar(128)
+  created         DateTime?         @db.Timestamp(6)
+  updated         DateTime?         @db.Timestamp(6)
+  persistence     String?           @db.VarChar(128)
+  device_template device_template[]
+  overrides       overrides[]
+  pre_shared_keys pre_shared_keys[]
+}
+
+model overrides {
+  id           Int      @id
+  did          String?  @db.VarChar(8)
+  aid          Int?
+  static_value String?  @db.VarChar(128)
+  attrs        attrs?   @relation(fields: [aid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  devices      devices? @relation(fields: [did], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model pre_shared_keys {
+  attr_id   Int
+  device_id String  @db.VarChar(8)
+  psk       Bytes
+  attrs     attrs   @relation(fields: [attr_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  devices   devices @relation(fields: [device_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([attr_id, device_id])
+}
+
+model templates {
+  id              Int               @id
+  label           String            @db.VarChar(128)
+  created         DateTime?         @db.Timestamp(6)
+  updated         DateTime?         @db.Timestamp(6)
+  attrs           attrs[]
+  device_template device_template[]
+}
+
+model task_send_event {
+  id              Int               @id
+  created         DateTime?         @db.Timestamp(6)
+  updated         DateTime?         @db.Timestamp(6)
+  status          Status_Event      @default(NO_SEND)
+}
+
+enum Status_Event {
+  NO_SEND
+  SEND
+}
