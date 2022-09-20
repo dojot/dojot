@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaClientUnknownRequestError } from "@prisma/client/runtime";
-import { prismaClient, Prisma } from "src/database/prismaclient";
+import { prismaClient } from "src/database/prismaclient";
 
 class DevicesServices {
 
@@ -25,13 +25,13 @@ class DevicesServices {
         return await prismaClient.$executeRaw`DELETE FROM device_template WHERE device_id = ${id}`
       } catch (e) 
       {
-        if (e instanceof Prisma.PrismaClientInitializationError) {
-            if (e.errorCode === 'P2002') {
-            console.log(
-              'There is a unique constraint violation, a new user cannot be created with this email'
-            )
-          }
-        }
+        // if (e instanceof Prisma.PrismaClientInitializationError) {
+        //     if (e.errorCode === 'P2002') {
+        //     console.log(
+        //       'There is a unique constraint violation, a new user cannot be created with this email'
+        //     )
+        //   }
+        // }
         throw e
       }
     }
@@ -69,14 +69,14 @@ export const remove_associate_templates =async (id:string) => {
     return await prismaClient.$executeRaw`DELETE FROM device_template WHERE device_id = ${id}`
   } catch (e) 
   {
-    if (e instanceof Prisma.PrismaClientInitializationError) {
-      // The .code property can be accessed in a type-safe manner
-      if (e.errorCode === 'P2002') {
-        console.log(
-          'There is a unique constraint violation, a new user cannot be created with this email'
-        )
-      }
-    }
+    // if (e instanceof Prisma.PrismaClientInitializationError) {
+    //   // The .code property can be accessed in a type-safe manner
+    //   if (e.errorCode === 'P2002') {
+    //     console.log(
+    //       'There is a unique constraint violation, a new user cannot be created with this email'
+    //     )
+    //   }
+    // }
     throw e
   }
 }
