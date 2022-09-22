@@ -7,9 +7,5 @@ export class RemoveDevicesBatchDto
     @IsString({ each: true })
     devices: string[];
 
-    @IsNotEmpty()
-    @IsNumber()
-    @IsPositive()
-    quantity: string;
 }
 

@@ -58,9 +58,6 @@ function getKeycloak() {
       return _keycloakSessionClient; 
 }
 
-function setKeycloak() {
-    _keycloakSessionClient = app.express;
-}
 
 module.exports = {
     initKeycloak,

@@ -1,59 +1,37 @@
 import { Logger } from "@dojot/microservice-sdk";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { validateAndConvert } from "src/dto/validation-dto";
 import { RemoveTemplatesBatchDto } from "src/model/remove-templates-batch.dto";
-import get from 'get-value';
-import { classToPlain } from 'class-transformer';
+import { TemplatesServices } from "src/services/templatesServices";
 
-const logger = new Logger('Device-Mmanager-Batch:TemplatesBatchController');
+export class TemplatesBatchController {
 
-class TemplatesBatchController {
-
-/*
-  public async renove (req: Request, res: Response): Promise<Response> {
-    logger.info('Remove Templates',{body:req.body});
-    try
-    {
-      if(req.body.constructor === Object && Object.keys(req.body).length !== 0)
-      {
-        try {
-          const conversionResult = await validateAndConvert(RemoveTemplatesBatchDto, req.body);
-          if (conversionResult.error) {
-            res.status(400).send(conversionResult.error);
-          } else 
-          {TemplatesBatchController
-              try {
-                const devices_associate = null;
-                //await remove_associate_templates(id);
-                if(devices_associate!= null)
-                {  public constructor () {
-    logger.info('Create Constructor',{});
+  public constructor (private logger: Logger,private templatesServices: TemplatesServices) {
+    this.logger.info('Create Constructor TemplatesBatchController',{});
   }
 
-
-                }
-              } catch (error) {
-                logger.error('',{message:error});
-                //throw PrismaException();
-              }
-            });
-            res.json(conversionResult.data);
-          }
-        } catch (error) {
-          res.status(513).jsonp('Service Not Available');
-        }
-        
-      }
-      else
+  async remove(req: Request, res: Response,next: NextFunction) {
+     
+    this.logger.info('Remove templates',{body:req.body});
+    try {
+      const dto = req.body as RemoveTemplatesBatchDto
+      dto.templates.forEach((id)=>
       {
-        res.sendStatus(204);
-      }
-    return res; 
-    } catch(error)
-    {
-      res.status(500).jsonp('No Service');
-    } 
-  }*/
-}
+        const device_associate = this.templatesServices.findByAssociateDevicesAndTemplate(id);
+        if(device_associate!= null)
+        {
 
-export { TemplatesBatchController }
+        }
+        else
+        {
+          this.templatesServices.remove(id);
+        }
+      })
+      return res.status(200).json(dto)
+    } catch (e) {
+      next(e)
+    }
+
+  }
+
+}

@@ -1,83 +1,51 @@
+import { Logger } from "@dojot/microservice-sdk";
 import { PrismaClient } from "@prisma/client";
 import { PrismaClientUnknownRequestError } from "@prisma/client/runtime";
 import { prismaClient } from "src/database/prismaclient";
 
-class DevicesServices {
+export class DevicesServices {
 
-    async remove1(id:string)
+    constructor(private logger: Logger,private prismaConnection: PrismaClient)
     {
-    
-      return await prismaClient.devices.delete({
-        where: { id: id.toString() }
-    });
+      this.logger.info('Create Constructor DevicesServices',{});
+    }
+
+    async remove(id:string)
+    {
+      try {
+        return await prismaClient.devices.delete({
+          where: { id: id.toString() }
+      });
+      } catch (error) {
+        this.logger.debug('DevicesServices - remove ', {error:error});
+      }
     }
 
      async findById (id: string){
-        
-      return await prismaClient.devices.findFirst({
+      try {
+        return await prismaClient.devices.findFirst({
           where: { id: id.toString() }
       });
+      }  catch (error) {
+        this.logger.debug('DevicesServices - findById ', {error:error});
+      }  
     }
 
     async remove_associate_templates(id:string) {
   
       try {
         return await prismaClient.$executeRaw`DELETE FROM device_template WHERE device_id = ${id}`
-      } catch (e) 
+      } catch (error) 
       {
-        // if (e instanceof Prisma.PrismaClientInitializationError) {
-        //     if (e.errorCode === 'P2002') {
-        //     console.log(
-        //       'There is a unique constraint violation, a new user cannot be created with this email'
-        //     )
-        //   }
-        // }
-        throw e
+        this.logger.debug('DevicesServices - remove_associate_templates ', {error:error});
       }
     }
 
-    async create(id:string){
-      
-      return "";
+    async create(id:string)
+    {
+      return await prismaClient.devices.findFirst({
+        where: { id: id.toString() }
+    });
     }
     
   }
-   
-
-
-  export default DevicesServices;
-
-
-export const findById = async (id: string) => {
-        
-  return await prismaClient.devices.findFirst({
-      where: { id: id.toString() }
-  });
-}
-
-export const remove =async (id:string) => {
-      
-  return await prismaClient.devices.delete({
-      where: { id: id.toString() }
-  });
-}
-
-
-export const remove_associate_templates =async (id:string) => {
-  
-  try {
-    return await prismaClient.$executeRaw`DELETE FROM device_template WHERE device_id = ${id}`
-  } catch (e) 
-  {
-    // if (e instanceof Prisma.PrismaClientInitializationError) {
-    //   // The .code property can be accessed in a type-safe manner
-    //   if (e.errorCode === 'P2002') {
-    //     console.log(
-    //       'There is a unique constraint violation, a new user cannot be created with this email'
-    //     )
-    //   }
-    // }
-    throw e
-  }
-}
-

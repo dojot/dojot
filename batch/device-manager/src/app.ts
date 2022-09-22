@@ -20,11 +20,11 @@ class App {
   }
 
   public async init() {
-    this.kafka();
-    await this.kafkaConsumer.init();
-    this.kafkaConsumer.initNewTenantEvent(this.tenantManager.create.bind(this.tenantManager))
+    //this.kafka();
+    //await this.kafkaConsumer.init();
+    //this.kafkaConsumer.initNewTenantEvent(this.tenantManager.create.bind(this.tenantManager))
     // this.database();
-    // this.middlewares();
+    this.middlewares();
     this.routes();
   }
 
