@@ -77,7 +77,14 @@ module.exports = ({
               } = req.query;
 
               const [result, paging] = await deviceDataService.getDeviceData(
-                req.tenant.id, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
+                req.tenant.id,
+                deviceId,
+                dateFrom,
+                dateTo,
+                limit,
+                page,
+                order,
+                req.getPaging,
               );
 
               res.type(accept);
@@ -129,7 +136,15 @@ module.exports = ({
               } = req.query;
 
               const [result, paging] = await deviceDataService.getDeviceAttrData(
-                req.tenant.id, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
+                req.tenant.id,
+                deviceId,
+                attr,
+                dateFrom,
+                dateTo,
+                limit,
+                page,
+                order,
+                req.getPaging,
               );
 
               res.type(accept);
