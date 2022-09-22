@@ -23,6 +23,8 @@ mongoose.model.mockImplementation((model, schema) => {
   modelRef.deleteMany = jest.fn(() => modelRef);
   modelRef.deleteOne = jest.fn(() => modelRef);
   modelRef.create = jest.fn(() => modelRef);
+  modelRef.findOneAndUpdate = jest.fn(() => modelRef);
+  modelRef.save = jest.fn(() => modelRef);
 
   return modelRef;
 });
@@ -55,14 +57,14 @@ describe('BasicCredentialsCtrl', () => {
       mockTenant.findOne.mockReturnValue(null);
       await basicCredentialsCtrl.create('tenant1', '123abc');
       expect(mockTenant.create).toHaveBeenCalled();
-      expect(mockBasicCredentials.create).toHaveBeenCalled();
+      expect(mockBasicCredentials.findOneAndUpdate).toHaveBeenCalled();
     });
 
     it('should just create the credentials and returned', async () => {
       mockTenant.findOne.mockReturnValue('tenant1');
       await basicCredentialsCtrl.create('tenant1', '123abc');
       expect(mockTenant.create).not.toHaveBeenCalled();
-      expect(mockBasicCredentials.create).toHaveBeenCalled();
+      expect(mockBasicCredentials.findOneAndUpdate).toHaveBeenCalled();
     });
   });
 

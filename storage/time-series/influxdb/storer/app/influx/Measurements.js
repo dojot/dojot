@@ -14,14 +14,16 @@ class Measurements {
    *
    * @param {String} url Url to access influxdb
    * @param {String} token A token with deletion permission in all orgs
+   * @param {Number} timeout Connection timeout with influxdb
    * @param {String} defaultBucket The default bucket to be using with all orgs
    */
-  constructor(url, token, defaultBucket) {
+  constructor(url, token, timeout, defaultBucket) {
     logger.debug('constructor:');
     logger.debug(`constructor: url=${url}`);
     logger.debug(`constructor: token=${token}`);
+    logger.debug(`constructor: timeout=${timeout}`);
     logger.debug(`constructor: defaultBucket=${defaultBucket}`);
-    const influxDB = new InfluxDB({ url, token });
+    const influxDB = new InfluxDB({ url, token, timeout });
     this.deleteAPI = new DeleteAPI(influxDB);
     this.bucket = defaultBucket;
   }

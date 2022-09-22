@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-focused-tests */
 const mockConfig = {
   sync: { 'cron.expression': '* */12 * * *' },
 };
@@ -37,7 +38,8 @@ const mockTenantModel = {
 };
 
 const mockTenantService = {
-  getTenants: jest.fn(),
+  loadTenants: jest.fn(),
+  tenants: [],
 };
 
 const mockDeviceService = {
@@ -124,16 +126,23 @@ describe('SyncLoader', () => {
   });
 
   describe('load', () => {
-    const fakedata1 = ['tenant1', 'tenant2'];
-    const fakedata2 = ['tenant3', 'tenant4'];
+    const fakedata1 = [
+      { id: 'tenant1' },
+      { id: 'tenant2' },
+    ];
+    const fakedata2 = [
+      { id: 'tenant3' },
+      { id: 'tenant4' },
+    ];
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('should call loadDevices method', async () => {
-      mockTenantModel.findAll.mockReturnValue(fakedata1);
-      mockTenantService.getTenants.mockReturnValue(fakedata1);
+      mockTenantModel.findAll.mockReturnValue(fakedata1.map((tenant) => tenant.id));
+      mockTenantService.loadTenants.mockReturnValue(fakedata1);
+      mockTenantService.tenants = fakedata1;
       syncLoader.loadDevices = jest.fn();
 
       await syncLoader.load();
@@ -143,7 +152,7 @@ describe('SyncLoader', () => {
 
     it('should call removeAllFromTenant', async () => {
       mockTenantModel.findAll.mockReturnValue(fakedata1);
-      mockTenantService.getTenants.mockReturnValue(fakedata2);
+      mockTenantService.loadTenants.mockReturnValue(fakedata2);
 
       await syncLoader.load();
 
@@ -173,7 +182,9 @@ describe('SyncLoader', () => {
       mockBasicCredentials.findAllDevicesFromTenant.mockReturnValue(fakedata1);
       mockDeviceService.getDevices.mockReturnValue(fakedata2);
 
-      await syncLoader.loadDevices();
+      await syncLoader.loadDevices({
+        id: 'tenant1',
+      });
 
       expect(mockBasicCredentials.remove).toHaveBeenCalledTimes(2);
     });

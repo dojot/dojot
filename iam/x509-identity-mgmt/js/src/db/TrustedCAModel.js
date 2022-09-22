@@ -36,6 +36,27 @@ const projectableFields = [
   'tenant',
 ];
 
+const sortByFields = [
+  'caFingerprint',
+  'asc:caFingerprint',
+  'desc:caFingerprint',
+  'subjectDN',
+  'asc:subjectDN',
+  'desc:subjectDN',
+  'validity.notBefore',
+  'asc:validity.notBefore',
+  'desc:validity.notBefore',
+  'validity.notAfter',
+  'asc:validity.notAfter',
+  'desc:validity.notAfter',
+  'createdAt',
+  'asc:createdAt',
+  'desc:createdAt',
+  'modifiedAt',
+  'asc:modifiedAt',
+  'desc:modifiedAt',
+];
+
 const mongoQS = Object.freeze(new MongoQS({
   keyRegex: /^[a-zA-Z0-9-_.]+$/i,
   arrRegex: /^[a-zA-Z0-9-_.]+(\[])?$/i,
@@ -55,7 +76,7 @@ const mongoQS = Object.freeze(new MongoQS({
 class TrustedCAModel extends CommonModel {
   constructor({ mongoClient }) {
     super({
-      mongoClient, mongooseModel, mongoQS, projectableFields,
+      mongoClient, mongooseModel, mongoQS, projectableFields, sortByFields,
     });
   }
 }

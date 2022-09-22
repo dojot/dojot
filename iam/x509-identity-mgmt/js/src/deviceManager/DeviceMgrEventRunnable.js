@@ -31,12 +31,12 @@ class DeviceMgrEventRunnable {
 
   async onCreation() {
     // inserts the device in the local cache
-    await this.deviceModel.insert(this.tenant, this.device.id);
+    await this.deviceModel.insert(this.tenant.id, this.device.id);
   }
 
   async onRemoval() {
     // removes the device from the local cache
-    await this.deviceModel.remove(this.tenant, this.device.id);
+    await this.deviceModel.remove(this.tenant.id, this.device.id);
 
     // disassociates the device from the certificates
     const queryFields = this.certificateModel.parseProjectionFields('fingerprint');

@@ -1,10 +1,26 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-try-expect */
+const { WebUtils } = jest.requireActual('@dojot/microservice-sdk');
+
 const mockConfig = {
   lightship: { a: 'abc' },
   url: {},
 };
+
+const mockConsumer = {
+  init: jest.fn(),
+  // eslint-disable-next-line no-unused-vars
+  registerCallback: jest.fn((topic, callback) => topic),
+  getStatus: jest.fn(() => ({
+    connected: true,
+  })),
+  finish: jest.fn(),
+};
+
 const mockSdk = {
+  Kafka: jest.fn().mockImplementation(() => ({
+    Consumer: mockConsumer,
+  })),
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
     transformObjectKeys: jest.fn((obj) => obj),
@@ -18,11 +34,20 @@ const mockSdk = {
     info: jest.fn(),
     warn: jest.fn(),
   })),
+  WebUtils,
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
 jest.mock('../../app/express');
 jest.mock('../../app/express/routes/v1/IncomingMessages');
+
+const mockConsumerMessagesInit = jest.fn();
+const mockConsumerMessages = {
+  init: mockConsumerMessagesInit,
+  getCallbackForNewTenantEvents: jest.fn().mockReturnValue(jest.fn()),
+  initCallbackForNewTenantEvents: jest.fn(),
+};
+jest.mock('../../app/kafka/ConsumerMessages', () => jest.fn().mockImplementation(() => mockConsumerMessages));
 
 const mockServerInit = jest.fn();
 const mockServerRegisterShutdown = jest.fn();
@@ -42,15 +67,19 @@ const mockProducerMessagesInit = jest.fn();
 const mockProducerMessages = jest.fn().mockImplementation(() => ({
   init: mockProducerMessagesInit,
 }));
-jest.mock('../../app/ProducerMessages', () => mockProducerMessages);
+jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
 const App = require('../../app/App');
+
+jest.mock('../../app/axios/TenantService', () => jest.fn().mockImplementation(() => ({
+  loadTenants: jest.fn(),
+})));
 
 describe('App', () => {
   let app;
 
   beforeEach(async () => {
-    app = new App();
+    app = new App(mockConfig);
   });
 
   afterAll(() => {
@@ -62,7 +91,6 @@ describe('App', () => {
       expect(app.server).toBeDefined();
       expect(app.producerMessages).toBeDefined();
       expect(app.redisManager).toBeDefined();
-      expect(app.deviceAuthService).toBeDefined();
       expect(app.certificateAclService).toBeDefined();
     });
   });
@@ -76,6 +104,7 @@ describe('App', () => {
 
       expect(mockRedisInit).toHaveBeenCalled();
       await expect(mockProducerMessagesInit).toHaveBeenCalled();
+      await expect(mockConsumerMessagesInit).toHaveBeenCalled();
       expect(mockServerInit).toHaveBeenCalled();
       expect(mockServerRegisterShutdown).toHaveBeenCalled();
     });

@@ -1,0 +1,181 @@
+version: "3.8"
+services:
+  keycloak:
+    build:
+      context: ../../keycloak
+    depends_on:
+      - kafka
+      - postgres
+    restart: always
+    environment:
+      JAVA_OPTS_APPEND: "-Dkeycloak.profile.feature.impersonation=disabled -Dkeycloak.profile.feature.upload_scripts=enabled"
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      DOJOT_ROOT_URL: "http://localhost:8080"
+      DOJOT_CUSTOM_REALM_REP_FILE: "/opt/dojot/customRealmRepresentation.json"
+      DOJOT_ADMIN_PASSWORD: aA1!bB2@cC3#
+      # DOJOT_REALM_SSL_MODE: NONE
+      # DOJOT_KAFKA_SERVERS: kafka:9092
+      # DOJOT_KAFKA_CLIENT_ID: keycloak
+      # DOJOT_KAFKA_TOPIC: dojot-management.dojot.tenancy
+      # DOJOT_VALID_REALM_NAME_REGEX: "^[a-zA-Z0-9]{1,30}$$"
+      # DOJOT_SMTP_HOST: smtp.gmail.com
+      # DOJOT_SMTP_PORT: "587"
+      # DOJOT_SMTP_SSL: "false"
+      # DOJOT_SMTP_START_TLS: "true"
+      # DOJOT_SMTP_FROM: noreply@dojot.iot
+      # DOJOT_SMTP_FROM_DISPLAY_NAME: IoT Dojot platform
+      # DOJOT_SMTP_USERNAME: smtp@dojot.iot
+      # DOJOT_SMTP_PASSWORD: smtp.secret
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_PORT: 5432
+      DB_DATABASE: keycloak
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      KEYCLOAK_LOGLEVEL: INFO
+      ROOT_LOGLEVEL: INFO
+      # PROXY_ADDRESS_FORWARDING: "true" # When running Keycloak behind a proxy, you will need to enable proxy address forwarding
+      # KEYCLOAK_STATISTICS: all
+      DEBUG: "true"
+      DEBUG_PORT: "*:8787"
+      # alternative debug: suspends the JVM until a debugger is attached (necessary to disable the DEBUG variable)
+      # JAVA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=$$DEBUG_PORT,server=y,suspend=y"
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8787:8787"
+    volumes:
+      - ./customRealmRepresentation.json:/opt/dojot/customRealmRepresentation.json:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  keycloak-init:
+    image: dojot/docker5gmedia-appropriate-curl-jq
+    entrypoint: /opt/keycloak.config.sh
+    restart: on-failure
+    environment:
+      KEYCLOAK_MASTER_USER: admin
+      KEYCLOAK_MASTER_PASSWORD: admin
+      KEYCLOAK_CREATE_REALM: admin
+    depends_on:
+      - keycloak
+    volumes:
+      - ./keycloak.config.sh:/opt/keycloak.config.sh:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  postgres:
+    image: dojot/postgres:9.5.21-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    depends_on:
+      - postgres
+    restart: always
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin-volume:/var/lib/pgadmin
+
+  kafka:
+    image: confluentinc/cp-kafka:5.5.0
+    depends_on:
+      - zookeeper
+    restart: always
+    hostname: "kafka"
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://:9092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_LOG_RETENTION_MINUTES: "30"
+      KAFKA_LOG_SEGMENT_BYTES: "262144000"
+      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: "30000"
+    volumes:
+      - kafka-volume:/var/lib/kafka/data
+      - kafka-secrets-volume:/etc/kafka/secrets
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  zookeeper:
+    image: "confluentinc/cp-zookeeper:5.5.0"
+    restart: always
+    environment:
+      ZOOKEEPER_REPLICAS: "1"
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_ELECTION_PORT: 3888
+      ZOOKEEPER_SERVER_PORT: 2888
+      ZOOKEEPER_HEAP_SIZE: "2G"
+      ZOOKEEPER_INIT_LIMIT: "5"
+      ZOOKEEPER_LOG_LEVEL: "INFO"
+      ZOOKEEPER_MAX_CLIENT_CNXNS: "100"
+      ZOOKEEPER_MAX_SESSION_TIMEOUT: "40000"
+      ZOOKEEPER_MIN_SESSION_TIMEOUT: "4000"
+      ZOOKEEPER_PURGE_INTERVAL: "0"
+      ZOOKEEPER_SNAP_RETAIN_COUNT: "3"
+      ZOOKEEPER_SYNC_LIMIT: "10"
+      ZOOKEEPER_TICK_TIME: "2000"
+    volumes:
+      - zookeeper-volume:/var/lib/zookeeper/data
+      - zookeeper-log-volume:/var/lib/zookeeper/log
+      - zookeeper-secrets-volume:/etc/zookeeper/secrets
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: '5'
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    depends_on:
+      - kafka
+    restart: always
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+      JVM_OPTS: "-Xms32M -Xmx64M"
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    ports:
+      - "9090:9000"
+
+volumes:
+  postgres-volume:
+  pgadmin-volume:
+  kafka-volume:
+  kafka-secrets-volume:
+  zookeeper-volume:
+  zookeeper-log-volume:
+  zookeeper-secrets-volume:
+

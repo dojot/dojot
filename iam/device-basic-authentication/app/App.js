@@ -1,23 +1,13 @@
 const {
   ServiceStateManager,
-  ConfigManager: { getConfig, transformObjectKeys },
+  ConfigManager: { transformObjectKeys },
   Logger,
+  WebUtils: {
+    DojotClientHttp,
+  },
 } = require('@dojot/microservice-sdk');
 
 const camelCase = require('lodash.camelcase');
-
-const {
-  lightship: configLightship,
-  url: configURL,
-} = getConfig('BASIC_AUTH');
-
-const serviceState = new ServiceStateManager({
-  lightship: transformObjectKeys(configLightship, camelCase),
-});
-serviceState.registerService('basic-auth-server');
-serviceState.registerService('basic-auth-producer');
-serviceState.registerService('basic-auth-consumer');
-serviceState.registerService('basic-auth-db');
 
 const logger = new Logger('basic-auth:App');
 
@@ -45,17 +35,35 @@ class App {
    * Constructor App
    * that instantiate basic-auth classes
    */
-  constructor() {
+  constructor(config) {
     logger.debug('constructor: instantiate app...');
     try {
+      const dojotClientHttp = new DojotClientHttp({
+        defaultClientOptions: {
+          timeout: 15000,
+        },
+        logger,
+        defaultRetryDelay: 15000,
+        defaultMaxNumberAttempts: 0,
+      });
+
+      this.serviceState = new ServiceStateManager({
+        lightship: transformObjectKeys(config.lightship, camelCase),
+      });
+      this.serviceState.registerService('basic-auth-server');
+      this.serviceState.registerService('basic-auth-producer');
+      this.serviceState.registerService('basic-auth-consumer');
+      this.serviceState.registerService('basic-auth-db');
+
       this.tenantCtrl = new TenantCtrl(Tenant);
       this.basicCredentialsCtrl = new BasicCredentialsCtrl(BasicCredentials, Tenant);
-      this.mongoClient = new MongoClient(serviceState);
-      this.producerMessages = new ProducerMessages(serviceState);
-      this.consumerMessages = new ConsumerMessages(serviceState, this.basicCredentialsCtrl);
-      this.server = new HTTPServer(serviceState);
-      this.deviceService = new DeviceService(configURL);
-      this.tenantService = new TenantService(configURL.tenants);
+      this.mongoClient = new MongoClient(this.serviceState);
+      this.server = new HTTPServer(this.serviceState);
+      this.deviceService = new DeviceService(config.url, dojotClientHttp);
+      this.tenantService = new TenantService(config, dojotClientHttp, logger);
+      this.producerMessages = new ProducerMessages(this.serviceState);
+      this.consumerMessages =
+        new ConsumerMessages(this.serviceState, this.basicCredentialsCtrl, this.tenantService);
       this.syncLoader = new SyncLoader(
         this.deviceService,
         this.tenantService,
@@ -88,8 +96,9 @@ class App {
               basicCredentialsCtrl: this.basicCredentialsCtrl,
             }),
           ],
-          serviceState,
+          this.serviceState,
           this.deviceService,
+          this.tenantService,
         ),
       );
     } catch (e) {

@@ -7,3 +7,5 @@ This software uses third-party libraries without any changes and, for clarity, w
 We'd like to credit and acknowledge the following libraries that are used in this software:
 
 caniuse-lite Code is available at https://github.com/ben-eb/caniuse-lite and is licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+
+colors Code is available at https://github.com/Marak/colors.js and is licensed under MIT (https://opensource.org/licenses/MIT)

@@ -2,10 +2,22 @@ const { Logger } = require('@dojot/microservice-sdk');
 const HttpStatus = require('http-status-codes');
 
 const { generateDeviceDataMessage } = require('../../../Utils');
-const messageSchema = require('../../schemas/messageSchema');
 
 const logger = new Logger('http-agent:express/routes/v1/Device');
 
+const createSchemaValidator = require('../../helpers/schemaValidator');
+
+const multipleMessagesSchema = require('../../schemas/multiple-messages.json');
+const singleMessageSchema = require('../../schemas/single-message.json');
+
+const validators = createSchemaValidator(
+  {
+    schemas: {
+      multipleMessagesSchema,
+      singleMessageSchema,
+    },
+  },
+);
 /**
  * Routes to Devices
  *
@@ -26,16 +38,10 @@ module.exports = ({ mountPoint, producerMessages }) => [
       {
         method: 'post',
         middleware: [
+          validators.validateSingleMessage(),
           async (req, res) => {
             try {
               const { body } = req;
-
-              const { error } = messageSchema.validate(body, {
-                abortEarly: false,
-              });
-              if (error) {
-                throw new Error(error.message);
-              }
 
               await producerMessages.send(
                 generateDeviceDataMessage(body, body.tenant, body.deviceId),
@@ -66,39 +72,25 @@ module.exports = ({ mountPoint, producerMessages }) => [
       {
         method: 'post',
         middleware: [
+          validators.validateMultipleMessages(),
           async (req, res) => {
             try {
               const { body } = req;
               const errors = {};
 
               body.forEach(async (message, index) => {
-                const { error } = messageSchema.validate(
-                  {
-                    tenant: body.tenant,
-                    deviceId: body.deviceId,
-                    ...message,
-                  },
-                  {
-                    abortEarly: false,
-                  },
-                );
-
-                if (error) {
-                  errors[+index] = error.message;
-                } else {
-                  try {
-                    await producerMessages.send(
-                      generateDeviceDataMessage(
-                        message,
-                        body.tenant,
-                        body.deviceId,
-                      ),
+                try {
+                  await producerMessages.send(
+                    generateDeviceDataMessage(
+                      message,
                       body.tenant,
                       body.deviceId,
-                    );
-                  } catch (e) {
-                    errors[+index] = e.message;
-                  }
+                    ),
+                    body.tenant,
+                    body.deviceId,
+                  );
+                } catch (e) {
+                  errors[+index] = e.message;
                 }
               });
 

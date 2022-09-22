@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const {
   pipeline, Writable, Readable,
 } = require('stream');
@@ -30,6 +29,14 @@ module.exports = class MinIoRepository {
   async createBucket(bucketName, region) {
     this.logger.debug(`Creating bucket ${this.suffixBucket + bucketName}`);
     await this.client.makeBucket(this.suffixBucket + bucketName, region);
+  }
+
+  async listBuckets() {
+    const buckets = await this.client.listBuckets();
+    return buckets.map((bucket) => ({
+      ...bucket,
+      name: bucket.name.replace(this.suffixBucket, ''),
+    }));
   }
 
   /**
@@ -108,8 +115,7 @@ module.exports = class MinIoRepository {
    *
    * @returns the transaction code and metadata of the put operation
    */
-  async putTmpObject(bucketName, fileStream) {
-    const transactionCode = uuidv4();
+  async putTmpObject(bucketName, fileStream, transactionCode) {
     this.logger.debug(`Start file transaction ${transactionCode}`);
     const info = await this.client.putObject(
       `${this.suffixBucket}${bucketName}`, `/.tmp/${transactionCode}`, fileStream,

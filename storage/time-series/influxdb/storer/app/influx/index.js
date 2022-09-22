@@ -34,6 +34,7 @@ class InfluxDB {
     this.influxOrgs = new InfluxOrgs(
       configInflux.url,
       configInflux['default.token'],
+      configInflux['default.timeout'],
       configInflux['default.organization'],
       configInflux['default.bucket'],
       configInflux['retention.hrs'],
@@ -41,6 +42,7 @@ class InfluxDB {
     this.influxDataWriter = new InfluxDataWriter(
       configInflux.url,
       configInflux['default.token'],
+      configInflux['default.timeout'],
       configInflux['default.bucket'],
       configInflux['default.write.as.string'],
       configInfluxWriteOptionsCamelCase,
@@ -48,6 +50,7 @@ class InfluxDB {
     this.influxMeasurement = new InfluxMeasurement(
       configInflux.url,
       configInflux['default.token'],
+      configInflux['default.timeout'],
       configInflux['default.bucket'],
     );
     this.influxState = new InfluxState(

@@ -10,15 +10,22 @@ const BasicCredentialSchema = new Schema({
   password: String,
 });
 
+const {
+  ConfigManager: { getConfig },
+} = require('@dojot/microservice-sdk');
+
+const {
+  credentials: credentialsConfig,
+} = getConfig('BASIC_AUTH');
+
 // Hash the user's password before saving it
-BasicCredentialSchema.pre('save', function (next) {
-  const credential = this;
-  if (this.isModified('password') || this.isNew) {
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(credential.password, salt);
-    credential.password = hash;
-    return next();
-  }
+BasicCredentialSchema.pre('findOneAndUpdate', function (next) {
+  const { password } = this.getUpdate();
+  if (!password) next();
+
+  const salt = bcrypt.genSaltSync(credentialsConfig.hash.salt.rounds);
+  const hash = bcrypt.hashSync(password, salt);
+  this.getUpdate().password = hash;
   next();
 });
 

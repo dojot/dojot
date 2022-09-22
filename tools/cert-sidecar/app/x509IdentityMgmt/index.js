@@ -17,8 +17,9 @@ class X509IdentityMgmt {
    * @param {an instance of @dojot/microservice-sdk.ServiceStateManager
    *          with register service 'x509IdentityMgmt'} serviceState
    *          Manages the services' states, providing health check and shutdown utilities.
+   * @param {KeycloakClientSession} keycloakSession Keycloak Session
   */
-  constructor(serviceState) {
+  constructor(serviceState, keycloakSession) {
     this.serviceState = serviceState;
     this.requests = new Requests(
       configX509.url,
@@ -30,6 +31,7 @@ class X509IdentityMgmt {
         ca: configX509['path.ca'],
         caBundle: configX509['path.cabundle'],
       },
+      keycloakSession,
     );
     this.logger = new Logger(`cert-sc-${configApp['sidecar.to']}:x509IdentityMgmt`);
   }
@@ -37,6 +39,7 @@ class X509IdentityMgmt {
   /**
    *
    */
+  // eslint-disable-next-line class-methods-use-this
   init() {
     this.createHealthChecker();
   }

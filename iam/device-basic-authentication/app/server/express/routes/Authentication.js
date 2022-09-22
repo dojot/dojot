@@ -34,14 +34,14 @@ module.exports = ({
               try {
                 const { tenant, params: { deviceId } } = req;
 
-                const credentials = await basicCredentialsCtrl.create(tenant, deviceId);
+                const credentials = await basicCredentialsCtrl.create(tenant.id, deviceId);
 
                 await producerMessages.send(
-                  generateMessage(tenant, deviceId),
-                  tenant,
+                  generateMessage(tenant.id, deviceId),
+                  tenant.id,
                   deviceId,
                 );
-                const buff = Buffer.from(`${tenant}@${deviceId}:${credentials.password}`, 'utf-8');
+                const buff = Buffer.from(`${tenant.id}@${deviceId}:${credentials.password}`, 'utf-8');
                 const basicAuth = `Basic ${buff.toString('base64')}`;
 
                 return res.status(HttpStatus.OK).json({ credentials, basicAuth });

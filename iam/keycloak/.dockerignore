@@ -1,0 +1,12 @@
+# Examples directory
+examples
+
+Dockerfile*
+.dockerignore
+**/.gitignore
+**/.vscode
+**/.idea
+**/README.md
+
+kafka-provider/target
+

@@ -151,6 +151,12 @@ These are the environment variables used by iotagent-http
 | http.host | 0.0.0.0       | string       | HTTP_AGENT_HTTP_HOST |
 | http.port | 3001          | integer      | HTTP_AGENT_HTTP_PORT |
 
+#### Device auth
+
+| Key                | Default Value | Valid Values | Environment variable                      |
+|--------------------|---------------|--------------|-------------------------------------------|
+| request.timeout.ms | 12000         | integer      | HTTP_AGENT_DEVICE_AUTH_REQUEST_TIMEOUT_MS |
+
 ### Secure Context
 
 | Key                         | Default Value | Valid Values                | Environment variable                   |
@@ -185,6 +191,8 @@ These are the environment variables used by iotagent-http
 | redis.db                   | 0                | integer      | HTTP_AGENT_REDIS_DB                   |
 | redis.reconnect.after.ms   | 5000             | integer      | HTTP_AGENT_REDIS_RECONNECT_AFTER_MS   |
 | redis.operation.timeout.ms | 1000             | integer      | HTTP_AGENT_REDIS_OPERATION_TIMEOUT_MS |
+| redis.hash.salt.rounds     | 10               | integer      | HTTP_AGENT_REDIS_HASH_SALT_ROUNDS     |
+
 
 ### URL
 

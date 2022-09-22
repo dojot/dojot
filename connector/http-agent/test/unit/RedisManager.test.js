@@ -7,6 +7,7 @@ function MockRedisClient() {
   this.setAsync = jest.fn();
   this.quitAsync = jest.fn();
   this.quitAsync = jest.fn();
+  this.delAsync = jest.fn();
 }
 MockRedisClient.prototype.emit = function emit(event, data) {
   this.eventListener[event](data);
@@ -58,6 +59,7 @@ const mockConfig = {
     db: 0,
     'reconnect.after.ms': 5000,
     'operation.timeout.ms': 1000,
+    hash: { salt: { rounds: 10 } },
   },
 };
 
@@ -182,7 +184,7 @@ describe('RedisManager', () => {
     const key = 'test@123abc';
     it('should get value', async () => {
       redisManager.redisClient.getAsync.mockReturnValue('$ioaswru9834%34r7rfnedfv');
-      redisManager.getSecurity(key);
+      redisManager.getSecurity('username', key);
       expect(redisManager.redisClient.getAsync).toHaveBeenCalled();
     });
 
