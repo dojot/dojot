@@ -249,5 +249,40 @@ module.exports = ({
     ],
   };
 
-  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute, queryRoute];
+  const flexQueryRoute = {
+    mountPoint,
+    name: 'flexquery-route',
+    path: ['/flexquery'],
+    handlers: [
+      {
+        method: 'post',
+        middleware: [
+          // eslint-disable-next-line consistent-return
+          async (req, res) => {
+            try {
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              const { query } = req.body;
+              const result = await genericQueryService.runFlexQuery(req.tenant.id, query);
+
+              res.type(accept);
+              if (accept === 'csv') {
+                return res.status(HttpStatus.OK).send(
+                  parseCSV(result),
+                );
+              }
+
+              res.status(200).json({ result });
+            } catch (error) {
+              logger.error('flexquery-route', error);
+              error.message = `flexquery-route: ${error.message}`;
+              throw error;
+            }
+          },
+        ],
+      },
+    ],
+  };
+
+  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute, queryRoute, flexQueryRoute];
 };

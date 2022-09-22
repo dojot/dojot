@@ -134,9 +134,36 @@ const mockDojotClientHttp = {
   }),
 };
 
+const mockOptions = jest.fn();
 const mockInfluxDBConnection = {
   getQueryApi: mockQueryApi,
+  _options: mockOptions,
 };
+
+const mockGetOrgs = jest.fn();
+const mockGetAuthorizations = jest.fn();
+const mockInfluxApi = {
+  OrgsAPI: jest.fn().mockImplementation(() => ({
+    getOrgs: mockGetOrgs,
+  })),
+  AuthorizationsAPI: jest.fn().mockImplementation(() => ({
+    getAuthorizations: mockGetAuthorizations,
+  })),
+};
+jest.mock('@influxdata/influxdb-client-apis', () => mockInfluxApi);
+
+const mockInflux = {
+  flux: jest.fn((a) => a),
+  fluxExpression: jest.fn((a) => a),
+  fluxDateTime: jest.fn((a) => a),
+  fluxInteger: jest.fn((a) => a),
+  fluxString: jest.fn((a) => a),
+  fluxDuration: jest.fn((a) => a),
+  InfluxDB: jest.fn().mockImplementation(() => ({
+    getQueryApi: mockQueryApi,
+  })),
+};
+jest.mock('@influxdata/influxdb-client', () => mockInflux);
 
 const mockTenantService = {
   tenants,
@@ -773,6 +800,114 @@ describe('Test Devices Routes', () => {
   test('Test Generic Route - should throw an error, when the accept header is not acceptable', (done) => {
     request(app)
       .post('/tss/v1/query')
+      .send({ query: 'from(bucket:\'default\')' })
+      .set('Accept', 'Application/xml')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(406);
+        expect(response.body.error).toEqual('This server does not support Application/xml');
+        done();
+      });
+  });
+
+  test('Test Flex Generic Route - should return data in json', (done) => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    mockData.mockReturnValueOnce(
+      [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ],
+    );
+
+    request(app)
+      .post('/tss/v1/flexquery')
+      .send({ query: 'query' })
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.body.result).toStrictEqual([
+          {
+            result: '_result',
+            table: 0,
+            _value: '_value',
+          },
+          {
+            result: '_result',
+            table: 0,
+            _value: '_value',
+          },
+        ]);
+        expect(response.body.result.length).toEqual(2);
+        done();
+      });
+  });
+
+  test('Test Flex Generic Route - should return data in csv', (done) => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    mockData.mockReturnValueOnce(
+      [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ],
+    );
+
+    request(app)
+      .post('/tss/v1/flexquery')
+      .send({ query: 'query' })
+      .set('Accept', 'text/csv')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toStrictEqual('"result","table","_value"\n"_result",0,"_value"\n"_result",0,"_value"');
+        expect(response.type).toEqual('text/csv');
+        done();
+      });
+  });
+
+  test('Test Flex Generic Route - should throw an error when the influxdb throws a query error', (done) => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    mockQueryApi.mockReturnValueOnce({
+      queryRows: (fluxQuery, consumer) => {
+        consumer.error({ statusMessage: 'BadRequest', body: '{ "message": "Error" }', statusCode: 400 });
+      },
+    });
+
+    request(app)
+      .post('/tss/v1/flexquery')
+      .send({ query: 'query' })
+      .set('Accept', 'text/csv')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+        done();
+      });
+  });
+
+  test('Test Flex Generic Route - should throw an error, when the accept header is not acceptable', (done) => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    request(app)
+      .post('/tss/v1/flexquery')
       .send({ query: 'from(bucket:\'default\')' })
       .set('Accept', 'Application/xml')
       .set('Authorization', `Bearer ${validToken}`)

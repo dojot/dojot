@@ -13,6 +13,10 @@ const { Logger } = require('@dojot/microservice-sdk');
 
 const logger = new Logger('influxdb-retriever:influx/DeviceDataRepository');
 
+const { AuthorizationsAPI, OrgsAPI, BucketsAPI } = require('@influxdata/influxdb-client-apis');
+
+const { InfluxDB } = require('@influxdata/influxdb-client');
+
 /**
  * This class handle with query data in a specific bucket.
  *
@@ -311,6 +315,78 @@ class DeviceDataRepository {
       return new Promise((resolve, reject) => {
         const result = [];
         queryApi.queryRows(fluxQuery, {
+          next(row, tableMeta) {
+            const o = tableMeta.toObject(row);
+            logger.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            result.push(o);
+          },
+          error(error) {
+            return reject(DeviceDataRepository.commonHandleError(error));
+          },
+          complete() {
+            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)}`);
+            return resolve(result);
+          },
+        });
+      });
+    } catch (e) {
+      logger.error('GenericQuery:', e);
+      throw e;
+    }
+  }
+
+  async runGenericFlexQuery(org, query) {
+    try {
+      const orgsResponse = await new OrgsAPI(this.influxDB).getOrgs({ org });
+      const orgID = orgsResponse.orgs[0].id;
+      logger.debug(' ', org, orgID);
+
+      const authorizationAPI = new AuthorizationsAPI(this.influxDB);
+      const authorizations = await authorizationAPI.getAuthorizations({ orgID });
+
+      let userOrgToken = null;
+
+      if (authorizations.authorizations.length > 0) {
+        userOrgToken = authorizations.authorizations[0].token;
+      } else {
+        logger.debug('*** CreateAuthorization ***');
+
+        const name = this.defaultBucket;
+        const bucketsAPI = new BucketsAPI(this.influxDB);
+        const buckets = await bucketsAPI.getBuckets({ orgID, name });
+        const bucketID = buckets.buckets[0].id;
+
+        const auth = await authorizationAPI.postAuthorizations(
+          {
+            body: {
+              description: 'user organization token',
+              orgID,
+              permissions: [
+                {
+                  action: 'read',
+                  resource: { type: 'buckets', id: bucketID, orgID },
+                },
+              ],
+            },
+          },
+        );
+        userOrgToken = auth.token;
+        logger.debug(' ', auth.description);
+      }
+
+      logger.debug(userOrgToken);
+
+      const userOrgInfluxDBConnection = new InfluxDB({
+        url: this.influxDB._options.url,
+        token: userOrgToken,
+        timeout: this.influxDB._options.timeout,
+      });
+
+      const queryApi = userOrgInfluxDBConnection.getQueryApi({ org, gzip: false });
+
+      return new Promise((resolve, reject) => {
+        const result = [];
+        queryApi.queryRows(query, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
             logger.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
