@@ -180,7 +180,7 @@ const localPersistenceManager = new LocalPersistenceManager(
   './data',
 );
 
-const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection, true);
+const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection, true, mockLogger);
 const deviceDataService = new DeviceDataService(deviceDataRepository);
 const genericQueryService = new GenericQueryService(deviceDataRepository);
 const deviceManagerService = new DeviceManagerService(

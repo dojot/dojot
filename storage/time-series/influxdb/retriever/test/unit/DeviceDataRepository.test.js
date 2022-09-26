@@ -61,6 +61,13 @@ const mockInfluxApi = {
 
 jest.mock('@influxdata/influxdb-client-apis', () => mockInfluxApi);
 
+const mockLogger = {
+  error: jest.fn(),
+  debug: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+};
+
 const DataQuery = require('../../app/influx/DeviceDataRepository');
 
 describe('Test Influx Data Query', () => {
@@ -106,7 +113,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, true);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, true, mockLogger);
   });
 
   test('queryByField - test ok 1', async () => {
@@ -365,7 +372,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, false);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, false, mockLogger);
   });
 
   test('queryByField - test ok 1', async () => {
