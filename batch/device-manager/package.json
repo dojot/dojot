@@ -19,7 +19,7 @@
     "scripts": {
         "build": "tsc && cp -r src/config build/config",
         "start": "node ./build/index.js",
-        "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/index.ts",
+        "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/index.ts && cp -r src/config build/config",
         "test": "jest --coverage",
         "unit-test": "jest ./tests/units --coverage",
         "integration-test": "jest ./tests/integration --runInBand"

@@ -1,4 +1,4 @@
-import { ConfigManager, Logger } from '@dojot/microservice-sdk'
+import { ConfigManager, Logger, WebUtils } from '@dojot/microservice-sdk'
 
 import { AppConfig } from 'src/types'
 import { KafkaConsumer, TenantManager } from './kafka'
@@ -18,11 +18,19 @@ const config: AppConfig = ConfigManager.getConfig(
   './build',
 )
 
-const logger = new Logger('report-manager')
+
+const logger = new Logger('device-manager-batch')
 Logger.setLevel('console', 'debug')
 
+const dojotHttpClient = new WebUtils.DojotHttpClient({
+  logger,
+  defaultClientOptions: {},
+  defaultRetryDelay: 15000,
+  defaultMaxNumberAttempts: 0,
+})
+
 const kafkaConsumer = new KafkaConsumer(logger, config)
-const tenantManager = new TenantManager(logger)
+const tenantManager = new TenantManager(logger,config,dojotHttpClient)
 
 new App(logger, config, kafkaConsumer, tenantManager).init().then((server) => {
   const handleCloseServerAndExitProcess = () => {

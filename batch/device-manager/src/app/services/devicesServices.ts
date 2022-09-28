@@ -15,12 +15,14 @@ export class DevicesServices {
         return await prisma.devices.delete({
           where: { id: id.toString() }
       });
-      } catch (error) {
-        this.logger.debug('DevicesServices - remove ', {error:error});
+      } catch (e: unknown) {
+
+        const error = e as Error
+        this.logger.debug('DevicesServices - remove ', {error:error.message});
       }
     }
 
-     async findById (prisma: PrismaClient,id: string){
+     async findById(prisma: PrismaClient,id: string){
       try {
         return await prisma.devices.findFirst({
           where: { id: id.toString() }
@@ -42,9 +44,9 @@ export class DevicesServices {
 
     async create(prisma: PrismaClient,id:string)
     {
-      return await prisma.devices.findFirst({
-        where: { id: id.toString() }
-    });
+      /*return await prisma.devices.create({
+      data: "",
+    });*/
     }
     
   }

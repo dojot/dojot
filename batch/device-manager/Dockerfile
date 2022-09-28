@@ -46,6 +46,8 @@ COPY --from=base /opt/device-manager /opt/device-manager
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
+COPY /src/config/default.conf ./build/config/default.conf
+
 CMD ["npm", "run", "dev"]
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \

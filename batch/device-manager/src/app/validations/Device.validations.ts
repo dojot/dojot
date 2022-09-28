@@ -6,6 +6,7 @@ export abstract class DevicesValidation {
     return Joi.object({
       body: Joi.object({
         devices: Joi.array()
+          .items(Joi.string())
           .min(1)
           .required(),
       }).required(),

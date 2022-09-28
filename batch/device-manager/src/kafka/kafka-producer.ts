@@ -64,7 +64,7 @@ export default class KafkaProducer extends Kafka.Producer{
 
       this.logger.debug(`Trying to send message to kafka topic ${kafkaTopic}...`,{});
 
-      await this.produce(kafkaTopic, stringMessage, messageKey,partition);
+      await this.produce(kafkaTopic, stringMessage, messageKey, partition);
            
 
       this.logger.debug(`Successfully sent message to Kafka in ${kafkaTopic}`,{});

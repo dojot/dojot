@@ -11,4 +11,14 @@ export type AppConfig = {
     express: {
       'parsing.limit': number
     }
+    database: {
+      host: string
+      name: string
+      schema: string
+      user: string
+      password: string
+    }
+    keycloak: {
+      'tenants.url': string
+    }
   }

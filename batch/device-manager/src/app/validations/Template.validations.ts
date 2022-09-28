@@ -6,15 +6,8 @@ export abstract class TemplatesValidation {
     return Joi.object({
       body: Joi.object({
         devices: Joi.array()
+          .items(Joi.number())
           .min(1)
-          .items({
-            id: Joi.string().required(),
-            attrs: Joi.array()
-              .min(1)
-              .items({
-               })
-              .required(),
-          })
           .required(),
       }).required(),
     })
