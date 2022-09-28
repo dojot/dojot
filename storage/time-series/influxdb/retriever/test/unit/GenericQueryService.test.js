@@ -11,6 +11,15 @@ describe('DeviceDataService', () => {
         },
       ];
     },
+    async runGenericFlexQuery() {
+      return [
+        {
+          result: '_result',
+          table: 0,
+          _value: '_value',
+        },
+      ];
+    },
   };
   let genericQueryService;
 
@@ -36,5 +45,16 @@ describe('DeviceDataService', () => {
     } catch (error) {
       expect(error.responseJSON.error).toEqual('The "from" function is determined by dojot');
     }
+  });
+
+  test('should execute flex query and return data', async () => {
+    const returnData = await genericQueryService.runFlexQuery('default', 'flexquery');
+    expect(returnData).toEqual([
+      {
+        result: '_result',
+        table: 0,
+        _value: '_value',
+      },
+    ]);
   });
 });
