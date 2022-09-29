@@ -27,7 +27,7 @@ if (configLog.file) {
   });
 }
 
-const logger = new Logger('influxdb-retriever:index');
+const logger = new Logger('influxdb-retriever');
 
 logger.info(`The current configuration is:\n${util.inspect(config, false, 5, true)}`);
 

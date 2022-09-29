@@ -9,9 +9,10 @@ const {
   fluxDuration,
 } = require('@influxdata/influxdb-client');
 const util = require('util');
-const { Logger } = require('@dojot/microservice-sdk');
 
-const logger = new Logger('influxdb-retriever:influx/DeviceDataRepository');
+const { AuthorizationsAPI, OrgsAPI, BucketsAPI } = require('@influxdata/influxdb-client-apis');
+
+const { InfluxDB } = require('@influxdata/influxdb-client');
 
 /**
  * This class handle with query data in a specific bucket.
@@ -32,8 +33,9 @@ class DeviceDataRepository {
    * @param {Boolean} readAsString Indicates whether to read Influxdb data as a String
    *
    */
-  constructor(defaultBucket, influxDBConnection, readAsString) {
+  constructor(defaultBucket, influxDBConnection, readAsString, logger) {
     logger.debug('constructor:');
+    this.logger = logger;
 
     this.influxDB = influxDBConnection;
     this.defaultBucket = defaultBucket;
@@ -64,11 +66,11 @@ class DeviceDataRepository {
  */
   async queryByMeasurement(org, measurement, filters = {}, page = {}, order = 'desc') {
     try {
-      logger.debug('queryByMeasurement:');
-      logger.debug(`queryByMeasurement: org=${org}`);
-      logger.debug(`queryByMeasurement: measurement=${measurement}`);
-      logger.debug(`queryByMeasurement: filters=${util.inspect(filters)}`);
-      logger.debug(`queryByMeasurement: page=${util.inspect(page)}`);
+      this.logger.debug('queryByMeasurement:');
+      this.logger.debug(`queryByMeasurement: org=${org}`);
+      this.logger.debug(`queryByMeasurement: measurement=${measurement}`);
+      this.logger.debug(`queryByMeasurement: filters=${util.inspect(filters)}`);
+      this.logger.debug(`queryByMeasurement: page=${util.inspect(page)}`);
 
       const {
         start, stop, limit, offset,
@@ -84,19 +86,21 @@ class DeviceDataRepository {
       ${fluxExpression(orderExp)}
       ${fluxExpression(limitExp)}`;
 
-      logger.debug(`queryByMeasurement: fluxQuery=${fluxQuery}`);
+      this.logger.debug(`queryByMeasurement: fluxQuery=${fluxQuery}`);
 
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
       const prefix = this.prefixFields;
       const prefixSize = this.prefixFieldsSize;
       const { readAsString } = this;
 
+      const loggerOuter = this.logger;
+
       return new Promise((resolve, reject) => {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            loggerOuter.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o, null, 2)}`);
             const point = {
               ts: o._time,
               attrs: [],
@@ -129,13 +133,13 @@ class DeviceDataRepository {
             return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByMeasurement: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            loggerOuter.debug(`queryByMeasurement: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
             return resolve({ result, totalItems: result.length });
           },
         });
       });
     } catch (e) {
-      logger.error('queryByMeasurement:', e);
+      this.logger.error('queryByMeasurement:', e);
       throw e;
     }
   }
@@ -165,12 +169,12 @@ class DeviceDataRepository {
  */
   async queryUsingGraphql(org, devices, filters = {}, page = {}, order = 'desc') {
     try {
-      logger.debug('queryUsingGraphql: Handling query created using Graphql.');
-      logger.debug(`queryUsingGraphql: org=${org}`);
-      logger.debug(`queryUsingGraphql: devices=${util.inspect(devices)}`);
-      logger.debug(`queryUsingGraphql: filters=${util.inspect(filters)}`);
-      logger.debug(`queryUsingGraphql: page=${util.inspect(page)}`);
-      logger.debug(`queryUsingGraphql: order=${order}`);
+      this.logger.debug('queryUsingGraphql: Handling query created using Graphql.');
+      this.logger.debug(`queryUsingGraphql: org=${org}`);
+      this.logger.debug(`queryUsingGraphql: devices=${util.inspect(devices)}`);
+      this.logger.debug(`queryUsingGraphql: filters=${util.inspect(filters)}`);
+      this.logger.debug(`queryUsingGraphql: page=${util.inspect(page)}`);
+      this.logger.debug(`queryUsingGraphql: order=${order}`);
 
       const {
         start, stop, limit, offset,
@@ -185,16 +189,18 @@ class DeviceDataRepository {
         ${fluxExpression(orderExp)}
         ${fluxExpression(limitExp)}`;
 
-      logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
+      this.logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
 
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
+
+      const loggerOuter = this.logger;
 
       return new Promise((resolve, reject) => {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryUsingGraphql: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            loggerOuter.debug(`queryUsingGraphql: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push({
               id: o._measurement,
               ts: o._time,
@@ -206,13 +212,13 @@ class DeviceDataRepository {
             return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryUsingGraphql: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            loggerOuter.debug(`queryUsingGraphql: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
             return resolve({ data: result });
           },
         });
       });
     } catch (e) {
-      logger.error('queryUsingGraphql:', e);
+      this.logger.error('queryUsingGraphql:', e);
       const er = new Error(e);
       er.message = `queryUsingGraphql: ${e.message}`;
       throw er;
@@ -242,12 +248,12 @@ class DeviceDataRepository {
  */
   async queryByField(org, measurement, field, filters = {}, page = {}, order = 'desc') {
     try {
-      logger.debug('queryByField:');
-      logger.debug(`queryByField: org=${org}`);
-      logger.debug(`queryByField: measurement=${measurement}`);
-      logger.debug(`queryByField: field=${field}`);
-      logger.debug(`queryByField: filters=${util.inspect(filters)}`);
-      logger.debug(`queryByField: page=${util.inspect(page)}`);
+      this.logger.debug('queryByField:');
+      this.logger.debug(`queryByField: org=${org}`);
+      this.logger.debug(`queryByField: measurement=${measurement}`);
+      this.logger.debug(`queryByField: field=${field}`);
+      this.logger.debug(`queryByField: filters=${util.inspect(filters)}`);
+      this.logger.debug(`queryByField: page=${util.inspect(page)}`);
 
       const {
         start, stop, limit, offset,
@@ -262,17 +268,19 @@ class DeviceDataRepository {
         ${fluxExpression(orderExp)}
         ${fluxExpression(limitExp)}`;
 
-      logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
+      this.logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
 
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
       const { readAsString } = this;
+
+      const loggerOuter = this.logger;
 
       return new Promise((resolve, reject) => {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`queryByField: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            loggerOuter.debug(`queryByField: queryRows.next=${JSON.stringify(o, null, 2)}`);
             let validatedValue;
             if (readAsString) {
               validatedValue = JSON.parse(o._value);
@@ -290,13 +298,13 @@ class DeviceDataRepository {
             return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
+            loggerOuter.debug(`queryByField: result=${JSON.stringify(result, null, 2)} totalItems=${result.length}`);
             return resolve({ result, totalItems: result.length });
           },
         });
       });
     } catch (e) {
-      logger.error('queryByField:', e);
+      this.logger.error('queryByField:', e);
       throw e;
     }
   }
@@ -308,25 +316,99 @@ class DeviceDataRepository {
 
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
 
+      const loggerOuter = this.logger;
+
       return new Promise((resolve, reject) => {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
-            logger.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            loggerOuter.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push(o);
           },
           error(error) {
             return reject(DeviceDataRepository.commonHandleError(error));
           },
           complete() {
-            logger.debug(`queryByField: result=${JSON.stringify(result, null, 2)}`);
+            loggerOuter.debug(`queryByField: result=${JSON.stringify(result, null, 2)}`);
             return resolve(result);
           },
         });
       });
     } catch (e) {
-      logger.error('GenericQuery:', e);
+      this.logger.error('GenericQuery:', e);
+      throw e;
+    }
+  }
+
+  async runGenericFlexQuery(org, query) {
+    try {
+      const orgsResponse = await new OrgsAPI(this.influxDB).getOrgs({ org });
+      const orgID = orgsResponse.orgs[0].id;
+      this.logger.debug(' ', org, orgID);
+
+      const authorizationAPI = new AuthorizationsAPI(this.influxDB);
+      const authorizations = await authorizationAPI.getAuthorizations({ orgID });
+
+      let userOrgToken = null;
+
+      if (authorizations.authorizations.length > 0) {
+        userOrgToken = authorizations.authorizations[0].token;
+      } else {
+        this.logger.debug('*** CreateAuthorization ***');
+
+        const name = this.defaultBucket;
+        const bucketsAPI = new BucketsAPI(this.influxDB);
+        const buckets = await bucketsAPI.getBuckets({ orgID, name });
+        const bucketID = buckets.buckets[0].id;
+
+        const auth = await authorizationAPI.postAuthorizations(
+          {
+            body: {
+              description: 'user organization token',
+              orgID,
+              permissions: [
+                {
+                  action: 'read',
+                  resource: { type: 'buckets', id: bucketID, orgID },
+                },
+              ],
+            },
+          },
+        );
+        userOrgToken = auth.token;
+        this.logger.debug(' ', auth.description);
+      }
+
+      const userOrgInfluxDBConnection = new InfluxDB({
+        url: this.influxDB._options.url,
+        token: userOrgToken,
+        timeout: this.influxDB._options.timeout,
+      });
+
+      const queryApi = userOrgInfluxDBConnection.getQueryApi({ org, gzip: false });
+
+      const loggerOuter = this.logger;
+
+      return new Promise((resolve, reject) => {
+        const result = [];
+        queryApi.queryRows(query, {
+          next(row, tableMeta) {
+            const o = tableMeta.toObject(row);
+            loggerOuter.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
+            result.push(o);
+          },
+          error(error) {
+            return reject(DeviceDataRepository.commonHandleError(error));
+          },
+          complete() {
+            loggerOuter.debug(`queryByField: result=${JSON.stringify(result, null, 2)}`);
+            return resolve(result);
+          },
+        });
+      });
+    } catch (e) {
+      this.logger.error('GenericQuery:', e);
       throw e;
     }
   }
