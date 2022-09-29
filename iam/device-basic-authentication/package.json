@@ -45,7 +45,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
-    "@dojot/microservice-sdk": "^0.2.0-beta.2",
+    "@dojot/microservice-sdk": "^0.2.1",
     "@types/jest": "^27.0.2",
     "axios": "^0.23.0",
     "bcrypt": "^5.0.1",

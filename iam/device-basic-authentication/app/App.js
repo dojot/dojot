@@ -3,7 +3,7 @@ const {
   ConfigManager: { transformObjectKeys },
   Logger,
   WebUtils: {
-    DojotClientHttp,
+    DojotHttpClient,
   },
 } = require('@dojot/microservice-sdk');
 
@@ -38,7 +38,7 @@ class App {
   constructor(config) {
     logger.debug('constructor: instantiate app...');
     try {
-      const dojotClientHttp = new DojotClientHttp({
+      const dojotHttpClient = new DojotHttpClient({
         defaultClientOptions: {
           timeout: 15000,
         },
@@ -59,8 +59,8 @@ class App {
       this.basicCredentialsCtrl = new BasicCredentialsCtrl(BasicCredentials, Tenant);
       this.mongoClient = new MongoClient(this.serviceState);
       this.server = new HTTPServer(this.serviceState);
-      this.deviceService = new DeviceService(config.url, dojotClientHttp);
-      this.tenantService = new TenantService(config, dojotClientHttp, logger);
+      this.deviceService = new DeviceService(config.url, dojotHttpClient);
+      this.tenantService = new TenantService(config, dojotHttpClient, logger);
       this.producerMessages = new ProducerMessages(this.serviceState);
       this.consumerMessages =
         new ConsumerMessages(this.serviceState, this.basicCredentialsCtrl, this.tenantService);
