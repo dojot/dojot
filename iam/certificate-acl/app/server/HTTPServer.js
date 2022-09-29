@@ -26,7 +26,7 @@ class HTTPServer {
    * @param {*} serviceStateManager instance of the @dojot/microservice-sdk.ServiceStateManager
    * @param {*} redisManager instance of ./../redis/RedisManager
   */
-  constructor(serviceStateManager, redisManager, tenantService) {
+  constructor(serviceStateManager, redisManager, tenantService, dojotHttpCircuit) {
     // http server config
     this.config = getConfig(CERTIFICATE_ACL_CONFIG_LABEL).server;
 
@@ -36,7 +36,7 @@ class HTTPServer {
     // framework
     const x509ServiceConfig = getConfig('CERTIFICATE_ACL').x509im;
     const framework = createFramework(
-      aclRoute(queryOwnerByFingerprint(redisManager, x509ServiceConfig)),
+      aclRoute(queryOwnerByFingerprint(redisManager, x509ServiceConfig, dojotHttpCircuit)),
       serviceStateManager,
       tenantService,
     );
