@@ -21,4 +21,8 @@ export type AppConfig = {
     keycloak: {
       'tenants.url': string
     }
+    producer: object
+    message: {
+      'produce.topic.suffix': string 
+    }
   }

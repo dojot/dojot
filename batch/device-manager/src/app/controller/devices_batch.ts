@@ -2,10 +2,11 @@ import e, { NextFunction, Request, Response } from "express";
 import { RemoveDevicesBatchDto } from "src/app/dto/remove-devices-batch.dto";
 import  { Logger } from  '@dojot/microservice-sdk';
 import { DevicesServices } from "src/app/services/devicesServices";
+import KafkaProducer from "src/kafka/kafka-producer";
 
 export class DevicesBatchController{
 
-  public constructor ( private logger: Logger,private devicesServices:DevicesServices) {
+  public constructor (private logger: Logger,private devicesServices:DevicesServices) {
     this.logger.info('Create Constructor DevicesBatchController',{});
   }
 
@@ -22,8 +23,12 @@ export class DevicesBatchController{
         console.log(devices_to_removed);
         if(devices_to_removed)
         {
-          const devices_removed_associate_termplates = await this.devicesServices.remove_associate_templates(req.prisma,id.toString());
-          const devices_removed = await this.devicesServices.remove(req.prisma,id.toString());
+          //if(await this.kafkaproducer.isConnected())
+         // {
+            const devices_removed_associate_termplates = await this.devicesServices.remove_associate_templates(req.prisma,id.toString());
+            const devices_removed = await this.devicesServices.remove(req.prisma,id.toString());
+         // }
+  
         }
       })
       return res.status(200).json(dto);

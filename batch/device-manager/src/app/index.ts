@@ -10,6 +10,7 @@ import {
 import { AppConfig } from '../types'
 import { KafkaConsumer,TenantManager } from '../kafka'
 import { DeviceRoutes, TemplateRoutes } from '../app/routes'
+import KafkaProducer from 'src/kafka/kafka-producer'
 
 export class App {
   private express: Express
@@ -23,18 +24,6 @@ export class App {
     const { jsonBodyParsingInterceptor,createKeycloakAuthInterceptor } =
       WebUtils.framework.interceptors
       
-    const keycloakClientSession = new WebUtils.KeycloakClientSession(
-        process.env.KEYCLOAK_URI || '',
-        process.env.KEYCLOAK_REALM || '',
-        {
-          grant_type: 'client_credentials',
-          client_id: process.env.KEYCLOAK_CLIENT_ID || '',
-          client_secret: process.env.KEYCLOAK_CLIENT_SECRET || '',
-        },
-        this.logger,
-        { retryDelay: 5000 },
-      )
-
     this.express = WebUtils.framework.createExpress({
       logger,
       server: undefined,
@@ -65,10 +54,12 @@ export class App {
     this.kafkaConsumer.initNewTenantEvent(
       this.tenantManager.create.bind(this.tenantManager),
     )
+    
+    //await this.kafkaProducer.init()
 
 
   return this.express.listen(this.config.api.port, () => {
-      this.logger.info(`Server running at port ${this.config.api.port}`, {})
+      this.logger.info(`Server Device Manager Batch running at port ${this.config.api.port}`, {})
     })
   }
 }

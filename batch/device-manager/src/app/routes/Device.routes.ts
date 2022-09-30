@@ -7,6 +7,7 @@ import {
   ValidationInterceptor,
   DisconnectPrismaInterceptor,
 } from '../interceptors'
+import KafkaProducer from 'src/kafka/kafka-producer'
 
 export abstract class DeviceRoutes {
   static use(logger: Logger) {
@@ -16,7 +17,7 @@ export abstract class DeviceRoutes {
     return [
       {
         mountPoint: '/',
-        path: ['/devices'],
+        path: ['/devices_batch'],
         name: 'DeviceRoutes.Remove',
         handlers: [
           {
@@ -28,7 +29,39 @@ export abstract class DeviceRoutes {
             ],
           },
         ],
+      }, 
+      {
+        mountPoint: '/',
+        path: ['/devices_batch'],
+        name: 'DeviceRoutes.create',
+        handlers: 
+        [
+          {
+            method: 'post',
+            middleware: [
+              //ValidationInterceptor.use(DevicesValidation.remove()),
+              devicesBatchController.create.bind(devicesBatchController),
+              DisconnectPrismaInterceptor.use(logger),
+            ],
+          },
+        ],
       },
+      {
+        mountPoint: '/',
+        path: ['/devices_batch/csv'],
+        name: 'DeviceRoutes.create',
+        handlers: 
+        [
+          {
+            method: 'post',
+            middleware: [
+              //ValidationInterceptor.use(DevicesValidation.remove()),
+              devicesBatchController.create_csv.bind(devicesBatchController),
+              DisconnectPrismaInterceptor.use(logger),
+            ],
+          },
+        ],
+      }
     ]
   }
 }

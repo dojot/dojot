@@ -4,6 +4,7 @@ import { AppConfig } from 'src/types'
 import { KafkaConsumer, TenantManager } from './kafka'
 
 import { App } from './app'
+import KafkaProducer from './kafka/kafka-producer'
 
 ConfigManager.loadSettings(
   'DEVICE_MANAGER_BATCH',
@@ -30,23 +31,47 @@ const dojotHttpClient = new WebUtils.DojotHttpClient({
 })
 
 const kafkaConsumer = new KafkaConsumer(logger, config)
+
 const tenantManager = new TenantManager(logger,config,dojotHttpClient)
 
-new App(logger, config, kafkaConsumer, tenantManager).init().then((server) => {
-  const handleCloseServerAndExitProcess = () => {
-    server.close(() => process.exit(0))
-  }
+const secretFileHandler = new WebUtils.SecretFileHandler(config, logger)
 
-  process.on('SIGINT', handleCloseServerAndExitProcess)
-  process.on('SIGTERM', handleCloseServerAndExitProcess)
+secretFileHandler
+  .handle('keycloak.client.secret', '/secrets')
+  .then(async () => {
+    try {
+      logger.info('Starting application', {})
 
-  process.on('unhandledRejection', (e: Error) => {
-    logger.error(`Unhandled rejection: ${e.stack || e}`, {})
-    process.kill(process.pid, 'SIGTERM')
+      const server = await new App(
+        logger,
+        config,
+        kafkaConsumer,
+        tenantManager,
+      ).init()
+
+      const handleCloseServerAndExitProcess = () => {
+        server.close(() => process.exit(0))
+      }
+
+      process.on('SIGINT', handleCloseServerAndExitProcess)
+      process.on('SIGTERM', handleCloseServerAndExitProcess)
+
+      process.on('unhandledRejection', (e: Error) => {
+        logger.error(`Unhandled rejection: ${e.stack || e}`, {})
+        process.kill(process.pid, 'SIGTERM')
+      })
+
+      process.on('uncaughtException', (e: Error) => {
+        logger.error(
+          `uncaughtException: Unhandled exception: ${e.stack || e}`,
+          {},
+        )
+        process.kill(process.pid, 'SIGTERM')
+      })
+
+      logger.info('Application is running', {})
+    } catch (error: unknown) {
+      logger.error('Application will be closed: ', { error })
+      process.kill(process.pid, 'SIGTERM')
+    }
   })
-
-  process.on('uncaughtException', (e: Error) => {
-    logger.error(`uncaughtException: Unhandled exception: ${e.stack || e}`, {})
-    process.kill(process.pid, 'SIGTERM')
-  })
-})

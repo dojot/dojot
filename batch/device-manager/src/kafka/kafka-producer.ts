@@ -1,6 +1,7 @@
 import { Kafka, Logger } from '@dojot/microservice-sdk';
+import { AppConfig } from 'src/types';
 
-enum EventDevices {
+enum EventKafka {
   CREATE = "create",
   UPDATE = "update",
   REMOVE = "remove",
@@ -31,18 +32,16 @@ class NotificationMessageProducer
  * @class
  */
 export default class KafkaProducer extends Kafka.Producer{
-  private idCallbackTenant: number;
   /**
    * Create an instance
    */
-  constructor(private logger: Logger, private config: any) {
+  constructor(private logger: Logger, private config: AppConfig) {
     super({
       ...config.sdk,
-      'kafka.consumer': config.producer,
+      'kafka.producer': config.producer,
       'kafka.topic': config.topic,
     });
     this.logger.debug('constructor: Instantiating a Kafka Producer', {});
-    this.idCallbackTenant = 0;
   }
 
   public init(): void {
@@ -50,7 +49,7 @@ export default class KafkaProducer extends Kafka.Producer{
   }
 
   async send(event: string, tenant: string, deviceId: string) {
-    const topicSuffix = this.config.messenger.produce.topic.suffix;
+    const topicSuffix = this.config.message['produce.topic.suffix'];
 
     const full_msg = new NotificationMessageProducer(event,tenant,deviceId).to_json();
     this.logger.debug(`Mount of message full  ${full_msg}...`,{});
@@ -79,12 +78,6 @@ export default class KafkaProducer extends Kafka.Producer{
   }
 
 
-  public initNewTenantEvent(callback: Function) {
-    const topic = new RegExp(this.config.subscribe['topics.regex.tenants']);
-    // @ts-expect-error
-    this.idCallbackTenant = this.registerCallback(topic, callback);
-  }
-
   /**
    * A function to get if kafka is connected
    *
@@ -103,5 +96,23 @@ export default class KafkaProducer extends Kafka.Producer{
     }
   }
 
+  async CloseConnected() {
+    try {
+      const { connected } = await this.getStatus();
+      if (connected) {
+        this.disconnect()
+      }
+    } catch (e) {
+      this.logger.error('isConnected:', {e});
+    }
+  }
+ 
+  registerShutdown() {
+    /*
+    this.serviceState.registerShutdownHandler(async () => {
+      logger.warn('Shutting down Kafka connection...');
+      return this.producer.disconnect();
+    });*/
+  } 
 
 }

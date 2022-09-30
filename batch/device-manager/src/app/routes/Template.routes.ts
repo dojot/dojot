@@ -15,7 +15,7 @@ export abstract class TemplateRoutes {
     return [
       {
         mountPoint: '/',
-        path: ['/templates'],
+        path: ['/templates_batch'],
         name: 'DeviceRoutes.Remove',
         handlers: [
           {
