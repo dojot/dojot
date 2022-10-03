@@ -46,7 +46,7 @@
     },
     "dependencies": {
         "@dojot/microservice-sdk": "^0.2.1",
-        "@prisma/client": "^4.3.1",
+        "@prisma/client": "^4.4.0",
         "@types/cors": "^2.8.12",
         "body-parse": "^0.1.0",
         "cors": "^2.8.5",

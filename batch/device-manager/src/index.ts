@@ -20,7 +20,7 @@ const config: AppConfig = ConfigManager.getConfig(
 )
 
 
-const logger = new Logger('device-manager-batch')
+const logger = new Logger('dojot-device-manager-batch')
 Logger.setLevel('console', 'debug')
 
 const dojotHttpClient = new WebUtils.DojotHttpClient({
@@ -31,7 +31,7 @@ const dojotHttpClient = new WebUtils.DojotHttpClient({
 })
 
 const kafkaConsumer = new KafkaConsumer(logger, config)
-
+const kafkaProducer = new KafkaProducer(logger, config)
 const tenantManager = new TenantManager(logger,config,dojotHttpClient)
 
 const secretFileHandler = new WebUtils.SecretFileHandler(config, logger)
@@ -47,6 +47,7 @@ secretFileHandler
         config,
         kafkaConsumer,
         tenantManager,
+        kafkaProducer
       ).init()
 
       const handleCloseServerAndExitProcess = () => {
@@ -69,7 +70,7 @@ secretFileHandler
         process.kill(process.pid, 'SIGTERM')
       })
 
-      logger.info('Application is running', {})
+      logger.info('Application Device Manager Batch is running', {})
     } catch (error: unknown) {
       logger.error('Application will be closed: ', { error })
       process.kill(process.pid, 'SIGTERM')

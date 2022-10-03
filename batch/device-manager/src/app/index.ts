@@ -13,53 +13,61 @@ import { DeviceRoutes, TemplateRoutes } from '../app/routes'
 import KafkaProducer from 'src/kafka/kafka-producer'
 
 export class App {
-  private express: Express
-
   constructor(
     private logger: Logger,
     private config: AppConfig,
     private kafkaConsumer: KafkaConsumer,
     private tenantManager: TenantManager,
-  ) {
-    const { jsonBodyParsingInterceptor,createKeycloakAuthInterceptor } =
-      WebUtils.framework.interceptors
-      
-    this.express = WebUtils.framework.createExpress({
-      logger,
-      server: undefined,
-      supportWebsockets: false,
-      supportTrustProxy: false,
-      catchInvalidRequest: false,
-      interceptors: [
-        jsonBodyParsingInterceptor({
-          config: {
-            limit: config.express['parsing.limit'],
-          },
-        }),
-        createKeycloakAuthInterceptor(this.tenantManager.tenants,
-          this.logger,
-          '/',),
-        PrismaClientInterceptor.use(logger,config),
-      ],
-      errorHandlers: [ErrorHandlerInterceptor.use(),ErrorKeycloakHandlerInterceptor.use()],
-      routes: [DeviceRoutes.use(logger), TemplateRoutes.use(logger)].flat(),
-    })
-  }
+    private KafkaProducer: KafkaProducer
+  ) 
+  {}
 
-  async init() {
+  private createExpress(): Express {
+    const { createKeycloakAuthInterceptor, jsonBodyParsingInterceptor } =
+      WebUtils.framework.interceptors
+
+      return WebUtils.framework.createExpress({
+        server: undefined,
+        logger: this.logger,
+        supportWebsockets: false,
+        supportTrustProxy: false,
+        catchInvalidRequest: false,
+        errorHandlers: undefined as unknown as unknown[],
+        interceptors: [
+          jsonBodyParsingInterceptor({
+            config: {
+              limit: this.config.express['parsing.limit'],
+            },
+          }),
+          createKeycloakAuthInterceptor(
+            this.tenantManager.tenants,
+            this.logger,
+            '/',
+          ),
+          PrismaClientInterceptor.use(this.logger,this.config),
+        ],
+        routes: [
+          DeviceRoutes.use(this.logger), 
+          TemplateRoutes.use(this.logger)].flat(),
+      })
+    }
+
+
+    async init() {
     
     await this.kafkaConsumer.init()
     await this.tenantManager.update()
-
+  
     this.kafkaConsumer.initNewTenantEvent(
-      this.tenantManager.create.bind(this.tenantManager),
-    )
-    
-    //await this.kafkaProducer.init()
-
-
-  return this.express.listen(this.config.api.port, () => {
-      this.logger.info(`Server Device Manager Batch running at port ${this.config.api.port}`, {})
+        this.tenantManager.create.bind(this.tenantManager),
+      )
+      
+    await this.KafkaProducer.init()
+  
+     const express = this.createExpress()
+     
+     return express.listen(this.config.api.port, () => {
+      this.logger.info(`Server running at port ${this.config.api.port}`, {})
     })
-  }
+    }
 }

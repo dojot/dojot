@@ -81,10 +81,10 @@ model templates {
 }
 
 model task_send_event {
-  id              Int               @id
-  created         DateTime?         @db.Timestamp(6)
-  updated         DateTime?         @db.Timestamp(6)
-  status          Status_Event      @default(NO_SEND)
+  id      Int          @id
+  created DateTime?    @db.Timestamp(6)
+  updated DateTime?    @db.Timestamp(6)
+  status  Status_Event @default(NO_SEND)
 }
 
 enum Status_Event {

@@ -9,7 +9,9 @@ export abstract class PrismaClientInterceptor {
 
   static use(logger: Logger,config: AppConfig) {
     const middleware = (req: Request, _: Response, next: NextFunction) => {
-      const databaseUrl = PrismaUtils.getDatabaseUrl(req.tenant,logger,config);
+
+      const databaseUrl = PrismaUtils.getDatabaseUrl(req.tenant.id,logger,config);
+
       logger.debug('Connection with Database',{databaseUrl})
       const prisma = new PrismaClient({
         datasources: {

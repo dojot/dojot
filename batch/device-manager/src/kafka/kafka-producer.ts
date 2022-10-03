@@ -45,8 +45,17 @@ export default class KafkaProducer extends Kafka.Producer{
   }
 
   public init(): void {
-    super.connect();
+    this.logger.info('Initializing Kafka Producer...',{});
+    this.connect().then(() => {
+      this.logger.info('... Kafka Producer was initialized',{});
+
+    }).catch((error) => {
+      this.logger.error('An error occurred while initializing the Agent Messenger. Bailing out!',{});
+      this.logger.error(error.stack || error,{});
+      process.exit(1);
+    });
   }
+
 
   async send(event: string, tenant: string, deviceId: string) {
     const topicSuffix = this.config.message['produce.topic.suffix'];

@@ -2,8 +2,12 @@ export type AppConfig = {
     sdk: object
     topic: object
     consumer: object
+    producer: object
     subscribe: {
       'topics.regex.tenants': string
+    }
+    message: {
+      'produce.topic.suffix': string 
     }
     api: {
       port: number
@@ -20,9 +24,5 @@ export type AppConfig = {
     }
     keycloak: {
       'tenants.url': string
-    }
-    producer: object
-    message: {
-      'produce.topic.suffix': string 
     }
   }
