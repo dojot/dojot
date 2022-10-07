@@ -7,12 +7,13 @@ import {
   ValidationInterceptor,
   DisconnectPrismaInterceptor,
 } from '../interceptors'
-import KafkaProducer from 'src/kafka/kafka-producer'
+import { KafkaProducer } from '../../kafka/kafka-producer'
 
 export abstract class DeviceRoutes {
-  static use(logger: Logger) {
+  static use(logger: Logger,kafkaProducer: KafkaProducer) {
+    
     const deviceServices = new DevicesServices(logger)
-    const devicesBatchController = new DevicesBatchController(logger,deviceServices)
+    const devicesBatchController = new DevicesBatchController(logger,deviceServices,kafkaProducer)
 
     return [
       {

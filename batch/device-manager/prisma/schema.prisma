@@ -82,6 +82,7 @@ model templates {
 
 model task_send_event {
   id      Int          @id
+  data    Json
   created DateTime?    @db.Timestamp(6)
   updated DateTime?    @db.Timestamp(6)
   status  Status_Event @default(NO_SEND)

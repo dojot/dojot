@@ -5,12 +5,12 @@ import { AppConfig, KafkaPayload } from 'src/types'
 export class KafkaConsumer extends Kafka.Consumer {
   private callbackId: number | null
 
-  constructor(private logger: Logger, private config: AppConfig) {
+  constructor(private logger: Logger, private appconfig: AppConfig) {
     super({
-      ...config.sdk,
+      ...appconfig.sdk,
       'enable.async.commit': true,
-      'kafka.consumer': config.consumer,
-      'kafka.topic': config.topic,
+      'kafka.consumer': appconfig.consumer,
+      'kafka.topic': appconfig.topic,
     })
 
     this.logger.debug('constructor: Instantiating a kafka consumer', {})
@@ -22,7 +22,7 @@ export class KafkaConsumer extends Kafka.Consumer {
   }
 
   initNewTenantEvent(callback: (payload: KafkaPayload) => void) {
-    const topic = new RegExp(this.config.subscribe['topics.regex.tenants'])
+    const topic = new RegExp(this.appconfig.subscribe['topics.regex.tenants'])
     this.callbackId = this.registerCallback(
       topic as unknown as string,
       callback,

@@ -1,6 +1,6 @@
 
 import { Express } from 'express'
-import { Logger, WebUtils } from '@dojot/microservice-sdk'
+import { Logger, ServiceStateManager, WebUtils } from '@dojot/microservice-sdk'
 
 import {
   ErrorHandlerInterceptor,
@@ -8,19 +8,27 @@ import {
   ErrorKeycloakHandlerInterceptor
 } from './interceptors'
 import { AppConfig } from '../types'
-import { KafkaConsumer,TenantManager } from '../kafka'
+import { KafkaConsumer,TenantManager,KafkaProducer } from '../kafka'
 import { DeviceRoutes, TemplateRoutes } from '../app/routes'
-import KafkaProducer from 'src/kafka/kafka-producer'
+import { createHttpTerminator } from 'http-terminator'
+import { Server } from 'http'
 
 export class App {
+
   constructor(
     private logger: Logger,
-    private config: AppConfig,
+    private appconfig: AppConfig,
     private kafkaConsumer: KafkaConsumer,
     private tenantManager: TenantManager,
-    private KafkaProducer: KafkaProducer
+    private KafkaProducer: KafkaProducer,
+    private serviceState: ServiceStateManager,
   ) 
-  {}
+  {
+  }
+
+  private createServer(): Server {
+    return WebUtils.createServer(this.logger,this.appconfig)
+  }
 
   private createExpress(): Express {
     const { createKeycloakAuthInterceptor, jsonBodyParsingInterceptor } =
@@ -36,7 +44,7 @@ export class App {
         interceptors: [
           jsonBodyParsingInterceptor({
             config: {
-              limit: this.config.express['parsing.limit'],
+              limit: this.appconfig.express['parsing.limit'],
             },
           }),
           createKeycloakAuthInterceptor(
@@ -44,17 +52,23 @@ export class App {
             this.logger,
             '/',
           ),
-          PrismaClientInterceptor.use(this.logger,this.config),
+          PrismaClientInterceptor.use(this.logger,this.appconfig),
         ],
         routes: [
-          DeviceRoutes.use(this.logger), 
+          DeviceRoutes.use(this.logger,this.KafkaProducer), 
           TemplateRoutes.use(this.logger)].flat(),
       })
     }
 
+    onListening = () => {
+      this.logger.info('Server ready to accept connections!',{});
+      //this.logger.info(this.server.address());
+      this.serviceState.signalReady('dojot-device-manager-batch');
+    }
 
     async init() {
-    
+       
+
     await this.kafkaConsumer.init()
     await this.tenantManager.update()
   
@@ -64,10 +78,37 @@ export class App {
       
     await this.KafkaProducer.init()
   
-     const express = this.createExpress()
+    const server = this.createServer(); 
+
+    const framework = this.createExpress()
+        
+    server.on('request',framework)  
+
+    server.on('listening',this.onListening)
+     server.on('close', () => {
+      this.serviceState.signalNotReady('dojot-device-manager-batch');
+    });
+      
+    server.on('error', () => {
+      this.logger.info('Received error event',{});
+      this.serviceState.signalNotReady('dojot-device-manager-batch');
+    });  
+    
+    // shutdown
+    const httpTerminator = createHttpTerminator({ server: server });
+
+    /*
+    this.serviceState.registerShutdownHandler(async () => {
+      this.logger.warn('Stopping the http server from accepting new connections...',{});
+      await httpTerminator.terminate();
+      this.logger.warn('The http server no longer accepts connections!',{});
+    });
+    */
+    
+
      
-     return express.listen(this.config.api.port, () => {
-      this.logger.info(`Server running at port ${this.config.api.port}`, {})
-    })
+     return server.listen(this.appconfig.api.port, () => {
+      this.logger.info(`Server running at port ${this.appconfig.api.port}`, {})
+      })
     }
 }

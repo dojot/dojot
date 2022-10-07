@@ -25,4 +25,7 @@ export type AppConfig = {
     keycloak: {
       'tenants.url': string
     }
+    lightship: {
+      'detect.kubernetes': boolean
+    }
   }

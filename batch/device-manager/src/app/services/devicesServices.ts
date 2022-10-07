@@ -1,6 +1,5 @@
 import { Logger } from "@dojot/microservice-sdk";
 import { PrismaClient } from "@prisma/client";
-import { PrismaClientUnknownRequestError } from "@prisma/client/runtime";
 
 export class DevicesServices {
 
@@ -27,8 +26,9 @@ export class DevicesServices {
         return await prisma.devices.findFirst({
           where: { id: id.toString() }
       });
-      }  catch (error) {
-        this.logger.debug('DevicesServices - findById ', {error:error});
+      }  catch (e: unknown) {
+        const error = e as Error
+        this.logger.debug('DevicesServices - findById ', {error:error.message});
       }  
     }
 
@@ -36,9 +36,9 @@ export class DevicesServices {
   
       try {
         return await prisma.$executeRaw`DELETE FROM device_template WHERE device_id = ${id}`
-      } catch (error) 
-      {
-        this.logger.debug('DevicesServices - remove_associate_templates ', {error:error});
+      }  catch (e: unknown) {
+        const error = e as Error
+        this.logger.debug('DevicesServices - remove_associate_templates ', {eerror:error.message});
       }
     }
 

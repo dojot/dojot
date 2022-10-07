@@ -1,10 +1,10 @@
-import { ConfigManager, Logger, WebUtils } from '@dojot/microservice-sdk'
+import { ConfigManager, Logger, ServiceStateManager, WebUtils } from '@dojot/microservice-sdk'
 
 import { AppConfig } from 'src/types'
-import { KafkaConsumer, TenantManager } from './kafka'
-
+import { KafkaConsumer, TenantManager,KafkaProducer } from './kafka'
 import { App } from './app'
-import KafkaProducer from './kafka/kafka-producer'
+import camelCase from 'lodash.camelcase'
+
 
 ConfigManager.loadSettings(
   'DEVICE_MANAGER_BATCH',
@@ -32,9 +32,13 @@ const dojotHttpClient = new WebUtils.DojotHttpClient({
 
 const kafkaConsumer = new KafkaConsumer(logger, config)
 const kafkaProducer = new KafkaProducer(logger, config)
-const tenantManager = new TenantManager(logger,config,dojotHttpClient)
-
+const tenantManager = new TenantManager(logger, config, dojotHttpClient)
 const secretFileHandler = new WebUtils.SecretFileHandler(config, logger)
+const serviceState = new ServiceStateManager({
+  lightship: ConfigManager.transformObjectKeys(config.lightship['detect.kubernetes'], camelCase),
+});
+
+serviceState.registerService('dojot-device-manager-batch');
 
 secretFileHandler
   .handle('keycloak.client.secret', '/secrets')
@@ -47,7 +51,8 @@ secretFileHandler
         config,
         kafkaConsumer,
         tenantManager,
-        kafkaProducer
+        kafkaProducer,
+        serviceState
       ).init()
 
       const handleCloseServerAndExitProcess = () => {

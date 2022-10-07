@@ -1,7 +1,8 @@
 import { Kafka, Logger } from '@dojot/microservice-sdk';
+import { number } from 'joi';
 import { AppConfig } from 'src/types';
 
-enum EventKafka {
+export enum EventKafka {
   CREATE = "create",
   UPDATE = "update",
   REMOVE = "remove",
@@ -12,6 +13,7 @@ class NotificationMessageProducer
   event: string;
   data:  String;
   meta:  String;
+  
 
   constructor(event:string,data:string,meta:string)
   {
@@ -22,7 +24,7 @@ class NotificationMessageProducer
 
   to_json():string
   {
-    return JSON.stringify({"event": this.event, "data": this.data, "meta": this.meta})
+    return JSON.stringify({"event": this.event, "data": this.data, "meta":{"service":this.meta}})
   }
 }
 
@@ -31,15 +33,15 @@ class NotificationMessageProducer
  * This class handles messages from dojot topics on kafka
  * @class
  */
-export default class KafkaProducer extends Kafka.Producer{
+export class KafkaProducer extends Kafka.Producer{
   /**
    * Create an instance
    */
-  constructor(private logger: Logger, private config: AppConfig) {
+  constructor(private logger: Logger, private appconfig: AppConfig) {
     super({
-      ...config.sdk,
-      'kafka.producer': config.producer,
-      'kafka.topic': config.topic,
+      ...appconfig.sdk,
+      'kafka.producer': appconfig.producer,
+      'kafka.topic': appconfig.topic,
     });
     this.logger.debug('constructor: Instantiating a Kafka Producer', {});
   }
@@ -58,17 +60,18 @@ export default class KafkaProducer extends Kafka.Producer{
 
 
   async send(event: string, tenant: string, deviceId: string) {
-    const topicSuffix = this.config.message['produce.topic.suffix'];
+ 
+    const topicSuffix = this.appconfig.message['produce.topic.suffix'];
 
-    const full_msg = new NotificationMessageProducer(event,tenant,deviceId).to_json();
+    const full_msg = new NotificationMessageProducer(event,deviceId,tenant).to_json();
     this.logger.debug(`Mount of message full  ${full_msg}...`,{});
     try {
       // publish
       const kafkaTopic = `${tenant}.${topicSuffix}`;
-      const stringMessage =full_msg;
+      const stringMessage = full_msg;
       const messageKey = `${tenant}:${deviceId}`;
-      const partition = 0;
-      
+      let partition: number | null; 
+      partition = 0;
 
       this.logger.debug(`Trying to send message to kafka topic ${kafkaTopic}...`,{});
 
