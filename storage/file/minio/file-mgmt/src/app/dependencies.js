@@ -1,5 +1,5 @@
 const {
-  ServiceStateManager, ConfigManager, WebUtils: { DojotClientHttp },
+  ServiceStateManager, ConfigManager, WebUtils: { DojotHttpClient },
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
 
@@ -35,7 +35,7 @@ module.exports = (config, logger) => {
   // Techs
   const httpServer = new Server(serviceState, configServerCamelCase, logger, config);
   const kafkaConsumer = new KafkaConsumer(config, logger);
-  const keycloakProxyClientHttp = new DojotClientHttp({ 
+  const keycloakProxyHttpClient = new DojotHttpClient({ 
     defaultClientOptions: {},
     logger,
     defaultMaxNumberAttempts: 0,
@@ -49,7 +49,7 @@ module.exports = (config, logger) => {
   // Services
   const tenantService = new TenantService(
     minioRepository,
-    keycloakProxyClientHttp,
+    keycloakProxyHttpClient,
     config.keycloak,
     logger,
   );
