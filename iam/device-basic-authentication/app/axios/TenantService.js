@@ -8,9 +8,9 @@ const {
 } = getConfig('BASIC_AUTH');
 
 module.exports = class TenantService {
-  constructor(config, dojotClientHttp, logger) {
+  constructor(config, dojotHttpClient, logger) {
     this.config = config;
-    this.dojotClientHttp = dojotClientHttp;
+    this.dojotHttpClient = dojotHttpClient;
     this.logger = logger;
     this.tenants = [];
   }
@@ -20,10 +20,10 @@ module.exports = class TenantService {
    *
    */
   async loadTenants() {
-    const response = await this.dojotClientHttp.request({
+    const response = await this.dojotHttpClient.request({
       url: this.config.url.tenants,
       method: 'GET',
-      timeout: tenantConfig.request.timeout.ms,
+      timeout: tenantConfig['request.timeout.ms'],
     });
 
     // authentic in each of the tenants
