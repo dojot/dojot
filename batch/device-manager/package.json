@@ -22,7 +22,8 @@
         "dev": "ts-node-dev --inspect --transpile-only --ignore-watch node_modules src/index.ts",
         "test": "jest --coverage",
         "unit-test": "jest ./tests/units --coverage",
-        "integration-test": "jest ./tests/integration --runInBand"
+        "integration-test": "jest ./tests/integration --runInBand",
+        "check-licenses": "apache2-license-checker"
     },
     "devDependencies": {
         "@types/express": "^4.17.13",
