@@ -59,13 +59,14 @@ module.exports = (config, logger) => {
   const fileRetrievalService = new FileRetrievalService(minioRepository, logger);
 
   // Interceptors
-  const busboyHandlerInterceptor = BusboyHandlerInterceptor(
-    logger, minioRepository, config,
-  ).middleware;
+  const handlerInterceptor = BusboyHandlerInterceptor(logger, minioRepository, config).middleware;
 
   // Controllers
   const fileController = new FileController(
-    fileUploadService, fileRetrievalService, fileRemovalService, logger,
+    fileUploadService,
+    fileRetrievalService,
+    fileRemovalService,
+    logger,
   );
   const fileListingController = new FileListingController(fileListingService, logger);
   const kafkaController = new KafkaController(tenantService, logger);
@@ -79,7 +80,7 @@ module.exports = (config, logger) => {
         fileListingController,
       },
       interceptors: {
-        busboyHandlerInterceptor,
+        busboyHandlerInterceptor: handlerInterceptor,
       },
     },
     kafka: {
