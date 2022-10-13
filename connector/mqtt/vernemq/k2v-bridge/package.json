@@ -36,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@dojot/microservice-sdk": "0.1.9",
+    "@dojot/microservice-sdk": "0.2.2",
     "flat": "^5.0.0",
     "lodash.camelcase": "^4.3.0",
     "mqtt": "4.2.5"
