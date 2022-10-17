@@ -53,14 +53,14 @@ func (c *FakeCreator) Create(brokers []string, group string, cfg *sarama.Config)
 func TestInit(t *testing.T) {
 	tests := []struct {
 		name      string
-		plugin    *KafkaConsumer
+		plugin    *KafkaConsumerDojot
 		initError bool
-		check     func(t *testing.T, plugin *KafkaConsumer)
+		check     func(t *testing.T, plugin *KafkaConsumerDojot)
 	}{
 		{
 			name:   "default config",
-			plugin: &KafkaConsumer{},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			plugin: &KafkaConsumerDojot{},
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.Equal(t, plugin.ConsumerGroup, defaultConsumerGroup)
 				require.Equal(t, plugin.MaxUndeliveredMessages, defaultMaxUndeliveredMessages)
 				require.Equal(t, plugin.config.ClientID, "Telegraf")
@@ -70,7 +70,7 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "parses valid version string",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				ReadConfig: kafka.ReadConfig{
 					Config: kafka.Config{
 						Version: "1.0.0",
@@ -78,13 +78,13 @@ func TestInit(t *testing.T) {
 				},
 				Log: testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.Equal(t, plugin.config.Version, sarama.V1_0_0_0)
 			},
 		},
 		{
 			name: "invalid version string",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				ReadConfig: kafka.ReadConfig{
 					Config: kafka.Config{
 						Version: "100",
@@ -96,7 +96,7 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "custom client_id",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				ReadConfig: kafka.ReadConfig{
 					Config: kafka.Config{
 						ClientID: "custom",
@@ -104,23 +104,23 @@ func TestInit(t *testing.T) {
 				},
 				Log: testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.Equal(t, plugin.config.ClientID, "custom")
 			},
 		},
 		{
 			name: "custom offset",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				Offset: "newest",
 				Log:    testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.Equal(t, plugin.config.Consumer.Offsets.Initial, sarama.OffsetNewest)
 			},
 		},
 		{
 			name: "invalid offset",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				Offset: "middle",
 				Log:    testutil.Logger{},
 			},
@@ -128,16 +128,16 @@ func TestInit(t *testing.T) {
 		},
 		{
 			name: "default tls without tls config",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				Log: testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.False(t, plugin.config.Net.TLS.Enable)
 			},
 		},
 		{
 			name: "enabled tls without tls config",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				ReadConfig: kafka.ReadConfig{
 					Config: kafka.Config{
 						EnableTLS: func(b bool) *bool { return &b }(true),
@@ -145,13 +145,13 @@ func TestInit(t *testing.T) {
 				},
 				Log: testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.True(t, plugin.config.Net.TLS.Enable)
 			},
 		},
 		{
 			name: "default tls with a tls config",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				ReadConfig: kafka.ReadConfig{
 					Config: kafka.Config{
 						ClientConfig: tls.ClientConfig{
@@ -161,13 +161,13 @@ func TestInit(t *testing.T) {
 				},
 				Log: testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.True(t, plugin.config.Net.TLS.Enable)
 			},
 		},
 		{
 			name: "Insecure tls",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				ReadConfig: kafka.ReadConfig{
 					Config: kafka.Config{
 						ClientConfig: tls.ClientConfig{
@@ -177,17 +177,17 @@ func TestInit(t *testing.T) {
 				},
 				Log: testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.True(t, plugin.config.Net.TLS.Enable)
 			},
 		},
 		{
 			name: "custom max_processing_time",
-			plugin: &KafkaConsumer{
+			plugin: &KafkaConsumerDojot{
 				MaxProcessingTime: config.Duration(1000 * time.Millisecond),
 				Log:               testutil.Logger{},
 			},
-			check: func(t *testing.T, plugin *KafkaConsumer) {
+			check: func(t *testing.T, plugin *KafkaConsumerDojot) {
 				require.Equal(t, plugin.config.Consumer.MaxProcessingTime, 1000*time.Millisecond)
 			},
 		},
@@ -211,7 +211,7 @@ func TestInit(t *testing.T) {
 
 func TestStartStop(t *testing.T) {
 	cg := &FakeConsumerGroup{errors: make(chan error)}
-	plugin := &KafkaConsumer{
+	plugin := &KafkaConsumerDojot{
 		ConsumerCreator: &FakeCreator{ConsumerGroup: cg},
 		Log:             testutil.Logger{},
 	}

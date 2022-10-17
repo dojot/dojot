@@ -44,6 +44,7 @@ type KafkaConsumerDojot struct {
 	Topics                 []string        `toml:"topics"`
 	TopicTag               string          `toml:"topic_tag"`
 	ConsumerFetchDefault   config.Size     `toml:"consumer_fetch_default"`
+	TopicRefreshInterval   string          `toml:"topics_refresh_interval"`
 
 	kafka.ReadConfig
 
@@ -53,9 +54,12 @@ type KafkaConsumerDojot struct {
 	ClientCreator   StreamClientCreator
 	consumer        ConsumerGroup
 	client          StreamClient
+	selectedTopics  []string
+	topicRegex      *regexp.Regexp
 	config          *sarama.Config
 
 	parser parsers.Parser
+	mutex  sync.Mutex
 	wg     sync.WaitGroup
 	cancel context.CancelFunc
 }
@@ -81,6 +85,8 @@ func (*SaramaClientCreator) Create(brokers []string, cfg *sarama.Config) (Stream
 type ConsumerGroup interface {
 	Consume(ctx context.Context, topics []string, handler sarama.ConsumerGroupHandler) error
 	Errors() <-chan error
+	PauseAll()
+	ResumeAll()
 	Close() error
 }
 
@@ -163,10 +169,12 @@ func (k *KafkaConsumerDojot) Init() error {
 func (k *KafkaConsumerDojot) Start(acc telegraf.Accumulator) error {
 	var err error
 
-	k.client, err = k.ClientCreator.Create(
-		k.Brokers,
-		k.config,
-	)
+	k.topicRegex, err = regexp.Compile(k.Topics[0])
+	if err != nil {
+		return nil
+	}
+
+	k.selectedTopics, err = k.selectTopics()
 	if err != nil {
 		return err
 	}
@@ -180,22 +188,24 @@ func (k *KafkaConsumerDojot) Start(acc telegraf.Accumulator) error {
 		return err
 	}
 
-	availableTopics, err := k.client.Topics()
+	refleshInterval, err := time.ParseDuration(k.TopicRefreshInterval)
 	if err != nil {
 		return err
 	}
-	k.client.Close()
+	ticker := time.NewTicker(refleshInterval)
+	go func() {
+		for range ticker.C {
+			k.Log.Debug("refreshing topics")
+			selectedTopics, err := k.selectTopics()
+			if err != nil {
+				k.Log.Error("topic refresh failed: %v", err.Error())
+			}
 
-	// Filter topics we care about
-	var selectedTopics []string
-	reg, _ := regexp.Compile(k.Topics[0])
-	for _, t := range availableTopics {
-		k.Log.Debug("Topic:" + t)
-		if reg.MatchString(t) {
-			k.Log.Debug("Selected: " + t)
-			selectedTopics = append(selectedTopics, t)
+			k.mutex.Lock()
+			k.selectedTopics = selectedTopics
+			k.mutex.Unlock()
 		}
-	}
+	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	k.cancel = cancel
@@ -205,10 +215,11 @@ func (k *KafkaConsumerDojot) Start(acc telegraf.Accumulator) error {
 	go func() {
 		defer k.wg.Done()
 		for ctx.Err() == nil {
+			k.Log.Debug("Initialize Consumer handler")
 			handler := NewConsumerGroupHandler(acc, k.MaxUndeliveredMessages, k.parser, k.Log)
 			handler.MaxMessageLen = k.MaxMessageLen
 			handler.TopicTag = k.TopicTag
-			err := k.consumer.Consume(ctx, selectedTopics, handler)
+			err := k.consumer.Consume(ctx, k.selectedTopics, handler)
 			if err != nil {
 				acc.AddError(err)
 				// Ignore returned error as we cannot do anything about it anyway
@@ -231,6 +242,35 @@ func (k *KafkaConsumerDojot) Start(acc telegraf.Accumulator) error {
 	}()
 
 	return nil
+}
+
+func (k *KafkaConsumerDojot) selectTopics() ([]string, error) {
+	var err error
+
+	k.client, err = k.ClientCreator.Create(
+		k.Brokers,
+		k.config,
+	)
+	defer k.client.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	availableTopics, err := k.client.Topics()
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter topics we care about
+	var selectedTopics []string
+	for _, t := range availableTopics {
+		if k.topicRegex.MatchString(t) {
+			k.Log.Debug("selected: " + t)
+			selectedTopics = append(selectedTopics, t)
+		}
+	}
+
+	return selectedTopics, nil
 }
 
 func (k *KafkaConsumerDojot) Gather(_ telegraf.Accumulator) error {
