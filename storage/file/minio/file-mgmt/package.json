@@ -32,7 +32,7 @@
   "homepage": "https://github.com/dojot",
   "dependencies": {
     "@bbc/apache2-license-checker": "^1.1.4",
-    "@dojot/microservice-sdk": "^0.2.0-beta.5",
+    "@dojot/microservice-sdk": "^0.2.2",
     "axios": "^0.25.0",
     "babel-eslint": "^10.1.0",
     "busboy": "^0.3.1",
