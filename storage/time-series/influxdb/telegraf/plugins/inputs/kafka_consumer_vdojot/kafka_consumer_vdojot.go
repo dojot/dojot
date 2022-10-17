@@ -85,8 +85,6 @@ func (*SaramaClientCreator) Create(brokers []string, cfg *sarama.Config) (Stream
 type ConsumerGroup interface {
 	Consume(ctx context.Context, topics []string, handler sarama.ConsumerGroupHandler) error
 	Errors() <-chan error
-	PauseAll()
-	ResumeAll()
 	Close() error
 }
 
@@ -203,6 +201,15 @@ func (k *KafkaConsumerDojot) Start(acc telegraf.Accumulator) error {
 
 			k.mutex.Lock()
 			k.selectedTopics = selectedTopics
+			k.consumer.Close()
+			k.consumer, err = k.ConsumerCreator.Create(
+				k.Brokers,
+				k.ConsumerGroup,
+				k.config,
+			)
+			if err != nil {
+				k.Log.Error(err.Error())
+			}
 			k.mutex.Unlock()
 		}
 	}()
