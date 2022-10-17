@@ -95,7 +95,7 @@ func (c *DojotOrganizationCreator) Write(metrics []telegraf.Metric) error {
 	for _, metric := range metrics {
 		org, ok := metric.GetField(c.OrganizationField)
 		if !ok {
-			return errors.New("OrganizationTag is null")
+			return errors.New("Organization field is not defined")
 		}
 
 		newOrganizationBodyRequest := NewOrganizationBodyRequest{
@@ -112,7 +112,10 @@ func (c *DojotOrganizationCreator) Write(metrics []telegraf.Metric) error {
 			OrgID: orgID,
 		}
 
-		c.createBucket(newBucketBodyRequest)
+		err = c.createBucket(newBucketBodyRequest)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
