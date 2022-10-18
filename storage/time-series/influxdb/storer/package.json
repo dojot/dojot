@@ -86,6 +86,6 @@
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-security-node": "^1.0.14",
     "jest": "^26.4.2",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.20"
   }
 }
