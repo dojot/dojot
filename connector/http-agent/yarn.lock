@@ -524,10 +524,10 @@
     "enabled" "2.0.x"
     "kuler" "^2.0.0"
 
-"@dojot/microservice-sdk@0.2.1":
-  "integrity" "sha512-jpcP1zqLroEx1ih6kHbLOs7oLU03iWvdYe2HI8Q2cOG2Dm5cJSDIIXwirdSkhDQuHzPUHmQhCUdQ9P/PA71Mww=="
-  "resolved" "https://registry.npmjs.org/@dojot/microservice-sdk/-/microservice-sdk-0.2.1.tgz"
-  "version" "0.2.1"
+"@dojot/microservice-sdk@0.2.2":
+  "integrity" "sha512-8w7OFk0h4QxQkJmH++ZT+uh7GEN6Sc5p3kMn2kB1hGKVSQo/V8G7xAh+Q52Ph8cDKifRURXhGWtJdZBMzvveTg=="
+  "resolved" "https://registry.npmjs.org/@dojot/microservice-sdk/-/microservice-sdk-0.2.2.tgz"
+  "version" "0.2.2"
   dependencies:
     "@types/axios" "^0.14.0"
     "@types/express" "^4.17.13"
