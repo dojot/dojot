@@ -58,7 +58,7 @@ type HTTPConfig struct {
 	Log        telegraf.Logger
 }
 
-type httpClient struct {
+type HttpClient struct {
 	ContentEncoding  string
 	Timeout          time.Duration
 	Headers          map[string]string
@@ -76,7 +76,7 @@ type httpClient struct {
 	log        telegraf.Logger
 }
 
-func NewHTTPClient(config *HTTPConfig) (*httpClient, error) {
+func NewHttpClient(config *HTTPConfig) (*HttpClient, error) {
 	if config.URL == nil {
 		return nil, ErrMissingURL
 	}
@@ -131,7 +131,7 @@ func NewHTTPClient(config *HTTPConfig) (*httpClient, error) {
 		return nil, fmt.Errorf("unsupported scheme %q", config.URL.Scheme)
 	}
 
-	client := &httpClient{
+	client := &HttpClient{
 		serializer: serializer,
 		client: &http.Client{
 			Timeout:   timeout,
@@ -152,7 +152,7 @@ func NewHTTPClient(config *HTTPConfig) (*httpClient, error) {
 }
 
 // URL returns the origin URL that this client connects too.
-func (c *httpClient) URL() string {
+func (c *HttpClient) URL() string {
 	return c.url.String()
 }
 
@@ -175,7 +175,7 @@ func (g genericRespError) Error() string {
 	return errString
 }
 
-func (c *httpClient) Write(ctx context.Context, metrics []telegraf.Metric) error {
+func (c *HttpClient) Write(ctx context.Context, metrics []telegraf.Metric) error {
 	if c.retryTime.After(time.Now()) {
 		return errors.New("retry time has not elapsed")
 	}
@@ -243,7 +243,7 @@ func (c *httpClient) Write(ctx context.Context, metrics []telegraf.Metric) error
 	return nil
 }
 
-func (c *httpClient) splitAndWriteBatch(ctx context.Context, organization string, bucket string, metrics []telegraf.Metric) error {
+func (c *HttpClient) splitAndWriteBatch(ctx context.Context, organization string, bucket string, metrics []telegraf.Metric) error {
 	c.log.Warnf("Retrying write after splitting metric payload in half to reduce batch size")
 	midpoint := len(metrics) / 2
 
@@ -254,7 +254,7 @@ func (c *httpClient) splitAndWriteBatch(ctx context.Context, organization string
 	return c.writeBatch(ctx, organization, bucket, metrics[midpoint:])
 }
 
-func (c *httpClient) writeBatch(ctx context.Context, organization string, bucket string, metrics []telegraf.Metric) error {
+func (c *HttpClient) writeBatch(ctx context.Context, organization string, bucket string, metrics []telegraf.Metric) error {
 	loc, err := makeWriteURL(*c.url, organization, bucket)
 	if err != nil {
 		return err
@@ -354,7 +354,7 @@ func (c *httpClient) writeBatch(ctx context.Context, organization string, bucket
 }
 
 // retryDuration takes the longer of the Retry-After header and our own back-off calculation
-func (c *httpClient) getRetryDuration(headers http.Header) time.Duration {
+func (c *HttpClient) getRetryDuration(headers http.Header) time.Duration {
 	// basic exponential backoff (x^2)/40 (denominator to widen the slope)
 	// at 40 denominator, it'll take 49 retries to hit the max defaultMaxWait of 60s
 	backoff := math.Pow(float64(c.retryCount), 2) / 40
@@ -378,7 +378,7 @@ func (c *httpClient) getRetryDuration(headers http.Header) time.Duration {
 	return time.Duration(retry*1000) * time.Millisecond
 }
 
-func (c *httpClient) makeWriteRequest(address string, body io.Reader) (*http.Request, error) {
+func (c *HttpClient) makeWriteRequest(address string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	req, err := http.NewRequest("POST", address, body)
@@ -398,7 +398,7 @@ func (c *httpClient) makeWriteRequest(address string, body io.Reader) (*http.Req
 
 // requestBodyReader warp io.Reader from influx.NewReader to io.ReadCloser, which is usefully to fast close the write
 // side of the connection in case of error
-func (c *httpClient) requestBodyReader(metrics []telegraf.Metric) (io.ReadCloser, error) {
+func (c *HttpClient) requestBodyReader(metrics []telegraf.Metric) (io.ReadCloser, error) {
 	reader := influx.NewReader(metrics, c.serializer)
 
 	if c.ContentEncoding == "gzip" {
@@ -413,7 +413,7 @@ func (c *httpClient) requestBodyReader(metrics []telegraf.Metric) (io.ReadCloser
 	return io.NopCloser(reader), nil
 }
 
-func (c *httpClient) addHeaders(req *http.Request) {
+func (c *HttpClient) addHeaders(req *http.Request) {
 	for header, value := range c.Headers {
 		req.Header.Set(header, value)
 	}
@@ -438,6 +438,6 @@ func makeWriteURL(loc url.URL, org, bucket string) (string, error) {
 	return loc.String(), nil
 }
 
-func (c *httpClient) Close() {
+func (c *HttpClient) Close() {
 	c.client.CloseIdleConnections()
 }

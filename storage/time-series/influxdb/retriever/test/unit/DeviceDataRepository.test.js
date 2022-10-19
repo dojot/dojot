@@ -117,7 +117,7 @@ describe('Test Influx Data Query', () => {
   });
 
   test('queryByField - test ok 1', async () => {
-    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: "value" })) };
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
     const tableMeta2 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 10 })) };
     const tableMeta3 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: true })) };
     const tableMeta4 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: null })) };
