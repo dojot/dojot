@@ -38,6 +38,7 @@ type InfluxDB struct {
 	Token            string            `toml:"token"`
 	Organization     string            `toml:"organization"`
 	OrganizationTag  string            `toml:"organization_tag"`
+	AttrPrefix       string            `toml:"attr_prefix"`
 	Bucket           string            `toml:"bucket"`
 	BucketTag        string            `toml:"bucket_tag"`
 	ExcludeBucketTag bool              `toml:"exclude_bucket_tag"`
@@ -104,6 +105,14 @@ func (i *InfluxDB) Close() error {
 // unsuccessful. If all servers fail, return an error.
 func (i *InfluxDB) Write(metrics []telegraf.Metric) error {
 	ctx := context.Background()
+
+	if i.AttrPrefix != "" {
+		for _, m := range metrics {
+			for _, field := range m.FieldList() {
+				field.Key = i.AttrPrefix + field.Key
+			}
+		}
+	}
 
 	var err error
 	p := rand.Perm(len(i.clients))
