@@ -35,6 +35,7 @@ type DojotOrganizationCreator struct {
 	URL                     string `toml:"url"`
 	Method                  string `toml:"method"`
 	Token                   string `toml:"token"`
+	Retention               int64  `toml:"retention"`
 	ContentEncoding         string `toml:"content_encoding"`
 	OrganizationField       string `toml:"organization_field"`
 	Bucket                  string `toml:"bucket"`
@@ -53,9 +54,16 @@ type NewOrganizationBodyRequest struct {
 	Name string `json:"name"`
 }
 
+type BucketRetentionRules struct {
+	EverySeconds              int64  `json:"everySeconds"`
+	ShardGroupDurationSeconds int    `json:"shardGroupDurationSeconds"`
+	Type                      string `json:"type"`
+}
+
 type NewBucketBodyRequest struct {
-	Name  string `json:"name"`
-	OrgID string `json:"orgID"`
+	Name           string                 `json:"name"`
+	OrgID          string                 `json:"orgID"`
+	RetentionRules []BucketRetentionRules `json:"retentionRules"`
 }
 
 type NewOrganizationBodyResponse struct {
@@ -110,6 +118,13 @@ func (c *DojotOrganizationCreator) Write(metrics []telegraf.Metric) error {
 		newBucketBodyRequest := NewBucketBodyRequest{
 			Name:  "devices",
 			OrgID: orgID,
+			RetentionRules: []BucketRetentionRules{
+				{
+					EverySeconds:              c.Retention,
+					ShardGroupDurationSeconds: 0,
+					Type:                      "expire",
+				},
+			},
 		}
 
 		err = c.createBucket(newBucketBodyRequest)

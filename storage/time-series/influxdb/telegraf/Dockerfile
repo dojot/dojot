@@ -36,6 +36,3 @@ COPY --from=base /opt/telegraf/telegraf /opt/telegraf/telegraf
 COPY dojot-telegraf.sh ./dojot-telegraf.sh
 
 CMD ["./dojot-telegraf.sh"]
-
-HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
-    CMD curl -f http://localhost:9000/health || exit 1
