@@ -1,23 +1,21 @@
 FROM golang:1.18.7-alpine3.16 AS base
 
+WORKDIR /opt/
+
+RUN apk --no-cache add git
+
+RUN git clone https://github.com/influxdata/telegraf
 WORKDIR /opt/telegraf
 
-COPY agent ./agent
-COPY cmd ./cmd
-COPY config ./config
-COPY filter ./filter
-COPY internal ./internal
-COPY logger ./logger
-COPY metric ./metric
-COPY models ./models
-COPY plugins ./plugins
-COPY scripts ./scripts
-COPY selfstat ./selfstat
-COPY testutil ./testutil
+RUN git checkout release-1.24
+COPY plugins/inputs/kafka_consumer_vdojot/ ./plugins/inputs/kafka_consumer_vdojot/
+COPY plugins/inputs/all/kafka_consumer_vdojot.go ./plugins/inputs/all/kafka_consumer_vdojot.go
 
-COPY *.go ./
-COPY go.mod ./go.mod
-COPY go.sum ./go.sum
+COPY plugins/outputs/dojot_organization_creator/ ./plugins/outputs/dojot_organization_creator/
+COPY plugins/outputs/all/dojot_organization_creator.go ./plugins/outputs/all/dojot_organization_creator.go
+
+COPY plugins/outputs/influxdb_vdojot ./plugins/outputs/influxdb_vdojot/
+COPY plugins/outputs/all/influxdb_vdojot.go ./plugins/outputs/all/influxdb_vdojot.go
 
 RUN go build ./cmd/telegraf
 
