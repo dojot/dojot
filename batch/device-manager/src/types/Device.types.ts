@@ -1,4 +1,8 @@
 export interface RemoveDevicesBatchDto {
-  devices: Array<{
-  }>
+  devices: Array<{}>;
+}
+
+export interface Devices {
+  id: string;
+  label: string;
 }

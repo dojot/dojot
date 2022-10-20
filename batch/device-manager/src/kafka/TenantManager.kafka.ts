@@ -1,5 +1,4 @@
 import { Logger, WebUtils } from '@dojot/microservice-sdk'
-import { request } from 'http'
 import { AppConfig, KafkaPayload } from 'src/types'
 import { KafkaUtils, PrismaUtils } from '../utils/'
 
@@ -11,9 +10,7 @@ export class TenantManager {
   }
 
   private updateTenantSchema(tenant: string) {
-    const databaseUrl = PrismaUtils.getDatabaseUrl(tenant,this.logger,this.config)
-    //PrismaUtils.deployMigrations(databaseUrl)
-    //PrismaUtils.seedDatabase(databaseUrl)
+    PrismaUtils.getDatabaseUrl(tenant,this.logger,this.config)
   }
 
   async update()

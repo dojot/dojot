@@ -30,6 +30,7 @@ COPY prisma ./prisma/
 
 RUN npm install
 COPY src ./src
+RUN npm run build
 
 FROM node:14-alpine
 
@@ -46,7 +47,9 @@ COPY --from=base /opt/device-manager /opt/device-manager
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD ["npm", "run", "dev"]
+COPY /src/config/default.conf ./build/config/default.conf
+
+CMD ["npm", "run", "start"]
 
 HEALTHCHECK --start-period=2m --interval=30s --timeout=10s --retries=3 \
   CMD curl -f http://localhost:9000/health || exit 1

@@ -19,7 +19,10 @@
       "./src/@types",
       "./@types",
       "./node_modules/@types"
-    ]
+    ],
+    "paths": {
+      "src/*": ["./src/*"]
+    }
   },
   "include": ["src"]
 }

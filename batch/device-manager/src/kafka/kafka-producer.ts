@@ -1,5 +1,4 @@
 import { Kafka, Logger } from '@dojot/microservice-sdk';
-import { number } from 'joi';
 import { AppConfig } from 'src/types';
 
 export enum EventKafka {

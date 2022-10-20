@@ -8,11 +8,13 @@ import {
   DisconnectPrismaInterceptor,
 } from '../interceptors'
 import { KafkaProducer } from '../../kafka/kafka-producer'
+import { DevicesRepository } from '../repository'
 
 export abstract class DeviceRoutes {
   static use(logger: Logger,kafkaProducer: KafkaProducer) {
-    
-    const deviceServices = new DevicesServices(logger)
+
+    const devicesRepository = new DevicesRepository(logger);
+    const deviceServices = new DevicesServices(logger,devicesRepository,kafkaProducer)
     const devicesBatchController = new DevicesBatchController(logger,deviceServices,kafkaProducer)
 
     return [

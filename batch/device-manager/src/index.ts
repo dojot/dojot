@@ -1,5 +1,4 @@
 import { ConfigManager, Logger, ServiceStateManager, WebUtils } from '@dojot/microservice-sdk'
-
 import { AppConfig } from 'src/types'
 import { KafkaConsumer, TenantManager,KafkaProducer } from './kafka'
 import { App } from './app'
