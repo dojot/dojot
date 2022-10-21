@@ -14,7 +14,7 @@ function createObject() {
   const modules = {
     logger: asClass(Logger, {
       injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({ sid: 'Certificate-ACL - Main' }),
+      injector: () => ({ sid: 'certificate-acl' }),
       lifetime: Lifetime.SINGLETON,
     }),
     scopedDIInterceptor: asFunction(scopedDIInterceptor, {

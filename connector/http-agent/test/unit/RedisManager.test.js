@@ -127,8 +127,7 @@ describe('RedisManager', () => {
 
     it('error - exhausted retries', () => {
       redisManager.redisClient.emit('error', { code: 'CONNECTION_BROKEN' });
-
-      expect(serviceStateMock.shutdown).toBeCalled();
+      expect(serviceStateMock.shutdown).toHaveBeenCalled();
     });
 
     it('error - except exhausted retries', () => {
@@ -137,14 +136,14 @@ describe('RedisManager', () => {
         { code: 'ANY ERROR, EXCEPT CONNECTION_BROKEN' },
       );
 
-      expect(serviceStateMock.shutdown).not.toBeCalled();
+      expect(serviceStateMock.shutdown).not.toHaveBeenCalled();
     });
 
     it('end', () => {
       redisManager.redisClient.emit('end');
 
-      expect(serviceStateMock.signalNotReady).toBeCalled();
-      expect(redisManager.eventEmitter.emit).toBeCalledWith('unhealthy');
+      expect(serviceStateMock.signalNotReady).toHaveBeenCalled();
+      expect(redisManager.eventEmitter.emit).toHaveBeenCalledWith('unhealthy');
     });
   });
 
