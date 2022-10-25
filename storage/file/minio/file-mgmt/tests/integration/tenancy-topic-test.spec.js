@@ -1,5 +1,7 @@
 const { generateApp, sendFakePayload } = require('./setup');
 
+jest.setTimeout(6000);
+
 describe('TOPIC *.dojot.tenancy', () => {
   let app;
   beforeAll(async () => {

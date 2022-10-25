@@ -8,6 +8,7 @@ const bigFilename = 'big_sample.txt';
 const path = 'tests/integration/files/';
 const filePath = `${path}${filename}`;
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
+jest.setTimeout(6000);
 
 describe('PUT /files', () => {
   const route = '/api/v1/files/upload';

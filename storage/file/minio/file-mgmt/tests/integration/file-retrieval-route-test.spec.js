@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const setup = require('./setup');
 
 const invalidJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1ZElmV3h0ZXUwbWFabEZLY1RPSUFzRUJqS';
+jest.setTimeout(6000);
 
 describe('GET /files/download', () => {
   const route = '/api/v1/files/download';
