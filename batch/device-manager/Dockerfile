@@ -1,4 +1,4 @@
-FROM node:14-alpine AS base
+FROM node:16.17.1-alpine3.15 AS base
 
 WORKDIR /opt/device-manager
 
