@@ -33,7 +33,7 @@ COPY src ./src
 COPY docs ./docs
 RUN npm run build
 
-FROM node:14-alpine
+FROM node:16.17.1-alpine3.15
 
 WORKDIR /opt/device-manager
 
