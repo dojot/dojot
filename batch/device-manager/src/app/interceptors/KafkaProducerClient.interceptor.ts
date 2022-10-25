@@ -17,7 +17,7 @@ export abstract class KafkaProducerClientInterceptor {
       const isConnected = await kafkaproducer.isConnected();
 
       if (!isConnected) {
-        return res.status(513).send();
+        return res.status(503).send();
       }
 
       return next();

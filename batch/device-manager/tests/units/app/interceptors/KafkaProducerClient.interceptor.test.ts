@@ -40,7 +40,7 @@ describe('KafkaProducerClient.interceptor', () => {
     RequestMock.body = { test: 123 };
     ResponseMock.status.mockReturnThis();
     await interceptor_kafka(RequestMock, ResponseMock, NextFunctionMock);
-    expect(ResponseMock.status).toBeCalledWith(513);
+    expect(ResponseMock.status).toBeCalledWith(503);
     expect(NextFunctionMock).not.toBeCalled();
   });
 });
