@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { RemoveDevicesBatchDto } from 'src/app/dto/remove-devices-batch.dto';
 import { Logger } from '@dojot/microservice-sdk';
 import { DevicesServices } from 'src/app/services/devicesServices';
-import { KafkaProducer } from '../../kafka/kafka-producer';
 export class DevicesBatchController {
   public constructor(
     private logger: Logger,

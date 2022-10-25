@@ -1,15 +1,9 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
 import { devices } from '@prisma/client';
-import { Devices, RemoveDevicesBatchDto } from 'src/types';
+import { RemoveDevicesBatchDto } from 'src/types';
 import { DevicesServices } from '../../../../src/app/services/devicesServices';
-import {
-  AppMock,
-  ExpressMock,
-  KafkaMock,
-  LoggerMock,
-  PrismaClientMock,
-} from '../../../mocks';
+import { KafkaMock, LoggerMock, PrismaClientMock } from '../../../mocks';
 import { DevicesRepository } from '../../../../src/app/repository/devicesRepository';
 
 describe('devicesServices', () => {

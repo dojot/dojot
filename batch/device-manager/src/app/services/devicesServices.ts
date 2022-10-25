@@ -4,7 +4,6 @@ import { EventKafka, KafkaProducer } from '../../kafka/kafka-producer';
 import { Devices } from 'src/types/Device.types';
 import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
 import { DevicesRepository } from '../repository/devicesRepository';
-import { type } from 'os';
 
 export class DevicesServices {
   constructor(

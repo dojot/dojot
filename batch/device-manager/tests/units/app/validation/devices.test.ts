@@ -1,5 +1,5 @@
 // Here the unit tests will be written.
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect } from '@jest/globals';
 import { DevicesValidation } from '../../../../src/app/validations/Device.validations';
 
 describe('Test Validation input body Remove in bath devices', () => {

@@ -9,8 +9,6 @@ import {
 import { AppConfig } from '../types';
 import { KafkaConsumer, TenantManager, KafkaProducer } from '../kafka';
 import { DeviceRoutes, TemplateRoutes } from '../app/routes';
-import { createHttpTerminator } from 'http-terminator';
-import { Server } from 'http';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 export class App {
