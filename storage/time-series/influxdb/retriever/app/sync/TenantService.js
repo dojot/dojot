@@ -46,9 +46,9 @@ class TenantService {
    *
    * @param {string} tenantsRouteUrl Url for api that returns data about tenants
    */
-  constructor(localPersistence, tenantsRouteUrl, dojotClientHttp, keycloakConfig, logger) {
+  constructor(localPersistence, tenantsRouteUrl, dojotHttpClient, keycloakConfig, logger) {
     this.tenantsRouteUrl = tenantsRouteUrl;
-    this.dojotClientHttp = dojotClientHttp;
+    this.dojotHttpClient = dojotHttpClient;
     this.keycloakConfig = keycloakConfig;
     this.logger = logger;
     this.db = localPersistence;
@@ -156,7 +156,7 @@ class TenantService {
   }
 
   async requestTenants() {
-    const response = await this.dojotClientHttp.request(
+    const response = await this.dojotHttpClient.request(
       {
         url: this.tenantsRouteUrl,
         method: 'GET',
