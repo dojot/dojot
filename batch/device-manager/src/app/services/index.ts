@@ -1,2 +1,2 @@
-export * from './devicesServices'
-export * from './templatesServices'
+export * from './devicesServices';
+export * from './templatesServices';

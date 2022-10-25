@@ -3,13 +3,24 @@ const { pathsToModuleNameMapper } = require('ts-jest/utils');
 // which contains the path mapping (ie the `compilerOptions.paths` option):
 const { compilerOptions } = require('./tsconfig.json');
 
-console.log('Teste '+compilerOptions.paths)
-
 module.exports = {
   // [...]
   clearMocks: true,
+  coveragePathIgnorePatterns: [
+    'tests/mocks',
+    '.mock.ts',
+    'src/kafka',
+    'src/app/repository/templatesRepository.ts',
+    'src/app/interceptors/PrismaClient.interceptor.ts',
+    'src/app/controller/templates_batch.ts',
+    'src/app/services/templatesServices.ts',
+    'src/app/routes/Template.routes.ts',
+    'build',
+  ],
   transform: {
-    "^.+\\.(t|j)sx?$": ["@swc/jest"],
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths /*, { prefix: '<rootDir>/' } */ )
+  moduleNameMapper: pathsToModuleNameMapper(
+    compilerOptions.paths /*, { prefix: '<rootDir>/' } */,
+  ),
 };

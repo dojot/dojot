@@ -15,14 +15,11 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "typeRoots": [
-      "./src/@types",
-      "./@types",
-      "./node_modules/@types"
-    ],
+    "typeRoots": ["./src/@types", "./@types", "./node_modules/@types"],
     "paths": {
-      "src/*": ["./src/*"]
+      "src/*": ["./src/*"],
+      "tests/*": ["./tests/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

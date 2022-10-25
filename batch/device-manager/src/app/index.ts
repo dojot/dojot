@@ -1,26 +1,28 @@
 import { Express } from 'express';
 import { Logger, ServiceStateManager, WebUtils } from '@dojot/microservice-sdk';
 
-import { PrismaClientInterceptor } from './interceptors';
+import {
+  DefaultErrorHandlerInterceptor,
+  KafkaProducerClientInterceptor,
+  PrismaClientInterceptor,
+} from './interceptors';
 import { AppConfig } from '../types';
 import { KafkaConsumer, TenantManager, KafkaProducer } from '../kafka';
 import { DeviceRoutes, TemplateRoutes } from '../app/routes';
 import { createHttpTerminator } from 'http-terminator';
 import { Server } from 'http';
+import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 export class App {
   constructor(
     private logger: Logger,
     private appconfig: AppConfig,
+    private prismaUtils: PrismaUtils,
     private kafkaConsumer: KafkaConsumer,
     private tenantManager: TenantManager,
     private KafkaProducer: KafkaProducer,
     private serviceState: ServiceStateManager,
   ) {}
-
-  private createServer(): Server {
-    return WebUtils.createServer(this.logger, this.appconfig);
-  }
 
   private createExpress(): Express {
     const { createKeycloakAuthInterceptor, jsonBodyParsingInterceptor } =
@@ -32,7 +34,12 @@ export class App {
       supportWebsockets: false,
       supportTrustProxy: false,
       catchInvalidRequest: false,
-      errorHandlers: undefined as unknown as unknown[],
+      errorHandlers: [
+        DefaultErrorHandlerInterceptor.use(this.prismaUtils),
+        WebUtils.framework.defaultErrorHandler({
+          logger: this.logger,
+        }),
+      ],
       interceptors: [
         jsonBodyParsingInterceptor({
           config: {
@@ -44,11 +51,20 @@ export class App {
           this.logger,
           '/',
         ),
-        PrismaClientInterceptor.use(this.logger, this.appconfig),
+        KafkaProducerClientInterceptor.use(
+          this.logger,
+          this.appconfig,
+          this.KafkaProducer,
+        ),
+        PrismaClientInterceptor.use(
+          this.logger,
+          this.appconfig,
+          this.prismaUtils,
+        ),
       ],
       routes: [
-        DeviceRoutes.use(this.logger, this.KafkaProducer),
-        TemplateRoutes.use(this.logger),
+        DeviceRoutes.use(this.logger, this.KafkaProducer, this.prismaUtils),
+        TemplateRoutes.use(this.logger, this.KafkaProducer, this.prismaUtils),
       ].flat(),
     });
   }
@@ -68,10 +84,10 @@ export class App {
     );
     await this.KafkaProducer.init();
 
-    const server = this.createServer();
-    const framework = this.createExpress();
-
-    server.on('request', framework);
+    const express = this.createExpress();
+    const server = express.listen(this.appconfig.api.port, () => {
+      this.logger.info(`Server running at port ${this.appconfig.api.port}`, {});
+    });
 
     server.on('listening', this.onListening);
     server.on('close', () => {
@@ -83,11 +99,6 @@ export class App {
       this.serviceState.signalNotReady('dojot-device-manager-batch');
     });
 
-    // shutdown
-    createHttpTerminator({ server: server });
-
-    return server.listen(this.appconfig.api.port, () => {
-      this.logger.info(`Server running at port ${this.appconfig.api.port}`, {});
-    });
+    return server;
   }
 }

@@ -1,7 +1,7 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { NextFunction, Request, Response } from 'express';
-import { TemplatesServices } from 'src/app/services/templatesServices';
 import { RemoveTemplatesBatchDto } from 'src/app/dto/remove-remplates-batch.dto';
+import { TemplatesServices } from '../services/templatesServices';
 
 export class TemplatesBatchController {
   public constructor(

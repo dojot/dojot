@@ -1,10 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
+import { WebUtils } from '@dojot/microservice-sdk';
 
 declare global {
   namespace Express {
     interface Request {
-      tenant: WebUtils.TenantInfo
-      prisma: PrismaClient
+      lang: string;
+      tenant: WebUtils.TenantInfo;
+      prisma: PrismaClient;
     }
   }
 }

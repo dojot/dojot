@@ -19,19 +19,19 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: RemoveDevicesBatchDto,
     tenant_id: string,
-  ) {
+  ): Promise<any> {
     try {
-      let outputs: Array<Devices> = [];
-      dto.devices.forEach(async (device_id) => {
-        const device_to_removed = await this.devicesRepository.findById(
-          connection,
-          device_id.toString(),
-        );
-        this.logger.debug('Device to Deleted in database', {
-          device_to_removed,
-        });
-        if (device_to_removed) {
-          if (await this.kafkaproducer.isConnected()) {
+      let devices_removed_batch: Array<Devices> = [];
+      const remove_devices_all_promisses = dto.devices.map(
+        async (device_id) => {
+          let device_to_removed = await this.devicesRepository.findById(
+            connection,
+            device_id.toString(),
+          );
+          this.logger.debug('Device to Deleted in database', {
+            device_to_removed,
+          });
+          if (device_to_removed) {
             await this.devicesRepository.remove_associate_templates(
               connection,
               device_id.toString(),
@@ -48,17 +48,18 @@ export class DevicesServices {
             this.logger.debug('Object Database Devices Removed', {
               devices_removed,
             });
-            outputs.push({
+            devices_removed_batch.push({
               id: device_to_removed.id,
               label: device_to_removed.label,
             });
             this.logger.debug('Object Database Devices add Array outputs', {
-              outputs,
+              devices_removed_batch,
             });
           }
-        }
-      });
-      return await outputs;
+        },
+      );
+      await Promise.all(remove_devices_all_promisses);
+      return devices_removed_batch;
     } catch (error) {
       this.logger.debug('Error', { error });
     }
