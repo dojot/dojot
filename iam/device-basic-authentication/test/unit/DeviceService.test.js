@@ -4,7 +4,7 @@ const mockDojotHttpClient = {
 };
 
 const mockConfig = {
-  device_manager: { request: { timeout: { ms: 15000 } } },
+  device_manager: { 'request.timeout.ms': 15000 },
 };
 
 const mockSdk = {
