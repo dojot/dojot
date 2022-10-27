@@ -1,4 +1,4 @@
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn(),
 };
 
@@ -36,11 +36,11 @@ describe('TenantService', () => {
       keycloak: {
         url: 'apitenant',
       },
-    }, mockDojotClientHttp);
+    }, mockDojotHttpClient);
   });
 
   it('should return a list of tenant', async () => {
-    mockDojotClientHttp.request.mockReturnValue({
+    mockDojotHttpClient.request.mockReturnValue({
       data: {
         tenants: [{
           id: 'tenant1',
@@ -57,7 +57,7 @@ describe('TenantService', () => {
   });
 
   it('should throw a error, when the request failed', async () => {
-    mockDojotClientHttp.request.mockImplementationOnce(() => {
+    mockDojotHttpClient.request.mockImplementationOnce(() => {
       throw new Error('Error');
     });
 

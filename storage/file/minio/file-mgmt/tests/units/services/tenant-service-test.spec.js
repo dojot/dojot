@@ -12,7 +12,7 @@ const MinIoRepositoryMock = require('../../mocks/minio-repository-mock');
 const LoggerMock = require('../../mocks/logger-mock');
 
 
-const mockKeycloakProxyClientHttp = {
+const mockKeycloakProxyHttpClient = {
   request: jest.fn(),
 };
 const mockKeycloakconfig = {
@@ -29,7 +29,7 @@ describe('TenantService', () => {
     minioRepository.listBuckets = jest.fn();
     tenantService = new TenantService(
       minioRepository,
-      mockKeycloakProxyClientHttp,
+      mockKeycloakProxyHttpClient,
       mockKeycloakconfig,
       LoggerMock,
     );
@@ -67,7 +67,7 @@ describe('TenantService', () => {
   });
 
   it('Should update the list of tenants and return it.', async () => {
-    mockKeycloakProxyClientHttp.request.mockReturnValueOnce({
+    mockKeycloakProxyHttpClient.request.mockReturnValueOnce({
       data: {
         tenants: [
           {
@@ -88,7 +88,7 @@ describe('TenantService', () => {
   });
 
   it('Should update the list of tenants and remove buckets that do not match a tenant.', async () => {
-    mockKeycloakProxyClientHttp.request.mockReturnValueOnce({
+    mockKeycloakProxyHttpClient.request.mockReturnValueOnce({
       data: {
         tenants: [ 
           {

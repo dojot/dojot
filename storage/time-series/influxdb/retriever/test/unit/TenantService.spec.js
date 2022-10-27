@@ -25,7 +25,7 @@ const mockDojot = {
 
 jest.mock('@dojot/microservice-sdk', () => mockDojot);
 
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn().mockResolvedValue({
     data: {
       tenants: [
@@ -76,7 +76,7 @@ describe('TenantService', () => {
     tenantService = new TenantService(
       mockLocalPersistence,
       'apidevice',
-      mockDojotClientHttp,
+      mockDojotHttpClient,
       {},
       mockLogger,
     );
@@ -195,7 +195,7 @@ describe('TenantService', () => {
 
   it('Should throw an error when the request failed ', async () => {
     let error;
-    mockDojotClientHttp.request.mockRejectedValue(new Error('Error'));
+    mockDojotHttpClient.request.mockRejectedValue(new Error('Error'));
     try {
       await tenantService.requestTenants();
     } catch (e) {
