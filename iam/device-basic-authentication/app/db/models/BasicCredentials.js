@@ -23,7 +23,7 @@ BasicCredentialSchema.pre('findOneAndUpdate', function (next) {
   const { password } = this.getUpdate();
   if (!password) next();
 
-  const salt = bcrypt.genSaltSync(credentialsConfig.hash.salt.rounds);
+  const salt = bcrypt.genSaltSync(credentialsConfig['hash.salt.rounds']);
   const hash = bcrypt.hashSync(password, salt);
   this.getUpdate().password = hash;
   next();
