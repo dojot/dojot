@@ -40,7 +40,7 @@ class DeviceService {
       {
         url: this.deviceRouteUrls.devices,
         method: 'GET',
-        timeout: deviceManagerConfig.request.timeout.ms,
+        timeout: deviceManagerConfig['request.timeout.ms'],
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -70,7 +70,7 @@ class DeviceService {
       const requestOptions = {
         url: `${this.deviceRouteUrls.device}/${deviceId}`,
         method: 'GET',
-        timeout: deviceManagerConfig.request.timeout.ms,
+        timeout: deviceManagerConfig['request.timeout.ms'],
         headers: {
           Authorization: `Bearer ${token}`,
         },
