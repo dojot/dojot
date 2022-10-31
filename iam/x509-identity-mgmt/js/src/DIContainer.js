@@ -119,7 +119,7 @@ function createObject(rawConfig) {
   const modules = {
     logger: asClass(Logger, {
       injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({ sid: 'X509-Identity-Mgmt - Main' }),
+      injector: () => ({ sid: 'X509-Identity-Mgmt' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
