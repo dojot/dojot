@@ -1,4 +1,7 @@
+/* eslint-disable security-node/non-literal-reg-expr */
 const awilix = require('awilix');
+
+const { unflatten } = require('flat');
 
 const url = require('url');
 
@@ -10,7 +13,12 @@ const {
   ServiceStateManager,
   Logger,
   Kafka,
-  WebUtils,
+  WebUtils: {
+    createServer,
+    SecretFileHandler,
+    DojotHttpClient,
+    framework,
+  },
 } = require('@dojot/microservice-sdk');
 
 const pkiUtils = require('./core/pkiUtils');
@@ -44,6 +52,12 @@ const caRoutes = require('./express/routes/caRoutes');
 const trustedCARoutes = require('./express/routes/trustedCARoutes');
 
 const certificateRoutes = require('./express/routes/certificateRoutes');
+
+const TenantManager = require('./tenantManager/TenantManager');
+
+const TenantManagerEventEngine = require('./tenantManager/TenantManagerEventEngine');
+
+const TenantManagerEventRunnable = require('./tenantManager/TenantManagerEventRunnable');
 
 const CertificateService = require('./services/CertificateService');
 
@@ -89,9 +103,10 @@ const {
   jsonBodyParsingInterceptor,
   tokenParsingInterceptor,
   staticFileInterceptor,
-} = WebUtils.framework.interceptors;
+} = framework.interceptors;
 
-function createObject(config) {
+function createObject(rawConfig) {
+  const config = unflatten(rawConfig);
   const levelDebug = () => (config.logger.console.level.toLowerCase() === 'debug'
   || (config.logger.file && config.logger.file.level.toLowerCase() === 'debug'));
 
@@ -102,10 +117,29 @@ function createObject(config) {
 
   // Configures the application modules, as well as their scope...
   const modules = {
-
     logger: asClass(Logger, {
       injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({ sid: 'X509-Identity-Mgmt - Main' }),
+      injector: () => ({ sid: 'X509-Identity-Mgmt' }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    secretFileHandler: asClass(SecretFileHandler, {
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        config: rawConfig,
+        logger: DIContainer.resolve('logger'),
+      }),
+      lifetime: Lifetime.SINGLETON,
+    }),
+
+    dojotHttpClient: asClass(DojotHttpClient, {
+      injectionMode: InjectionMode.PROXY,
+      injector: () => ({
+        defaultClientOptions: { timeout: 12000 },
+        defaultRetryDelay: 15000,
+        defaultMaxNumberAttempts: 0,
+        logger: DIContainer.resolve('logger'),
+      }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -150,7 +184,7 @@ function createObject(config) {
       lifetime: Lifetime.SCOPED,
     }),
 
-    errorTemplate: asValue(WebUtils.framework.errorTemplate, {
+    errorTemplate: asValue(framework.errorTemplate, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -167,9 +201,10 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    tokenGen: asFunction(WebUtils.createTokenGen, {
-      lifetime: Lifetime.SINGLETON,
-    }),
+    // tokenGen: asFunction(WebUtils.createTokenGen, {
+    //   lifetime: Lifetime.SINGLETON,
+    // }),
+
 
     // +---------+
     // | MongoDB |
@@ -234,12 +269,12 @@ function createObject(config) {
     // | Web service |
     // +-------------+
 
-    server: asFunction(WebUtils.createServer, {
+    server: asFunction(createServer, {
       injector: () => ({ config: config.server }),
       lifetime: Lifetime.SINGLETON,
     }),
 
-    framework: asFunction(WebUtils.framework.createExpress, {
+    framework: asFunction(framework.createExpress, {
       injector: () => ({
         interceptors: [
           // The order of the interceptors matters
@@ -250,7 +285,7 @@ function createObject(config) {
           DIContainer.resolve('requestLogInterceptor'),
           DIContainer.resolve('paginateInterceptor'),
           DIContainer.resolve('jsonBodyParsingInterceptor'),
-          DIContainer.resolve('tokenParsingInterceptor'),
+          DIContainer.resolve('keycloakAuthInterceptor'),
           DIContainer.resolve('staticFileInterceptor'),
           DIContainer.resolve('scopedDIInterceptor'),
         ],
@@ -277,7 +312,7 @@ function createObject(config) {
     // | Route Error Handlers |
     // +----------------------+
 
-    defaultErrorHandler: asFunction(WebUtils.framework.defaultErrorHandler, {
+    defaultErrorHandler: asFunction(framework.defaultErrorHandler, {
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -390,6 +425,14 @@ function createObject(config) {
     // +----------+
     // | Services |
     // +----------+
+    tenantManager: asFunction(fromDecoratedClass(TenantManager), {
+      injector: () => ({
+        keycloakConfig: rawConfig.keycloak,
+        // dojotHttpClient: DIContainer.resolve('dojotHttpClient'),
+        // logger: DIContainer.resolve('logger'),
+      }),
+      lifetime: Lifetime.SINGLETON,
+    }),
 
     certificateService: asFunction(fromDecoratedClass(CertificateService), {
       injector: () => ({
@@ -444,7 +487,7 @@ function createObject(config) {
     // +------------------------------+
     // | DeviceManager Kafka Consumer |
     // +------------------------------+
-    deviceMgrKafkaConsumer: asClass(Kafka.Consumer, {
+    kafkaConsumer: asClass(Kafka.Consumer, {
       injectionMode: InjectionMode.CLASSIC,
       injector: () => {
         const _ = config.kafka.consumer;
@@ -493,9 +536,44 @@ function createObject(config) {
       lifetime: Lifetime.SINGLETON,
     }),
 
+    tenantManagerEventEngine: asFunction(fromDecoratedClass(TenantManagerEventEngine), {
+      injector: () => {
+        const topicSuffix = config.keycloak.tenant.topic.suffix;
+
+        // eslint-disable-next-line security/detect-non-literal-regexp
+        const topics = new RegExp(`^.+\\.${topicSuffix}`);
+
+        return {
+          DIContainer,
+          tenantManagerKafkaTopics: topics,
+        };
+      },
+      lifetime: Lifetime.SINGLETON,
+    }),
+
     deviceMgrEventRunnable: asFunction(fromDecoratedClass(DeviceMgrEventRunnable), {
       lifetime: Lifetime.SCOPED,
     }),
+
+    tenantManagerEventRunnable: asFunction(fromDecoratedClass(TenantManagerEventRunnable), {
+      lifetime: Lifetime.SCOPED,
+    }),
+
+    keycloakAuthInterceptor: asFunction(
+      framework.interceptors.createKeycloakAuthInterceptorWithFilter,
+      {
+        injectionMode: InjectionMode.CLASSIC,
+        injector: () => ({
+          filter: (tenantId) => DIContainer.resolve('tenantManager').findTenant(tenantId),
+          options: {
+            allowMasterTenant: true,
+            verifyOnline: true,
+            configKeycloak: config.keycloak,
+          },
+        }),
+        lifetime: Lifetime.SCOPED,
+      },
+    ),
 
     deviceMgrProvider: asFunction(fromDecoratedClass(DeviceMgrProvider), {
       injector: () => {
@@ -505,6 +583,7 @@ function createObject(config) {
           httpAgent,
           deviceMgrUrl,
           deviceMgrTimeout: config.devicemgr.device.timeout.ms,
+          tenantManager: DIContainer.resolve('tenantManager'),
         };
       },
       lifetime: Lifetime.SCOPED,

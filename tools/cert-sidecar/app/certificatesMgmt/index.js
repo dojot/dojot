@@ -2,7 +2,7 @@ const {
   ConfigManager: { getConfig },
   Logger,
 } = require('@dojot/microservice-sdk');
-const Certificates = require('./Certificates.js');
+const Certificates = require('./Certificates');
 
 
 const {

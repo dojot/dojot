@@ -3,6 +3,9 @@ jest.mock('@dojot/microservice-sdk', () => ({
   ConfigManager: {
     transformObjectKeys: jest.fn(),
   },
+  WebUtils: {
+    DojotHttpClient: jest.fn().mockImplementation(),
+  },
 }));
 
 jest.mock('../../../src/app/server', () => jest.fn().mockImplementation(() => ({})));

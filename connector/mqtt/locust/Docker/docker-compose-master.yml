@@ -23,6 +23,11 @@ services:
       REDIS_PORT: "6379"
       REDIS_PASSWD: ""
       REDIS_BACKUP: "y"
+
+      "INFLUX_HOST": "127.0.0.1"
+      "INFLUX_PORT": 30001
+      "INFLUX_ORG": "admin"
+      "INFLUX_TOKEN": ""
     networks:
       - default
     depends_on:
@@ -54,7 +59,7 @@ services:
       - ../db/:/data
 
   locust-exporter:
-    image: containersol/locust_exporter:v0.3.0
+    image: containersol/locust_exporter:v0.4.3
     networks:
       - default
     restart: always

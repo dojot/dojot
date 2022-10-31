@@ -54,7 +54,10 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
+      is: () => true,
     };
     const response = new ResponseMock();
 
@@ -92,7 +95,10 @@ describe('BusboyInterceptor', () => {
     };
     const request = {
       pipe: pipeMock,
-      tenant: 'test',
+      tenant: {
+        id: 'test',
+      },
+      is: () => true,
     };
     const response = new ResponseMock();
 
@@ -111,6 +117,7 @@ describe('BusboyInterceptor', () => {
     const request = {
       pipe: pipeErrorMock,
       tenant: 'test',
+      is: () => true,
     };
     const response = new ResponseMock();
 
@@ -128,6 +135,7 @@ describe('BusboyInterceptor', () => {
     const request = {
       pipe: pipeErrorMock,
       tenant: 'test_not_found',
+      is: () => true,
     };
     const response = new ResponseMock();
 
@@ -135,6 +143,25 @@ describe('BusboyInterceptor', () => {
       try {
         expect(error.responseJSON.error).toEqual('Tenant does not exist.');
         expect(error.responseJSON.detail).toEqual('There is no bucket for this tenant.');
+        done();
+      } catch (e) {
+        done(e);
+      }
+    });
+  });
+
+  it('Should return a Unsupported Media Type http response, when content-type is unsupported ', (done) => {
+    const request = {
+      pipe: pipeErrorMock,
+      tenant: 'test',
+      is: () => false,
+    };
+    const response = new ResponseMock();
+
+    busboyInterceptor.middleware(request, response, (error) => {
+      try {
+        expect(error.responseJSON.error).toEqual('Unsupported Media Type.');
+        expect(error.responseJSON.detail).toEqual('Unsupported Media Type.');
         done();
       } catch (e) {
         done(e);

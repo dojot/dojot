@@ -11,6 +11,12 @@ const mockConfig = {
 
 jest.mock('uuid');
 
+const dojotClientHttpMock = jest.fn().mockImplementation(() => ({
+  request: () => {
+
+  },
+}));
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -27,6 +33,7 @@ const mockSdk = {
   })),
   WebUtils: {
     createTokenGen: jest.fn(),
+    DojotHttpClient: dojotClientHttpMock,
   },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
@@ -72,7 +79,7 @@ describe('App', () => {
   let app;
 
   beforeEach(async () => {
-    app = new App();
+    app = new App(mockConfig);
   });
 
   afterAll(() => {

@@ -38,9 +38,10 @@ describe('DELETE /files/remove', () => {
       .delete(route)
       .set('Authorization', `Bearer ${setup.generateJWT('test')}`)
       .query({ path })
-      .expect(400)
+      .expect(401)
       .then((response) => {
-        expect(response.body.error).toEqual('Tenant does not exist.');
+        expect(response.body.error).toEqual('Unauthorized access');
+        expect(response.body.detail).toEqual('Tenant not found or invalid');
         done();
       })
       .catch((error) => {

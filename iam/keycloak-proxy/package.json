@@ -1,0 +1,59 @@
+{
+  "name": "keycloak-proxy",
+  "version": "1.0.0",
+  "description": "The keycloak-proxy is responsible for access the master realm data of the keycloak to other dojot services",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev-debug": "node --inspect=0.0.0.0 src/index.js",
+    "test": "jest --verbose --coverage",
+    "integration-test": "jest ./tests/integration --no-cache --detectOpenHandles",
+    "unit-test": "jest ./tests/units --no-cache --coverage",
+    "check-licenses": "apache2-license-checker"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dojot/dojot/tree/master/iam/keycloak-proxy"
+  },
+  "keywords": [
+    "Keycloak",
+    "proxy",
+    "dojot",
+    "IoT",
+    "auth",
+    "dojot"
+  ],
+  "author": "Rodrigo Aparecido Silva Maia",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "homepage": "https://github.com/dojot",
+  "dependencies": {
+    "@dojot/microservice-sdk": "^0.2.2",
+    "@keycloak/keycloak-admin-client": "^15.0.2",
+    "axios": "^0.21.4",
+    "express": "^4.17.1",
+    "express-openapi-validator": "^4.13.4",
+    "http-terminator": "^3.0.4",
+    "js-yaml": "^3.14.1",
+    "lodash.camelcase": "^4.3.0",
+    "npm": "^8.1.4",
+    "openid-client": "^5.0.2",
+    "swagger-ui-express": "^4.1.6"
+  },
+  "devDependencies": {
+    "@bbc/apache2-license-checker": "^1.1.4",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-security": "^1.4.0",
+    "eslint-plugin-security-node": "^1.0.14",
+    "jest": "^27.2.4",
+    "supertest": "^6.1.6"
+  }
+}

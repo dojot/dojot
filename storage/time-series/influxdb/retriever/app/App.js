@@ -1,19 +1,15 @@
 const {
   ServiceStateManager,
   ConfigManager: { getConfig, transformObjectKeys },
-  Logger,
-  LocalPersistence: {
-    LocalPersistenceManager,
-  },
 } = require('@dojot/microservice-sdk');
-
-const { InfluxDB } = require('@influxdata/influxdb-client');
 
 const path = require('path');
 
 const camelCase = require('lodash.camelcase');
 
-const { lightship: configLightship, sync, influx: configInflux } = getConfig('RETRIEVER');
+const {
+  lightship: configLightship,
+} = getConfig('RETRIEVER');
 
 const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(configLightship, camelCase),
@@ -21,21 +17,11 @@ const serviceState = new ServiceStateManager({
 serviceState.registerService('server');
 serviceState.registerService('influxdb');
 
-const logger = new Logger('influxdb-retriever:App');
-
-
 const Server = require('./Server');
-const RetrieverConsumer = require('./sync/RetrieverConsumer');
-
 const express = require('./express');
 const devicesRoutes = require('./express/routes/v1/Devices');
-const DeviceManagerService = require('./sync/DeviceManagerService');
-const SyncLoader = require('./sync/SyncLoader');
-const TenantService = require('./sync/TenantService');
-const DeviceDataRepository = require('./influx/DeviceDataRepository');
-const DeviceDataService = require('./express/services/v1/DeviceDataService');
+
 const InfluxState = require('./influx/State');
-const GenericQueryService = require('./express/services/v1/GenericQueryService');
 
 const openApiPath = path.join(__dirname, '../api/v1.yml');
 
@@ -47,31 +33,19 @@ class App {
     * Constructor App
     * that instantiate influxdb classes
     */
-  constructor() {
+  constructor(dependencyContainer, logger) {
     logger.debug('constructor: instantiate app...');
     try {
-      // Extern dependencies
+      this.logger = logger;
       this.server = new Server(serviceState);
-      this.influxDBConnection = new InfluxDB({
-        url: configInflux.url,
-        token: configInflux['default.token'],
-        timeout: configInflux['max.timeout.ms'],
-      });
-      this.influxState = new InfluxState(this.influxDBConnection, serviceState);
-
-      // Intern dependencies
-      // API Dependencies
-      this.deviceDataRepository = new DeviceDataRepository(configInflux['default.bucket'], this.influxDBConnection);
-      this.deviceDataService = new DeviceDataService(this.deviceDataRepository);
-      this.genericQueryService = new GenericQueryService(this.deviceDataRepository);
-      // Sync Dependencies
-      this.localPersistence = new LocalPersistenceManager(logger, true, sync['database.path']);
-      this.retrieverConsumer = new RetrieverConsumer(this.localPersistence);
-      this.authService = new TenantService(sync.tenants);
-      this.deviceManagerService = new DeviceManagerService(sync.devices);
-      this.syncLoader = new SyncLoader(
-        this.localPersistence, this.authService, this.deviceManagerService, this.retrieverConsumer,
-      );
+      this.influxState = new InfluxState(dependencyContainer.influxDBConnection, serviceState);
+      this.localPersistence = dependencyContainer.localPersistence;
+      this.deviceDataService = dependencyContainer.deviceDataService;
+      this.genericQueryService = dependencyContainer.genericQueryService;
+      this.deviceDataRepository = dependencyContainer.deviceDataRepository;
+      this.tenantService = dependencyContainer.tenantService;
+      this.deviceManagerService = dependencyContainer.deviceManagerService;
+      this.syncLoader = dependencyContainer.syncLoader;
     } catch (e) {
       logger.error('constructor:', e);
       const er = new Error(e);
@@ -84,7 +58,7 @@ class App {
    * Initialize the server and influxdb
    */
   async init() {
-    logger.info('init: Initializing the influxdb-retriever...');
+    this.logger.info('init: Initializing the influxdb-retriever...');
     try {
       const influxIsReady = await this.influxState.isReady();
       if (!influxIsReady) {
@@ -92,13 +66,13 @@ class App {
       }
       this.influxState.createInfluxHealthChecker();
       this.server.registerShutdown();
-      this.syncLoader.init();
+      await this.syncLoader.init();
 
       // Initializes API
       this.server.init(express(
         [
           devicesRoutes({
-            localPersistence: this.localPersistence,
+            deviceManagerService: this.deviceManagerService,
             mountPoint: '/tss/v1',
             deviceDataService: this.deviceDataService,
             genericQueryService: this.genericQueryService,
@@ -107,12 +81,13 @@ class App {
         ],
         serviceState,
         openApiPath,
+        this.tenantService,
       ));
     } catch (e) {
-      logger.error('init:', e);
+      this.logger.error('init:', e);
       throw e;
     }
-    logger.info('init:...service initialized.');
+    this.logger.info('init:...service initialized.');
   }
 }
 

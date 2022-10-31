@@ -32,5 +32,5 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         workdir: connector/mqtt/vernemq/broker/
-        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        buildoptions: " --no-cache --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
         tag_names: true # tag will be based in branch name or tag name

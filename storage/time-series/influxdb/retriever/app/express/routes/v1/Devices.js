@@ -31,7 +31,7 @@ const { parseCSV } = require('../../helpers/SimpleCSVParser');
  *                               A promise that returns a result and a totalItems inside that result
  */
 module.exports = ({
-  localPersistence, mountPoint, deviceDataService, genericQueryService, deviceDataRepository,
+  deviceManagerService, mountPoint, deviceDataService, genericQueryService, deviceDataRepository,
 }) => {
   /**
    * if there is no dateTo, add dateTo to
@@ -67,9 +67,9 @@ module.exports = ({
               const accept = AcceptHeaderHelper.getAcceptableType(req);
 
               try {
-                await localPersistence.get(req.tenant, deviceId);
+                await deviceManagerService.findDevice(req.tenant.id, deviceId);
               } catch (error) {
-                throw framework.errorTemplate.NotFound(`Not found ${req.tenant}/${deviceId}`);
+                throw framework.errorTemplate.NotFound(`Not found ${req.tenant.id}/${deviceId}`);
               }
 
               const {
@@ -77,7 +77,14 @@ module.exports = ({
               } = req.query;
 
               const [result, paging] = await deviceDataService.getDeviceData(
-                req.tenant, deviceId, dateFrom, dateTo, limit, page, order, req.getPaging,
+                req.tenant.id,
+                deviceId,
+                dateFrom,
+                dateTo,
+                limit,
+                page,
+                order,
+                req.getPaging,
               );
 
               res.type(accept);
@@ -119,9 +126,9 @@ module.exports = ({
               const accept = AcceptHeaderHelper.getAcceptableType(req);
 
               try {
-                await localPersistence.get(req.tenant, deviceId);
+                await deviceManagerService.findDevice(req.tenant.id, deviceId);
               } catch (error) {
-                throw framework.errorTemplate.NotFound(`Not found ${req.tenant}/${deviceId}`);
+                throw framework.errorTemplate.NotFound(`Not found ${req.tenant.id}/${deviceId}`);
               }
 
               const {
@@ -129,7 +136,15 @@ module.exports = ({
               } = req.query;
 
               const [result, paging] = await deviceDataService.getDeviceAttrData(
-                req.tenant, deviceId, attr, dateFrom, dateTo, limit, page, order, req.getPaging,
+                req.tenant.id,
+                deviceId,
+                attr,
+                dateFrom,
+                dateTo,
+                limit,
+                page,
+                order,
+                req.getPaging,
               );
 
               res.type(accept);
@@ -228,7 +243,7 @@ module.exports = ({
               const accept = AcceptHeaderHelper.getAcceptableType(req);
 
               const { query } = req.body;
-              const result = await genericQueryService.runQuery(req.tenant, query);
+              const result = await genericQueryService.runQuery(req.tenant.id, query);
 
               res.type(accept);
               if (accept === 'csv') {
@@ -249,5 +264,40 @@ module.exports = ({
     ],
   };
 
-  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute, queryRoute];
+  const flexQueryRoute = {
+    mountPoint,
+    name: 'flexquery-route',
+    path: ['/flexquery'],
+    handlers: [
+      {
+        method: 'post',
+        middleware: [
+          // eslint-disable-next-line consistent-return
+          async (req, res) => {
+            try {
+              const accept = AcceptHeaderHelper.getAcceptableType(req);
+
+              const { query } = req.body;
+              const result = await genericQueryService.runFlexQuery(req.tenant.id, query);
+
+              res.type(accept);
+              if (accept === 'csv') {
+                return res.status(HttpStatus.OK).send(
+                  parseCSV(result),
+                );
+              }
+
+              res.status(200).json({ result });
+            } catch (error) {
+              logger.error('flexquery-route', error);
+              error.message = `flexquery-route: ${error.message}`;
+              throw error;
+            }
+          },
+        ],
+      },
+    ],
+  };
+
+  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute, queryRoute, flexQueryRoute];
 };

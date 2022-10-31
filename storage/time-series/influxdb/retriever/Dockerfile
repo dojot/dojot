@@ -25,7 +25,7 @@ RUN apk add --no-cache --virtual .build-deps \
 
 COPY package-lock.json package-lock.json
 
-RUN npm install --only=prod
+RUN npm install
 
 COPY app ./app
 COPY api ./api

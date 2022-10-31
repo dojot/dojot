@@ -9,6 +9,16 @@ const mockSdk = {
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);
 
+const mockGetQueryRows = jest.fn();
+const mockGetQueryApi = jest.fn(() => ({
+  queryRows: mockGetQueryRows,
+}));
+const mockOptions = jest.fn();
+const mockInfluxDBConnection = {
+  getQueryApi: mockGetQueryApi,
+  _options: mockOptions,
+};
+
 const mockInflux = {
   flux: jest.fn((a) => a),
   fluxExpression: jest.fn((a) => a),
@@ -16,6 +26,9 @@ const mockInflux = {
   fluxInteger: jest.fn((a) => a),
   fluxString: jest.fn((a) => a),
   fluxDuration: jest.fn((a) => a),
+  InfluxDB: jest.fn().mockImplementation(() => ({
+    getQueryApi: mockGetQueryApi,
+  })),
 };
 jest.mock('@influxdata/influxdb-client', () => mockInflux);
 
@@ -29,12 +42,30 @@ const mockHttpError = jest.fn((statusCode, message) => {
 });
 jest.mock('http-errors', () => mockHttpError);
 
-const mockGetQueryRows = jest.fn();
-const mockGetQueryApi = jest.fn(() => ({
-  queryRows: mockGetQueryRows,
-}));
-const mockInfluxDBConnection = {
-  getQueryApi: mockGetQueryApi,
+const mockGetOrgs = jest.fn();
+const mockGetAuthorizations = jest.fn();
+const mockPostAuthorizations = jest.fn();
+const mockGetBuckets = jest.fn();
+const mockInfluxApi = {
+  OrgsAPI: jest.fn().mockImplementation(() => ({
+    getOrgs: mockGetOrgs,
+  })),
+  AuthorizationsAPI: jest.fn().mockImplementation(() => ({
+    getAuthorizations: mockGetAuthorizations,
+    postAuthorizations: mockPostAuthorizations,
+  })),
+  BucketsAPI: jest.fn().mockImplementation(() => ({
+    getBuckets: mockGetBuckets,
+  })),
+};
+
+jest.mock('@influxdata/influxdb-client-apis', () => mockInfluxApi);
+
+const mockLogger = {
+  error: jest.fn(),
+  debug: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
 };
 
 const DataQuery = require('../../app/influx/DeviceDataRepository');
@@ -82,7 +113,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, true, mockLogger);
   });
 
   test('queryByField - test ok 1', async () => {
@@ -339,6 +370,58 @@ describe('Test Influx Data Query', () => {
     }
   });
 
+  /* Test block */
+  test('Instantiate class', () => {
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, false, mockLogger);
+  });
+
+  test('queryByField - test ok 1', async () => {
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
+    const tableMeta2 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 10 })) };
+    const tableMeta3 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: true })) };
+    const tableMeta4 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: null })) };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x1', tableMeta1);
+        next('x2', tableMeta2);
+        next('x3', tableMeta3);
+        next('x4', tableMeta4);
+        complete();
+      },
+    );
+    const x = await dataQuery.queryByField('org', 'measurement', 'field', {}, {}, 'desc');
+    expect(x).toStrictEqual({
+      result: [{ ts: 'ts-time', value: 'value' }, {
+        ts: 'ts-time',
+        value: 10,
+      }, {
+        ts: 'ts-time',
+        value: true,
+      }, {
+        ts: 'ts-time',
+        value: null,
+      }],
+      totalItems: 4,
+    });
+  });
+
+
+  test('queryByField - test ok 2', async () => {
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x1', tableMeta1);
+        complete();
+      },
+    );
+
+    const x = await dataQuery.queryByField('org', 'measurement', 'field', { dateFrom: 'x', dateTo: 'y' }, { limit: 10, page: 1 }, 'asc');
+    expect(x).toStrictEqual({
+      result: [{ ts: 'ts-time', value: 'value' }],
+      totalItems: 1,
+    });
+  });
+
 
   /* Testing queryUsingGraphql method
 */
@@ -493,6 +576,87 @@ describe('Test Influx Data Query', () => {
 
     try {
       await dataQuery.runGenericQuery('org', 'query');
+    } catch (e) {
+      error = e;
+    }
+    expect(error.message).toEqual('Error');
+  });
+
+  test('runGenericFlexQuery - should return a data when create authorization', async () => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [] });
+    mockPostAuthorizations.mockResolvedValueOnce({ token: 'abc', description: 'user token' });
+    mockGetBuckets.mockResolvedValueOnce({ buckets: [{ id: 'abc' }] });
+
+    const tableMeta1 = {
+      toObject: jest.fn(() => ({
+        result: '_result',
+        table: '0',
+        _time: '_time',
+        _value: '_value',
+      })),
+    };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x', tableMeta1);
+        complete();
+      },
+    );
+
+    const data = await dataQuery.runGenericFlexQuery('org', 'query');
+
+    expect(data.length).toEqual(1);
+    expect(data.shift()).toEqual({
+      result: '_result',
+      table: '0',
+      _time: '_time',
+      _value: '_value',
+    });
+  });
+
+  test('runGenericFlexQuery - should return a data', async () => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+
+    const tableMeta1 = {
+      toObject: jest.fn(() => ({
+        result: '_result',
+        table: '0',
+        _time: '_time',
+        _value: '_value',
+      })),
+    };
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        next('x', tableMeta1);
+        complete();
+      },
+    );
+
+    const data = await dataQuery.runGenericFlexQuery('org', 'query');
+
+    expect(data.length).toEqual(1);
+    expect(data.shift()).toEqual({
+      result: '_result',
+      table: '0',
+      _time: '_time',
+      _value: '_value',
+    });
+  });
+
+  test('runGenericFlexQuery - should return a data', async () => {
+    mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
+    mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+
+    mockGetQueryRows.mockImplementationOnce(
+      (fluxQuery, { next, error, complete }) => {
+        throw new Error('Error');
+      },
+    );
+    let error;
+
+    try {
+      await dataQuery.runGenericFlexQuery('org', 'query');
     } catch (e) {
       error = e;
     }

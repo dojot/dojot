@@ -1,5 +1,5 @@
 const {
-  ServiceStateManager, ConfigManager,
+  ServiceStateManager, ConfigManager, WebUtils: { DojotHttpClient },
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
 
@@ -35,31 +35,44 @@ module.exports = (config, logger) => {
   // Techs
   const httpServer = new Server(serviceState, configServerCamelCase, logger, config);
   const kafkaConsumer = new KafkaConsumer(config, logger);
+  const keycloakProxyHttpClient = new DojotHttpClient({ 
+    defaultClientOptions: {},
+    logger,
+    defaultMaxNumberAttempts: 0,
+    defaultRetryDelay: 15000,
+  });
 
   // Repositories
   const minioConnection = createMinIOConnection(config.minio);
   const minioRepository = new MinIoRepository(minioConnection, config.minio, logger);
 
   // Services
-  const tenantService = new TenantService(minioRepository);
+  const tenantService = new TenantService(
+    minioRepository,
+    keycloakProxyHttpClient,
+    config.keycloak,
+    logger,
+  );
   const fileUploadService = new FileUploadService(minioRepository, logger);
   const fileListingService = new FileListingService(minioRepository, logger);
   const fileRemovalService = new FileRemoveService(minioRepository, logger);
   const fileRetrievalService = new FileRetrievalService(minioRepository, logger);
 
   // Interceptors
-  const busboyHandlerInterceptor = BusboyHandlerInterceptor(
-    logger, minioRepository, config,
-  ).middleware;
+  const handlerInterceptor = BusboyHandlerInterceptor(logger, minioRepository, config).middleware;
 
   // Controllers
   const fileController = new FileController(
-    fileUploadService, fileRetrievalService, fileRemovalService, logger,
+    fileUploadService,
+    fileRetrievalService,
+    fileRemovalService,
+    logger,
   );
   const fileListingController = new FileListingController(fileListingService, logger);
   const kafkaController = new KafkaController(tenantService, logger);
 
   return {
+    tenantService,
     web: {
       httpServer,
       controllers: {
@@ -67,7 +80,7 @@ module.exports = (config, logger) => {
         fileListingController,
       },
       interceptors: {
-        busboyHandlerInterceptor,
+        busboyHandlerInterceptor: handlerInterceptor,
       },
     },
     kafka: {

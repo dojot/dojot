@@ -5,7 +5,7 @@
   "description": "Service to bridge messages from Apache Kafka to VerneMQ according to dojot rules.",
   "engines": {
     "node": ">=12.18.4",
-    "npm": ">=6.14.8"
+    "npm": ">=6.14.6"
   },
   "homepage": "https://github.com/dojot/dojot",
   "repository": {
@@ -16,6 +16,7 @@
   "main": "index.js",
   "scripts": {
     "app": "node index.js",
+    "app-debug": "node --inspect=0.0.0.0 index.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "check-licenses": "apache2-license-checker"
@@ -35,7 +36,7 @@
     }
   ],
   "dependencies": {
-    "@dojot/microservice-sdk": "0.1.9",
+    "@dojot/microservice-sdk": "^0.2.2",
     "flat": "^5.0.0",
     "lodash.camelcase": "^4.3.0",
     "mqtt": "4.2.5"

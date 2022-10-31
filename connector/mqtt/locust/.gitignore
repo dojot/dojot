@@ -9,6 +9,7 @@ lib64
 share
 pyvenv.cfg
 .coverage
+venv
 
 # Certificates
 cert
@@ -17,3 +18,4 @@ db
 
 # IDEs
 .vscode
+.idea

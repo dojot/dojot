@@ -7,6 +7,7 @@ function MockRedisClient() {
   this.setAsync = jest.fn();
   this.quitAsync = jest.fn();
   this.quitAsync = jest.fn();
+  this.delAsync = jest.fn();
 }
 MockRedisClient.prototype.emit = function emit(event, data) {
   this.eventListener[event](data);
@@ -58,6 +59,7 @@ const mockConfig = {
     db: 0,
     'reconnect.after.ms': 5000,
     'operation.timeout.ms': 1000,
+    hash: { salt: { rounds: 10 } },
   },
 };
 
@@ -125,8 +127,7 @@ describe('RedisManager', () => {
 
     it('error - exhausted retries', () => {
       redisManager.redisClient.emit('error', { code: 'CONNECTION_BROKEN' });
-
-      expect(serviceStateMock.shutdown).toBeCalled();
+      expect(serviceStateMock.shutdown).toHaveBeenCalled();
     });
 
     it('error - except exhausted retries', () => {
@@ -135,14 +136,14 @@ describe('RedisManager', () => {
         { code: 'ANY ERROR, EXCEPT CONNECTION_BROKEN' },
       );
 
-      expect(serviceStateMock.shutdown).not.toBeCalled();
+      expect(serviceStateMock.shutdown).not.toHaveBeenCalled();
     });
 
     it('end', () => {
       redisManager.redisClient.emit('end');
 
-      expect(serviceStateMock.signalNotReady).toBeCalled();
-      expect(redisManager.eventEmitter.emit).toBeCalledWith('unhealthy');
+      expect(serviceStateMock.signalNotReady).toHaveBeenCalled();
+      expect(redisManager.eventEmitter.emit).toHaveBeenCalledWith('unhealthy');
     });
   });
 
@@ -182,7 +183,7 @@ describe('RedisManager', () => {
     const key = 'test@123abc';
     it('should get value', async () => {
       redisManager.redisClient.getAsync.mockReturnValue('$ioaswru9834%34r7rfnedfv');
-      redisManager.getSecurity(key);
+      redisManager.getSecurity('username', key);
       expect(redisManager.redisClient.getAsync).toHaveBeenCalled();
     });
 

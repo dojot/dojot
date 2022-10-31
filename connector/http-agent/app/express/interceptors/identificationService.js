@@ -12,12 +12,37 @@ const Unauthorized = new createError[401]();
  * and add the new tenant request (req.tenant and req.deviceId).
  *
  * */
-module.exports = ({ redisManager, deviceAuthService, certificateAclService }) => ({
+module.exports = ({
+  redisManager, deviceAuthService, certificateAclService, deviceManagerService,
+}) => ({
   cn: async (clientCert) => {
     try {
       const { CN } = clientCert.subject;
-      return CN.split(':');
+      const array = CN.split(':');
+
+      if (array.length !== 2) {
+        throw new Error();
+      }
+
+      const deviceExistsRedis = await redisManager.getAsync(CN);
+
+      if (deviceExistsRedis === null) {
+        const deviceExistsDeviceManager = await deviceManagerService.getDevice(array[0], array[1]);
+        if (deviceExistsDeviceManager) {
+          redisManager.setAsync(CN, true);
+        } else {
+          redisManager.setAsync(CN, false);
+          throw new Error();
+        }
+      } else if (deviceExistsRedis === 'false') {
+        throw new Error();
+      }
+
+      return array;
     } catch (e) {
+      if (clientCert.subject.CN.split(':').length === 2) {
+        redisManager.setAsync(clientCert.subject.CN, false);
+      }
       Forbidden.message = 'Client certificate is invalid';
       throw Forbidden;
     }
@@ -64,7 +89,8 @@ module.exports = ({ redisManager, deviceAuthService, certificateAclService }) =>
       }
 
       try {
-        const authenticated = await deviceAuthService.getAuthenticationStatus(username, password);
+        const authenticated = await deviceAuthService
+          .getAuthenticationStatus(tenant, username, password);
         if (authenticated) {
           await redisManager.setSecurity(username, password);
           return [tenant, deviceId];
@@ -76,6 +102,20 @@ module.exports = ({ redisManager, deviceAuthService, certificateAclService }) =>
       throw new Error('Invalid credentials.');
     } catch (err) {
       Unauthorized.message = err.message;
+      throw Unauthorized;
+    }
+  },
+  params: async (req) => {
+    try {
+      const {
+        query: { tenant, deviceId },
+      } = req;
+
+      if (!tenant || !deviceId) throw new Error('Unidentified parameters');
+
+      return [tenant, deviceId];
+    } catch (error) {
+      Unauthorized.message = error.message;
       throw Unauthorized;
     }
   },

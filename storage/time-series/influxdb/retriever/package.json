@@ -33,6 +33,9 @@
     "!test/unit/coverage/"
   ],
   "author": "@mprevide",
+  "contributors": [
+    "Ademir Rorato Junior"
+  ],
   "license": "Apache-2.0",
   "licenses": [
     {
@@ -42,7 +45,7 @@
   ],
   "homepage": "https://github.com/dojot",
   "dependencies": {
-    "@dojot/microservice-sdk": "0.1.15",
+    "@dojot/microservice-sdk": "^0.2.2",
     "@google-cloud/precise-date": "^2.0.3",
     "@influxdata/influxdb-client": "^1.9.0",
     "@influxdata/influxdb-client-apis": "^1.9.0",
@@ -60,10 +63,13 @@
     "http-terminator": "^2.0.3",
     "js-yaml": "^3.14.0",
     "json2csv": "^5.0.6",
+    "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
     "lodash.camelcase": "^4.3.0",
     "node-cron": "^3.0.0",
-    "swagger-ui-express": "^4.1.4"
+    "openid-client": "^5.1.1",
+    "swagger-ui-express": "^4.1.4",
+    "uuid": "^8.3.2"
   },
   "jest": {
     "verbose": true,

@@ -36,11 +36,21 @@ const {
  * @param {an instance of CertificateAclService} certificateAclService
  *          Provides query to certificate-acl to verify certificate.
  *
+ * @param {an instance of DeviceManagerService} deviceManagerService
+ *          Provides query to device-manager to get data from a specific device.
+ *
  * @throws  Some error when try load open api in yaml
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, redisManager, deviceAuthService, certificateAclService) => {
+module.exports = (
+  routes,
+  serviceState,
+  redisManager,
+  deviceAuthService,
+  certificateAclService,
+  deviceManagerService,
+) => {
   const {
     responseCompressInterceptor,
     requestIdInterceptor,
@@ -70,6 +80,7 @@ module.exports = (routes, serviceState, redisManager, deviceAuthService, certifi
           redisManager,
           deviceAuthService,
           certificateAclService,
+          deviceManagerService,
         }),
       }),
     ],

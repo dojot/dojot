@@ -53,6 +53,9 @@ const { killApplication } = require('../../app/Utils');
 
 mongoose.connection = new EventEmitter();
 mongoose.connection.close = jest.fn();
+mongoose.connect = jest.fn();
+
+mongoose.connect.mockRejectedValue('Error');
 
 const MongoClient = require('../../app/db/MongoClient');
 
@@ -67,6 +70,7 @@ describe('mongoClient', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
+
   describe('constructor', () => {
     it('should successfully create constructor', () => {
       expect(mongoClient.mongo).toBeDefined();
@@ -80,8 +84,8 @@ describe('mongoClient', () => {
       jest.clearAllMocks();
     });
 
-    beforeEach(() => {
-      mongoClient.init();
+    beforeEach(async () => {
+      await mongoClient.init();
     });
 
     it('log an error', async () => {
@@ -160,7 +164,9 @@ describe('mongoClient', () => {
   describe('shutdownHandler', () => {
     it('should call the disconnect function from the producer', async () => {
       await mongoClient.init();
-      await mongoClient.registerShutdown();
+      mongoClient.mongo = {
+        disconnect: jest.fn(),
+      };
       const callback = mockRegisterShutdownHandler.mock.calls[0][0];
       callback();
       expect(mockRegisterShutdownHandler).toHaveBeenCalled();

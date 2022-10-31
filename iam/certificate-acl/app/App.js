@@ -4,12 +4,17 @@ const util = require('util');
 const {
   ConfigManager: { getConfig, transformObjectKeys },
   ServiceStateManager,
+  WebUtils: {
+    DojotHttpCircuit,
+    DojotHttpClient,
+  },
   Logger,
 } = require('@dojot/microservice-sdk');
 const { asClass, InjectionMode, Lifetime } = require('awilix');
 const KafkaConsumer = require('./kafka/KafkaConsumer');
 const RedisManager = require('./redis/RedisManager');
 const HTTPServer = require('./server/HTTPServer');
+const TenantService = require('./service/tenantService');
 const DIContainer = require('./DIContainer');
 
 const container = DIContainer();
@@ -25,6 +30,7 @@ class Application {
     this.logger = container.resolve('logger');
     // configuration
     this.config = getConfig('CERTIFICATE_ACL');
+    const x509ServiceConfig = this.config.x509im;
 
     // instantiate Service State Manager
     this.serviceStateManager = new ServiceStateManager(
@@ -33,14 +39,38 @@ class Application {
 
     // instantiate Kafka Consumer
     this.kafkaConsumer = new KafkaConsumer(this.serviceStateManager);
+    this.dojotHttpClient = new DojotHttpClient({
+      defaultClientOptions: { timeout: 12000 },
+      logger: this.logger,
+      defaultRetryDelay: 15000,
+      defaultMaxNumberAttempts: 0,
+    });
+
+    this.tenantService = new TenantService(this.config.keycloak, this.dojotHttpClient, this.logger);
 
     // instantiate Redis Manager
     this.redisManager = new RedisManager(this.serviceStateManager);
     this.redisManager.on('healthy', () => this.kafkaConsumer.resume());
     this.redisManager.on('unhealthy', () => this.kafkaConsumer.suspend());
 
+    // Circuit with x509
+    this.dojotHttpCircuit = new DojotHttpCircuit({
+      serviceName: 'x509',
+      logger: this.logger,
+      defaultClientOptions: {
+        baseURL: `http://${x509ServiceConfig.hostname}:${x509ServiceConfig.port}`,
+        timeout: x509ServiceConfig.timeout,
+      },
+      attemptsThreshold: 3,
+    });
+
     // instantiate HTTP server
-    this.server = new HTTPServer(this.serviceStateManager, this.redisManager);
+    this.server = new HTTPServer(
+      this.serviceStateManager,
+      this.redisManager,
+      this.tenantService,
+      this.dojotHttpCircuit,
+    );
   }
 
   /**

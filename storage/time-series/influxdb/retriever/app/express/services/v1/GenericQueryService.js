@@ -15,4 +15,10 @@ module.exports = class GenericQueryService {
 
     return result;
   }
+
+  async runFlexQuery(org, query) {
+    const result = await this.deviceDataRepository.runGenericFlexQuery(org, query);
+
+    return result;
+  }
 };

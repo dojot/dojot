@@ -1,5 +1,9 @@
 
-const { ConfigManager, Logger, WebUtils } = require('@dojot/microservice-sdk');
+const {
+  ConfigManager,
+  Logger,
+  WebUtils,
+} = require('@dojot/microservice-sdk');
 
 const swaggerUi = require('swagger-ui-express');
 const yaml = require('js-yaml');
@@ -8,10 +12,10 @@ const fs = require('fs');
 const logger = new Logger('influxdb-retriever:express');
 
 const paginateInterceptor = require('./interceptors/CustomPaginator');
-const dojotTenantJwtParseInterceptor = require('./interceptors/DojotTenantJwtParse');
+
 const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
 
-const { express: configExpress, paginate: configPaginate } = ConfigManager.getConfig('RETRIEVER');
+const { express: configExpress, paginate: configPaginate, keycloak: configKeycloak } = ConfigManager.getConfig('RETRIEVER');
 
 
 /**
@@ -37,7 +41,7 @@ const { express: configExpress, paginate: configPaginate } = ConfigManager.getCo
  *
  * @returns {express}
  */
-module.exports = (routes, serviceState, openApiPath) => {
+module.exports = (routes, serviceState, openApiPath, tenantService) => {
   let openApiJson = null;
   try {
     // eslint-disable-next-line security/detect-non-literal-fs-filename
@@ -54,6 +58,7 @@ module.exports = (routes, serviceState, openApiPath) => {
     beaconInterceptor,
     requestLogInterceptor,
     jsonBodyParsingInterceptor,
+    createKeycloakAuthInterceptorWithFilter,
   } = WebUtils.framework.interceptors;
 
   return WebUtils.framework.createExpress({
@@ -63,7 +68,15 @@ module.exports = (routes, serviceState, openApiPath) => {
         path: '/tss/v1/api-docs',
         middleware: [swaggerUi.serve, swaggerUi.setup(openApiJson)],
       },
-      dojotTenantJwtParseInterceptor(),
+      createKeycloakAuthInterceptorWithFilter(
+        (tenantId) => tenantService.tenants.find((tenant) => tenant.id === tenantId),
+        logger,
+        '/',
+        {
+          verifyOnline: true,
+          configKeycloak,
+        },
+      ),
       jsonBodyParsingInterceptor({ config: { limit: '100kb' } }),
       paginateInterceptor({
         defaultLimit: configPaginate['default.max.limit'],

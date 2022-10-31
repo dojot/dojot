@@ -10,15 +10,15 @@ class DeviceMgrProvider {
     deviceMgrUrl,
     deviceMgrTimeout,
     deviceModel,
-    tokenGen,
+    tenantManager,
     errorTemplate,
     logger,
   }) {
+    Object.defineProperty(this, 'tenantManager', { value: tenantManager });
     Object.defineProperty(this, 'httpAgent', { value: httpAgent });
     Object.defineProperty(this, 'deviceMgrUrl', { value: deviceMgrUrl });
     Object.defineProperty(this, 'deviceMgrTimeout', { value: deviceMgrTimeout });
     Object.defineProperty(this, 'deviceModel', { value: deviceModel });
-    Object.defineProperty(this, 'tokenGen', { value: tokenGen });
     Object.defineProperty(this, 'error', { value: errorTemplate });
     Object.defineProperty(this, 'logger', { value: logger });
   }
@@ -63,7 +63,7 @@ class DeviceMgrProvider {
    * @param {string} xRequestId
    */
   async getDevice(tenant, deviceId, xRequestId) {
-    const token = await this.tokenGen.generate({ tenant });
+    const token = await this.tenantManager.findTenant(tenant).session.getTokenSet().access_token;
 
     const options = {
       protocol: this.deviceMgrUrl.protocol,

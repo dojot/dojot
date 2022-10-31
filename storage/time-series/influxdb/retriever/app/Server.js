@@ -37,10 +37,11 @@ class Server {
     this.server.on('close', () => {
       this.serviceState.signalNotReady('server');
     });
-    this.server.on('error', (e) => {
-      logger.error('Server experienced an error:', e);
-    });
     this.server.listen(configServer.port, configServer.host);
+    // eslint-disable-next-line security-node/detect-unhandled-event-errors
+    this.server.on('error', (err) => {
+      logger.error('Server experienced an error:', err);
+    });
   }
 
   /**

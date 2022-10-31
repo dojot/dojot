@@ -1,0 +1,38 @@
+name: iam-keycloak
+
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'iam/keycloak/**'
+
+jobs:
+  docker-hub:
+    # Path to help identify each job in the status checks
+    name: (iam/keycloak) Build and Publish image to DockerHub
+    runs-on: ubuntu-latest
+    # If this is a PR, it won't run
+    if: contains(github.ref, 'refs/pull/') == false
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.16
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/keycloak
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: iam/keycloak
+        # Label with the built image's commit
+        buildoptions: ' --label commit_sha_dojot=${{ github.sha }} '
+        # Whether tag will be based in the branch name or in the tag name
+        tag_names: true

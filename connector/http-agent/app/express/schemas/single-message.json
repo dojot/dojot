@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "2674a775-5e93-4370-8f1f-2e6f9d102e1f",
+    "title": "IoT Agent HTTP - Incoming Message (Single Message)",
+    "description": "Data gathered from an IoT device (single point in time)",
+    "type": "object",
+    "required": [
+        "data"
+    ],
+    "properties": {
+        "ts": {
+            "description": "A timestamp when the device data are gathered (RFC3339 or Milliseconds since Unix Epoch)",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            ]
+        },
+        "data": {
+            "description": "Device data",
+            "type": "object"
+        }
+    }
+}
