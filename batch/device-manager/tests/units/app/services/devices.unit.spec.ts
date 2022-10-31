@@ -3,8 +3,18 @@ import { describe } from '@jest/globals';
 import { devices } from '@prisma/client';
 import { RemoveDevicesBatchDto } from 'src/types';
 import { DevicesServices } from '../../../../src/app/services/devicesServices';
-import { KafkaMock, LoggerMock, PrismaClientMock } from '../../../mocks';
-import { DevicesRepository } from '../../../../src/app/repository/devicesRepository';
+import {
+  ConfigMock,
+  KafkaMock,
+  LoggerMock,
+  PrismaClientMock,
+} from '../../../mocks';
+import {
+  DevicesRepository,
+  TemplatesRepository,
+  AttrsRepository,
+} from '../../../../src/app/repository/';
+import { PrismaUtils } from '../../../../src/utils/Prisma.utils';
 
 describe('devicesServices', () => {
   describe('remove', () => {
@@ -22,14 +32,19 @@ describe('devicesServices', () => {
 
     it('should remove one id and retrun id, label of objetc removed.', async () => {
       const { KafkaProducerMock } = KafkaMock.new();
-      //const { DeviceRepositoryMock } = AppMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const devicesRepository = new DevicesRepository(LoggerMock.new());
+      const templatesRepository = new TemplatesRepository(LoggerMock.new());
+      const attrsRepository = new AttrsRepository(LoggerMock.new());
+      const prismaUtils = new PrismaUtils(LoggerMock.new(), ConfigMock.new());
 
       const devicesServices = new DevicesServices(
         LoggerMock.new(),
         devicesRepository,
         KafkaProducerMock,
+        prismaUtils,
+        templatesRepository,
+        attrsRepository,
       );
       FakePrismaClient.devices.findUnique.mockResolvedValue(devices_fake);
       const return_devices_removed = await devicesServices.remove(
@@ -37,7 +52,9 @@ describe('devicesServices', () => {
         removeDevicesBatchDto_fake,
         '',
       );
-      expect(return_devices_removed).toHaveLength(1);
+      expect(return_devices_removed).toEqual({
+        devices: [{ id: '1', label: 'dev1' }],
+      });
     });
   });
 });

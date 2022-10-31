@@ -15,7 +15,7 @@ module.exports = {
     'src/app/controller/templates_batch.ts',
     'src/app/services/templatesServices.ts',
     'src/app/routes/Template.routes.ts',
-    'build',
+    'tests/integration/setup/index.js',
   ],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],

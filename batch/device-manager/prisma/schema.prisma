@@ -43,7 +43,7 @@ model device_template {
 
 model devices {
   id              String            @id @unique @db.VarChar(8)
-  label           String            @db.VarChar(128)
+  label           String            @db.VarChar(128) @unique
   created         DateTime?         @db.Timestamp(6)
   updated         DateTime?         @db.Timestamp(6)
   persistence     String?           @db.VarChar(128)
@@ -73,7 +73,7 @@ model pre_shared_keys {
 
 model templates {
   id              Int               @id
-  label           String            @db.VarChar(128)
+  label           String            @db.VarChar(128) @unique
   created         DateTime?         @db.Timestamp(6)
   updated         DateTime?         @db.Timestamp(6)
   attrs           attrs[]

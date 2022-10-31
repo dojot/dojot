@@ -1,5 +1,6 @@
 import { Logger } from '@dojot/microservice-sdk';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 
 export class DevicesRepository {
   constructor(private logger: Logger) {
@@ -40,6 +41,64 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - remove_associate_templates ', {
         eerror: error.message,
       });
+    }
+  }
+
+  async create(prisma: PrismaClient, id: string, prefix_name: string) {
+    try {
+      return await prisma.devices.create({
+        data: {
+          id: id,
+          label: prefix_name,
+          created: new Date(),
+        },
+      });
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('DevicesRepository - create_devices in batch ', {
+        eerror: error.message,
+      });
+    }
+  }
+
+  async create_associated_devices_templates(
+    prisma: PrismaClient,
+    device_id: string,
+    template_id: number,
+  ) {
+    try {
+      return await prisma.device_template.create({
+        data: {
+          device_id: device_id,
+          template_id: template_id,
+        },
+      });
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug(
+        'DevicesRepository - create_associated_devices_templates in batch ',
+        {
+          eerror: error.message,
+        },
+      );
+    }
+  }
+
+  async assert_devices_exists(prisma: PrismaClient, label: string) {
+    try {
+      return await prisma.devices.findFirst({
+        where: {
+          label: label,
+        },
+      });
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug(
+        'DevicesRepository - create_associated_devices_templates in batch ',
+        {
+          eerror: error.message,
+        },
+      );
     }
   }
 }
