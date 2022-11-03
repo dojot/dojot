@@ -39,7 +39,7 @@ export class DevicesRepository {
     } catch (e: unknown) {
       const error = e as Error;
       this.logger.debug('DevicesRepository - remove_associate_templates ', {
-        eerror: error.message,
+        error: error.message,
       });
     }
   }
@@ -56,7 +56,7 @@ export class DevicesRepository {
     } catch (e: unknown) {
       const error = e as Error;
       this.logger.debug('DevicesRepository - create_devices in batch ', {
-        eerror: error.message,
+        error: error.message,
       });
     }
   }
@@ -78,7 +78,7 @@ export class DevicesRepository {
       this.logger.debug(
         'DevicesRepository - create_associated_devices_templates in batch ',
         {
-          eerror: error.message,
+          error: error.message,
         },
       );
     }
@@ -96,7 +96,7 @@ export class DevicesRepository {
       this.logger.debug(
         'DevicesRepository - create_associated_devices_templates in batch ',
         {
-          eerror: error.message,
+          error: error.message,
         },
       );
     }

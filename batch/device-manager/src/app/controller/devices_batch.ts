@@ -39,6 +39,11 @@ export class DevicesBatchController {
       );
       res.status(200).json(result);
     } catch (e) {
+      const error = e as Error;
+      this.logger.debug('DevicesRepository - create_devices in batch ', {
+        error: error.message,
+      });
+      res.status(400).json(error.message);
       next(e);
     }
   }
