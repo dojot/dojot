@@ -1,0 +1,1 @@
+{"api":{"port":3791},"consumer":{"client.id":"report-manager","group.id":"report-manager","metadata.broker.list":"kafka:9092","topic.metadata.refresh.interval.ms":30000},"topic":{"auto.offset.reset":"earliest"},"subscribe":{"topics.regex.tenants":"^.+dojot\\.tenancy"},"express":{"parsing.limit":25000}}
