@@ -4,6 +4,7 @@ const logger = new Logger('http-agent:express');
 
 const identificationService = require('./interceptors/identificationService');
 const deviceIdentificationInterceptor = require('./interceptors/deviceIdentification');
+const deviceValidatorInterceptor = require('./interceptors/deviceValidatorInterceptor');
 
 const {
   express: configExpress,
@@ -82,6 +83,9 @@ module.exports = (
           certificateAclService,
           deviceManagerService,
         }),
+      }),
+      deviceValidatorInterceptor({
+        deviceManagerService,
       }),
     ],
     routes: routes.flat(),

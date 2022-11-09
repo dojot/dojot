@@ -93,13 +93,18 @@ const mockProducerMessages = {
 };
 jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
+const mockgetDevice = jest.fn();
+const mockDeviceManagerService = {
+  getDevice: mockgetDevice,
+};
+jest.mock(
+  '../../app/axios/DeviceManagerService.js',
+  () => mockDeviceManagerService,
+);
+
 jest.setTimeout(30000);
 
 let app;
-
-const mockTenantService = {
-  tenants: [],
-};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -114,7 +119,7 @@ beforeEach(() => {
     mockRedis,
     mockDeviceAuthService,
     mockCertificateAclService,
-    mockTenantService,
+    mockDeviceManagerService,
   );
 });
 
@@ -127,6 +132,7 @@ describe('HTTPS', () => {
 
       it('should successfully execute the request with tenant and deviceId from redis', async () => {
         mockRedis.getAsync.mockReturnValue('test:abc123');
+        mockDeviceManagerService.getDevice.mockReturnValue({ disabled: false });
         await requestHttps(app)
           .post(urlIncomingMessages)
           .set('Content-Type', 'application/json')

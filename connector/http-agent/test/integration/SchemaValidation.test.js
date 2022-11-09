@@ -64,6 +64,15 @@ const mockRedis = {
   setSecurity: mockRedisSetSecurity,
 };
 
+const mockgetDevice = jest.fn();
+const mockDeviceManagerService = {
+  getDevice: mockgetDevice,
+};
+jest.mock(
+  '../../app/axios/DeviceManagerService.js',
+  () => mockDeviceManagerService,
+);
+
 jest.setTimeout(30000);
 
 let app;
@@ -78,6 +87,9 @@ beforeEach(() => {
     ],
     serviceStateMock,
     mockRedis,
+    null,
+    null,
+    mockDeviceManagerService,
   );
 });
 
@@ -88,6 +100,7 @@ describe('HTTPS - Schema validation for single messages', () => {
 
   it("should have required property 'data'", async () => {
     mockRedis.getAsync.mockReturnValue('test:abc123');
+    mockDeviceManagerService.getDevice.mockReturnValue({ disabled: false });
     await requestHttps(app)
       .post(urlIncomingMessages)
       .set('Content-Type', 'application/json')
