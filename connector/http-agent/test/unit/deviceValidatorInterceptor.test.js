@@ -33,7 +33,7 @@ describe('ScopedDIInterceptor', () => {
 
     await interceptor.middleware(req, {}, next);
 
-    expect(next).toBeCalled();
+    expect(next).toHaveBeenCalled();
 
     expect(next.mock.calls[0][0]).toEqual(undefined);
   });
@@ -47,7 +47,7 @@ describe('ScopedDIInterceptor', () => {
 
     await interceptor.middleware(req, {}, next);
 
-    expect(next).toBeCalled();
+    expect(next).toHaveBeenCalled();
 
     expect(next.mock.calls[0][0]).toEqual('Device abc123 está desabilitado. A mensagem será descartada.');
   });
