@@ -24,7 +24,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Create-Devices-Batch'
+              $ref: '#/components/schemas/devices-batch-input-create'
         required: true
       responses:
         '200':
@@ -32,13 +32,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Devices-Batch-Sucess'
+                $ref: '#/components/schemas/ApiResponse_200_devices_create'
         '400':
           description: Invalid type Arguments or field is required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse_400_create'
+
         '503':
           description: Services Unavailable
           content:
@@ -56,7 +57,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Devices-Batch'
+              $ref: '#/components/schemas/devices-batch-input'
         required: true
       responses:
         '200':
@@ -64,9 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ApiResponse_200_devices'
+                $ref: '#/components/schemas/ApiResponse_200_devices'
         '400':
           description: Invalid type Arguments or field is required.
           content:
@@ -135,7 +134,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Templares-Batch'
+              $ref: '#/components/schemas/templares-batch-input'
         required: true
       responses:
         '200':
@@ -143,9 +142,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ApiResponse_200_templates'
+                $ref: '#/components/schemas/ApiResponse_200_templates'
         '400':
           description: Invalid type Arguments or field is required.
           content:
@@ -221,7 +218,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Devices-Batch'
+              $ref: '#/components/schemas/devices-batch-input'
         required: true
       responses:
         '200':
@@ -237,7 +234,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error_required'
+                $ref: '#/components/schemas/error_required_devices'
         '503':
           description: Services Unavailable
           content:
@@ -247,7 +244,7 @@ paths:
 
 components:
   schemas:
-    Create-Devices-Batch:
+    devices-batch-input-create:
       required:
         - name_prefix
         - quantity
@@ -256,18 +253,17 @@ components:
         name_prefix:
           type: string
           example: 'teste_sensor'
+        start_sufix:
+          type: integer
+          format: int32
+          example: 1
         quantity:
           type: integer
           format: int32
-          example: 7
-        associate_certificates:
-          type: boolean
-          example: True
+          example: 4
         templates:
-          type: array
-          items:
-            type: number
-            example: 14
+          type: number
+          example: [14, 111]
         attrs:
           type: object
           example:
@@ -306,28 +302,26 @@ components:
               },
             ]
 
-    Templares-Batch:
+    templares-batch-input:
       type: object
       properties:
         templates:
-          type: array
-          items:
-            type: number
-            example: 14
+          type: number
+          example: [1, 2, 14, 111]
 
-    Devices-Batch:
+    devices-batch-input:
       type: object
       properties:
         devices:
-          example: ['a1d8513', 'a1d8588']
+          example: ['a1d8513', 'a1d8588', 'a1d8555']
 
     Devices-Batch-Sucess:
       type: object
       properties:
-        devices:
+        devices_created:
           type: array
           items:
-            type: number
+            type: string
             example: a1d6f5,a1d6333,a1d8513,a1d8515,a1d8522,a1d8612
 
     Certifictes-Batch:
@@ -348,18 +342,38 @@ components:
             type: number
             example: 14
 
-    error_required:
-      type: object
+    error_required_devices:
       properties:
-        name:
-          type: string
-          example: xxxxx
         type:
           type: string
-          example: FIELD_REQUIRED_BODY
+          example: VALIDATION
         message:
           type: string
-          example: The field in Body is requied.
+          example: '"body.devices[0]" is not allowed to be empty. "body.devices" does not contain 1 required value(s)'
+
+    error_required_devices_create:
+      properties:
+        type:
+          type: string
+          example: VALIDATION
+        message:
+          type: string
+          example: '"body.name_prefix" is not allowed to be empty'
+
+    error_attrs_devices_create:
+      properties:
+        message:
+          type: string
+          example: 'A device can not have repeated attributes.'
+
+    error_required_templates:
+      properties:
+        type:
+          type: string
+          example: VALIDATION
+        message:
+          type: string
+          example: '"body.templates[0]" is not allowed to be empty. "body.templates" does not contain 1 required value(s)'
 
     error_file_upload_required:
       type: object
@@ -384,16 +398,13 @@ components:
           type: string
           example: The field must be greater than 1
 
-    devices_error_not_found:
+    devices_not_found:
       type: object
       properties:
         id:
           type: integer
           format: int64
-          example: a1d8513
-        label:
-          type: string
-          example: device_1
+          example: a1d8555
         type:
           type: string
           example: NOT_FOUND
@@ -408,8 +419,14 @@ components:
           type: integer
           format: int64
           example: 111
+        type:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: Template not found
 
-    templates_error_has_associated_devies:
+    templates_associated_devies:
       type: object
       properties:
         id:
@@ -425,31 +442,10 @@ components:
         message:
           type: string
           example: The template has associated devices
-        associate_devices:
+        associated_devices:
           type: array
           items:
             $ref: '#/components/schemas/associate_devices'
-
-    templates_error_not_found:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 21
-        label:
-          type: string
-          example: modelo_22
-        type:
-          type: string
-          example: NOT_FOUND
-        message:
-          type: string
-          example: Template not found
-        associate_devices:
-          type: array
-          items: { type: string }
-          example: []
 
     associate_devices:
       type: object
@@ -507,23 +503,56 @@ components:
         id:
           type: integer
           format: int64
-          example: a1d8987
+          example: a1d8588
         label:
           type: string
           example: device_2
 
-    templates_200_1:
+    devices_200_create1:
       type: object
       properties:
         id:
           type: integer
           format: int64
-          example: 1
+          example: a1d9899
         label:
           type: string
-          example: modelo_1
+          example: teste_sensor-3
 
-    templates_200_2:
+    devices_200_create2:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d9999
+        label:
+          type: string
+          example: teste_sensor-4
+
+    devices_200_not_create1:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8513
+        label:
+          type: string
+          example: teste_sensor-1
+
+    devices_200_not_create2:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8588
+        label:
+          type: string
+          example: teste_sensor-2
+
+    templates_200_1:
       type: object
       properties:
         id:
@@ -534,8 +563,38 @@ components:
           type: string
           example: modelo_2
 
-    ApiResponse_200_devices:
+    templates_200_2:
       type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 14
+        label:
+          type: string
+          example: modelo_14
+
+    ApiResponse_200_devices_create:
+      properties:
+        devices_created:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/devices_200_create1'
+              - $ref: '#/components/schemas/devices_200_create2'
+        devices_not_created:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/devices_200_not_create1'
+              - $ref: '#/components/schemas/devices_200_not_create2'
+        templates_not_found:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_not_found'
+
+    ApiResponse_200_devices:
       properties:
         devices:
           type: array
@@ -543,6 +602,7 @@ components:
             oneOf:
               - $ref: '#/components/schemas/devices_200_1'
               - $ref: '#/components/schemas/devices_200_2'
+              - $ref: '#/components/schemas/devices_not_found'
 
     ApiResponse_200_templates:
       type: object
@@ -553,37 +613,31 @@ components:
             oneOf:
               - $ref: '#/components/schemas/templates_200_1'
               - $ref: '#/components/schemas/templates_200_2'
+        templates_associated_devices:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_associated_devies'
+        templates_not_found:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_not_found'
 
     ApiResponse_400_create:
-      type: object
-      properties:
-        error:
-          type: array
-          items:
-            oneOf:
-              - $ref: '#/components/schemas/error_required'
-              - $ref: '#/components/schemas/error_invalidate_value'
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/error_attrs_devices_create'
+          - $ref: '#/components/schemas/error_required_devices_create'
 
     ApiResponse_400_remove_devices:
-      type: object
-      properties:
-        error:
-          type: array
-          items:
-            oneOf:
-              - $ref: '#/components/schemas/error_required'
-              - $ref: '#/components/schemas/devices_error_not_found'
+      oneOf:
+        - $ref: '#/components/schemas/error_required_devices'
 
     ApiResponse_400_remove_templates:
-      type: object
-      properties:
-        error:
-          type: array
-          items:
-            oneOf:
-              - $ref: '#/components/schemas/error_required'
-              - $ref: '#/components/schemas/templates_error_has_associated_devies'
-              - $ref: '#/components/schemas/templates_error_not_found'
+      oneOf:
+        - $ref: '#/components/schemas/error_required_templates'
 
     ApiResponse_400_csv:
       type: object
