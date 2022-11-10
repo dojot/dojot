@@ -1,15 +1,18 @@
-import Joi, { Schema } from 'joi'
-
+import Joi, { number, Schema } from 'joi';
 
 export abstract class TemplatesValidation {
   static remove(): Schema {
     return Joi.object({
-      body: Joi.object().keys({
+      body: Joi.object({
         templates: Joi.array()
-          .items(Joi.number().integer())
+          .items(
+            Joi.string().invalid().forbidden(),
+            Joi.number().integer().required(),
+          )
           .min(1)
-          .required(),
+          .required()
+          .unique(),
       }).required(),
-    })
+    });
   }
 }
