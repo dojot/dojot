@@ -1,6 +1,5 @@
 import { Express } from 'express';
 import { Logger, ServiceStateManager, WebUtils } from '@dojot/microservice-sdk';
-
 import {
   DefaultErrorHandlerInterceptor,
   KafkaProducerClientInterceptor,
@@ -8,8 +7,9 @@ import {
 } from './interceptors';
 import { AppConfig } from '../types';
 import { KafkaConsumer, TenantManager, KafkaProducer } from '../kafka';
-import { DeviceRoutes, TemplateRoutes } from '../app/routes';
+import { DeviceRoutes } from '../app/routes';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
+import { TemplateRoutes } from './routes/Template.routes';
 
 export class App {
   constructor(
@@ -61,7 +61,12 @@ export class App {
         ),
       ],
       routes: [
-        DeviceRoutes.use(this.logger, this.KafkaProducer, this.prismaUtils),
+        DeviceRoutes.use(
+          this.logger,
+          this.KafkaProducer,
+          this.prismaUtils,
+          this.appconfig,
+        ),
         TemplateRoutes.use(this.logger, this.KafkaProducer, this.prismaUtils),
       ].flat(),
     });

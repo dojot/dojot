@@ -37,7 +37,6 @@ describe('Prisma.utils', () => {
   });
 
   it('should generate random of size 6', async () => {
-    const FakePrismaClient = PrismaClientMock.new();
     expect(prismaUtils.getRandomicHexIdDevices().length).toBe(6);
   });
 });

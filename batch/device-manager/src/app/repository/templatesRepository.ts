@@ -5,27 +5,65 @@ export class TemplatesRepository {
   constructor(private logger: Logger) {
     this.logger.info('Create Constructor TemplatesRepository', {});
   }
-
-  async findByAssociateDevicesAndTemplate(prisma: PrismaClient, id: number) {
+  /**
+   * Method Search Templates have Associated with devices or no.
+   * @param prisma
+   * @param id
+   * @returns Return Obejct Array with templates wit templates_devices and Devices.
+   */
+  async findByTemplateAssociatesDevicesOrNot(prisma: PrismaClient, id: number) {
     try {
-      return await prisma.device_template.findMany({
-        where: { template_id: id },
+      return await prisma.templates.findMany({
+        where: { id: id },
+        include: {
+          device_template: {
+            include: {
+              devices: {},
+            },
+          },
+        },
       });
-    } catch (error) {
-      this.logger.debug(
-        'TemplatesServices - findByAssociateDevicesAndTemplate ',
-        { error: error },
-      );
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('TemplatesRepository - remove ', {
+        error: error.message,
+      });
     }
   }
-
+  /**
+   * Method Search Template with id.
+   * @param prisma
+   * @param id
+   * @returns Return one object Template.
+   */
+  async findById(prisma: PrismaClient, id: number) {
+    try {
+      return await prisma.templates.findUnique({
+        where: { id: id },
+      });
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('TemplatesRepository - remove ', {
+        error: error.message,
+      });
+    }
+  }
+  /**
+   * Method remove one Template with id parameter.
+   * @param prisma
+   * @param id
+   * @returns  Return object null or template.
+   */
   async remove(prisma: PrismaClient, id: number) {
     try {
       return await prisma.templates.delete({
         where: { id: id },
       });
-    } catch (error) {
-      this.logger.debug('TemplatesServices - remove ', { error: error });
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('TemplatesRepository - remove ', {
+        error: error.message,
+      });
     }
   }
 }

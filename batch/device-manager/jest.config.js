@@ -9,12 +9,9 @@ module.exports = {
   coveragePathIgnorePatterns: [
     'tests/mocks',
     '.mock.ts',
+    'build',
     'src/kafka',
-    'src/app/repository/templatesRepository.ts',
     'src/app/interceptors/PrismaClient.interceptor.ts',
-    'src/app/controller/templates_batch.ts',
-    'src/app/services/templatesServices.ts',
-    'src/app/routes/Template.routes.ts',
     'tests/integration/setup/index.js',
   ],
   transform: {

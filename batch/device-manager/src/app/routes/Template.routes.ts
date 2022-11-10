@@ -8,6 +8,7 @@ import {
 } from '../interceptors';
 import { KafkaProducer } from 'src/kafka/kafka-producer';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
+import { TemplatesRepository } from '../repository';
 
 export abstract class TemplateRoutes {
   static use(
@@ -15,7 +16,12 @@ export abstract class TemplateRoutes {
     kafkaProducer: KafkaProducer,
     prismaUtils: PrismaUtils,
   ) {
-    const templatesServices = new TemplatesServices(logger);
+    const templatesRepository = new TemplatesRepository(logger);
+    const templatesServices = new TemplatesServices(
+      logger,
+      templatesRepository,
+      kafkaProducer,
+    );
     const templatesBatchController = new TemplatesBatchController(
       logger,
       templatesServices,

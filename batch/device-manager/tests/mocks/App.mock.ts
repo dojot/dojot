@@ -4,7 +4,7 @@ import {
   TemplatesRepository,
   AttrsRepository,
 } from 'src/app/repository';
-import { DevicesServices } from 'src/app/services/';
+import { DevicesServices, TemplatesServices } from 'src/app/services/';
 import { PrismaUtils } from '../../src/utils/Prisma.utils';
 
 export const AppMock = {
@@ -13,6 +13,7 @@ export const AppMock = {
     const DeviceServiceMock = mockDeep<DevicesServices>();
     const DeviceRepositoryMock = mockDeep<DevicesRepository>();
     const TemplatesRepositoryMock = mockDeep<TemplatesRepository>();
+    const TemplatesServiceMock = mockDeep<TemplatesServices>();
     const AttrsRepositoryMock = mockDeep<AttrsRepository>();
 
     return {
@@ -20,6 +21,7 @@ export const AppMock = {
       DeviceServiceMock,
       DeviceRepositoryMock,
       TemplatesRepositoryMock,
+      TemplatesServiceMock,
       AttrsRepositoryMock,
     };
   },
