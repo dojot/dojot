@@ -9,7 +9,7 @@ export class AttrsRepository {
 
   async findById(prisma: PrismaClient, id: number) {
     try {
-      return await prisma.attrs.findMany({
+      return await prisma.attrs.findUnique({
         where: { id: id },
       });
     } catch (e: unknown) {

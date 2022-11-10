@@ -102,6 +102,13 @@ export class DevicesServices {
     }
   }
 
+  /**
+   * Method Create Devices in batch
+   * @param connection
+   * @param dto
+   * @param tenant_id
+   * @returns Return Array creted Devices and Array not created and Array Not Found Templates.
+   */
   async create(
     connection: PrismaClient,
     dto: CreateDevicesBatchDto,
@@ -113,11 +120,8 @@ export class DevicesServices {
       let attrs_not_found: Array<any> = [];
       let start_sufix = dto.start_sufix;
 
-      await this.validate_repeated_attrs(connection, dto);
-
       const array_asserts_templates =
         await this.assert_all_templates_valid_exits(connection, dto);
-
       for (let index = 0; index < dto.quantity; index++) {
         let name_prefix_device = dto.name_prefix + '-' + start_sufix;
         let device_id_generated = this.prismaUtils.getRandomicHexIdDevices();
@@ -232,34 +236,5 @@ export class DevicesServices {
     });
     await Promise.all(promisse_templates);
     return { templates_found, templates_not_found };
-  }
-
-  /**
-   * Method check exists label repeated in attrs array.
-   * @param connection
-   * @param dto
-   * @return thow excpetion with message.
-   */
-  async validate_repeated_attrs(
-    connection: PrismaClient,
-    dto: CreateDevicesBatchDto,
-  ): Promise<any> {
-    const BreakError = {};
-    try {
-      if (dto.attrs.length != 0) {
-        const promisse_attrs = dto.attrs.map((attrs_result_1) => {
-          dto.attrs.map((attrs_result_2) => {
-            if (attrs_result_1.id !== attrs_result_2.id) {
-              if (attrs_result_1.label === attrs_result_2.label) {
-                throw new Error('A device can not have repeated attributes.');
-              }
-            }
-          });
-        });
-        await Promise.all(promisse_attrs);
-      }
-    } catch (error) {
-      if (error !== BreakError) throw error;
-    }
   }
 }

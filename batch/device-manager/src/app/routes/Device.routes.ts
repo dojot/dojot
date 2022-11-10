@@ -6,6 +6,7 @@ import { DevicesValidation } from '../validations/Device.validations';
 import {
   ValidationInterceptor,
   DisconnectPrismaInterceptor,
+  ValidationAttrsInterceptor,
 } from '../interceptors';
 import { KafkaProducer } from '../../kafka/kafka-producer';
 import { DevicesRepository, TemplatesRepository } from '../repository';
@@ -59,6 +60,7 @@ export abstract class DeviceRoutes {
             method: 'post',
             middleware: [
               ValidationInterceptor.use(DevicesValidation.create()),
+              ValidationAttrsInterceptor.use(DevicesValidation.create()),
               devicesBatchController.create.bind(devicesBatchController),
               DisconnectPrismaInterceptor.use(prismaUtils),
             ],

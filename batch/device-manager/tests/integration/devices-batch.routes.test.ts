@@ -25,7 +25,7 @@ describe('Devices-batch.routes', () => {
     devices: ['1', '2'],
   };
 
-  it('should return the ids and label of devices removed', async () => {
+  it('should return response status 200 and ids and label of devices removed', async () => {
     const { PrismaUtilsMock } = AppMock.new();
     const { KafkaConsumerMock, TenantManagerMock, KafkaProducerMock } =
       KafkaMock.new([AuthSetup.getTenantInfo()]);
@@ -49,5 +49,34 @@ describe('Devices-batch.routes', () => {
 
     server.close();
     expect(response.status).toBe(200);
+  });
+
+  it('should return response status 400 with validation field', async () => {
+    const removeDevicesBatchDto: RemoveDevicesBatchDto = {
+      devices: [],
+    };
+    const { PrismaUtilsMock } = AppMock.new();
+    const { KafkaConsumerMock, TenantManagerMock, KafkaProducerMock } =
+      KafkaMock.new([AuthSetup.getTenantInfo()]);
+
+    const app = new App(
+      LoggerMock.new(),
+      ConfigMock.new(),
+      PrismaUtilsMock,
+      KafkaConsumerMock,
+      TenantManagerMock,
+      KafkaProducerMock,
+      ServiceStateMock.new(),
+    );
+    KafkaProducerMock.isConnected.mockResolvedValue(true);
+    const server = await app.init();
+
+    const response = await request(server)
+      .put('/devices_batch')
+      .set('Authorization', `Bearer ${AuthSetup.signJWT()}`)
+      .send(removeDevicesBatchDto);
+
+    server.close();
+    expect(response.status).toBe(400);
   });
 });
