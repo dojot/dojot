@@ -2,24 +2,15 @@ import { Logger } from '@dojot/microservice-sdk'
 import { NextFunction, Request, Response } from 'express'
 
 import { DeviceService } from 'src/app/services'
-import { DeviceReportQueue } from 'src/app/jobs'
-import { CreateDeviceReportDto } from 'src/app/dto'
 
 export class DeviceController {
-  constructor(
-    private logger: Logger,
-    private deviceService: DeviceService,
-    private deviceReportQueue: DeviceReportQueue,
-  ) {}
+  constructor(private logger: Logger, private deviceService: DeviceService) {}
 
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       this.logger.debug('create: creating device report', {})
 
-      const dto = req.body as CreateDeviceReportDto
-      const report = await this.deviceService.create(req.prisma, dto)
-
-      await this.deviceReportQueue.createReport(report, {
+      const report = await this.deviceService.create(req.prisma, req.body, {
         lang: req.lang,
         tenant: req.tenant.id,
       })

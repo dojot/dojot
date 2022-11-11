@@ -1,6 +1,4 @@
-import axios, { AxiosInstance } from 'axios'
-
-import { Config } from 'src/types'
+import { WebUtils } from '@dojot/microservice-sdk'
 
 type GetDeviceDataFilters = {
   dateFrom?: string
@@ -35,11 +33,7 @@ type GetDeviceDataReturn = {
 }
 
 export class RetrieverApi {
-  private api: AxiosInstance
-
-  constructor(private config: Config) {
-    this.api = axios.create({ baseURL: `${this.config.apis.retriever}/tss/v1` })
-  }
+  constructor(private api: WebUtils.DojotHttpClient) {}
 
   async getDeviceData(
     deviceId: string,
@@ -53,14 +47,13 @@ export class RetrieverApi {
     if (filters?.page) params.append('page', String(filters.page))
     if (filters?.order) params.append('order', filters.order)
 
-    const response = await this.api.get<GetDeviceDataReturn>(
-      `/devices/${deviceId}/data?${params.toString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${metadata.token}`,
-        },
+    const response: { data: GetDeviceDataReturn } = await this.api.request({
+      method: 'GET',
+      url: `/devices/${deviceId}/data?${params.toString()}`,
+      headers: {
+        Authorization: `Bearer ${metadata.token}`,
       },
-    )
+    })
 
     return response.data
   }

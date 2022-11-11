@@ -33,14 +33,6 @@ jest.mock('@prisma/client', () => ({
   })),
 }))
 
-jest.mock('axios', () => {
-  return {
-    create: jest.fn(() => ({
-      delete: jest.fn(() => Promise.resolve({})),
-    })),
-  }
-})
-
 jest.mock('bull')
 
 describe('Report.routes', () => {

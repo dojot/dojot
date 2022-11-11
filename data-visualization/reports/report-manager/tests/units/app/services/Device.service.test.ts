@@ -1,11 +1,12 @@
 import { ReportType } from '@prisma/client'
 
-import { PrismaClientMock } from 'tests/mocks'
+import { AppMock, PrismaClientMock } from 'tests/mocks'
 import { DeviceService } from 'src/app/services'
-import { REPORT_FORMATS, REPORT_TYPES } from 'src/app/constants'
+import { LOCALES, REPORT_FORMATS, REPORT_TYPES } from 'src/app/constants'
 
 describe('Device.service', () => {
-  const deviceService = new DeviceService()
+  const { DeviceReportQueueMock } = AppMock.new()
+  const deviceService = new DeviceService(DeviceReportQueueMock)
 
   describe('create', () => {
     const devices = [
@@ -35,12 +36,19 @@ describe('Device.service', () => {
       const FakePrismaClient = PrismaClientMock.new()
       FakePrismaClient.reportType.findUnique.mockResolvedValue(reportType)
 
-      await deviceService.create(FakePrismaClient, {
-        devices,
-        name: 'Report',
-        singleReportFile: true,
-        format: REPORT_FORMATS.CSV,
-      })
+      await deviceService.create(
+        FakePrismaClient,
+        {
+          devices,
+          name: 'Report',
+          singleReportFile: true,
+          format: REPORT_FORMATS.CSV,
+        },
+        {
+          tenant: 'test',
+          lang: LOCALES.PT_BR,
+        },
+      )
 
       expect(FakePrismaClient.reportType.findUnique).toBeCalled()
       expect(FakePrismaClient.report.create).toBeCalled()
@@ -54,11 +62,18 @@ describe('Device.service', () => {
         ({ data }) => Promise.resolve(data) as never,
       )
 
-      const report = await deviceService.create(FakePrismaClient, {
-        devices,
-        name: 'Report',
-        format: REPORT_FORMATS.CSV,
-      })
+      const report = await deviceService.create(
+        FakePrismaClient,
+        {
+          devices,
+          name: 'Report',
+          format: REPORT_FORMATS.CSV,
+        },
+        {
+          tenant: 'test',
+          lang: LOCALES.PT_BR,
+        },
+      )
 
       expect(report.singleReportFile).toBe(true)
     })
@@ -67,12 +82,19 @@ describe('Device.service', () => {
       const FakePrismaClient = PrismaClientMock.new()
 
       const fn = () => {
-        return deviceService.create(FakePrismaClient, {
-          devices,
-          name: 'Report',
-          singleReportFile: true,
-          format: REPORT_FORMATS.CSV,
-        })
+        return deviceService.create(
+          FakePrismaClient,
+          {
+            devices,
+            name: 'Report',
+            singleReportFile: true,
+            format: REPORT_FORMATS.CSV,
+          },
+          {
+            tenant: 'test',
+            lang: LOCALES.PT_BR,
+          },
+        )
       }
 
       expect(fn).rejects.toThrow(Error)

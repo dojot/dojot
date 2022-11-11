@@ -32,18 +32,21 @@ export class App {
     private kafkaConsumer: KafkaConsumer,
     private tenantManager: TenantManager,
     private serviceState: ServiceStateManager,
+    private retrieverHttpClient: WebUtils.DojotHttpClient,
+    private fileManagementHttpClient: WebUtils.DojotHttpClient,
   ) {}
 
   private createExpress(): Express {
     const { createKeycloakAuthInterceptor, jsonBodyParsingInterceptor } =
       WebUtils.framework.interceptors
 
+    const retrieverApi = new RetrieverApi(this.retrieverHttpClient)
+    const fileManagementApi = new FileManagementApi(
+      this.fileManagementHttpClient,
+    )
+
     const localeManager = new LocaleManager(this.logger)
-
     const deviceReports = new DeviceReports(this.logger, localeManager)
-
-    const retrieverApi = new RetrieverApi(this.config)
-    const fileManagementApi = new FileManagementApi(this.config)
 
     const reportAttemptService = new ReportAttemptService()
     const reportFileService = new ReportFileService()
@@ -65,12 +68,8 @@ export class App {
       deviceReportProcessor,
     )
 
-    const deviceService = new DeviceService()
-    const deviceController = new DeviceController(
-      this.logger,
-      deviceService,
-      deviceReportQueue,
-    )
+    const deviceService = new DeviceService(deviceReportQueue)
+    const deviceController = new DeviceController(this.logger, deviceService)
 
     const reportService = new ReportService(this.logger, fileManagementApi)
     const reportController = new ReportController(this.logger, reportService)

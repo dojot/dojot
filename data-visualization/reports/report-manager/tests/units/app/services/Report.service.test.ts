@@ -25,9 +25,11 @@ describe('Report.service', () => {
     it('should find no reports and return an empty array', async () => {
       const FakePrismaClient = PrismaClientMock.new()
       FakePrismaClient.report.findMany.mockResolvedValue([])
-      const reports = await reportService.findMany(FakePrismaClient)
+      FakePrismaClient.report.count.mockResolvedValue(0)
+      const { reports, total } = await reportService.findMany(FakePrismaClient)
       expect(FakePrismaClient.report.findMany).toBeCalled()
       expect(reports).toHaveLength(0)
+      expect(total).toBe(0)
     })
 
     it('should parse the params of the reports array', async () => {
@@ -35,19 +37,17 @@ describe('Report.service', () => {
 
       const fakeReport1 = { params: '{ "test": "test" }' } as Report
       const fakeReport2 = {} as Report
+      const fakeReports = [fakeReport1, fakeReport2]
 
-      FakePrismaClient.report.findMany.mockResolvedValue([
-        fakeReport1,
-        fakeReport2,
-      ])
+      FakePrismaClient.report.findMany.mockResolvedValue(fakeReports)
+      FakePrismaClient.report.count.mockResolvedValue(fakeReports.length)
 
-      const [firstReport, secondReport] = await reportService.findMany(
-        FakePrismaClient,
-      )
+      const { reports, total } = await reportService.findMany(FakePrismaClient)
 
       expect(FakePrismaClient.report.findMany).toBeCalled()
-      expect(firstReport.params).toEqual({ test: 'test' })
-      expect(secondReport.params).toBeFalsy()
+      expect(reports[0].params).toEqual({ test: 'test' })
+      expect(reports[1].params).toBeFalsy()
+      expect(total).toBe(fakeReports.length)
     })
 
     it('should use page and pageSize params', async () => {

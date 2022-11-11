@@ -1,41 +1,37 @@
-import { ConfigMock } from 'tests/mocks'
 import { RetrieverApi } from 'src/app/apis'
-
-const FAKE_RETURNED_DATA = {
-  data: {
-    ts: new Date().toISOString(),
-    attrs: [
-      { label: 'one', value: 1 },
-      { label: 'two', value: 2 },
-    ],
-  },
-  paging: {
-    current: {
-      number: 1,
-      url: 'url',
-    },
-  },
-}
-
-jest.mock('axios', () => {
-  return {
-    create: jest.fn(() => ({
-      get: jest.fn(() => ({
-        data: FAKE_RETURNED_DATA,
-      })),
-    })),
-  }
-})
+import { DojotHttpClientMock } from 'tests/mocks'
 
 describe('Retriever.api', () => {
+  const FAKE_RETURNED_DATA = {
+    data: {
+      ts: new Date().toISOString(),
+      attrs: [
+        { label: 'one', value: 1 },
+        { label: 'two', value: 2 },
+      ],
+    },
+    paging: {
+      current: {
+        number: 1,
+        url: 'url',
+      },
+    },
+  }
+
+  const FAKE_DOJOT_CLIENT_RESPONSE = { data: FAKE_RETURNED_DATA } as never
+
   it('should get device data with no filters', async () => {
-    const retrieverApi = new RetrieverApi(ConfigMock.new())
+    const FakeDojotClient = DojotHttpClientMock.new()
+    FakeDojotClient.request.mockResolvedValue(FAKE_DOJOT_CLIENT_RESPONSE)
+    const retrieverApi = new RetrieverApi(FakeDojotClient)
 
     const token = '123456'
     const data = await retrieverApi.getDeviceData('id', { token })
 
     expect(data).toEqual(FAKE_RETURNED_DATA)
-    expect(retrieverApi['api'].get).toBeCalledWith(expect.any(String), {
+    expect(retrieverApi['api'].request).toBeCalledWith({
+      method: 'GET',
+      url: expect.any(String),
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -43,7 +39,9 @@ describe('Retriever.api', () => {
   })
 
   it('should get device data using filters', async () => {
-    const retrieverApi = new RetrieverApi(ConfigMock.new())
+    const FakeDojotClient = DojotHttpClientMock.new()
+    FakeDojotClient.request.mockResolvedValue(FAKE_DOJOT_CLIENT_RESPONSE)
+    const retrieverApi = new RetrieverApi(FakeDojotClient)
 
     const token = '123456'
     const filters = {
@@ -66,13 +64,12 @@ describe('Retriever.api', () => {
     const data = await retrieverApi.getDeviceData('id', { token }, filters)
 
     expect(data).toEqual(FAKE_RETURNED_DATA)
-    expect(retrieverApi['api'].get).toBeCalledWith(
-      expect.stringContaining(`?${params.toString()}`),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    expect(retrieverApi['api'].request).toBeCalledWith({
+      method: 'GET',
+      url: expect.stringContaining(`?${params.toString()}`),
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
-    )
+    })
   })
 })

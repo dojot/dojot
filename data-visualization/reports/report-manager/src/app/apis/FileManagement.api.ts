@@ -1,7 +1,5 @@
 import FormData from 'form-data'
-import axios, { AxiosInstance } from 'axios'
-
-import { Config } from 'src/types'
+import { WebUtils } from '@dojot/microservice-sdk'
 
 type TokenMetadata = {
   token: string
@@ -40,11 +38,7 @@ type RemoveFileReturn = {
 }
 
 export class FileManagementApi {
-  private api: AxiosInstance
-
-  constructor(private config: Config) {
-    this.api = axios.create({ baseURL: `${this.config.apis.filemgmt}/api/v1` })
-  }
+  constructor(private api: WebUtils.DojotHttpClient) {}
 
   private getBearerToken(token: string): string {
     if (token.includes('Bearer')) return token
@@ -56,15 +50,14 @@ export class FileManagementApi {
     formData.append('file', data.file)
     formData.append('path', data.path)
 
-    const response = await this.api.put<UploadFileReturn>(
-      '/files/upload',
-      formData,
-      {
-        headers: {
-          Authorization: this.getBearerToken(metadata.token),
-        },
-      },
-    )
+    const response: { data: UploadFileReturn } = await this.api.request({
+      method: 'PUT',
+      url: '/files/upload',
+      data: formData,
+      headers: formData.getHeaders({
+        Authorization: this.getBearerToken(metadata.token),
+      }),
+    })
 
     return response.data
   }
@@ -72,14 +65,13 @@ export class FileManagementApi {
   async delete(path: string, metadata: TokenMetadata) {
     const params = new URLSearchParams({ path })
 
-    const response = await this.api.delete<RemoveFileReturn>(
-      `/files/remove?${params.toString()}`,
-      {
-        headers: {
-          Authorization: this.getBearerToken(metadata.token),
-        },
+    const response: { data: RemoveFileReturn } = await this.api.request({
+      method: 'DELETE',
+      url: `/files/remove?${params.toString()}`,
+      headers: {
+        Authorization: this.getBearerToken(metadata.token),
       },
-    )
+    })
 
     return response.data
   }

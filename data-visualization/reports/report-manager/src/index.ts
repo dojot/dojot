@@ -51,6 +51,24 @@ const tenantManager = new TenantManager(
   dojotHttpClient,
 )
 
+const retrieverHttpClient = new WebUtils.DojotHttpClient({
+  logger,
+  defaultRetryDelay: 10000,
+  defaultMaxNumberAttempts: 5,
+  defaultClientOptions: {
+    baseURL: `${config.apis.retriever}/tss/v1`,
+  },
+})
+
+const fileManagementHttpClient = new WebUtils.DojotHttpClient({
+  logger,
+  defaultRetryDelay: 10000,
+  defaultMaxNumberAttempts: 5,
+  defaultClientOptions: {
+    baseURL: `${config.apis.filemgmt}/api/v1`,
+  },
+})
+
 const secretFileHandler = new WebUtils.SecretFileHandler(config, logger)
 
 secretFileHandler
@@ -66,6 +84,8 @@ secretFileHandler
         kafkaConsumer,
         tenantManager,
         serviceState,
+        retrieverHttpClient,
+        fileManagementHttpClient,
       ).init()
 
       const handleCloseServerAndExitProcess = () => {

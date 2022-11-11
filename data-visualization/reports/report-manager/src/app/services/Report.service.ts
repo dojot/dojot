@@ -55,7 +55,9 @@ export class ReportService {
       return { ...report, params: this.parseParams(report.params) }
     })
 
-    return reportsWithParsedParams
+    const total = await this.count(prisma)
+
+    return { reports: reportsWithParsedParams, total }
   }
 
   async findById(prisma: PrismaClient, id: string) {

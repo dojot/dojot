@@ -7,8 +7,10 @@ describe('Report.controller', () => {
       const { ReportServiceMock } = AppMock.new()
 
       const fakeReports = [{ id: '123' }, { id: '456' }]
-      ReportServiceMock.findMany.mockResolvedValue(fakeReports as never)
-      ReportServiceMock.count.mockResolvedValue(fakeReports.length)
+      ReportServiceMock.findMany.mockResolvedValue({
+        reports: fakeReports as never,
+        total: fakeReports.length,
+      })
 
       const reportController = new ReportController(
         LoggerMock.new(),
@@ -40,7 +42,6 @@ describe('Report.controller', () => {
         }),
       )
 
-      expect(ReportServiceMock.count).toBeCalled()
       expect(ReportServiceMock.findMany).toBeCalled()
       expect(ResponseMock.status).toBeCalledWith(200)
       expect(NextFunctionMock).toBeCalled()
@@ -50,8 +51,10 @@ describe('Report.controller', () => {
       const { ReportServiceMock } = AppMock.new()
 
       const fakeReports = [{ id: '123' }, { id: '456' }]
-      ReportServiceMock.findMany.mockResolvedValue(fakeReports as never)
-      ReportServiceMock.count.mockResolvedValue(fakeReports.length)
+      ReportServiceMock.findMany.mockResolvedValue({
+        reports: fakeReports as never,
+        total: fakeReports.length,
+      })
 
       const reportController = new ReportController(
         LoggerMock.new(),
@@ -91,7 +94,6 @@ describe('Report.controller', () => {
         pageSize: Number(RequestMock.query.pageSize),
       })
 
-      expect(ReportServiceMock.count).toBeCalled()
       expect(ResponseMock.status).toBeCalledWith(200)
       expect(NextFunctionMock).toBeCalled()
     })

@@ -16,13 +16,11 @@ export class ReportController {
         ? Number(req.query.pageSize)
         : undefined
 
-      const reports = await this.reportService.findMany(req.prisma, {
+      const { reports, total } = await this.reportService.findMany(req.prisma, {
         name,
         page,
         pageSize,
       })
-
-      const total = await this.reportService.count(req.prisma)
 
       res.status(200).json({
         reports,
@@ -33,7 +31,7 @@ export class ReportController {
         },
       })
 
-      this.logger.debug(`findMany: ${reports.length} reports found`, {
+      this.logger.debug(`findMany: ${reports.length}/${total} reports found`, {
         query: req.query,
       })
 
