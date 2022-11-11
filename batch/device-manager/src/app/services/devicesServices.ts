@@ -137,8 +137,8 @@ export class DevicesServices {
             );
           if (assert_devices_exists) {
             devices_not_create_result_batch.push({
-              id: assert_devices_exists?.id,
-              label: assert_devices_exists?.label,
+              id: assert_devices_exists.id,
+              label: assert_devices_exists.label,
             });
           } else {
             /**
@@ -157,8 +157,8 @@ export class DevicesServices {
                * Add element device in the Array to return.
                */
               devices_create_result_batch.push({
-                id: createdDevices?.id,
-                label: createdDevices?.label,
+                id: createdDevices.id,
+                label: createdDevices.label,
               });
               this.logger.debug('Devices created add Array.', {
                 devices_create_result_batch,

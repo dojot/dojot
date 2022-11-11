@@ -1,6 +1,5 @@
 // Here the unit tests will be written.
 import { describe, expect } from '@jest/globals';
-import { build } from 'joi';
 import { TemplatesValidation } from '../../../../src/app/validations/Template.validations';
 
 describe('Test Validation input body Remove in bath templates', () => {

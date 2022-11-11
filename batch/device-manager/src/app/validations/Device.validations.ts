@@ -17,7 +17,7 @@ export abstract class DevicesValidation {
       body: Joi.object({
         name_prefix: Joi.string().required(),
         start_sufix: Joi.number().integer().positive().required(),
-        quantity: Joi.number().integer().positive().min(1).max(999).required(),
+        quantity: Joi.number().integer().positive().min(1).required(),
         templates: Joi.array()
           .min(1)
           .items(

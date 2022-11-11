@@ -1,6 +1,6 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
-import { devices, device_template, templates } from '@prisma/client';
+import { devices, templates } from '@prisma/client';
 import { RemoveTemplatesBatchDto } from 'src/types';
 import { TemplatesServices } from '../../../../src/app/services/templatesServices';
 import { KafkaMock, LoggerMock, PrismaClientMock } from '../../../mocks';

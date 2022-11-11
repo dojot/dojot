@@ -1,4 +1,4 @@
-import Joi, { number, Schema } from 'joi';
+import Joi, { Schema } from 'joi';
 
 export abstract class TemplatesValidation {
   static remove(): Schema {
