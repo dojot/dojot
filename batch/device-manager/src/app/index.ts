@@ -61,12 +61,7 @@ export class App {
         ),
       ],
       routes: [
-        DeviceRoutes.use(
-          this.logger,
-          this.KafkaProducer,
-          this.prismaUtils,
-          this.appconfig,
-        ),
+        DeviceRoutes.use(this.logger, this.KafkaProducer, this.prismaUtils),
         TemplateRoutes.use(this.logger, this.KafkaProducer, this.prismaUtils),
       ].flat(),
     });
