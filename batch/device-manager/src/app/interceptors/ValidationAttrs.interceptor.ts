@@ -36,7 +36,7 @@ export abstract class ValidationAttrsInterceptor {
   static validate_label_repetead(dto: CreateDevicesBatchDto) {
     let message_error = '';
     if (dto.attrs?.length != 0) {
-      const promisse_attrs = dto.attrs?.map((attrs_result_1) => {
+      dto.attrs?.map((attrs_result_1) => {
         dto.attrs?.map((attrs_result_2) => {
           if (attrs_result_1.id !== attrs_result_2.id) {
             if (attrs_result_1.label === attrs_result_2.label) {

@@ -1,14 +1,8 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
-import { EventKafka, KafkaProducer } from '../../kafka/kafka-producer';
-import {
-  RemoveTemplatesBatchDto,
-  Templates,
-  Templates_Associate_Devices,
-  Templates_Not_Found,
-} from 'src/types';
+import { KafkaProducer } from '../../kafka/kafka-producer';
+import { RemoveTemplatesBatchDto } from 'src/types';
 import { TemplatesRepository } from '../repository';
-import { object } from 'joi';
 
 export class TemplatesServices {
   constructor(

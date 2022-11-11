@@ -1,6 +1,5 @@
 import { Logger } from '@dojot/microservice-sdk';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
+import { PrismaClient } from '@prisma/client';
 
 export class DevicesRepository {
   constructor(private logger: Logger) {

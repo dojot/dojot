@@ -1,5 +1,3 @@
-import { devices } from '@prisma/client';
-import { number } from 'joi';
 import { Devices } from './Device.types';
 
 export interface RemoveTemplatesBatchDto {
