@@ -46,7 +46,7 @@ class DeviceAuthService {
             'Content-Type': 'application/json',
           },
         },
-        deviceAuthConfig.request.timeout.ms,
+        deviceAuthConfig['request.timeout.ms'],
         3,
       );
       return true;
