@@ -113,14 +113,14 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, true, mockLogger);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, mockLogger);
   });
 
   test('queryByField - test ok 1', async () => {
-    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: '"value"' })) };
-    const tableMeta2 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: '10' })) };
-    const tableMeta3 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'true' })) };
-    const tableMeta4 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'null' })) };
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
+    const tableMeta2 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 10 })) };
+    const tableMeta3 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: true })) };
+    const tableMeta4 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: null })) };
     mockGetQueryRows.mockImplementationOnce(
       (fluxQuery, { next, error, complete }) => {
         next('x1', tableMeta1);
@@ -148,7 +148,7 @@ describe('Test Influx Data Query', () => {
 
 
   test('queryByField - test ok 2', async () => {
-    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: '"value"' })) };
+    const tableMeta1 = { toObject: jest.fn(() => ({ _time: 'ts-time', _value: 'value' })) };
     mockGetQueryRows.mockImplementationOnce(
       (fluxQuery, { next, error, complete }) => {
         next('x1', tableMeta1);
@@ -199,9 +199,9 @@ describe('Test Influx Data Query', () => {
           _time: 'ts-time-1',
           'dojot.array': '',
           'dojot.nulled': '',
-          'dojot.bool': 'false',
-          'dojot.float': '15.5',
-          'dojot.string': '"value"',
+          'dojot.bool': false,
+          'dojot.float': 15.5,
+          'dojot.string': 'value',
         })),
     };
 
@@ -211,9 +211,9 @@ describe('Test Influx Data Query', () => {
           result: '_result',
           table: 0,
           _time: 'ts-time-2',
-          'dojot.bool': 'true',
-          'dojot.float': '20',
-          'dojot.string': '"value2"',
+          'dojot.bool': true,
+          'dojot.float': 20,
+          'dojot.string': 'value2',
           'dojot.null': null,
         })),
     };
@@ -224,9 +224,9 @@ describe('Test Influx Data Query', () => {
           result: '_result',
           table: 0,
           _time: 'ts-time-3',
-          'dojot.bool': 'false',
-          'dojot.float': '100000',
-          'dojot.string': '"value3"',
+          'dojot.bool': false,
+          'dojot.float': 100000,
+          'dojot.string': 'value3',
           'dojot.test': null,
         })),
     };
@@ -309,7 +309,7 @@ describe('Test Influx Data Query', () => {
           _time: 'ts-time-1',
           'dojot.bool': false,
           'dojot.float': 15.5,
-          'dojot.string': '"value"',
+          'dojot.string': 'value',
         })),
     };
     mockGetQueryRows.mockImplementationOnce(
@@ -372,7 +372,7 @@ describe('Test Influx Data Query', () => {
 
   /* Test block */
   test('Instantiate class', () => {
-    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, false, mockLogger);
+    dataQuery = new DataQuery('defaultBucket', mockInfluxDBConnection, mockLogger);
   });
 
   test('queryByField - test ok 1', async () => {
