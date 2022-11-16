@@ -22,7 +22,7 @@ describe('App Dependencies', () => {
     expect(dependencies.serviceState).toBeDefined();
     expect(dependencies.web.httpServer).toBeDefined();
   });
-
+  
   it('Should throw an error when initialization of a dependency fails', () => {
     mockServer.mockImplementationOnce(() => {
       throw new Error('Error');

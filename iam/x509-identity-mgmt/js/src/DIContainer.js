@@ -16,7 +16,7 @@ const {
   WebUtils: {
     createServer,
     SecretFileHandler,
-    DojotClientHttp,
+    DojotHttpClient,
     framework,
   },
 } = require('@dojot/microservice-sdk');
@@ -119,7 +119,7 @@ function createObject(rawConfig) {
   const modules = {
     logger: asClass(Logger, {
       injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({ sid: 'X509-Identity-Mgmt - Main' }),
+      injector: () => ({ sid: 'X509-Identity-Mgmt' }),
       lifetime: Lifetime.SINGLETON,
     }),
 
@@ -132,7 +132,7 @@ function createObject(rawConfig) {
       lifetime: Lifetime.SINGLETON,
     }),
 
-    dojotClientHttp: asClass(DojotClientHttp, {
+    dojotHttpClient: asClass(DojotHttpClient, {
       injectionMode: InjectionMode.PROXY,
       injector: () => ({
         defaultClientOptions: { timeout: 12000 },
@@ -428,7 +428,7 @@ function createObject(rawConfig) {
     tenantManager: asFunction(fromDecoratedClass(TenantManager), {
       injector: () => ({
         keycloakConfig: rawConfig.keycloak,
-        // dojotClientHttp: DIContainer.resolve('dojotClientHttp'),
+        // dojotHttpClient: DIContainer.resolve('dojotHttpClient'),
         // logger: DIContainer.resolve('logger'),
       }),
       lifetime: Lifetime.SINGLETON,

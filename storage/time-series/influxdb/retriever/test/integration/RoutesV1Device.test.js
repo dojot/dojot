@@ -125,7 +125,7 @@ const mockLogger = {
   info: jest.fn(),
 };
 
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn().mockResolvedValue({
     data: [
       'device1',
@@ -185,7 +185,7 @@ const deviceDataService = new DeviceDataService(deviceDataRepository);
 const genericQueryService = new GenericQueryService(deviceDataRepository);
 const deviceManagerService = new DeviceManagerService(
   'url',
-  mockDojotClientHttp,
+  mockDojotHttpClient,
   localPersistenceManager,
   mockLogger,
 );

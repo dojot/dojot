@@ -14,7 +14,7 @@ const keycloakConfig = {
 
 };
 
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn(),
 };
 
@@ -29,12 +29,12 @@ describe('TenantManager', () => {
   let tenantManager;
   beforeEach(() => {
     tenantManager = new TenantManager({
-      keycloakConfig, dojotClientHttp: mockDojotClientHttp, logger,
+      keycloakConfig, dojotHttpClient: mockDojotHttpClient, logger,
     });
   });
 
   it('Should loads all the tenants', async () => {
-    mockDojotClientHttp.request.mockReturnValue({
+    mockDojotHttpClient.request.mockReturnValue({
       data: {
         tenants: [
           {
