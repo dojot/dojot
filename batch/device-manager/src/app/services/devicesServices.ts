@@ -1,6 +1,7 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
 import { PrismaClient } from '@prisma/client';
+
 import { EventKafka, KafkaProducer } from '../../kafka/kafka-producer';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
