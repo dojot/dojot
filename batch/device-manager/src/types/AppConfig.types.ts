@@ -8,6 +8,7 @@ export type AppConfig = {
   };
   message: {
     'produce.topic.suffix': string;
+    'produce.topic.subject': string;
   };
   server: {
     port: number;

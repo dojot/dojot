@@ -4,7 +4,10 @@ import { devices, templates } from '@prisma/client';
 import { RemoveTemplatesBatchDto } from 'src/types';
 import { TemplatesServices } from '../../../../src/app/services/templatesServices';
 import { KafkaMock, LoggerMock, PrismaClientMock } from '../../../mocks';
-import { TemplatesRepository } from '../../../../src/app/repository';
+import {
+  AttrsRepository,
+  TemplatesRepository,
+} from '../../../../src/app/repository';
 
 describe('TemplatesServices', () => {
   describe('remove', () => {
@@ -69,19 +72,18 @@ describe('TemplatesServices', () => {
         templates: [1],
       };
 
-      const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const templatesRepository = new TemplatesRepository(LoggerMock.new());
+      const attrsRepository = new AttrsRepository(LoggerMock.new());
       const templatesServices = new TemplatesServices(
         LoggerMock.new(),
         templatesRepository,
-        KafkaProducerMock,
+        attrsRepository,
       );
       FakePrismaClient.templates.findUnique.mockResolvedValue(tenplates_fake1);
       FakePrismaClient.templates.findMany.mockResolvedValue(
         template_no_associate,
       );
-      FakePrismaClient.templates.delete.mockResolvedValue(tenplates_fake1);
 
       const return_template_removed = await templatesServices.remove(
         FakePrismaClient,
@@ -99,13 +101,13 @@ describe('TemplatesServices', () => {
         templates: [2],
       };
 
-      const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const templatesRepository = new TemplatesRepository(LoggerMock.new());
+      const attrsRepository = new AttrsRepository(LoggerMock.new());
       const templatesServices = new TemplatesServices(
         LoggerMock.new(),
         templatesRepository,
-        KafkaProducerMock,
+        attrsRepository,
       );
       FakePrismaClient.templates.findUnique.mockResolvedValue(tenplates_fake1);
       FakePrismaClient.templates.findMany.mockResolvedValue(
@@ -129,13 +131,13 @@ describe('TemplatesServices', () => {
         templates: [200, 211],
       };
 
-      const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const templatesRepository = new TemplatesRepository(LoggerMock.new());
+      const attrsRepository = new AttrsRepository(LoggerMock.new());
       const templatesServices = new TemplatesServices(
         LoggerMock.new(),
         templatesRepository,
-        KafkaProducerMock,
+        attrsRepository,
       );
       FakePrismaClient.templates.findUnique.mockResolvedValue(null);
 
@@ -154,15 +156,15 @@ describe('TemplatesServices', () => {
       const removeTemplatesBatchDto_fake: RemoveTemplatesBatchDto = {
         templates: [1.0],
       };
-      const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const templates_repository = new TemplatesRepository(LoggerMock.new());
+      const attrsRepository = new AttrsRepository(LoggerMock.new());
       FakePrismaClient.templates.findUnique.mockRejectedValue(devices_fake1);
 
       const templatesServices = new TemplatesServices(
         LoggerMock.new(),
         templates_repository,
-        KafkaProducerMock,
+        attrsRepository,
       );
 
       const fn = () => {

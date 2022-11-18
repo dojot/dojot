@@ -19,7 +19,6 @@ export abstract class DeviceRoutes {
     kafkaProducer: KafkaProducer,
     prismaUtils: PrismaUtils,
   ) {
-    const attrsRepository = new AttrsRepository(logger);
     const templatesRepository = new TemplatesRepository(logger);
     const devicesRepository = new DevicesRepository(logger);
     const deviceServices = new DevicesServices(
@@ -28,7 +27,6 @@ export abstract class DeviceRoutes {
       kafkaProducer,
       prismaUtils,
       templatesRepository,
-      attrsRepository,
     );
     const devicesBatchController = new DevicesBatchController(
       logger,

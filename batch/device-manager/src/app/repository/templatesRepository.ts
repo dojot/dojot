@@ -49,6 +49,28 @@ export class TemplatesRepository {
     }
   }
   /**
+   * Method Search Template with id.
+   * @param prisma
+   * @param id
+   * @returns Return one object Template and Array of object Attrs.
+   */
+  async findByIdWithAttrs(prisma: PrismaClient, id: number) {
+    try {
+      return await prisma.templates.findMany({
+        where: { id: id },
+        include: {
+          attrs: {},
+        },
+      });
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('TemplatesRepository - remove ', {
+        error: error.message,
+      });
+    }
+  }
+
+  /**
    * Method remove one Template with id parameter.
    * @param prisma
    * @param id

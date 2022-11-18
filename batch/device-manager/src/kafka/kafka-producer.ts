@@ -2,37 +2,36 @@ import { Kafka, Logger } from '@dojot/microservice-sdk';
 import { AppConfig } from 'src/types';
 
 export enum EventKafka {
-  CREATE = "create",
-  UPDATE = "update",
-  REMOVE = "remove",
+  CREATE = 'create',
+  UPDATE = 'update',
+  REMOVE = 'remove',
 }
 
-class NotificationMessageProducer
-{
+class NotificationMessageProducer {
   event: string;
-  data:  String;
-  meta:  String;
-  
+  data: String;
+  meta: String;
 
-  constructor(event:string,data:string,meta:string)
-  {
+  constructor(event: string, data: string, meta: string) {
     this.event = event;
     this.data = data;
     this.meta = meta;
   }
 
-  to_json():string
-  {
-    return JSON.stringify({"event": this.event, "data": this.data, "meta":{"service":this.meta}})
+  to_json(): string {
+    return JSON.stringify({
+      event: this.event,
+      data: this.data,
+      meta: { service: this.meta },
+    });
   }
 }
-
 
 /**
  * This class handles messages from dojot topics on kafka
  * @class
  */
-export class KafkaProducer extends Kafka.Producer{
+export class KafkaProducer extends Kafka.Producer {
   /**
    * Create an instance
    */
@@ -46,48 +45,64 @@ export class KafkaProducer extends Kafka.Producer{
   }
 
   public init(): void {
-    this.logger.info('Initializing Kafka Producer...',{});
-    this.connect().then(() => {
-      this.logger.info('... Kafka Producer was initialized',{});
-
-    }).catch((error) => {
-      this.logger.error('An error occurred while initializing the Agent Messenger. Bailing out!',{});
-      this.logger.error(error.stack || error,{});
-      process.exit(1);
-    });
+    this.logger.info('Initializing Kafka Producer...', {});
+    this.connect()
+      .then(() => {
+        this.logger.info('... Kafka Producer was initialized', {});
+      })
+      .catch((error) => {
+        this.logger.error(
+          'An error occurred while initializing the Agent Messenger. Bailing out!',
+          {},
+        );
+        this.logger.error(error.stack || error, {});
+        process.exit(1);
+      });
   }
 
-
   async send(event: string, tenant: string, deviceId: string) {
- 
-    const topicSuffix = this.appconfig.message['produce.topic.suffix'];
+    const topicSuffix = this.appconfig.message['produce.topic.subject'];
 
-    const full_msg = new NotificationMessageProducer(event,deviceId,tenant).to_json();
-    this.logger.debug(`Mount of message full  ${full_msg}...`,{});
+    const full_msg = new NotificationMessageProducer(
+      event,
+      deviceId,
+      tenant,
+    ).to_json();
+    this.logger.debug(`Mount of message full  ${full_msg}...`, {});
     try {
       // publish
       const kafkaTopic = `${tenant}.${topicSuffix}`;
       const stringMessage = full_msg;
       const messageKey = `${tenant}:${deviceId}`;
-      let partition: number | null; 
+      let partition: number | null;
       partition = 0;
 
-      this.logger.debug(`Trying to send message to kafka topic ${kafkaTopic}...`,{});
+      this.logger.debug(
+        `Trying to send message to kafka topic ${kafkaTopic}...`,
+        {},
+      );
 
       await this.produce(kafkaTopic, stringMessage, messageKey, partition);
-           
 
-      this.logger.debug(`Successfully sent message to Kafka in ${kafkaTopic}`,{});
       this.logger.debug(
-        `Published message ${stringMessage} to ${tenant}/${topicSuffix}`,{});
+        `Successfully sent message to Kafka in ${kafkaTopic}`,
+        {},
+      );
+      this.logger.debug(
+        `Published message ${stringMessage} to ${tenant}/${topicSuffix}`,
+        {},
+      );
       return;
     } catch (error) {
       this.logger.error(
-        `Failed to publish message to ${tenant}/${topicSuffix} (${error}).`,{});
-      throw new Error(`Failed to publish message to ${tenant}/${topicSuffix} (${error}).`);
+        `Failed to publish message to ${tenant}/${topicSuffix} (${error}).`,
+        {},
+      );
+      throw new Error(
+        `Failed to publish message to ${tenant}/${topicSuffix} (${error}).`,
+      );
     }
   }
-
 
   /**
    * A function to get if kafka is connected
@@ -102,7 +117,7 @@ export class KafkaProducer extends Kafka.Producer{
       }
       return false;
     } catch (e) {
-      this.logger.error('isConnected:', {e});
+      this.logger.error('isConnected:', { e });
       return false;
     }
   }
@@ -111,19 +126,18 @@ export class KafkaProducer extends Kafka.Producer{
     try {
       const { connected } = await this.getStatus();
       if (connected) {
-        this.disconnect()
+        this.disconnect();
       }
     } catch (e) {
-      this.logger.error('isConnected:', {e});
+      this.logger.error('isConnected:', { e });
     }
   }
- 
+
   registerShutdown() {
     /*
     this.serviceState.registerShutdownHandler(async () => {
       logger.warn('Shutting down Kafka connection...');
       return this.producer.disconnect();
     });*/
-  } 
-
+  }
 }

@@ -1,14 +1,13 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
-import { KafkaProducer } from '../../kafka/kafka-producer';
 import { RemoveTemplatesBatchDto } from 'src/types';
-import { TemplatesRepository } from '../repository';
+import { AttrsRepository, TemplatesRepository } from '../repository';
 
 export class TemplatesServices {
   constructor(
     private logger: Logger,
     private templatesRepository: TemplatesRepository,
-    private kafkaproducer: KafkaProducer,
+    private attrsRepository: AttrsRepository,
   ) {
     this.logger.info('Create Constructor TemplatesServices', {});
   }
@@ -62,19 +61,17 @@ export class TemplatesServices {
 
               if (qt_associated_with_devices >= 1) {
                 template_to_removed[0].device_template.forEach(
-                  (devices_result) => {
+                  (devices: any) => {
                     if (
                       !aux_ids_device_found_associated.includes(
-                        devices_result.devices.id,
+                        devices.devices.id,
                       )
                     ) {
                       devices_associated_templatesd_batch.push({
-                        id: devices_result.devices.id,
-                        label: devices_result.devices.label,
+                        id: devices.devices.id,
+                        label: devices.devices.label,
                       });
-                      aux_ids_device_found_associated.push(
-                        devices_result.devices.id,
-                      );
+                      aux_ids_device_found_associated.push(devices.devices.id);
                     }
                   },
                 );
@@ -86,6 +83,15 @@ export class TemplatesServices {
                   associated_devices: devices_associated_templatesd_batch,
                 });
               } else {
+                /**
+                 * Remove template associate with attrs in repository.
+                 */
+                let attrs_removed =
+                  await this.attrsRepository.remove_associate_attrs_template(
+                    connection,
+                    template_id,
+                  );
+
                 /**
                  * Remove template found in repository.
                  */
