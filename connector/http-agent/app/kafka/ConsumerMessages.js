@@ -42,6 +42,7 @@ class ConsumerMessages {
     try {
       this.consumer = new Consumer({
         ...configSDK,
+        'enable.async.commit': true,
         'kafka.consumer': configConsumer,
         'kafka.topic': configTopic,
       });
