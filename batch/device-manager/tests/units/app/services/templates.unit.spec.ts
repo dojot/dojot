@@ -3,7 +3,7 @@ import { describe } from '@jest/globals';
 import { devices, templates } from '@prisma/client';
 import { RemoveTemplatesBatchDto } from 'src/types';
 import { TemplatesServices } from '../../../../src/app/services/templatesServices';
-import { KafkaMock, LoggerMock, PrismaClientMock } from '../../../mocks';
+import { LoggerMock, PrismaClientMock } from '../../../mocks';
 import {
   AttrsRepository,
   TemplatesRepository,

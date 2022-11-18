@@ -3,7 +3,6 @@ import { PrismaUtils } from 'src/utils/Prisma.utils';
 import { EventKafka, KafkaProducer } from '../../kafka/kafka-producer';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
-import { AttrsRepository } from '../repository/attrsRepository';
 import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';

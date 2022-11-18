@@ -11,7 +11,6 @@ import {
 import { KafkaProducer } from '../../kafka/kafka-producer';
 import { DevicesRepository, TemplatesRepository } from '../repository';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
-import { AttrsRepository } from '../repository/attrsRepository';
 
 export abstract class DeviceRoutes {
   static use(

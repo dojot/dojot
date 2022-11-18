@@ -1,5 +1,3 @@
-import { string, number } from 'joi';
-
 export type KafkaPayload = {
   value: string;
 };

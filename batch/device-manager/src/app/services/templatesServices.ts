@@ -91,7 +91,9 @@ export class TemplatesServices {
                     connection,
                     template_id,
                   );
-
+                this.logger.debug('Attrs Removed in repository', {
+                  attrs_removed,
+                });
                 /**
                  * Remove template found in repository.
                  */
