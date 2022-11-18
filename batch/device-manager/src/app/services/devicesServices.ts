@@ -7,6 +7,7 @@ import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
 import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
+
 export class DevicesServices {
   constructor(
     private logger: Logger,
@@ -94,7 +95,7 @@ export class DevicesServices {
              * Create Event in Kafka of remove device and publish of message in topic.
              */
             if (removed_device) {
-              let data = this.create_body_of_field_data_published_kafka(
+              const data = this.create_body_of_field_data_published_kafka(
                 assert_device_exists[0],
                 templates_associated_with_device,
                 attrs_associated_with_template_and_device,
