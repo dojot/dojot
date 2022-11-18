@@ -36,10 +36,8 @@ export class TemplatesServices {
           /**
            * Assert template exists
            */
-          let assert_template_exists = await this.templatesRepository.findById(
-            connection,
-            template_id,
-          );
+          const assert_template_exists =
+            await this.templatesRepository.findById(connection, template_id);
           this.logger.debug('Assert Template Exists', {
             assert_template_exists,
           });
@@ -56,7 +54,7 @@ export class TemplatesServices {
              * Assert Exist Associated Devices in found.
              */
             if (typeof template_to_removed !== 'undefined') {
-              let qt_associated_with_devices =
+              const qt_associated_with_devices =
                 template_to_removed[0].device_template.length;
 
               if (qt_associated_with_devices >= 1) {
@@ -86,7 +84,7 @@ export class TemplatesServices {
                 /**
                  * Remove template associate with attrs in repository.
                  */
-                let attrs_removed =
+                const attrs_removed =
                   await this.attrsRepository.remove_associate_attrs_template(
                     connection,
                     template_id,
@@ -97,7 +95,7 @@ export class TemplatesServices {
                 /**
                  * Remove template found in repository.
                  */
-                let template_removed = await this.templatesRepository.remove(
+                const template_removed = await this.templatesRepository.remove(
                   connection,
                   template_id,
                 );

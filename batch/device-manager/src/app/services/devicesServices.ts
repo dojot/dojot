@@ -1,12 +1,12 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
+import { PrismaClient } from '@prisma/client';
 import { EventKafka, KafkaProducer } from '../../kafka/kafka-producer';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
 import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
-import { PrismaClient } from '@prisma/client';
 export class DevicesServices {
   constructor(
     private logger: Logger,
@@ -31,7 +31,7 @@ export class DevicesServices {
   ): Promise<any> {
     try {
       let devices_result_batch: Array<any> = [];
-      let devices_not_found_batch: Array<any> = [];
+      const devices_not_found_batch: Array<any> = [];
       const remove_devices_all_promisses = dto.devices.map(
         async (device_id) => {
           /**
@@ -47,8 +47,8 @@ export class DevicesServices {
           });
 
           if (assert_device_exists?.length) {
-            let templates_associated_with_device: Array<number> = [];
-            let attrs_associated_with_template_and_device: Array<any> = [];
+            const templates_associated_with_device: Array<number> = [];
+            const attrs_associated_with_template_and_device: Array<any> = [];
 
             assert_device_exists[0].device_template.map(
               async (element: any) => {
@@ -175,7 +175,7 @@ export class DevicesServices {
           /**
            * Assert exist object Device with parameter label = name_prefix_device.
            */
-          let assert_devices_exists =
+          const assert_devices_exists =
             await this.devicesRepository.assert_devices_exists(
               connection,
               name_prefix_device,
@@ -199,7 +199,7 @@ export class DevicesServices {
               createdDevices,
             });
             if (createdDevices) {
-              let data = this.create_body_of_field_data_published_kafka(
+              const data = this.create_body_of_field_data_published_kafka(
                 createdDevices,
                 array_asserts_templates_and_attrs_not_found_templates.templates_found,
                 array_asserts_templates_and_attrs_not_found_templates.attrs_found,
@@ -278,7 +278,7 @@ export class DevicesServices {
       /**
        * Assert template and attrs exists
        */
-      let assert_template_exists =
+      const assert_template_exists =
         await this.templatesRepository.findByIdWithAttrs(
           connection,
           template_id,
@@ -311,8 +311,7 @@ export class DevicesServices {
     templates_event: Array<number>,
     attrs_event: Array<any>,
   ) {
-    let EventData: KafkaEventData;
-    EventData = {
+    const EventData: KafkaEventData = {
       id: device_event.id,
       label: device_event.label,
       created: device_event.created,
