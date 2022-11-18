@@ -20,6 +20,7 @@ The minimal set of dojot services needed to run Device Manager is:
 - Kafka
 - PostgreSQL
 - Keycloak proxy
+- Docker
 
 ### Development
 
