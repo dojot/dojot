@@ -1,0 +1,777 @@
+openapi: 3.0.3
+info:
+  title: Swagger Device Manager - Batch - OpenAPI 3.0
+  description: Operation in Batch to Devices an Templates.
+  version: '3.0.3'
+servers:
+  - url: https://device-manege-batch:8000/
+tags:
+  - name: Devices
+    description: Operation in Batch to Devices.
+  - name: Templates
+    description: Operation in Batch to Templates.
+  - name: Certificates
+    description: Operation in Batch to Certificates.
+paths:
+  /devices_batch/:
+    post:
+      tags:
+        - Devices
+      summary: Create new devices in batch.
+      description: Create new devices in batch
+      requestBody:
+        description: Create new devices.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/devices-batch-input-create'
+        required: true
+      responses:
+        '200':
+          description: Success Operation of Create in batch devices, returnin array of iDs objects created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_200_devices_create'
+        '400':
+          description: Invalid type Arguments or field is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400_create'
+
+        '503':
+          description: Services Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_503'
+
+    put:
+      tags:
+        - Devices
+      summary: Delete Many devices in batch.
+      description: Delete of devices in batch
+      requestBody:
+        description: Array of Id Devices.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/devices-batch-input'
+        required: true
+      responses:
+        '200':
+          description: Success Operation of REMOVE in batch of devices.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_200_devices'
+        '400':
+          description: Invalid type Arguments or field is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400_remove_devices'
+        '503':
+          description: Services Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_503'
+
+  /devices_batch/csv/:
+    post:
+      tags:
+        - Devices
+      summary: Create Devices in batch with file in format .CSV
+      description: Create Devices in batch with file in format .CSV
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fileName:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        '200':
+          description: Successful operation upload Batch process.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_csv'
+        '400':
+          description: Invalid type Arguments or field is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400_csv'
+
+        '415':
+          description: Extension the file not supported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_415'
+
+        '503':
+          description: Services Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_503'
+
+  /templates_batch/:
+    put:
+      tags:
+        - Templates
+      summary: Delete Many templates.
+      description: Delete many templates in repository.
+      requestBody:
+        description: Array of column Id in table templates.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/templares-batch-input'
+        required: true
+      responses:
+        '200':
+          description: Success Operation of REMOVE in batch of templates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_200_templates'
+        '400':
+          description: Invalid type Arguments or field is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400_remove_templates'
+        '503':
+          description: Services Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_503'
+
+  /certificates_batch/:
+    post:
+      tags:
+        - Certificates
+      summary: Import certificates batch.
+      description: Import many certificates batch
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename_ca_raiz:
+                  type: string
+                  format: binary
+                filename_certificates:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+        required: true
+      responses:
+        '200':
+          description: Success Operation of Create in batch certificates, return in array of iDs objects created.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiResponse_200'
+        '400':
+          description: Invalid type Arguments or field is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400_certificates'
+
+        '415':
+          description: Extension the file not supported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_415'
+
+        '503':
+          description: Services Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_503'
+
+  /certificates_batch/associate:
+    post:
+      tags:
+        - Certificates
+      summary: Associate certificates in batch to devices.
+      description: Associate of many certificates to many devices seletecd.
+      requestBody:
+        description: Array of Id Devices.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/devices-batch-input'
+        required: true
+      responses:
+        '200':
+          description: Return list devices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiResponse_cert_associates'
+        '400':
+          description: Invalid type Arguments or field is required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error_required_devices'
+        '503':
+          description: Services Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_503'
+
+components:
+  schemas:
+    devices-batch-input-create:
+      required:
+        - name_prefix
+        - quantity
+      type: object
+      properties:
+        name_prefix:
+          type: string
+          example: 'teste_sensor'
+        start_sufix:
+          type: integer
+          format: int32
+          example: 1
+        quantity:
+          type: integer
+          format: int32
+          example: 4
+        templates:
+          type: number
+          example: [14, 111]
+        attrs:
+          type: object
+          example:
+            [
+              {
+                'id': 15,
+                'type': 'dynamic',
+                'label': 'attr',
+                'valueType': 'bool',
+                'templateId': '1',
+                'staticValue': null,
+              },
+              {
+                'id': 18,
+                'type': 'dynamic',
+                'label': 'attr1',
+                'valueType': 'float',
+                'templateId': '1',
+                'staticValue': '',
+              },
+              {
+                'id': 24,
+                'type': 'static',
+                'label': 'static',
+                'valueType': 'integer',
+                'templateId': '3',
+                'staticValue': '30',
+              },
+              {
+                'id': 23,
+                'type': 'dynamic',
+                'label': 'test',
+                'valueType': 'bool',
+                'templateId': '19',
+                'staticValue': '',
+              },
+            ]
+
+    templares-batch-input:
+      type: object
+      properties:
+        templates:
+          type: number
+          example: [1, 2, 14, 111]
+
+    devices-batch-input:
+      type: object
+      properties:
+        devices:
+          example: ['a1d8513', 'a1d8588', 'a1d8555']
+
+    Devices-Batch-Sucess:
+      type: object
+      properties:
+        devices_created:
+          type: array
+          items:
+            type: string
+            example: a1d6f5,a1d6333,a1d8513,a1d8515,a1d8522,a1d8612
+
+    Certifictes-Batch:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            type: number
+            example: 14
+
+    Certifictes-Associates-Batch:
+      type: object
+      properties:
+        devices:
+          type: array
+          items:
+            type: number
+            example: 14
+
+    error_required_devices:
+      properties:
+        type:
+          type: string
+          example: VALIDATION
+        message:
+          type: string
+          example: '"body.devices[0]" is not allowed to be empty. "body.devices" does not contain 1 required value(s)'
+
+    error_required_devices_create:
+      properties:
+        type:
+          type: string
+          example: VALIDATION
+        message:
+          type: string
+          example: '"body.name_prefix" is not allowed to be empty'
+
+    error_attrs_devices_create:
+      properties:
+        message:
+          type: string
+          example: 'A device can not have repeated attributes.'
+
+    error_required_templates:
+      properties:
+        type:
+          type: string
+          example: VALIDATION
+        message:
+          type: string
+          example: '"body.templates[0]" is not allowed to be empty. "body.templates" does not contain 1 required value(s)'
+
+    error_file_upload_required:
+      type: object
+      properties:
+        type:
+          type: string
+          example: FILE_REQUIRED
+        message:
+          type: string
+          example: The file upload in Body is requied.
+
+    error_invalidate_value:
+      type: object
+      properties:
+        name:
+          type: string
+          example: YYYYYY
+        type:
+          type: string
+          example: FIELD_INVALIDATE_VALUE
+        message:
+          type: string
+          example: The field must be greater than 1
+
+    devices_not_found:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8555
+        type:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: Device not found
+
+    templates_not_found:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 111
+        type:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: Template not found
+
+    templates_associated_devies:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        label:
+          type: string
+          example: modelo_1
+        type:
+          type: string
+          example: HAS_ASSOCIATED_DEVICES
+        message:
+          type: string
+          example: The template has associated devices
+        associated_devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/associate_devices'
+
+    associate_devices:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d6f5
+        label:
+          type: string
+          example: Device 1
+
+    certificates:
+      type: object
+      properties:
+        id:
+          type: string
+          example:
+
+    ApiResponse_200:
+      type: object
+      properties:
+        certificates:
+          type: string
+          example: 8272A
+
+    ApiResponse_503:
+      type: object
+      properties:
+        type:
+          type: string
+          example: SERVICE_UNAVAIBLE
+
+    ApiResponse_415:
+      type: object
+      properties:
+        type:
+          type: string
+          example: TYPE_FILE_NOT_SUPPORT
+
+    devices_200_1:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8513
+        label:
+          type: string
+          example: device_1
+
+    devices_200_2:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8588
+        label:
+          type: string
+          example: device_2
+
+    devices_200_create1:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d9899
+        label:
+          type: string
+          example: teste_sensor-3
+
+    devices_200_create2:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d9999
+        label:
+          type: string
+          example: teste_sensor-4
+
+    devices_200_not_create1:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8513
+        label:
+          type: string
+          example: teste_sensor-1
+
+    devices_200_not_create2:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: a1d8588
+        label:
+          type: string
+          example: teste_sensor-2
+
+    templates_200_1:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 2
+        label:
+          type: string
+          example: modelo_2
+
+    templates_200_2:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 14
+        label:
+          type: string
+          example: modelo_14
+
+    ApiResponse_200_devices_create:
+      properties:
+        devices_created:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/devices_200_create1'
+              - $ref: '#/components/schemas/devices_200_create2'
+        devices_not_created:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/devices_200_not_create1'
+              - $ref: '#/components/schemas/devices_200_not_create2'
+        templates_not_found:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_not_found'
+
+    ApiResponse_200_devices:
+      properties:
+        devices:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/devices_200_1'
+              - $ref: '#/components/schemas/devices_200_2'
+              - $ref: '#/components/schemas/devices_not_found'
+
+    ApiResponse_200_templates:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_200_1'
+              - $ref: '#/components/schemas/templates_200_2'
+        templates_associated_devices:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_associated_devies'
+        templates_not_found:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/templates_not_found'
+
+    ApiResponse_400_create:
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/error_attrs_devices_create'
+          - $ref: '#/components/schemas/error_required_devices_create'
+
+    ApiResponse_400_remove_devices:
+      oneOf:
+        - $ref: '#/components/schemas/error_required_devices'
+
+    ApiResponse_400_remove_templates:
+      oneOf:
+        - $ref: '#/components/schemas/error_required_templates'
+
+    ApiResponse_400_csv:
+      type: object
+      properties:
+        error:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/error_csv_file_columm'
+              - $ref: '#/components/schemas/error_file_upload_required'
+
+    ApiResponse_400_certificates:
+      type: object
+      properties:
+        error:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/error_file_upload_required'
+
+    error_csv_file_columm:
+      type: object
+      properties:
+        name:
+          type: string
+          example: templetes_name
+        type:
+          type: string
+          example: 'FILE_COLUMN_FORMAT_INCORRET'
+        message:
+          type: string
+          example: 'Format of columns incorret.'
+
+    error_csv_devices:
+      type: object
+      properties:
+        name:
+          type: string
+          example: dispositivo_1
+        type:
+          type: string
+          example: 'ID_NOT_FOUND_OR_INVALIDATE'
+        message:
+          type: string
+          example: 'ID do dispositivo informado inválido ou existente'
+
+    error_csv_templates:
+      type: object
+      properties:
+        name:
+          type: string
+          example: dispositivo_3
+        type:
+          type: string
+          example: 'NAME_NOT_FOUND_TEMPLATE'
+        message:
+          type: string
+          example: 'Nome do modelo informado não encontrado'
+
+    error_csv_attributes:
+      type: object
+      properties:
+        name:
+          type: string
+          example: dispositivo_8
+        type:
+          type: string
+          example: 'NAME_NOT_FOUND_ATTRIBUTE'
+        message:
+          type: string
+          example: 'Atribuito informado não encontrado para o modelo ou não é estático'
+
+    ApiResponse_csv:
+      type: object
+      properties:
+        qt_success:
+          type: integer
+          format: int32
+          example: 8
+        error:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/error_csv_devices'
+              - $ref: '#/components/schemas/error_csv_templates'
+              - $ref: '#/components/schemas/error_csv_attributes'
+
+    ApiResponse_cert:
+      type: object
+      properties:
+        qt_success:
+          type: integer
+          format: int32
+          example: 8
+        qt_error:
+          type: integer
+          format: int32
+          example: 1
+        devices_error:
+          type: array
+          items:
+            type: number
+            example: 14
+
+    ApiResponse_cert_associates:
+      type: object
+      properties:
+        devices_associateswith_certificates:
+          type: array
+          items:
+            type: string
+            example: dispositivo_1,dispositivo_2
+
+        devices_not_associates_with_certificates:
+          type: array
+          items:
+            type: string
+            example: dispositivo_5,dispositivo_4
+
+        devices_not_associates_without_certificates:
+          type: array
+          items:
+            type: string
+            example: dispositivo_6,dispositivo_7
+
+    ApiResponse_error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 404
+        type:
+          type: string
+        message:
+          type: string
+          example: 'Id not found'

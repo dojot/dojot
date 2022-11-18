@@ -1,7 +1,8 @@
 {
-    "watch" : ["src"],
-    "ext" : "ts",
+    "watch": ["src"],
+    "ext": "ts, js, json",
+    "ignore": ["src/configs/*.json"],
     "execMap" : {
-       "ts" : "ts-node-dev -r tsconfig-paths/register ./src/server.ts"
-    }
+        "ts" : "ts-node-dev -r tsconfig-paths/register ./src/index.ts"
+  }
 }
