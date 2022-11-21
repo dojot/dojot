@@ -1,4 +1,3 @@
-
 const {
   ConfigManager: { getConfig },
   Logger,
@@ -9,7 +8,6 @@ const { timeout } = require('promise-timeout');
 const redis = require('redis');
 const bcrypt = require('bcrypt');
 const { killApplication } = require('../Utils');
-
 
 redis.RedisClient.prototype.getAsync = promisify(redis.RedisClient.prototype.get);
 redis.RedisClient.prototype.setAsync = promisify(redis.RedisClient.prototype.set);

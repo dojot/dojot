@@ -43,13 +43,21 @@ class App {
     });
 
     this.deviceManagerService = new DeviceManagerService(config.url['device.manager'], dojotHttpClient, this.tenantService, logger);
-    this.consumerMessages = new ConsumerMessages(this.tenantService, this.serviceState,
+    this.consumerMessages = new ConsumerMessages(
+      this.tenantService,
+      this.serviceState,
       this.redisManager,
-      logger);
+      logger,
+    );
 
     this.agentMessenger = new AgentMessenger(config, logger);
-    this.mqttClient = new MQTTClient(this.agentMessenger, this.serviceState, logger,
-      this.deviceManagerService, this.redisManager);
+    this.mqttClient = new MQTTClient(
+      this.agentMessenger,
+      this.serviceState,
+      logger,
+      this.deviceManagerService,
+      this.redisManager,
+    );
   }
 
   /**

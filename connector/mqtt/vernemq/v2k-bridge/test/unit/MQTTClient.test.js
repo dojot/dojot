@@ -120,9 +120,12 @@ describe('MQTTClient', () => {
         key: 'keyValue',
       };
 
-      const client = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager,
+      const client = new MQTTClient(
+        mockAgentMessenger,
+        mockSdk.ServiceStateManager,
         mockConfig.Logger,
-        mockDeviceManagerService);
+        mockDeviceManagerService,
+      );
 
       expect(client.logger).toBeDefined();
       expect(client.agentMessenger).toBeDefined();
@@ -144,9 +147,12 @@ describe('MQTTClient', () => {
     let mqttClient;
 
     beforeEach(() => {
-      mqttClient = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager,
+      mqttClient = new MQTTClient(
+        mockAgentMessenger,
+        mockSdk.ServiceStateManager,
         mockConfig.Logger,
-        mockDeviceManagerService);
+        mockDeviceManagerService,
+      );
     });
 
     it('should successfully initialize the client - MQTTClient not connected', () => {
@@ -206,9 +212,12 @@ describe('MQTTClient', () => {
     let mqttClient;
 
     beforeEach(() => {
-      mqttClient = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager,
+      mqttClient = new MQTTClient(
+        mockAgentMessenger,
+        mockSdk.ServiceStateManager,
         mockConfig.Logger,
-        mockDeviceManagerService);
+        mockDeviceManagerService,
+      );
       mqttClient.init();
       jest.clearAllMocks();
     });

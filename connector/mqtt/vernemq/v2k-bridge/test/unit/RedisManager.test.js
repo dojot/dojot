@@ -101,7 +101,6 @@ describe('RedisManager', () => {
     });
   });
 
-
   describe('Redis Events', () => {
     beforeEach(() => {
       jest.clearAllMocks();

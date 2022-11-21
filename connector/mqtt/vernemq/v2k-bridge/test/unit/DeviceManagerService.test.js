@@ -34,8 +34,12 @@ describe('DeviceManagerService', () => {
   it('should throw a error, when the request failed', async () => {
     mockDojotHttpClient.request.mockRejectedValueOnce(new Error('Error'));
     let error;
-    deviceManagerService = new DeviceManagerService(null, mockDojotHttpClient, tenantManager,
-      mockLogger);
+    deviceManagerService = new DeviceManagerService(
+      null,
+      mockDojotHttpClient,
+      tenantManager,
+      mockLogger,
+    );
     try {
       await deviceManagerService.getDevice();
     } catch (e) {

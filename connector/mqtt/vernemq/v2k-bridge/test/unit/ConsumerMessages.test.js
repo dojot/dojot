@@ -57,7 +57,6 @@ const mockUtils = {
 };
 jest.mock('../../app/Utils', () => mockUtils);
 
-
 const mockTenantService = {
   create: jest.fn(() => Promise.resolve('')),
   remove: jest.fn(() => Promise.resolve('')),
@@ -69,8 +68,12 @@ describe('ConsumerMessages', () => {
   let consumerMessages;
 
   beforeEach(() => {
-    consumerMessages = new ConsumerMessages(mockTenantService, mockServiceState, mockRedisManager,
-      mockLogger);
+    consumerMessages = new ConsumerMessages(
+      mockTenantService,
+      mockServiceState,
+      mockRedisManager,
+      mockLogger,
+    );
   });
 
   afterAll(() => {
