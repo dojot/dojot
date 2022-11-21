@@ -2,13 +2,14 @@ const {
   ConfigManager: { getConfig, loadSettings, transformObjectKeys },
   Logger,
   ServiceStateManager,
+  WebUtils: { SecretFileHandler },
 } = require('@dojot/microservice-sdk');
 
 const camelCase = require('lodash.camelcase');
+
 const util = require('util');
 
-const AgentMessenger = require('./app/AgentMessenger');
-const MQTTClient = require('./app/MQTTClient');
+const { killApplication } = require('./app/Utils');
 
 /*
  * TODO: the idea is to create a default environment variable that will be used internally by the
@@ -29,24 +30,28 @@ if (config.log['file.enable']) {
     filename: config.log['file.filename'],
   });
 }
-const logger = new Logger('app');
+const logger = new Logger('v2k-bridge');
 
 logger.info(`Configuration:\n${util.inspect(config, false, 5, true)}`);
 
-const manager = new ServiceStateManager({
+const serviceState = new ServiceStateManager({
   lightship: transformObjectKeys(config.lightship, camelCase),
 });
-const agentMessenger = new AgentMessenger();
-const mqttClient = new MQTTClient(agentMessenger, manager);
 
-manager.registerService('kafka');
-manager.addHealthChecker(
-  'kafka',
-  agentMessenger.healthChecker.bind(agentMessenger),
-  config.healthcheck['kafka.interval.ms'],
-);
+const App = require('./app/App');
 
-manager.registerShutdownHandler(agentMessenger.shutdownHandler.bind(agentMessenger));
-manager.registerShutdownHandler(mqttClient.shutdownHandler.bind(mqttClient));
+const secretFileHandler = new SecretFileHandler(config, logger);
 
-agentMessenger.init(mqttClient);
+// Initializing the service...
+secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
+  setTimeout(async () => {
+    try {
+      logger.info('Initializing...');
+      const app = new App(config, logger, serviceState);
+      await app.init();
+    } catch (err) {
+      logger.error('Service will be closed', err);
+      killApplication();
+    }
+  }, 10000);
+});

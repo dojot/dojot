@@ -93,7 +93,7 @@ describe('AgentMessenger', () => {
   let agentMessenger;
 
   beforeEach(() => {
-    agentMessenger = new AgentMessenger();
+    agentMessenger = new AgentMessenger(mockConfig.ConfigManager, mockConfig.Logger);
     jest.clearAllMocks();
   });
 
@@ -196,7 +196,7 @@ describe('AgentMessenger', () => {
     beforeEach(() => {
       signalReady = jest.fn();
       signalNotReady = jest.fn();
-      agentMessenger = new AgentMessenger();
+      agentMessenger = new AgentMessenger(mockConfig.ConfigManager, mockConfig.Logger);
       mqttClient = {
         init: jest.fn(),
         connectOrDisconnectClient: jest.fn(),
