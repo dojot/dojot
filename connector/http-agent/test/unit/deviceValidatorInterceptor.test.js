@@ -49,6 +49,6 @@ describe('ScopedDIInterceptor', () => {
 
     expect(next).toHaveBeenCalled();
 
-    expect(next.mock.calls[0][0]).toEqual('Device abc123 está desabilitado. A mensagem será descartada.');
+    expect(next.mock.calls[0][0]).toEqual('Device abc123 is disabled. The message will be discarded.');
   });
 });
