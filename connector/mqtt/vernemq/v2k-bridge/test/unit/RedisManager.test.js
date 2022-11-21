@@ -1,4 +1,3 @@
-
 function MockRedisClient() {
   this.eventListener = {};
   this.table = new Map();
