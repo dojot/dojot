@@ -12,6 +12,8 @@
     "influxdb-retriever-debug": "node --inspect=0.0.0.0 index.js",
     "dev": "nodemon index.js --ignore ./config -V",
     "test": "jest --verbose",
+    "unit-test": "jest ./test/unit --verbose",
+    "integration-test": "jest ./test/integration --verbose",
     "test:watch": "jest --watchAll --no-cache --runInBand --detectOpenHandles",
     "lint": "eslint --ext .js .",
     "lint:fix": "eslint --fix --ext .js .",

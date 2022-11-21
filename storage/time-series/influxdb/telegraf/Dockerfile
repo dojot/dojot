@@ -1,0 +1,36 @@
+FROM golang:1.18.7-alpine3.16 AS base
+
+WORKDIR /opt/
+
+RUN apk --no-cache add git
+
+RUN git clone https://github.com/influxdata/telegraf
+WORKDIR /opt/telegraf
+
+RUN git checkout release-1.24
+COPY plugins/inputs/kafka_consumer_vdojot/ ./plugins/inputs/kafka_consumer_vdojot/
+COPY plugins/inputs/all/kafka_consumer_vdojot.go ./plugins/inputs/all/kafka_consumer_vdojot.go
+
+COPY plugins/outputs/dojot_organization_creator/ ./plugins/outputs/dojot_organization_creator/
+COPY plugins/outputs/all/dojot_organization_creator.go ./plugins/outputs/all/dojot_organization_creator.go
+
+COPY plugins/outputs/influxdb_vdojot ./plugins/outputs/influxdb_vdojot/
+COPY plugins/outputs/all/influxdb_vdojot.go ./plugins/outputs/all/influxdb_vdojot.go
+
+RUN go build ./cmd/telegraf
+
+FROM golang:1.18.7-alpine3.16
+
+RUN apk --no-cache add \
+  libsasl \
+  lz4-libs \
+  openssl \
+  tini \
+  curl \
+  bash
+
+WORKDIR /opt/telegraf
+COPY --from=base /opt/telegraf/telegraf /opt/telegraf/telegraf
+COPY dojot-telegraf.sh ./dojot-telegraf.sh
+
+CMD ["./dojot-telegraf.sh"]
