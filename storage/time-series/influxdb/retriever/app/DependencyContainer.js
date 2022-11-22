@@ -31,7 +31,7 @@ function dependencyContainerFactory(config, logger) {
   });
 
   // API Dependencies
-  const deviceDataRepository = new DeviceDataRepository(config.influx['default.bucket'], influxDBConnection, config.influx['default.read.as.string'], logger);
+  const deviceDataRepository = new DeviceDataRepository(config.influx['default.bucket'], influxDBConnection, logger);
   const deviceDataService = new DeviceDataService(deviceDataRepository);
   const genericQueryService = new GenericQueryService(deviceDataRepository);
 

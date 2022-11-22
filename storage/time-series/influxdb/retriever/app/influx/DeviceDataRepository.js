@@ -33,13 +33,12 @@ class DeviceDataRepository {
    * @param {Boolean} readAsString Indicates whether to read Influxdb data as a String
    *
    */
-  constructor(defaultBucket, influxDBConnection, readAsString, logger) {
+  constructor(defaultBucket, influxDBConnection, logger) {
     logger.debug('constructor:');
     this.logger = logger;
 
     this.influxDB = influxDBConnection;
     this.defaultBucket = defaultBucket;
-    this.readAsString = readAsString;
     // prefix adds to all fields to be written
     this.prefixFields = 'dojot.';
     this.prefixFieldsSize = (this.prefixFields).length;
@@ -91,8 +90,6 @@ class DeviceDataRepository {
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
       const prefix = this.prefixFields;
       const prefixSize = this.prefixFieldsSize;
-      const { readAsString } = this;
-
       const loggerOuter = this.logger;
 
       return new Promise((resolve, reject) => {
@@ -115,15 +112,9 @@ class DeviceDataRepository {
                 && value !== null
                 // strings that don't exist for that point are empty
                 && value !== '') {
-                let validatedValue;
-                if (readAsString) {
-                  validatedValue = JSON.parse(value);
-                } else {
-                  validatedValue = value;
-                }
                 point.attrs.push({
                   label: key.slice(prefixSize),
-                  value: validatedValue,
+                  value,
                 });
               }
             });

@@ -1,0 +1,35 @@
+name: InfluxDB Telegraf (storage/time-series/influxdb/telegraf)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'storage/time-series/influxdb/storer/**'
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - 'storage/time-series/influxdb/telegraf/**'
+
+jobs:
+  docker-hub:
+    name: (storage/time-series/influxdb/Telegraf) Build and Publish image to DockerHub #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+
+    - name: Owner Repository
+      id: get_owner
+      run: |
+        export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+        echo Current Owner is $OWNER
+        echo ::set-output name=owner::$OWNER
+    - name: Checkout
+      uses: actions/checkout@v1
+
+    - name: Build and Push
+      uses: elgohr/Publish-Docker-Github-Action@2.16
+      with:
+        name: ${{ steps.get_owner.outputs.owner }}/telegraf
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        workdir: storage/time-series/influxdb/telegraf/
+        buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+        tag_names: true # tag will be based in branch name or tag name
