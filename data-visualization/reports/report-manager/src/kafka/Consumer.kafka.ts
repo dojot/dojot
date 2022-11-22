@@ -20,7 +20,7 @@ export class KafkaConsumer extends Kafka.Consumer {
     await super.init()
   }
 
-  initNewTenantEvent(callback: (payload: KafkaPayload) => void) {
+  registerTenantEvent(callback: (payload: KafkaPayload) => void) {
     const topic = new RegExp(this.appConfig.subscribe['topics.regex.tenants'])
     this.callbackId = this.registerCallback(
       topic as unknown as string,

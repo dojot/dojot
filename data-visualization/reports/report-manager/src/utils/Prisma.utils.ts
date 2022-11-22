@@ -43,4 +43,18 @@ export class PrismaUtils {
       )
     }
   }
+
+  async dropSchema(tenant: string, prisma: PrismaClient): Promise<boolean> {
+    try {
+      this.logger.debug(`dropSchema: dropping schema: ${tenant}`, {})
+      await prisma.$executeRawUnsafe(`DROP SCHEMA ${tenant} CASCADE`)
+      return true
+    } catch (error) {
+      this.logger.error(
+        `dropSchema: failed to drop schema: ${tenant}`,
+        error as never,
+      )
+    }
+    return false
+  }
 }

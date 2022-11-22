@@ -111,8 +111,8 @@ export class App {
     await this.kafkaConsumer.init()
     await this.tenantManager.update()
 
-    this.kafkaConsumer.initNewTenantEvent(
-      this.tenantManager.create.bind(this.tenantManager),
+    this.kafkaConsumer.registerTenantEvent(
+      this.tenantManager.handleTenantEvent.bind(this.tenantManager),
     )
 
     this.serviceState.registerService(SERVICE_NAMES.REPORT_MANAGER)

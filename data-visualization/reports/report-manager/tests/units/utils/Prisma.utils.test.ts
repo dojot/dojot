@@ -35,11 +35,27 @@ describe('Prisma.utils', () => {
     expect(FakeLogger.debug).toBeCalled()
   })
 
-  it('should handle an error when disconnecting from database', async () => {
+  it('should handle errors when disconnecting from database', async () => {
     const FakePrismaClient = PrismaClientMock.new()
     FakePrismaClient.$disconnect.mockRejectedValue(new Error('Error'))
     await prismaUtils.disconnectPrisma('admin', FakePrismaClient)
     expect(FakePrismaClient.$disconnect).toBeCalled()
+    expect(FakeLogger.error).toBeCalled()
+  })
+
+  it('should drop a database schema', async () => {
+    const FakePrismaClient = PrismaClientMock.new()
+    await prismaUtils.dropSchema('admin', FakePrismaClient)
+    expect(FakePrismaClient.$executeRawUnsafe).toBeCalledWith(
+      expect.stringContaining('DROP SCHEMA'),
+    )
+  })
+
+  it('should handle errors when dropping a database schema', async () => {
+    const FakePrismaClient = PrismaClientMock.new()
+    FakePrismaClient.$executeRawUnsafe.mockRejectedValue(new Error('Error'))
+    await prismaUtils.dropSchema('admin', FakePrismaClient)
+    expect(FakePrismaClient.$executeRawUnsafe).toBeCalled()
     expect(FakeLogger.error).toBeCalled()
   })
 })
