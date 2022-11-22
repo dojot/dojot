@@ -189,6 +189,10 @@ func (c *HttpClient) Write(ctx context.Context, metrics []telegraf.Metric) error
 				if err.StatusCode == http.StatusRequestEntityTooLarge {
 					return c.splitAndWriteBatch(ctx, c.Organization, c.Bucket, metrics)
 				}
+
+				if err.StatusCode == http.StatusInternalServerError {
+					return nil
+				}
 			}
 
 			return err
@@ -233,6 +237,10 @@ func (c *HttpClient) Write(ctx context.Context, metrics []telegraf.Metric) error
 				if err, ok := err.(*APIError); ok {
 					if err.StatusCode == http.StatusRequestEntityTooLarge {
 						return c.splitAndWriteBatch(ctx, org, bucket, metrics)
+					}
+
+					if err.StatusCode == http.StatusInternalServerError {
+						return nil
 					}
 				}
 

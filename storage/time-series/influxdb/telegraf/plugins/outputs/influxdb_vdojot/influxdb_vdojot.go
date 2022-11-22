@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/influxdata/telegraf"
@@ -109,7 +110,9 @@ func (i *InfluxDB) Write(metrics []telegraf.Metric) error {
 	if i.AttrPrefix != "" {
 		for _, m := range metrics {
 			for _, field := range m.FieldList() {
-				field.Key = i.AttrPrefix + field.Key
+				if !strings.HasPrefix(field.Key, i.AttrPrefix) {
+					field.Key = i.AttrPrefix + field.Key
+				}
 			}
 		}
 	}
@@ -153,7 +156,7 @@ func (i *InfluxDB) getHTTPClient(address *url.URL, proxy *url.URL) (Client, erro
 		Log:              i.Log,
 	}
 
-	c, err := NewHTTPClient(httpConfig)
+	c, err := NewHttpClient(httpConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP client [%s]: %v", address, err)
 	}
