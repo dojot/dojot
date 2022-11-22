@@ -1,5 +1,4 @@
 const { ConfigManager: { getConfig }, Logger } = require('@dojot/microservice-sdk');
-
 const events = require('events');
 const { promisify } = require('util');
 const { timeout } = require('promise-timeout');
