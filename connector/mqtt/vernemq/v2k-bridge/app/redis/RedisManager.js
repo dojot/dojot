@@ -199,7 +199,6 @@ class RedisManager {
     }));
   }
 
-
   /**
    * Computes the time to wait for the next reconnection attempt.
    * Function to be passed to redis client.
