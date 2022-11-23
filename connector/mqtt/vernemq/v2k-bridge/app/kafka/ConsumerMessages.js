@@ -25,9 +25,8 @@ class ConsumerMessages {
      *          with register service 'v2k-bridge-consumer'} serviceState
      *          Manages the services' states, providing health check and shutdown utilities.
      */
-  constructor(tenantService, serviceState, redisManager, logger) {
+  constructor(tenantService, serviceState, logger) {
     this.serviceState = serviceState;
-    this.redisManager = redisManager;
     this.tenantService = tenantService;
     this.logger = logger;
     this.consumer = null;
@@ -40,6 +39,7 @@ class ConsumerMessages {
     try {
       this.consumer = new Consumer({
         ...configSDK,
+        'enable.async.commit': true,
         'kafka.consumer': configConsumer,
         'kafka.topic': configTopic,
       });
@@ -49,7 +49,6 @@ class ConsumerMessages {
 
       this.createHealthChecker();
       this.registerShutdown();
-      this.initCallbackForDeviceEvents();
       this.initCallbackForTenancyEvents();
       this.logger.info('... Kafka Consumer was initialized');
     } catch (error) {
@@ -57,53 +56,6 @@ class ConsumerMessages {
       this.logger.error(`Couldn't initialize the Kafka Consumer (${error}).`);
       killApplication();
     }
-  }
-
-  /**
-   * Instantiates the consumerMessages callback for the device manager topic
-   *
-   * @returns callback
-   */
-  getCallbacksForDeviceEvents() {
-    return async (data) => {
-      try {
-        const { value: payload } = data;
-        const payloadObject = JSON.parse(payload.toString());
-        this.logger.info(`payloadObject: ${payload.toString()}`);
-        if (payloadObject.event === 'remove') {
-          this.logger.info(`${payloadObject.event} device event received`);
-          this.logger.info('removing registry in redis');
-          this.logger.debug(payloadObject);
-          const key = `${payloadObject.data.id}`;
-          await this.redisManager.deleteAsync(key);
-        }
-        if (payloadObject.event === 'update') {
-          const key = `${payloadObject.data.id}`;
-          if (payloadObject.data.disabled) {
-            await this.redisManager.setAsync(key, 'Disabled');
-          } else {
-            await this.redisManager.setAsync(key, 'Enabled');
-          }
-        }
-      } catch (error) {
-        this.logger.error(error);
-      }
-    };
-  }
-
-  /*
-  * Initializes the consumption of the device manager topic
-  *
-  * @public
-  */
-  // eslint-disable-next-line class-methods-use-this
-  initCallbackForDeviceEvents() {
-    const topic = RegExp(configSubscribe['topics.regex.device.manager']);
-
-    this.idCallbackDeviceManager = this.consumer.registerCallback(
-      topic,
-      this.getCallbacksForDeviceEvents(),
-    );
   }
 
   /**
@@ -186,11 +138,6 @@ class ConsumerMessages {
     } else {
       this.logger.warn('unregisterCallbacks: Doesn\'t exist Callback to unregister for devices');
     }
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  resume() {
-    this.initCallbackForDeviceEvents();
   }
 
   createHealthChecker() {

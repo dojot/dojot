@@ -44,14 +44,12 @@ const secretFileHandler = new SecretFileHandler(config, logger);
 
 // Initializing the service...
 secretFileHandler.handle('keycloak.client.secret', '/secrets/').then(async () => {
-  setTimeout(async () => {
-    try {
-      logger.info('Initializing...');
-      const app = new App(config, logger, serviceState);
-      await app.init();
-    } catch (err) {
-      logger.error('Service will be closed', err);
-      killApplication();
-    }
-  }, 10000);
+  try {
+    logger.info('Initializing...');
+    const app = new App(config, logger, serviceState);
+    await app.init();
+  } catch (err) {
+    logger.error('Service will be closed', err);
+    killApplication();
+  }
 });

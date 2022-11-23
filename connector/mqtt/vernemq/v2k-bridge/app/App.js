@@ -9,7 +9,6 @@ const MQTTClient = require('./MQTTClient');
 const DeviceManagerService = require('./axios/DeviceManagerService');
 const TenantService = require('./axios/TenantService');
 const ConsumerMessages = require('./kafka/ConsumerMessages');
-const RedisManager = require('./redis/RedisManager');
 
 /**
 * Wrapper to initialize the service
@@ -24,9 +23,7 @@ class App {
     this.logger = logger;
     this.serviceState = serviceState;
 
-    this.serviceState.registerService('v2k-redis');
     this.serviceState.registerService('v2k-bridge-consumer');
-    this.redisManager = new RedisManager(this.serviceState);
 
     const dojotHttpClient = new DojotHttpClient({
       defaultClientOptions: {
@@ -46,7 +43,6 @@ class App {
     this.consumerMessages = new ConsumerMessages(
       this.tenantService,
       this.serviceState,
-      this.redisManager,
       logger,
     );
 
@@ -56,12 +52,11 @@ class App {
       this.serviceState,
       logger,
       this.deviceManagerService,
-      this.redisManager,
     );
   }
 
   /**
-   * Initialize the redis, consumer and agentMessenger and load tenants
+   * Initialize the consumer and agentMessenger and load tenants
    */
   async init() {
     this.serviceState.registerService('kafka');
@@ -80,7 +75,6 @@ class App {
 
     await this.tenantService.loadTenants();
     try {
-      this.redisManager.init();
       await this.consumerMessages.init();
       this.agentMessenger.init(this.mqttClient);
     } catch (e) {

@@ -47,12 +47,6 @@ const mockConsumerMessages = {
 };
 jest.mock('../../app/kafka/ConsumerMessages', () => jest.fn().mockImplementation(() => mockConsumerMessages));
 
-const mockRedisInit = jest.fn();
-const mockRedis = jest.fn().mockImplementation(() => ({
-  init: mockRedisInit,
-}));
-jest.mock('../../app/redis/RedisManager.js', () => mockRedis);
-
 const mockAgentMessengerInit = jest.fn();
 const mockHealthChecker = jest.fn();
 const mockShutdownHandler = jest.fn();
@@ -98,7 +92,6 @@ describe('App', () => {
 
   describe('constructor', () => {
     it('should successfully create a new instance', () => {
-      expect(app.redisManager).toBeDefined();
       expect(app.tenantService).toBeDefined();
       expect(app.deviceManagerService).toBeDefined();
       expect(app.consumerMessages).toBeDefined();
@@ -117,7 +110,6 @@ describe('App', () => {
       mockHealthChecker.mockReturnValue();
       mockShutdownHandler.mockReturnValue();
       mockMqttShutdownHandler.mockReturnValue();
-      expect(mockRedisInit).toHaveBeenCalled();
       await expect(mockConsumerMessagesInit).toHaveBeenCalled();
       expect(mockAgentMessengerInit).toHaveBeenCalled();
     });

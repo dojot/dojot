@@ -20,12 +20,6 @@ const mockServiceState = {
   signalNotReady: mockSignalNotReady,
 };
 
-const mockRedisManager = {
-  setSecurity: jest.fn(),
-  setAsync: jest.fn(),
-  deleteAsync: jest.fn(),
-};
-
 const mockConfig = {
   lightship: { a: 'abc' },
   subscribe: {
@@ -71,7 +65,6 @@ describe('ConsumerMessages', () => {
     consumerMessages = new ConsumerMessages(
       mockTenantService,
       mockServiceState,
-      mockRedisManager,
       mockLogger,
     );
   });
@@ -83,7 +76,6 @@ describe('ConsumerMessages', () => {
   describe('constructor', () => {
     it('should successfully create constructor', () => {
       expect(consumerMessages.serviceState).toEqual(mockServiceState);
-      expect(consumerMessages.redisManager).toEqual(mockRedisManager);
       expect(consumerMessages.consumer).toBeDefined();
       expect(consumerMessages.idCallbackDeviceManager).toBeDefined();
       expect(consumerMessages.isReady).toBeFalsy();
@@ -99,14 +91,12 @@ describe('ConsumerMessages', () => {
       mockConsumer.init.mockReturnValue(Promise.resolve());
       consumerMessages.createHealthChecker = jest.fn();
       consumerMessages.registerShutdown = jest.fn();
-      consumerMessages.initCallbackForDeviceEvents = jest.fn();
 
       await consumerMessages.init();
 
       expect(mockConsumer.init).toHaveBeenCalled();
       expect(consumerMessages.createHealthChecker).toHaveBeenCalled();
       expect(consumerMessages.registerShutdown).toHaveBeenCalled();
-      expect(consumerMessages.initCallbackForDeviceEvents).toHaveBeenCalled();
     });
 
     it('should not correctly initialize - Promise rejected', async () => {
@@ -149,40 +139,6 @@ describe('ConsumerMessages', () => {
 
       const active = await consumerMessages.isConnected();
       expect(active).toEqual(false);
-    });
-  });
-
-  describe('initCallbackForDeviceEvents', () => {
-    beforeEach(async () => {
-      jest.clearAllMocks();
-      await consumerMessages.init();
-    });
-
-    it('should init callback', async () => {
-      consumerMessages.getCallbacksForDeviceEvents = jest.fn();
-
-      consumerMessages.initCallbackForDeviceEvents();
-      expect(consumerMessages.getCallbacksForDeviceEvents).toHaveBeenCalled();
-    });
-
-    it('should call removeAllFromTenant', async () => {
-      const payload = '{"event": "remove", "data": {"templates": [], "id": "8239ad", "created": "2021-10-29T04:35:53.223599+00:00", "label": "vitalParametersMonitorDevice", "attrs": {}}, "meta": {"service": "tenant1"}}';
-      const payloadBuf = Buffer.from(payload, 'utf8');
-      const data = { value: payloadBuf };
-
-      const callback = consumerMessages.getCallbacksForDeviceEvents();
-      callback(data);
-      expect(mockRedisManager.deleteAsync).toHaveBeenCalled();
-    });
-  });
-
-  describe('resume', () => {
-    it('should initiate callbacks', async () => {
-      consumerMessages.initCallbackForDeviceEvents = jest.fn();
-
-      consumerMessages.resume();
-
-      expect(consumerMessages.initCallbackForDeviceEvents).toHaveBeenCalled();
     });
   });
 
