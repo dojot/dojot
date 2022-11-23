@@ -98,6 +98,27 @@ describe('HTTPS - Schema validation for single messages', () => {
     jest.clearAllMocks();
   });
 
+  it('should return an error when device is disabled', async () => {
+    mockRedis.getAsync.mockReturnValue('test:abc123');
+    mockDeviceManagerService.getDevice.mockReturnValue({ disabled: true });
+    await requestHttps(app)
+      .post(urlIncomingMessages)
+      .set('Content-Type', 'application/json')
+      .send({
+        data: {
+          test: 'abc',
+        },
+      })
+      .key(key)
+      .cert(cert)
+      .ca(ca)
+      .then((response) => {
+        expect(response.body).toEqual({
+          error: 'An unexpected error has occurred.',
+        });
+      });
+  });
+
   it("should have required property 'data'", async () => {
     mockRedis.getAsync.mockReturnValue('test:abc123');
     mockDeviceManagerService.getDevice.mockReturnValue({ disabled: false });
