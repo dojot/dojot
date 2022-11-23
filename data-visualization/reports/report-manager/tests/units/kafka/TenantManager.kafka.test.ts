@@ -1,5 +1,4 @@
 import { TenantManager } from 'src/kafka'
-import { KafkaParsedPayloadValue } from 'src/types'
 import {
   AppMock,
   ConfigMock,
@@ -14,7 +13,7 @@ jest.mock('@prisma/client', () => ({
 describe('TenantManager.kafka', () => {
   describe('update', () => {
     it('should update the list of tenants', async () => {
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
       const FakeDojotHttpClient = DojotHttpClientMock.new()
 
       const TENANTS = [{ id: 'admin' }, { id: 'master' }]
@@ -24,7 +23,6 @@ describe('TenantManager.kafka', () => {
       const tenantManager = new TenantManager(
         LoggerMock.new(),
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         FakeDojotHttpClient,
       )
@@ -39,7 +37,7 @@ describe('TenantManager.kafka', () => {
     })
 
     it('should log error when fails to update the list of tenants', async () => {
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
       const FakeDojotHttpClient = DojotHttpClientMock.new()
       const FakeLogger = LoggerMock.new()
 
@@ -49,7 +47,6 @@ describe('TenantManager.kafka', () => {
       const tenantManager = new TenantManager(
         FakeLogger,
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         FakeDojotHttpClient,
       )
@@ -66,55 +63,48 @@ describe('TenantManager.kafka', () => {
   })
 
   describe('create', () => {
-    it('should create a new tenant', () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'CREATE',
+    it('should create a new tenant', async () => {
+      const PARAMS = {
         tenant: 'admin',
         signatureKey: {},
       }
 
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
 
       const tenantManager = new TenantManager(
         LoggerMock.new(),
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         DojotHttpClientMock.new(),
       )
 
       expect(tenantManager.tenants).toHaveLength(0)
 
-      tenantManager.create(PAYLOAD_VALUE)
+      await tenantManager.create(PARAMS)
 
       expect(tenantManager.tenants).toHaveLength(1)
       expect(tenantManager.tenants[0]).toMatchObject({
-        id: PAYLOAD_VALUE.tenant,
-        signatureKey: PAYLOAD_VALUE.signatureKey,
+        id: PARAMS.tenant,
+        signatureKey: PARAMS.signatureKey,
       })
 
-      expect(PrismaUtilsMock.getDatabaseUrl).toBeCalledWith(
-        PAYLOAD_VALUE.tenant,
-      )
-
+      expect(PrismaUtilsMock.getDatabaseUrl).toBeCalledWith(PARAMS.tenant)
       expect(PrismaUtilsMock.deployMigrations).toBeCalled()
       expect(PrismaUtilsMock.seedDatabase).toBeCalled()
     })
 
-    it('should log error when fails to create tenant', () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'CREATE',
+    it('should log error when fails to create tenant', async () => {
+      const PARAMS = {
         tenant: 'admin',
         signatureKey: {},
       }
 
       const FakeLogger = LoggerMock.new()
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
 
       const tenantManager = new TenantManager(
         FakeLogger,
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         DojotHttpClientMock.new(),
       )
@@ -123,7 +113,7 @@ describe('TenantManager.kafka', () => {
         throw new Error('Error')
       })
 
-      tenantManager.create(PAYLOAD_VALUE)
+      await tenantManager.create(PARAMS)
 
       expect(FakeLogger.error).toBeCalled()
       expect(PrismaUtilsMock.seedDatabase).not.toBeCalled()
@@ -134,11 +124,7 @@ describe('TenantManager.kafka', () => {
 
   describe('delete', () => {
     it('should delete a tenant', async () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'DELETE',
-        tenant: 'master',
-        signatureKey: {},
-      }
+      const PARAMS = { tenant: 'master' }
 
       const TENANTS = [
         { id: 'admin', sigKey: {} },
@@ -146,13 +132,12 @@ describe('TenantManager.kafka', () => {
         { id: 'test', sigKey: {} },
       ]
 
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
       PrismaUtilsMock.dropSchema.mockResolvedValue(true)
 
       const tenantManager = new TenantManager(
         LoggerMock.new(),
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         DojotHttpClientMock.new(),
       )
@@ -160,30 +145,23 @@ describe('TenantManager.kafka', () => {
       tenantManager.tenants = TENANTS
       expect(tenantManager.tenants).toEqual(TENANTS)
 
-      await tenantManager.delete(PAYLOAD_VALUE)
+      await tenantManager.delete(PARAMS)
 
-      const NEW_TENANTS = TENANTS.filter(
-        ({ id }) => id !== PAYLOAD_VALUE.tenant,
-      )
-
+      const NEW_TENANTS = TENANTS.filter(({ id }) => id !== PARAMS.tenant)
       expect(tenantManager.tenants).toEqual(NEW_TENANTS)
       expect(PrismaUtilsMock.getDatabaseUrl).toBeCalled()
       expect(PrismaUtilsMock.dropSchema).toBeCalledWith(
-        PAYLOAD_VALUE.tenant,
+        PARAMS.tenant,
         expect.any(Object),
       )
       expect(PrismaUtilsMock.disconnectPrisma).toBeCalledWith(
-        PAYLOAD_VALUE.tenant,
+        PARAMS.tenant,
         expect.any(Object),
       )
     })
 
     it('should handle errors when deleting a tenant', async () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'DELETE',
-        tenant: 'master',
-        signatureKey: {},
-      }
+      const PARAMS = { tenant: 'master' }
 
       const TENANTS = [
         { id: 'admin', sigKey: {} },
@@ -192,7 +170,7 @@ describe('TenantManager.kafka', () => {
       ]
 
       const FakeLogger = LoggerMock.new()
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
 
       PrismaUtilsMock.getDatabaseUrl.mockImplementation(() => {
         throw new Error('Error')
@@ -201,7 +179,6 @@ describe('TenantManager.kafka', () => {
       const tenantManager = new TenantManager(
         FakeLogger,
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         DojotHttpClientMock.new(),
       )
@@ -209,110 +186,16 @@ describe('TenantManager.kafka', () => {
       tenantManager.tenants = TENANTS
       expect(tenantManager.tenants).toEqual(TENANTS)
 
-      await tenantManager.delete(PAYLOAD_VALUE)
+      await tenantManager.delete(PARAMS)
 
       expect(tenantManager.tenants).toEqual(TENANTS)
       expect(FakeLogger.error).toBeCalled()
     })
   })
 
-  describe('handleTenantEvent', () => {
-    it('should handle a tenant creation event', async () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'CREATE',
-        tenant: 'admin',
-        signatureKey: {},
-      }
-
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
-      KafkaUtilsMock.getValue.mockReturnValue(PAYLOAD_VALUE)
-
-      const tenantManager = new TenantManager(
-        LoggerMock.new(),
-        ConfigMock.new(),
-        KafkaUtilsMock,
-        PrismaUtilsMock,
-        DojotHttpClientMock.new(),
-      )
-
-      const createFn = jest.spyOn(tenantManager, 'create')
-      const deleteFn = jest.spyOn(tenantManager, 'delete')
-
-      const payload = { value: JSON.stringify(PAYLOAD_VALUE) }
-      await tenantManager.handleTenantEvent(payload)
-
-      expect(KafkaUtilsMock.getValue).toBeCalledWith(payload)
-      expect(deleteFn).not.toBeCalled()
-      expect(createFn).toBeCalled()
-    })
-
-    it('should handle a tenant deletion event', async () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'DELETE',
-        tenant: 'admin',
-        signatureKey: {},
-      }
-
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
-      KafkaUtilsMock.getValue.mockReturnValue(PAYLOAD_VALUE)
-
-      const tenantManager = new TenantManager(
-        LoggerMock.new(),
-        ConfigMock.new(),
-        KafkaUtilsMock,
-        PrismaUtilsMock,
-        DojotHttpClientMock.new(),
-      )
-
-      const createFn = jest.spyOn(tenantManager, 'create')
-      const deleteFn = jest.spyOn(tenantManager, 'delete')
-
-      const payload = { value: JSON.stringify(PAYLOAD_VALUE) }
-      await tenantManager.handleTenantEvent(payload)
-
-      expect(KafkaUtilsMock.getValue).toBeCalledWith(payload)
-      expect(createFn).not.toBeCalled()
-      expect(deleteFn).toBeCalled()
-    })
-
-    it('should handle errors when handling a tenant event', async () => {
-      const PAYLOAD_VALUE: KafkaParsedPayloadValue = {
-        type: 'CREATE',
-        tenant: 'admin',
-        signatureKey: {},
-      }
-
-      const FakeLogger = LoggerMock.new()
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
-
-      KafkaUtilsMock.getValue.mockImplementation(() => {
-        throw new Error('Error')
-      })
-
-      const tenantManager = new TenantManager(
-        FakeLogger,
-        ConfigMock.new(),
-        KafkaUtilsMock,
-        PrismaUtilsMock,
-        DojotHttpClientMock.new(),
-      )
-
-      const createFn = jest.spyOn(tenantManager, 'create')
-      const deleteFn = jest.spyOn(tenantManager, 'delete')
-
-      const payload = { value: JSON.stringify(PAYLOAD_VALUE) }
-      await tenantManager.handleTenantEvent(payload)
-
-      expect(KafkaUtilsMock.getValue).toBeCalledWith(payload)
-      expect(createFn).not.toBeCalled()
-      expect(deleteFn).not.toBeCalled()
-      expect(FakeLogger.error).toBeCalled()
-    })
-  })
-
   describe('updateTenantSchema', () => {
     it('should update a tenant schema', () => {
-      const { KafkaUtilsMock, PrismaUtilsMock } = AppMock.new()
+      const { PrismaUtilsMock } = AppMock.new()
 
       const VALUES = {
         TENANT: 'admin',
@@ -324,7 +207,6 @@ describe('TenantManager.kafka', () => {
       const tenantManager = new TenantManager(
         LoggerMock.new(),
         ConfigMock.new(),
-        KafkaUtilsMock,
         PrismaUtilsMock,
         DojotHttpClientMock.new(),
       )

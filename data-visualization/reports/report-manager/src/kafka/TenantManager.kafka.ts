@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client'
 import { Logger, WebUtils } from '@dojot/microservice-sdk'
 
-import { KafkaUtils, PrismaUtils } from 'src/utils'
-import { Config, KafkaParsedPayloadValue, KafkaPayload } from 'src/types'
+import { PrismaUtils } from 'src/utils'
+import { Config } from 'src/types'
+
+type CreateTenantParams = {
+  tenant: string
+  signatureKey: object
+}
+
+type deleteTenantParams = {
+  tenant: string
+}
 
 export class TenantManager {
   public tenants: WebUtils.TenantInfo[] = []
@@ -10,7 +19,6 @@ export class TenantManager {
   constructor(
     private logger: Logger,
     private config: Config,
-    private kafkaUtils: KafkaUtils,
     private prismaUtils: PrismaUtils,
     private dojotHttpClient: WebUtils.DojotHttpClient,
   ) {
@@ -47,7 +55,7 @@ export class TenantManager {
     }
   }
 
-  create({ tenant, signatureKey }: KafkaParsedPayloadValue) {
+  async create({ tenant, signatureKey }: CreateTenantParams) {
     try {
       this.logger.info(`create: creating tenant ${tenant}`, {})
       this.updateTenantSchema(tenant)
@@ -58,7 +66,7 @@ export class TenantManager {
     }
   }
 
-  async delete({ tenant }: KafkaParsedPayloadValue) {
+  async delete({ tenant }: deleteTenantParams) {
     try {
       this.logger.info(`delete: deleting tenant ${tenant}`, {})
       this.logger.debug('delete: connecting to the database', {})
@@ -82,25 +90,6 @@ export class TenantManager {
       }
     } catch (e) {
       this.logger.error(`delete: tenant deletion failed`, e as never)
-    }
-  }
-
-  async handleTenantEvent(payload: KafkaPayload) {
-    try {
-      const value = this.kafkaUtils.getValue(payload)
-
-      this.logger.info(
-        `handleTenantEvent: type (${value.type}), tenant (${value.tenant})`,
-        {},
-      )
-
-      if (value.type === 'CREATE') this.create(value)
-      else if (value.type === 'DELETE') await this.delete(value)
-    } catch (e) {
-      this.logger.error(
-        `handleTenantEvent: tenant event handling failed`,
-        e as never,
-      )
     }
   }
 }

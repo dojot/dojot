@@ -7,7 +7,7 @@ import {
 import camelcase from 'lodash.camelcase'
 
 import { Config } from 'src/types'
-import { KafkaUtils, PrismaUtils } from 'src/utils'
+import { PrismaUtils } from 'src/utils'
 import { KafkaConsumer, TenantManager } from 'src/kafka'
 
 import { App } from './app'
@@ -39,17 +39,16 @@ const dojotHttpClient = new WebUtils.DojotHttpClient({
   defaultMaxNumberAttempts: 0,
 })
 
-const kafkaUtils = new KafkaUtils()
 const prismaUtils = new PrismaUtils(logger, config)
 
-const kafkaConsumer = new KafkaConsumer(logger, config)
 const tenantManager = new TenantManager(
   logger,
   config,
-  kafkaUtils,
   prismaUtils,
   dojotHttpClient,
 )
+
+const kafkaConsumer = new KafkaConsumer(logger, config, tenantManager)
 
 const retrieverHttpClient = new WebUtils.DojotHttpClient({
   logger,

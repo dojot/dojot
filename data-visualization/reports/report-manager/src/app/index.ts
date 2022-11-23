@@ -108,14 +108,10 @@ export class App {
   }
 
   async init() {
+    this.serviceState.registerService(SERVICE_NAMES.REPORT_MANAGER)
+
     await this.kafkaConsumer.init()
     await this.tenantManager.update()
-
-    this.kafkaConsumer.registerTenantEvent(
-      this.tenantManager.handleTenantEvent.bind(this.tenantManager),
-    )
-
-    this.serviceState.registerService(SERVICE_NAMES.REPORT_MANAGER)
 
     const express = this.createExpress()
     const server = express.listen(this.config.server.port)

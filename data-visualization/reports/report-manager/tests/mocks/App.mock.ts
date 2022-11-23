@@ -6,14 +6,13 @@ import {
   ReportFileService,
   ReportAttemptService,
 } from 'src/app/services'
+import { PrismaUtils } from 'src/utils'
 import { DeviceReports } from 'src/app/reports'
-import { KafkaUtils, PrismaUtils } from 'src/utils'
 import { FileManagementApi, RetrieverApi } from 'src/app/apis'
 import { DeviceReportProcessor, DeviceReportQueue } from 'src/app/jobs'
 
 export const AppMock = {
   new() {
-    const KafkaUtilsMock = mockDeep<KafkaUtils>()
     const PrismaUtilsMock = mockDeep<PrismaUtils>()
 
     const DeviceReportsMock = mockDeep<DeviceReports>()
@@ -30,7 +29,6 @@ export const AppMock = {
     const DeviceReportProcessorMock = mockDeep<DeviceReportProcessor>()
 
     return {
-      KafkaUtilsMock,
       PrismaUtilsMock,
 
       DeviceReportsMock,
