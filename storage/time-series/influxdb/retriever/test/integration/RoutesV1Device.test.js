@@ -125,7 +125,7 @@ const mockLogger = {
   info: jest.fn(),
 };
 
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn().mockResolvedValue({
     data: [
       'device1',
@@ -180,12 +180,12 @@ const localPersistenceManager = new LocalPersistenceManager(
   './data',
 );
 
-const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection, true, mockLogger);
+const deviceDataRepository = new DeviceDataRepository('default_repository', mockInfluxDBConnection, mockLogger);
 const deviceDataService = new DeviceDataService(deviceDataRepository);
 const genericQueryService = new GenericQueryService(deviceDataRepository);
 const deviceManagerService = new DeviceManagerService(
   'url',
-  mockDojotClientHttp,
+  mockDojotHttpClient,
   localPersistenceManager,
   mockLogger,
 );
@@ -238,7 +238,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        'dojot.string': '"string"',
+        'dojot.string': 'string',
       },
     ]);
 
@@ -276,7 +276,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        'dojot.string': '"string"',
+        'dojot.string': 'string',
       },
     ]);
     request(app)
@@ -319,7 +319,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        _value: '"string"',
+        _value: 'string',
       },
     ]);
     request(app)
@@ -346,7 +346,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        _value: '"string"',
+        _value: 'string',
       },
     ]);
     request(app)
@@ -365,7 +365,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        _value: '"string"',
+        _value: 'string',
       },
     ]);
     request(app)
@@ -398,7 +398,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        _value: '"string"',
+        _value: 'string',
       },
     ]);
     request(app)
@@ -429,7 +429,7 @@ describe('Test Devices Routes', () => {
     mockData.mockReturnValueOnce([
       {
         _time: '2020-11-25T16:37:10.590Z',
-        _value: '"string"',
+        _value: 'string',
       },
     ]);
     request(app)

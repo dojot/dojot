@@ -8,16 +8,16 @@ const {
  * @class
  */
 module.exports = class TenantService {
-  constructor(keycloadProxyClientHttp, keycloakConfig, logger) {
+  constructor(keycloadProxyHttpClient, keycloakConfig, logger) {
     this.logger = logger;
-    this.keycloadProxyClientHttp = keycloadProxyClientHttp;
+    this.keycloadProxyHttpClient = keycloadProxyHttpClient;
     this.keycloakConfig = keycloakConfig;
     this.listTenants = [];
   }
 
   updateListTenants = async () => {
     // Requests to keycloak-proxy all tenants
-    const response = await this.keycloadProxyClientHttp.request({
+    const response = await this.keycloadProxyHttpClient.request({
       method: 'GET',
       url: this.keycloakConfig['tenants.url'],
       timeout: 15000,

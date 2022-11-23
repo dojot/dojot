@@ -11,7 +11,7 @@ const mockDojot = {
 
 jest.mock('@dojot/microservice-sdk', () => mockDojot);
 
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn().mockResolvedValue({
     data: [
       'device1',
@@ -40,7 +40,7 @@ describe('DeviceService', () => {
   beforeEach(() => {
     deviceService = new DeviceService(
       'route.url',
-      mockDojotClientHttp,
+      mockDojotHttpClient,
       mockLocalPersistence,
       mockLogger,
     );
@@ -59,7 +59,7 @@ describe('DeviceService', () => {
   });
 
   it('Should return a list of device in multiple requests when there are more than 100 devices', async () => {
-    mockDojotClientHttp.request.mockImplementation(() => ({
+    mockDojotHttpClient.request.mockImplementation(() => ({
       data: Array.from({ length: 203 }, () => 'device'),
     }));
 
