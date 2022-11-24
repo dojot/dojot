@@ -17,6 +17,10 @@ export abstract class KafkaProducerClientInterceptor {
       const isConnected = await kafkaproducer.isConnected();
 
       if (!isConnected) {
+        logger.debug(
+          'KafkaProducerClientInterceptor - Error Service Unavailable  ',
+          {},
+        );
         return res.status(503).send();
       }
 

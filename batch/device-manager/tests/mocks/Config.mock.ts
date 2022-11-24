@@ -29,6 +29,7 @@ export const ConfigMock = {
         host: 'postgres',
         port: 5432,
         name: 'dev',
+        schema: 'admin',
       },
       lightship: {
         'detect.kubernetes': false,

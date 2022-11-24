@@ -8,6 +8,7 @@ import {
   AttrsRepository,
   TemplatesRepository,
 } from '../../../../src/app/repository';
+import { isNull } from 'lodash';
 
 describe('TemplatesServices', () => {
   describe('remove', () => {
@@ -153,20 +154,17 @@ describe('TemplatesServices', () => {
     });
 
     it('should return exception', async () => {
-      const removeTemplatesBatchDto_fake: RemoveTemplatesBatchDto = {
-        templates: [1.0],
-      };
+      const removeTemplatesBatchDto_fake: RemoveTemplatesBatchDto = {} as any;
       const FakePrismaClient = PrismaClientMock.new();
       const templates_repository = new TemplatesRepository(LoggerMock.new());
-      const attrsRepository = new AttrsRepository(LoggerMock.new());
-      FakePrismaClient.templates.findUnique.mockRejectedValue(devices_fake1);
+      const attrs_repository = new AttrsRepository(LoggerMock.new());
 
       const templatesServices = new TemplatesServices(
         LoggerMock.new(),
         templates_repository,
-        attrsRepository,
+        attrs_repository,
       );
-
+      FakePrismaClient.templates.findUnique.mockRejectedValue(devices_fake1);
       const fn = () => {
         return templatesServices.remove(
           FakePrismaClient,

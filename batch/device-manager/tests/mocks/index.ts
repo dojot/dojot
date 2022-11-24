@@ -6,3 +6,4 @@ export * from './Express.mock';
 export * from './PrismaClient.mock';
 export * from './ServiceState.mock';
 export * from './KeycloakClientSession.mock';
+export * from './DojotHttpClient.mock';

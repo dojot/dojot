@@ -14,22 +14,7 @@ export abstract class ValidationAttrsInterceptor {
             message: error_validate_label,
           });
         }
-      } else {
-        const { error } = schema.validate(req, {
-          abortEarly: false,
-          allowUnknown: true,
-        });
-
-        if (error) {
-          return res.status(400).json({
-            type: APP_ERRORS.VALIDATION,
-            cause: error.cause,
-            details: error.details,
-            message: error.message,
-          });
-        }
       }
-
       return next();
     };
   }

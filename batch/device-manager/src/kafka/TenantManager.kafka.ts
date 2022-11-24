@@ -55,7 +55,6 @@ export class TenantManager {
       const newTenant = { id: tenant, signatureKey, sigKey: {} };
       this.tenants.push(newTenant);
     } catch (e: unknown) {
-      const error = e as Error;
       this.logger.error(`create: tenant creation failed`, e as never);
     }
   }
