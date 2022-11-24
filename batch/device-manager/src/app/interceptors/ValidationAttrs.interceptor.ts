@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from 'express';
-import { Schema } from 'joi';
 
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 

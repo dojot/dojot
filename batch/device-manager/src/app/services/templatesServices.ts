@@ -3,13 +3,14 @@ import { PrismaClient } from '@prisma/client';
 import { RemoveTemplatesBatchDto } from 'src/types';
 
 import { AttrsRepository, TemplatesRepository } from '../repository';
+
 import { DeviceResultBatch, TemplatesAssociatedDevicesBatch, TemplatesBatch, TemplatesNotFoundBatch } from './entities';
 
 type RemoveTemplatesServicesOutput = {
-  templates: Array<TemplatesBatch>,
-  templates_associated_devices: Array<TemplatesAssociatedDevicesBatch>,
-  templates_not_found: Array<TemplatesNotFoundBatch>,
-}
+  templates: Array<TemplatesBatch>;
+  templates_associated_devices: Array<TemplatesAssociatedDevicesBatch>;
+  templates_not_found: Array<TemplatesNotFoundBatch>;
+};
 
 export class TemplatesServices {
   constructor(
@@ -32,11 +33,11 @@ export class TemplatesServices {
     dto: RemoveTemplatesBatchDto,
   ): Promise<RemoveTemplatesServicesOutput | undefined> {
     try {
-      let templates_removed_batch: Array<TemplatesBatch> = [];
-      let templates_not_found_batch: Array<TemplatesNotFoundBatch> = [];
-      let templates_associated_devices_batch: Array<TemplatesAssociatedDevicesBatch> = [];
-      let devices_associated_templates_batch: Array<DeviceResultBatch> = [];
-      let aux_ids_device_found_associated: Array<string> = [];
+      const templates_removed_batch: Array<TemplatesBatch> = [];
+      const templates_not_found_batch: Array<TemplatesNotFoundBatch> = [];
+      const templates_associated_devices_batch: Array<TemplatesAssociatedDevicesBatch> = [];
+      const devices_associated_templates_batch: Array<DeviceResultBatch> = [];
+      const aux_ids_device_found_associated: Array<string> = [];
 
       let template_to_removed;
       const remove_templates_all_promisses = dto.templates.map(

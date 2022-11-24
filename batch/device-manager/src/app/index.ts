@@ -13,7 +13,6 @@ import {
   PrismaClientInterceptor,
 } from './interceptors';
 
-
 import { TemplateRoutes } from './routes/Template.routes';
 
 export class App {

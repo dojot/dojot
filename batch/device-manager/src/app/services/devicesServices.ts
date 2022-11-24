@@ -8,18 +8,24 @@ import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
 import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
-import { AttrBatch, DeviceNotFoundBatch, DeviceResultBatch, TemplatesNotFoundBatch } from './entities';
+
+import { 
+  AttrBatch, 
+  DeviceNotFoundBatch, 
+  DeviceResultBatch, 
+  TemplatesNotFoundBatch
+} from './entities';
 
 export type RemoveDevicesServicesOutput = {
-  devices: Array<DeviceResultBatch>,
-  devices_not_found: Array<DeviceNotFoundBatch>,
+  devices: Array<DeviceResultBatch>;
+  devices_not_found: Array<DeviceNotFoundBatch>;
 }
 
 export type CreateDevicesServicesOutput = {
-  devices_created: Array<DeviceResultBatch>,
-  devices_not_created: Array<DeviceResultBatch>,
-  templates_not_found: Array<TemplatesNotFoundBatch>,
-  attrs_not_found: Array<AttrBatch>
+  devices_created: Array<DeviceResultBatch>;
+  devices_not_created: Array<DeviceResultBatch>;
+  templates_not_found: Array<TemplatesNotFoundBatch>;
+  attrs_not_found: Array<AttrBatch>;
 }
 
 export class DevicesServices {

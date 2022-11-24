@@ -17,8 +17,6 @@ import {
 } from '../../../../src/app/repository/';
 import { PrismaUtils } from '../../../../src/utils/Prisma.utils';
 
-
-
 describe('devicesServices', () => {
   const removeDevicesBatchDto_fake: RemoveDevicesBatchDto = {
     devices: ['1'],
@@ -71,7 +69,7 @@ describe('devicesServices', () => {
 
   describe('remove', () => {
     it('should return exception', async () => {
-      const removeDevicesBatchDto_fake: RemoveDevicesBatchDto = {} as RemoveDevicesBatchDto;
+      const removeDevicesBatchDto_fake = {} as RemoveDevicesBatchDto;
       const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const devicesRepository = new DevicesRepository(LoggerMock.new());
