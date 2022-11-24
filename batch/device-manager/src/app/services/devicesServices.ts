@@ -10,15 +10,15 @@ import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
 
 type DeviceResultBatch = {
-  id: string,
-  label: string,
+  id: string;
+  label: string;
 };
 
 type DeviceNotFoundBatch = {
-  id: string,
-  message: string,
-  type: string,
-}
+  id: string;
+  message: string;
+  type: string;
+};
 
 export class DevicesServices {
   constructor(
@@ -63,12 +63,14 @@ export class DevicesServices {
             const templates_associated_with_device: Array<number> = [];
             const attrs_associated_with_template_and_device: Array<any> = [];
 
-            assert_device_exists.device_template.forEach(async (element: any) => {
-              templates_associated_with_device.push(element.templates.id);
-              attrs_associated_with_template_and_device.push({
-                [element.templates.id.toString()]: element.templates.attrs,
-              });
-            });
+            assert_device_exists.device_template.forEach(
+              async (element: any) => {
+                templates_associated_with_device.push(element.templates.id);
+                attrs_associated_with_template_and_device.push({
+                  [element.templates.id.toString()]: element.templates.attrs,
+                });
+              },
+            );
 
             /**
              *  disassociated devices with template.
@@ -168,16 +170,16 @@ export class DevicesServices {
     tenant_id: string,
   ): Promise<any> {
     try {
-      let devices_create_result_batch: Array<any> = [];
-      let devices_not_create_result_batch: Array<any> = [];
-      let attrs_not_found: Array<any> = [];
+      const devices_create_result_batch: Array<any> = [];
+      const devices_not_create_result_batch: Array<any> = [];
+      const attrs_not_found: Array<any> = [];
       let start_sufix = dto.start_sufix;
 
       const array_asserts_templates_and_attrs_not_found_templates =
         await this.assert_all_templates_valid_exits(connection, dto);
       for (let index = 0; index < dto.quantity; index++) {
         const name_prefix_device = dto.name_prefix + '-' + start_sufix;
-        let device_id_generated = this.prismaUtils.getRandomicHexIdDevices();
+        const device_id_generated = this.prismaUtils.getRandomicHexIdDevices();
 
         if (
           array_asserts_templates_and_attrs_not_found_templates.templates_found
@@ -201,7 +203,7 @@ export class DevicesServices {
             /**
              * Create Device in repository.
              */
-            let createdDevices = await this.devicesRepository.create(
+            const createdDevices = await this.devicesRepository.create(
               connection,
               device_id_generated,
               name_prefix_device,
@@ -237,7 +239,7 @@ export class DevicesServices {
                */
               array_asserts_templates_and_attrs_not_found_templates.templates_found.map(
                 async (id: number) => {
-                  let createdAssociatedDevicesTenplates =
+                  const createdAssociatedDevicesTenplates =
                     await this.devicesRepository.create_associated_devices_templates(
                       connection,
                       device_id_generated,

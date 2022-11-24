@@ -25,11 +25,11 @@ export class TemplatesServices {
     dto: RemoveTemplatesBatchDto,
   ): Promise<any> {
     try {
-      let templates_removed_batch: Array<any> = [];
-      let templates_not_found_batch: Array<any> = [];
-      let templates_associated_devices_batch: Array<any> = [];
-      let devices_associated_templatesd_batch: Array<any> = [];
-      let aux_ids_device_found_associated: Array<string> = [];
+      const templates_removed_batch: Array<any> = [];
+      const templates_not_found_batch: Array<any> = [];
+      const templates_associated_devices_batch: Array<any> = [];
+      const devices_associated_templatesd_batch: Array<any> = [];
+      const aux_ids_device_found_associated: Array<string> = [];
 
       let template_to_removed;
       const remove_templates_all_promisses = dto.templates.map(
