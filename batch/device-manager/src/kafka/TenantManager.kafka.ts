@@ -1,7 +1,11 @@
 import { Logger, WebUtils } from '@dojot/microservice-sdk';
-import { AppConfig, KafkaPayload } from 'src/types';
-import { KafkaUtils } from 'src/utils/kafka.utils';
+import { AppConfig } from 'src/types';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
+
+type CreateTenantParams = {
+  tenant: string;
+  signatureKey: object;
+};
 
 export class TenantManager {
   public tenants: WebUtils.TenantInfo[];
@@ -11,7 +15,6 @@ export class TenantManager {
     private config: AppConfig,
     private dojotHttpClient: WebUtils.DojotHttpClient,
     private prismaUtils: PrismaUtils,
-    private kafkaUtils: KafkaUtils,
   ) {
     this.tenants = [];
   }
@@ -29,30 +32,30 @@ export class TenantManager {
         url: this.config.keycloak['tenants.url'],
         timeout: 15000,
       });
-
-      this.logger.info('Running migrations for all tenants', {});
-
+      this.logger.info('update: updating the schema of all tenants', {});
       this.tenants = response.data.tenants;
-      this.tenants.forEach((tenant) => this.updateTenantSchema(tenant.id));
+      this.tenants.forEach((tenant) => {
+        this.logger.info(`update: updating schema for ${tenant.id}`, {});
+        this.updateTenantSchema(tenant.id);
+      });
 
-      this.logger.info('Migrations ran successfully', {});
-    } catch (e: unknown) {
-      const error = e as Error;
       this.logger.info(
-        `Failed to update list of tenants: ${error.stack || error}`,
+        'update: all schemas have been updated successfully',
         {},
       );
+    } catch (e) {
+      this.logger.error('update: failed to update list of tenants', e as never);
     }
   }
 
-  create(payload: KafkaPayload) {
+  async create({ tenant, signatureKey }: CreateTenantParams) {
     try {
-      const value = this.kafkaUtils.getValue(payload);
-      this.logger.info(`${value.type} bucket for ${value.tenant} tenant`, {});
-      //this.updateTenantSchema(value.tenant)
+      this.logger.info(`create: creating tenant ${tenant}`, {});
+      this.updateTenantSchema(tenant);
+      const newTenant = { id: tenant, signatureKey, sigKey: {} };
+      this.tenants.push(newTenant);
     } catch (e: unknown) {
-      const error = e as Error;
-      this.logger.info(`Tenant creation failed: ${error.stack || error}`, {});
+      this.logger.error(`create: tenant creation failed`, e as never);
     }
   }
 }

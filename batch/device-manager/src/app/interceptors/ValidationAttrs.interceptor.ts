@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { Schema } from 'joi';
-import { APP_ERRORS } from '../constants/Errors.constants';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 
 export abstract class ValidationAttrsInterceptor {
@@ -14,22 +13,7 @@ export abstract class ValidationAttrsInterceptor {
             message: error_validate_label,
           });
         }
-      } else {
-        const { error } = schema.validate(req, {
-          abortEarly: false,
-          allowUnknown: true,
-        });
-
-        if (error) {
-          return res.status(400).json({
-            type: APP_ERRORS.VALIDATION,
-            cause: error.cause,
-            details: error.details,
-            message: error.message,
-          });
-        }
       }
-
       return next();
     };
   }

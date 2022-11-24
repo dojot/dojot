@@ -77,9 +77,6 @@ export class App {
     await this.kafkaConsumer.init();
     await this.tenantManager.update();
 
-    this.kafkaConsumer.initNewTenantEvent(
-      this.tenantManager.create.bind(this.tenantManager),
-    );
     await this.KafkaProducer.init();
 
     const express = this.createExpress();

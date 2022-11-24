@@ -11,7 +11,6 @@ import {
 import { KafkaProducer } from '../../kafka/kafka-producer';
 import { DevicesRepository, TemplatesRepository } from '../repository';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
-import { AttrsRepository } from '../repository/attrsRepository';
 
 export abstract class DeviceRoutes {
   static use(
@@ -19,7 +18,6 @@ export abstract class DeviceRoutes {
     kafkaProducer: KafkaProducer,
     prismaUtils: PrismaUtils,
   ) {
-    const attrsRepository = new AttrsRepository(logger);
     const templatesRepository = new TemplatesRepository(logger);
     const devicesRepository = new DevicesRepository(logger);
     const deviceServices = new DevicesServices(
@@ -28,7 +26,6 @@ export abstract class DeviceRoutes {
       kafkaProducer,
       prismaUtils,
       templatesRepository,
-      attrsRepository,
     );
     const devicesBatchController = new DevicesBatchController(
       logger,

@@ -1,12 +1,32 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
-import { attrs, templates } from '@prisma/client';
+import { attrs, devices, templates } from '@prisma/client';
 import { AttrsRepository } from '../../../../src/app/repository/attrsRepository';
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 
 describe('attrsRepository', () => {
+  const device_fake: devices = {
+    id: '1',
+    label: 'dev1',
+    created: new Date(),
+    updated: new Date(),
+    persistence: null,
+  };
+
   const attrs_fake: attrs = {
     id: 1,
+    label: 'teste',
+    created: new Date(),
+    updated: new Date(),
+    type: 'dynamic',
+    value_type: 'bool',
+    static_value: null,
+    template_id: 1,
+    parent_id: null,
+  };
+
+  const attrs_fake_error: attrs = {
+    id: -1,
     label: 'teste',
     created: new Date(),
     updated: new Date(),
@@ -47,9 +67,26 @@ describe('attrsRepository', () => {
 
     it('should findById return exception', async () => {
       const FakePrismaClient = PrismaClientMock.new();
-      FakePrismaClient.attrs.findUnique.mockRejectedValue([template_fake]);
+      FakePrismaClient.attrs.findUnique.mockRejectedValue({});
       const fn = () => {
-        return attrs_repository.findById(FakePrismaClient, 1);
+        return attrs_repository.findById(FakePrismaClient, -1);
+      };
+
+      expect(fn).rejects.toThrow(Error);
+    });
+  });
+
+  describe('remove', () => {
+    const attrs_repository = new AttrsRepository(LoggerMock.new());
+
+    it('should remove return exception.', async () => {
+      const FakePrismaClient = {} as any;
+
+      const fn = () => {
+        return attrs_repository.remove_associate_attrs_template(
+          FakePrismaClient,
+          -1,
+        );
       };
 
       expect(fn).rejects.toThrow(Error);

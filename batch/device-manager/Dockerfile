@@ -29,9 +29,12 @@ COPY nodemon.json ./nodemon.json
 COPY prisma ./prisma/
 
 RUN npm install
+
 COPY src ./src
 COPY docs ./docs
+
 RUN npm run build
+# RUN npx prisma generate --schema ./prisma/schema.prisma
 
 FROM node:16.17.1-alpine3.15
 

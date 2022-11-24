@@ -39,4 +39,9 @@ describe('Prisma.utils', () => {
   it('should generate random of size 6', async () => {
     expect(prismaUtils.getRandomicHexIdDevices().length).toBe(6);
   });
+
+  it('should schema with parameter empty get config parameter schema', async () => {
+    const databaseUrl = prismaUtils.getDatabaseUrl('', FakeLogger, appconfig);
+    expect(databaseUrl).toContain('?schema=admin');
+  });
 });

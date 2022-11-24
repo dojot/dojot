@@ -1,4 +1,4 @@
-FROM node:14-alpine AS base
+FROM node:16.17.1-alpine3.15 AS base
 
 WORKDIR /opt/device-manager
 
@@ -27,12 +27,14 @@ COPY package-lock.json ./package-lock.json
 COPY tsconfig.json ./tsconfig.json
 COPY nodemon.json ./nodemon.json
 COPY prisma ./prisma/
+COPY src ./src
+COPY docs ./docs
 
 RUN npm install
-COPY src ./src
 RUN npm run build
+# RUN npx prisma generate --schema ./prisma/schema.prisma
 
-FROM node:14-alpine
+FROM node:16.17.1-alpine3.15
 
 WORKDIR /opt/device-manager
 

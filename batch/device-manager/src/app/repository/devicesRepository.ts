@@ -6,10 +6,10 @@ export class DevicesRepository {
     this.logger.info('Create Constructor DevicesRepository', {});
   }
 
-  async remove(prisma: PrismaClient, id: string) {
+  async remove(prisma: PrismaClient, id_devices: string) {
     try {
       return await prisma.devices.delete({
-        where: { id: id.toString() },
+        where: { id: id_devices.toString() },
       });
     } catch (e: unknown) {
       const error = e as Error;
@@ -19,10 +19,23 @@ export class DevicesRepository {
     }
   }
 
-  async findById(prisma: PrismaClient, id: string) {
+  async findByIdWithTemplatesAttrs(prisma: PrismaClient, id: string) {
     try {
       return await prisma.devices.findUnique({
         where: { id: id.toString() },
+        include: {
+          device_template: {
+            include: {
+              templates: {
+                select: {
+                  id: true,
+                  label: true,
+                  attrs: {},
+                },
+              },
+            },
+          },
+        },
       });
     } catch (e: unknown) {
       const error = e as Error;
@@ -32,12 +45,37 @@ export class DevicesRepository {
     }
   }
 
-  async remove_associate_templates(prisma: PrismaClient, id: string) {
+  async remove_associate_templates(prisma: PrismaClient, id_device: string) {
     try {
-      return await prisma.$executeRaw`DELETE FROM device_template WHERE device_id = ${id}`;
+      return await prisma.$executeRaw`DELETE FROM device_template WHERE device_id = ${id_device}`;
     } catch (e: unknown) {
       const error = e as Error;
       this.logger.debug('DevicesRepository - remove_associate_templates ', {
+        error: error.message,
+      });
+    }
+  }
+
+  async remove_associate_overrides(prisma: PrismaClient, id_device: string) {
+    try {
+      return await prisma.$executeRaw`DELETE FROM overrides WHERE did = ${id_device}`;
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('DevicesRepository - remove_associate_overrides ', {
+        error: error.message,
+      });
+    }
+  }
+
+  async remove_associate_pre_shared_keys(
+    prisma: PrismaClient,
+    id_device: string,
+  ) {
+    try {
+      return await prisma.$executeRaw`DELETE FROM pre_shared_keys WHERE device_id = ${id_device}`;
+    } catch (e: unknown) {
+      const error = e as Error;
+      this.logger.debug('DevicesRepository - remove_associate_overrides ', {
         error: error.message,
       });
     }
@@ -85,7 +123,7 @@ export class DevicesRepository {
 
   async assert_devices_exists(prisma: PrismaClient, label: string) {
     try {
-      return await prisma.devices.findFirst({
+      return await prisma.devices.findUnique({
         where: {
           label: label,
         },

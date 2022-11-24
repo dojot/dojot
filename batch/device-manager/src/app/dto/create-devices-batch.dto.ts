@@ -10,5 +10,6 @@ export interface CreateDevicesBatchDto {
     type: string;
     valueType: string;
     staticValue: string;
+    templateId: string;
   }>;
 }
