@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { Schema } from 'joi';
+
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 
 export abstract class ValidationAttrsInterceptor {
-  static use(schema: Schema) {
+  static use(_schema: Schema) {
     return (req: Request, res: Response, next: NextFunction) => {
       const dto = req.body as CreateDevicesBatchDto;
       if (dto) {

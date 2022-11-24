@@ -1,6 +1,6 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
-import { devices, device_template, templates } from '@prisma/client';
+import { devices, device_template, PrismaClient, templates } from '@prisma/client';
 import { DevicesRepository } from '../../../../src/app/repository/devicesRepository';
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 
@@ -118,8 +118,6 @@ describe('devicesRepository', () => {
   });
 
   describe('create', () => {
-    const device_repository = new DevicesRepository(LoggerMock.new());
-
     it('should call create device in batch .', async () => {
       const FakePrismaClient = PrismaClientMock.new();
       const device_repository = new DevicesRepository(LoggerMock.new());
@@ -139,11 +137,6 @@ describe('devicesRepository', () => {
       FakePrismaClient.device_template.create.mockResolvedValue(
         device_template_fake,
       );
-      const device_created = await device_repository.create(
-        FakePrismaClient,
-        '1',
-        'teste',
-      );
       await device_repository.create_associated_devices_templates(
         FakePrismaClient,
         '1',
@@ -154,7 +147,7 @@ describe('devicesRepository', () => {
     });
 
     it('should remove_associate_overrides return exception', async () => {
-      const FakePrismaClient = {} as any;
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
       const fn = () => {
         return device_repository.remove_associate_overrides(
@@ -167,7 +160,7 @@ describe('devicesRepository', () => {
     });
 
     it('should remove_associate_pre_shared_keys return exception', async () => {
-      const FakePrismaClient = {} as any;
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
       const fn = () => {
         return device_repository.remove_associate_pre_shared_keys(
@@ -180,7 +173,7 @@ describe('devicesRepository', () => {
     });
 
     it('should create return exception', async () => {
-      const FakePrismaClient = {} as any;
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
       const fn = () => {
         return device_repository.create(FakePrismaClient, '', '');
@@ -190,7 +183,7 @@ describe('devicesRepository', () => {
     });
 
     it('should return exception in create devices and templates associoted ', async () => {
-      const FakePrismaClient = {} as any;
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
       const fn = () => {
         return device_repository.create_associated_devices_templates(

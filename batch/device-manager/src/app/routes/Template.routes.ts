@@ -1,4 +1,7 @@
 import { Logger } from '@dojot/microservice-sdk';
+
+import { KafkaProducer } from 'src/kafka/kafka-producer';
+import { PrismaUtils } from 'src/utils/Prisma.utils';
 import { TemplatesServices } from '../services/templatesServices';
 import { TemplatesBatchController } from '../controller/templates_batch';
 import { TemplatesValidation } from '../validations/Template.validations';
@@ -6,8 +9,6 @@ import {
   ValidationInterceptor,
   DisconnectPrismaInterceptor,
 } from '../interceptors';
-import { KafkaProducer } from 'src/kafka/kafka-producer';
-import { PrismaUtils } from 'src/utils/Prisma.utils';
 import { AttrsRepository, TemplatesRepository } from '../repository';
 
 export abstract class TemplateRoutes {

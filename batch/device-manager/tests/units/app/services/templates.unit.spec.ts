@@ -2,6 +2,7 @@
 import { describe } from '@jest/globals';
 import { devices, templates } from '@prisma/client';
 import { RemoveTemplatesBatchDto } from 'src/types';
+
 import { TemplatesServices } from '../../../../src/app/services/templatesServices';
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 import {
@@ -11,10 +12,6 @@ import {
 
 describe('TemplatesServices', () => {
   describe('remove', () => {
-    const removeTemplatesBatchDto_fake: RemoveTemplatesBatchDto = {
-      templates: [1],
-    };
-
     const tenplates_fake1: templates = {
       id: 1,
       label: 'modelo1',
@@ -153,7 +150,7 @@ describe('TemplatesServices', () => {
     });
 
     it('should return exception', async () => {
-      const removeTemplatesBatchDto_fake: RemoveTemplatesBatchDto = {} as any;
+      const removeTemplatesBatchDto_fake = {} as RemoveTemplatesBatchDto;
       const FakePrismaClient = PrismaClientMock.new();
       const templates_repository = new TemplatesRepository(LoggerMock.new());
       const attrs_repository = new AttrsRepository(LoggerMock.new());

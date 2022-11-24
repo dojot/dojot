@@ -9,6 +9,17 @@ import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
 
+type DeviceResultBatch = {
+  id: string,
+  label: string,
+};
+
+type DeviceNotFoundBatch = {
+  id: string,
+  message: string,
+  type: string,
+}
+
 export class DevicesServices {
   constructor(
     private logger: Logger,
@@ -32,8 +43,8 @@ export class DevicesServices {
     tenant_id: string,
   ): Promise<any> {
     try {
-      let devices_result_batch: Array<any> = [];
-      const devices_not_found_batch: Array<any> = [];
+      const devices_result_batch: Array<DeviceResultBatch> = [];
+      const devices_not_found_batch: Array<DeviceNotFoundBatch> = [];
       const remove_devices_all_promisses = dto.devices.map(
         async (device_id) => {
           /**
@@ -52,7 +63,7 @@ export class DevicesServices {
             const templates_associated_with_device: Array<number> = [];
             const attrs_associated_with_template_and_device: Array<any> = [];
 
-            assert_device_exists.device_template.map(async (element: any) => {
+            assert_device_exists.device_template.forEach(async (element: any) => {
               templates_associated_with_device.push(element.templates.id);
               attrs_associated_with_template_and_device.push({
                 [element.templates.id.toString()]: element.templates.attrs,
@@ -165,7 +176,7 @@ export class DevicesServices {
       const array_asserts_templates_and_attrs_not_found_templates =
         await this.assert_all_templates_valid_exits(connection, dto);
       for (let index = 0; index < dto.quantity; index++) {
-        let name_prefix_device = dto.name_prefix + '-' + start_sufix;
+        const name_prefix_device = dto.name_prefix + '-' + start_sufix;
         let device_id_generated = this.prismaUtils.getRandomicHexIdDevices();
 
         if (

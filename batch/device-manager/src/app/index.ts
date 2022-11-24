@@ -1,14 +1,19 @@
 import { Express } from 'express';
 import { Logger, ServiceStateManager, WebUtils } from '@dojot/microservice-sdk';
+
+import { AppConfig } from '../types';
+import { KafkaConsumer, TenantManager, KafkaProducer } from '../kafka';
+import { DeviceRoutes } from '../app/routes';
+
+import { PrismaUtils } from 'src/utils/Prisma.utils';
+
 import {
   DefaultErrorHandlerInterceptor,
   KafkaProducerClientInterceptor,
   PrismaClientInterceptor,
 } from './interceptors';
-import { AppConfig } from '../types';
-import { KafkaConsumer, TenantManager, KafkaProducer } from '../kafka';
-import { DeviceRoutes } from '../app/routes';
-import { PrismaUtils } from 'src/utils/Prisma.utils';
+
+
 import { TemplateRoutes } from './routes/Template.routes';
 
 export class App {

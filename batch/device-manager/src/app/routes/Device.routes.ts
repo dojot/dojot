@@ -1,4 +1,5 @@
 import { Logger } from '@dojot/microservice-sdk';
+import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 import { DevicesServices } from '../services/devicesServices';
 import { DevicesBatchController } from '../controller/devices_batch';
@@ -10,7 +11,6 @@ import {
 } from '../interceptors';
 import { KafkaProducer } from '../../kafka/kafka-producer';
 import { DevicesRepository, TemplatesRepository } from '../repository';
-import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 export abstract class DeviceRoutes {
   static use(

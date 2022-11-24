@@ -1,18 +1,11 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
 import { devices, templates } from '@prisma/client';
+
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 import { TemplatesRepository } from '../../../../src/app/repository/';
 
 describe('TemplatesRepository', () => {
-  const devices_fake: devices = {
-    id: '1',
-    label: 'sensor_1',
-    created: new Date(),
-    updated: new Date(),
-    persistence: null,
-  };
-
   const templates_fake1: templates = {
     id: 1,
     label: 'modelo_1',
