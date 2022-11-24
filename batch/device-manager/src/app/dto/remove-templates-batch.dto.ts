@@ -1,6 +1,3 @@
-
-export interface RemoveTemplatesBatchDto
-{
-   templates: number[];
+export interface RemoveTemplatesBatchDto {
+  templates: number[];
 }
-

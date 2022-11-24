@@ -28,4 +28,5 @@ export type TemplatesAssociatedDevicesBatch = {
   associated_devices: Array<DeviceResultBatch>;
 };
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type AttrBatch = {};

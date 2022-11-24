@@ -4,10 +4,12 @@ import {
   ServiceStateManager,
   WebUtils,
 } from '@dojot/microservice-sdk';
+import camelCase from 'lodash.camelcase';
+
 import { AppConfig } from 'src/types';
+
 import { KafkaConsumer, TenantManager, KafkaProducer } from './kafka';
 import { App } from './app';
-import camelCase from 'lodash.camelcase';
 import { PrismaUtils } from './utils/Prisma.utils';
 
 ConfigManager.loadSettings(

@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+
 import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 export abstract class DisconnectPrismaInterceptor {

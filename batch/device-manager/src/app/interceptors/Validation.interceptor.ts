@@ -1,7 +1,7 @@
-import { Schema } from 'joi'
-import { NextFunction, Request, Response } from 'express'
+import { Schema } from 'joi';
+import { NextFunction, Request, Response } from 'express';
 
-import { APP_ERRORS } from '../constants'
+import { APP_ERRORS } from '../constants';
 
 export abstract class ValidationInterceptor {
   static use(schema: Schema) {
@@ -9,7 +9,7 @@ export abstract class ValidationInterceptor {
       const { error } = schema.validate(req, {
         abortEarly: false,
         allowUnknown: true,
-      })
+      });
 
       if (error) {
         return res.status(400).json({
@@ -17,10 +17,10 @@ export abstract class ValidationInterceptor {
           cause: error.cause,
           details: error.details,
           message: error.message,
-        })
+        });
       }
 
-      return next()
-    }
+      return next();
+    };
   }
 }

@@ -1,4 +1,5 @@
 import { Logger } from '@dojot/microservice-sdk';
+
 import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 import { DevicesServices } from '../services/devicesServices';
@@ -57,7 +58,7 @@ export abstract class DeviceRoutes {
             method: 'post',
             middleware: [
               ValidationInterceptor.use(DevicesValidation.create()),
-              ValidationAttrsInterceptor.use(DevicesValidation.create()),
+              ValidationAttrsInterceptor.use(),
               devicesBatchController.create.bind(devicesBatchController),
               DisconnectPrismaInterceptor.use(prismaUtils),
             ],

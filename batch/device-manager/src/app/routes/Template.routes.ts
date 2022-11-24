@@ -2,6 +2,7 @@ import { Logger } from '@dojot/microservice-sdk';
 
 import { KafkaProducer } from 'src/kafka/kafka-producer';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
+
 import { TemplatesServices } from '../services/templatesServices';
 import { TemplatesBatchController } from '../controller/templates_batch';
 import { TemplatesValidation } from '../validations/Template.validations';

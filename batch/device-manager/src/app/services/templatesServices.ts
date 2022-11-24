@@ -1,10 +1,16 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
+
 import { RemoveTemplatesBatchDto } from 'src/types';
 
 import { AttrsRepository, TemplatesRepository } from '../repository';
 
-import { DeviceResultBatch, TemplatesAssociatedDevicesBatch, TemplatesBatch, TemplatesNotFoundBatch } from './entities';
+import {
+  DeviceResultBatch,
+  TemplatesAssociatedDevicesBatch,
+  TemplatesBatch,
+  TemplatesNotFoundBatch,
+} from './entities';
 
 type RemoveTemplatesServicesOutput = {
   templates: Array<TemplatesBatch>;
@@ -35,7 +41,8 @@ export class TemplatesServices {
     try {
       const templates_removed_batch: Array<TemplatesBatch> = [];
       const templates_not_found_batch: Array<TemplatesNotFoundBatch> = [];
-      const templates_associated_devices_batch: Array<TemplatesAssociatedDevicesBatch> = [];
+      const templates_associated_devices_batch: Array<TemplatesAssociatedDevicesBatch> =
+        [];
       const devices_associated_templates_batch: Array<DeviceResultBatch> = [];
       const aux_ids_device_found_associated: Array<string> = [];
 

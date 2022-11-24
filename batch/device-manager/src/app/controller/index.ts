@@ -1,2 +1,2 @@
-export * from './devices_batch'
-export * from './templates_batch'
+export * from './devices_batch';
+export * from './templates_batch';
