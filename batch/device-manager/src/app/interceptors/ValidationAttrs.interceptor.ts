@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { Schema } from 'joi';
-import { APP_ERRORS } from '../constants/Errors.constants';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 
 export abstract class ValidationAttrsInterceptor {

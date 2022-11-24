@@ -8,7 +8,6 @@ import {
   AttrsRepository,
   TemplatesRepository,
 } from '../../../../src/app/repository';
-import { isNull } from 'lodash';
 
 describe('TemplatesServices', () => {
   describe('remove', () => {

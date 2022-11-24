@@ -12,7 +12,6 @@ import {
 import {
   DevicesRepository,
   TemplatesRepository,
-  AttrsRepository,
 } from '../../../../src/app/repository/';
 import { PrismaUtils } from '../../../../src/utils/Prisma.utils';
 import { CreateDevicesBatchDto } from 'src/app/dto/create-devices-batch.dto';

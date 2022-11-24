@@ -5,7 +5,6 @@ import {
   LoggerMock,
   ConfigMock,
   ServiceStateMock,
-  DojotHttpClientMock,
 } from 'tests/mocks';
 
 import { AuthSetup } from '.';

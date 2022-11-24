@@ -1,6 +1,5 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
-import { execSync } from 'child_process';
 import { AppConfig } from 'src/types';
 import * as crypto from 'crypto';
 
