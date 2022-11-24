@@ -8,16 +8,18 @@ import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
 import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
+import { AttrBatch, DeviceNotFoundBatch, DeviceResultBatch, TemplatesNotFoundBatch } from './entities';
 
-type DeviceResultBatch = {
-  id: string,
-  label: string,
-};
+export type RemoveDevicesServicesOutput = {
+  devices: Array<DeviceResultBatch>,
+  devices_not_found: Array<DeviceNotFoundBatch>,
+}
 
-type DeviceNotFoundBatch = {
-  id: string,
-  message: string,
-  type: string,
+export type CreateDevicesServicesOutput = {
+  devices_created: Array<DeviceResultBatch>,
+  devices_not_created: Array<DeviceResultBatch>,
+  templates_not_found: Array<TemplatesNotFoundBatch>,
+  attrs_not_found: Array<AttrBatch>
 }
 
 export class DevicesServices {
@@ -41,7 +43,7 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: RemoveDevicesBatchDto,
     tenant_id: string,
-  ): Promise<any> {
+  ): Promise<RemoveDevicesServicesOutput | undefined> {
     try {
       const devices_result_batch: Array<DeviceResultBatch> = [];
       const devices_not_found_batch: Array<DeviceNotFoundBatch> = [];
@@ -166,11 +168,11 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: CreateDevicesBatchDto,
     tenant_id: string,
-  ): Promise<any> {
+  ): Promise<CreateDevicesServicesOutput | undefined> {
     try {
-      let devices_create_result_batch: Array<any> = [];
-      let devices_not_create_result_batch: Array<any> = [];
-      let attrs_not_found: Array<any> = [];
+      const devices_create_result_batch: Array<DeviceResultBatch> = [];
+      const devices_not_create_result_batch: Array<DeviceResultBatch> = [];
+      const attrs_not_found: Array<AttrBatch> = [];
       let start_sufix = dto.start_sufix;
 
       const array_asserts_templates_and_attrs_not_found_templates =
@@ -235,7 +237,7 @@ export class DevicesServices {
               /**
                * Function load array of templates, and insert associated devices with templates.
                */
-              array_asserts_templates_and_attrs_not_found_templates.templates_found.map(
+              array_asserts_templates_and_attrs_not_found_templates.templates_found.forEach(
                 async (id: number) => {
                   let createdAssociatedDevicesTenplates =
                     await this.devicesRepository.create_associated_devices_templates(

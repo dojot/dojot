@@ -4,7 +4,7 @@ import { Schema } from 'joi';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 
 export abstract class ValidationAttrsInterceptor {
-  static use(_schema: Schema) {
+  static use() {
     return (req: Request, res: Response, next: NextFunction) => {
       const dto = req.body as CreateDevicesBatchDto;
       if (dto) {

@@ -1,6 +1,6 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
-import { devices, templates } from '@prisma/client';
+import { templates } from '@prisma/client';
 
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 import { TemplatesRepository } from '../../../../src/app/repository/';
