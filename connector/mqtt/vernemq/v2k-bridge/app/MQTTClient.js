@@ -1,9 +1,11 @@
-const { ConfigManager, Logger } = require('@dojot/microservice-sdk');
+const { ConfigManager } = require('@dojot/microservice-sdk');
 
 const fs = require('fs');
 const async = require('async');
 const mqtt = require('mqtt');
 const camelCase = require('lodash.camelcase');
+
+const Utils = require('./Utils');
 
 /**
  * Class representing an MQTTClient.
@@ -19,17 +21,18 @@ class MQTTClient {
    *
    * @constructor
    */
-  constructor(agentMessenger, serviceStateManager) {
+  constructor(agentMessenger, serviceStateManager, logger, deviceManagerService) {
     if (!agentMessenger) {
       throw new Error('no AgentMessenger instance was passed');
     }
     if (!serviceStateManager) {
       throw new Error('no ServiceStateMessenger instance was passed');
     }
-    this.logger = new Logger('v2k:mqtt-client');
 
     this.agentMessenger = agentMessenger;
     this.serviceStateManager = serviceStateManager;
+    this.logger = logger;
+    this.deviceManagerService = deviceManagerService;
     /**
      * The service to be registered in the ServiceStateManager
      * @type {string}
@@ -237,7 +240,33 @@ class MQTTClient {
    */
   asyncQueueWorker(data) {
     const { topic, message } = data;
-    this.agentMessenger.sendMessage(topic, message);
+    this.isDeviceDisabled(topic, message).then((res) => {
+      if (!res) {
+        this.agentMessenger.sendMessage(topic, message);
+      }
+    }).catch((error) => {
+      const jsonPayload = JSON.parse(message);
+      const deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);
+      this.logger.warn(`Error when trying to get device information ${deviceDataMessage.metadata.deviceid}`);
+      if (error) {
+        this.logger.error(error.stack || error);
+      }
+    });
+  }
+
+  async isDeviceDisabled(topic, message) {
+    const jsonPayload = JSON.parse(message);
+    const deviceDataMessage = Utils.generateDojotDeviceDataMessage(topic, jsonPayload);
+    const deviceInformation = await this.deviceManagerService.getDevice(
+      deviceDataMessage.metadata.tenant,
+      deviceDataMessage.metadata.deviceid,
+    );
+    if (deviceInformation.disabled) {
+      const error = `Device ${deviceInformation.label} is disabled. The message will be discarded.`;
+      this.logger.warn(error);
+      return true;
+    }
+    return false;
   }
 
   /**

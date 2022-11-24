@@ -1,4 +1,4 @@
-const { ConfigManager, Kafka: { Producer }, Logger } = require('@dojot/microservice-sdk');
+const { Kafka: { Producer } } = require('@dojot/microservice-sdk');
 
 const Utils = require('./Utils');
 
@@ -13,15 +13,15 @@ class AgentMessenger {
    *
    * @constructor
    */
-  constructor() {
-    this.config = ConfigManager.getConfig('V2K');
+  constructor(config, logger) {
+    this.config = config;
+    this.logger = logger;
 
     this.producer = new Producer({
-      ...this.config.sdk,
-      'kafka.producer': this.config.producer,
-      'kafka.topic': this.config.topic,
+      ...config.sdk,
+      'kafka.producer': config.producer,
+      'kafka.topic': config.topic,
     });
-    this.logger = new Logger('v2k:agent-messenger');
     this.mqttClient = null;
   }
 
