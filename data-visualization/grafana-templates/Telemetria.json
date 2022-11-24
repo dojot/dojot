@@ -1,0 +1,1577 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 11,
+  "iteration": 1666209792056,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"10c325\" and r._field == \"dojot.temperatura\")\n|> toFloat()",
+          "refId": "A"
+        }
+      ],
+      "title": "Dispositivo ID = 10c325",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 35,
+      "options": {
+        "content": "# Linha com 1 atributo para 1 dispositivo sem uso de variáveis\n\nGráfico simples que exibe o atributo temperatura do dispositivo \"10c325\" ao longo do tempo.\nO range utilizado na query \"aponta\" para o combo de período que está no menu, no topo, onde é possível escolher diversos períodos. Esse range, por sua vez, também é parametrizável, podendo aceitar muitos valores, e não apenas os valores contidos no referido combo.\nA função \"toFloat()\" no final da query é necessária para converter o valor da temperatura de string para float, pois, hoje na Dojot, todos os dados são gravados como string (apesar de recentemente ter sido implementada uma configuração para isso na Dojot, permitindo a gravação e recuperação dos dados do InfluxDB pelos tipos originais).",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 1",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperatura"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "unit",
+                "value": "celsius"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Umidade"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "humidity"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "2.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"10c325\" and r._field == \"dojot.temperatura\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "hide": false,
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"10c325\" and r._field == \"dojot.umidade\")\n|> map(fn: (r) => ({r with Umidade: float(v: r._value)}))\n|> keep(columns: [\"Umidade\", \"_time\"])",
+          "refId": "C"
+        }
+      ],
+      "title": "Dispositivo ID = 10c325",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 36,
+      "options": {
+        "content": "# Linha com 2 atributos para 1 dispositivo sem uso de variáveis\n\nNesse painel foram usadas duas queries, sendo que cada query consulta um atributo diferente do mesmo dispositivo. Nas queries foi possível definir também os nomes \"Temperatura\" e \"Umidade\" (através das funções map() e keep()) para os atributos consultados, para que sejam exibidos de maneira mais legível no gráfico.\nNas configurações do Grafana no lado direito foi possível definir para cada atributo a posição que cada um seria exibido no gráfico e também a unidade de medida. Para isso foi utilizada a opção \"Add field override\", que é a última opção do lado direito. Após clicar nela, foi selecionada a opção \"Fields with name\" -> \"Add override property\" -> \"Axis > Placement\" para configurar a posição e \"Standard options > Unit\" para as unidades de medida.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 2",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"10c325\" and r._field == \"dojot.temperatura\")\n|> toFloat()\n|> mean()",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperatura média dispositivo ID = 10c325",
+      "type": "stat"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 37,
+      "options": {
+        "content": "# \"Label\" com 1 atributo para 1 dispositivo sem uso de variáveis com função de agregação (média, máx, mín)\n\nNesse painel, obtemos o valor médio de temperatura através da função \"mean()\" na query. O período escolhido para obter essa média pode ser alterado no combo já citado num painel anterior. Já o valor médio pode ser obtido também através das configurações do Grafana, no lado direito, na opção \"Value options --> Calculation --> Mean\".",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 3",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"10c325\" and r._field == \"dojot.temperatura\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])\n|> limit(n: ${limitVar})",
+          "refId": "A"
+        }
+      ],
+      "title": "Dispositivo ID = 10c325",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 38,
+      "options": {
+        "content": "# Linha com 1 atributo para 1 dispositivo limitando a quantidade de pontos por variável\n\nNesse painel, estamos limitando a quantidade de itens consultados na query através da função \"limit\" e com a variável \"limitVar\" que pode ser carregada através do combo \"Limite\" lá no topo.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 4",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\" and r._field == \"dojot.temperatura\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Dispositivo ${device}",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 39,
+      "options": {
+        "content": "# Linha com 1 atributo para 1 dispositivo variável\n\nNesse painel, o nome do dispositivo que está no título é obtido através de uma variável que é carregada através da seleção do combo \"Nome do dispositivo\", no topo, no canto esquerdo, pelo usuário. Nesse combo o usuário pode selecionar apenas um dispositivo de cada vez. Já na query que é executada na linguagem Flux, é utilizado o ID do dispositivo (também com uma variável) ao invés do nome, mesmo sem o usuário ter escolhido explicitamente um ID. Isso ocorre pois ao selecionar um nome de dispositivo no combo, uma nova consulta ao banco de dados é feita para obter o ID, atribuindo na variável de forma transparente ao usuário. Isso também só foi possível devido ao nome do dispositivo ser único no banco de dados, não sendo possível existir 2 nomes de dispositivos iguais.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 5",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\" and r._field == \"dojot.${field}\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Dispositivo ID = 10c325",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 40,
+      "options": {
+        "content": "# Linha com 1 atributo variável para 1 dispositivo\n\nNesse painel, a query também está usando variável, só que desta vez no atributo. A variável \"field\" é carregada com a seleção do combo \"Atributo\".",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 6",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 3,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "10c325"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "9eac60"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "2.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => contains(value: r[\"_measurement\"], set: ${devicesIds:json}))\n|> filter(fn: (r) => r[\"_field\"] == \"dojot.${field}\")\n|> toFloat()\n|> drop(columns: [\"_field\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperatura nos dispositivos: ${devices}",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 41,
+      "options": {
+        "content": "# Linha com 1 atributo para 2 dispositivos variáveis\n\nNesse painel, a query utiliza uma variável que contém uma lista de IDs que é carregada através da seleção do combo \"Dispositivos\". Nesse combo é possível selecionar mais de um dispositivo de uma vez. Assim como num painel anterior, aqui também usa-se o nome dos dispositivos no combo, porém, usa-se os IDs na query. Nesse painel selecionamos 2 dispositivos na lista, mas é possível inserir mais, sendo recomendado, nesse caso, atualizar a configuração \"override\", já explicada anteriormente, para que os novos dispositivos exibam a unidade de medida correta. Na query utilizamos a função drop() para ocultar o nome do atributo no gráfico, deixando apenas o ID do dispositivo.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 7",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "area"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperatura"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    },
+                    {
+                      "color": "#EAB839",
+                      "value": 20
+                    },
+                    {
+                      "color": "red",
+                      "value": 30
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "unit",
+                "value": "celsius"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "id": 28,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\" and r._field == \"dojot.${field}\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Device ${device}",
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "id": 42,
+      "options": {
+        "content": "# Linha/área com 1 atributo para 1 dispositivo com uso de limites\n\nPainel parecido com outros anteriores, mas com o uso de cores no gráfico conforme os valores dos atributos. Essa configuração do Grafana é feita no lado direito, na opção \"Add field override\", que é a última opção do lado direito. Após clicar nela, foi selecionada a opção \"Fields with name\" -> \"Add override property\" -> \"Thresholds\".",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 8",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Temperatura"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "blue",
+                      "value": null
+                    },
+                    {
+                      "color": "#EAB839",
+                      "value": 20
+                    },
+                    {
+                      "color": "red",
+                      "value": 30
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 64
+      },
+      "id": 29,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\" and r._field == \"dojot.${field}\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Device ${device}",
+      "type": "stat"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 64
+      },
+      "id": 43,
+      "options": {
+        "content": "# \"Label\" com último valor de 1 atributo para 1 dispositivo, contendo os últimos pontos na base do gráfico\n\nNesse painel estamos usando a opção \"Stat\" lá em cima, à direita, nas configurações do Grafana, no tipo de gráfico, e em \"Value options\" -> \"Calculation\" selecionamos \"Last\" para que seja exibido o valor mais atual de temperatura. Embaixo do valor que é exibido no painel, é exibido uma gráfico no estilo time-series com um \"resumo\" das temperaturas obtidas no período escolhido.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 9",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 72
+      },
+      "id": 30,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\" and r._field == \"dojot.${field}\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Device ${device}",
+      "type": "gauge"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 72
+      },
+      "id": 44,
+      "options": {
+        "content": "# \"Gauge\" com último valor de 1 atributo para 1 dispositivo\n\nNesse painel estamos usando a opção \"Gauge\" lá em cima, à direita, nas configurações do Grafana, no tipo de gráfico, e em \"Value options\" -> \"Calculation\" selecionamos \"Last\" para que seja exibido o valor mais atual de temperatura. Esse gauge está utilizando a configuração default nos valores limite, ou seja, os valores mínimo e máximo que serão considerados no gauge são o menor e o maior valor contidos na lista retornada pela consulta.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 10",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 40,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 80
+      },
+      "id": 31,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\" and r._field == \"dojot.${field}\")\n|> map(fn: (r) => ({r with Temperatura: float(v: r._value)}))\n|> keep(columns: [\"Temperatura\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Device ${device}",
+      "type": "gauge"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 80
+      },
+      "id": 45,
+      "options": {
+        "content": "# \"Gauge\" com último valor de 1 atributo para 1 dispositivo com uso de limites\n\nParecido com o painel anterior, porém, ao invés de valores default nos limites, estamos configurando os limites na parte de configurações do Grafana no lado direito, em \"Standard options\", valor mínimo = 0 e valor máximo = 40. Utilizamos também thresholds para exibir os valores por cores.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 11",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 88
+      },
+      "id": 33,
+      "options": {
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "type": "osm-standard"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "fixed": "dark-green"
+                },
+                "opacity": 0.4,
+                "rotation": {
+                  "fixed": 0,
+                  "max": 360,
+                  "min": -360,
+                  "mode": "mod"
+                },
+                "size": {
+                  "fixed": 5,
+                  "max": 15,
+                  "min": 2
+                },
+                "symbol": {
+                  "fixed": "img/icons/marker/circle.svg",
+                  "mode": "fixed"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                }
+              }
+            },
+            "location": {
+              "latitude": "dojot.latitude",
+              "longitude": "dojot.longitude",
+              "mode": "coords"
+            },
+            "name": "Layer 1",
+            "type": "markers"
+          }
+        ],
+        "view": {
+          "id": "coords",
+          "lat": -22.907104,
+          "lon": -47.06324,
+          "zoom": 5
+        }
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb"
+          },
+          "query": "from(bucket:\"devices\")\n|> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn: (r) => r._measurement == \"${deviceId}\")\n|> filter(fn: (r) => r._field == \"dojot.latitude\" or r._field == \"dojot.longitude\")\n|> toFloat()\n|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n|> drop(columns: [\"_start\", \"_stop\", \"_time\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Localização dispositivo ${device}",
+      "type": "geomap"
+    },
+    {
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 88
+      },
+      "id": 46,
+      "options": {
+        "content": "# Mapa para exibir posição de latitude e longitude\n\nNesse painel estamos exibindo a localização de um dispositivo no mapa, através da latitude e longitude (que devem ser do tipo float). A query precisa usar a função pivot() para que essa exibição no mapa funcione, pois essa função coloca os atributos latitude e longitude numa linha só (já que originalmente esses atributos estão em linhas diferentes no InfluxDB, na coluna \"_field\"), e o Geomap precisa desses atributos \"alinhados\". Já a função drop() está ocultando alguns dados desnecessários e deixando só latitude e longitude para serem exibidos no mapa, ao passar o mouse sobre o ponto da localização. Na parte de configurações, selecionamos os nomes dos atributos de latitude e longitude em \"Data Layer\" -> \"Location\" -> \"Coords\".",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.3.3",
+      "title": "Painel 12",
+      "type": "text"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 34,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "10c325",
+          "value": "10c325"
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "definition": "import \"influxdata/influxdb/v1\"\nv1.measurements(bucket: v.bucket)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Device ID",
+        "multi": false,
+        "name": "deviceIds",
+        "options": [],
+        "query": "import \"influxdata/influxdb/v1\"\nv1.measurements(bucket: v.bucket)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "Device 01",
+          "value": "Device 01"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "postgres"
+        },
+        "definition": "select label from admin.devices",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Nome do dispositivo",
+        "multi": false,
+        "name": "device",
+        "options": [],
+        "query": "select label from admin.devices",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "temperatura",
+          "value": "temperatura"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "postgres"
+        },
+        "definition": "select label from admin.attrs",
+        "description": "",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Atributo",
+        "multi": false,
+        "name": "field",
+        "options": [],
+        "query": "select label from admin.attrs",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "10c325",
+          "value": "10c325"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "postgres"
+        },
+        "definition": "select id from admin.devices where label = '${device}'",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "deviceId",
+        "options": [],
+        "query": "select id from admin.devices where label = '${device}'",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "dojot.pressao",
+            "dojot.umidade"
+          ],
+          "value": [
+            "dojot.pressao",
+            "dojot.umidade"
+          ]
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "postgres"
+        },
+        "definition": "select 'dojot.' || label from admin.attrs",
+        "hide": 2,
+        "includeAll": false,
+        "multi": true,
+        "name": "fields",
+        "options": [],
+        "query": "select 'dojot.' || label from admin.attrs",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "Device 01",
+            "Device 02"
+          ],
+          "value": [
+            "Device 01",
+            "Device 02"
+          ]
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "postgres"
+        },
+        "definition": "select label from admin.devices",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Dispositivos",
+        "multi": true,
+        "name": "devices",
+        "options": [],
+        "query": "select label from admin.devices",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "postgres"
+        },
+        "definition": "select id from admin.devices where label in (${devices})",
+        "hide": 2,
+        "includeAll": true,
+        "multi": true,
+        "name": "devicesIds",
+        "options": [],
+        "query": "select id from admin.devices where label in (${devices})",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "100",
+          "value": "100"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Limite",
+        "multi": false,
+        "name": "limitVar",
+        "options": [
+          {
+            "selected": false,
+            "text": "1",
+            "value": "1"
+          },
+          {
+            "selected": false,
+            "text": "5",
+            "value": "5"
+          },
+          {
+            "selected": false,
+            "text": "10",
+            "value": "10"
+          },
+          {
+            "selected": false,
+            "text": "15",
+            "value": "15"
+          },
+          {
+            "selected": false,
+            "text": "20",
+            "value": "20"
+          },
+          {
+            "selected": false,
+            "text": "50",
+            "value": "50"
+          },
+          {
+            "selected": true,
+            "text": "100",
+            "value": "100"
+          }
+        ],
+        "query": "1,5,10,15,20,50,100",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Telemetria",
+  "uid": "-6fKkWVVz",
+  "version": 134,
+  "weekStart": ""
+}
