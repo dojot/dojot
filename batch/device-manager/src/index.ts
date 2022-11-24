@@ -9,7 +9,6 @@ import { KafkaConsumer, TenantManager, KafkaProducer } from './kafka';
 import { App } from './app';
 import camelCase from 'lodash.camelcase';
 import { PrismaUtils } from './utils/Prisma.utils';
-import { KafkaUtils } from './utils/kafka.utils';
 
 ConfigManager.loadSettings(
   'DEVICE_MANAGER_BATCH',
@@ -33,17 +32,15 @@ const dojotHttpClient = new WebUtils.DojotHttpClient({
   defaultRetryDelay: 15000,
   defaultMaxNumberAttempts: 0,
 });
-const kafkaUtils = new KafkaUtils();
 const prismaUtils = new PrismaUtils(logger, config);
-const kafkaConsumer = new KafkaConsumer(logger, config);
-const kafkaProducer = new KafkaProducer(logger, config);
 const tenantManager = new TenantManager(
   logger,
   config,
   dojotHttpClient,
   prismaUtils,
-  kafkaUtils,
 );
+const kafkaConsumer = new KafkaConsumer(logger, config, tenantManager);
+const kafkaProducer = new KafkaProducer(logger, config);
 const secretFileHandler = new WebUtils.SecretFileHandler(config, logger);
 const serviceState = new ServiceStateManager({
   lightship: ConfigManager.transformObjectKeys(
@@ -60,7 +57,7 @@ secretFileHandler
     try {
       logger.info('Starting application', {});
 
-      const server = await new App(
+      const app = new App(
         logger,
         config,
         prismaUtils,
@@ -68,10 +65,12 @@ secretFileHandler
         tenantManager,
         kafkaProducer,
         serviceState,
-      ).init();
+      );
+
+      const server_app = await app.init();
 
       const handleCloseServerAndExitProcess = () => {
-        server.close(() => process.exit(0));
+        server_app.close(() => process.exit(0));
       };
 
       process.on('SIGINT', handleCloseServerAndExitProcess);
