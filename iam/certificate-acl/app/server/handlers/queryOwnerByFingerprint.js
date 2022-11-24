@@ -1,6 +1,3 @@
-const http = require('http');
-const HTTPStatus = require('http-status-codes');
-
 const {
   WebUtils: { framework: { errorTemplate } },
 } = require('@dojot/microservice-sdk');
@@ -18,70 +15,40 @@ function queryOwnerByFingerprintFromCache(redisManager, fingerprint) {
   });
 }
 
-function queryOwnerByFingerprintFromService(fingerprint, serviceConfig) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: serviceConfig.hostname,
-      port: serviceConfig.port,
-      path: `${serviceConfig.path + fingerprint}?fields=tenant,belongsTo`,
-      method: 'GET',
-      timeout: serviceConfig.timeout,
-    };
-    const req = http.request(options, (res) => {
-      if (res.statusCode === HTTPStatus.OK) {
-        let data = '';
-        // A chunk of data has been received.
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
+async function queryOwnerByFingerprintFromService(fingerprint, serviceConfig, httpCircuit) {
+  const options = {
+    url: `${serviceConfig.path + fingerprint}?fields=tenant,belongsTo`,
+    method: 'GET',
+  };
+  let response = {};
 
-        // The whole response has been received.
-        res.on('end', () => {
-          const {
-            tenant,
-            belongsTo: { device, application } = {},
-          } = JSON.parse(data);
-          const owner = ((tenant && device) ? `${tenant}:${device}` : application);
-          // Notice that value will be an empty string if
-          // the certificate is not associated with anything
-          if (owner) {
-            resolve(owner);
-          } else {
-            reject(errorTemplate.NotFound(
-              `The fingerprint ${fingerprint} is not associated with anything.`,
-            ));
-          }
-        });
-      } else if (res.statusCode === HTTPStatus.NOT_FOUND) {
-        reject(errorTemplate.NotFound(
-          `The fingerprint ${fingerprint} doesn't exist.`,
-        ));
-      } else {
-        reject(new Error(`Failed to get fingerprint ${fingerprint} from service`
-        + ` (HTTP Status = ${res.statusCode})`));
-      }
-    });
+  try {
+    response = await httpCircuit.request(options);
+    const {
+      tenant,
+      belongsTo: { device, application } = {},
+    } = response.data;
 
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error(`Failed to get fingerprint ${fingerprint} from service`
-      + ' (request timeout)'));
-    });
+    const owner = ((tenant && device) ? `${tenant}:${device}` : application);
+    if (owner) {
+      return owner;
+    }
+  } catch (requestError) {
+    throw errorTemplate.NotFound(
+      `The fingerprint ${fingerprint} doesn't exist.`,
+    );
+  }
 
-    req.on('error', (err) => {
-      reject(new Error(`Failed to get fingerprint ${fingerprint} from service`
-      + ` (${err})`));
-    });
-
-    req.end();
-  });
+  throw errorTemplate.NotFound(
+    `The fingerprint ${fingerprint} is not associated with anything.`,
+  );
 }
 
 function updateFingerprintEntryOnCache(redisManager, fingerprint, value) {
   return redisManager.setAsync(fingerprint, value);
 }
 
-module.exports = (redisManager, serviceConfig) => (fingerprint) => {
+module.exports = (redisManager, serviceConfig, httpCircuit) => (fingerprint) => {
   logger.debug(`Getting data for fingerprint ${fingerprint} from cache.`);
   return queryOwnerByFingerprintFromCache(redisManager, fingerprint)
     .then((value) => {
@@ -93,7 +60,7 @@ module.exports = (redisManager, serviceConfig) => (fingerprint) => {
         `Getting data for fingerprint ${fingerprint} from service.`,
       );
 
-      return queryOwnerByFingerprintFromService(fingerprint, serviceConfig)
+      return queryOwnerByFingerprintFromService(fingerprint, serviceConfig, httpCircuit)
         .then((value) => {
           logger.debug(`Got from service: ${fingerprint} -> ${value}.`);
 

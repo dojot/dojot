@@ -6,17 +6,17 @@ const { WebUtils: { KeycloakClientSession } } = require('@dojot/microservice-sdk
  * @class
  */
 module.exports = class TenantService {
-  constructor(minioRepository, keycloadProxyClientHttp, keycloakConfig, logger) {
+  constructor(minioRepository, keycloakProxyHttpClient, keycloakConfig, logger) {
     this.minioRepository = minioRepository;
     this.logger = logger;
-    this.keycloadProxyClientHttp = keycloadProxyClientHttp;
+    this.keycloakProxyHttpClient = keycloakProxyHttpClient;
     this.keycloakConfig = keycloakConfig;
     this.listTenants = [];
   }
 
   updateListTenants = async () => {
     // Requests to keycloak-proxy all tenants
-    const response = await this.keycloadProxyClientHttp.request({ 
+    const response = await this.keycloakProxyHttpClient.request({ 
       method: 'GET',
       url: this.keycloakConfig['tenants.url'],
       timeout: 15000,
@@ -55,9 +55,14 @@ module.exports = class TenantService {
         this.logger,
       );
       await keycloakSession.start();
-      
+
       if (!await this.minioRepository.bucketExists(tenant.id)) {
-        await this.minioRepository.createBucket(tenant.id, 'us-east-1');
+        try {
+          this.logger.debug(`Creating a bucker for ${tenant.id}`);
+          await this.minioRepository.createBucket(tenant.id, 'us-east-1');
+        } catch (error) {
+          this.logger.error(error.message);
+        }
       }
 
       this.listTenants.push({

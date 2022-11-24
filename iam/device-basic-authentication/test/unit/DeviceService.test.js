@@ -1,10 +1,10 @@
 /* eslint-disable jest/no-focused-tests */
-const mockDojotClientHttp = {
+const mockDojotHttpClient = {
   request: jest.fn(),
 };
 
 const mockConfig = {
-  device_manager: { request: { timeout: { ms: 15000 } } },
+  device_manager: { 'request.timeout.ms': 15000 },
 };
 
 const mockSdk = {
@@ -26,12 +26,12 @@ describe('DeviceService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    deviceService = new DeviceService(deviceRouteUrls, mockDojotClientHttp);
+    deviceService = new DeviceService(deviceRouteUrls, mockDojotHttpClient);
   });
 
   describe('getDevices', () => {
     it('should return a list of device', async () => {
-      mockDojotClientHttp.request = jest.fn().mockReturnValue({
+      mockDojotHttpClient.request = jest.fn().mockReturnValue({
         data: ['device1', 'device2'],
       });
       const devices = await deviceService.getDevices({
@@ -48,7 +48,7 @@ describe('DeviceService', () => {
 
     it('should throw a error, when the request failed', async () => {
       let error;
-      deviceService = new DeviceService(null, mockDojotClientHttp);
+      deviceService = new DeviceService(null, mockDojotHttpClient);
       try {
         await deviceService.getDevices({
           id: 'tenant1',
@@ -62,7 +62,7 @@ describe('DeviceService', () => {
         error = e;
       }
 
-      expect(error.message).toEqual("Cannot read property 'devices' of null");
+      expect(error.message).toEqual("Cannot read properties of null (reading 'devices')");
     });
   });
 

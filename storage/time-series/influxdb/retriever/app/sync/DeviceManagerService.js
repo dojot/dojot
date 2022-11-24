@@ -42,9 +42,9 @@ class DeviceManagerService {
    *
    * @param {string} deviceRouteUrl Url for api that returns data about devices
    */
-  constructor(deviceRouteUrl, dojotClientHttp, localPersistence, logger) {
+  constructor(deviceRouteUrl, dojotHttpClient, localPersistence, logger) {
     this.deviceRouteUrl = deviceRouteUrl;
-    this.dojotClientHttp = dojotClientHttp;
+    this.dojotHttpClient = dojotHttpClient;
     this.logger = logger;
     this.localPersistence = localPersistence;
     this.inputPersister = new InputPersister(localPersistence, INPUT_CONFIG);
@@ -66,7 +66,7 @@ class DeviceManagerService {
     do {
       this.logger.debug(`requesting page ${pageNum}`);
       // eslint-disable-next-line no-await-in-loop
-      response = await this.dojotClientHttp.request({
+      response = await this.dojotHttpClient.request({
         url: this.deviceRouteUrl,
         method: 'GET',
         timeout: 12000,

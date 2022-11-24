@@ -53,6 +53,9 @@ const { killApplication } = require('../../app/Utils');
 
 mongoose.connection = new EventEmitter();
 mongoose.connection.close = jest.fn();
+mongoose.connect = jest.fn();
+
+mongoose.connect.mockRejectedValue('Error');
 
 const MongoClient = require('../../app/db/MongoClient');
 

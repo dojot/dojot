@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReportType {
+  id String @id @default(uuid()) @map("id")
+
+  identifier String   @unique @map("identifier")
+  name       String   @map("name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  reports Report[]
+
+  @@map("report_type")
+}
+
+model Report {
+  id     String @id @default(uuid()) @map("id")
+  typeId String @map("type_id")
+
+  name             String    @map("name") @db.VarChar(255)
+  format           String    @map("format")
+  singleReportFile Boolean   @map("single_report_file")
+  initialDate      DateTime? @map("initial_date")
+  finalDate        DateTime? @map("final_date")
+  params           Json      @map("params")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  file     ReportFile?
+  attempts ReportAttempt[]
+
+  type ReportType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+
+  @@map("report")
+}
+
+model ReportFile {
+  id       String @id @default(uuid()) @map("id")
+  reportId String @unique @map("report_id")
+
+  path       String    @map("path")
+  mimeType   String    @map("mime_type")
+  filename   String    @map("filename")
+  fileSizeKb Float     @map("file_size_kb")
+  expiresAt  DateTime? @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("report_file")
+}
+
+model ReportAttempt {
+  id       String @id @default(uuid()) @map("id")
+  reportId String @map("report_id")
+
+  error      Json?     @map("error")
+  failedAt   DateTime? @map("failed_at")
+  canceledAt DateTime? @map("canceled_at")
+  finishedAt DateTime? @map("finished_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("report_attempt")
+}

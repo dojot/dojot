@@ -33,7 +33,7 @@ const mockSdk = {
   })),
   WebUtils: {
     createTokenGen: jest.fn(),
-    DojotClientHttp: dojotClientHttpMock,
+    DojotHttpClient: dojotClientHttpMock,
   },
 };
 jest.mock('@dojot/microservice-sdk', () => mockSdk);

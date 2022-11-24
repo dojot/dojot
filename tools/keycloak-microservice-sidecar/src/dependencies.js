@@ -1,7 +1,7 @@
 const {
   ServiceStateManager,
   ConfigManager,
-  WebUtils: { DojotClientHttp },
+  WebUtils: { DojotHttpClient },
 } = require('@dojot/microservice-sdk');
 const camelCase = require('lodash.camelcase');
 
@@ -34,7 +34,7 @@ module.exports = (config, logger) => {
     config,
   );
 
-  const keycloakProxyClientHttp = new DojotClientHttp({
+  const keycloakProxyClientHttp = new DojotHttpClient({
     defaultClientOptions: {},
     logger,
     defaultMaxNumberAttempts: 0,

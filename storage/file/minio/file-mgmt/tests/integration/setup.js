@@ -58,7 +58,7 @@ const mockDojot = {
   })),
   WebUtils: {
     ...WebUtils,
-    DojotClientHttp: jest.fn().mockImplementation(() => ({
+    DojotHttpClient: jest.fn().mockImplementation(() => ({
       request: () => ({
         data: {
           tenants: [

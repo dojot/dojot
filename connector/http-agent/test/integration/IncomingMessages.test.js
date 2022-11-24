@@ -93,13 +93,18 @@ const mockProducerMessages = {
 };
 jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
 
+const mockgetDevice = jest.fn();
+const mockDeviceManagerService = {
+  getDevice: mockgetDevice,
+};
+jest.mock(
+  '../../app/axios/DeviceManagerService.js',
+  () => mockDeviceManagerService,
+);
+
 jest.setTimeout(30000);
 
 let app;
-
-const mockTenantService = {
-  tenants: [],
-};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -114,7 +119,7 @@ beforeEach(() => {
     mockRedis,
     mockDeviceAuthService,
     mockCertificateAclService,
-    mockTenantService,
+    mockDeviceManagerService,
   );
 });
 
@@ -125,8 +130,33 @@ describe('HTTPS', () => {
         jest.clearAllMocks();
       });
 
+      it('should unsuccessfully execute the request with device disabled', async () => {
+        mockRedis.getAsync.mockReturnValue('test:abc123');
+        mockDeviceManagerService.getDevice.mockReturnValue({ disabled: true });
+        await requestHttps(app)
+          .post(urlIncomingMessages)
+          .set('Content-Type', 'application/json')
+          .send({
+            ts: '2021-07-12T09:31:01.683000Z',
+            data: {
+              temperature: 25.79,
+            },
+          })
+          .key(key)
+          .cert(cert)
+          .ca(ca)
+          .expect('Content-Type', /json/)
+          .expect(500)
+          .then((response) => {
+            expect(response.body).toStrictEqual({
+              error: 'An unexpected error has occurred.',
+            });
+          });
+      });
+
       it('should successfully execute the request with tenant and deviceId from redis', async () => {
         mockRedis.getAsync.mockReturnValue('test:abc123');
+        mockDeviceManagerService.getDevice.mockReturnValue({ disabled: false });
         await requestHttps(app)
           .post(urlIncomingMessages)
           .set('Content-Type', 'application/json')

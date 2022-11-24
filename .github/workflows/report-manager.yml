@@ -1,0 +1,103 @@
+name: report-manager (data-visualization/reports/report-manager)
+
+# trigger when create a branch, push a tag or a branch, PR with changes in 'data-visualization/reports/report-manager**'
+on:
+  create:
+  push:
+  pull_request:
+    paths:
+      - "data-visualization/reports/report-manager/**"
+
+jobs:
+  unit-test:
+    name: (data-visualization/reports/report-manager) Unit Test # path to help identify in Status checks each job
+    if: contains(github.event.head_commit.message, 'ci skip') == false # if the commit message has ci skip, doesn't run anything
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        node-version: [14.x]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: yarn check-licenses and run tests
+        run: |
+          cd data-visualization/reports/report-manager
+          yarn install --frozen-lockfile
+          yarn check:licenses
+          yarn test:unit:ci
+          yarn test:integration:ci
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          file: data-visualization/reports/report-manager/coverage/lcov.info # create when run unit tests
+          flags: report-manager # Flags allow you to isolate coverage reports for different tests
+          name: report-manager # Custom defined name for the upload
+
+  docker-hub:
+    needs: unit-test
+    name: (data-visualization/reports/report-manager) Build and Publish image to DockerHub #  path to help identify in Status checks each job
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # # If this is a PR, it won't run
+    steps:
+      - name: Owner Repository
+        id: get_owner
+        run: |
+          export OWNER=$(echo ${{ github.repository }} | cut -f1 -d"/")
+          echo Current Owner is $OWNER
+          echo ::set-output name=owner::$OWNER
+
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Build and Push
+        uses: elgohr/Publish-Docker-Github-Action@2.11
+        with:
+          name: ${{ steps.get_owner.outputs.owner }}/report-manager
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          workdir: data-visualization/reports/report-manager
+          buildoptions: " --label 'commit_sha'='${{ github.sha }}' " # label with commit that built image
+          tag_names: true # tag will be based in branch name or tag name
+
+  gh-pages:
+    needs: unit-test
+    name: (data-visualization/reports/report-manager) Generate documentation and Publish in gh-pages
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/pull/') == false # if this a PR doesn't run
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Version Doc
+        id: version_doc
+        env:
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          export TAG_VERSION=$(sh .github/workflows/scripts/translate_docker_tag.sh)
+          echo Documentation Version $TAG_VERSION
+          echo ::set-output name=version::$TAG_VERSION
+      # I need to improve this, find another way to do
+      - name: Generate docs
+        env:
+          FOLDER_TO_GH_PAGES: data-visualization/reports/report-manager
+          PATH_SWAGGER_YML: ./data-visualization/reports/report-manager/docs/swagger.yml
+          VERSION_NAME: ${{ steps.version_doc.outputs.version }}
+        run: |
+          sh .github/workflows/scripts/swagger.sh
+      - name: Publish Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./swagger-docs
+          destination_dir: data-visualization/reports/report-manager
+          keep_files: true
+          allow_empty_commit: false
