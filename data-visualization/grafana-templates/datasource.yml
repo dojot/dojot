@@ -1,0 +1,32 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    url: localhost:5432
+    database: dojot_devm
+    user: postgres
+    secureJsonData:
+      password: "postgres"
+    jsonData:
+      sslmode: "disable"
+      maxOpenConns: 0
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 903
+      timescaledb: false
+      readOnly: false
+      editable: true
+
+  - name: InfluxDB
+    type: influxdb
+    access: default
+    url: http://localhost:8086
+    secureJsonData:
+      token: token
+    jsonData:
+      version: Flux
+      organization: admin
+      defaultBucket: devices
+      readOnly: false
+      editable: true
