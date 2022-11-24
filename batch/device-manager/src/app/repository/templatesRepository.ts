@@ -56,7 +56,7 @@ export class TemplatesRepository {
    */
   async findByIdWithAttrs(prisma: PrismaClient, id: number) {
     try {
-      return await prisma.templates.findMany({
+      return await prisma.templates.findUnique({
         where: { id: id },
         include: {
           attrs: {},

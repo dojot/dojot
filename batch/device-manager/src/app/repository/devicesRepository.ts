@@ -21,7 +21,7 @@ export class DevicesRepository {
 
   async findByIdWithTemplatesAttrs(prisma: PrismaClient, id: string) {
     try {
-      return await prisma.devices.findMany({
+      return await prisma.devices.findUnique({
         where: { id: id.toString() },
         include: {
           device_template: {

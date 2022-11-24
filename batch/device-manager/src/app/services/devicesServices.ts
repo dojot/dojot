@@ -48,18 +48,16 @@ export class DevicesServices {
             assert_device_exists,
           });
 
-          if (assert_device_exists?.length) {
+          if (assert_device_exists != null) {
             const templates_associated_with_device: Array<number> = [];
             const attrs_associated_with_template_and_device: Array<any> = [];
 
-            assert_device_exists[0].device_template.map(
-              async (element: any) => {
-                templates_associated_with_device.push(element.templates.id);
-                attrs_associated_with_template_and_device.push({
-                  [element.templates.id.toString()]: element.templates.attrs,
-                });
-              },
-            );
+            assert_device_exists.device_template.map(async (element: any) => {
+              templates_associated_with_device.push(element.templates.id);
+              attrs_associated_with_template_and_device.push({
+                [element.templates.id.toString()]: element.templates.attrs,
+              });
+            });
 
             /**
              *  disassociated devices with template.
@@ -97,7 +95,7 @@ export class DevicesServices {
              */
             if (removed_device) {
               const data = this.create_body_of_field_data_published_kafka(
-                assert_device_exists[0],
+                assert_device_exists,
                 templates_associated_with_device,
                 attrs_associated_with_template_and_device,
               );
@@ -288,7 +286,7 @@ export class DevicesServices {
 
       if (assert_template_exists) {
         templates_found.push(template_id);
-        attrs_found.push({ [template_id]: assert_template_exists[0].attrs });
+        attrs_found.push({ [template_id]: assert_template_exists.attrs });
       } else {
         templates_not_found.push({
           id: template_id,

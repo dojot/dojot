@@ -53,7 +53,7 @@ export class TemplatesServices {
             /**
              * Assert Exist Associated Devices in found.
              */
-            if (typeof template_to_removed !== 'undefined') {
+            if (template_to_removed != null) {
               const qt_associated_with_devices =
                 template_to_removed[0].device_template.length;
 
