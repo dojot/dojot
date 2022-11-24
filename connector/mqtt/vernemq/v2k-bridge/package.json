@@ -16,6 +16,7 @@
   "main": "index.js",
   "scripts": {
     "app": "node index.js",
+    "debug": "node --inspect=0.0.0.0 index.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "lint": "eslint --ext .js .",
@@ -41,7 +42,9 @@
     "async": "^3.1.1",
     "lodash.camelcase": "^4.3.0",
     "md5": "^2.2.1",
-    "mqtt": "^4.2.5"
+    "mqtt": "^4.2.5",
+    "promise-timeout": "^1.3.0",
+    "bcrypt": "^5.0.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
