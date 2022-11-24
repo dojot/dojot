@@ -15,17 +15,21 @@ export class PrismaUtils {
 
   deployMigrations(databaseUrl: string) {
     this.logger.debug('deployMigrations: deploying migrations', {})
-    const exportCommand = `export DATABASE_URL=${databaseUrl}`
-    const migrateCommand = 'yarn prisma migrate deploy'
-    execSync(`${exportCommand} && ${migrateCommand}`)
+
+    execSync('yarn prisma migrate deploy', {
+      env: { ...process.env, DATABASE_URL: databaseUrl },
+    })
+
     this.logger.debug('deployMigrations: migrations deployed successfully', {})
   }
 
   seedDatabase(databaseUrl: string) {
     this.logger.debug('seedDatabase: seeding database', {})
-    const exportCommand = `export DATABASE_URL=${databaseUrl}`
-    const seedCommand = 'yarn prisma db seed'
-    execSync(`${exportCommand} && ${seedCommand}`)
+
+    execSync('yarn prisma db seed', {
+      env: { ...process.env, DATABASE_URL: databaseUrl },
+    })
+
     this.logger.debug('seedDatabase: seeds ran successfully', {})
   }
 
@@ -47,7 +51,11 @@ export class PrismaUtils {
   async dropSchema(tenant: string, prisma: PrismaClient): Promise<boolean> {
     try {
       this.logger.debug(`dropSchema: dropping schema: ${tenant}`, {})
+
+      // WARNING: Susceptible to SQL injections
+      // But $executeRawUnsafe does not return any data, just the affected rows
       await prisma.$executeRawUnsafe(`DROP SCHEMA ${tenant} CASCADE`)
+
       return true
     } catch (error) {
       this.logger.error(
