@@ -1,0 +1,30 @@
+{
+  "version": "0.2",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": [],
+  "ignoreWords": [],
+  "import": [],
+  "words": [
+    "amdefine",
+    "argparse",
+    "bolditalics",
+    "camelcase",
+    "caniuse",
+    "datasources",
+    "dojot",
+    "ecmascript",
+    "filemgmt",
+    "keycloak",
+    "kubernetes",
+    "nodebuffer",
+    "openapi",
+    "pako",
+    "pdfmake",
+    "pgdata",
+    "postgres",
+    "postgresql",
+    "stringifier",
+    "websockets"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "dts": false,
+      "tsx": false,
+      "decorators": false,
+      "dynamicImport": false
+    },
+    "paths": {
+      "src/*": ["./src/*"],
+      "tests/*": ["./tests/*"]
+    },
+    "baseUrl": ".",
+    "target": "es2022",
+    "loose": false,
+    "externalHelpers": false
+  },
+  "module": {
+    "type": "commonjs",
+    "strict": true,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "minify": true,
+  "sourceMaps": false
+}

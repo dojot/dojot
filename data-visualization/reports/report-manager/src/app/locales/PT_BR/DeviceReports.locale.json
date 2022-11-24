@@ -1,0 +1,11 @@
+{
+  "csv.timestamp": "TIMESTAMP",
+  "csv.deviceId": "ID_DISPOSITIVO",
+  "csv.deviceLabel": "LABEL_DISPOSITIVO",
+  "csv.attribute": "ATRIBUTO",
+  "csv.value": "VALOR",
+
+  "pdf.attribute": "Atributo",
+  "pdf.value": "Valor",
+  "pdf.date": "Data"
+}

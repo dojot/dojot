@@ -1,0 +1,23 @@
+# IDE
+.idea/*
+
+# Build
+dist
+
+# Dependencies
+node_modules
+
+# Tests
+coverage
+
+# Yarn
+yarn-error.log
+
+# Environment
+.env
+
+# Markdown
+TODO.md
+
+# @bbc/apache2-license-checker
+licenses.json
