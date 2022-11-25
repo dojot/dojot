@@ -4,7 +4,7 @@ import { PrismaUtils } from 'src/utils'
 import { ConfigMock, LoggerMock, PrismaClientMock } from 'tests/mocks'
 
 jest.mock('child_process', () => {
-  return { execSync: jest.fn((command: string) => command) }
+  return { execSync: jest.fn() }
 })
 
 describe('Prisma.utils', () => {
@@ -20,12 +20,26 @@ describe('Prisma.utils', () => {
 
   it('should execute the command to deploy migrations', () => {
     prismaUtils.deployMigrations(fakeDatabaseUrl)
-    expect(execSync).toBeCalled()
+    expect(execSync).toBeCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        env: expect.objectContaining({
+          DATABASE_URL: fakeDatabaseUrl,
+        }),
+      }),
+    )
   })
 
   it('should execute the command to seed database', () => {
     prismaUtils.seedDatabase(fakeDatabaseUrl)
-    expect(execSync).toBeCalled()
+    expect(execSync).toBeCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        env: expect.objectContaining({
+          DATABASE_URL: fakeDatabaseUrl,
+        }),
+      }),
+    )
   })
 
   it('should disconnect from database', async () => {
