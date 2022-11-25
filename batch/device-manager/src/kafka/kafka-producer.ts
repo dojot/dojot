@@ -1,4 +1,5 @@
 import { Kafka, Logger } from '@dojot/microservice-sdk';
+
 import { AppConfig } from 'src/types';
 
 export enum EventKafka {
@@ -9,8 +10,8 @@ export enum EventKafka {
 
 class NotificationMessageProducer {
   event: string;
-  data: String;
-  meta: String;
+  data: string;
+  meta: string;
 
   constructor(event: string, data: string, meta: string) {
     this.event = event;
@@ -74,8 +75,7 @@ export class KafkaProducer extends Kafka.Producer {
       const kafkaTopic = `${tenant}.${topicSuffix}`;
       const stringMessage = full_msg;
       const messageKey = `${tenant}:${deviceId}`;
-      let partition: number | null;
-      partition = 0;
+      const partition = 0;
 
       this.logger.debug(
         `Trying to send message to kafka topic ${kafkaTopic}...`,

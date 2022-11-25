@@ -1,7 +1,10 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
 import { devices, templates } from '@prisma/client';
+
 import { RemoveDevicesBatchDto } from 'src/types';
+import { CreateDevicesBatchDto } from 'src/app/dto/create-devices-batch.dto';
+
 import { DevicesServices } from '../../../../src/app/services/devicesServices';
 import {
   ConfigMock,
@@ -14,7 +17,6 @@ import {
   TemplatesRepository,
 } from '../../../../src/app/repository/';
 import { PrismaUtils } from '../../../../src/utils/Prisma.utils';
-import { CreateDevicesBatchDto } from 'src/app/dto/create-devices-batch.dto';
 
 describe('devicesServices', () => {
   const removeDevicesBatchDto_fake: RemoveDevicesBatchDto = {
@@ -68,7 +70,7 @@ describe('devicesServices', () => {
 
   describe('remove', () => {
     it('should return exception', async () => {
-      const removeDevicesBatchDto_fake: RemoveDevicesBatchDto = {} as any;
+      const removeDevicesBatchDto_fake = {} as RemoveDevicesBatchDto;
       const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const devicesRepository = new DevicesRepository(LoggerMock.new());
@@ -213,7 +215,7 @@ describe('devicesServices', () => {
     });
 
     it('should return exception', async () => {
-      const createDevicesBatchDto_fake: CreateDevicesBatchDto = {} as any;
+      const createDevicesBatchDto_fake = {} as CreateDevicesBatchDto;
       const { KafkaProducerMock } = KafkaMock.new();
       const FakePrismaClient = PrismaClientMock.new();
       const devicesRepository = new DevicesRepository(LoggerMock.new());

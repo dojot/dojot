@@ -16,6 +16,7 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - remove ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -42,6 +43,7 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - findById ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -53,6 +55,7 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - remove_associate_templates ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -64,6 +67,7 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - remove_associate_overrides ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -78,6 +82,7 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - remove_associate_overrides ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -95,6 +100,7 @@ export class DevicesRepository {
       this.logger.debug('DevicesRepository - create_devices in batch ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -118,6 +124,7 @@ export class DevicesRepository {
           error: error.message,
         },
       );
+      throw e;
     }
   }
 
@@ -136,6 +143,7 @@ export class DevicesRepository {
           error: error.message,
         },
       );
+      throw e;
     }
   }
 }

@@ -16,6 +16,7 @@ export class AttrsRepository {
       this.logger.debug('AttrsRepository - findById ', {
         error: error.message,
       });
+      throw e;
     }
   }
 
@@ -30,6 +31,7 @@ export class AttrsRepository {
       this.logger.debug('AttrsRepository - remove_associate_overrides ', {
         error: error.message,
       });
+      throw e;
     }
   }
 }

@@ -1,7 +1,9 @@
+import * as crypto from 'crypto';
+
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
+
 import { AppConfig } from 'src/types';
-import * as crypto from 'crypto';
 
 export class PrismaUtils {
   constructor(private logger: Logger, private appconfig: AppConfig) {}
@@ -35,7 +37,7 @@ export class PrismaUtils {
     }
   }
 
-  getRandomicHexIdDevices(size_byte: number = 3) {
+  getRandomicHexIdDevices(size_byte = 3) {
     const randomString = crypto.randomBytes(size_byte).toString('hex');
     return randomString;
   }

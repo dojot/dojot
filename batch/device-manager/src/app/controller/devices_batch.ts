@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { RemoveDevicesBatchDto } from 'src/app/dto/remove-devices-batch.dto';
 import { Logger } from '@dojot/microservice-sdk';
+
+import { RemoveDevicesBatchDto } from 'src/app/dto/remove-devices-batch.dto';
 import { DevicesServices } from 'src/app/services/devicesServices';
+
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
 export class DevicesBatchController {
   public constructor(

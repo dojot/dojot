@@ -9,7 +9,6 @@ describe('Prisma.utils', () => {
   const FakeLogger = LoggerMock.new();
   const appconfig = ConfigMock.new();
   const prismaUtils = new PrismaUtils(FakeLogger, appconfig);
-  const fakeDatabaseUrl = '--fake-database-url--';
 
   it('should the database url contain the schema and postgres prefix', () => {
     const databaseUrl = prismaUtils.getDatabaseUrl(

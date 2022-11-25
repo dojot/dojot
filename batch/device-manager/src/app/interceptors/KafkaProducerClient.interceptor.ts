@@ -1,5 +1,6 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { NextFunction, Request, Response } from 'express';
+
 import { KafkaProducer } from 'src/kafka/kafka-producer';
 import { AppConfig, DojotSdkInterceptor } from 'src/types';
 

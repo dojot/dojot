@@ -1,3 +1,2 @@
-
-export * from './Device.validations'
-export * from './Template.validations'
+export * from './Device.validations';
+export * from './Template.validations';

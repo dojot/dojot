@@ -1,4 +1,5 @@
 import { Kafka, Logger } from '@dojot/microservice-sdk';
+
 import { AppConfig } from 'src/types';
 import { TenantManager } from 'src/kafka/';
 
@@ -9,6 +10,7 @@ type Payload = {
 type ParsedPayloadValue = {
   type: 'CREATE';
   tenant: string;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   signatureKey: object;
 };
 

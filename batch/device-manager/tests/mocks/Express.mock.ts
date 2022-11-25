@@ -8,6 +8,8 @@ export const ExpressMock = {
     const ResponseMock = mockDeep<Response>();
     const NextFunctionMock = jest.fn();
 
+    ResponseMock.status.mockReturnValue(ResponseMock);
+
     return {
       ErrorMock,
       RequestMock,

@@ -1,6 +1,7 @@
 import { Logger } from '@dojot/microservice-sdk';
-import { PrismaUtils } from 'src/utils/Prisma.utils';
 import { PrismaClient } from '@prisma/client';
+
+import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 import { EventKafka, KafkaProducer } from '../../kafka/kafka-producer';
 import { CreateDevicesBatchDto } from '../dto/create-devices-batch.dto';
@@ -8,6 +9,25 @@ import { RemoveDevicesBatchDto } from '../dto/remove-devices-batch.dto';
 import { DevicesRepository } from '../repository/devicesRepository';
 import { TemplatesRepository } from '../repository/templatesRepository';
 import { KafkaEventData } from '../../types/Kafka.types';
+
+import {
+  AttrBatch,
+  DeviceNotFoundBatch,
+  DeviceResultBatch,
+  TemplatesNotFoundBatch,
+} from './entities';
+
+export type RemoveDevicesServicesOutput = {
+  devices: Array<DeviceResultBatch>;
+  devices_not_found: Array<DeviceNotFoundBatch>;
+};
+
+export type CreateDevicesServicesOutput = {
+  devices_created: Array<DeviceResultBatch>;
+  devices_not_created: Array<DeviceResultBatch>;
+  templates_not_found: Array<TemplatesNotFoundBatch>;
+  attrs_not_found: Array<AttrBatch>;
+};
 
 export class DevicesServices {
   constructor(
@@ -30,10 +50,10 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: RemoveDevicesBatchDto,
     tenant_id: string,
-  ): Promise<any> {
+  ): Promise<RemoveDevicesServicesOutput> {
     try {
-      let devices_result_batch: Array<any> = [];
-      const devices_not_found_batch: Array<any> = [];
+      const devices_result_batch: Array<DeviceResultBatch> = [];
+      const devices_not_found_batch: Array<DeviceNotFoundBatch> = [];
       const remove_devices_all_promisses = dto.devices.map(
         async (device_id) => {
           /**
@@ -52,12 +72,14 @@ export class DevicesServices {
             const templates_associated_with_device: Array<number> = [];
             const attrs_associated_with_template_and_device: Array<any> = [];
 
-            assert_device_exists.device_template.map(async (element: any) => {
-              templates_associated_with_device.push(element.templates.id);
-              attrs_associated_with_template_and_device.push({
-                [element.templates.id.toString()]: element.templates.attrs,
-              });
-            });
+            assert_device_exists.device_template.forEach(
+              async (element: any) => {
+                templates_associated_with_device.push(element.templates.id);
+                attrs_associated_with_template_and_device.push({
+                  [element.templates.id.toString()]: element.templates.attrs,
+                });
+              },
+            );
 
             /**
              *  disassociated devices with template.
@@ -141,6 +163,7 @@ export class DevicesServices {
       };
     } catch (error) {
       this.logger.debug('Error', { error });
+      throw error;
     }
   }
 
@@ -155,18 +178,18 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: CreateDevicesBatchDto,
     tenant_id: string,
-  ): Promise<any> {
+  ): Promise<CreateDevicesServicesOutput> {
     try {
-      let devices_create_result_batch: Array<any> = [];
-      let devices_not_create_result_batch: Array<any> = [];
-      let attrs_not_found: Array<any> = [];
+      const devices_create_result_batch: Array<DeviceResultBatch> = [];
+      const devices_not_create_result_batch: Array<DeviceResultBatch> = [];
+      const attrs_not_found: Array<AttrBatch> = [];
       let start_sufix = dto.start_sufix;
 
       const array_asserts_templates_and_attrs_not_found_templates =
         await this.assert_all_templates_valid_exits(connection, dto);
       for (let index = 0; index < dto.quantity; index++) {
-        let name_prefix_device = dto.name_prefix + '-' + start_sufix;
-        let device_id_generated = this.prismaUtils.getRandomicHexIdDevices();
+        const name_prefix_device = dto.name_prefix + '-' + start_sufix;
+        const device_id_generated = this.prismaUtils.getRandomicHexIdDevices();
 
         if (
           array_asserts_templates_and_attrs_not_found_templates.templates_found
@@ -190,7 +213,7 @@ export class DevicesServices {
             /**
              * Create Device in repository.
              */
-            let createdDevices = await this.devicesRepository.create(
+            const createdDevices = await this.devicesRepository.create(
               connection,
               device_id_generated,
               name_prefix_device,
@@ -224,9 +247,9 @@ export class DevicesServices {
               /**
                * Function load array of templates, and insert associated devices with templates.
                */
-              array_asserts_templates_and_attrs_not_found_templates.templates_found.map(
+              array_asserts_templates_and_attrs_not_found_templates.templates_found.forEach(
                 async (id: number) => {
-                  let createdAssociatedDevicesTenplates =
+                  const createdAssociatedDevicesTenplates =
                     await this.devicesRepository.create_associated_devices_templates(
                       connection,
                       device_id_generated,

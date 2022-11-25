@@ -3,6 +3,6 @@ import { WebUtils } from '@dojot/microservice-sdk'
 
 export const DojotHttpClientMock = {
   new() {
-    return mockDeep<WebUtils.DojotHttpClient>()
+    return mockDeep<WebUtils.DojotHttpClient>();
   },
 }

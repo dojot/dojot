@@ -9,6 +9,7 @@ import {
 } from '../mocks';
 import { App } from '../../src/app';
 import { RemoveDevicesBatchDto } from '../../src/app/dto/remove-devices-batch.dto';
+
 import { AuthSetup } from './setup';
 
 jest.mock('@prisma/client', () => ({

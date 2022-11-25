@@ -1,9 +1,11 @@
 import { Logger, WebUtils } from '@dojot/microservice-sdk';
+
 import { AppConfig } from 'src/types';
 import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 type CreateTenantParams = {
   tenant: string;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   signatureKey: object;
 };
 

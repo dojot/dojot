@@ -1,6 +1,7 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
+
 import { AppConfig } from 'src/types';
 import { DojotSdkInterceptor } from 'src/types/DojotSdk.types';
 import { PrismaUtils } from 'src/utils/Prisma.utils';

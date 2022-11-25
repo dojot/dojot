@@ -1,6 +1,12 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
-import { devices, device_template, templates } from '@prisma/client';
+import {
+  devices,
+  device_template,
+  PrismaClient,
+  templates,
+} from '@prisma/client';
+
 import { DevicesRepository } from '../../../../src/app/repository/devicesRepository';
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 
@@ -31,7 +37,13 @@ describe('devicesRepository', () => {
     it('should findById return null object device.', async () => {
       const FakePrismaClient = PrismaClientMock.new();
       FakePrismaClient.devices.findUnique.mockResolvedValue(null);
-      expect(await FakePrismaClient.devices.findUnique).not.toBeCalled();
+
+      const result = await device_repository.findByIdWithTemplatesAttrs(
+        FakePrismaClient,
+        'id',
+      );
+
+      expect(result).toBeNull();
     });
 
     it('should findById return one object device.', async () => {
@@ -45,17 +57,19 @@ describe('devicesRepository', () => {
     });
 
     it('should findById return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = PrismaClientMock.new();
       const device_repository = new DevicesRepository(LoggerMock.new());
-      FakePrismaClient.devices.findMany.mockRejectedValue([templates_fake]);
-      const fn = () => {
-        return device_repository.findByIdWithTemplatesAttrs(
+      FakePrismaClient.devices.findUnique.mockRejectedValue([templates_fake]);
+
+      try {
+        await device_repository.findByIdWithTemplatesAttrs(
           FakePrismaClient,
           '1',
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 
@@ -63,33 +77,47 @@ describe('devicesRepository', () => {
     const device_repository = new DevicesRepository(LoggerMock.new());
     it('should remove return null object device. ', async () => {
       const FakePrismaClient = PrismaClientMock.new();
-      FakePrismaClient.devices.delete.mockRejectedValue({});
-      await device_repository.remove(FakePrismaClient, '1');
-      expect(FakePrismaClient.devices.delete).toBeCalled();
+      const shouldResult = {
+        id: 'id',
+        label: 'label',
+        created: new Date(),
+        updated: new Date(),
+        persistence: null,
+      };
+
+      FakePrismaClient.devices.delete.mockResolvedValueOnce(shouldResult);
+
+      const result = await device_repository.remove(FakePrismaClient, '1');
+
+      expect(result).toEqual(shouldResult);
     });
 
     it('should remove return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = PrismaClientMock.new();
       const device_repository = new DevicesRepository(LoggerMock.new());
       FakePrismaClient.devices.delete.mockRejectedValue({ templates_fake });
-      const fn = () => {
-        return device_repository.remove(FakePrismaClient, '1');
-      };
 
-      expect(fn).rejects.toThrow(Error);
+      try {
+        await device_repository.remove(FakePrismaClient, '1');
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
 
     it('should remove_associate_templates return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = {} as any;
       const device_repository = new DevicesRepository(LoggerMock.new());
-      const fn = () => {
-        return device_repository.remove_associate_templates(
+
+      try {
+        await device_repository.remove_associate_templates(
           FakePrismaClient,
           '',
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 
@@ -107,19 +135,18 @@ describe('devicesRepository', () => {
     });
 
     it('should assert_devices_exists return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = {} as any;
       const device_repository = new DevicesRepository(LoggerMock.new());
-      const fn = () => {
-        return device_repository.assert_devices_exists(FakePrismaClient, '');
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      try {
+        await device_repository.assert_devices_exists(FakePrismaClient, '');
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 
   describe('create', () => {
-    const device_repository = new DevicesRepository(LoggerMock.new());
-
     it('should call create device in batch .', async () => {
       const FakePrismaClient = PrismaClientMock.new();
       const device_repository = new DevicesRepository(LoggerMock.new());
@@ -139,68 +166,68 @@ describe('devicesRepository', () => {
       FakePrismaClient.device_template.create.mockResolvedValue(
         device_template_fake,
       );
-      const device_created = await device_repository.create(
-        FakePrismaClient,
-        '1',
-        'teste',
-      );
       await device_repository.create_associated_devices_templates(
         FakePrismaClient,
         '1',
         1,
       );
-      expect(FakePrismaClient.devices.create).toBeCalled();
+
       expect(FakePrismaClient.device_template.create).toBeCalled();
     });
 
     it('should remove_associate_overrides return exception', async () => {
-      const FakePrismaClient = {} as any;
+      expect.assertions(1);
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
-      const fn = () => {
-        return device_repository.remove_associate_overrides(
+
+      try {
+        await device_repository.remove_associate_overrides(
           FakePrismaClient,
           '',
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
 
     it('should remove_associate_pre_shared_keys return exception', async () => {
-      const FakePrismaClient = {} as any;
+      expect.assertions(1);
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
-      const fn = () => {
-        return device_repository.remove_associate_pre_shared_keys(
+      try {
+        await device_repository.remove_associate_pre_shared_keys(
           FakePrismaClient,
           '',
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
 
     it('should create return exception', async () => {
-      const FakePrismaClient = {} as any;
+      expect.assertions(1);
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
-      const fn = () => {
-        return device_repository.create(FakePrismaClient, '', '');
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      try {
+        await device_repository.create(FakePrismaClient, '', '');
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
 
     it('should return exception in create devices and templates associoted ', async () => {
-      const FakePrismaClient = {} as any;
+      expect.assertions(1);
+      const FakePrismaClient = {} as PrismaClient;
       const device_repository = new DevicesRepository(LoggerMock.new());
-      const fn = () => {
-        return device_repository.create_associated_devices_templates(
+      try {
+        await device_repository.create_associated_devices_templates(
           FakePrismaClient,
           '',
           -1,
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 });

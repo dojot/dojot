@@ -1,7 +1,22 @@
 import { Logger } from '@dojot/microservice-sdk';
 import { PrismaClient } from '@prisma/client';
+
 import { RemoveTemplatesBatchDto } from 'src/types';
+
 import { AttrsRepository, TemplatesRepository } from '../repository';
+
+import {
+  DeviceResultBatch,
+  TemplatesAssociatedDevicesBatch,
+  TemplatesBatch,
+  TemplatesNotFoundBatch,
+} from './entities';
+
+type RemoveTemplatesServicesOutput = {
+  templates: Array<TemplatesBatch>;
+  templates_associated_devices: Array<TemplatesAssociatedDevicesBatch>;
+  templates_not_found: Array<TemplatesNotFoundBatch>;
+};
 
 export class TemplatesServices {
   constructor(
@@ -22,13 +37,14 @@ export class TemplatesServices {
   async remove(
     connection: PrismaClient,
     dto: RemoveTemplatesBatchDto,
-  ): Promise<any> {
+  ): Promise<RemoveTemplatesServicesOutput> {
     try {
-      let templates_removed_batch: Array<any> = [];
-      let templates_not_found_batch: Array<any> = [];
-      let templates_associated_devices_batch: Array<any> = [];
-      let devices_associated_templatesd_batch: Array<any> = [];
-      let aux_ids_device_found_associated: Array<any> = [];
+      const templates_removed_batch: Array<TemplatesBatch> = [];
+      const templates_not_found_batch: Array<TemplatesNotFoundBatch> = [];
+      const templates_associated_devices_batch: Array<TemplatesAssociatedDevicesBatch> =
+        [];
+      const devices_associated_templates_batch: Array<DeviceResultBatch> = [];
+      const aux_ids_device_found_associated: Array<string> = [];
 
       let template_to_removed;
       const remove_templates_all_promisses = dto.templates.map(
@@ -65,7 +81,7 @@ export class TemplatesServices {
                         devices.devices.id,
                       )
                     ) {
-                      devices_associated_templatesd_batch.push({
+                      devices_associated_templates_batch.push({
                         id: devices.devices.id,
                         label: devices.devices.label,
                       });
@@ -78,7 +94,7 @@ export class TemplatesServices {
                   label: assert_template_exists.label,
                   type: 'HAS_ASSOCIATED_DEVICES',
                   message: 'The template has associated devices',
-                  associated_devices: devices_associated_templatesd_batch,
+                  associated_devices: devices_associated_templates_batch,
                 });
               } else {
                 /**
@@ -128,6 +144,7 @@ export class TemplatesServices {
       };
     } catch (error) {
       this.logger.debug('Error', { error });
+      throw error;
     }
   }
 }

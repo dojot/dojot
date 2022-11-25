@@ -1,5 +1,7 @@
 import { Logger } from '@dojot/microservice-sdk';
 
+import { PrismaUtils } from 'src/utils/Prisma.utils';
+
 import { DevicesServices } from '../services/devicesServices';
 import { DevicesBatchController } from '../controller/devices_batch';
 import { DevicesValidation } from '../validations/Device.validations';
@@ -10,7 +12,6 @@ import {
 } from '../interceptors';
 import { KafkaProducer } from '../../kafka/kafka-producer';
 import { DevicesRepository, TemplatesRepository } from '../repository';
-import { PrismaUtils } from 'src/utils/Prisma.utils';
 
 export abstract class DeviceRoutes {
   static use(
@@ -57,7 +58,7 @@ export abstract class DeviceRoutes {
             method: 'post',
             middleware: [
               ValidationInterceptor.use(DevicesValidation.create()),
-              ValidationAttrsInterceptor.use(DevicesValidation.create()),
+              ValidationAttrsInterceptor.use(),
               devicesBatchController.create.bind(devicesBatchController),
               DisconnectPrismaInterceptor.use(prismaUtils),
             ],
