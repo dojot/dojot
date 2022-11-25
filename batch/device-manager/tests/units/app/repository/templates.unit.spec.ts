@@ -19,7 +19,13 @@ describe('TemplatesRepository', () => {
     it('should findById return null object template.', async () => {
       const FakePrismaClient = PrismaClientMock.new();
       FakePrismaClient.templates.findUnique.mockResolvedValue(null);
-      expect(await FakePrismaClient.templates.findUnique).not.toBeCalled();
+
+      const template_findById = await templates_repository.findById(
+        FakePrismaClient,
+        1,
+      );
+
+      expect(template_findById).toBeNull();
     });
 
     it('should findById return one object template.', async () => {
@@ -33,12 +39,15 @@ describe('TemplatesRepository', () => {
     });
 
     it('should findById return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = PrismaClientMock.new();
-      const fn = () => {
-        return templates_repository.findById(FakePrismaClient, -1);
-      };
+      FakePrismaClient.templates.findUnique.mockRejectedValueOnce('error');
 
-      expect(fn).rejects.toThrow(Error);
+      try {
+        await templates_repository.findById(FakePrismaClient, -1);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 
@@ -46,12 +55,13 @@ describe('TemplatesRepository', () => {
     it('should return null object templates. ', async () => {
       const FakePrismaClient = PrismaClientMock.new();
       const templates_repository = new TemplatesRepository(LoggerMock.new());
-      FakePrismaClient.templates.findMany.mockRejectedValue({});
-      await templates_repository.findByTemplateAssociatesDevicesOrNot(
-        FakePrismaClient,
-        0,
-      );
-      expect(FakePrismaClient.templates.findMany).toBeCalled();
+      FakePrismaClient.templates.findMany.mockResolvedValue([]);
+      const result =
+        await templates_repository.findByTemplateAssociatesDevicesOrNot(
+          FakePrismaClient,
+          0,
+        );
+      expect(result.length).toBe(0);
     });
 
     it('should return object templates with associate devices.', async () => {
@@ -80,26 +90,24 @@ describe('TemplatesRepository', () => {
     });
 
     it('should findByTemplateAssociatesDevicesOrNot return exception', async () => {
+      expect.assertions(1);
       const templates_repository = new TemplatesRepository(LoggerMock.new());
       const FakePrismaClient = PrismaClientMock.new();
-      const fn = () => {
-        return templates_repository.findByTemplateAssociatesDevicesOrNot(
+      FakePrismaClient.templates.findMany.mockRejectedValue('Error');
+
+      try {
+        await templates_repository.findByTemplateAssociatesDevicesOrNot(
           FakePrismaClient,
           -1,
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
     });
   });
 
   describe('remove', () => {
     const templates_repository = new TemplatesRepository(LoggerMock.new());
-    it('should remove return null object templates. ', async () => {
-      const FakePrismaClient = PrismaClientMock.new();
-      FakePrismaClient.templates.delete.mockRejectedValue({});
-      expect(FakePrismaClient.devices.delete).not.toBeCalled();
-    });
 
     it('should remove one object device return object deleted', async () => {
       const FakePrismaClient = PrismaClientMock.new();
@@ -112,14 +120,15 @@ describe('TemplatesRepository', () => {
     });
 
     it('should remove return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = PrismaClientMock.new();
       const templates_repository = new TemplatesRepository(LoggerMock.new());
       FakePrismaClient.templates.delete.mockRejectedValue({});
-      const fn = () => {
-        return templates_repository.remove(FakePrismaClient, 1);
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      try {
+        await templates_repository.remove(FakePrismaClient, 1);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 
@@ -127,12 +136,14 @@ describe('TemplatesRepository', () => {
     const templates_repository = new TemplatesRepository(LoggerMock.new());
     it('should findByIdWithAttrs return null object templates. ', async () => {
       const FakePrismaClient = PrismaClientMock.new();
-      FakePrismaClient.templates.findUnique.mockRejectedValue({});
-      const fn = () => {
-        return templates_repository.findByIdWithAttrs(FakePrismaClient, 1);
-      };
+      FakePrismaClient.templates.findUnique.mockResolvedValueOnce(null);
 
-      expect(fn).rejects.toThrow(Error);
+      const result = await templates_repository.findByIdWithAttrs(
+        FakePrismaClient,
+        1,
+      );
+
+      expect(result).toBeNull();
     });
   });
 });

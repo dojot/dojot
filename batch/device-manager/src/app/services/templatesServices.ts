@@ -37,7 +37,7 @@ export class TemplatesServices {
   async remove(
     connection: PrismaClient,
     dto: RemoveTemplatesBatchDto,
-  ): Promise<RemoveTemplatesServicesOutput | undefined> {
+  ): Promise<RemoveTemplatesServicesOutput> {
     try {
       const templates_removed_batch: Array<TemplatesBatch> = [];
       const templates_not_found_batch: Array<TemplatesNotFoundBatch> = [];
@@ -144,6 +144,7 @@ export class TemplatesServices {
       };
     } catch (error) {
       this.logger.debug('Error', { error });
+      throw error;
     }
   }
 }

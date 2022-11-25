@@ -18,11 +18,11 @@ describe('KafkaProducerClient.interceptor', () => {
     expect(Array.isArray(interceptor.middleware)).toBe(true);
   });
 
-  it('should validate the call next', () => {
+  it('should validate the call next', async () => {
     const { RequestMock, ResponseMock, NextFunctionMock } = ExpressMock.new();
     RequestMock.body = { test: 'test' };
 
-    middleware(RequestMock, ResponseMock, NextFunctionMock);
+    await middleware(RequestMock, ResponseMock, NextFunctionMock);
     expect(NextFunctionMock).not.toBeCalled();
   });
 

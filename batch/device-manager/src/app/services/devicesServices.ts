@@ -50,7 +50,7 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: RemoveDevicesBatchDto,
     tenant_id: string,
-  ): Promise<RemoveDevicesServicesOutput | undefined> {
+  ): Promise<RemoveDevicesServicesOutput> {
     try {
       const devices_result_batch: Array<DeviceResultBatch> = [];
       const devices_not_found_batch: Array<DeviceNotFoundBatch> = [];
@@ -163,6 +163,7 @@ export class DevicesServices {
       };
     } catch (error) {
       this.logger.debug('Error', { error });
+      throw error;
     }
   }
 
@@ -177,7 +178,7 @@ export class DevicesServices {
     connection: PrismaClient,
     dto: CreateDevicesBatchDto,
     tenant_id: string,
-  ): Promise<CreateDevicesServicesOutput | undefined> {
+  ): Promise<CreateDevicesServicesOutput> {
     try {
       const devices_create_result_batch: Array<DeviceResultBatch> = [];
       const devices_not_create_result_batch: Array<DeviceResultBatch> = [];

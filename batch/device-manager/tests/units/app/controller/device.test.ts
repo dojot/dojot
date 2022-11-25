@@ -1,5 +1,6 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
+
 import { DevicesBatchController } from '../../../../src/app/controller/devices_batch';
 import { AppMock, ExpressMock, LoggerMock } from '../../../mocks';
 
@@ -22,7 +23,7 @@ describe('devices_batch.controller', () => {
 
       expect(DeviceServiceMock.remove).toBeCalled();
       expect(ResponseMock.status).toBeCalledWith(200);
-      expect(NextFunctionMock).toBeCalled();
+      expect(NextFunctionMock).not.toBeCalled();
     });
 
     it('should call next passing the error if fails', async () => {

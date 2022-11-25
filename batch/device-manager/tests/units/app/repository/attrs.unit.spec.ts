@@ -1,6 +1,7 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
 import { attrs, devices, templates } from '@prisma/client';
+
 import { AttrsRepository } from '../../../../src/app/repository/attrsRepository';
 import { LoggerMock, PrismaClientMock } from '../../../mocks';
 
@@ -66,13 +67,15 @@ describe('attrsRepository', () => {
     });
 
     it('should findById return exception', async () => {
+      expect.assertions(1);
       const FakePrismaClient = PrismaClientMock.new();
       FakePrismaClient.attrs.findUnique.mockRejectedValue({});
-      const fn = () => {
-        return attrs_repository.findById(FakePrismaClient, -1);
-      };
 
-      expect(fn).rejects.toThrow(Error);
+      try {
+        await attrs_repository.findById(FakePrismaClient, -1);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 
@@ -81,15 +84,16 @@ describe('attrsRepository', () => {
 
     it('should remove return exception.', async () => {
       const FakePrismaClient = {} as any;
+      expect.assertions(1);
 
-      const fn = () => {
-        return attrs_repository.remove_associate_attrs_template(
+      try {
+        await attrs_repository.remove_associate_attrs_template(
           FakePrismaClient,
           -1,
         );
-      };
-
-      expect(fn).rejects.toThrow(Error);
+      } catch (err) {
+        expect(err).toBeDefined();
+      }
     });
   });
 });

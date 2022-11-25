@@ -28,6 +28,7 @@ export class TemplatesRepository {
       this.logger.debug('TemplatesRepository - remove ', {
         error: error.message,
       });
+      throw e;
     }
   }
   /**
@@ -46,6 +47,7 @@ export class TemplatesRepository {
       this.logger.debug('TemplatesRepository - remove ', {
         error: error.message,
       });
+      throw e;
     }
   }
   /**
@@ -86,6 +88,7 @@ export class TemplatesRepository {
       this.logger.debug('TemplatesRepository - remove ', {
         error: error.message,
       });
+      throw error;
     }
   }
 }

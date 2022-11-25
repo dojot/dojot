@@ -1,6 +1,7 @@
 // Here the unit tests will be written.
 import { describe } from '@jest/globals';
 import { devices, templates } from '@prisma/client';
+
 import { RemoveDevicesBatchDto } from 'src/types';
 import { CreateDevicesBatchDto } from 'src/app/dto/create-devices-batch.dto';
 
