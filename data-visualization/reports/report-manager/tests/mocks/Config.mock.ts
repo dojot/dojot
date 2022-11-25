@@ -23,15 +23,15 @@ export const ConfigMock = {
         port: 1324,
       },
       keycloak: {
-        url: 'http://keycloak:1432',
+        url: 'https://keycloak:1432',
         'client.id': 'client',
         'tenants.url': 'tenant',
         'client.secret': 'secret',
         'client.secret.file': 'file',
       },
       apis: {
-        retriever: 'http://retriever:4321',
-        filemgmt: 'http://filemgmt:3412',
+        retriever: 'https://retriever:4321',
+        filemgmt: 'https://filemgmt:3412',
       },
       app: {
         'report.expiration.ms': 0,
@@ -39,7 +39,7 @@ export const ConfigMock = {
       },
       postgres: {
         user: 'postgres',
-        password: 'postgres',
+        password: Date.now().toString(), // NOSONAR
         host: 'postgres',
         port: 5432,
         database: 'postgres',
