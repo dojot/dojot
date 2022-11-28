@@ -42,4 +42,8 @@ export type Config = {
     'detect.kubernetes': boolean
     port?: number
   }
+  logger: {
+    level: string
+    verbose: boolean
+  }
 }

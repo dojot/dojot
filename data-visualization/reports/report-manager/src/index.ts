@@ -26,7 +26,8 @@ const config: Config = ConfigManager.getConfig(
 )
 
 const logger = new Logger('report-manager')
-Logger.setLevel('console', 'debug')
+Logger.setLevel('console', config.logger.level)
+Logger.setVerbose(config.logger.verbose)
 
 const serviceState = new ServiceStateManager({
   lightship: ConfigManager.transformObjectKeys(config.lightship, camelcase),
