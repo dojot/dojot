@@ -1,4 +1,5 @@
 import Joi from 'joi';
+
 import { ValidationAttrsInterceptor } from '../../../../src/app/interceptors';
 import { ExpressMock } from '../../../mocks';
 
@@ -10,12 +11,12 @@ describe('ValidationAttr.interceptor', () => {
   };
 
   it('should have the structure of an interceptor', () => {
-    const interceptor = ValidationAttrsInterceptor.use(getSchema());
+    const interceptor = ValidationAttrsInterceptor.use();
     expect(typeof interceptor).toBe('function');
   });
 
   it('should validate the schema and call next', () => {
-    const interceptor = ValidationAttrsInterceptor.use(getSchema());
+    const interceptor = ValidationAttrsInterceptor.use();
     const { RequestMock, ResponseMock, NextFunctionMock } = ExpressMock.new();
     RequestMock.body = {};
     interceptor(RequestMock, ResponseMock, NextFunctionMock);
@@ -23,7 +24,7 @@ describe('ValidationAttr.interceptor', () => {
   });
 
   it('should validate the schema and return error 400', () => {
-    const interceptor = ValidationAttrsInterceptor.use(getSchema());
+    const interceptor = ValidationAttrsInterceptor.use();
     const { RequestMock, ResponseMock, NextFunctionMock } = ExpressMock.new();
     RequestMock.body = {
       name_prefix: 'temp_sensor',
