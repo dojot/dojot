@@ -1,34 +1,55 @@
 {
-  "exceptions": {
-    "amdefine@*": {
-      "reason": "BSD-3-Clause OR MIT"
-    },
-    "argparse@*": {
-      "reason": "Python-2.0"
-    },
-    "caniuse-lite@*": {
-      "reason": "CC-BY-4.0"
-    },
-    "cluster-key-slot@*": {
-      "reason": "APACHE-2.0"
-    },
-    "jszip@*": {
-      "reason": "(MIT OR GPL-3.0-or-later)"
-    },
-    "pako@*": {
-      "reason": "(MIT AND Zlib)"
-    },
-    "tslib@*": {
-      "reason": "0BSD"
-    },
-    "type-fest@*": {
-      "reason": "(MIT OR CC0-1.0)"
-    },
-    "@swc/core-linux-x64-gnu@1.3.14": {
-      "reason": "Apache-2.0 AND MIT"
-    },
-    "@swc/core-linux-x64-musl@1.3.14": {
-      "reason": "Apache-2.0 AND MIT"
+    "exceptions": {
+        "atob@2.1.2": {
+            "reason": "It allows to choose between MIT and Apache-2.0"
+        },
+        "type-fest@0.20.2": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@0.21.3": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@0.6.0": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@0.8.1": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@2.3.4": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@2.17.0": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@2.19.0": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "tslib@1.14.1": {
+            "reason": "0BSD are compatible with Apache-2.0"
+        },
+        "caniuse-lite@1.0.30001252": {
+            "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
+        },
+        "caniuse-lite@1.0.30001264": {
+            "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
+        },
+        "caniuse-lite@1.0.30001367": {
+            "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
+        },
+        "caniuse-lite@1.0.30001418": {
+            "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
+        },
+        "argparse@2.0.1": {
+            "reason": "Python2.0 are compatible with Apache-2.0"
+        },
+        "@zxing/text-encoding@0.9.0": {
+            "reason": "Unlicense and/or Apache-2 are compatible with Apache-2.0"
+        },
+        "sha.js@2.4.11": {
+            "reason": "MIT is compatible with Apache-2.0. It's licensed under the BSD 3-Clause License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
+        },
+        "axe-core@4.4.3": {
+            "reason": "MPL-2.0 is compatible with Apache-2.0."
+        }
     }
-  }
 }
