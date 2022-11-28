@@ -1,12 +1,21 @@
 {
     "exceptions": {
-        "type-fest@^0.20.2": {
+        "type-fest@0.20.2": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@0.21.3": {
             "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
         },
         "type-fest@2.3.4": {
             "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
         },
         "type-fest@2.17.0": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@0.6.0": {
+            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
+        },
+        "type-fest@0.8.1": {
             "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
         },
         "type-fest@2.19.0": {
