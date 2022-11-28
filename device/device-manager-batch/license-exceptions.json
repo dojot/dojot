@@ -1,8 +1,5 @@
 {
     "exceptions": {
-        "atob@2.1.2": {
-            "reason": "It allows to choose between MIT and Apache-2.0"
-        },
         "type-fest@0.20.2": {
             "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
         },
@@ -21,9 +18,6 @@
         "type-fest@2.17.0": {
             "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
         },
-        "type-fest@2.19.0": {
-            "reason": "MIT and/or CC0-1.0 are compatible with Apache-2.0"
-        },
         "tslib@1.14.1": {
             "reason": "0BSD are compatible with Apache-2.0"
         },
@@ -34,9 +28,6 @@
             "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
         },
         "caniuse-lite@1.0.30001367": {
-            "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
-        },
-        "caniuse-lite@1.0.30001418": {
             "reason": "It's licensed under the CC-BY-4.0 License, appropriately labelled in README and NOTICE files and no code changes, what makes compatible with Apache-2.0"
         },
         "argparse@2.0.1": {
@@ -50,6 +41,21 @@
         },
         "axe-core@4.4.3": {
             "reason": "MPL-2.0 is compatible with Apache-2.0."
+        },
+        "@swc/core-linux-x64-gnu@1.3.7": {
+            "reason": "It allows to choose between MIT and Apache-2.0"
+        },
+        "@swc/core-linux-x64-musl@1.3.7": {
+            "reason": "It allows to choose between MIT and Apache-2.0"
+        },
+        "atob@2.1.2": {
+            "reason": "It allows to choose between MIT and Apache-2.0"
+        },
+        "qrcode-terminal@0.12.0": {
+            "reason": "It allows to choose between MIT and Apache-2.0"
+        },
+        "npm@9.1.2": {
+            "reason": "Artistic-2.0 is compatible with Apache-2.0"
         }
     }
 }
