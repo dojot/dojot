@@ -33,7 +33,7 @@ In addition, there is an endpoint for using version 1 documentation (the only on
 
 For example, the address could be:
 
-`http://localhost:3000/tss/v1/api-docs/`
+`http://localhost:4000/tss/v1/api-docs/`
 
 ### Mapping between InfluxDB and dojot devices
 
@@ -95,7 +95,7 @@ convention.
 | Key                        | Purpose                                                                                                                                                           | Default Value | Valid Values | Environment variable                 |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------ | ------------------------------------ |
 | server.host                | Server address                                                                                                                                                    | 0.0.0.0       | string       | RETRIEVER_SERVER_HOST                |
-| server.port                | Sever Port                                                                                                                                                        | 3000          | integer      | RETRIEVER_SERVER_PORT                |
+| server.port                | Sever Port                                                                                                                                                        | 4000          | integer      | RETRIEVER_SERVER_PORT                |
 | server.ca                  | File path to list of supplied CAs. If passed enable TLS                                                                                                           | none          | path         | RETRIEVER_SERVER_CA                  |
 | server.cert                | File path to certificate.                                                                                                                                         | none          | path         | RETRIEVER_SERVER_CERT                |
 | server.key                 | File path to key certificate.                                                                                                                                     | none          | path         | RETRIEVER_SERVER_KEY                 |
