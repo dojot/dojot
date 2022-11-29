@@ -30,7 +30,6 @@ class DeviceDataRepository {
    * @param {String} defaultBucket  Bucket Name for all data write
    * @param {@influxdata/influxdb-client/InfluxDB} influxDBConnection  Request timeout in
    *  the communication with the influxdb
-   * @param {Boolean} readAsString Indicates whether to read Influxdb data as a String
    *
    */
   constructor(defaultBucket, influxDBConnection, logger) {
@@ -262,7 +261,6 @@ class DeviceDataRepository {
       this.logger.debug(`queryByField: fluxQuery=${fluxQuery}`);
 
       const queryApi = this.influxDB.getQueryApi({ org, gzip: false });
-      const { readAsString } = this;
 
       const loggerOuter = this.logger;
 
@@ -272,17 +270,10 @@ class DeviceDataRepository {
           next(row, tableMeta) {
             const o = tableMeta.toObject(row);
             loggerOuter.debug(`queryByField: queryRows.next=${JSON.stringify(o, null, 2)}`);
-            let validatedValue;
-            if (readAsString) {
-              validatedValue = JSON.parse(o._value);
-            } else {
-              validatedValue = o._value;
-            }
-            // when storer write the data it just check if is a number or a boolean
-            // the others types are writer as string with json stringify
+
             result.push({
               ts: o._time,
-              value: validatedValue,
+              value: o._value,
             });
           },
           error(error) {
