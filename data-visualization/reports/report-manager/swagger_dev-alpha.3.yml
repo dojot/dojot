@@ -1,0 +1,353 @@
+openapi: 3.0.1
+info:
+  title: Report Manager
+  version: 1.0.0
+  description: API responsible for creating reports.
+  contact:
+    name: View on GitHub
+    url: https://github.com/dojot/report-manager
+servers:
+  - url: '{url}'
+    description: Default Server
+    variables:
+      url:
+        default: http://localhost:8000/report-manager
+tags:
+  - name: Devices
+    description: Device reports
+  - name: Reports
+    description: Reports
+paths:
+  /devices:
+    post:
+      tags:
+        - Devices
+      summary: Create a report with device data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              name: Report Name
+              format: pdf
+              singleReportFile: true
+              initialDate: '2022-09-01T00:00:00Z'
+              finalDate: '2022-09-10T00:00:00Z'
+              devices:
+                - id: a1b2c3
+                  label: Device 1
+                  attrs:
+                    - id: 1
+                      label: Attr_1
+                      type: dynamic
+                      valueType: float
+                    - id: 2
+                      label: Attr_2
+                      type: dynamic
+                      valueType: json
+                    - id: 3
+                      label: Attr_3
+                      type: dynamic
+                      valueType: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              example:
+                id: eef1aa04-daba-411a-b266-23e618938dd2
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              example:
+                type: VALIDATION
+                message: Bad request
+                details:
+                  - type: name.empty
+                    message: Required field
+                    path:
+                      - body
+                      - name
+                    context:
+                      key: name
+                      label: name
+                      value: ''
+                  - type: format.empty
+                    message: Required field
+                    path:
+                      - body
+                      - format
+                    context:
+                      key: format
+                      label: format
+                      value: ''
+                  - type: devices.empty
+                    message: Required field
+                    path:
+                      - body
+                      - devices
+                    context:
+                      key: devices
+                      label: devices
+                      value: null
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal server error
+  /reports:
+    get:
+      tags:
+        - Reports
+      summary: Get all reports paginated
+      parameters:
+        - in: query
+          name: name
+          description: Filter reports by name (case insensitive)
+          example: Report Name
+          schema:
+            type: string
+        - in: query
+          name: page
+          description: Page number (starting from 1)
+          example: 1
+          schema:
+            type: number
+        - in: query
+          name: pageSize
+          description: Page size
+          example: 10
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Recovered data
+          content:
+            application/json:
+              example:
+                reports:
+                  - id: eef1aa04-daba-411a-b266-23e618938dd2
+                    typeId: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                    format: csv
+                    name: Report Name
+                    initialDate: '2022-09-01T00:00:00Z'
+                    finalDate: '2022-09-10T00:00:00Z'
+                    params:
+                      - id: a1b2c3
+                        label: Device 1
+                        attrs:
+                          - id: 1
+                            label: Attr_1
+                            type: dynamic
+                            valueType: float
+                    createdAt: '2022-09-10T00:00:00Z'
+                    updatedAt: '2022-09-10T00:00:00Z'
+                    file:
+                      id: 0462c0f6-6af0-416e-bade-3b51cfa0d9e2
+                      reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                      path: /reports/eef1aa04-daba-411a-b266-23e618938dd2.csv
+                      mimeType: application/octet-stream
+                      filename: eef1aa04-daba-411a-b266-23e618938dd2.csv
+                      fileSizeKb: 0.1884765625
+                      expiresAt: null
+                      createdAt: '2022-09-01T00:00:00Z'
+                      updatedAt: '2022-09-01T00:00:00Z'
+                    type:
+                      id: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                      identifier: DEVICES
+                      name: Devices
+                      createdAt: '2022-09-01T00:00:00Z'
+                      updatedAt: '2022-09-01T00:00:00Z'
+                    attempts:
+                      - id: 2bc29232-190a-45a9-8d64-49c1928bc4dd
+                        reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                        error: null
+                        failedAt: null
+                        canceledAt: null
+                        finishedAt: '2022-10-05T15:18:01.556Z'
+                        createdAt: '2022-10-05T15:18:01.458Z'
+                        updatedAt: '2022-10-05T15:18:01.560Z'
+                total: 2
+                page: 1
+                pageSize: 10
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal server error
+  /reports/{reportId}:
+    get:
+      tags:
+        - Reports
+      summary: Get a single report
+      parameters:
+        - in: path
+          name: reportId
+          description: Report ID
+          required: true
+          example: eef1aa04-daba-411a-b266-23e618938dd2
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recovered data
+          content:
+            application/json:
+              example:
+                id: eef1aa04-daba-411a-b266-23e618938dd2
+                typeId: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                format: csv
+                name: Report Name
+                initialDate: '2022-09-01T00:00:00Z'
+                finalDate: '2022-09-10T00:00:00Z'
+                params:
+                  - id: a1b2c3
+                    label: Device 1
+                    attrs:
+                      - id: 1
+                        label: Attr_1
+                        type: dynamic
+                        valueType: float
+                createdAt: '2022-09-10T00:00:00Z'
+                updatedAt: '2022-09-10T00:00:00Z'
+                file:
+                  id: 0462c0f6-6af0-416e-bade-3b51cfa0d9e2
+                  reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                  path: /reports/eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  mimeType: application/octet-stream
+                  filename: eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  fileSizeKb: 0.1884765625
+                  expiresAt: null
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                type:
+                  id: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                  identifier: DEVICES
+                  name: Devices
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                attempts:
+                  - id: 2bc29232-190a-45a9-8d64-49c1928bc4dd
+                    reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                    error: null
+                    failedAt: null
+                    canceledAt: null
+                    finishedAt: '2022-10-05T15:18:01.556Z'
+                    createdAt: '2022-10-05T15:18:01.458Z'
+                    updatedAt: '2022-10-05T15:18:01.560Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '404':
+          description: Not found
+          content:
+            application/json:
+              example:
+                message: Report not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal server error
+    delete:
+      tags:
+        - Reports
+      summary: Delete a report by id
+      parameters:
+        - in: path
+          name: reportId
+          description: Report ID
+          required: true
+          example: eef1aa04-daba-411a-b266-23e618938dd2
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted report data
+          content:
+            application/json:
+              example:
+                id: eef1aa04-daba-411a-b266-23e618938dd2
+                typeId: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                format: csv
+                name: Report Name
+                initialDate: '2022-09-01T00:00:00Z'
+                finalDate: '2022-09-10T00:00:00Z'
+                params:
+                  - id: a1b2c3
+                    label: Device 1
+                    attrs:
+                      - id: 1
+                        label: Attr_1
+                        type: dynamic
+                        valueType: float
+                createdAt: '2022-09-10T00:00:00Z'
+                updatedAt: '2022-09-10T00:00:00Z'
+                file:
+                  id: 0462c0f6-6af0-416e-bade-3b51cfa0d9e2
+                  reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                  path: /reports/eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  mimeType: application/octet-stream
+                  filename: eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  fileSizeKb: 0.1884765625
+                  expiresAt: null
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                type:
+                  id: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                  identifier: DEVICES
+                  name: Devices
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                attempts:
+                  - id: 2bc29232-190a-45a9-8d64-49c1928bc4dd
+                    reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                    error: null
+                    failedAt: null
+                    canceledAt: null
+                    finishedAt: '2022-10-05T15:18:01.556Z'
+                    createdAt: '2022-10-05T15:18:01.458Z'
+                    updatedAt: '2022-10-05T15:18:01.560Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '404':
+          description: Not found
+          content:
+            application/json:
+              example:
+                message: Report not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal server error
