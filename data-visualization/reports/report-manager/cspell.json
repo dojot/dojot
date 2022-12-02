@@ -19,6 +19,7 @@
     "kubernetes",
     "nodebuffer",
     "nosonar",
+    "nullable",
     "openapi",
     "pako",
     "pdfmake",
