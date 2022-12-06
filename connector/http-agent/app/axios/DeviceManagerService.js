@@ -25,6 +25,11 @@ class DeviceManagerService {
    */
   async getDevice(tenantId, deviceId) {
     const tenant = this.tenantManager.findTenant(tenantId);
+
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
     const token = tenant.session.getTokenSet().access_token;
     logger.debug(`requesting device ${deviceId}`);
     const messageKey = await this.dojotHttpclient.request(
