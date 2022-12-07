@@ -47,6 +47,10 @@ export const ConfigMock = {
       lightship: {
         'detect.kubernetes': false,
       },
+      logger: {
+        level: 'info',
+        verbose: false,
+      },
     })
   },
 }

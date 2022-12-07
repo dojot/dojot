@@ -109,6 +109,16 @@ These parameters are passed directly to the SDK ServiceStateManager. Check the [
 
 </details>
 
+<details>
+  <summary>Logger</summary>
+
+| Key            | Type   | Default Value | Env Var                       |
+| -------------- | ------ | ------------- | ----------------------------- |
+| logger.level   | string | info          | REPORT_MANAGER_LOGGER_LEVEL   |
+| logger.verbose | string | false         | REPORT_MANAGER_LOGGER_VERBOSE |
+
+</details>
+
 ## :computer: Development
 
 You will need to have [NodeJS](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/) installed in your computer.
