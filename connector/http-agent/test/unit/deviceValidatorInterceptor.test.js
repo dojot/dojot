@@ -38,17 +38,39 @@ describe('ScopedDIInterceptor', () => {
     expect(next.mock.calls[0][0]).toEqual(undefined);
   });
 
-  it('should return an error when device is disabled', async () => {
+  it('should return a conflict http error when device is disabled', async () => {
     mockDeviceManagerSr.getDevice.mockReturnValue({ disabled: true });
 
     const next = jest.fn();
-
     const req = { body: { tenant: 'test', deviceId: 'abc123' } };
+    const res = {
+      status: (code) => {
+        res.code = code;
+        return res;
+      },
+      json: jest.fn(),
+    };
+    await interceptor.middleware(req, res, next);
 
-    await interceptor.middleware(req, {}, next);
+    expect(res.code).toEqual(409);
+    expect(res.json.mock.calls[0][0]).toEqual({ error: 'Device abc123 is disabled. The message will be discarded.' });
+  });
 
-    expect(next).toHaveBeenCalled();
+  it('should return an 424 http error when getDevice throws an exception', async () => {
+    mockDeviceManagerSr.getDevice.mockRejectedValueOnce({ message: 'error.message' });
 
-    expect(next.mock.calls[0][0]).toEqual('Device abc123 is disabled. The message will be discarded.');
+    const next = jest.fn();
+    const req = { body: { tenant: 'test', deviceId: 'abc123' } };
+    const res = {
+      status: (code) => {
+        res.code = code;
+        return res;
+      },
+      json: jest.fn(),
+    };
+    await interceptor.middleware(req, res, next);
+
+    expect(res.code).toEqual(424);
+    expect(res.json.mock.calls[0][0]).toEqual({ error: 'error.message' });
   });
 });

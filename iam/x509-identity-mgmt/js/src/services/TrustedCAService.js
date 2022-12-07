@@ -174,7 +174,7 @@ class TrustedCAService {
     const { caFingerprint } = caCertRecord;
     const { tenant } = this;
 
-    const ff = this.parseCertCndtFlds({ tenant, caFingerprint, autoRegistered: false });
+    const ff = this.parseCertCndtFlds({ tenant: tenant.id, caFingerprint, autoRegistered: false });
     const certCount = await this.CertificateModel.countDocuments(ff);
     if (certCount > 0) {
       throw this.error.BadRequest('There are certificates dependent on the CA to be removed, '
@@ -183,7 +183,11 @@ class TrustedCAService {
     }
 
     // When we start using MongoDB >= 4.4 we can use transactions here...
-    await this.CertificateModel.deleteMany({ tenant, caFingerprint, autoRegistered: true })
+    await this.CertificateModel.deleteMany({
+      tenant: tenant.id,
+      caFingerprint,
+      autoRegistered: true,
+    })
       .maxTimeMS(this.queryMaxTimeMS)
       .exec();
 
