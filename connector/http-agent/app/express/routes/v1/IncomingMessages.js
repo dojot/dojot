@@ -52,7 +52,7 @@ module.exports = ({ mountPoint, producerMessages }) => [
               res.status(HttpStatus.NO_CONTENT).send();
             } catch (e) {
               logger.error('incoming-messages.post:', e);
-              res.status(HttpStatus.BAD_REQUEST).json({
+              res.status(HttpStatus.StatusCodes.FAILED_DEPENDENCY).json({
                 error: e.message,
               });
             }
@@ -78,7 +78,7 @@ module.exports = ({ mountPoint, producerMessages }) => [
               const { body } = req;
               const errors = {};
 
-              body.forEach(async (message, index) => {
+              const payloadsPromises = body.map(async (message, index) => {
                 try {
                   await producerMessages.send(
                     generateDeviceDataMessage(
@@ -94,6 +94,8 @@ module.exports = ({ mountPoint, producerMessages }) => [
                 }
               });
 
+              await Promise.all(payloadsPromises);
+
               if (Object.keys(errors).length) {
                 throw new Error(JSON.stringify(errors));
               }
@@ -101,7 +103,7 @@ module.exports = ({ mountPoint, producerMessages }) => [
               res.status(HttpStatus.NO_CONTENT).send();
             } catch (e) {
               logger.error('incoming-messages.post:', e);
-              res.status(HttpStatus.BAD_REQUEST).json({
+              res.status(HttpStatus.StatusCodes.FAILED_DEPENDENCY).json({
                 error: JSON.parse(e.message),
               });
             }

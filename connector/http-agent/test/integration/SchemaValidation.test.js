@@ -114,7 +114,7 @@ describe('HTTPS - Schema validation for single messages', () => {
       .ca(ca)
       .then((response) => {
         expect(response.body).toEqual({
-          error: 'An unexpected error has occurred.',
+          error: 'Device abc123 is disabled. The message will be discarded.',
         });
       });
   });

@@ -1,3 +1,4 @@
+/* eslint-disable jest/expect-expect */
 /** @format */
 
 const fs = require('fs');
@@ -91,7 +92,10 @@ const mockProducerMessagesSend = jest.fn();
 const mockProducerMessages = {
   send: mockProducerMessagesSend,
 };
-jest.mock('../../app/kafka/ProducerMessages', () => mockProducerMessages);
+
+jest.mock('../../app/kafka/ProducerMessages', () => ({
+  send: mockProducerMessagesSend,
+}));
 
 const mockgetDevice = jest.fn();
 const mockDeviceManagerService = {
@@ -146,12 +150,7 @@ describe('HTTPS', () => {
           .cert(cert)
           .ca(ca)
           .expect('Content-Type', /json/)
-          .expect(500)
-          .then((response) => {
-            expect(response.body).toStrictEqual({
-              error: 'An unexpected error has occurred.',
-            });
-          });
+          .expect(409);
       });
 
       it('should successfully execute the request with tenant and deviceId from redis', async () => {
@@ -369,6 +368,33 @@ describe('HTTPS', () => {
               },
             },
           );
+        });
+    });
+
+    it('should return a http error when unable to publish payload', async () => {
+      mockProducerMessagesSend.mockRejectedValueOnce(new Error('publish error'));
+      await requestHttps(app)
+        .post(urlCreateMany)
+        .set('Content-Type', 'application/json')
+        .send([
+          {
+            ts: '2021-07-12T09:31:01.683000Z',
+            data: {
+              temperature: 25.79,
+            },
+          },
+          {
+            ts: '2021-07-12T10:10:01.683000Z',
+            data: {
+              temperature: 25.79,
+            },
+          },
+        ])
+        .key(keyCN)
+        .cert(certCN)
+        .ca(ca)
+        .then((response) => {
+          expect(response.statusCode).toStrictEqual(424);
         });
     });
   });
