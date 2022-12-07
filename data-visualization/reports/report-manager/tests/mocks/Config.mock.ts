@@ -48,8 +48,8 @@ export const ConfigMock = {
         'detect.kubernetes': false,
       },
       logger: {
-        level: 'debug',
-        verbose: true,
+        level: 'info',
+        verbose: false,
       },
     })
   },

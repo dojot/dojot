@@ -114,7 +114,7 @@ These parameters are passed directly to the SDK ServiceStateManager. Check the [
 
 | Key            | Type   | Default Value | Env Var                       |
 | -------------- | ------ | ------------- | ----------------------------- |
-| logger.level   | string | debug         | REPORT_MANAGER_LOGGER_LEVEL   |
+| logger.level   | string | info          | REPORT_MANAGER_LOGGER_LEVEL   |
 | logger.verbose | string | false         | REPORT_MANAGER_LOGGER_VERBOSE |
 
 </details>
