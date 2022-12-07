@@ -20,10 +20,7 @@ export abstract class ReportValidation {
   }
 
   static delete(): Schema {
-    return Joi.object({
-      params: Joi.object({
-        id: Joi.string().required(),
-      }).required(),
-    })
+    const params = Joi.object({ id: Joi.string().required() }).required()
+    return Joi.object({ params })
   }
 }

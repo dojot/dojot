@@ -12,7 +12,7 @@ describe('PrismaErrors.constants', () => {
   })
 
   it('should all values have the letter P followed by four numbers', () => {
-    const regex = new RegExp('^P[0-9]{4}$')
+    const regex = /^P\d{4}$/
 
     const allValuesAreValid = Object.values(PRISMA_ERRORS).every((value) =>
       value.match(regex),

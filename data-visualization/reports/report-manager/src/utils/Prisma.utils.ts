@@ -16,9 +16,10 @@ export class PrismaUtils {
   deployMigrations(databaseUrl: string) {
     this.logger.debug('deployMigrations: deploying migrations', {})
 
-    execSync('yarn prisma migrate deploy', {
-      env: { ...process.env, DATABASE_URL: databaseUrl },
-    })
+    execSync(
+      'yarn prisma migrate deploy', // NOSONAR
+      { env: { ...process.env, DATABASE_URL: databaseUrl } },
+    )
 
     this.logger.debug('deployMigrations: migrations deployed successfully', {})
   }
@@ -26,9 +27,10 @@ export class PrismaUtils {
   seedDatabase(databaseUrl: string) {
     this.logger.debug('seedDatabase: seeding database', {})
 
-    execSync('yarn prisma db seed', {
-      env: { ...process.env, DATABASE_URL: databaseUrl },
-    })
+    execSync(
+      'yarn prisma db seed', // NOSONAR
+      { env: { ...process.env, DATABASE_URL: databaseUrl } },
+    )
 
     this.logger.debug('seedDatabase: seeds ran successfully', {})
   }
