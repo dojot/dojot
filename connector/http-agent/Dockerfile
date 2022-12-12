@@ -31,7 +31,7 @@ COPY app ./app
 COPY config ./config
 COPY index.js ./index.js
 
-FROM node:16.17.1-alpine3.15
+FROM node:16.17.1-alpine
 
 WORKDIR /opt/http-agent
 
