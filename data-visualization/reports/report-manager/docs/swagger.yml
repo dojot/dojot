@@ -1,0 +1,671 @@
+openapi: 3.0.1
+info:
+  title: Report Manager
+  version: 1.0.0
+  description: API responsible for creating reports.
+  contact:
+    name: View on GitHub
+    url: https://github.com/dojot/dojot/tree/development/data-visualization/reports/report-manager
+servers:
+  - url: '{url}'
+    description: Default Server
+    variables:
+      url:
+        default: http://localhost:8000/report-manager
+tags:
+  - name: Devices
+    description: Device reports
+  - name: Reports
+    description: Reports
+paths:
+  /devices:
+    post:
+      tags:
+        - Devices
+      summary: Create a report with device data.
+      parameters:
+        - in: header
+          name: lang
+          description: Language to generate the report
+          schema:
+            $ref: '#/components/schemas/Locales'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeviceReport'
+            example:
+              name: Report Name
+              format: pdf
+              singleReportFile: true
+              initialDate: '2022-09-01T00:00:00Z'
+              finalDate: '2022-09-10T00:00:00Z'
+              devices:
+                - id: a1b2c3
+                  label: Device 1
+                  attrs:
+                    - id: 1
+                      label: Attr_1
+                      type: dynamic
+                      valueType: float
+                    - id: 2
+                      label: Attr_2
+                      type: dynamic
+                      valueType: json
+                    - id: 3
+                      label: Attr_3
+                      type: dynamic
+                      valueType: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportCreated'
+              example:
+                id: eef1aa04-daba-411a-b266-23e618938dd2
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              example:
+                type: VALIDATION
+                message: Bad request
+                details:
+                  - type: name.empty
+                    message: Required field
+                    path:
+                      - body
+                      - name
+                    context:
+                      key: name
+                      label: name
+                      value: ''
+                  - type: format.empty
+                    message: Required field
+                    path:
+                      - body
+                      - format
+                    context:
+                      key: format
+                      label: format
+                      value: ''
+                  - type: devices.empty
+                    message: Required field
+                    path:
+                      - body
+                      - devices
+                    context:
+                      key: devices
+                      label: devices
+                      value: null
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              example:
+                error: Internal server error
+  /reports:
+    get:
+      tags:
+        - Reports
+      summary: Get all reports paginated
+      parameters:
+        - in: query
+          name: name
+          description: Filter reports by name (case insensitive)
+          example: Report Name
+          schema:
+            $ref: '#/components/schemas/ReportNameQueryParam'
+        - in: query
+          name: page
+          description: Page number (starting from 1)
+          example: 1
+          schema:
+            $ref: '#/components/schemas/PageNumberQueryParam'
+        - in: query
+          name: pageSize
+          description: Page size
+          example: 10
+          schema:
+            $ref: '#/components/schemas/PageSizeQueryParam'
+      responses:
+        '200':
+          description: Recovered data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindManyReports'
+              example:
+                reports:
+                  - id: eef1aa04-daba-411a-b266-23e618938dd2
+                    typeId: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                    format: csv
+                    name: Report Name
+                    initialDate: '2022-09-01T00:00:00Z'
+                    finalDate: '2022-09-10T00:00:00Z'
+                    params:
+                      - id: a1b2c3
+                        label: Device 1
+                        attrs:
+                          - id: 1
+                            label: Attr_1
+                            type: dynamic
+                            valueType: float
+                    createdAt: '2022-09-10T00:00:00Z'
+                    updatedAt: '2022-09-10T00:00:00Z'
+                    file:
+                      id: 0462c0f6-6af0-416e-bade-3b51cfa0d9e2
+                      reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                      path: /reports/eef1aa04-daba-411a-b266-23e618938dd2.csv
+                      mimeType: application/octet-stream
+                      filename: eef1aa04-daba-411a-b266-23e618938dd2.csv
+                      fileSizeKb: 0.1884765625
+                      expiresAt: null
+                      createdAt: '2022-09-01T00:00:00Z'
+                      updatedAt: '2022-09-01T00:00:00Z'
+                    type:
+                      id: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                      identifier: DEVICES
+                      name: Devices
+                      createdAt: '2022-09-01T00:00:00Z'
+                      updatedAt: '2022-09-01T00:00:00Z'
+                    attempts:
+                      - id: 2bc29232-190a-45a9-8d64-49c1928bc4dd
+                        reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                        error: null
+                        failedAt: null
+                        canceledAt: null
+                        finishedAt: '2022-10-05T15:18:01.556Z'
+                        createdAt: '2022-10-05T15:18:01.458Z'
+                        updatedAt: '2022-10-05T15:18:01.560Z'
+                pagination:
+                  total: 2
+                  page: 1
+                  pageSize: 10
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              example:
+                error: Internal server error
+  /reports/{reportId}:
+    get:
+      tags:
+        - Reports
+      summary: Get a single report
+      parameters:
+        - in: path
+          name: reportId
+          description: Report ID
+          required: true
+          example: eef1aa04-daba-411a-b266-23e618938dd2
+          schema:
+            $ref: '#/components/schemas/ReportIdPathParam'
+      responses:
+        '200':
+          description: Recovered data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindReportById'
+              example:
+                id: eef1aa04-daba-411a-b266-23e618938dd2
+                typeId: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                format: csv
+                name: Report Name
+                initialDate: '2022-09-01T00:00:00Z'
+                finalDate: '2022-09-10T00:00:00Z'
+                params:
+                  - id: a1b2c3
+                    label: Device 1
+                    attrs:
+                      - id: 1
+                        label: Attr_1
+                        type: dynamic
+                        valueType: float
+                createdAt: '2022-09-10T00:00:00Z'
+                updatedAt: '2022-09-10T00:00:00Z'
+                file:
+                  id: 0462c0f6-6af0-416e-bade-3b51cfa0d9e2
+                  reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                  path: /reports/eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  mimeType: application/octet-stream
+                  filename: eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  fileSizeKb: 0.1884765625
+                  expiresAt: null
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                type:
+                  id: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                  identifier: DEVICES
+                  name: Devices
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                attempts:
+                  - id: 2bc29232-190a-45a9-8d64-49c1928bc4dd
+                    reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                    error: null
+                    failedAt: null
+                    canceledAt: null
+                    finishedAt: '2022-10-05T15:18:01.556Z'
+                    createdAt: '2022-10-05T15:18:01.458Z'
+                    updatedAt: '2022-10-05T15:18:01.560Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              example:
+                message: Report not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              example:
+                error: Internal server error
+    delete:
+      tags:
+        - Reports
+      summary: Delete a report by id
+      parameters:
+        - in: path
+          name: reportId
+          description: Report ID
+          required: true
+          example: eef1aa04-daba-411a-b266-23e618938dd2
+          schema:
+            $ref: '#/components/schemas/ReportIdPathParam'
+      responses:
+        '200':
+          description: Deleted report data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteReport'
+              example:
+                id: eef1aa04-daba-411a-b266-23e618938dd2
+                typeId: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                format: csv
+                name: Report Name
+                initialDate: '2022-09-01T00:00:00Z'
+                finalDate: '2022-09-10T00:00:00Z'
+                params:
+                  - id: a1b2c3
+                    label: Device 1
+                    attrs:
+                      - id: 1
+                        label: Attr_1
+                        type: dynamic
+                        valueType: float
+                createdAt: '2022-09-10T00:00:00Z'
+                updatedAt: '2022-09-10T00:00:00Z'
+                file:
+                  id: 0462c0f6-6af0-416e-bade-3b51cfa0d9e2
+                  reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                  path: /reports/eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  mimeType: application/octet-stream
+                  filename: eef1aa04-daba-411a-b266-23e618938dd2.csv
+                  fileSizeKb: 0.1884765625
+                  expiresAt: null
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                type:
+                  id: ed323e6b-c21c-4f1d-856e-7a2807a6970f
+                  identifier: DEVICES
+                  name: Devices
+                  createdAt: '2022-09-01T00:00:00Z'
+                  updatedAt: '2022-09-01T00:00:00Z'
+                attempts:
+                  - id: 2bc29232-190a-45a9-8d64-49c1928bc4dd
+                    reportId: eef1aa04-daba-411a-b266-23e618938dd2
+                    error: null
+                    failedAt: null
+                    canceledAt: null
+                    finishedAt: '2022-10-05T15:18:01.556Z'
+                    createdAt: '2022-10-05T15:18:01.458Z'
+                    updatedAt: '2022-10-05T15:18:01.560Z'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+              example:
+                error: Unauthorized access
+                detail: jwt expired
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              example:
+                message: Report not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              example:
+                error: Internal server error
+components:
+  schemas:
+    Locales:
+      type: string
+      enum:
+        - pt-BR
+        - en-US
+    ReportFormats:
+      type: string
+      enum:
+        - pdf
+        - csv
+    DeviceParams:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          label:
+            type: string
+          attrs:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: number
+                label:
+                  type: string
+                type:
+                  type: string
+                valueType:
+                  type: string
+    CreateDeviceReport:
+      type: object
+      properties:
+        name:
+          type: string
+        format:
+          $ref: '#/components/schemas/ReportFormats'
+        singleReportFile:
+          type: boolean
+        initialDate:
+          type: string
+          format: ISO
+        finalDate:
+          type: string
+          format: ISO
+        devices:
+          $ref: '#/components/schemas/DeviceParams'
+    ReportCreated:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+    ValidationError:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - VALIDATION
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+              path:
+                type: array
+                items:
+                  type: string
+              context:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  label:
+                    type: string
+                  value:
+                    type: string
+                    nullable: true
+    UnauthorizedError:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+    InternalServerError:
+      type: object
+      properties:
+        error:
+          type: string
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+    ReportNameQueryParam:
+      type: string
+    PageNumberQueryParam:
+      type: number
+      minimum: 1
+    PageSizeQueryParam:
+      type: number
+    ReportIdPathParam:
+      type: string
+      format: UUID
+    ReportFile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        reportId:
+          type: string
+          format: UUID
+        path:
+          type: string
+        mimeType:
+          type: string
+        filename:
+          type: string
+        fileSizeKb:
+          type: number
+        expiresAt:
+          type: string
+          format: ISO
+          nullable: true
+        createdAt:
+          type: string
+          format: ISO
+        updatedAt:
+          type: string
+          format: ISO
+    ReportType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        name:
+          type: string
+        identifier:
+          type: string
+          enum:
+            - DEVICES
+        createdAt:
+          type: string
+          format: ISO
+        updatedAt:
+          type: string
+          format: ISO
+    ReportAttempt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        reportId:
+          type: string
+          format: UUID
+        error:
+          type: object
+          nullable: true
+        finishedAt:
+          type: string
+          format: ISO
+          nullable: true
+        failedAt:
+          type: string
+          format: ISO
+          nullable: true
+        canceledAt:
+          type: string
+          format: ISO
+          nullable: true
+        createdAt:
+          type: string
+          format: ISO
+        updatedAt:
+          type: string
+          format: ISO
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        typeId:
+          type: string
+          format: UUID
+        format:
+          $ref: '#/components/schemas/ReportFormats'
+        name:
+          type: string
+        initialDate:
+          type: string
+          format: ISO
+        finalDate:
+          type: string
+          format: ISO
+        params:
+          $ref: '#/components/schemas/DeviceParams'
+        createdAt:
+          type: string
+          format: ISO
+        updatedAt:
+          type: string
+          format: ISO
+    FindManyReports:
+      type: object
+      properties:
+        reports:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Report'
+              - type: object
+                properties:
+                  file:
+                    nullable: true
+                    allOf:
+                      - $ref: '#/components/schemas/ReportFile'
+                  type:
+                    $ref: '#/components/schemas/ReportType'
+                  attempts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportAttempt'
+        pagination:
+          type: object
+          properties:
+            total:
+              type: number
+              minimum: 0
+            page:
+              type: number
+              minimum: 1
+              nullable: true
+            pageSize:
+              type: number
+              nullable: true
+    FindReportById:
+      allOf:
+        - $ref: '#/components/schemas/Report'
+        - type: object
+          properties:
+            file:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/ReportFile'
+            type:
+              $ref: '#/components/schemas/ReportType'
+            attempts:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReportAttempt'
+    DeleteReport:
+      allOf:
+        - $ref: '#/components/schemas/Report'
+        - type: object
+          properties:
+            file:
+              nullable: true
+              allOf:
+                - $ref: '#/components/schemas/ReportFile'
+            type:
+              $ref: '#/components/schemas/ReportType'
+            attempts:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReportAttempt'

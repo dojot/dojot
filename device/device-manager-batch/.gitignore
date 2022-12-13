@@ -1,0 +1,20 @@
+# IDE
+.idea/*
+
+# Build
+build
+
+# Dependencies
+node_modules
+
+# Tests
+coverage
+
+# Environment
+.env
+
+# Markdown
+TODO.md
+
+# Editor Config
+.editorconfig

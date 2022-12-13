@@ -10,7 +10,7 @@ class TrustedCANotifier {
   }) {
     Object.defineProperty(this, 'tenant', { value: tenant });
     Object.defineProperty(this, 'xRequestId', { value: xRequestId });
-    Object.defineProperty(this, 'topic', { value: (tenant) ? `${tenant}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });
+    Object.defineProperty(this, 'topic', { value: (tenant) ? `${tenant.id}.${kafkaTopicSuffix}` : `${kafkaTopicSuffix}` });
     Object.defineProperty(this, 'notificationEngine', { value: notificationEngine });
     Object.defineProperty(this, 'logger', { value: logger });
   }
@@ -38,12 +38,11 @@ class TrustedCANotifier {
       topic: this.topic,
       eventType,
       eventData,
-      partitionKey: `${this.tenant}:${caCertRecord.caFingerprint}`,
+      partitionKey: `${this.tenant.id}:${caCertRecord.caFingerprint}`,
       xRequestId: this.xRequestId,
     });
 
-    this.logger.info(`Notification issued: '${eventType}'. `
-      + `CA Certificate '${caCertRecord.caFingerprint}'.`);
+    this.logger.info(`Notification issued: '${eventType}'.`);
   }
 
   /**

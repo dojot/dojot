@@ -1,6 +1,6 @@
 const { Logger } = require('@dojot/microservice-sdk');
 
-const logger = new Logger('v2k:mqtt-utils');
+const logger = new Logger('v2k-bridge');
 
 /**
  * A module with helper functions
@@ -68,4 +68,12 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
  */
 const toBoolean = (value) => value && (value.toString().toLowerCase().trim() === 'true');
 
-module.exports = { generateDojotDeviceDataMessage, toBoolean };
+/**
+ * Kills the program process.
+ * @function killApplication
+ */
+const killApplication = () => process.kill(process.pid);
+
+module.exports = {
+  generateDojotDeviceDataMessage, toBoolean, killApplication,
+};

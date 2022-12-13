@@ -29,6 +29,9 @@ class DeviceAuthService {
    */
   async getAuthenticationStatus(tenantId, username, password) {
     const tenant = this.tenantManager.findTenant(tenantId);
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
     const token = tenant.session.getTokenSet().access_token;
 
     try {

@@ -29,6 +29,13 @@ const mockConfig = {
     qos: 1,
     topic: 'testTopic',
   },
+
+  Logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  },
 };
 
 const mockFs = {
@@ -55,18 +62,22 @@ const mockSdk = {
   Kafka: jest.fn(() => ({
     Producer: jest.fn(),
   })),
-  Logger: jest.fn(() => ({
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  })),
   ServiceStateManager: {
     registerService: jest.fn(),
     signalReady: jest.fn(),
     signalNotReady: jest.fn(),
   },
+  Logger: jest.fn(() => mockConfig.Logger),
 };
+
+const mockgetDevice = jest.fn();
+const mockDeviceManagerService = {
+  getDevice: mockgetDevice,
+};
+jest.mock(
+  '../../app/axios/DeviceManagerService.js',
+  () => mockDeviceManagerService,
+);
 
 /**
  * Manual mocks
@@ -109,11 +120,17 @@ describe('MQTTClient', () => {
         key: 'keyValue',
       };
 
-      const client = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager);
+      const client = new MQTTClient(
+        mockAgentMessenger,
+        mockSdk.ServiceStateManager,
+        mockConfig.Logger,
+        mockDeviceManagerService,
+      );
 
       expect(client.logger).toBeDefined();
       expect(client.agentMessenger).toBeDefined();
       expect(client.serviceStateManager).toBeDefined();
+      expect(client.deviceManagerService).toBeDefined();
       expect(client.config).toEqual(mockConfig);
       expect(client.isConnected).toBeFalsy();
       expect(client.mqttOptions).toEqual({ ...mockConfig.mqtt, ...certificates });
@@ -130,7 +147,12 @@ describe('MQTTClient', () => {
     let mqttClient;
 
     beforeEach(() => {
-      mqttClient = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager);
+      mqttClient = new MQTTClient(
+        mockAgentMessenger,
+        mockSdk.ServiceStateManager,
+        mockConfig.Logger,
+        mockDeviceManagerService,
+      );
     });
 
     it('should successfully initialize the client - MQTTClient not connected', () => {
@@ -190,7 +212,12 @@ describe('MQTTClient', () => {
     let mqttClient;
 
     beforeEach(() => {
-      mqttClient = new MQTTClient(mockAgentMessenger, mockSdk.ServiceStateManager);
+      mqttClient = new MQTTClient(
+        mockAgentMessenger,
+        mockSdk.ServiceStateManager,
+        mockConfig.Logger,
+        mockDeviceManagerService,
+      );
       mqttClient.init();
       jest.clearAllMocks();
     });
@@ -204,6 +231,14 @@ describe('MQTTClient', () => {
 
         expect(mqttClient.isConnected).toBeTruthy();
         expect(subscribeSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('onReconnect', () => {
+      it('should successfully reconnect to the broker', () => {
+        mqttClient.onReconnect();
+
+        expect(mqttClient.isConnected).toBeFalsy();
       });
     });
 
@@ -289,11 +324,47 @@ describe('MQTTClient', () => {
     });
 
     describe('asyncQueueWorker', () => {
-      it('should send a message', () => {
+      it('should send a message', async () => {
         const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
         const { topic, message } = fakeMessage;
-        mqttClient.asyncQueueWorker(fakeMessage);
+        mqttClient.isDeviceDisabled = jest.fn();
+        mqttClient.isDeviceDisabled.mockReturnValue(Promise.resolve(false));
+        await mqttClient.asyncQueueWorker(fakeMessage);
         expect(mockAgentMessenger.sendMessage).toHaveBeenCalledWith(topic, message);
+      });
+
+      it('shouldnt send a message', async () => {
+        const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
+        mqttClient.isDeviceDisabled = jest.fn();
+        mqttClient.isDeviceDisabled.mockReturnValue(Promise.resolve(true));
+        await mqttClient.asyncQueueWorker(fakeMessage);
+        expect(mockAgentMessenger.sendMessage).toHaveBeenCalledTimes(0);
+      });
+
+      it('should throw a error, when the request failed', async () => {
+        const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
+        mqttClient.isDeviceDisabled = jest.fn();
+        mqttClient.isDeviceDisabled.mockReturnValue(Promise.reject(new Error('Error')));
+        await mqttClient.asyncQueueWorker(fakeMessage);
+        expect(mockAgentMessenger.sendMessage).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    describe('isDeviceDisabled', () => {
+      it('should return disabled is true', async () => {
+        const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
+        const { topic, message } = fakeMessage;
+        mockDeviceManagerService.getDevice.mockReturnValue({ disabled: true });
+        const result = await mqttClient.isDeviceDisabled(topic, message);
+        expect(result === true);
+      });
+
+      it('should return disabled is false', async () => {
+        const fakeMessage = { topic: 'topic', message: '{ "name":"John", "age":30, "city":"New York"}' };
+        const { topic, message } = fakeMessage;
+        mockDeviceManagerService.getDevice.mockReturnValue({ disabled: false });
+        const result = await mqttClient.isDeviceDisabled(topic, message);
+        expect(result === false);
       });
     });
 
