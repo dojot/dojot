@@ -27,6 +27,7 @@
     "pgdata",
     "postgres",
     "postgresql",
+    "reportmanager",
     "stringifier",
     "websockets"
   ]

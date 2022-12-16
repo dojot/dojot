@@ -13,14 +13,14 @@ import { KafkaConsumer, TenantManager } from 'src/kafka'
 import { App } from './app'
 
 ConfigManager.loadSettings(
-  'REPORT_MANAGER',
+  'REPORTMANAGER',
   'default.conf',
   './configs',
   './dist',
 )
 
 const config: Config = ConfigManager.getConfig(
-  'REPORT_MANAGER',
+  'REPORTMANAGER',
   './configs',
   './dist',
 )
