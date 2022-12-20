@@ -13,14 +13,14 @@ import { App } from './app';
 import { PrismaUtils } from './utils/Prisma.utils';
 
 ConfigManager.loadSettings(
-  'DEVICE_MANAGER_BATCH',
+  'DEVICEMANAGERBATCH',
   'default.conf',
   './config',
   './build',
 );
 
 const config: AppConfig = ConfigManager.getConfig(
-  'DEVICE_MANAGER_BATCH',
+  'DEVICEMANAGERBATCH',
   './config',
   './build',
 );
