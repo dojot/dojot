@@ -107,11 +107,10 @@ describe('Report.service', () => {
     })
 
     it('should return a falsy value when handle a prisma known error', async () => {
-      const prismaError = new PrismaClientKnownRequestError(
-        'Prisma Error',
-        PRISMA_ERRORS.DEPENDS_ON_NOT_FOUND_RECORD,
-        'x.x.x',
-      )
+      const prismaError = new PrismaClientKnownRequestError('Prisma Error', {
+        code: PRISMA_ERRORS.DEPENDS_ON_NOT_FOUND_RECORD,
+        clientVersion: 'x.x.x',
+      })
 
       const FakePrismaClient = PrismaClientMock.new()
       FakePrismaClient.report.delete.mockRejectedValue(prismaError)
