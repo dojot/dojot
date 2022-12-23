@@ -42,7 +42,7 @@
     "http-errors": "^1.8.0",
     "http-terminator": "^3.0.3",
     "js-yaml": "^4.1.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "jwt-decode": "^3.1.2",
     "jwt-encode": "^1.0.1",
     "lodash.camelcase": "^4.3.0",
