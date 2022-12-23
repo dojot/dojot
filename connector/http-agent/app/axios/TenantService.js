@@ -43,6 +43,10 @@ module.exports = class TenantService {
 
     // Waits for all authentications to complete
     this.tenants = await Promise.all(tenantPromises);
+    this.logger.debug(`All tenants have been loaded`);
+    for (const tenant1 of this.tenants) {
+      this.logger.debug(tenant1.id);
+    }
   }
 
   /**
@@ -66,6 +70,7 @@ module.exports = class TenantService {
    * } tenant tenant object
    */
   async create(tenant) {
+    this.logger.debug(`Tenant to be created: ${tenant.id}`);
     const createdTenant = this.tenants.find((item) => item.id === tenant.id);
     if (!createdTenant) {
       const keycloakSession = new KeycloakClientSession(
@@ -94,14 +99,14 @@ module.exports = class TenantService {
    * @param {string} tenantId tenant id
    */
   async remove(tenantId) {
-    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId);
+    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId.id);
     if (removedTenant) {
       if (removedTenant.session) {
-        this.logger.debug(`${tenantId} tenant session closed`);
+        this.logger.debug(`${tenantId.id} tenant session closed`);
         removedTenant.session.close();
       }
-      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId);
-      this.logger.debug(`Tenant ${tenantId} was deleted`);
+      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId.id);
+      this.logger.debug(`Tenant ${tenantId.id} was deleted`);
     }
   }
 };
