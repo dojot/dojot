@@ -43,12 +43,12 @@ export class TemplatesServices {
       const templates_not_found_batch: Array<TemplatesNotFoundBatch> = [];
       const templates_associated_devices_batch: Array<TemplatesAssociatedDevicesBatch> =
         [];
-      const devices_associated_templates_batch: Array<DeviceResultBatch> = [];
-      const aux_ids_device_found_associated: Array<string> = [];
 
       let template_to_removed;
       const remove_templates_all_promisses = dto.templates.map(
         async (template_id) => {
+          const devices_associated_templates_batch: Array<DeviceResultBatch> = [];
+
           /**
            * Assert template exists
            */
@@ -76,17 +76,10 @@ export class TemplatesServices {
               if (qt_associated_with_devices >= 1) {
                 template_to_removed[0].device_template.forEach(
                   (devices: any) => {
-                    if (
-                      !aux_ids_device_found_associated.includes(
-                        devices.devices.id,
-                      )
-                    ) {
-                      devices_associated_templates_batch.push({
-                        id: devices.devices.id,
-                        label: devices.devices.label,
-                      });
-                      aux_ids_device_found_associated.push(devices.devices.id);
-                    }
+                    devices_associated_templates_batch.push({
+                      id: devices.devices.id,
+                      label: devices.devices.label,
+                    });
                   },
                 );
                 templates_associated_devices_batch.push({
