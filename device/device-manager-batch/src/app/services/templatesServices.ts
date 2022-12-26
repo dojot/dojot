@@ -47,7 +47,8 @@ export class TemplatesServices {
       let template_to_removed;
       const remove_templates_all_promisses = dto.templates.map(
         async (template_id) => {
-          const devices_associated_templates_batch: Array<DeviceResultBatch> = [];
+          const devices_associated_templates_batch: Array<DeviceResultBatch> =
+            [];
 
           /**
            * Assert template exists
