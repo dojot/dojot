@@ -33,13 +33,6 @@ jobs:
           yarn test:unit:ci
           yarn test:integration:ci
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          file: data-visualization/reports/report-manager/coverage/lcov.info # create when run unit tests
-          flags: report-manager # Flags allow you to isolate coverage reports for different tests
-          name: report-manager # Custom defined name for the upload
-
   docker-hub:
     needs: unit-test
     name: (data-visualization/reports/report-manager) Build and Publish image to DockerHub #  path to help identify in Status checks each job

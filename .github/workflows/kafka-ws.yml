@@ -37,15 +37,6 @@ jobs:
         npm run parser:compile
         npm run lint
         npm test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        # Created when 'npm test' was executed
-        file: subscription-engine/kafka-ws/coverage/lcov.info
-        # Flags allow you to isolate coverage reports for different tests
-        flags: kafkaWs
-        # Custom name for the upload
-        name: kafka-ws
 
   docker-hub:
     needs: unit-tests

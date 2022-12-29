@@ -37,15 +37,6 @@ jobs:
         npm run lint
         npm test
         npm run check-licenses
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        # Created when 'npm test' was executed
-        directory: iam/certificate-acl/coverage
-        # Flags allow you to isolate coverage reports for different tests
-        flags: certificateACL
-        # Custom name for the upload
-        name: certificate-acl
 
   docker-hub:
     needs: unit-tests
