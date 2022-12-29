@@ -38,14 +38,6 @@ jobs:
           npm run check-licenses
           npm test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          # Created when 'npm test' was executed
-          directory: iam/device-basic-authentication/coverage
-          flags: device-basic-authentication # Flags allow you to isolate coverage reports for different tests
-          name: device-basic-authentication # Custom defined name for the upload
-
   docker-hub:
     needs: unit-tests
     # Path to help identify each job in the status checks

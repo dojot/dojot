@@ -37,15 +37,6 @@ jobs:
         npm run lint
         npm run check-licenses
         npm run test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        # Created when 'npm test' was executed
-        directory: tools/cert-sidecar
-        # Flags allow you to isolate coverage reports for different tests
-        flags: certSidecar
-        # Custom name for the upload
-        name: cert-sidecar
 
   docker-hub:
     needs: unit-tests

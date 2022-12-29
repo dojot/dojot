@@ -41,13 +41,6 @@ jobs:
         cd connector/mqtt/locust
         coverage run -m pytest tests && coverage xml
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: connector/mqtt/locust/coverage.xml
-        flags: locust
-        name: locust
-
   docker-hub:
     needs: tests
     name: (connector/mqtt/locust) Build and Publish image to DockerHub
