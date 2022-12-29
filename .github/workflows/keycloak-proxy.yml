@@ -32,13 +32,6 @@ jobs:
           npm run check-licenses
           npm run test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          file: iam/keycloak-proxy/coverage/lcov.info # create when run npm test
-          flags: keycloak-proxy # Flags allow you to isolate coverage reports for different tests
-          name: keycloak-proxy # Custom defined name for the upload
-
   docker-hub:
     needs: unit-test
     name: (keycloak-proxy) Build and Publish image to DockerHub #  path to help identify in Status checks each job

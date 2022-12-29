@@ -34,12 +34,6 @@ jobs:
         npm run lint
         npm run check-licenses
         npm test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: connector/kafka2ftp/coverage/lcov.info # create when run npm test
-        flags: kafka2ftp # Flags allow you to isolate coverage reports for different tests
-        name: kafka2ftp # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests

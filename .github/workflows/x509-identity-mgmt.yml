@@ -32,12 +32,6 @@ jobs:
           npm run lint
           npm run check-licenses
           npm test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          file: iam/x509-identity-mgmt/js/coverage/lcov.info # Created when 'npm test' is executed
-          flags: x509IdentityMgmt # Flags allow you to isolate coverage reports for different tests
-          name: x509-identity-mgmt # Custom name for the upload
 
   docker-hub:
     needs: unit-tests

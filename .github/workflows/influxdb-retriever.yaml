@@ -34,12 +34,6 @@ jobs:
         npm run lint
         npm run check-licenses
         npm run test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        directory: storage/time-series/influxdb/retriever
-        flags: influxdbRetriever # Flags allow you to isolate coverage reports for different tests
-        name: influxdb-retriever # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests

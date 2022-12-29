@@ -33,13 +33,6 @@ jobs:
           npm run check-licenses
           npm test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
-        with:
-          file: connector/http-agent/test/coverage/lcov.info # create when run npm test
-          flags: http-agent # Flags allow you to isolate coverage reports for different tests
-          name: http-agent # Custom defined name for the upload
-
   docker-hub:
     needs: unit-test
     name: (connector/http-agent) Build and Publish image to DockerHUb #  path to help identify in Status checks each job
