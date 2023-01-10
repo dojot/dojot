@@ -97,10 +97,10 @@ class SyncLoader {
     const devices = await this.deviceService.getDevices(tenant);
 
     // eslint-disable-next-line no-restricted-syntax
-    for (const device of credentilsDevices) {
-      const targetDevice = devices.find((deviceObj) => deviceObj.id === device);
+    for (const credentilsDeviceId of credentilsDevices) {
+      const targetDevice = devices.find((deviceId) => deviceId === credentilsDeviceId);
       if (!targetDevice) {
-        await this.basicCredentials.remove(tenant.id, device);
+        await this.basicCredentials.remove(tenant.id, credentilsDeviceId);
       }
     }
   }
