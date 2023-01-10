@@ -163,6 +163,7 @@ describe('SyncLoader', () => {
   describe('loadDevices', () => {
     const fakedata1 = ['device1', 'device2'];
     const fakedata2 = ['device3', 'device4'];
+    const fakedata3 = { devices: [{ id: 'device5' }, { id: 'device6' }] };
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -187,6 +188,21 @@ describe('SyncLoader', () => {
       });
 
       expect(mockBasicCredentials.remove).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw an error when the format response is different', async () => {
+      expect.assertions(1);
+      mockBasicCredentials.findAllDevicesFromTenant.mockReturnValue(fakedata1);
+      mockDeviceService.getDevices.mockReturnValue(fakedata3);
+
+      try {
+        await syncLoader.loadDevices({
+          id: 'tenant1',
+        });
+      } catch (error) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(error).toBeDefined();
+      }
     });
   });
 });
