@@ -108,7 +108,9 @@ const serviceStateMock = {
     die: () => jest.fn(),
   })),
 };
-const columns = [
+
+// Mock FluxTableMeta in yours columns
+const deviceDataColumns = [
   createFluxTableColumn({
     label: '_time',
     dataType: 'string',
@@ -126,7 +128,89 @@ const columns = [
     get: (x) => x,
   }),
 ];
-const tableMeta = createFluxTableMetaData(columns);
+
+const attrDataColumns = [
+  createFluxTableColumn({
+    label: '_time',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_value',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 2,
+    get: (x) => x,
+  }),
+];
+
+const graphqlColumns = [
+  createFluxTableColumn({
+    label: '_field',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_measurement',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_time',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_value',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+];
+
+const queryColumns = [
+  createFluxTableColumn({
+    label: 'result',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: 'table',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_value',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+];
+
+let tableMeta = createFluxTableMetaData([]);
 
 const mockData = jest.fn();
 const mockQueryApi = jest.fn(() => ({
@@ -256,6 +340,8 @@ describe('Test Devices Routes', () => {
 
 
   test('Data from device in json - Test endpoint', (done) => {
+    tableMeta = createFluxTableMetaData(deviceDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -291,6 +377,8 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from device in csv - Test endpoint', (done) => {
+    tableMeta = createFluxTableMetaData(deviceDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -331,7 +419,9 @@ describe('Test Devices Routes', () => {
       });
   });
 
-  test.only('Data from attr on a device in json -  Test endpoint  1', (done) => {
+  test('Data from attr on a device in json -  Test endpoint  1', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -357,6 +447,8 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in csv -  Test endpoint  1', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -373,6 +465,8 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device -  More results then limit and page 2', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -403,6 +497,8 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in csv -  More results then limit and page 2', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -431,6 +527,8 @@ describe('Test Devices Routes', () => {
 
 
   test('Data from attr on a device -  Test endpoint 2', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -581,22 +679,26 @@ describe('Test Devices Routes', () => {
 
 
   test('Test graphQl endpoint - valid graphql query', (done) => {
-    mockData.mockReturnValueOnce([{
-      _field: 'dojot.temperature',
-      _measurement: 'RANDID1',
-      _time: '2021-06-17T20:00:00.000Z',
-      _value: '36.2',
-    }, {
-      _field: 'dojot.gps',
-      _measurement: 'RANDID1',
-      _time: '2021-06-17T20:30:00.000Z',
-      _value: '-18,-23',
-    }, {
-      _field: 'dojot.temperature',
-      _measurement: 'RANDID2',
-      _time: '2021-06-17T20:30:00.000Z',
-      _value: '42.1',
-    }]);
+    tableMeta = createFluxTableMetaData(graphqlColumns);
+
+    mockData.mockReturnValueOnce([
+      [
+        'dojot.temperature',
+        'RANDID1',
+        '2021-06-17T20:00:00.000Z',
+        '36.2',
+      ], [
+        'dojot.gps',
+        'RANDID1',
+        '2021-06-17T20:30:00.000Z',
+        '-18,-23',
+      ], [
+        'dojot.temperature',
+        'RANDID2',
+        '2021-06-17T20:30:00.000Z',
+        '42.1',
+      ],
+    ]);
 
     request(app)
       .get('/tss/v1/devices/graphql')
@@ -628,14 +730,15 @@ describe('Test Devices Routes', () => {
 
 
   test('Test graphQl endpoint - valid graphql query - 2', (done) => {
+    tableMeta = createFluxTableMetaData(graphqlColumns);
     expect.assertions(2);
     mockData.mockReturnValueOnce(
-      [{
-        _field: 'temperature',
-        _measurement: 'RANDID1',
-        _time: '2021-06-17T20:00:00.000Z',
-        _value: '36.2',
-      }],
+      [[
+        'temperature',
+        'RANDID1',
+        '2021-06-17T20:00:00.000Z',
+        '36.2',
+      ]],
     );
 
     request(app)
@@ -700,18 +803,11 @@ describe('Test Devices Routes', () => {
   });
 
   test('Test Generic Route - should return data in json', (done) => {
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -740,18 +836,11 @@ describe('Test Devices Routes', () => {
   });
 
   test('Test Generic Route - should return data in csv', (done) => {
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -815,18 +904,11 @@ describe('Test Devices Routes', () => {
   test('Test Flex Generic Route - should return data in json', (done) => {
     mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
     mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -857,18 +939,11 @@ describe('Test Devices Routes', () => {
   test('Test Flex Generic Route - should return data in csv', (done) => {
     mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
     mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 

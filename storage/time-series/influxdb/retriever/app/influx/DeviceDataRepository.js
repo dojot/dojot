@@ -309,7 +309,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push(o);
           },
@@ -381,7 +382,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(query, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push(o);
           },
