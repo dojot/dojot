@@ -6,6 +6,7 @@ const mockConfig = {
   graphql: { graphiql: true },
 };
 
+
 const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA4R9mBEIaygmSpF+4FStSpuM3ssiJmfclPuSjEa1SxK9IhBGq
 6ZPuLQxJ9twgA01mQaYxBcSib9ahoCS7j5hHvs4gcweh5F0xX5NCWZ12wUagXzW7
@@ -61,6 +62,11 @@ const {
   },
 } = jest.requireActual('@dojot/microservice-sdk');
 
+const {
+  createFluxTableColumn,
+  createFluxTableMetaData,
+} = jest.requireActual('@influxdata/influxdb-client');
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -102,17 +108,32 @@ const serviceStateMock = {
     die: () => jest.fn(),
   })),
 };
+const columns = [
+  createFluxTableColumn({
+    label: '_time',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: 'dojot.string',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 2,
+    get: (x) => x,
+  }),
+];
+const tableMeta = createFluxTableMetaData(columns);
 
 const mockData = jest.fn();
 const mockQueryApi = jest.fn(() => ({
   queryRows(fluxQuery, consumer) {
     const data = mockData();
     data.forEach((mockRow) => {
-      consumer.next(mockRow, {
-        toObject(row) {
-          return row;
-        },
-      });
+      consumer.next(mockRow, tableMeta);
     });
     consumer.complete();
   },
@@ -236,10 +257,7 @@ describe('Test Devices Routes', () => {
 
   test('Data from device in json - Test endpoint', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        'dojot.string': 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
 
     request(app)
@@ -274,11 +292,9 @@ describe('Test Devices Routes', () => {
 
   test('Data from device in csv - Test endpoint', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        'dojot.string': 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
+
     request(app)
       .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -315,15 +331,13 @@ describe('Test Devices Routes', () => {
       });
   });
 
-  test('Data from attr on a device in json -  Test endpoint  1', (done) => {
+  test.only('Data from attr on a device in json -  Test endpoint  1', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
+
     request(app)
-      .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .get('/tss/v1/devices/1234/attrs/string/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
       .then((response) => {
         expect(response.statusCode).toBe(200);
@@ -333,7 +347,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20&order=desc',
+              url: '/tss/v1/devices/1234/attrs/string/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20&order=desc',
             },
             next: null,
           },
@@ -344,10 +358,7 @@ describe('Test Devices Routes', () => {
 
   test('Data from attr on a device in csv -  Test endpoint  1', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
@@ -363,10 +374,7 @@ describe('Test Devices Routes', () => {
 
   test('Data from attr on a device -  More results then limit and page 2', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
@@ -396,10 +404,7 @@ describe('Test Devices Routes', () => {
 
   test('Data from attr on a device in csv -  More results then limit and page 2', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
@@ -427,10 +432,7 @@ describe('Test Devices Routes', () => {
 
   test('Data from attr on a device -  Test endpoint 2', (done) => {
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=0')
