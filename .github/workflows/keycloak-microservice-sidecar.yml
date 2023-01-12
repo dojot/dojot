@@ -32,13 +32,6 @@ jobs:
           npm run check-licenses
           npm run test
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          file: tools/keycloak-microservice-sidecar/coverage/lcov.info # create when run npm test
-          flags: keycloak-microservice-sidecar # Flags allow you to isolate coverage reports for different tests
-          name: keycloak-microservice-sidecar # Custom defined name for the upload
-
   docker-hub:
     needs: unit-test
     name: (keycloak-microservice-sidecar) Build and Publish image to DockerHub #  path to help identify in Status checks each job

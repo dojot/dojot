@@ -38,16 +38,6 @@ jobs:
         npm run eslint:lint
         npm run check-licenses
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        # Created when 'npm test' was executed
-        directory: device/device-manager-batch/coverage
-        # Flags allow you to isolate coverage reports for different tests
-        flags: device-manager-batch
-        # Custom name for the upload
-        name: device-manager-batch
-
   docker-hub:
     needs: unit-tests
     # Path to help identify each job in the status checks

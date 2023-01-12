@@ -34,12 +34,6 @@ jobs:
         npm run lint
         npm run check-licenses
         npm run test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        directory: compatibility/history-proxy
-        flags: historyProxy # Flags allow you to isolate coverage reports for different tests
-        name: history-proxy # Custom defined name for the upload
 
   docker-hub:
     needs: unit-tests

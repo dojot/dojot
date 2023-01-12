@@ -9,88 +9,88 @@ Click in the items below to expand. :point_down:
 <details>
   <summary>Server</summary>
 
-| Key         | Type    | Default Value | Env Var                    |
-| ----------- | ------- | ------------- | -------------------------- |
-| server.port | integer | 3791          | REPORT_MANAGER_SERVER_PORT |
+| Key         | Type    | Default Value | Env Var                   |
+| ----------- | ------- | ------------- | ------------------------- |
+| server.port | integer | 3791          | REPORTMANAGER_SERVER_PORT |
 
 </details>
 
 <details>
   <summary>App</summary>
 
-| Key                      | Type    | Default Value | Env Var                                 | Description                                                          |
-| ------------------------ | ------- | ------------- | --------------------------------------- | -------------------------------------------------------------------- |
-| app.report.expiration.ms | integer | 0             | REPORT_MANAGER_APP_REPORT_EXPIRATION_MS | Report file expiration in milliseconds. Use 0 to disable expiration. |
-| app.report.path          | string  | /reports      | REPORT_MANAGER_APP_REPORT_PATH          | Report file path. Don't put a slash at the end.                      |
+| Key                      | Type    | Default Value | Env Var                                | Description                                                          |
+| ------------------------ | ------- | ------------- | -------------------------------------- | -------------------------------------------------------------------- |
+| app.report.expiration.ms | integer | 0             | REPORTMANAGER_APP_REPORT_EXPIRATION_MS | Report file expiration in milliseconds. Use 0 to disable expiration. |
+| app.report.path          | string  | /reports      | REPORTMANAGER_APP_REPORT_PATH          | Report file path. Don't put a slash at the end.                      |
 
 </details>
 
 <details>
   <summary>Kafka</summary>
 
-| Key                                         | Type    | Default Value               | Env Var                                                    |
-| ------------------------------------------- | ------- | --------------------------- | ---------------------------------------------------------- |
-| consumer.client.id                          | string  | ${HOSTNAME:-report-manager} | REPORT_MANAGER_CONSUMER_CLIENT_ID                          |
-| consumer.group.id                           | string  | ${HOSTNAME:-report-manager} | REPORT_MANAGER_CONSUMER_GROUP_ID                           |
-| consumer.metadata.broker.list               | string  | kafka:9092                  | REPORT_MANAGER_CONSUMER_METADATA_BROKER_LIST               |
-| consumer.topic.metadata.refresh.interval.ms | integer | 30000                       | REPORT_MANAGER_CONSUMER_TOPIC_METADATA_REFRESH_INTERVAL_MS |
-| topic.auto.offset.reset                     | string  | earliest                    | REPORT_MANAGER_TOPIC_AUTO_OFFSET_RESET                     |
-| subscribe.topics.regex.tenants              | string  | ^.+dojot\.tenancy           | REPORT_MANAGER_SUBSCRIBE_TOPICS_REGEX_TENANTS              |
+| Key                                         | Type    | Default Value               | Env Var                                                   |
+| ------------------------------------------- | ------- | --------------------------- | --------------------------------------------------------- |
+| consumer.client.id                          | string  | ${HOSTNAME:-report-manager} | REPORTMANAGER_CONSUMER_CLIENT_ID                          |
+| consumer.group.id                           | string  | ${HOSTNAME:-report-manager} | REPORTMANAGER_CONSUMER_GROUP_ID                           |
+| consumer.metadata.broker.list               | string  | kafka:9092                  | REPORTMANAGER_CONSUMER_METADATA_BROKER_LIST               |
+| consumer.topic.metadata.refresh.interval.ms | integer | 30000                       | REPORTMANAGER_CONSUMER_TOPIC_METADATA_REFRESH_INTERVAL_MS |
+| topic.auto.offset.reset                     | string  | earliest                    | REPORTMANAGER_TOPIC_AUTO_OFFSET_RESET                     |
+| subscribe.topics.regex.tenants              | string  | ^.+dojot\.tenancy           | REPORTMANAGER_SUBSCRIBE_TOPICS_REGEX_TENANTS              |
 
 </details>
 
 <details>
   <summary>Express</summary>
 
-| Key                   | Type    | Default Value | Env Var                              |
-| --------------------- | ------- | ------------- | ------------------------------------ |
-| express.parsing.limit | integer | 256000        | REPORT_MANAGER_EXPRESS_PARSING_LIMIT |
+| Key                   | Type    | Default Value | Env Var                             |
+| --------------------- | ------- | ------------- | ----------------------------------- |
+| express.parsing.limit | integer | 256000        | REPORTMANAGER_EXPRESS_PARSING_LIMIT |
 
 </details>
 
 <details>
   <summary>Redis</summary>
 
-| Key        | Type    | Default Value        | Env Var                   |
-| ---------- | ------- | -------------------- | ------------------------- |
-| redis.host | string  | report-manager-redis | REPORT_MANAGER_REDIS_HOST |
-| redis.port | integer | 6379                 | REPORT_MANAGER_REDIS_PORT |
-| redis.db   | integer | 0                    | REPORT_MANAGER_REDIS_DB   |
+| Key        | Type    | Default Value        | Env Var                  |
+| ---------- | ------- | -------------------- | ------------------------ |
+| redis.host | string  | report-manager-redis | REPORTMANAGER_REDIS_HOST |
+| redis.port | integer | 6379                 | REPORTMANAGER_REDIS_PORT |
+| redis.db   | integer | 0                    | REPORTMANAGER_REDIS_DB   |
 
 </details>
 
 <details>
   <summary>Keycloak</summary>
 
-| Key                         | Type   | Default Value                            | Env Var                                    |
-| --------------------------- | ------ | ---------------------------------------- | ------------------------------------------ |
-| keycloak.url                | string | http://keycloak:8080                     | REPORT_MANAGER_KEYCLOAK_URL                |
-| keycloak.tenants.url        | string | http://keycloak-proxy:8081/api/v1/tenant | REPORT_MANAGER_KEYCLOAK_TENANTS_URL        |
-| keycloak.client.id          | string | dojot-report-manager                     | REPORT_MANAGER_KEYCLOAK_CLIENT_ID          |
-| keycloak.client.secret.file | string | dojot-report-manager                     | REPORT_MANAGER_KEYCLOAK_CLIENT_SECRET_FILE |
+| Key                         | Type   | Default Value                            | Env Var                                   |
+| --------------------------- | ------ | ---------------------------------------- | ----------------------------------------- |
+| keycloak.url                | string | http://keycloak:8080                     | REPORTMANAGER_KEYCLOAK_URL                |
+| keycloak.tenants.url        | string | http://keycloak-proxy:8081/api/v1/tenant | REPORTMANAGER_KEYCLOAK_TENANTS_URL        |
+| keycloak.client.id          | string | dojot-report-manager                     | REPORTMANAGER_KEYCLOAK_CLIENT_ID          |
+| keycloak.client.secret.file | string | dojot-report-manager                     | REPORTMANAGER_KEYCLOAK_CLIENT_SECRET_FILE |
 
 </details>
 
 <details>
   <summary>APIs</summary>
 
-| Key            | Type   | Default Value                  | Env Var                       |
-| -------------- | ------ | ------------------------------ | ----------------------------- |
-| apis.retriever | string | http://influxdb-retriever:4000 | REPORT_MANAGER_APIS_RETRIEVER |
-| apis.filemgmt  | string | http://file-mgmt:7000          | REPORT_MANAGER_APIS_FILEMGMT  |
+| Key            | Type   | Default Value                  | Env Var                      |
+| -------------- | ------ | ------------------------------ | ---------------------------- |
+| apis.retriever | string | http://influxdb-retriever:4000 | REPORTMANAGER_APIS_RETRIEVER |
+| apis.filemgmt  | string | http://file-mgmt:7000          | REPORTMANAGER_APIS_FILEMGMT  |
 
 </details>
 
 <details>
   <summary>Postgres</summary>
 
-| Key               | Type    | Default Value  | Env Var                          |
-| ----------------- | ------- | -------------- | -------------------------------- |
-| postgres.user     | string  | postgres       | REPORT_MANAGER_POSTGRES_USER     |
-| postgres.password | string  | postgres       | REPORT_MANAGER_POSTGRES_PASSWORD |
-| postgres.host     | string  | postgres       | REPORT_MANAGER_POSTGRES_HOST     |
-| postgres.port     | integer | 5432           | REPORT_MANAGER_POSTGRES_PORT     |
-| postgres.database | string  | report-manager | REPORT_MANAGER_POSTGRES_DATABASE |
+| Key               | Type    | Default Value  | Env Var                         |
+| ----------------- | ------- | -------------- | ------------------------------- |
+| postgres.user     | string  | postgres       | REPORTMANAGER_POSTGRES_USER     |
+| postgres.password | string  | postgres       | REPORTMANAGER_POSTGRES_PASSWORD |
+| postgres.host     | string  | postgres       | REPORTMANAGER_POSTGRES_HOST     |
+| postgres.port     | integer | 5432           | REPORTMANAGER_POSTGRES_PORT     |
+| postgres.database | string  | report-manager | REPORTMANAGER_POSTGRES_DATABASE |
 
 </details>
 
@@ -99,23 +99,23 @@ Click in the items below to expand. :point_down:
 
 These parameters are passed directly to the SDK ServiceStateManager. Check the [official repository](https://github.com/dojot/dojot-microservice-sdk-js) for more info on the values.
 
-| Key                                 | Default Value | Valid Values | Environment variable                               |
-| ----------------------------------- | ------------- | ------------ | -------------------------------------------------- |
-| lightship.detect.kubernetes         | false         | boolean      | REPORT_MANAGER_LIGHTSHIP_DETECT_KUBERNETES         |
-| lightship.graceful.shutdown.timeout | 60000         | number       | REPORT_MANAGER_LIGHTSHIP_GRACEFUL_SHUTDOWN_TIMEOUT |
-| lightship.port                      | 9000          | number       | REPORT_MANAGER_LIGHTSHIP_PORT                      |
-| lightship.shutdown.delay            | 5000          | number       | REPORT_MANAGER_LIGHTSHIP_SHUTDOWN_DELAY            |
-| lightship.shutdown.handler.timeout  | 5000          | number       | REPORT_MANAGER_LIGHTSHIP_SHUTDOWN_HANDLER_TIMEOUT  |
+| Key                                 | Default Value | Valid Values | Environment variable                              |
+| ----------------------------------- | ------------- | ------------ | ------------------------------------------------- |
+| lightship.detect.kubernetes         | false         | boolean      | REPORTMANAGER_LIGHTSHIP_DETECT_KUBERNETES         |
+| lightship.graceful.shutdown.timeout | 60000         | number       | REPORTMANAGER_LIGHTSHIP_GRACEFUL_SHUTDOWN_TIMEOUT |
+| lightship.port                      | 9000          | number       | REPORTMANAGER_LIGHTSHIP_PORT                      |
+| lightship.shutdown.delay            | 5000          | number       | REPORTMANAGER_LIGHTSHIP_SHUTDOWN_DELAY            |
+| lightship.shutdown.handler.timeout  | 5000          | number       | REPORTMANAGER_LIGHTSHIP_SHUTDOWN_HANDLER_TIMEOUT  |
 
 </details>
 
 <details>
   <summary>Logger</summary>
 
-| Key            | Type   | Default Value | Env Var                       |
-| -------------- | ------ | ------------- | ----------------------------- |
-| logger.level   | string | info          | REPORT_MANAGER_LOGGER_LEVEL   |
-| logger.verbose | string | false         | REPORT_MANAGER_LOGGER_VERBOSE |
+| Key            | Type   | Default Value | Env Var                      |
+| -------------- | ------ | ------------- | ---------------------------- |
+| logger.level   | string | info          | REPORTMANAGER_LOGGER_LEVEL   |
+| logger.verbose | string | false         | REPORTMANAGER_LOGGER_VERBOSE |
 
 </details>
 

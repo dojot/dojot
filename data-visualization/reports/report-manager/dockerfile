@@ -1,4 +1,4 @@
-FROM node:14-alpine AS base
+FROM node:16.17.1-alpine AS base
 
 WORKDIR /opt/report-manager
 
@@ -34,7 +34,7 @@ COPY src ./src
 
 RUN yarn build
 
-FROM node:14-alpine
+FROM node:16.17.1-alpine
 
 WORKDIR /opt/report-manager
 
