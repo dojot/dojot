@@ -13,6 +13,8 @@ const util = require('util');
 const { AuthorizationsAPI, OrgsAPI, BucketsAPI } = require('@influxdata/influxdb-client-apis');
 
 const { InfluxDB } = require('@influxdata/influxdb-client');
+const parseDojotTableMeta = require('./DojotFluxTableMetaData');
+
 
 /**
  * This class handle with query data in a specific bucket.
@@ -95,7 +97,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`queryByMeasurement: queryRows.next=${JSON.stringify(o, null, 2)}`);
             const point = {
               ts: o._time,
@@ -189,7 +192,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`queryUsingGraphql: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push({
               id: o._measurement,
@@ -268,7 +272,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`queryByField: queryRows.next=${JSON.stringify(o, null, 2)}`);
 
             result.push({
@@ -304,7 +309,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(fluxQuery, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push(o);
           },
@@ -376,7 +382,8 @@ class DeviceDataRepository {
         const result = [];
         queryApi.queryRows(query, {
           next(row, tableMeta) {
-            const o = tableMeta.toObject(row);
+            const dojotTableMeta = parseDojotTableMeta(tableMeta);
+            const o = dojotTableMeta.toObject(row);
             loggerOuter.debug(`GenericQuery: queryRows.next=${JSON.stringify(o, null, 2)}`);
             result.push(o);
           },
