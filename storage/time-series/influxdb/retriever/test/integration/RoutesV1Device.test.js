@@ -263,7 +263,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20&order=desc',
+              url: '/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20',
             },
             next: null,
           },
@@ -333,7 +333,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20&order=desc',
+              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20',
             },
             next: null,
           },
@@ -378,15 +378,15 @@ describe('Test Devices Routes', () => {
           paging: {
             previous: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?page=1&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=1&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z',
             },
             current: {
               number: 2,
-              url: '/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z',
             },
             next: {
               number: 3,
-              url: '/tss/v1/devices/1234/attrs/1234/data?page=3&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=3&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z',
             },
           },
         });
@@ -443,7 +443,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=20&page=1&order=desc',
+              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=20&page=1',
             },
             next: null,
           },
@@ -914,6 +914,18 @@ describe('Test Devices Routes', () => {
       .then((response) => {
         expect(response.statusCode).toBe(406);
         expect(response.body.error).toEqual('This server does not support Application/xml');
+        done();
+      });
+  });
+
+  test('Test Device cache Route - should return all devices in cache', (done) => {
+    request(app)
+      .get('/tss/v1/devices')
+      .set('Accept', 'Application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.body.devices).toEqual(['1234']);
         done();
       });
   });

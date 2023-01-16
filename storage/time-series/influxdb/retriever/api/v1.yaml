@@ -35,7 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceAttrResponse"
+                $ref: "#/components/schemas/DeviceAttrDataResponse"
             text/csv:
               schema:
                 type: "string"
@@ -106,7 +106,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceResponse"
+                $ref: "#/components/schemas/DeviceDataResponse"
             text/csv:
               schema:
                 type: "string"
@@ -267,6 +267,21 @@ paths:
                 properties:
                   error:
                     type: string
+  "/tss/v1/devices":
+    get:
+      tags:
+        - remote-cache
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/cacheSource"
+      responses:
+        "200":
+          description: Recovered data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/deviceCacheResponse"
 
 externalDocs:
   description: Find out more about Dojot
@@ -285,6 +300,15 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
+    cacheSource:
+      in: query
+      name: "source"
+      description: "Set cache source"
+      required: false
+      allowReserved: true
+      schema:
+        type: string
+        enum: ['memory', 'disk']
     dateFrom:
       name: dateFrom
       in: query
@@ -420,7 +444,7 @@ components:
           default: 1
         url:
           type: string
-    DeviceResponse:
+    DeviceDataResponse:
       type: object
       properties:
         data:
@@ -453,7 +477,7 @@ components:
                         - type: object
         paging:
           $ref: "#/components/schemas/paging"
-    DeviceAttrResponse:
+    DeviceAttrDataResponse:
       type: object
       properties:
         data:
@@ -476,3 +500,12 @@ components:
                   - type: object
         paging:
           $ref: "#/components/schemas/paging"
+    deviceCacheResponse:
+      type: object
+      properties:
+        devices:
+          type: array
+          items:
+            type: string
+
+

@@ -360,6 +360,6 @@ module.exports = ({
     deviceDataRoute,
     deviceAttrDataRoute,
     queryRoute,
-    flexQueryRoute.handlers,
+    flexQueryRoute,
   ];
 };
