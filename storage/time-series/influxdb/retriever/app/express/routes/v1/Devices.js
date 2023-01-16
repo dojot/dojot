@@ -208,7 +208,7 @@ module.exports = ({
                 // request data
                 try {
                   const res = await deviceDataRepository.queryUsingGraphql(
-                    params.tenant,
+                    params.tenant.id,
                     devices,
                     filters,
                     page,

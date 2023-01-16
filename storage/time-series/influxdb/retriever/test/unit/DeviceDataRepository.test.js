@@ -32,6 +32,7 @@ const mockInflux = {
 };
 jest.mock('@influxdata/influxdb-client', () => mockInflux);
 
+jest.mock('../../app/influx/DojotFluxTableMetaData', () => ((x) => x));
 const mockHttpError = jest.fn((statusCode, message) => {
   const error = {
     message,
