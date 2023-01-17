@@ -119,7 +119,7 @@ module.exports = ({
   const deviceRoute = {
     mountPoint,
     name: 'devices-route',
-    path: ['/devices'],
+    path: ['/internal/devices'],
     handlers: [
       {
         method: 'get',
@@ -263,7 +263,7 @@ module.exports = ({
                 // request data
                 try {
                   const res = await deviceDataRepository.queryUsingGraphql(
-                    params.tenant,
+                    params.tenant.id,
                     devices,
                     filters,
                     page,

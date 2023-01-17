@@ -6,6 +6,7 @@ const mockConfig = {
   graphql: { graphiql: true },
 };
 
+
 const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA4R9mBEIaygmSpF+4FStSpuM3ssiJmfclPuSjEa1SxK9IhBGq
 6ZPuLQxJ9twgA01mQaYxBcSib9ahoCS7j5hHvs4gcweh5F0xX5NCWZ12wUagXzW7
@@ -61,6 +62,11 @@ const {
   },
 } = jest.requireActual('@dojot/microservice-sdk');
 
+const {
+  createFluxTableColumn,
+  createFluxTableMetaData,
+} = jest.requireActual('@influxdata/influxdb-client');
+
 const mockSdk = {
   ConfigManager: {
     getConfig: jest.fn(() => mockConfig),
@@ -86,7 +92,7 @@ const path = require('path');
 const express = require('../../app/express');
 const devicesRoutes = require('../../app/express/routes/v1/Devices');
 
-const openApiPath = path.join(__dirname, '../../api/v1.yml');
+const openApiPath = path.join(__dirname, '../../api/v1.yaml');
 
 const mockSignalReady = jest.fn();
 const mockNotSignalReady = jest.fn();
@@ -103,16 +109,115 @@ const serviceStateMock = {
   })),
 };
 
+// Mock FluxTableMeta in yours columns
+const deviceDataColumns = [
+  createFluxTableColumn({
+    label: '_time',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: 'dojot.string',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 2,
+    get: (x) => x,
+  }),
+];
+
+const attrDataColumns = [
+  createFluxTableColumn({
+    label: '_time',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_value',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 2,
+    get: (x) => x,
+  }),
+];
+
+const graphqlColumns = [
+  createFluxTableColumn({
+    label: '_field',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_measurement',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_time',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_value',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+];
+
+const queryColumns = [
+  createFluxTableColumn({
+    label: 'result',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: 'table',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+  createFluxTableColumn({
+    label: '_value',
+    dataType: 'string',
+    defaultValue: null,
+    group: true,
+    index: 1,
+    get: (x) => x,
+  }),
+];
+
+let tableMeta = createFluxTableMetaData([]);
+
 const mockData = jest.fn();
 const mockQueryApi = jest.fn(() => ({
   queryRows(fluxQuery, consumer) {
     const data = mockData();
     data.forEach((mockRow) => {
-      consumer.next(mockRow, {
-        toObject(row) {
-          return row;
-        },
-      });
+      consumer.next(mockRow, tableMeta);
     });
     consumer.complete();
   },
@@ -235,11 +340,9 @@ describe('Test Devices Routes', () => {
 
 
   test('Data from device in json - Test endpoint', (done) => {
+    tableMeta = createFluxTableMetaData(deviceDataColumns);
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        'dojot.string': 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
 
     request(app)
@@ -263,7 +366,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20',
+              url: '/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20&order=desc',
             },
             next: null,
           },
@@ -273,12 +376,12 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from device in csv - Test endpoint', (done) => {
+    tableMeta = createFluxTableMetaData(deviceDataColumns);
+
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        'dojot.string': 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
+
     request(app)
       .get('/tss/v1/devices/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
@@ -316,14 +419,14 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in json -  Test endpoint  1', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
+
     request(app)
-      .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
+      .get('/tss/v1/devices/1234/attrs/string/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
       .set('Authorization', `Bearer ${validToken}`)
       .then((response) => {
         expect(response.statusCode).toBe(200);
@@ -333,7 +436,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20',
+              url: '/tss/v1/devices/1234/attrs/string/data?dateTo=2020-11-25T20%3A03%3A06.108Z&page=1&limit=20&order=desc',
             },
             next: null,
           },
@@ -343,11 +446,10 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in csv -  Test endpoint  1', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z')
@@ -362,11 +464,10 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device -  More results then limit and page 2', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
@@ -378,15 +479,15 @@ describe('Test Devices Routes', () => {
           paging: {
             previous: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?page=1&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z',
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=1&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
             },
             current: {
               number: 2,
-              url: '/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z',
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
             },
             next: {
               number: 3,
-              url: '/tss/v1/devices/1234/attrs/1234/data?page=3&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z',
+              url: '/tss/v1/devices/1234/attrs/1234/data?page=3&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z&order=desc',
             },
           },
         });
@@ -395,11 +496,10 @@ describe('Test Devices Routes', () => {
   });
 
   test('Data from attr on a device in csv -  More results then limit and page 2', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?page=2&limit=1&dateTo=2020-11-25T20%3A03%3A06.108Z')
@@ -426,11 +526,10 @@ describe('Test Devices Routes', () => {
 
 
   test('Data from attr on a device -  Test endpoint 2', (done) => {
+    tableMeta = createFluxTableMetaData(attrDataColumns);
+
     mockData.mockReturnValueOnce([
-      {
-        _time: '2020-11-25T16:37:10.590Z',
-        _value: 'string',
-      },
+      ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
     request(app)
       .get('/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=0')
@@ -443,7 +542,7 @@ describe('Test Devices Routes', () => {
             previous: null,
             current: {
               number: 1,
-              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=20&page=1',
+              url: '/tss/v1/devices/1234/attrs/1234/data?dateTo=2020-11-25T20%3A03%3A06.108Z&limit=20&page=1&order=desc',
             },
             next: null,
           },
@@ -579,22 +678,26 @@ describe('Test Devices Routes', () => {
 
 
   test('Test graphQl endpoint - valid graphql query', (done) => {
-    mockData.mockReturnValueOnce([{
-      _field: 'dojot.temperature',
-      _measurement: 'RANDID1',
-      _time: '2021-06-17T20:00:00.000Z',
-      _value: '36.2',
-    }, {
-      _field: 'dojot.gps',
-      _measurement: 'RANDID1',
-      _time: '2021-06-17T20:30:00.000Z',
-      _value: '-18,-23',
-    }, {
-      _field: 'dojot.temperature',
-      _measurement: 'RANDID2',
-      _time: '2021-06-17T20:30:00.000Z',
-      _value: '42.1',
-    }]);
+    tableMeta = createFluxTableMetaData(graphqlColumns);
+
+    mockData.mockReturnValueOnce([
+      [
+        'dojot.temperature',
+        'RANDID1',
+        '2021-06-17T20:00:00.000Z',
+        '36.2',
+      ], [
+        'dojot.gps',
+        'RANDID1',
+        '2021-06-17T20:30:00.000Z',
+        '-18,-23',
+      ], [
+        'dojot.temperature',
+        'RANDID2',
+        '2021-06-17T20:30:00.000Z',
+        '42.1',
+      ],
+    ]);
 
     request(app)
       .get('/tss/v1/devices/graphql')
@@ -626,14 +729,15 @@ describe('Test Devices Routes', () => {
 
 
   test('Test graphQl endpoint - valid graphql query - 2', (done) => {
+    tableMeta = createFluxTableMetaData(graphqlColumns);
     expect.assertions(2);
     mockData.mockReturnValueOnce(
-      [{
-        _field: 'temperature',
-        _measurement: 'RANDID1',
-        _time: '2021-06-17T20:00:00.000Z',
-        _value: '36.2',
-      }],
+      [[
+        'temperature',
+        'RANDID1',
+        '2021-06-17T20:00:00.000Z',
+        '36.2',
+      ]],
     );
 
     request(app)
@@ -698,18 +802,11 @@ describe('Test Devices Routes', () => {
   });
 
   test('Test Generic Route - should return data in json', (done) => {
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -738,18 +835,11 @@ describe('Test Devices Routes', () => {
   });
 
   test('Test Generic Route - should return data in csv', (done) => {
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -813,18 +903,11 @@ describe('Test Devices Routes', () => {
   test('Test Flex Generic Route - should return data in json', (done) => {
     mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
     mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -855,18 +938,11 @@ describe('Test Devices Routes', () => {
   test('Test Flex Generic Route - should return data in csv', (done) => {
     mockGetOrgs.mockResolvedValueOnce({ orgs: [{ id: 'abc' }] });
     mockGetAuthorizations.mockResolvedValueOnce({ authorizations: [{ token: 'abc' }] });
+    tableMeta = createFluxTableMetaData(queryColumns);
     mockData.mockReturnValueOnce(
       [
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
-        {
-          result: '_result',
-          table: 0,
-          _value: '_value',
-        },
+        ['_result', 0, '_value'],
+        ['_result', 0, '_value'],
       ],
     );
 
@@ -920,7 +996,7 @@ describe('Test Devices Routes', () => {
 
   test('Test Device cache Route - should return all devices in cache', (done) => {
     request(app)
-      .get('/tss/v1/devices')
+      .get('/tss/v1/internal/devices')
       .set('Accept', 'Application/json')
       .set('Authorization', `Bearer ${validToken}`)
       .then((response) => {

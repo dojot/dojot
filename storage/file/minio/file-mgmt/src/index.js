@@ -22,7 +22,6 @@ Logger.setTransport('console', {
 });
 Logger.setVerbose(config.log.verbose);
 
-
 const secretsLoader = new SecretFileHandler(config, logger);
 secretsLoader.handleCollection(['minio.access.key', 'minio.secret.key', 'keycloak.client.secret'], '/secrets/').then(() => {
   // Init Application
@@ -32,7 +31,25 @@ secretsLoader.handleCollection(['minio.access.key', 'minio.secret.key', 'keycloa
     logger.info('Server started..');
   }).catch((error) => {
     logger.error(error);
+    process.kill(process.pid, 'SIGTERM');
   });
 }).catch((error) => {
   logger.error(error);
+  process.kill(process.pid, 'SIGTERM');
+});
+
+process.on('unhandledRejection', async (reason) => {
+  // The 'unhandledRejection' event is emitted whenever a Promise is rejected and
+  // no error handler is attached to the promise within a turn of the event loop.
+  logger.error(`Unhandled Rejection at: ${reason.stack || reason}.`);
+
+  process.kill(process.pid, 'SIGTERM');
+});
+
+// eslint-disable-next-line security-node/detect-improper-exception-handling
+process.on('uncaughtException', async (ex) => {
+  // The 'uncaughtException' event is emitted when an uncaught JavaScript
+  logger.error(`uncaughtException: Unhandled Exception at: ${ex.stack || ex}. Bailing out!!`);
+
+  process.kill(process.pid, 'SIGTERM');
 });

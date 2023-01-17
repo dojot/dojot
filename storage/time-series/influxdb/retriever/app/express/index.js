@@ -13,7 +13,7 @@ const logger = new Logger('influxdb-retriever:express');
 
 const paginateInterceptor = require('./interceptors/CustomPaginator');
 
-// const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
+const openApiValidatorInterceptor = require('./interceptors/OpenApiValidator');
 
 const { express: configExpress, paginate: configPaginate, keycloak: configKeycloak } = ConfigManager.getConfig('RETRIEVER');
 
@@ -82,7 +82,7 @@ module.exports = (routes, serviceState, openApiPath, tenantService) => {
         defaultLimit: configPaginate['default.max.limit'],
         maxLimit: configPaginate['default.max.limit'],
       }),
-      // openApiValidatorInterceptor({ openApiPath }),
+      openApiValidatorInterceptor({ openApiPath }),
       requestIdInterceptor(),
       beaconInterceptor({
         stateManager: serviceState,

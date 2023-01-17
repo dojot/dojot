@@ -162,6 +162,13 @@ paths:
       operationId: graphqlGet
       x-allow-unknown-query-parameters: true
       responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+
         "401":
           description: Unauthorized
           content:
@@ -267,7 +274,7 @@ paths:
                 properties:
                   error:
                     type: string
-  "/tss/v1/devices":
+  "/tss/v1/internal/devices":
     get:
       tags:
         - remote-cache
@@ -282,6 +289,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/deviceCacheResponse"
+        default:
+          description: Unexpected error
 
 externalDocs:
   description: Find out more about Dojot

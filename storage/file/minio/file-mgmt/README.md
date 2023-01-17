@@ -23,7 +23,6 @@ available by default.
 | log.file.level             | Log level to log on files                                                       | info          | string                   | FILEMGMT_LOG_FILE_LEVEL             |
 | log.verbose                | Whether to enable logger verbosity or not                                       | false         | boolean                  | FILEMGMT_LOG_VERBOSE                |
 | express.trustproxy         | Enables reverse proxy support                                                   | true          | boolean                  | FILEMGMT_EXPRESS_TRUSTPROXY         |
-| paginate.default.max.limit | Sets the default/maximum number of records/points in a page.                    | 256           | integer                  | FILEMGMT_PAGINATE_DEFAULT_MAX_LIMIT |
 
 #### Server Configurations
 
