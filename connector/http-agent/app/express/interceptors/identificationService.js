@@ -18,16 +18,16 @@ module.exports = ({
   cn: async (clientCert) => {
     try {
       const { CN } = clientCert.subject;
-      const array = CN.split(':');
+      const values = CN.split(':');
 
-      if (array.length !== 2) {
+      if (values.length !== 2) {
         throw new Error();
       }
 
+      const [tenant, device] = values;
       const deviceExistsRedis = await redisManager.getAsync(CN);
-
       if (deviceExistsRedis === null) {
-        const deviceExistsDeviceManager = await deviceManagerService.getDevice(array[0], array[1]);
+        const deviceExistsDeviceManager = await deviceManagerService.getDevice(tenant, device);
         if (deviceExistsDeviceManager) {
           redisManager.setAsync(CN, true);
         } else {
@@ -38,7 +38,7 @@ module.exports = ({
         throw new Error();
       }
 
-      return array;
+      return values;
     } catch (e) {
       if (clientCert.subject.CN.split(':').length === 2) {
         redisManager.setAsync(clientCert.subject.CN, false);
