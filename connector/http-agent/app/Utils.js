@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 const createError = require('http-errors');
 
 const err = new createError.BadRequest();
@@ -6,6 +7,41 @@ const err = new createError.BadRequest();
  * A module with helper functions
  * @module utils
  */
+
+/**
+ * A module with helper functions
+ * @module utils
+ */
+
+/**
+ * Validates if the attribute is an object
+ *
+ * @param {Object} obj
+ *
+ * @returns boolean
+ * @private
+ */
+const isObject = (obj) => Object.prototype.toString.call(obj) === '[object Object]';
+
+/**
+   * handles the payload
+   *
+   * @param {Object} payload
+   * @returns Object
+   *
+   * @private
+   */
+const attrsHandler = (payload) => {
+  const attrs = {};
+  Object.entries(payload).forEach(([key, value]) => {
+    if (isObject(value)) {
+      attrs[key] = JSON.stringify(value);
+    } else {
+      attrs[key] = value;
+    }
+  });
+  return attrs;
+};
 
 /**
  * @function parseTimestamp
@@ -49,7 +85,7 @@ const generateDeviceDataMessage = (payload, tenant, deviceid) => ({
     tenant,
     timestamp: parseTimestamp(payload.ts),
   },
-  attrs: payload.data,
+  attrs: attrsHandler(payload.data),
 });
 
 /**
