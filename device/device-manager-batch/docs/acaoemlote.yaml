@@ -4,7 +4,8 @@ info:
   description: Operation in Batch to Devices an Templates.
   version: '3.0.3'
 servers:
-  - url: https://device-manege-batch:8000/
+  - url: http://localhost:8000/device-manager-batch
+  - url: http://device-manager-batch:8089
 tags:
   - name: Devices
     description: Operation in Batch to Devices.
@@ -28,24 +29,24 @@ paths:
         required: true
       responses:
         '200':
-          description: Success Operation of Create in batch devices, returnin array of iDs objects created.
+          description: Success Operation of Create in batch devices, return in array of iDs objects created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_200_devices_create'
+                $ref: '#/components/schemas/api_response_200_devices_create'
         '400':
           description: Invalid type Arguments or field is required.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_400_create'
+                $ref: '#/components/schemas/api_response_400_create'
 
         '503':
           description: Services Unavailable
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_503'
+                $ref: '#/components/schemas/api_response_503'
 
     put:
       tags:
@@ -65,19 +66,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_200_devices'
+                $ref: '#/components/schemas/api_response_200_devices'
         '400':
           description: Invalid type Arguments or field is required.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_400_remove_devices'
+                $ref: '#/components/schemas/api_response_400_remove_devices'
         '503':
           description: Services Unavailable
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_503'
+                $ref: '#/components/schemas/api_response_503'
 
   /devices_batch/csv/:
     post:
@@ -101,27 +102,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_csv'
+                $ref: '#/components/schemas/api_response_csv'
         '400':
           description: Invalid type Arguments or field is required.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_400_csv'
+                $ref: '#/components/schemas/api_response_400_csv'
 
         '415':
           description: Extension the file not supported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_415'
+                $ref: '#/components/schemas/api_response_415'
 
         '503':
           description: Services Unavailable
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_503'
+                $ref: '#/components/schemas/api_response_503'
 
   /templates_batch/:
     put:
@@ -142,19 +143,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_200_templates'
+                $ref: '#/components/schemas/api_response_200_templates'
         '400':
           description: Invalid type Arguments or field is required.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_400_remove_templates'
+                $ref: '#/components/schemas/api_response_400_remove_templates'
         '503':
           description: Services Unavailable
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_503'
+                $ref: '#/components/schemas/api_response_503'
 
   /certificates_batch/:
     post:
@@ -185,27 +186,27 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApiResponse_200'
+                  $ref: '#/components/schemas/api_response_200'
         '400':
           description: Invalid type Arguments or field is required.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_400_certificates'
+                $ref: '#/components/schemas/api_response_400_certificates'
 
         '415':
           description: Extension the file not supported
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_415'
+                $ref: '#/components/schemas/api_response_415'
 
         '503':
           description: Services Unavailable
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_503'
+                $ref: '#/components/schemas/api_response_503'
 
   /certificates_batch/associate:
     post:
@@ -228,7 +229,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ApiResponse_cert_associates'
+                  $ref: '#/components/schemas/api_response_cert_associates'
         '400':
           description: Invalid type Arguments or field is required.
           content:
@@ -240,7 +241,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse_503'
+                $ref: '#/components/schemas/api_response_503'
 
 components:
   schemas:
@@ -315,7 +316,7 @@ components:
         devices:
           example: ['a1d8513', 'a1d8588', 'a1d8555']
 
-    Devices-Batch-Sucess:
+    devices-batch-success:
       type: object
       properties:
         devices_created:
@@ -324,7 +325,7 @@ components:
             type: string
             example: a1d6f5,a1d6333,a1d8513,a1d8515,a1d8522,a1d8612
 
-    Certifictes-Batch:
+    certificates-batch:
       type: object
       properties:
         templates:
@@ -333,7 +334,7 @@ components:
             type: number
             example: 14
 
-    Certifictes-Associates-Batch:
+    certificates-associates-batch:
       type: object
       properties:
         devices:
@@ -383,7 +384,7 @@ components:
           example: FILE_REQUIRED
         message:
           type: string
-          example: The file upload in Body is requied.
+          example: The file upload in Body is required.
 
     error_invalidate_value:
       type: object
@@ -426,7 +427,7 @@ components:
           type: string
           example: Template not found
 
-    templates_associated_devies:
+    templates_associated_devices:
       type: object
       properties:
         id:
@@ -465,21 +466,21 @@ components:
           type: string
           example:
 
-    ApiResponse_200:
+    api_response_200:
       type: object
       properties:
         certificates:
           type: string
           example: 8272A
 
-    ApiResponse_503:
+    api_response_503:
       type: object
       properties:
         type:
           type: string
-          example: SERVICE_UNAVAIBLE
+          example: SERVICE_UNAVAILABLE
 
-    ApiResponse_415:
+    api_response_415:
       type: object
       properties:
         type:
@@ -574,7 +575,7 @@ components:
           type: string
           example: modelo_14
 
-    ApiResponse_200_devices_create:
+    api_response_200_devices_create:
       properties:
         devices_created:
           type: array
@@ -594,7 +595,7 @@ components:
             oneOf:
               - $ref: '#/components/schemas/templates_not_found'
 
-    ApiResponse_200_devices:
+    api_response_200_devices:
       properties:
         devices:
           type: array
@@ -604,7 +605,7 @@ components:
               - $ref: '#/components/schemas/devices_200_2'
               - $ref: '#/components/schemas/devices_not_found'
 
-    ApiResponse_200_templates:
+    api_response_200_templates:
       type: object
       properties:
         templates:
@@ -617,39 +618,39 @@ components:
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/templates_associated_devies'
+              - $ref: '#/components/schemas/templates_associated_devices'
         templates_not_found:
           type: array
           items:
             oneOf:
               - $ref: '#/components/schemas/templates_not_found'
 
-    ApiResponse_400_create:
+    api_response_400_create:
       type: array
       items:
         oneOf:
           - $ref: '#/components/schemas/error_attrs_devices_create'
           - $ref: '#/components/schemas/error_required_devices_create'
 
-    ApiResponse_400_remove_devices:
+    api_response_400_remove_devices:
       oneOf:
         - $ref: '#/components/schemas/error_required_devices'
 
-    ApiResponse_400_remove_templates:
+    api_response_400_remove_templates:
       oneOf:
         - $ref: '#/components/schemas/error_required_templates'
 
-    ApiResponse_400_csv:
+    api_response_400_csv:
       type: object
       properties:
         error:
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/error_csv_file_columm'
+              - $ref: '#/components/schemas/error_csv_file_column'
               - $ref: '#/components/schemas/error_file_upload_required'
 
-    ApiResponse_400_certificates:
+    api_response_400_certificates:
       type: object
       properties:
         error:
@@ -658,7 +659,7 @@ components:
             oneOf:
               - $ref: '#/components/schemas/error_file_upload_required'
 
-    error_csv_file_columm:
+    error_csv_file_column:
       type: object
       properties:
         name:
@@ -666,10 +667,10 @@ components:
           example: templetes_name
         type:
           type: string
-          example: 'FILE_COLUMN_FORMAT_INCORRET'
+          example: 'FILE_COLUMN_FORMAT_INCORRECT'
         message:
           type: string
-          example: 'Format of columns incorret.'
+          example: 'Format of columns incorrect.'
 
     error_csv_devices:
       type: object
@@ -708,9 +709,9 @@ components:
           example: 'NAME_NOT_FOUND_ATTRIBUTE'
         message:
           type: string
-          example: 'Atribuito informado não encontrado para o modelo ou não é estático'
+          example: 'Atributo informado não encontrado para o modelo ou não é estático'
 
-    ApiResponse_csv:
+    api_response_csv:
       type: object
       properties:
         qt_success:
@@ -725,7 +726,7 @@ components:
               - $ref: '#/components/schemas/error_csv_templates'
               - $ref: '#/components/schemas/error_csv_attributes'
 
-    ApiResponse_cert:
+    api_response_cert:
       type: object
       properties:
         qt_success:
@@ -742,10 +743,10 @@ components:
             type: number
             example: 14
 
-    ApiResponse_cert_associates:
+    api_response_cert_associates:
       type: object
       properties:
-        devices_associateswith_certificates:
+        devices_associates_with_certificates:
           type: array
           items:
             type: string
@@ -763,7 +764,7 @@ components:
             type: string
             example: dispositivo_6,dispositivo_7
 
-    ApiResponse_error:
+    api_response_error:
       type: object
       properties:
         code:
