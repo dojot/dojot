@@ -92,7 +92,7 @@ const path = require('path');
 const express = require('../../app/express');
 const devicesRoutes = require('../../app/express/routes/v1/Devices');
 
-const openApiPath = path.join(__dirname, '../../api/v1.yml');
+const openApiPath = path.join(__dirname, '../../api/v1.yaml');
 
 const mockSignalReady = jest.fn();
 const mockNotSignalReady = jest.fn();
@@ -341,7 +341,6 @@ describe('Test Devices Routes', () => {
 
   test('Data from device in json - Test endpoint', (done) => {
     tableMeta = createFluxTableMetaData(deviceDataColumns);
-
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);
@@ -991,6 +990,18 @@ describe('Test Devices Routes', () => {
       .then((response) => {
         expect(response.statusCode).toBe(406);
         expect(response.body.error).toEqual('This server does not support Application/xml');
+        done();
+      });
+  });
+
+  test('Test Device cache Route - should return all devices in cache', (done) => {
+    request(app)
+      .get('/tss/v1/internal/devices')
+      .set('Accept', 'Application/json')
+      .set('Authorization', `Bearer ${validToken}`)
+      .then((response) => {
+        expect(response.statusCode).toBe(200);
+        expect(response.body.devices).toEqual(['1234']);
         done();
       });
   });

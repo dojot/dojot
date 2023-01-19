@@ -16,6 +16,8 @@ const logger = new Logger('influxdb-retriever:express/interceptors/CustomPaginat
  */
 module.exports = ({ defaultLimit, maxLimit }) => ({
   name: 'custom-paginator-interceptor',
+  // eslint-disable-next-line no-useless-escape
+  path: ['/tss/v1/devices', '/tss/v1/query', '/tss/v1/fluxquery'],
   middleware: [(req, res, next) => {
     // check if was passed a value greater than the configured maximum limit
     logger.debug(`CustomPaginator1: req.params=${util.inspect(req.params)}`);
