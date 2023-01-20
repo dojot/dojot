@@ -146,6 +146,7 @@ describe('Utils', () => {
       expect(msg.attrs.boolean).toEqual(true);
       expect(msg.attrs.text).toEqual('texto');
       expect(typeof msg.attrs.object).toEqual('string');
+      expect(JSON.parse(msg.attrs.object)).toEqual(payload.object);
     });
   });
 
