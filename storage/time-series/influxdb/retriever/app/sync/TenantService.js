@@ -188,7 +188,9 @@ class TenantService {
         client_secret: this.keycloakConfig['client.secret'],
       },
       this.logger,
-      {},
+      {
+        retryDelay: 5000,
+      },
     );
     await keycloakSession.start();
     return keycloakSession;
