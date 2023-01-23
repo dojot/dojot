@@ -13,8 +13,6 @@ RUN apk --no-cache add \
     make \
     python
 
-COPY package.json package.json
-
 RUN apk add --no-cache --virtual .build-deps \
     gcc \
     zlib-dev \

@@ -5,8 +5,11 @@ const {
 } = require('@dojot/microservice-sdk');
 const { graphqlHTTP } = require('express-graphql');
 const HttpStatus = require('http-status-codes');
-
+const { pipeline, Writable } = require('stream');
 const util = require('util');
+
+const pipelineAsync = util.promisify(pipeline);
+
 const AcceptHeaderHelper = require('../../helpers/AcceptHeaderHelper');
 
 const logger = new Logger('influxdb-retriever:express/routes/v1/Devices');
@@ -15,6 +18,11 @@ const { graphql: { graphiql } } = getConfig('RETRIEVER');
 const rootSchema = require('../../../graphql/Schema');
 const DeviceDataService = require('../../services/v1/DeviceDataService');
 const { parseCSV } = require('../../helpers/SimpleCSVParser');
+
+const deviceDataSource = {
+  memory: 'createStreamInMemory',
+  disk: 'createStreamInDisk',
+};
 
 
 /**
@@ -49,7 +57,7 @@ module.exports = ({
    * This feature returns data for an device with time
    * filter, pagination and order
    */
-  const deviceRoute = {
+  const deviceDataRoute = {
     mountPoint,
     name: 'device-route',
     path: ['/devices/:deviceId/data'],
@@ -69,6 +77,7 @@ module.exports = ({
               try {
                 await deviceManagerService.findDevice(req.tenant.id, deviceId);
               } catch (error) {
+                logger.debug(error.message);
                 throw framework.errorTemplate.NotFound(`Not found ${req.tenant.id}/${deviceId}`);
               }
 
@@ -105,10 +114,56 @@ module.exports = ({
   };
 
   /**
+   * This feature returns devices in cache
+   */
+  const deviceRoute = {
+    mountPoint,
+    name: 'devices-route',
+    path: ['/internal/devices'],
+    handlers: [
+      {
+        method: 'get',
+        middleware: [
+          checkDateTo,
+          async (req, res) => {
+            const devices = [];
+            let readStream;
+            const { source } = req.params;
+
+            try {
+              const writableStream = Writable({
+                async write(
+                  key, encoding, cb,
+                ) {
+                  devices.push(key.toString());
+                  cb();
+                },
+              });
+
+              try {
+                readStream = await deviceManagerService[deviceDataSource[source]](req.tenant.id);
+              } catch (error) {
+                readStream = await deviceManagerService.createStreamInDisk(req.tenant.id);
+              }
+
+              await pipelineAsync(readStream, writableStream);
+            } catch (e) {
+              logger.error('devices-route.get:', e);
+              return res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return res.status(HttpStatus.OK).json({ devices });
+          },
+        ],
+      },
+    ],
+  };
+
+  /**
    * This feature returns data for an attribute with time
    * filter, pagination and order
    */
-  const deviceAttrRoute = {
+  const deviceAttrDataRoute = {
     mountPoint,
     name: 'device-route-attr',
     path: ['/devices/:deviceId/attrs/:attr/data'],
@@ -299,5 +354,12 @@ module.exports = ({
     ],
   };
 
-  return [deviceGraphqlRoute, deviceRoute, deviceAttrRoute, queryRoute, flexQueryRoute];
+  return [
+    deviceGraphqlRoute,
+    deviceRoute,
+    deviceDataRoute,
+    deviceAttrDataRoute,
+    queryRoute,
+    flexQueryRoute,
+  ];
 };

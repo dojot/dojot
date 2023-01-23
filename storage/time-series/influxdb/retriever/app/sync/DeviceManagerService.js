@@ -128,6 +128,14 @@ class DeviceManagerService {
   async findDevice(tenantId, deviceId) {
     return this.localPersistence.get(tenantId, deviceId);
   }
+
+  async createStreamInMemory(tenantId) {
+    return this.localPersistence.createKeyStreamInMemory(tenantId);
+  }
+
+  async createStreamInDisk(tenantId) {
+    return this.localPersistence.createKeyStreamInDisk(tenantId);
+  }
 }
 
 module.exports = DeviceManagerService;
