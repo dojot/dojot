@@ -8,6 +8,35 @@ const logger = new Logger('v2k-bridge');
  */
 
 /**
+ * Validates if the attribute is an object
+ *
+ * @param {Object} obj
+ *
+ * @returns boolean
+ * @private
+ */
+const isObject = (obj) => Object.prototype.toString.call(obj) === '[object Object]';
+
+/**
+  * handles the payload
+  *
+  * @param {Object} payload
+  * @returns Object
+  * @private
+  */
+const attrsHandler = (payload) => {
+  const attrs = {};
+  Object.entries(payload).forEach(([key, value]) => {
+    if (isObject(value)) {
+      attrs[key] = JSON.stringify(value);
+    } else {
+      attrs[key] = value;
+    }
+  });
+  return attrs;
+};
+
+/**
  * @function generateDojotDeviceDataMessage
  *
  * Generates a payload for device-data topic for Dojot
@@ -16,6 +45,7 @@ const logger = new Logger('v2k-bridge');
  * @param {Object} payload
  *
  * @returns {{metadata: {deviceid: string, tenant: string, timestamp: number}, attrs: Object}}
+ * @public
  */
 const generateDojotDeviceDataMessage = (topic, payload) => {
   const username = topic.split('/')[0];
@@ -23,8 +53,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
 
   const tenantValue = splitUsername[0];
   const deviceIdValue = splitUsername[1];
-
-  const attrs = payload;
+  const attrs = attrsHandler(payload);
 
   let timestamp = Date.now();
 
@@ -65,6 +94,7 @@ const generateDojotDeviceDataMessage = (topic, payload) => {
  * Transforms a string into a boolean (case insensitive).
  *
  * @param {string} value
+ * @public
  */
 const toBoolean = (value) => value && (value.toString().toLowerCase().trim() === 'true');
 

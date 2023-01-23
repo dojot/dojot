@@ -341,6 +341,7 @@ describe('Test Devices Routes', () => {
 
   test('Data from device in json - Test endpoint', (done) => {
     tableMeta = createFluxTableMetaData(deviceDataColumns);
+
     mockData.mockReturnValueOnce([
       ['2020-11-25T16:37:10.590Z', 'string'],
     ]);

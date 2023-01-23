@@ -126,6 +126,28 @@ describe('Utils', () => {
       };
       expect(msg).toMatchObject(expectedMsg);
     });
+
+    it('Should turn sub-objects in a Payload into text', () => {
+      const topic = 'tenant:device/attrs';
+      const payload = {
+        integer: 10,
+        float: 10.2,
+        boolean: true,
+        text: 'texto',
+        object: {
+          attr1: 'attr1',
+          attr2: 'attr2',
+        },
+      };
+      const msg = utils.generateDojotDeviceDataMessage(topic, payload);
+
+      expect(msg.attrs.integer).toEqual(10);
+      expect(msg.attrs.float).toEqual(10.2);
+      expect(msg.attrs.boolean).toEqual(true);
+      expect(msg.attrs.text).toEqual('texto');
+      expect(typeof msg.attrs.object).toEqual('string');
+      expect(JSON.parse(msg.attrs.object)).toEqual(payload.object);
+    });
   });
 
   describe('toBoolean', () => {
