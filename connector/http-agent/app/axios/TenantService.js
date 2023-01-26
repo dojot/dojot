@@ -43,6 +43,8 @@ module.exports = class TenantService {
 
     // Waits for all authentications to complete
     this.tenants = await Promise.all(tenantPromises);
+    this.logger.debug(`All tenants have been loaded`);
+    this.logger.debug(this.tenants.map(tenant => tenant.id).join(', '));
   }
 
   /**
@@ -66,6 +68,7 @@ module.exports = class TenantService {
    * } tenant tenant object
    */
   async create(tenant) {
+    this.logger.debug(`Tenant to be created: ${tenant.id}`);
     const createdTenant = this.tenants.find((item) => item.id === tenant.id);
     if (!createdTenant) {
       const keycloakSession = new KeycloakClientSession(
@@ -89,19 +92,23 @@ module.exports = class TenantService {
   }
 
   /**
-   * Removes a tenant
+   * Removes a Tenant
    *
-   * @param {string} tenantId tenant id
+   * @param {object} tenantObj tenant object
+   * @param {string} tenantObj.id
+   * @param {object} tenantObj.signatureKey
+   * @param {string} tenantObj.signatureKey.certificate
+   * @param {string} tenantObj.signatureKey.algorithm
    */
-  async remove(tenantId) {
-    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId);
+  async remove(tenantObj) {
+    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantObj.id);
     if (removedTenant) {
       if (removedTenant.session) {
-        this.logger.debug(`${tenantId} tenant session closed`);
+        this.logger.debug(`${tenantObj.id} tenant session closed`);
         removedTenant.session.close();
       }
-      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId);
-      this.logger.debug(`Tenant ${tenantId} was deleted`);
+      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantObj.id);
+      this.logger.debug(`Tenant ${tenantObj.id} was deleted`);
     }
   }
 };

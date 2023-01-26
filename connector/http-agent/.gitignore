@@ -30,3 +30,6 @@ config/*.json
 
 # prettier
 .prettierrc.json
+
+#Desktop Services Store
+.DS_Store
