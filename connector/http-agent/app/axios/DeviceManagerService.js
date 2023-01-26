@@ -24,6 +24,7 @@ class DeviceManagerService {
    * @return data from a specific device
    */
   async getDevice(tenantId, deviceId) {
+    logger.debug(`Getting device: ${deviceId}, with the tenant: ${tenantId}`);
     const tenant = this.tenantManager.findTenant(tenantId);
 
     if (!tenant) {
