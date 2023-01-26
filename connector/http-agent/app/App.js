@@ -82,6 +82,7 @@ class App {
       this.tenantService,
       this.config.url['device.auth'],
       dojotHttpClient,
+      logger,
     );
     logger.info('init: Initializing the http-agent...');
     try {

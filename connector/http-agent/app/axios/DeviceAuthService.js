@@ -1,9 +1,6 @@
 const {
   ConfigManager: { getConfig },
-  Logger
 } = require('@dojot/microservice-sdk');
-
-const logger = new Logger('http-agent:DeviceManagerService');
 
 const {
   device_auth: deviceAuthConfig,
@@ -15,10 +12,11 @@ class DeviceAuthService {
    *
    * @param {string} tenantsRouteUrl Url for api that returns authentication status
    */
-  constructor(tenantManager, deviceAuthRouteUrl, dojotClientHttp) {
+  constructor(tenantManager, deviceAuthRouteUrl, dojotClientHttp, logger) {
     this.tenantManager = tenantManager;
     this.deviceAuthRouteUrl = deviceAuthRouteUrl;
     this.dojotClientHttp = dojotClientHttp;
+    this.logger = logger;
   }
 
   /**
@@ -31,7 +29,7 @@ class DeviceAuthService {
    * @returns authentication status
    */
   async getAuthenticationStatus(tenantId, username, password) {
-    logger.debug(`Getting authentication status with tenant: ${tenantId}`);
+    this.logger.debug(`Getting authentication status with tenant: ${tenantId}`);
     const tenant = this.tenantManager.findTenant(tenantId);
     if (!tenant) {
       throw new Error('Tenant not found');

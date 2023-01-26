@@ -44,9 +44,7 @@ module.exports = class TenantService {
     // Waits for all authentications to complete
     this.tenants = await Promise.all(tenantPromises);
     this.logger.debug(`All tenants have been loaded`);
-    for (const tenant1 of this.tenants) {
-      this.logger.debug(tenant1.id);
-    }
+    this.logger.debug(this.tenants.map(tenant => tenant.id).join(', '));
   }
 
   /**
@@ -94,19 +92,23 @@ module.exports = class TenantService {
   }
 
   /**
-   * Removes a tenant
+   * Removes a Tenant
    *
-   * @param {string} tenantId tenant id
+   * @param {object} tenantObj tenant object
+   * @param {string} tenantObj.id
+   * @param {object} tenantObj.signatureKey
+   * @param {string} tenantObj.signatureKey.certificate
+   * @param {string} tenantObj.signatureKey.algorithm
    */
-  async remove(tenantId) {
-    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantId.id);
+  async remove(tenantObj) {
+    const removedTenant = this.tenants.find((tenant) => tenant.id === tenantObj.id);
     if (removedTenant) {
       if (removedTenant.session) {
-        this.logger.debug(`${tenantId.id} tenant session closed`);
+        this.logger.debug(`${tenantObj.id} tenant session closed`);
         removedTenant.session.close();
       }
-      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantId.id);
-      this.logger.debug(`Tenant ${tenantId.id} was deleted`);
+      this.tenants = this.tenants.filter((tenant) => tenant.id !== tenantObj.id);
+      this.logger.debug(`Tenant ${tenantObj.id} was deleted`);
     }
   }
 };
